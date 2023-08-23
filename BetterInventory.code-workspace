@@ -1,0 +1,24 @@
+{
+    "folders": [
+        {
+            "name": "Better Inventory",
+            "path": "."
+        },
+        {
+            "name": "Configs",
+            "path": "../../../tModLoader/ModConfigs"
+        },
+        {
+            "name": "Configs Preview",
+            "path": "../../../tModLoader-preview/ModConfigs"
+        }
+    ],
+    "settings": {
+        "extension-profiles.activeProfiles": [
+            "C#",
+            "Hjson",
+            "GitHub",
+            "Markdown"
+        ],
+    },
+}

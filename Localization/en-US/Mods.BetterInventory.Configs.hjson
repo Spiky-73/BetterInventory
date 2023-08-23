@@ -1,0 +1,45 @@
+ClientConfig: {
+	DisplayName: Client Config
+
+	smartConsumption: {
+		Label: "[i:42] Smart item consumption"
+		Tooltip: Consumes items from the smallest stack in the inventory
+	}
+
+	smartAmmo: {
+		Label: "[i:40] Smart ammo consumption"
+		Tooltip: Consumes ammo from the last stack in the inventory
+	}
+
+	smartPickup: {
+		Label: "[i:75] Smart item pickup"
+		Tooltip: Items go to slot they were taken from
+	}
+
+	filterRecipes: {
+		Label: "[i: 36] Filter recipes"
+		Tooltip: Holding an item only show recipes using this item
+	}
+
+	itemSwap: {
+		Label: "[i:3620] Item swap"
+		Tooltip: Hover or hold an item and press any hotbar hotkey to swap them both items
+	}
+
+	fastRightClick: {
+		Label: "[i:5075] Fast right click"
+		Tooltip: Hold rick click to rapidly right click an item
+	}
+
+	itemRightClick: {
+		Label: "[i:1503] Extra item right click"
+		Tooltip: Item that can be right clicked in the inventory can be right clicked when held
+	}
+}
+
+SmartPickupLevel: {
+	Tooltip: ""
+	Off.Label: Off
+	FavoriteOnly.Label: Favorite Only
+	AllItems.Label: All Items
+}
