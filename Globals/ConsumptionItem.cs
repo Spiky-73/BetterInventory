@@ -3,7 +3,7 @@ using Terraria.ModLoader;
 
 namespace BetterInventory.Globals;
 
-public class BetterInventoryItem : GlobalItem {
+public sealed class BetterInventoryItem : GlobalItem {
 
     public override void OnConsumeItem(Item item, Player player) {
         if (Configs.ClientConfig.Instance.smartConsumption) OnConsume(item, player);
@@ -18,7 +18,4 @@ public class BetterInventoryItem : GlobalItem {
         consumed.stack++;
         smartStack.stack--;
     }
-
 }
-
-

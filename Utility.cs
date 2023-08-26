@@ -47,14 +47,17 @@ public static class Utility {
 
     public static bool InChest(this Player player, [MaybeNullWhen(false)] out Item[] chest) => (chest = player.Chest()) is not null;
     [return: NotNullIfNotNull("chest")]
-    public static Item[]? Chest(this Player player, int? chest = null) => (chest ?? player.chest) switch {
-        > -1 => Main.chest[player.chest].item,
-        -2 => player.bank.item,
-        -3 => player.bank2.item,
-        -4 => player.bank3.item,
-        -5 => player.bank4.item,
-        _ => null
-    };
+    public static Item[]? Chest(this Player player, int? chest = null) {
+        int c = chest ?? player.chest;
+        return c switch {
+            > -1 => Main.chest[c].item,
+            -2 => player.bank.item,
+            -3 => player.bank2.item,
+            -4 => player.bank3.item,
+            -5 => player.bank4.item,
+            _ => null
+        };
+    }
 
     public static void RunWithHiddenItems(Item[] chest, System.Predicate<Item> hidden, System.Action action) {
         Dictionary<int, Item> hiddenItems = new();

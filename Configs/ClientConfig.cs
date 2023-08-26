@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using Terraria;
 using Terraria.ModLoader.Config;
 
 namespace BetterInventory.Configs;
@@ -9,7 +10,7 @@ public enum SmartPickupLevel {
     AllItems
 }
 
-public class ClientConfig : ModConfig {
+public sealed class ClientConfig : ModConfig {
 
     [DefaultValue(true)] public bool smartConsumption;
     [DefaultValue(true)] public bool smartAmmo;
@@ -20,7 +21,11 @@ public class ClientConfig : ModConfig {
     
     [DefaultValue(true)] public bool filterRecipes;
 
-
+    public static bool SmartPickupEnabled(Item item) => Instance.smartPickup switch {
+        SmartPickupLevel.AllItems => true,
+        SmartPickupLevel.FavoriteOnly => item.favorited,
+        SmartPickupLevel.Off or _ => false
+    };
     public override ConfigScope Mode => ConfigScope.ClientSide;
     public static ClientConfig Instance = null!;
 }
