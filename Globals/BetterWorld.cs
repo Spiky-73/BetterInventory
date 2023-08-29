@@ -10,6 +10,20 @@ namespace BetterInventory.Globals;
 public sealed class BetterWorld : ModSystem {
     public override void Load() {
         IL_Main.DrawInventory += IlDrawInventory;
+        On_Player.dropItemCheck += OndropItems;
+        On_Main.DrawInterface_26_InterfaceLogic3 += OnLogic;
+    }
+
+    private static void OnLogic(On_Main.orig_DrawInterface_26_InterfaceLogic3 orig) {
+        if(!Main.playerInventory) InRecipes = false;
+        orig();
+    }
+
+    private static void OndropItems(On_Player.orig_dropItemCheck orig, Player self) {
+        bool old = Main.InGuideCraftMenu;
+        Main.InGuideCraftMenu = InRecipes;
+        orig(self);
+        Main.InGuideCraftMenu = old;
     }
 
     private static void IlDrawInventory(ILContext il) {
@@ -63,6 +77,7 @@ public sealed class BetterWorld : ModSystem {
         cursor.GotoNext();
         ILLabel drop = cursor.DefineLabel();
         cursor.MarkLabel(drop);
+        cursor.EmitDelegate<Action>(() => InRecipes = false);
 
         // Apply end
         ILLabel end = cursor.DefineLabel();
@@ -79,7 +94,10 @@ public sealed class BetterWorld : ModSystem {
         // Apply guide + Mark recipe
         cursor.GotoNext(i => i.MatchStsfld(typeof(Terraria.UI.Gamepad.UILinkPointNavigator.Shortcuts), nameof(Terraria.UI.Gamepad.UILinkPointNavigator.Shortcuts.CRAFT_CurrentRecipeBig)));
         cursor.GotoPrev(MoveType.AfterLabel);
-        cursor.EmitDelegate<Action>(() => Main.InGuideCraftMenu = true);
+        cursor.EmitDelegate<Action>(() => {
+            Main.InGuideCraftMenu = Main.player[Main.myPlayer].chest == -1 && Main.npcShop == 0 && !Main.InReforgeMenu;
+            InRecipes = true;
+        });
         cursor.EmitBr(guide);
         cursor.GotoNext(MoveType.AfterLabel);
         cursor.MarkLabel(recipe);
@@ -97,9 +115,11 @@ public sealed class BetterWorld : ModSystem {
         // Find + Apply end
         cursor.GotoLabel(noRecipe, MoveType.AfterLabel);
         cursor.EmitLdloc(16);
-        cursor.EmitDelegate((bool flag10) => Main.InReforgeMenu || Main.LocalPlayer.tileEntityAnchor.InUse || flag10);
+        cursor.EmitDelegate((bool flag10) => (Main.InReforgeMenu || Main.LocalPlayer.tileEntityAnchor.InUse || flag10) && InRecipes);
         cursor.EmitBrtrue(drop);
         cursor.GotoNext();
         cursor.MarkLabel(end);
     }
+
+    public static bool InRecipes { get; private set; }
 }
