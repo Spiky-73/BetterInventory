@@ -2,10 +2,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
+using ReLogic.Content;
 using Terraria;
 using Terraria.Audio;
+using Terraria.GameContent;
+using Terraria.GameInput;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
 
@@ -98,14 +103,35 @@ public static class BetterCrafting {
         cursor.GotoNext(MoveType.Before, i => i.MatchCall(typeof(ItemSlot), nameof(ItemSlot.Draw)));
         cursor.EmitLdloc(130);
         cursor.EmitDelegate((int matI) => {
-            if (!Enabled || Main.guideItem.type == ItemID.None || AvailableRecipes[Main.focusRecipe]) return;
+            if (!Enabled || Main.guideItem.type == ItemID.None ||  AvailableRecipes[Main.focusRecipe]) return;
             Item material = Main.recipe[Main.availableRecipe[Main.focusRecipe]].requiredItem[matI];
             if (_ownedMaterials.GetValueOrDefault(material.type, 0) >= material.stack) return;
             byte alpha = Main.inventoryBack.A;
             Main.inventoryBack *= 0.5f;
             Main.inventoryBack.A = alpha;
-        });
+        }); // x: 77, y:78 (138, 139)
 
+        cursor.GotoNext(MoveType.After, i => i.MatchStsfld(typeof(Main), nameof(Main.hidePlayerCraftingMenu)));
+        cursor.EmitLdloc(13);
+        cursor.EmitDelegate((int yOffset) => {
+            int x = 94;
+            int y = 450 + yOffset;
+            if (!Enabled || Main.guideItem.IsAir) return;
+            y += TextureAssets.CraftToggle[0].Height();
+            Vector2 hibBox = TextureAssets.CraftToggle[0].Size() * 0.45f;
+            Asset<Texture2D> eye = hideUnavailableRecipes ? TextureAssets.InventoryTickOff : TextureAssets.InventoryTickOn;
+            Main.spriteBatch.Draw(eye.Value, new Vector2(x, y), null, Color.White, 0f, eye.Value.Size() / 2, 1f, 0, 0f);
+            if (Main.mouseX > x - hibBox.X && Main.mouseX < x + hibBox.X && Main.mouseY > y - hibBox.Y && Main.mouseY < y + hibBox.Y && !PlayerInput.IgnoreMouseInterface) {
+                Main.spriteBatch.Draw(EyeBorder.Value, new Vector2(x, y), null, Color.White, 0f, EyeBorder.Value.Size() / 2, 1f, 0, 0f);
+                Main.instance.MouseText(Language.GetTextValue("Mods.BetterInventory.UI.ShowRecipes"));
+                Main.player[Main.myPlayer].mouseInterface = true;
+                if (Main.mouseLeft && Main.mouseLeftRelease) {
+                    hideUnavailableRecipes = !hideUnavailableRecipes;
+                    SoundEngine.PlaySound(SoundID.MenuTick);
+                    Recipe.FindRecipes();
+                }
+            }
+        });
         // Background of recipes
         cursor.GotoNext(i => i.MatchCall(typeof(Main), nameof(Main.LockCraftingForThisCraftClickDuration)));
         cursor.GotoNext(i => i.MatchCall(typeof(ItemSlot), nameof(ItemSlot.MouseHover)));
@@ -198,24 +224,56 @@ public static class BetterCrafting {
             orig(canDelayCheck);
             return;
         }
-        int stack = Main.guideItem.stack;
-        Main.guideItem.stack = 0;
-        orig(canDelayCheck);
-        int[] availables = Main.availableRecipe[..Main.numAvailableRecipes];
-        Main.guideItem.stack = 1;
-        orig(canDelayCheck);
-        AvailableRecipes = new bool[Main.numAvailableRecipes];
-        Main.guideItem.stack = stack;
-        int r = 0;
-        int i = 0;
-        while(i < Main.numAvailableRecipes && r < availables.Length) {
-            int sign = availables[r].CompareTo(Main.availableRecipe[i]);
-            if (sign == 0) {
-                AvailableRecipes[i] = true;
-                r++;
-                i++;
-            } else if(sign < 0) r++;
-            else i++;
+
+        if (hideUnavailableRecipes) {
+            int oldRecipe = Main.availableRecipe[Main.focusRecipe];
+            float focusY = Main.availableRecipeY[Main.focusRecipe];
+            int stack = Main.guideItem.stack;
+            Main.guideItem.stack = 1;
+            orig(canDelayCheck);
+            int[] guide = Main.availableRecipe[..Main.numAvailableRecipes];
+            Main.guideItem.stack = 0;
+            orig(canDelayCheck);
+            int[] available = Main.availableRecipe[..Main.numAvailableRecipes];
+            Main.guideItem.stack = stack;
+
+            AvailableRecipes = new bool[Main.numAvailableRecipes];
+            Recipe.ClearAvailableRecipes();
+            int g = 0;
+            int a = 0;
+            while (a < available.Length && g < guide.Length) {
+                int sign = available[a].CompareTo(guide[g]);
+                if (sign == 0) {
+                    AvailableRecipes[Main.numAvailableRecipes] = true;
+                    Main.availableRecipe[Main.numAvailableRecipes++] = available[a];
+                    g++;
+                    a++;
+                } else if (sign < 0) a++;
+                else g++;
+            }
+            TryRefocusingRecipeMethod.Invoke(null, new object[] { oldRecipe });
+            VisuallyRepositionRecipesMethod.Invoke(null, new object[] { focusY });
+
+        } else {
+            int stack = Main.guideItem.stack;
+            Main.guideItem.stack = 0;
+            orig(canDelayCheck);
+            int[] availables = Main.availableRecipe[..Main.numAvailableRecipes];
+            Main.guideItem.stack = 1;
+            orig(canDelayCheck);
+            AvailableRecipes = new bool[Main.numAvailableRecipes];
+            Main.guideItem.stack = stack;
+            int a = 0;
+            int g = 0;
+            while (g < Main.numAvailableRecipes && a < availables.Length) {
+                int sign = availables[a].CompareTo(Main.availableRecipe[g]);
+                if (sign == 0) {
+                    AvailableRecipes[g] = true;
+                    a++;
+                    g++;
+                } else if (sign < 0) a++;
+                else g++;
+            }
         }
     }
 
@@ -236,6 +294,7 @@ public static class BetterCrafting {
         });
         cursor.EmitBrtrue(endLoop!);
     }
+
 
     private static void UpdateHoveredItem(GameTime time) {
         if (HoverItemInfo.Type == Main.HoverItem.type) return;
@@ -279,10 +338,13 @@ public static class BetterCrafting {
     }
 
 
+    public static Asset<Texture2D> EyeBorder => ModContent.Request<Texture2D>($"BetterInventory/Assets/Eye_Border");
+
     public static bool Enabled => Configs.ClientConfig.Instance.betterCrafting;
 
     public static bool[] AvailableRecipes { get; private set; } = System.Array.Empty<bool>();
 
+    public static bool hideUnavailableRecipes = false;
     public static bool AlternateGuideItem => Enabled && !Main.InGuideCraftMenu;
 
     public static HoverItemCache HoverItemInfo { get; private set; }
@@ -295,7 +357,11 @@ public static class BetterCrafting {
     public static readonly PropertyInfo AlternateGuideItemField = typeof(BetterCrafting).GetProperty(nameof(AlternateGuideItem), BindingFlags.Static | BindingFlags.Public)!;
     public static readonly FieldInfo RecBigListField = typeof(Main).GetField(nameof(Main.recBigList), BindingFlags.Static | BindingFlags.Public)!;
     public static readonly FieldInfo InGuideCraftMenuField = typeof(Main).GetField(nameof(Main.InGuideCraftMenu), BindingFlags.Static | BindingFlags.Public)!;
+    
+    
     public static readonly FieldInfo OwnedItemsField = typeof(Recipe).GetField("_ownedItems", BindingFlags.Static | BindingFlags.NonPublic)!;
+    public static readonly MethodInfo TryRefocusingRecipeMethod = typeof(Recipe).GetMethod("TryRefocusingRecipe", BindingFlags.Static | BindingFlags.NonPublic)!;
+    public static readonly MethodInfo VisuallyRepositionRecipesMethod = typeof(Recipe).GetMethod("VisuallyRepositionRecipes", BindingFlags.Static | BindingFlags.NonPublic)!;
 }
 
 public readonly record struct HoverItemCache(int Type, bool Material, bool CanBeCrafted) {
