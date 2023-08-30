@@ -1,7 +1,6 @@
 using System.Reflection;
 using Terraria;
 using Terraria.Audio;
-using Terraria.DataStructures;
 using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -81,45 +80,37 @@ public sealed class BetterPlayer : ModPlayer {
 
     public override void ProcessTriggers(TriggersSet triggersSet) {
         if (FavoritedBuffKb.JustPressed) FavoritedBuff(Player);
-
         foreach (BuilderAccToggle bat in BuilderAccToggles) bat.Process(Player);
+    }
 
-        if (Configs.ClientConfig.Instance.itemSwap && Main.playerInventory && !Main.mouseItem.IsAir && Main.HoverItem.tooltipContext == ItemSlot.Context.InventoryItem) { // TODO swap from chest and mouse item
+    public override bool HoverSlot(Item[] inventory, int context, int slot) {
+        if (Configs.ClientConfig.Instance.itemSwap && context == ItemSlot.Context.InventoryItem) { // TODO swap from chest and mouse item and full inventory
             for (int destSlot = 0; destSlot < SwapSlots.Length; destSlot++) {
-                if (!triggersSet.KeyStatus[SwapSlots[destSlot]]) continue;
-                if (!_swapping){
-                    _swapping = true;
-
-                    int sourceSlot = System.Array.FindIndex(Player.inventory, i => !i.IsNotSameTypePrefixAndStack(Main.HoverItem));
-                    (Player.inventory[destSlot], Player.inventory[sourceSlot]) = (Player.inventory[sourceSlot], Player.inventory[destSlot]);
-                    // TODO smart pickup compatibility
-                    SoundEngine.PlaySound(SoundID.Grab);
-                }
-                goto swapped;
+                if (!PlayerInput.Triggers.JustPressed.KeyStatus[SwapSlots[destSlot]]) continue;
+                (Player.inventory[destSlot], Player.inventory[slot]) = (Player.inventory[slot], Player.inventory[destSlot]);
+                SoundEngine.PlaySound(SoundID.Grab);
+                break;
             }
-            _swapping = false;
-        swapped:;
         }
+        return false;
     }
 
     public override bool PreItemCheck() {
         if (Configs.ClientConfig.Instance.itemRightClick && Player.controlUseTile && Player.releaseUseItem && !Player.controlUseItem && !Player.tileInteractionHappened
                 && !Player.mouseInterface && !Terraria.Graphics.Capture.CaptureManager.Instance.Active && !Main.HoveringOverAnNPC && !Main.SmartInteractShowingGenuine
                 && Main.HoverItem.IsAir && Player.altFunctionUse == 0 && Player.selectedItem < 10) {
-            int split = Main.stackSplit;
-            Main.stackSplit = 2;
-            ItemSlot.RightClick(Player.inventory, 0, Player.selectedItem); // TODO disable if would pickup item in mouse
-            if (Main.stackSplit == 2) Main.stackSplit = split;
+            if(Main.stackSplit == 1) Main.stackSplit = 31;
+            ItemSlot.RightClick(Player.inventory, ItemSlot.Context.InventoryItem, Player.selectedItem);
             return false;
         }
         return true;
     }
 
     private static void HookTryOpenContainer(On_ItemSlot.orig_TryOpenContainer orig, Item item, Player player) {
-        int stackSplit = Main.stackSplit;
+        int split = Main.stackSplit;
         orig(item, player);
-        if (Configs.ClientConfig.Instance.fastRightClick && Main.stackSplit != stackSplit) {
-            Main.stackSplit = stackSplit;
+        if (Configs.ClientConfig.Instance.fastRightClick) {
+            Main.stackSplit = split == 31 ? 1 : split;
             ItemSlot.RefreshStackSplitCooldown();
         }
     }
@@ -168,8 +159,6 @@ public sealed class BetterPlayer : ModPlayer {
 
     public static void CycleAccState(Player player, int index, int cycle = 2) => player.builderAccStatus[index] = (player.builderAccStatus[index] + 1) % cycle;
     public static void FavoritedBuff(Player player) => Utility.RunWithHiddenItems(player.inventory, i => !i.favorited, player.QuickBuff);
-
-    private bool _swapping;
 
     public static readonly MethodInfo FillEmptyMethod = typeof(Player).GetMethod("GetItem_FillEmptyInventorySlot", BindingFlags.Instance | BindingFlags.NonPublic, new System.Type[] { typeof(int), typeof(Item), typeof(GetItemSettings), typeof(Item), typeof(int) })!;
     public static readonly MethodInfo FillOccupiedMethod = typeof(Player).GetMethod("GetItem_FillIntoOccupiedSlot", BindingFlags.Instance | BindingFlags.NonPublic, new System.Type[] { typeof(int), typeof(Item), typeof(GetItemSettings), typeof(Item), typeof(int) })!;

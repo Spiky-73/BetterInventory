@@ -6,6 +6,7 @@ public sealed class BetterInventory : Mod {
 
     public override void Load() {
         Instance = this;
+        BetterCrafting.Load();
     }
 
     public override void Unload() {
