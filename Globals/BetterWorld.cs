@@ -1,125 +1,132 @@
-using System;
-using System.Collections.Generic;
 using System.Reflection;
+using BetterInventory.Configs;
 using MonoMod.Cil;
 using Terraria;
+using Terraria.Audio;
+using Terraria.DataStructures;
+using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.UI;
 
 namespace BetterInventory.Globals;
 
 public sealed class BetterWorld : ModSystem {
     public override void Load() {
-        IL_Main.DrawInventory += IlDrawInventory;
-        On_Player.dropItemCheck += OndropItems;
-        On_Main.DrawInterface_26_InterfaceLogic3 += OnLogic;
+        if (ClientConfig.Instance.betterGuide) {
+            IL_Main.DrawInventory += IlDrawInventory;
+            On_Player.dropItemCheck += OndropItems;
+            On_ItemSlot.OverrideHover_ItemArray_int_int += HookOverrideHover;
+            On_ItemSlot.OverrideLeftClick += HookOverrideLeftClick;
+            On_ItemSlot.RightClick_ItemArray_int_int += HookRightClick;
+        }
     }
 
-    private static void OnLogic(On_Main.orig_DrawInterface_26_InterfaceLogic3 orig) {
-        if(!Main.playerInventory) InRecipes = false;
-        orig();
+    private static void HookOverrideHover(On_ItemSlot.orig_OverrideHover_ItemArray_int_int orig, Item[] inv, int context, int slot) {
+        // TODO keybind
+
+        if(ItemSlot.ShiftInUse && (Main.InGuideCraftMenu || context == ItemSlot.Context.GuideItem)){
+            Main.cursorOverride = CursorOverrideID.Magnifiers;
+            return;
+        }
+        orig(inv, context, slot);
+
+        if(ItemSlot.ShiftInUse && Main.cursorOverride == -1){
+            Main.cursorOverride = CursorOverrideID.Magnifiers;
+        }
     }
 
     private static void OndropItems(On_Player.orig_dropItemCheck orig, Player self) {
         bool old = Main.InGuideCraftMenu;
-        Main.InGuideCraftMenu = InRecipes;
+        Main.InGuideCraftMenu = true;
         orig(self);
         Main.InGuideCraftMenu = old;
     }
 
+    private void HookRightClick(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
+        if (Main.mouseRight && Main.mouseRightRelease && context == ItemSlot.Context.GuideItem) {
+            Main.guideItem.SetDefaults();
+            SoundEngine.PlaySound(SoundID.Grab);
+            return;
+        }
+        orig(inv, context, slot);
+    }
+
+    private static bool HookOverrideLeftClick(On_ItemSlot.orig_OverrideLeftClick orig, Item[] inv, int context, int slot) {
+        if(ItemSlot.ShiftInUse && Main.cursorOverride == CursorOverrideID.Magnifiers){
+            Main.guideItem.SetDefaults(inv[slot].type);
+            SoundEngine.PlaySound(SoundID.Grab);
+            return true;
+        }
+        if(context == ItemSlot.Context.GuideItem){
+            if(Main.cursorOverride == CursorOverrideID.TrashCan){
+                Main.guideItem.SetDefaults();
+            } else {
+                Main.guideItem.SetDefaults(Main.mouseItem.type);
+                if (Main.mouseItem.type > ItemID.None) {
+                    Main.mouseItem.position = Main.LocalPlayer.Center;
+                    Item item = Main.LocalPlayer.GetItem(Main.LocalPlayer.whoAmI, Main.mouseItem, GetItemSettings.GetItemInDropItemCheck);
+                    if (item.stack > 0) {
+                        int i = Item.NewItem(new EntitySource_OverfullInventory(Main.LocalPlayer, null), (int)Main.LocalPlayer.position.X, (int)Main.LocalPlayer.position.Y, Main.LocalPlayer.width, Main.LocalPlayer.height, item.type, item.stack, false, Main.mouseItem.prefix, true, false);
+                        Main.item[i] = item.Clone();
+                        Main.item[i].newAndShiny = false;
+                        if (Main.netMode == NetmodeID.MultiplayerClient) NetMessage.SendData(MessageID.SyncItem, -1, -1, null, i, 1f, 0f, 0f, 0, 0, 0);
+                    }
+                    Main.mouseItem = new Item();
+                    Main.LocalPlayer.inventory[58] = new Item();
+                    Recipe.FindRecipes(false);
+                }
+            }
+            SoundEngine.PlaySound(SoundID.Grab);
+            return true;
+        }
+        return orig(inv, context, slot);
+        
+    }
+
     private static void IlDrawInventory(ILContext il) {
+        // ...
         // if(Main.InReforgeMenu){
         //     ...
-        // } else {
-        //     ++ goto skip
-        //     if(Main.InGuideCraftMenu) {
-        //         if(...) {
-        //             <drop>
-        //             ++ goto end
-        //         } else {
-        //             <guide>
-        //             ++ goto recipe
-        //         }
+        // } else if(Main.InGuideCraftMenu) {
+        //     if(<closeGuideUI>) {
+        //         <drop>
+        //     } else {
+        //         ++ guide:
+        //         <guide>
+        //         ++ if(!Main.InGuideCraftMenu) goto recipe;
         //     }
         // }
-        // skip:
         // ...
-        // if(<show recipes>){
-        //     ++ Main.InGuideCraftMenu = true;
-        //     ++ goto guide
+        // if(<showRecipes>){
+        //     ++ if(!Main.InGuideCraftMenu) goto guide;
+        //     ++ recipe:
         //     <recipe>
         //     ...
-        //     ++ goto skipHammer
-        //     if(InGuideCraftMenu){
-        //         <moveHammer>
-        //     }
-        //     <postHammer>
-        //     ...
         // }
-        // ++ else if(InGuideCraftMenu) goto drop
-        // <end>
-        
+        // ...
+
         ILCursor cursor = new(il);
 
         FieldInfo inGuideCraftMenu = typeof(Main).GetField(nameof(Main.InGuideCraftMenu), BindingFlags.Static | BindingFlags.Public)!;
 
-        // Find + Apply skip
+        // Mark guide
+        ILLabel? endGuide = null;
         cursor.GotoNext(i => i.MatchCall(typeof(Main), "DrawGuideCraftText"));
-        cursor.GotoPrev(i => i.MatchLdsfld(inGuideCraftMenu));
-        IEnumerable<ILLabel> originalLabels = cursor.IncomingLabels;
-        ILLabel? skip = null;
-        cursor.GotoPrev(i => i.MatchBr(out skip));
-        foreach(ILLabel label in originalLabels) label.Target = skip.Target; // ? change with emit br
-
-        // Find guide + Mark drop
-        ILLabel? guide = null;
-        cursor.GotoNext(i => i.MatchCallvirt(typeof(Player), nameof(Player.dropItemCheck)));
-        cursor.GotoPrev(i => i.MatchBrfalse(out guide));
-        cursor.GotoNext();
-        ILLabel drop = cursor.DefineLabel();
-        cursor.MarkLabel(drop);
-        cursor.EmitDelegate<Action>(() => InRecipes = false);
-
-        // Apply end
-        ILLabel end = cursor.DefineLabel();
-        ILLabel? endIf = null;
-        cursor.GotoNext(i => i.MatchBr(out endIf));
-        cursor.Remove();
-        cursor.EmitBr(end);
+        cursor.GotoPrev(MoveType.After, i => i.MatchBr(out endGuide));
+        ILLabel guide = cursor.DefineLabel();
+        cursor.MarkLabel(guide);
 
         // Apply recipe
-        ILLabel? recipe = cursor.DefineLabel();
-        cursor.GotoLabel(endIf, MoveType.Before);
-        cursor.EmitBr(recipe);
+        cursor.GotoLabel(endGuide, MoveType.Before);
+        ILLabel recipe = cursor.DefineLabel();
+        cursor.EmitLdsfld(inGuideCraftMenu);
+        cursor.EmitBrfalse(recipe);
 
         // Apply guide + Mark recipe
         cursor.GotoNext(i => i.MatchStsfld(typeof(Terraria.UI.Gamepad.UILinkPointNavigator.Shortcuts), nameof(Terraria.UI.Gamepad.UILinkPointNavigator.Shortcuts.CRAFT_CurrentRecipeBig)));
         cursor.GotoPrev(MoveType.AfterLabel);
-        cursor.EmitDelegate<Action>(() => {
-            Main.InGuideCraftMenu = Main.player[Main.myPlayer].chest == -1 && Main.npcShop == 0 && !Main.InReforgeMenu;
-            InRecipes = true;
-        });
-        cursor.EmitBr(guide);
-        cursor.GotoNext(MoveType.AfterLabel);
+        cursor.EmitLdsfld(inGuideCraftMenu);
+        cursor.EmitBrfalse(guide);
         cursor.MarkLabel(recipe);
-
-        // Find new drop entry
-        ILLabel? noRecipe = null;
-        cursor.GotoPrev(i => i.MatchBrtrue(out noRecipe));
-
-        // Mark + Apply noHammer
-        ILLabel? postHammer = null;
-        cursor.GotoNext(i => i.MatchStloc(138));
-        cursor.GotoNext(i => i.MatchLdsfld(inGuideCraftMenu) && i.Next.MatchBrfalse(out postHammer));
-        cursor.EmitBr(postHammer);
-
-        // Find + Apply end
-        cursor.GotoLabel(noRecipe, MoveType.AfterLabel);
-        cursor.EmitLdloc(16);
-        cursor.EmitDelegate((bool flag10) => (Main.InReforgeMenu || Main.LocalPlayer.tileEntityAnchor.InUse || flag10) && InRecipes);
-        cursor.EmitBrtrue(drop);
-        cursor.GotoNext();
-        cursor.MarkLabel(end);
     }
-
-    public static bool InRecipes { get; private set; }
 }
