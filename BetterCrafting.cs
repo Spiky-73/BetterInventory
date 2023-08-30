@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.IO;
 using System.Reflection;
 using Microsoft.Xna.Framework;
 using MonoMod.Cil;
@@ -13,61 +13,24 @@ namespace BetterInventory;
 
 public static class BetterCrafting {
     public static void Load(){
-        FindItemRecipes = KeybindLoader.RegisterKeybind(BetterInventory.Instance, "FindRecipes", Microsoft.Xna.Framework.Input.Keys.N);
         IL_Main.DrawInventory += IlDrawInventory;
-        On_Player.dropItemCheck += OndropItems;
+
+        FindItemRecipes = KeybindLoader.RegisterKeybind(BetterInventory.Instance, "FindRecipes", Microsoft.Xna.Framework.Input.Keys.N);
+        Main.OnPostDraw += UpdateHoveredItem;
+
         On_ItemSlot.OverrideHover_ItemArray_int_int += HookOverrideHover;
         On_ItemSlot.OverrideLeftClick += HookOverrideLeftClick;
         On_ItemSlot.RightClick_ItemArray_int_int += HookRightClick;
-        Main.OnPostDraw += UpdateHoveredItem;
-    }
 
-    private static void OndropItems(On_Player.orig_dropItemCheck orig, Player self) {
-        if(!Configs.ClientConfig.Instance.betterCrafting){
-            orig(self);
-            return;
-        }
-        bool old = Main.InGuideCraftMenu;
-        Main.InGuideCraftMenu = true;
-        orig(self);
-        Main.InGuideCraftMenu = old;
-    }
+        On_Player.dropItemCheck += OndropItems;
+        On_Player.SaveTemporaryItemSlotContents += HookSaveTemporaryItemSlotContents;
 
-    private static void HookOverrideHover(On_ItemSlot.orig_OverrideHover_ItemArray_int_int orig, Item[] inv, int context, int slot) {
-        if (!Configs.ClientConfig.Instance.betterCrafting) {
-            orig(inv, context, slot);
-            return;
-        }
-        if (FindItemRecipes.Current) return;
-        if (context == ItemSlot.Context.GuideItem && ((Main.guideItem.type > ItemID.None && Main.mouseItem.type == ItemID.None) || ItemSlot.ShiftInUse)) Main.cursorOverride = CursorOverrideID.TrashCan;
-        else if (Main.InGuideCraftMenu && ItemSlot.ShiftInUse) Main.cursorOverride = CursorOverrideID.Magnifiers;
-        else orig(inv, context, slot);
-    }
+        On_Main.HoverOverCraftingItemButton += HookHoverOverCraftingItemButton;
+        On_Main.TryAllowingToCraftRecipe += HookTryAllowingToCraftRecipe;
+        On_Recipe.FindRecipes += HookFindRecipes;
+        IL_Recipe.CollectGuideRecipes += ILGuideRecipes;
 
-    private static bool HookOverrideLeftClick(On_ItemSlot.orig_OverrideLeftClick orig, Item[] inv, int context, int slot) {
-        if (!Configs.ClientConfig.Instance.betterCrafting) return orig(inv, context, slot);
-        if (FindItemRecipes.Current) return true;
-        if (context == ItemSlot.Context.GuideItem) {
-            if (Main.cursorOverride == CursorOverrideID.TrashCan) FindRecipes(ItemID.None);
-            else {
-                FindRecipes(Main.mouseItem.type);
-                Main.LocalPlayer.GetDropItem(ref Main.mouseItem);
-            }
-            return true;
-        }
-        if (Main.InGuideCraftMenu && Main.cursorOverride == CursorOverrideID.Magnifiers) {
-            FindRecipes(inv[slot].type);
-            return true;
-        }
-        return orig(inv, context, slot);
-    }
-
-    private static void HookRightClick(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
-        if (Configs.ClientConfig.Instance.betterCrafting && context == ItemSlot.Context.GuideItem && Main.mouseRight && Main.mouseRightRelease) {
-            FindRecipes(ItemID.None);
-            return;
-        }
-        orig(inv, context, slot);
+        _ownedMaterials = (Dictionary<int, int>)OwnedItemsField.GetValue(null)!;
     }
 
     private static void IlDrawInventory(ILContext il) {
@@ -91,6 +54,7 @@ public static class BetterCrafting {
 
         ILCursor cursor = new(il);
 
+        // Keybind
         cursor.EmitDelegate(CheckFindRecipes);
 
         // Mark guide
@@ -112,37 +76,197 @@ public static class BetterCrafting {
         cursor.EmitCall(AlternateGuideItemField.GetMethod!);
         cursor.EmitBrtrue(guide);
         cursor.MarkLabel(recipe);
+
+        // Background of createdItem
+        cursor.GotoNext(i => i.MatchCall(typeof(Main), "HoverOverCraftingItemButton"));
+        cursor.GotoNext(MoveType.Before, i => i.MatchCall(typeof(ItemSlot), nameof(ItemSlot.Draw)));
+        cursor.EmitLdloc(124);
+        cursor.EmitDelegate((int i) => {
+            if (!Enabled || Main.guideItem.type == ItemID.None || AvailableRecipes[i]) return;
+            if (ItemSlot.DrawGoldBGForCraftingMaterial) {
+                ItemSlot.DrawGoldBGForCraftingMaterial = false;
+                Main.inventoryBack.B = (byte)(Main.inventoryBack.B / 8f);
+            } else {
+                byte alpha = Main.inventoryBack.A;
+                Main.inventoryBack *= 0.5f;
+                Main.inventoryBack.A = alpha;
+            }
+        });
+
+        // Background of materials
+        cursor.GotoNext(i => i.MatchCall(typeof(Main), "SetRecipeMaterialDisplayName"));
+        cursor.GotoNext(MoveType.Before, i => i.MatchCall(typeof(ItemSlot), nameof(ItemSlot.Draw)));
+        cursor.EmitLdloc(130);
+        cursor.EmitDelegate((int matI) => {
+            if (!Enabled || Main.guideItem.type == ItemID.None || AvailableRecipes[Main.focusRecipe]) return;
+            Item material = Main.recipe[Main.availableRecipe[Main.focusRecipe]].requiredItem[matI];
+            if (_ownedMaterials.GetValueOrDefault(material.type, 0) >= material.stack) return;
+            byte alpha = Main.inventoryBack.A;
+            Main.inventoryBack *= 0.5f;
+            Main.inventoryBack.A = alpha;
+        });
+
+        // Background of recipes
+        cursor.GotoNext(i => i.MatchCall(typeof(Main), nameof(Main.LockCraftingForThisCraftClickDuration)));
+        cursor.GotoNext(i => i.MatchCall(typeof(ItemSlot), nameof(ItemSlot.MouseHover)));
+        cursor.EmitDelegate<System.Action>(() => Main.recBigList |= Enabled);
+        cursor.GotoNext(MoveType.Before, i => i.MatchCall(typeof(ItemSlot), nameof(ItemSlot.Draw)));
+        cursor.EmitLdloc(153);
+        cursor.EmitDelegate((int i) => {
+            if (!Enabled || Main.guideItem.type == ItemID.None || AvailableRecipes[i]) return;
+            byte alpha = Main.inventoryBack.A;
+            Main.inventoryBack *= 0.5f;
+            Main.inventoryBack.A = alpha;
+        });
+    }
+
+
+    private static void HookOverrideHover(On_ItemSlot.orig_OverrideHover_ItemArray_int_int orig, Item[] inv, int context, int slot) {
+        if (!Enabled) {
+            orig(inv, context, slot);
+            return;
+        }
+        if (FindItemRecipes.Current) return;
+        if (context == ItemSlot.Context.GuideItem && ((Main.guideItem.type > ItemID.None && Main.mouseItem.type == ItemID.None) || ItemSlot.ShiftInUse)) Main.cursorOverride = CursorOverrideID.TrashCan;
+        else if (Main.InGuideCraftMenu && ItemSlot.ShiftInUse) Main.cursorOverride = CursorOverrideID.Magnifiers;
+        else orig(inv, context, slot);
+    }
+
+    private static bool HookOverrideLeftClick(On_ItemSlot.orig_OverrideLeftClick orig, Item[] inv, int context, int slot) {
+        if (!Enabled) return orig(inv, context, slot);
+        if (FindItemRecipes.Current) return true;
+        if (context == ItemSlot.Context.GuideItem) {
+            if (Main.cursorOverride == CursorOverrideID.TrashCan) FindRecipes(ItemID.None);
+            else {
+                FindRecipes(Main.mouseItem.type);
+                Main.LocalPlayer.GetDropItem(ref Main.mouseItem);
+            }
+            return true;
+        }
+        if (Main.InGuideCraftMenu && Main.cursorOverride == CursorOverrideID.Magnifiers) {
+            FindRecipes(inv[slot].type);
+            return true;
+        }
+        return orig(inv, context, slot);
+    }
+
+    private static void HookRightClick(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
+        if (Enabled && context == ItemSlot.Context.GuideItem && Main.mouseRight && Main.mouseRightRelease) {
+            FindRecipes(ItemID.None);
+            return;
+        }
+        orig(inv, context, slot);
+    }
+
+
+    private static void OndropItems(On_Player.orig_dropItemCheck orig, Player self) {
+        if (!Enabled) {
+            orig(self);
+            return;
+        }
+        bool old = Main.InGuideCraftMenu;
+        Main.InGuideCraftMenu = true;
+        orig(self);
+        Main.InGuideCraftMenu = old;
+    }
+
+    private static void HookSaveTemporaryItemSlotContents(On_Player.orig_SaveTemporaryItemSlotContents orig, Player self, BinaryWriter writer) {
+        if (!Enabled || Main.guideItem.IsAir) {
+            orig(self, writer);
+            return;
+        }
+        Main.guideItem.stack = 0;
+        orig(self, writer);
+        Main.guideItem.stack = 1;
+    }
+
+
+    private static void HookHoverOverCraftingItemButton(On_Main.orig_HoverOverCraftingItemButton orig, int recipeIndex) {
+        if (!Enabled || Main.guideItem.IsAir || !AvailableRecipes[recipeIndex]) {
+            orig(recipeIndex);
+            return;
+        }
+        Main.guideItem.stack = 0;
+        orig(recipeIndex);
+        Main.guideItem.stack = 1;
+    }
+    
+    private static bool HookTryAllowingToCraftRecipe(On_Main.orig_TryAllowingToCraftRecipe orig, Recipe currentRecipe, bool tryFittingItemInInventoryToAllowCrafting, out bool movedAnItemToAllowCrafting) => orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting || Enabled, out movedAnItemToAllowCrafting);
+
+    private static void HookFindRecipes(On_Recipe.orig_FindRecipes orig, bool canDelayCheck) {
+        if(!Enabled || Main.guideItem.type == ItemID.None || canDelayCheck){
+            orig(canDelayCheck);
+            return;
+        }
+        int stack = Main.guideItem.stack;
+        Main.guideItem.stack = 0;
+        orig(canDelayCheck);
+        int[] availables = Main.availableRecipe[..Main.numAvailableRecipes];
+        Main.guideItem.stack = 1;
+        orig(canDelayCheck);
+        AvailableRecipes = new bool[Main.numAvailableRecipes];
+        Main.guideItem.stack = stack;
+        int r = 0;
+        int i = 0;
+        while(i < Main.numAvailableRecipes && r < availables.Length) {
+            int sign = availables[r].CompareTo(Main.availableRecipe[i]);
+            if (sign == 0) {
+                AvailableRecipes[i] = true;
+                r++;
+                i++;
+            } else if(sign < 0) r++;
+            else i++;
+        }
+    }
+
+    private static void ILGuideRecipes(ILContext il) {
+        ILCursor cursor = new(il);
+        ILLabel? endLoop = null;
+        cursor.GotoNext(i => i.MatchCallvirt(typeof(Recipe).GetProperty(nameof(Recipe.Disabled))!.GetMethod!));
+        cursor.GotoNext(i => i.MatchBrtrue(out endLoop));
+        cursor.GotoNext(MoveType.AfterLabel);
+        cursor.EmitLdloc1();
+        cursor.EmitDelegate<System.Func<int, bool>>(i => {
+            if(Enabled && Main.recipe[i].createItem.type == Main.guideItem.type){
+                Main.availableRecipe[Main.numAvailableRecipes] = i;
+                Main.numAvailableRecipes++;
+                return true;
+            }
+            return false;
+        });
+        cursor.EmitBrtrue(endLoop!);
     }
 
     private static void UpdateHoveredItem(GameTime time) {
         if (HoverItemInfo.Type == Main.HoverItem.type) return;
-        List<int> crafts = new();
+        bool canBeCrafted = false;
         for (int i = 0; i < Recipe.maxRecipes; i++) {
-            if (!Main.recipe[i].Disabled && Main.recipe[i].createItem.type == Main.HoverItem.type) crafts.Add(i);
+            if (Main.recipe[i].Disabled || Main.recipe[i].createItem.type != Main.HoverItem.type) continue;
+            canBeCrafted = true;
+            break;
         }
-        HoverItemInfo = new(Main.HoverItem.type, Main.HoverItem.material, crafts.AsReadOnly());
+        HoverItemInfo = new(Main.HoverItem.type, Main.HoverItem.material, canBeCrafted);
     }
 
-
     private static void CheckFindRecipes() {
-        if(!Configs.ClientConfig.Instance.betterCrafting) return;
+        if (!Enabled) return;
         if (!FindItemRecipes.Current) {
-            if(FindItemRecipes.JustReleased && _findRecipesFrames <= 20) Main.recBigList = !Main.recBigList;
+            if (FindItemRecipes.JustReleased && _findRecipesFrames <= 20) Main.recBigList = !Main.recBigList;
             return;
         }
-        if(FindItemRecipes.JustPressed) _findRecipesFrames = 0;
+        if (FindItemRecipes.JustPressed) _findRecipesFrames = 0;
         _findRecipesFrames++;
 
-        if(HoverItemInfo.Type <= 0) return;
-        if(!HoverItemInfo.HasAnyRecipe) return;
+        if (HoverItemInfo.Type <= 0) return;
+        if (!HoverItemInfo.HasAnyRecipe) return;
         Main.cursorOverride = CursorOverrideID.Magnifiers;
 
         if (!Main.mouseLeft || !Main.mouseLeftRelease) return;
         _findRecipesFrames = 20;
         Player player = Main.LocalPlayer;
         if (Main.CreativeMenu.Enabled) Main.CreativeMenu.CloseMenu();
-        if (player.tileEntityAnchor.InUse) player.tileEntityAnchor.Clear(); // TODO Allow some anchors
-        if(Main.InReforgeMenu) player.SetTalkNPC(-1);
+        if (player.tileEntityAnchor.InUse) player.tileEntityAnchor.Clear();
+        if (Main.InReforgeMenu) player.SetTalkNPC(-1);
         FindRecipes(HoverItemInfo.Type);
     }
 
@@ -154,17 +278,26 @@ public static class BetterCrafting {
         Main.recBigList = type > ItemID.None;
     }
 
-    public static bool AlternateGuideItem => !Main.InGuideCraftMenu && Configs.ClientConfig.Instance.betterCrafting;
+
+    public static bool Enabled => Configs.ClientConfig.Instance.betterCrafting;
+
+    public static bool[] AvailableRecipes { get; private set; } = System.Array.Empty<bool>();
+
+    public static bool AlternateGuideItem => Enabled && !Main.InGuideCraftMenu;
 
     public static HoverItemCache HoverItemInfo { get; private set; }
 
     public static ModKeybind FindItemRecipes { get; private set; } = null!;
     private static int _findRecipesFrames = 0;
 
+    private static Dictionary<int, int> _ownedMaterials = null!;
+
     public static readonly PropertyInfo AlternateGuideItemField = typeof(BetterCrafting).GetProperty(nameof(AlternateGuideItem), BindingFlags.Static | BindingFlags.Public)!;
+    public static readonly FieldInfo RecBigListField = typeof(Main).GetField(nameof(Main.recBigList), BindingFlags.Static | BindingFlags.Public)!;
     public static readonly FieldInfo InGuideCraftMenuField = typeof(Main).GetField(nameof(Main.InGuideCraftMenu), BindingFlags.Static | BindingFlags.Public)!;
+    public static readonly FieldInfo OwnedItemsField = typeof(Recipe).GetField("_ownedItems", BindingFlags.Static | BindingFlags.NonPublic)!;
 }
 
-public readonly record struct HoverItemCache(int Type, bool Material, ReadOnlyCollection<int> Crafts) {
-    public bool HasAnyRecipe => Material || Crafts.Count != 0;
+public readonly record struct HoverItemCache(int Type, bool Material, bool CanBeCrafted) {
+    public bool HasAnyRecipe => Material || CanBeCrafted;
 }
