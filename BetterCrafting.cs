@@ -19,6 +19,7 @@ namespace BetterInventory;
 public static class BetterCrafting {
     public static void Load(){
         IL_Main.DrawInventory += IlDrawInventory;
+        On_Main.DrawInterface_36_Cursor += HookDrawCursor;
 
         FindItemRecipes = KeybindLoader.RegisterKeybind(BetterInventory.Instance, "FindRecipes", Microsoft.Xna.Framework.Input.Keys.N);
         Main.OnPostDraw += UpdateHoveredItem;
@@ -36,10 +37,21 @@ public static class BetterCrafting {
 
         On_Main.TryAllowingToCraftRecipe += HookTryAllowingToCraftRecipe;
         IL_Main.CraftItem += ILCraftItem;
+        IL_Recipe.Create += ILCreateRecipe;
 
         _ownedMaterials = (Dictionary<int, int>)OwnedItemsField.GetValue(null)!;
     }
 
+    private static void HookDrawCursor(On_Main.orig_DrawInterface_36_Cursor orig) {
+        if(Main.cursorOverride != CraftCursorID) {
+            orig();
+            return;
+        }
+        Main.spriteBatch.End();
+        Main.spriteBatch.Begin(0, BlendState.AlphaBlend, Main.SamplerStateForCursor, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
+        Main.spriteBatch.Draw(CursorCraft.Value, new Vector2(Main.mouseX, Main.mouseY), null, Color.White, 0, default, Main.cursorScale, 0, 0f);
+        return;
+    }
 
     internal static void OnStateChanged() {
         if (!Enabled) Main.guideItem.TurnToAir();
@@ -225,6 +237,7 @@ public static class BetterCrafting {
             orig(recipeIndex);
             return;
         }
+        if(recipeIndex == Main.focusRecipe && Main.cursorOverride == -1 && ItemSlot.ShiftInUse) Main.cursorOverride = CraftCursorID;
         _inHoverCrafting = true;
         if(Main.guideItem.IsAir || !AvailableRecipes[recipeIndex]) {
             orig(recipeIndex);
@@ -322,7 +335,11 @@ public static class BetterCrafting {
     private static void CheckFindRecipes() {
         if (!Enabled) return;
         if (!FindItemRecipes.Current) {
-            if (FindItemRecipes.JustReleased && _findRecipesFrames <= 15) Main.recBigList = !Main.recBigList;
+            if (FindItemRecipes.JustReleased && _findRecipesFrames <= 15) {
+                if(FocusRecipes()) Main.recBigList = true;
+                else Main.recBigList = !Main.recBigList;
+                SoundEngine.PlaySound(SoundID.MenuTick);
+            }
             return;
         }
         if (FindItemRecipes.JustPressed) _findRecipesFrames = 0;
@@ -334,19 +351,25 @@ public static class BetterCrafting {
 
         if (!Main.mouseLeft || !Main.mouseLeftRelease) return;
         _findRecipesFrames = 20;
-        Player player = Main.LocalPlayer;
-        if (Main.CreativeMenu.Enabled) Main.CreativeMenu.CloseMenu();
-        if (player.tileEntityAnchor.InUse) player.tileEntityAnchor.Clear();
-        if (Main.InReforgeMenu) player.SetTalkNPC(-1);
+        FocusRecipes();
         FindRecipes(HoverItemInfo.Type);
     }
 
+    public static bool FocusRecipes(){
+        Player player = Main.LocalPlayer;
+        if (Main.CreativeMenu.Enabled) Main.CreativeMenu.CloseMenu();
+        else if (player.tileEntityAnchor.InUse) player.tileEntityAnchor.Clear();
+        else if (Main.InReforgeMenu) player.SetTalkNPC(-1);
+        else return false;
+        return true;
+    }
+
     public static void FindRecipes(int type) {
+        Main.recBigList = HoverItemInfo.Type > ItemID.None;
+        SoundEngine.PlaySound(SoundID.Grab);
         if (type == Main.guideItem.type) return;
         Main.guideItem.SetDefaults(type);
-        SoundEngine.PlaySound(SoundID.Grab);
         Recipe.FindRecipes(false);
-        Main.recBigList = type > ItemID.None;
     }
 
 
@@ -375,26 +398,92 @@ public static class BetterCrafting {
 
         // Vanilla check
         cursor.GotoNext(i => i.MatchCallOrCallvirt(typeof(Recipe), nameof(Recipe.Create)));
+        cursor.EmitLdarg0();
+        cursor.EmitDelegate((Recipe r) => {
+            craftMultiplier = 1;
+            if(!Main.mouseLeft) return;
+            int amount = GetMaxCraftAmount(r);
+            if(ItemSlot.ShiftInUse) craftMultiplier = System.Math.Min(amount, GetMaxPickupAmount(r.createItem) / r.createItem.stack);
+            else craftMultiplier = System.Math.Min(amount, (r.createItem.maxStack - Main.mouseItem.stack) / r.createItem.stack);
+        });
         cursor.GotoPrev(MoveType.After, i => i.MatchRet());
         cursor.MarkLabel(skipCheck);
 
         // Shift Click grab
-        ILLabel dontRet = cursor.DefineLabel();
+        ILLabel normalCraftItemCode = cursor.DefineLabel();
         cursor.GotoNext(MoveType.After, i => i.MatchCallOrCallvirt(typeof(RecipeLoader), nameof(RecipeLoader.OnCraft)));
         cursor.EmitLdloc0();
         cursor.EmitDelegate((Item crafted) => {
+            crafted.stack *= craftMultiplier;
             if (!(ItemSlot.ShiftInUse && Main.mouseLeft)) return false;
+            craftMultiplier = 1;
             Main.LocalPlayer.GetItem(Main.myPlayer, crafted, GetItemSettings.InventoryUIToInventorySettingsShowAsNew);
             return true;
         });
-        cursor.EmitBrfalse(dontRet);
+        cursor.EmitBrfalse(normalCraftItemCode);
         cursor.EmitRet();
-        cursor.MarkLabel(dontRet);
+        cursor.MarkLabel(normalCraftItemCode);
+
+        // Mouse text correction
+        cursor.GotoNext(i => i.MatchCall(typeof(PopupText), nameof(PopupText.NewText)));
+        cursor.GotoPrev(MoveType.After, i => i.MatchLdfld(typeof(Item), nameof(Item.stack)));
+        cursor.EmitDelegate((int stack) => {
+            int c = stack * craftMultiplier;
+            craftMultiplier = 1;
+            return c;
+        });
+
     }
+
+
+    private static void ILCreateRecipe(ILContext il) {
+        ILCursor cursor = new(il);
+
+        cursor.GotoNext(MoveType.After, i => i.MatchCall(typeof(RecipeLoader), nameof(RecipeLoader.ConsumeItem)));
+        cursor.EmitLdloca(4);
+        cursor.EmitDelegate((ref int consumed) => { consumed *= craftMultiplier; });
+    }
+
+    public static int GetMaxCraftAmount(Recipe recipe){
+        Dictionary<int, int> groupItems = new();
+        foreach(int id in recipe.acceptedGroups){
+            RecipeGroup group = RecipeGroup.recipeGroups[id];
+            groupItems.Add(group.IconicItemId, group.GetGroupFakeItemId());
+        }
+
+        int amount = 0;
+        foreach(Item material in recipe.requiredItem){
+            int a = _ownedMaterials[groupItems.GetValueOrDefault(material.type, material.type)] / material.stack;
+            if(amount == 0 || a < amount) amount = a;
+        }
+        return amount;
+    }
+    public static int GetMaxPickupAmount(Item item, int max = -1){
+        if(max == -1) max = item.maxStack;
+        int free = GetFreeSpace(Main.LocalPlayer.inventory, item, 58);
+        if(Main.LocalPlayer.InChest(out Item[]? chest)) free += GetFreeSpace(chest, item);
+        if(Main.LocalPlayer.useVoidBag() && Main.LocalPlayer.chest != -5) free += GetFreeSpace(Main.LocalPlayer.bank4.item, item);
+        return System.Math.Min(max, free);
+    }
+
+    public static int GetFreeSpace(Item[] inv, Item item, params int[] ignored){
+        int free = 0;
+        for (int i = 0; i < inv.Length; i++) {
+            if(System.Array.IndexOf(ignored, i) != -1) continue;
+            Item slot = inv[i];
+            if (slot.IsAir) free += item.maxStack;
+            if (slot.type == item.type) free += item.maxStack - slot.stack;
+        }
+        return free;
+    }
+
 
 
     public static Asset<Texture2D> EyeBorder => ModContent.Request<Texture2D>($"BetterInventory/Assets/Inventory_Tick_Border");
     public static Asset<Texture2D> EyeForced => ModContent.Request<Texture2D>($"BetterInventory/Assets/Inventory_Tick_Forced");
+    public static Asset<Texture2D> CursorCraft => ModContent.Request<Texture2D>($"BetterInventory/Assets/Cursor_Craft");
+
+    public const int CraftCursorID = 22;
 
     public static bool Enabled => Configs.ClientConfig.Instance.betterCrafting;
 
@@ -403,6 +492,8 @@ public static class BetterCrafting {
     public static bool hideUnavailableRecipes = false;
     public static bool forceAllRecipes = false;
     public static bool AlternateGuideItem => Enabled && !Main.InGuideCraftMenu;
+
+    public static int craftMultiplier = 1;
 
     public static HoverItemCache HoverItemInfo { get; private set; }
 
