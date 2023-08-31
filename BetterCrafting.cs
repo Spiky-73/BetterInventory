@@ -31,12 +31,24 @@ public static class BetterCrafting {
         On_Player.SaveTemporaryItemSlotContents += HookSaveTemporaryItemSlotContents;
 
         On_Main.HoverOverCraftingItemButton += HookHoverOverCraftingItemButton;
-        On_Main.TryAllowingToCraftRecipe += HookTryAllowingToCraftRecipe;
         On_Recipe.FindRecipes += HookFindRecipes;
         IL_Recipe.CollectGuideRecipes += ILGuideRecipes;
 
+        On_Main.TryAllowingToCraftRecipe += HookTryAllowingToCraftRecipe;
+        IL_Main.CraftItem += ILCraftItem;
+
         _ownedMaterials = (Dictionary<int, int>)OwnedItemsField.GetValue(null)!;
     }
+
+
+    internal static void OnStateChanged() {
+        if (!Enabled) Main.guideItem.TurnToAir();
+        else if (!Main.guideItem.IsAir) {
+            Main.LocalPlayer.GetDropItem(ref Main.guideItem);
+            Main.guideItem = new(Main.guideItem.type);
+        }
+    }
+
 
     private static void IlDrawInventory(ILContext il) {
         // if(Main.InReforgeMenu){
@@ -209,17 +221,21 @@ public static class BetterCrafting {
 
 
     private static void HookHoverOverCraftingItemButton(On_Main.orig_HoverOverCraftingItemButton orig, int recipeIndex) {
-        if (!Enabled || Main.guideItem.IsAir || !AvailableRecipes[recipeIndex]) {
+        if (!Enabled) {
+            orig(recipeIndex);
+            return;
+        }
+        _inHoverCrafting = true;
+        if(Main.guideItem.IsAir || !AvailableRecipes[recipeIndex]) {
             orig(recipeIndex);
             return;
         }
         Main.guideItem.stack = 0;
         orig(recipeIndex);
         Main.guideItem.stack = 1;
+        _inHoverCrafting = false;
     }
     
-    private static bool HookTryAllowingToCraftRecipe(On_Main.orig_TryAllowingToCraftRecipe orig, Recipe currentRecipe, bool tryFittingItemInInventoryToAllowCrafting, out bool movedAnItemToAllowCrafting) => orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting || Enabled, out movedAnItemToAllowCrafting);
-
     private static void HookFindRecipes(On_Recipe.orig_FindRecipes orig, bool canDelayCheck) {
         if(!Enabled || Main.guideItem.type == ItemID.None || canDelayCheck){
             orig(canDelayCheck);
@@ -334,6 +350,49 @@ public static class BetterCrafting {
     }
 
 
+    private static bool HookTryAllowingToCraftRecipe(On_Main.orig_TryAllowingToCraftRecipe orig, Recipe currentRecipe, bool tryFittingItemInInventoryToAllowCrafting, out bool movedAnItemToAllowCrafting) {
+        movedAnItemToAllowCrafting = false;
+        if(Main.mouseLeft && !Main.mouseLeftRelease) return false;
+        if(ItemSlot.ShiftInUse && Main.mouseLeft) return Main.LocalPlayer.ItemSpace(currentRecipe.createItem).CanTakeItem;
+        return orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting || Enabled, out movedAnItemToAllowCrafting);
+    }
+
+    private static void ILCraftItem(ILContext il) {
+        ILCursor cursor = new(il);
+
+        ILLabel vanillaCheck = cursor.DefineLabel();
+        ILLabel skipCheck = cursor.DefineLabel();
+
+        // Shift Click check
+        cursor.EmitLdarg0();
+        cursor.EmitDelegate((Recipe r) => ItemSlot.ShiftInUse && Main.mouseLeft);
+        cursor.EmitBrfalse(vanillaCheck);
+        cursor.EmitLdarg0();
+        cursor.EmitDelegate((Recipe r) => Main.LocalPlayer.ItemSpace(r.createItem).CanTakeItem);
+        cursor.EmitBrtrue(skipCheck);
+        cursor.EmitRet();
+        cursor.MarkLabel(vanillaCheck);
+
+        // Vanilla check
+        cursor.GotoNext(i => i.MatchCallOrCallvirt(typeof(Recipe), nameof(Recipe.Create)));
+        cursor.GotoPrev(MoveType.After, i => i.MatchRet());
+        cursor.MarkLabel(skipCheck);
+
+        // Shift Click grab
+        ILLabel dontRet = cursor.DefineLabel();
+        cursor.GotoNext(MoveType.After, i => i.MatchCallOrCallvirt(typeof(RecipeLoader), nameof(RecipeLoader.OnCraft)));
+        cursor.EmitLdloc0();
+        cursor.EmitDelegate((Item crafted) => {
+            if (!(ItemSlot.ShiftInUse && Main.mouseLeft)) return false;
+            Main.LocalPlayer.GetItem(Main.myPlayer, crafted, GetItemSettings.InventoryUIToInventorySettingsShowAsNew);
+            return true;
+        });
+        cursor.EmitBrfalse(dontRet);
+        cursor.EmitRet();
+        cursor.MarkLabel(dontRet);
+    }
+
+
     public static Asset<Texture2D> EyeBorder => ModContent.Request<Texture2D>($"BetterInventory/Assets/Inventory_Tick_Border");
     public static Asset<Texture2D> EyeForced => ModContent.Request<Texture2D>($"BetterInventory/Assets/Inventory_Tick_Forced");
 
@@ -351,6 +410,7 @@ public static class BetterCrafting {
     private static int _findRecipesFrames = 0;
 
     private static Dictionary<int, int> _ownedMaterials = null!;
+    private static bool _inHoverCrafting;
 
     public static readonly PropertyInfo AlternateGuideItemField = typeof(BetterCrafting).GetProperty(nameof(AlternateGuideItem), BindingFlags.Static | BindingFlags.Public)!;
     public static readonly FieldInfo RecBigListField = typeof(Main).GetField(nameof(Main.recBigList), BindingFlags.Static | BindingFlags.Public)!;
@@ -365,3 +425,11 @@ public static class BetterCrafting {
 public readonly record struct HoverItemCache(int Type, bool Material, bool CanBeCrafted) {
     public bool HasAnyRecipe => Material || CanBeCrafted;
 }
+
+/*
+Shift + Left => Craft max + go in inventory
+    -> ? cursor override
+Left => Craft Max + default
+    -> ? cursor override
+Right => default
+*/

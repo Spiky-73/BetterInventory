@@ -28,4 +28,8 @@ public sealed class ClientConfig : ModConfig {
     };
     public override ConfigScope Mode => ConfigScope.ClientSide;
     public static ClientConfig Instance = null!;
+
+    public override void OnChanged() {
+        BetterCrafting.OnStateChanged();
+    }
 }
