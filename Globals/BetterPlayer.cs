@@ -1,9 +1,11 @@
+using System.Collections.Generic;
 using System.Reflection;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.ModLoader.IO;
 using Terraria.UI;
 
 namespace BetterInventory.Globals;
@@ -159,6 +161,10 @@ public sealed class BetterPlayer : ModPlayer {
 
     public static void CycleAccState(Player player, int index, int cycle = 2) => player.builderAccStatus[index] = (player.builderAccStatus[index] + 1) % cycle;
     public static void FavoritedBuff(Player player) => Utility.RunWithHiddenItems(player.inventory, i => !i.favorited, player.QuickBuff);
+
+    public override void SaveData(TagCompound tag) => RecipeFilters.Save(tag);
+    public override void LoadData(TagCompound tag) => RecipeFilters.Load(tag);
+    public Crafting.RecipeFilters RecipeFilters { get; set; } = new();
 
     public static readonly MethodInfo FillEmptyMethod = typeof(Player).GetMethod("GetItem_FillEmptyInventorySlot", BindingFlags.Instance | BindingFlags.NonPublic, new System.Type[] { typeof(int), typeof(Item), typeof(GetItemSettings), typeof(Item), typeof(int) })!;
     public static readonly MethodInfo FillOccupiedMethod = typeof(Player).GetMethod("GetItem_FillIntoOccupiedSlot", BindingFlags.Instance | BindingFlags.NonPublic, new System.Type[] { typeof(int), typeof(Item), typeof(GetItemSettings), typeof(Item), typeof(int) })!;
