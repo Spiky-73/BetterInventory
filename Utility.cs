@@ -1,11 +1,20 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 
 namespace BetterInventory;
 public static class Utility {
+
+    public static void Load() {
+        OwnedItems = new((Dictionary<int, int>)typeof(Recipe).GetField("_ownedItems", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null)!);
+    }
+    public static void Unload() {
+        OwnedItems = null!;
+    }
 
     public static Item? LastStack(this Player player, Item item, bool notArg = false) {
         for (int i = player.inventory.Length - 1 - 8; i >= 0; i--) {
@@ -30,7 +39,7 @@ public static class Utility {
     }
 
     public static void GetDropItem(this Player player, ref Item item) {
-        if(item.IsAir) return;
+        if (item.IsAir) return;
         Main.mouseItem.position = player.Center;
         Item rem = player.GetItem(player.whoAmI, item, GetItemSettings.GetItemInDropItemCheck);
         if (rem.stack > 0) {
@@ -47,10 +56,10 @@ public static class Utility {
     public enum InclusionFlag {
         Min = 0x01,
         Max = 0x10,
-        Both = Min|Max
+        Both = Min | Max
     }
 
-    public static bool InRange<T>(this T self, T min, T max, InclusionFlag flags = InclusionFlag.Both) where T: System.IComparable<T> {
+    public static bool InRange<T>(this T self, T min, T max, InclusionFlag flags = InclusionFlag.Both) where T : System.IComparable<T> {
         int l = self.CompareTo(min);
         int r = self.CompareTo(max);
         return (l > 0 || (flags.HasFlag(InclusionFlag.Min) && l == 0)) && (r < 0 || (flags.HasFlag(InclusionFlag.Max) && r == 0));
@@ -88,4 +97,8 @@ public static class Utility {
             chest[slot] = item;
         }
     }
+
+    public static ReadOnlyDictionary<int, int> OwnedItems { get; private set; } = null!;
+
+    public static readonly MethodInfo AddToAvailableRecipesMethod = typeof(Recipe).GetMethod("AddToAvailableRecipes", BindingFlags.Static | BindingFlags.NonPublic)!;
 }

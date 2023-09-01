@@ -30,6 +30,6 @@ public sealed class ClientConfig : ModConfig {
     public static ClientConfig Instance = null!;
 
     public override void OnChanged() {
-        BetterCrafting.OnStateChanged();
+        Crafting.BetterGuide.UpdateMouseItem();
     }
 }
