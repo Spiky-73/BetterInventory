@@ -19,7 +19,7 @@ public sealed class ClientConfig : ModConfig {
     [DefaultValue(true)] public bool fastRightClick;
     [DefaultValue(true)] public bool itemRightClick;
 
-    [DefaultValue(true)] public bool betterCrafting; // ? Split in 2 
+    [DefaultValue(true)] public bool betterCrafting;
 
     public static bool SmartPickupEnabled(Item item) => Instance.smartPickup switch {
         SmartPickupLevel.AllItems => true,
