@@ -110,10 +110,43 @@ public static class RecipeFiltering {
         cursor.EmitLdloc(13);
         cursor.EmitCall(typeof(RecipeFiltering).GetMethod(nameof(DrawFilters), BindingFlags.Static | BindingFlags.NonPublic)!);
 
-        // Background of recipes
+        // Cursor override
         cursor.GotoNext(i => i.MatchCall(typeof(Main), nameof(Main.LockCraftingForThisCraftClickDuration)));
+        cursor.GotoPrev(i => i.MatchLdsfld(typeof(Main), nameof(Main.mouseLeft)));
+        ILLabel? noClick = null;
+        cursor.GotoNext(i => i.MatchBrfalse(out noClick));
+        cursor.GotoPrev(MoveType.After, i => i.MatchStfld(typeof(Player), nameof(Player.mouseInterface)));
+        cursor.EmitLdloc(153);
+        cursor.EmitDelegate((int i) => {
+            bool click = Main.mouseLeft && Main.mouseLeftRelease;
+            if(Main.keyState.IsKeyDown(Main.FavoriteKey)) {
+                Main.cursorOverride = CursorOverrideID.FavoriteStar;
+                if (click) {
+                    RecipeState state = RecipeStatus.GetValueOrDefault(Main.availableRecipe[i]);
+                    RecipeStatus[Main.availableRecipe[i]] = state == RecipeState.Favorited ? RecipeState.Default : RecipeState.Favorited;
+                    Recipe.FindRecipes(true);
+                    return true;
+                }
+            }
+            if (ItemSlot.ControlInUse) {
+                Main.cursorOverride = CursorOverrideID.TrashCan;
+                if (click) {
+                    RecipeState state = RecipeStatus.GetValueOrDefault(Main.availableRecipe[i]);
+                    RecipeStatus[Main.availableRecipe[i]] = state == RecipeState.Blacklisted ? RecipeState.Default : RecipeState.Blacklisted;
+                    Recipe.FindRecipes(true);
+                    return true;
+                }
+            }
+            return false;
+        });
+        cursor.EmitBrtrue(noClick!);
+
+
+        // Force recBigList on
         cursor.GotoNext(i => i.MatchCall(typeof(ItemSlot), nameof(ItemSlot.MouseHover)));
         cursor.EmitDelegate<System.Action>(() => Main.recBigList |= Enabled);
+        
+        // Background of recipes
         cursor.GotoNext(MoveType.Before, i => i.MatchCall(typeof(ItemSlot), nameof(ItemSlot.Draw)));
         cursor.EmitLdloc(153);
         cursor.EmitDelegate((int i) => {
