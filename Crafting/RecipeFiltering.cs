@@ -239,6 +239,20 @@ public static class RecipeFiltering {
         cursor.EmitLdloc(13);
         cursor.EmitCall(typeof(RecipeFiltering).GetMethod(nameof(DrawFilters), BindingFlags.Static | BindingFlags.NonPublic)!);
 
+        // revBigList scroll fix
+        for (int i = 0; i < 2; i++) {
+            cursor.GotoNext(i => i.MatchCallvirt(typeof(SpriteBatch), nameof(SpriteBatch.Draw)));
+            cursor.GotoPrev(MoveType.After, i => i.MatchStfld(typeof(Player), nameof(Player.mouseInterface)));
+            cursor.EmitDelegate(() => {
+                if(!Enabled || !Main.mouseLeft) return;
+                if (Main.mouseLeftRelease || _recDelay == 0) {
+                    Main.mouseLeftRelease = true;
+                    _recDelay = 1;
+                } else _recDelay--;
+            });
+            cursor.GotoNext(MoveType.After, i => i.MatchCallvirt(typeof(SpriteBatch), nameof(SpriteBatch.Draw)));
+        }
+
         // Cursor override
         cursor.GotoNext(i => i.MatchCall(typeof(Main), nameof(Main.LockCraftingForThisCraftClickDuration)));
         cursor.GotoPrev(i => i.MatchLdsfld(typeof(Main), nameof(Main.mouseLeft)));
@@ -365,6 +379,7 @@ public static class RecipeFiltering {
     public static bool[] CraftableRecipes = System.Array.Empty<bool>();
 
     private static Asset<Texture2D> _inventoryBack4 = null!;
+    private static int _recDelay = 0;
 
     public static readonly PropertyInfo EnabledField = typeof(RecipeFiltering).GetProperty(nameof(Enabled), BindingFlags.Static | BindingFlags.Public)!;
     public static readonly PropertyInfo DisabledProp = typeof(Recipe).GetProperty(nameof(Recipe.Disabled), BindingFlags.Instance | BindingFlags.Public)!;
