@@ -1,7 +1,5 @@
-
 using System.IO;
 using System.Reflection;
-using Microsoft.Xna.Framework;
 using MonoMod.Cil;
 using Terraria;
 using Terraria.Audio;
@@ -19,19 +17,17 @@ public static class BetterGuide {
     public static bool Enabled => Configs.ClientConfig.Instance.betterCrafting;
 
     public static ModKeybind SearchItem { get; private set; } = null!;
-    private static int _searchItemHoldFrames = 0;
+    private static int _searchItemTimer = 0;
     private static int _searchItemClicks = 0;
-
-    public static int HoverItemType { get; private set; }
 
     public static void Load(){
         IL_Main.DrawInventory += IlDrawInventory;
 
+        On_Main.DrawInterface_36_Cursor += HookDrawCursor;
+
         IL_Recipe.CollectGuideRecipes += ILGuideRecipes;
 
         SearchItem = KeybindLoader.RegisterKeybind(BetterInventory.Instance, "SearchItem", Microsoft.Xna.Framework.Input.Keys.N);
-
-        Main.OnPostDraw += UpdateHoveredItem;
 
         On_ItemSlot.OverrideHover_ItemArray_int_int += HookOverrideHover;
         On_ItemSlot.OverrideLeftClick += HookOverrideLeftClick;
@@ -39,6 +35,11 @@ public static class BetterGuide {
 
         On_Player.dropItemCheck += OndropItems;
         On_Player.SaveTemporaryItemSlotContents += HookSaveTemporaryItemSlotContents;
+    }
+
+    private static void HookDrawCursor(On_Main.orig_DrawInterface_36_Cursor orig) {
+        if(Enabled) ProcessSearchItem();
+        orig();
     }
 
     private static void ILGuideRecipes(ILContext il) {
@@ -69,8 +70,6 @@ public static class BetterGuide {
 
     private static void IlDrawInventory(ILContext il) {
         ILCursor cursor = new(il);
-
-        cursor.EmitCall(typeof(BetterGuide).GetMethod(nameof(CheckSearchItem), BindingFlags.Static | BindingFlags.NonPublic)!);
 
         // if(Main.InReforgeMenu){
         //     ...
@@ -118,53 +117,53 @@ public static class BetterGuide {
         }
     }
 
-    private static void UpdateHoveredItem(GameTime time) {
-        HoverItemType = Main.HoverItem.type;
+    public static void ProcessClickSearch(){
+        TryDelaySetBestiaryItem();
+        _searchItemTimer++;
+        if (SearchItem.JustReleased) {
+            if (_searchItemTimer <= 15) {
+                if (Main.InGameUI.CurrentState == Main.BestiaryUI) {
+                    ToggleBestiary();
+                    SoundEngine.PlaySound(SoundID.MenuTick);
+                    _searchItemClicks = -1;
+                } else {
+                    if (_searchItemClicks % 2 == 0) {
+                        ToggleRecipeList();
+                        SoundEngine.PlaySound(SoundID.MenuTick);
+                    } else {
+                        ToggleRecipeList(false);
+                        ToggleBestiary();
+                    }
+                }
+                _searchItemClicks++;
+            } else _searchItemClicks = 0;
+            _searchItemTimer = 0;
+        }
+
+        if (SearchItem.JustPressed) {
+            if (_searchItemTimer > 15) _searchItemClicks = 0;
+            _searchItemTimer = 0;
+        }
     }
 
-    private static void CheckSearchItem() {
-        if (!Enabled) return;
-        UpdateSearchItemsCounters();
-        ProcessSearchItem();
-    }
-
-    private static void UpdateSearchItemsCounters() {
-        _searchItemHoldFrames++;
-        if (!SearchItem.JustPressed) return;
-        _searchItemClicks = _searchItemHoldFrames <= 15 ? (1 - _searchItemClicks) : 0;
-        _searchItemHoldFrames = 0;
-    }
-
-    private static void ProcessSearchItem() {
-
+    public static void ProcessSearchItem() {
         if (SearchItem.Current) {
-            if (HoverItemType <= 0) return;
+            if (Main.HoverItem.IsAir) {
+                if(Main.cursorOverride == CursorOverrideID.Magnifiers) Main.cursorOverride = -1;
+                return;
+            }
             Main.cursorOverride = CursorOverrideID.Magnifiers;
             if (Main.mouseLeft && Main.mouseLeftRelease) {
-                _searchItemHoldFrames = 15;
-                SetGuideItem(HoverItemType);
+                _searchItemTimer = 30;
+                SetGuideItem(Main.HoverItem.type);
                 ToggleRecipeList(true);
             } else if (Main.mouseRight && Main.mouseRightRelease) {
-                SetBestiaryItem(HoverItemType);
                 ToggleBestiary(true);
-                _searchItemHoldFrames = 15;
+                SetBestiaryItem(Main.HoverItem.type, true);
+                _searchItemTimer = 30;
             }
-            _searchItemClicks = -1;
             return;
-        }
-        if (!SearchItem.JustReleased) return;
-        if (_searchItemHoldFrames <= 15) {
-            if (Main.InGameUI.CurrentState == Main.BestiaryUI) {
-                ToggleBestiary();
-                _searchItemClicks = 0;
-            } else {
-                if (_searchItemClicks % 2 == 0) {
-                    ToggleRecipeList();
-                    SoundEngine.PlaySound(SoundID.MenuTick);
-                } else ToggleBestiary();
-            }
-        }
-        _searchItemHoldFrames = 0;
+        } else if (Main.cursorOverride == CursorOverrideID.Magnifiers) Main.cursorOverride = -1;
     }
 
     private static void HookOverrideHover(On_ItemSlot.orig_OverrideHover_ItemArray_int_int orig, Item[] inv, int context, int slot) {
@@ -233,14 +232,19 @@ public static class BetterGuide {
     }
 
     public static void ToggleRecipeList(bool? enabled = null) {
-        if (Main.recBigList) {
+        if (Main.playerInventory && Main.recBigList) {
             if(enabled == true) return;
             Main.recBigList = false;
         } else {
             if(enabled == false) return;
-            Main.CreativeMenu.CloseMenu();
-            Main.LocalPlayer.tileEntityAnchor.Clear();
-            Main.LocalPlayer.SetTalkNPC(-1);
+            if(!Main.playerInventory) {
+                Main.LocalPlayer.ToggleInv();
+                if(!Main.playerInventory) Main.LocalPlayer.ToggleInv();
+            } else {
+                Main.CreativeMenu.CloseMenu();
+                Main.LocalPlayer.tileEntityAnchor.Clear();
+                Main.LocalPlayer.SetTalkNPC(-1);
+            }
             Main.recBigList = Main.numAvailableRecipes > 0;
         }
     }
@@ -250,7 +254,7 @@ public static class BetterGuide {
             if(enabled == true) return;
             // ? Main.BestiaryUI.Click_GoBack(null, null);
             IngameFancyUI.Close();
-        } else {
+        } else { // TODO sound
             if(enabled == false) return;
             // ? Reset Filters
             Main.LocalPlayer.SetTalkNPC(-1, false);
@@ -270,16 +274,42 @@ public static class BetterGuide {
         }
     }
 
-    public static void SetBestiaryItem(int type) {
-        UISearchBar searchBar = (UISearchBar)BestiarySearchBar.GetValue(Main.BestiaryUI)!;
+    public static void SetBestiaryItem(int type, bool delayed = false) {
+        if (delayed) {
+            _delay = 2;
+            _bestiaryDelayedType = type;
+            return;
+        }
+        static void PlayNoise(string content) => SoundEngine.PlaySound(SoundID.Grab);
+        UISearchBar searchBar = (UISearchBar)BestiarySearchBarField.GetValue(Main.BestiaryUI)!;
+        searchBar.OnContentsChanged += PlayNoise;        
         searchBar.SetContents(Lang.GetItemNameValue(type), true);
         if(searchBar.IsWritingText) searchBar.ToggleTakingText();
+        searchBar.OnContentsChanged -= PlayNoise;
+        UIBestiaryEntryGrid grid = (UIBestiaryEntryGrid)BestiaryGridField.GetValue(Main.BestiaryUI)!;
+        foreach(UIElement element in grid.Children){
+            if(element is not UIBestiaryEntryButton button) continue;
+            SelectEntryButtonMethod.Invoke(Main.BestiaryUI, new object[] { button });
+            break;
+        }
     }
+
+    public static void TryDelaySetBestiaryItem(){
+        _delay--;
+        if(!_bestiaryDelayedType.HasValue || _delay > 0) return;
+        SetBestiaryItem(_bestiaryDelayedType.Value);
+        _bestiaryDelayedType = null;
+    }
+
+    private static int _delay;
+    private static int? _bestiaryDelayedType;
 
     public static bool AlternateGuideItem => Enabled && !Main.InGuideCraftMenu;
 
     public static readonly PropertyInfo AlternateGuideItemProp = typeof(BetterGuide).GetProperty(nameof(AlternateGuideItem), BindingFlags.Static | BindingFlags.Public)!;
     public static readonly MethodInfo SetBestiaryTextMethod = typeof(UIBestiaryTest).GetMethod("OnFinishedSettingName", BindingFlags.Instance | BindingFlags.NonPublic)!;
-    public static readonly FieldInfo BestiarySearchBar = typeof(UIBestiaryTest).GetField("_searchBar", BindingFlags.Instance | BindingFlags.NonPublic)!;
+    public static readonly FieldInfo BestiarySearchBarField = typeof(UIBestiaryTest).GetField("_searchBar", BindingFlags.Instance | BindingFlags.NonPublic)!;
+    public static readonly FieldInfo BestiaryGridField = typeof(UIBestiaryTest).GetField("_entryGrid", BindingFlags.Instance | BindingFlags.NonPublic)!;
+    public static readonly MethodInfo SelectEntryButtonMethod = typeof(UIBestiaryTest).GetMethod("SelectEntryButton", BindingFlags.Instance | BindingFlags.NonPublic)!;
 
 }

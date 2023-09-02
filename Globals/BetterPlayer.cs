@@ -81,6 +81,7 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public override void ProcessTriggers(TriggersSet triggersSet) {
+        Crafting.BetterGuide.ProcessClickSearch();
         if (FavoritedBuffKb.JustPressed) FavoritedBuff(Player);
         foreach (BuilderAccToggle bat in BuilderAccToggles) bat.Process(Player);
     }

@@ -14,7 +14,8 @@
             "console": "internalConsole",
             "stopAtEntry": false,
             "requireExactSource": false,
-            "enableStepFiltering": false
+            "enableStepFiltering": false,
+            "justMyCode": false
         },
         {
             "name": "tModLoader - Attach",
