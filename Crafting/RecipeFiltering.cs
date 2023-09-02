@@ -93,6 +93,12 @@ public sealed class RecipeFilters {
 
     public readonly Dictionary<int, FavoriteState> FavoriteRecipes = new();
 
+    public bool MatchVisibility(Recipe recipe, bool craftable) => FavoriteRecipes.GetValueOrDefault(recipe.RecipeIndex) switch {
+        FavoriteState.Favorited => true,
+        FavoriteState.Blacklisted => ShowAllRecipes,
+        _ => ShowAllRecipes || craftable,
+    };
+
     public void Save(TagCompound tag) {
         byte all = 0;
         if(ShowAllRecipesNoGuide) all |= 0b01;
@@ -160,7 +166,7 @@ public static class RecipeFiltering {
         _inventoryBack4 = TextureAssets.InventoryBack4;
     }
 
-    public static void PostAddRecipes() => CraftableRecipes = new bool[Recipe.maxRecipes];
+    public static void PostAddRecipes() => craftableRecipes = new bool[Recipe.maxRecipes];
 
     private static void HookHoverOverCraftingItemButton(On_Main.orig_HoverOverCraftingItemButton orig, int recipeIndex) {
         if (!Enabled) {
@@ -171,7 +177,7 @@ public static class RecipeFiltering {
         bool cancel = OverrideRecipeHover(recipeIndex);
         if(cancel) Recipe.FindRecipes(true);
                 
-        cancel |= recipeIndex == Main.focusRecipe && !CraftableRecipes[recipeIndex];
+        cancel |= recipeIndex == Main.focusRecipe && !craftableRecipes[recipeIndex];
         (bool lstate, bool rstate) = (Main.mouseLeft, Main.mouseRight);
         if (cancel) (Main.mouseLeft, Main.mouseRight) = (false, false);
         orig(recipeIndex);
@@ -210,7 +216,7 @@ public static class RecipeFiltering {
         cursor.EmitLdloc(124);
         cursor.EmitDelegate((int i) => {
             if (!Enabled) return;
-            OverrideRecipeTexture(LocalFilters.FavoriteRecipes.GetValueOrDefault(Main.availableRecipe[i]), ItemSlot.DrawGoldBGForCraftingMaterial, CraftableRecipes[i]);
+            OverrideRecipeTexture(LocalFilters.FavoriteRecipes.GetValueOrDefault(Main.availableRecipe[i]), ItemSlot.DrawGoldBGForCraftingMaterial, craftableRecipes[i]);
             ItemSlot.DrawGoldBGForCraftingMaterial = false;
         });
         cursor.GotoNext(MoveType.After, i => true);
@@ -222,7 +228,7 @@ public static class RecipeFiltering {
         cursor.EmitLdloc(130);
         cursor.EmitDelegate((int matI) => {
             if(!Enabled) return;
-            bool canCraft = CraftableRecipes[Main.focusRecipe];
+            bool canCraft = craftableRecipes[Main.focusRecipe];
             FavoriteState state = LocalFilters.FavoriteRecipes.GetValueOrDefault(Main.availableRecipe[Main.focusRecipe]);
             if(!canCraft) {
                 Item material = Main.recipe[Main.availableRecipe[Main.focusRecipe]].requiredItem[matI];
@@ -276,7 +282,7 @@ public static class RecipeFiltering {
         cursor.GotoNext(MoveType.Before, i => i.MatchCall(typeof(ItemSlot), nameof(ItemSlot.Draw)));
         cursor.EmitLdloc(153);
         cursor.EmitDelegate((int i) => {
-            if (Enabled) OverrideRecipeTexture(LocalFilters.FavoriteRecipes.GetValueOrDefault(Main.availableRecipe[i]), false, CraftableRecipes[i]);
+            if (Enabled) OverrideRecipeTexture(LocalFilters.FavoriteRecipes.GetValueOrDefault(Main.availableRecipe[i]), false, craftableRecipes[i]);
         });
         cursor.GotoNext(MoveType.After, i => true);
         cursor.EmitDelegate(() => { TextureAssets.InventoryBack4 = _inventoryBack4; });
@@ -343,6 +349,8 @@ public static class RecipeFiltering {
         } else recipes = AllRecipesIndex();
 
         Recipe.ClearAvailableRecipes();
+        for (int i = 0; i < craftableRecipes.Length; i++) craftableRecipes[i] = false;
+
         AddFilteredRecipes(recipes, availableRecipes, FavoriteState.Favorited);
         AddFilteredRecipes(recipes, availableRecipes, FavoriteState.Default);
         if(LocalFilters.ShowAllRecipes) AddFilteredRecipes(recipes, availableRecipes, FavoriteState.Blacklisted);
@@ -358,25 +366,13 @@ public static class RecipeFiltering {
             while(a < craftableRecipes.Length && craftableRecipes[a] < index) a++;
             Recipe recipe = Main.recipe[index];
             bool craftable = a < craftableRecipes.Length && index == craftableRecipes[a];
-            if (!MatchVisibilityFilter(recipe, craftable)) continue;
-            CraftableRecipes[Main.numAvailableRecipes] = craftable;
+            if (!LocalFilters.MatchVisibility(recipe, craftable)) continue;
+            RecipeFiltering.craftableRecipes[Main.numAvailableRecipes] = craftable;
             Utility.AddToAvailableRecipesMethod.Invoke(null, new object[] { index });
         }
     }
 
-    private static void HookClearRecipes(On_Recipe.orig_ClearAvailableRecipes orig) {
-        for (int i = 0; i < Main.numAvailableRecipes; i++) CraftableRecipes[i] = false;
-        orig();
-    }
-
-    public static bool MatchVisibilityFilter(Recipe recipe, bool craftable) => LocalFilters.FavoriteRecipes.GetValueOrDefault(recipe.RecipeIndex) switch {
-        FavoriteState.Favorited => true,
-        FavoriteState.Blacklisted => LocalFilters.ShowAllRecipes,
-        _ => LocalFilters.ShowAllRecipes || craftable,
-    };
-
-
-    public static bool[] CraftableRecipes = System.Array.Empty<bool>();
+    public static bool[] craftableRecipes = System.Array.Empty<bool>();
 
     private static Asset<Texture2D> _inventoryBack4 = null!;
     private static int _recDelay = 0;
