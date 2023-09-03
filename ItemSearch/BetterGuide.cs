@@ -44,32 +44,32 @@ public sealed class BetterGuide : ILoadable {
             } else {
                 Main.cursorOverride = CursorOverrideID.Magnifiers;
                 if (Enabled && Main.mouseLeft && Main.mouseLeftRelease) {
-                    _searchItemTimer = 30;
+                    s_searchItemTimer = 30;
                     bool? rec = Main.HoverItem.type == Main.guideItem.type ? Main.recBigList : null;
                     SetGuideItem(Main.HoverItem.type);
                     ToggleRecipeList(true);
                     if(rec.HasValue && rec != Main.recBigList) SoundEngine.PlaySound(SoundID.Grab);
                 } else if (Bestiary.Enabled && Main.mouseRight && Main.mouseRightRelease) {
+                    bool delay = Main.InGameUI.CurrentState != Main.BestiaryUI;
                     Bestiary.ToggleBestiary(true);
-                    Bestiary.SetBestiaryItem(Main.HoverItem.type, true);
-                    _searchItemTimer = 30;
+                    Bestiary.SetBestiaryItem(Main.HoverItem.type, delay);
+                    s_searchItemTimer = 30;
                 }
             }
         } else if (!Main.playerInventory && Main.cursorOverride == CursorOverrideID.Magnifiers) Main.cursorOverride = -1;
         orig();
     }
     public static void ProcessSearchTap() {
-        Bestiary.TryDelaySetBestiaryItem();
         if (!Enabled && !Bestiary.Enabled) return;
-        _searchItemTimer++;
+        s_searchItemTimer++;
         if (SearchItem.JustReleased) {
-            if (_searchItemTimer <= 15) {
+            if (s_searchItemTimer <= 15) {
                 if (Main.InGameUI.CurrentState == Main.BestiaryUI) {
                         Bestiary.ToggleBestiary();
                         SoundEngine.PlaySound(SoundID.MenuTick);
-                        _searchItemTaps = -1;
+                        s_searchItemTaps = -1;
                 } else {
-                    if (_searchItemTaps % 2 == 0) {
+                    if (s_searchItemTaps % 2 == 0) {
                         ToggleRecipeList();
                         SoundEngine.PlaySound(SoundID.MenuTick);
                     } else {
@@ -78,14 +78,14 @@ public sealed class BetterGuide : ILoadable {
                         SoundEngine.PlaySound(SoundID.MenuTick);
                     }
                 }
-                _searchItemTaps++;
-            } else _searchItemTaps = 0;
-            _searchItemTimer = 0;
+                s_searchItemTaps++;
+            } else s_searchItemTaps = 0;
+            s_searchItemTimer = 0;
         }
 
         if (SearchItem.JustPressed) {
-            if (_searchItemTimer > 15) _searchItemTaps = 0;
-            _searchItemTimer = 0;
+            if (s_searchItemTimer > 15) s_searchItemTaps = 0;
+            s_searchItemTimer = 0;
         }
     }
 
@@ -255,7 +255,7 @@ public sealed class BetterGuide : ILoadable {
 
 
     public static ModKeybind SearchItem { get; private set; } = null!;
-    private static int _searchItemTimer = 0, _searchItemTaps = 0;
+    private static int s_searchItemTimer = 0, s_searchItemTaps = 0;
 
     public static readonly MethodInfo SetBestiaryTextMethod = typeof(UIBestiaryTest).GetMethod("OnFinishedSettingName", BindingFlags.Instance | BindingFlags.NonPublic)!;
 }

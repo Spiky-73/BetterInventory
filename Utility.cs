@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -22,6 +23,12 @@ public static class Utility {
                 return player.inventory[i];
         }
         return null;
+    }
+
+    public static void ApplyRGB(ref this Color color, float mult) {
+        color.R = (byte)(color.R * mult);
+        color.G = (byte)(color.G * mult);
+        color.B = (byte)(color.B * mult);
     }
     public static Item? SmallestStack(this Player player, Item item, bool notArg = false) {
         Item? currentMin = null;

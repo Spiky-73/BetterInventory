@@ -26,10 +26,10 @@ public sealed class RecipeFiltering : ILoadable {
         IL_Main.DrawInventory += IlDrawInventory;
         On_Recipe.FindRecipes += HookFindRecipes;
 
-        _inventoryBack4 = TextureAssets.InventoryBack4;
+        s_inventoryBack4 = TextureAssets.InventoryBack4;
     }
     public static void PostAddRecipes() => craftableRecipes = new bool[Recipe.maxRecipes];
-    public void Unload() => _inventoryBack4 = null!;
+    public void Unload() => s_inventoryBack4 = null!;
 
     private static void OverrideCraftHover(On_Main.orig_HoverOverCraftingItemButton orig, int recipeIndex) {
         if (!Enabled) {
@@ -72,7 +72,7 @@ public sealed class RecipeFiltering : ILoadable {
         cursor.GotoNext(MoveType.After, i => true);
 
         //                 ++ <restoreBackground>
-        cursor.EmitDelegate(() => { TextureAssets.InventoryBack4 = _inventoryBack4; });
+        cursor.EmitDelegate(() => { TextureAssets.InventoryBack4 = s_inventoryBack4; });
         //             }
         //         }
         //     }
@@ -103,7 +103,7 @@ public sealed class RecipeFiltering : ILoadable {
         cursor.GotoNext(MoveType.After, i => true);
 
         //             ++ <restoreBackground>
-        cursor.EmitDelegate(() => { TextureAssets.InventoryBack4 = _inventoryBack4; });
+        cursor.EmitDelegate(() => { TextureAssets.InventoryBack4 = s_inventoryBack4; });
         //         }
         //     }
         //     ...
@@ -188,7 +188,7 @@ public sealed class RecipeFiltering : ILoadable {
         cursor.GotoNext(MoveType.After, i => true);
 
         //             ++ <restoreBackground>
-        cursor.EmitDelegate(() => { TextureAssets.InventoryBack4 = _inventoryBack4; });
+        cursor.EmitDelegate(() => { TextureAssets.InventoryBack4 = s_inventoryBack4; });
         //         }
         //         ...
         //     }
@@ -275,11 +275,7 @@ public sealed class RecipeFiltering : ILoadable {
     }
     public static void OverrideRecipeTexture(FavoriteState state, bool selected, bool canCraft) {
         TextureAssets.InventoryBack4 = (selected ? SelectedRecipeTextures : DefaultRecipeTextures)[(int)state];
-        if (!canCraft) {
-            byte alpha = Main.inventoryBack.A;
-            Main.inventoryBack *= 0.5f;
-            Main.inventoryBack.A = alpha;
-        }
+        if (!canCraft) Main.inventoryBack.ApplyRGB(0.5f);
     }
 
     private static void AddFilteredRecipes(IEnumerable<int> recipes, int[] craftableRecipes, FavoriteState applyTo){
@@ -310,7 +306,7 @@ public sealed class RecipeFiltering : ILoadable {
     public static Asset<Texture2D> EyeBorder => ModContent.Request<Texture2D>($"BetterInventory/Assets/Inventory_Tick_Border");
     public static Asset<Texture2D> EyeForced => ModContent.Request<Texture2D>($"BetterInventory/Assets/Inventory_Tick_Forced");
     
-    private static Asset<Texture2D> _inventoryBack4 = null!;
+    private static Asset<Texture2D> s_inventoryBack4 = null!;
     
     
     public static readonly MethodInfo CollectGuideRecipesMethod = typeof(Recipe).GetMethod("CollectGuideRecipes", BindingFlags.Static | BindingFlags.NonPublic)!;
