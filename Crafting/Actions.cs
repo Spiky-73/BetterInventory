@@ -9,22 +9,26 @@ using Terraria.UI;
 
 namespace BetterInventory.Crafting;
 
-public static class CraftingActions {
+public sealed class Actions : ILoadable {
 
-    public static bool Enabled => Configs.ClientConfig.Instance.betterCrafting;
+    public static bool Enabled => Configs.ClientConfig.Instance.craftOverride;
 
-    public static void Load() {
-        On_Main.DrawInterface_36_Cursor += HookDrawCursor;
+    public void Load(Mod mod) {
+        On_Main.DrawInterface_36_Cursor += DrawCustomCursor;
 
-        On_Main.HoverOverCraftingItemButton += HookHoverOverCraftingItemButton;
-        On_Main.TryAllowingToCraftRecipe += HookTryAllowingToCraftRecipe;
+        On_Main.HoverOverCraftingItemButton += OverrideHover;
+        On_Main.TryAllowingToCraftRecipe += TryAllowingToCraftRecipe;
 
         IL_Main.CraftItem += ILCraftItem;
         IL_Recipe.Create += ILCreateRecipe;
     }
+    public void Unload(){}
 
-
-    private static void HookDrawCursor(On_Main.orig_DrawInterface_36_Cursor orig) {
+    private static void OverrideHover(On_Main.orig_HoverOverCraftingItemButton orig, int recipeIndex) {
+        if (Enabled && recipeIndex == Main.focusRecipe && ItemSlot.ShiftInUse) Main.cursorOverride = CraftCursorID;
+        orig(recipeIndex);
+    }
+    private static void DrawCustomCursor(On_Main.orig_DrawInterface_36_Cursor orig) {
         if (Main.cursorOverride == CraftCursorID) {
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(0, BlendState.AlphaBlend, Main.SamplerStateForCursor, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
@@ -32,13 +36,7 @@ public static class CraftingActions {
         } else orig();
     }
 
-
-    private static void HookHoverOverCraftingItemButton(On_Main.orig_HoverOverCraftingItemButton orig, int recipeIndex) {
-        if (Enabled && recipeIndex == Main.focusRecipe && ItemSlot.ShiftInUse) Main.cursorOverride = CraftCursorID;
-        orig(recipeIndex);
-    }
-
-    private static bool HookTryAllowingToCraftRecipe(On_Main.orig_TryAllowingToCraftRecipe orig, Recipe currentRecipe, bool tryFittingItemInInventoryToAllowCrafting, out bool movedAnItemToAllowCrafting) {
+    private static bool TryAllowingToCraftRecipe(On_Main.orig_TryAllowingToCraftRecipe orig, Recipe currentRecipe, bool tryFittingItemInInventoryToAllowCrafting, out bool movedAnItemToAllowCrafting) {
         if (Enabled) {
             movedAnItemToAllowCrafting = false;
             if (Main.mouseLeft && !Main.mouseLeftRelease) return false;
@@ -50,12 +48,15 @@ public static class CraftingActions {
     private static void ILCraftItem(ILContext il) {
         ILCursor cursor = new(il);
 
-        ILLabel vanillaCheck = cursor.DefineLabel();
+        // ++ if(<Shift+LeftClick>){
+        // ++     if(!<canTakeItem>) return;
+        // ++     goto skipCheck;
+        // ++ }
+        // ++ vanillaCheck:
         ILLabel skipCheck = cursor.DefineLabel();
-
-        // Shift Click check
+        ILLabel vanillaCheck = cursor.DefineLabel();
         cursor.EmitLdarg0();
-        cursor.EmitDelegate((Recipe r) => Enabled && ItemSlot.ShiftInUse && Main.mouseLeft);
+        cursor.EmitDelegate((Recipe r) => Enabled && Main.cursorOverride == CraftCursorID && Main.mouseLeft);
         cursor.EmitBrfalse(vanillaCheck);
         cursor.EmitLdarg0();
         cursor.EmitDelegate((Recipe r) => Main.LocalPlayer.ItemSpace(r.createItem).CanTakeItem);
@@ -63,26 +64,41 @@ public static class CraftingActions {
         cursor.EmitRet();
         cursor.MarkLabel(vanillaCheck);
 
-        // Vanilla check
+        // <vanillaCheck>
+        cursor.GotoNext(i => i.MatchCallOrCallvirt(typeof(Recipe), nameof(Recipe.Create)));
+        cursor.GotoPrev(MoveType.After, i => i.MatchRet());
+
+        // ++ skipCheck:
+        cursor.MarkLabel(skipCheck);
+
+        // ...
+        // ++ if(<bulkCraft>) craftMultiplier = <maxAmountOfCrafts>;
+        // ++ else craftMultiplier = 1;
         cursor.GotoNext(i => i.MatchCallOrCallvirt(typeof(Recipe), nameof(Recipe.Create)));
         cursor.EmitLdarg0();
         cursor.EmitDelegate((Recipe r) => {
             craftMultiplier = 1;
-            if (!Enabled || !Main.mouseLeft) return;
-            int amount = GetMaxCraftAmount(r);
-            if (ItemSlot.ShiftInUse) craftMultiplier = System.Math.Min(amount, GetMaxPickupAmount(r.createItem) / r.createItem.stack);
-            else craftMultiplier = System.Math.Min(amount, (r.createItem.maxStack - Main.mouseItem.stack) / r.createItem.stack);
+            if (Enabled && Main.mouseLeft) {
+                int amount = GetMaxCraftAmount(r);
+                if (Main.cursorOverride == CraftCursorID) craftMultiplier = System.Math.Min(amount, GetMaxPickupAmount(r.createItem) / r.createItem.stack);
+                else craftMultiplier = System.Math.Min(amount, (r.createItem.maxStack - Main.mouseItem.stack) / r.createItem.stack);
+            } else craftMultiplier = 1;
         });
-        cursor.GotoPrev(MoveType.After, i => i.MatchRet());
-        cursor.MarkLabel(skipCheck);
 
-        // Shift Click grab
+        // r.Create();
+        // RecipeLoader.OnCraft(crafted, r, Main.mouseItem);
         ILLabel normalCraftItemCode = cursor.DefineLabel();
         cursor.GotoNext(MoveType.After, i => i.MatchCallOrCallvirt(typeof(RecipeLoader), nameof(RecipeLoader.OnCraft)));
+
+        // ++ <multiplyCraftAmount>
+        // ++ if(<gotoInventory>) {
+        // ++     <getItems>
+        // ++     return;
+        // ++ }
         cursor.EmitLdloc0();
         cursor.EmitDelegate((Item crafted) => {
             crafted.stack *= craftMultiplier;
-            if (!Enabled || !ItemSlot.ShiftInUse || !Main.mouseLeft) return false;
+            if (!Enabled || Main.cursorOverride != CraftCursorID || !Main.mouseLeft) return false;
             craftMultiplier = 1;
             Main.LocalPlayer.GetItem(Main.myPlayer, crafted, GetItemSettings.InventoryUIToInventorySettingsShowAsNew);
             return true;
@@ -95,19 +111,27 @@ public static class CraftingActions {
         cursor.GotoNext(i => i.MatchCall(typeof(PopupText), nameof(PopupText.NewText)));
         cursor.GotoPrev(MoveType.After, i => i.MatchLdfld(typeof(Item), nameof(Item.stack)));
         cursor.EmitDelegate((int stack) => {
-            int c = stack * craftMultiplier;
+            stack *= craftMultiplier;
             craftMultiplier = 1;
-            return c;
+            return stack;
         });
-
+        // PopupText.NewText(...);
+        // ...
     }
-
     private static void ILCreateRecipe(ILContext il) {
         ILCursor cursor = new(il);
 
+        // foreach (<requiredItem>) {
+        //     ...
+        //     RecipeLoader.ConsumeItem(this, item2.type, ref num);
         cursor.GotoNext(MoveType.After, i => i.MatchCall(typeof(RecipeLoader), nameof(RecipeLoader.ConsumeItem)));
+        
+        //     ++ <bulkCraftCost>
         cursor.EmitLdloca(4);
         cursor.EmitDelegate((ref int consumed) => { consumed *= craftMultiplier; });
+        //     <consumeItems>
+        // }
+        // ...
     }
 
 

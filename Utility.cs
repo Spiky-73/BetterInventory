@@ -5,16 +5,12 @@ using System.Reflection;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
+using Terraria.ModLoader;
 
 namespace BetterInventory;
+
 public static class Utility {
 
-    public static void Load() {
-        OwnedItems = new((Dictionary<int, int>)typeof(Recipe).GetField("_ownedItems", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null)!);
-    }
-    public static void Unload() {
-        OwnedItems = null!;
-    }
 
     public static Item? LastStack(this Player player, Item item, bool notArg = false) {
         for (int i = player.inventory.Length - 1 - 8; i >= 0; i--) {
@@ -98,7 +94,13 @@ public static class Utility {
         }
     }
 
-    public static ReadOnlyDictionary<int, int> OwnedItems { get; private set; } = null!;
+    public static ReadOnlyDictionary<int, int> OwnedItems => Data.ownedItems;
 
     public static readonly MethodInfo AddToAvailableRecipesMethod = typeof(Recipe).GetMethod("AddToAvailableRecipes", BindingFlags.Static | BindingFlags.NonPublic)!;
+    
+    private class Data : ILoadable {
+        public void Load(Mod mod) => ownedItems = new((Dictionary<int, int>)typeof(Recipe).GetField("_ownedItems", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null)!);
+        public void Unload() => ownedItems = null!;
+        public static ReadOnlyDictionary<int, int> ownedItems = null!;
+    }
 }

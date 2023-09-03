@@ -10,8 +10,11 @@ public enum SmartPickupLevel {
     AllItems
 }
 
+public enum UnknownSearchBehaviour { Hidden, Unknown, Known}
+
 public sealed class ClientConfig : ModConfig {
 
+    [Header("InventoryManagement")]
     [DefaultValue(true)] public bool smartConsumption;
     [DefaultValue(true)] public bool smartAmmo;
     [DefaultValue(SmartPickupLevel.FavoriteOnly)] public SmartPickupLevel smartPickup;
@@ -19,7 +22,13 @@ public sealed class ClientConfig : ModConfig {
     [DefaultValue(true)] public bool fastRightClick;
     [DefaultValue(true)] public bool itemRightClick;
 
-    [DefaultValue(true)] public bool betterCrafting;
+    [Header("Crafting")]
+    [DefaultValue(true)] public bool recipeFiltering;
+    [DefaultValue(true)] public bool craftOverride;
+    [Header("ItemSearch")]
+    [DefaultValue(true)] public bool betterGuide;
+    [DefaultValue(true)] public bool searchDrops;
+    [DefaultValue(UnknownSearchBehaviour.Known)] public bool unknownBehaviour;
 
     public static bool SmartPickupEnabled(Item item) => Instance.smartPickup switch {
         SmartPickupLevel.AllItems => true,
@@ -29,7 +38,5 @@ public sealed class ClientConfig : ModConfig {
     public override ConfigScope Mode => ConfigScope.ClientSide;
     public static ClientConfig Instance = null!;
 
-    public override void OnChanged() {
-        Crafting.BetterGuide.UpdateMouseItem();
-    }
+    public override void OnChanged() => ItemSearch.BetterGuide.UpdateMouseItem();
 }
