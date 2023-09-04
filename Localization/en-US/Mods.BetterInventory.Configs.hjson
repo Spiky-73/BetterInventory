@@ -83,3 +83,10 @@ SmartPickupLevel: {
 	FavoriteOnly.Label: Favorite Only
 	AllItems.Label: All Items
 }
+
+UnknownSearchBehaviour: {
+	Tooltip: ""
+	Hidden.Label: Hidden
+	Unknown.Label: Unknown
+	Known.Label: Known
+}

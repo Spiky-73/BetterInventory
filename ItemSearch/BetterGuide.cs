@@ -1,9 +1,7 @@
 using System.IO;
-using System.Reflection;
 using MonoMod.Cil;
 using Terraria;
 using Terraria.Audio;
-using Terraria.GameContent.UI.States;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI;
@@ -166,7 +164,7 @@ public sealed class BetterGuide : ILoadable {
         // for (<recipeIndex>) {
         //     ...
         //     if (recipe.Disabled) continue;
-        cursor.GotoNext(i => i.MatchCallvirt(typeof(Recipe).GetProperty(nameof(Recipe.Disabled))!.GetMethod!));
+        cursor.GotoNext(i => i.MatchCallvirt(Reflection.Recipe.Disabled.GetMethod!));
         cursor.GotoNext(i => i.MatchBrtrue(out endLoop));
         cursor.GotoNext(MoveType.AfterLabel);
 
@@ -177,7 +175,7 @@ public sealed class BetterGuide : ILoadable {
         cursor.EmitLdloc1();
         cursor.EmitDelegate<System.Func<int, bool>>(i => {
             if (Enabled && Main.recipe[i].createItem.type == Main.guideItem.type) {
-                Utility.AddToAvailableRecipesMethod.Invoke(null, new object[] { i });
+                Reflection.Recipe.AddToAvailableRecipes.Invoke(null, i);
                 return true;
             }
             return false;
@@ -253,9 +251,6 @@ public sealed class BetterGuide : ILoadable {
         }
     }
 
-
     public static ModKeybind SearchItem { get; private set; } = null!;
     private static int s_searchItemTimer = 0, s_searchItemTaps = 0;
-
-    public static readonly MethodInfo SetBestiaryTextMethod = typeof(UIBestiaryTest).GetMethod("OnFinishedSettingName", BindingFlags.Instance | BindingFlags.NonPublic)!;
 }

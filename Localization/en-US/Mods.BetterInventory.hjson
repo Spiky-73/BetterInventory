@@ -1,1 +1,4 @@
-UI.ShowRecipes: Show All Recipes
+UI: {
+	ShowRecipes: Show All Recipes
+	FullUnlock: Non fully Unlocked
+}

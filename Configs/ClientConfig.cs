@@ -28,7 +28,7 @@ public sealed class ClientConfig : ModConfig {
     [Header("ItemSearch")]
     [DefaultValue(true)] public bool betterGuide;
     [DefaultValue(true)] public bool searchDrops;
-    [DefaultValue(UnknownSearchBehaviour.Known)] public bool unknownBehaviour;
+    [DefaultValue(UnknownSearchBehaviour.Known)] public UnknownSearchBehaviour unknownBehaviour;
 
     public static bool SmartPickupEnabled(Item item) => Instance.smartPickup switch {
         SmartPickupLevel.AllItems => true,

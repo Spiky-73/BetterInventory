@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Reflection;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
@@ -114,7 +113,7 @@ public sealed class RecipeFiltering : ILoadable {
 
         // ++ <drawFilter>
         cursor.EmitLdloc(13);
-        cursor.EmitCall(typeof(RecipeFiltering).GetMethod(nameof(DrawFilters), BindingFlags.Static | BindingFlags.NonPublic)!);
+        cursor.EmitDelegate(DrawFilters);
 
         // ----- recBigList Scroll ----- 
         // if(<recBigListVisible>) {
@@ -212,7 +211,7 @@ public sealed class RecipeFiltering : ILoadable {
         IEnumerable<int> recipes;
         if(!Main.guideItem.IsAir) {
             Recipe.ClearAvailableRecipes();
-            CollectGuideRecipesMethod.Invoke(null, null);
+            Reflection.Recipe.CollectGuideRecipes.Invoke(null);
             int[] guideRecipes = Main.availableRecipe[..Main.numAvailableRecipes];
             recipes = guideRecipes;
         } else recipes = AllRecipesIndex();
@@ -224,8 +223,8 @@ public sealed class RecipeFiltering : ILoadable {
         AddFilteredRecipes(recipes, availableRecipes, FavoriteState.Default);
         if(LocalFilters.ShowAllRecipes) AddFilteredRecipes(recipes, availableRecipes, FavoriteState.Blacklisted);
 
-        TryRefocusingRecipeMethod.Invoke(null, new object[] { oldRecipe });
-        VisuallyRepositionRecipesMethod.Invoke(null, new object[] { focusY });
+        Reflection.Recipe.TryRefocusingRecipe.Invoke(null, oldRecipe);
+        Reflection.Recipe.VisuallyRepositionRecipes.Invoke(null, focusY);
     }
 
 
@@ -287,7 +286,7 @@ public sealed class RecipeFiltering : ILoadable {
             bool craftable = a < craftableRecipes.Length && index == craftableRecipes[a];
             if (!LocalFilters.MatchShowAll(recipe, craftable)) continue;
             RecipeFiltering.craftableRecipes[Main.numAvailableRecipes] = craftable;
-            Utility.AddToAvailableRecipesMethod.Invoke(null, new object[] { index });
+            Reflection.Recipe.AddToAvailableRecipes.Invoke(null, index);
         }
     }
 
@@ -307,9 +306,4 @@ public sealed class RecipeFiltering : ILoadable {
     public static Asset<Texture2D> EyeForced => ModContent.Request<Texture2D>($"BetterInventory/Assets/Inventory_Tick_Forced");
     
     private static Asset<Texture2D> s_inventoryBack4 = null!;
-    
-    
-    public static readonly MethodInfo CollectGuideRecipesMethod = typeof(Recipe).GetMethod("CollectGuideRecipes", BindingFlags.Static | BindingFlags.NonPublic)!;
-    public static readonly MethodInfo TryRefocusingRecipeMethod = typeof(Recipe).GetMethod("TryRefocusingRecipe", BindingFlags.Static | BindingFlags.NonPublic)!;
-    public static readonly MethodInfo VisuallyRepositionRecipesMethod = typeof(Recipe).GetMethod("VisuallyRepositionRecipes", BindingFlags.Static | BindingFlags.NonPublic)!;
 }

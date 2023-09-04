@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
@@ -11,7 +10,6 @@ using Terraria.ModLoader;
 namespace BetterInventory;
 
 public static class Utility {
-
 
     public static Item? LastStack(this Player player, Item item, bool notArg = false) {
         for (int i = player.inventory.Length - 1 - 8; i >= 0; i--) {
@@ -25,12 +23,7 @@ public static class Utility {
         return null;
     }
 
-    public static void ApplyRGB(ref this Color color, float mult) {
-        color.R = (byte)(color.R * mult);
-        color.G = (byte)(color.G * mult);
-        color.B = (byte)(color.B * mult);
-    }
-    public static Item? SmallestStack(this Player player, Item item, bool notArg = false) {
+   public static Item? SmallestStack(this Player player, Item item, bool notArg = false) {
         Item? currentMin = null;
         for (int i = player.inventory.Length - 1; i >= 0; i--) {
             if (item.type == player.inventory[i].type
@@ -101,12 +94,16 @@ public static class Utility {
         }
     }
 
-    public static ReadOnlyDictionary<int, int> OwnedItems => Data.ownedItems;
+    public static void ApplyRGB(ref this Color color, float mult) {
+        color.R = (byte)(color.R * mult);
+        color.G = (byte)(color.G * mult);
+        color.B = (byte)(color.B * mult);
+    }
 
-    public static readonly MethodInfo AddToAvailableRecipesMethod = typeof(Recipe).GetMethod("AddToAvailableRecipes", BindingFlags.Static | BindingFlags.NonPublic)!;
+    public static ReadOnlyDictionary<int, int> OwnedItems => Data.ownedItems;
     
     private class Data : ILoadable {
-        public void Load(Mod mod) => ownedItems = new((Dictionary<int, int>)typeof(Recipe).GetField("_ownedItems", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null)!);
+        public void Load(Mod mod) => ownedItems = new(Reflection.Recipe._ownedItems.GetValue(null));
         public void Unload() => ownedItems = null!;
         public static ReadOnlyDictionary<int, int> ownedItems = null!;
     }

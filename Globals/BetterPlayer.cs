@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Reflection;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameInput;
@@ -167,9 +165,4 @@ public sealed class BetterPlayer : ModPlayer {
     public override void SaveData(TagCompound tag) => tag["filters"] = RecipeFilters;
     public override void LoadData(TagCompound tag) => RecipeFilters = tag.Get<Crafting.Filters>("filters");
     public Crafting.Filters RecipeFilters { get; set; } = new();
-
-    public static readonly MethodInfo FillEmptyMethod = typeof(Player).GetMethod("GetItem_FillEmptyInventorySlot", BindingFlags.Instance | BindingFlags.NonPublic, new System.Type[] { typeof(int), typeof(Item), typeof(GetItemSettings), typeof(Item), typeof(int) })!;
-    public static readonly MethodInfo FillOccupiedMethod = typeof(Player).GetMethod("GetItem_FillIntoOccupiedSlot", BindingFlags.Instance | BindingFlags.NonPublic, new System.Type[] { typeof(int), typeof(Item), typeof(GetItemSettings), typeof(Item), typeof(int) })!;
-    public static readonly MethodInfo FillEmptVoidMethod = typeof(Player).GetMethod("GetItem_FillEmptyInventorySlot_VoidBag", BindingFlags.Instance | BindingFlags.NonPublic, new System.Type[] { typeof(int), typeof(Item[]), typeof(Item), typeof(GetItemSettings), typeof(Item), typeof(int) })!;
-    public static readonly MethodInfo FillOccupiedVoidMethod = typeof(Player).GetMethod("GetItem_FillIntoOccupiedSlot_VoidBag", BindingFlags.Instance | BindingFlags.NonPublic, new System.Type[] { typeof(int), typeof(Item[]), typeof(Item), typeof(GetItemSettings), typeof(Item), typeof(int) })!;
 }
