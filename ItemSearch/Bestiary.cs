@@ -6,6 +6,7 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.GameContent.Bestiary;
+using Terraria.GameContent.ItemDropRules;
 using Terraria.GameContent.UI.Elements;
 using Terraria.GameContent.UI.States;
 using Terraria.ID;
@@ -38,6 +39,10 @@ public sealed class Bestiary : ILoadable {
         On_UIBestiaryTest.Recalculate += HookDelaySearch;
 
         On_UIBestiaryTest.FilterEntries += HookBestiaryUnkownNPCBehaviour;
+
+        On_FewFromOptionsNotScaledWithLuckDropRule.ReportDroprates += HookFixDropRates;
+        On_UIBestiaryInfoItemLine.ctor += HookBossBag;
+        On_ItemDropBestiaryInfoElement.GetSearchString += HookSearchBossBagText;
     }
 
     public void Unload() {}
@@ -164,6 +169,53 @@ public sealed class Bestiary : ILoadable {
         if (s_bestiaryDelayedType == ItemID.None) return;
         SetBestiaryItem(s_bestiaryDelayedType);
         s_bestiaryDelayedType = ItemID.None;
+    }
+
+
+    private void HookFixDropRates(On_FewFromOptionsNotScaledWithLuckDropRule.orig_ReportDroprates orig, FewFromOptionsNotScaledWithLuckDropRule self, List<DropRateInfo> drops, DropRateInfoChainFeed ratesInfo) {
+        float pesonalDroprate = System.Math.Min(1, self.chanceNumerator / (float)self.chanceDenominator);
+        float globalDroprate = pesonalDroprate * ratesInfo.parentDroprateChance;
+        float dropRate = 1f / self.dropIds.Length * self.amount * globalDroprate;
+        for (int i = 0; i < self.dropIds.Length; i++) drops.Add(new DropRateInfo(self.dropIds[i], 1, 1, dropRate, ratesInfo.conditions));
+        Chains.ReportDroprates(self.ChainedRules, pesonalDroprate, drops, ratesInfo);
+    }
+
+    private void HookBossBag(On_UIBestiaryInfoItemLine.orig_ctor orig, UIBestiaryInfoItemLine self, DropRateInfo info, BestiaryUICollectionInfo uiinfo, float textScale) {
+        orig(self, info, uiinfo, textScale);
+        if (ItemID.Sets.BossBag[info.itemId]) {
+            UIList uIList = new(){
+                Left = StyleDimension.FromPixelsAndPercent(-1, 0f),
+                Width = StyleDimension.FromPixelsAndPercent(0, 1f),
+                Height = StyleDimension.FromPixelsAndPercent(0, 1f),
+            };
+            uIList.SetPadding(0);
+            uIList.PaddingBottom = 4;
+            uIList.PaddingBottom = 4;
+            uIList.ListPadding = 4;
+            uIList.Top.Set(self.Height.Pixels + uIList.PaddingTop, 0);
+            self.Append(uIList);
+
+            List<DropRateInfo> drops = new();
+            DropRateInfoChainFeed ratesInfo = new(1f);
+            foreach (IItemDropRule itemDropRule in Main.ItemDropsDB.GetRulesForItemID(info.itemId)) itemDropRule.ReportDroprates(drops, ratesInfo);
+            foreach (DropRateInfo drop in drops) {
+                if (drop.itemId.InRange(ItemID.CopperCoin, ItemID.PlatinumCoin)) continue;
+                ItemDropBestiaryInfoElement element = new(drop);
+                UIElement? dropLine = element.ProvideUIElement(uiinfo);
+                if (dropLine is null) continue;
+                dropLine.Left.Set(0, 0);
+                dropLine.Width.Set(0, 1);
+                dropLine.PaddingLeft /= 2;
+                dropLine.PaddingRight /= 2;
+                uIList.Add(dropLine);
+            }
+            uIList.Recalculate();
+            self.Height.Pixels += uIList.GetTotalHeight() + uIList.PaddingBottom;
+        }
+    }
+
+    private string HookSearchBossBagText(On_ItemDropBestiaryInfoElement.orig_GetSearchString orig, ItemDropBestiaryInfoElement self, ref BestiaryUICollectionInfo info) {
+        return orig(self, ref info);
     }
 
 

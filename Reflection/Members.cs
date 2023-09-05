@@ -111,7 +111,7 @@ public abstract class StaticMember<TMemberInfo> where TMemberInfo : MemberInfo {
 
     public static implicit operator TMemberInfo(StaticMember<TMemberInfo> member) => member.MemberInfo;
 
-    public const BindingFlags Flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+    public const BindingFlags Flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 }
 
 public sealed class StaticField<TField> : StaticMember<FieldInfo>{
