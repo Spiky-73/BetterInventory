@@ -211,7 +211,7 @@ public sealed class RecipeFiltering : ILoadable {
         IEnumerable<int> recipes;
         if(!Main.guideItem.IsAir) {
             Recipe.ClearAvailableRecipes();
-            Reflection.Recipe.CollectGuideRecipes.Invoke(null);
+            Reflection.Recipe.CollectGuideRecipes.Invoke();
             int[] guideRecipes = Main.availableRecipe[..Main.numAvailableRecipes];
             recipes = guideRecipes;
         } else recipes = AllRecipesIndex();
@@ -223,8 +223,8 @@ public sealed class RecipeFiltering : ILoadable {
         AddFilteredRecipes(recipes, availableRecipes, FavoriteState.Default);
         if(LocalFilters.ShowAllRecipes) AddFilteredRecipes(recipes, availableRecipes, FavoriteState.Blacklisted);
 
-        Reflection.Recipe.TryRefocusingRecipe.Invoke(null, oldRecipe);
-        Reflection.Recipe.VisuallyRepositionRecipes.Invoke(null, focusY);
+        Reflection.Recipe.TryRefocusingRecipe.Invoke(oldRecipe);
+        Reflection.Recipe.VisuallyRepositionRecipes.Invoke(focusY);
     }
 
 
@@ -286,7 +286,7 @@ public sealed class RecipeFiltering : ILoadable {
             bool craftable = a < craftableRecipes.Length && index == craftableRecipes[a];
             if (!LocalFilters.MatchShowAll(recipe, craftable)) continue;
             RecipeFiltering.craftableRecipes[Main.numAvailableRecipes] = craftable;
-            Reflection.Recipe.AddToAvailableRecipes.Invoke(null, index);
+            Reflection.Recipe.AddToAvailableRecipes.Invoke(index);
         }
     }
 

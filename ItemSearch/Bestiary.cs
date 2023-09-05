@@ -58,7 +58,10 @@ public sealed class Bestiary : ILoadable {
         cursor.GotoNext(MoveType.After, i => i.MatchCallvirt(typeof(IBestiaryUICollectionInfoProvider), nameof(IBestiaryUICollectionInfoProvider.GetEntryUICollectionInfo)));
 
         // ++ <fakeUnlock> 
-        cursor.EmitDelegate(ForceUnlock);
+        cursor.EmitDelegate((BestiaryUICollectionInfo info) => {
+            if (Enabled && Configs.ClientConfig.Instance.unknownBehaviour == Configs.UnknownSearchBehaviour.Known) info.UnlockState = BestiaryEntryUnlockState.CanShowDropsWithDropRates_4;
+            return info;
+        });
         // ...
     }
     private static void ILIconDrawFakeUnlock(ILContext il) {
@@ -69,7 +72,7 @@ public sealed class Bestiary : ILoadable {
         cursor.GotoNext(MoveType.After, i => i.MatchCallvirt(typeof(IEntryIcon), nameof(IEntryIcon.GetUnlockState)));
 
         // ++ <changeVisibleState>
-        cursor.EmitDelegate((bool unlocked) => unlocked || Enabled);
+        cursor.EmitDelegate((bool unlocked) => unlocked || (Enabled && Configs.ClientConfig.Instance.unknownBehaviour == Configs.UnknownSearchBehaviour.Known));
     }
     
 
@@ -80,7 +83,12 @@ public sealed class Bestiary : ILoadable {
         cursor.GotoNext(MoveType.After, i => i.MatchCall(typeof(UIBestiaryEntryInfoPage), "GetUICollectionInfo"));
 
         // ++ <fakeUnlock> 
-        cursor.EmitDelegate(ForceUnlock);
+        cursor.EmitDelegate((BestiaryUICollectionInfo info) => {
+            if(!Enabled) return info;
+            if (Configs.ClientConfig.Instance.unknownBehaviour == Configs.UnknownSearchBehaviour.Known) info.UnlockState = BestiaryEntryUnlockState.CanShowDropsWithDropRates_4;
+            else if(BestiaryEntryUnlockState.NotKnownAtAll_0 < info.UnlockState && info.UnlockState < BestiaryEntryUnlockState.CanShowDropsWithoutDropRates_3) info.UnlockState = BestiaryEntryUnlockState.CanShowDropsWithoutDropRates_3;
+            return info;
+        });
         // ...
     }
 
@@ -103,7 +111,10 @@ public sealed class Bestiary : ILoadable {
         cursor.GotoNext(MoveType.After, i => i.MatchCallvirt(typeof(IBestiaryUICollectionInfoProvider), nameof(IBestiaryUICollectionInfoProvider.GetEntryUICollectionInfo)));
 
         // ++ <fakeUnlock> 
-        cursor.EmitDelegate(ForceUnlock);
+        cursor.EmitDelegate((BestiaryUICollectionInfo info) => {
+            if (Enabled) info.UnlockState = BestiaryEntryUnlockState.CanShowDropsWithDropRates_4;
+            return info;
+        });
         // ...
     }
 
@@ -127,7 +138,7 @@ public sealed class Bestiary : ILoadable {
         cursor.EmitLdloc(14);
         cursor.EmitDelegate((bool on, IBestiaryEntryFilter filter, List<BestiaryEntry> entries) => {
             if(filter.ForcedDisplay.HasValue) return on;
-            if (Enabled) {
+            if (Enabled && Configs.ClientConfig.Instance.unknownBehaviour == Configs.UnknownSearchBehaviour.Known) {
                 for (int i = 0; i < entries.Count; i++) if (filter.FitsFilter(entries[i])) return true;
             }
             return on;
@@ -137,7 +148,7 @@ public sealed class Bestiary : ILoadable {
 
     private void HookDarkenFilters(On_UIBestiaryFilteringOptionsGrid.orig_UpdateButtonSelections orig, UIBestiaryFilteringOptionsGrid self) {
         orig(self);
-        EntryFilterer<BestiaryEntry, IBestiaryEntryFilter> filterer = Reflection.UIBestiaryFilteringOptionsGrid._filterer.GetValue(self)!;
+        EntryFilterer<BestiaryEntry, IBestiaryEntryFilter> filterer = Reflection.UIBestiaryFilteringOptionsGrid._filterer.GetValue(self);
         List<GroupOptionButton<int>> filters = Reflection.UIBestiaryFilteringOptionsGrid._filterButtons.GetValue(self);
         for (int i = 0; i < filterer.AvailableFilters.Count; i++){
             if (Reflection.UIBestiaryFilteringOptionsGrid.GetIsFilterAvailableForEntries.Invoke(self, filterer.AvailableFilters[i], Reflection.UIBestiaryFilteringOptionsGrid._filterAvailabilityTests.GetValue(self)[i])) continue;
@@ -158,9 +169,11 @@ public sealed class Bestiary : ILoadable {
 
     private void HookBestiaryUnkownNPCBehaviour(On_UIBestiaryTest.orig_FilterEntries orig, UIBestiaryTest self) {
         orig(self);
-        if(!Enabled || Configs.ClientConfig.Instance.unknownBehaviour == Configs.UnknownSearchBehaviour.Hidden) return;
-        Reflection.UIBestiaryTest._workingSetEntries.GetValue(Main.BestiaryUI);
-
+        if(!Enabled || Configs.ClientConfig.Instance.unknownBehaviour != Configs.UnknownSearchBehaviour.Hidden) return;
+        List<BestiaryEntry> entries = Reflection.UIBestiaryTest._workingSetEntries.GetValue(Main.BestiaryUI);
+        for (int i = entries.Count - 1; i >= 0 ; i--) {
+            if(entries[i].UIInfoProvider.GetEntryUICollectionInfo().UnlockState == BestiaryEntryUnlockState.NotKnownAtAll_0) entries.RemoveAt(i);
+        }
     }
 
     public static void DarkenElement(UIElement element, float dark, int depth = -1){
@@ -180,12 +193,6 @@ public sealed class Bestiary : ILoadable {
             if (element is UIList list) foreach (UIElement e in list) DarkenElement(e, dark, depth);
             else foreach(UIElement e in element.Children) DarkenElement(e, dark, depth);
         }
-    }
-
-
-    public static BestiaryUICollectionInfo ForceUnlock(BestiaryUICollectionInfo info) {
-        if (Enabled) info.UnlockState = BestiaryEntryUnlockState.CanShowDropsWithDropRates_4;
-        return info;
     }
 
 
@@ -209,13 +216,13 @@ public sealed class Bestiary : ILoadable {
             return;
         }
         static void PlayNoise(string content) => SoundEngine.PlaySound(SoundID.Grab);
-        UISearchBar searchBar = Reflection.UIBestiaryTest._searchBar.GetValue(Main.BestiaryUI)!;
+        UISearchBar searchBar = Reflection.UIBestiaryTest._searchBar.GetValue(Main.BestiaryUI);
         BestiaryEntry? oldEntry = Reflection.UIBestiaryTest._selectedEntryButton.GetValue(Main.BestiaryUI).Entry;
         searchBar.OnContentsChanged += PlayNoise;
         searchBar.SetContents(Lang.GetItemNameValue(type), true);
         if (searchBar.IsWritingText) searchBar.ToggleTakingText();
         searchBar.OnContentsChanged -= PlayNoise;
-        UIBestiaryEntryGrid grid = Reflection.UIBestiaryTest._entryGrid.GetValue(Main.BestiaryUI)!;
+        UIBestiaryEntryGrid grid = Reflection.UIBestiaryTest._entryGrid.GetValue(Main.BestiaryUI);
         if (oldEntry is not null) {
             foreach (UIElement element in grid.Children) {
                 if (element is not UIBestiaryEntryButton button || button.Entry != oldEntry) continue;

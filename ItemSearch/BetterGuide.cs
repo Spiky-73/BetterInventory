@@ -175,7 +175,7 @@ public sealed class BetterGuide : ILoadable {
         cursor.EmitLdloc1();
         cursor.EmitDelegate<System.Func<int, bool>>(i => {
             if (Enabled && Main.recipe[i].createItem.type == Main.guideItem.type) {
-                Reflection.Recipe.AddToAvailableRecipes.Invoke(null, i);
+                Reflection.Recipe.AddToAvailableRecipes.Invoke(i);
                 return true;
             }
             return false;
