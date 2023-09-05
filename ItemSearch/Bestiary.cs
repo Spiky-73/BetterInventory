@@ -38,7 +38,7 @@ public sealed class Bestiary : ILoadable {
         
         On_UIBestiaryTest.Recalculate += HookDelaySearch;
 
-        On_UIBestiaryTest.FilterEntries += HookBestiaryUnkownNPCBehaviour;
+        On_UIBestiaryTest.FilterEntries += HookBestiaryUnkownNPCBehaviourFilter;
 
         On_FewFromOptionsNotScaledWithLuckDropRule.ReportDroprates += HookFixDropRates;
         On_UIBestiaryInfoItemLine.ctor += HookBossBag;
@@ -110,6 +110,15 @@ public sealed class Bestiary : ILoadable {
     }
 
 
+    private void HookBestiaryUnkownNPCBehaviourFilter(On_UIBestiaryTest.orig_FilterEntries orig, UIBestiaryTest self) {
+        orig(self);
+        if (!Enabled || Configs.ClientConfig.Instance.unknownBehaviour != Configs.UnknownSearchBehaviour.Hidden) return;
+        List<BestiaryEntry> entries = Reflection.UIBestiaryTest._workingSetEntries.GetValue(Main.BestiaryUI);
+        for (int i = entries.Count - 1; i >= 0; i--) {
+            if (entries[i].UIInfoProvider.GetEntryUICollectionInfo().UnlockState == BestiaryEntryUnlockState.NotKnownAtAll_0) entries.RemoveAt(i);
+        }
+    }
+
     private static void ILSearchFilterFakeUnlock(ILContext il) {
         ILCursor cursor = new(il);
 
@@ -125,10 +134,8 @@ public sealed class Bestiary : ILoadable {
         // ...
     }
 
-
     private static string HookUnlockFilterName(On_Filters.ByUnlockState.orig_GetDisplayNameKey orig, Filters.ByUnlockState self) => !Enabled ? orig(self) : "Mods.BetterInventory.UI.FullUnlock";
-    private static bool HookCustomUnlockFilter(On_Filters.ByUnlockState.orig_FitsFilter orig, Filters.ByUnlockState self, BestiaryEntry entry) => !Enabled ?
-        orig(self, entry) : entry.UIInfoProvider.GetEntryUICollectionInfo().UnlockState != BestiaryEntryUnlockState.CanShowDropsWithDropRates_4;
+    private static bool HookCustomUnlockFilter(On_Filters.ByUnlockState.orig_FitsFilter orig, Filters.ByUnlockState self, BestiaryEntry entry) => !Enabled ? orig(self, entry) : entry.UIInfoProvider.GetEntryUICollectionInfo().UnlockState != BestiaryEntryUnlockState.CanShowDropsWithDropRates_4;
 
 
     private void ILFakeUnlockFilters(ILContext il) {
@@ -155,6 +162,7 @@ public sealed class Bestiary : ILoadable {
 
     private void HookDarkenFilters(On_UIBestiaryFilteringOptionsGrid.orig_UpdateButtonSelections orig, UIBestiaryFilteringOptionsGrid self) {
         orig(self);
+        if (!Enabled) return;
         EntryFilterer<BestiaryEntry, IBestiaryEntryFilter> filterer = Reflection.UIBestiaryFilteringOptionsGrid._filterer.GetValue(self);
         List<GroupOptionButton<int>> filters = Reflection.UIBestiaryFilteringOptionsGrid._filterButtons.GetValue(self);
         for (int i = 0; i < filterer.AvailableFilters.Count; i++){
@@ -163,14 +171,6 @@ public sealed class Bestiary : ILoadable {
             color.ApplyRGB(IconDark);
             Reflection.GroupOptionButton<int>._color.SetValue(filters[i], color);
         }
-    }
-
-
-    private static void HookDelaySearch(On_UIBestiaryTest.orig_Recalculate orig, UIBestiaryTest self) {
-        orig(self);
-        if (s_bestiaryDelayedType == ItemID.None) return;
-        SetBestiaryItem(s_bestiaryDelayedType);
-        s_bestiaryDelayedType = ItemID.None;
     }
 
 
@@ -184,8 +184,8 @@ public sealed class Bestiary : ILoadable {
 
     private void HookBossBag(On_UIBestiaryInfoItemLine.orig_ctor orig, UIBestiaryInfoItemLine self, DropRateInfo info, BestiaryUICollectionInfo uiinfo, float textScale) {
         orig(self, info, uiinfo, textScale);
-        if (ItemID.Sets.BossBag[info.itemId]) {
-            UIList uIList = new(){
+        if (Enabled && ItemID.Sets.BossBag[info.itemId]) {
+            UIList uIList = new() {
                 Left = StyleDimension.FromPixelsAndPercent(-1, 0f),
                 Width = StyleDimension.FromPixelsAndPercent(0, 1f),
                 Height = StyleDimension.FromPixelsAndPercent(0, 1f),
@@ -217,21 +217,21 @@ public sealed class Bestiary : ILoadable {
     }
 
     private string HookSearchBossBagText(On_ItemDropBestiaryInfoElement.orig_GetSearchString orig, ItemDropBestiaryInfoElement self, ref BestiaryUICollectionInfo info) {
-        DropRateInfo dropRateInfo = Reflection.ItemDropBestiaryInfoElement._droprateInfo.GetValue(self);
         string s = orig(self, ref info);
-        if(!ItemID.Sets.BossBag[dropRateInfo.itemId]) return s;
+        if(!Enabled) return s;
+        DropRateInfo dropRateInfo = Reflection.ItemDropBestiaryInfoElement._droprateInfo.GetValue(self);
+        if (!ItemID.Sets.BossBag[dropRateInfo.itemId]) return s;
         return $"{s}|{GetBossBagSearch(dropRateInfo)}";
     }
 
 
-    private void HookBestiaryUnkownNPCBehaviour(On_UIBestiaryTest.orig_FilterEntries orig, UIBestiaryTest self) {
+    private static void HookDelaySearch(On_UIBestiaryTest.orig_Recalculate orig, UIBestiaryTest self) {
         orig(self);
-        if(!Enabled || Configs.ClientConfig.Instance.unknownBehaviour != Configs.UnknownSearchBehaviour.Hidden) return;
-        List<BestiaryEntry> entries = Reflection.UIBestiaryTest._workingSetEntries.GetValue(Main.BestiaryUI);
-        for (int i = entries.Count - 1; i >= 0 ; i--) {
-            if(entries[i].UIInfoProvider.GetEntryUICollectionInfo().UnlockState == BestiaryEntryUnlockState.NotKnownAtAll_0) entries.RemoveAt(i);
-        }
+        if (s_bestiaryDelayedType == ItemID.None) return;
+        SetBestiaryItem(s_bestiaryDelayedType);
+        s_bestiaryDelayedType = ItemID.None;
     }
+
 
     public static void DarkenElement(UIElement element, float dark, int depth = -1){
         if (element is UIHorizontalSeparator sep) sep.Color.ApplyRGB(dark);
@@ -293,6 +293,7 @@ public sealed class Bestiary : ILoadable {
             break;
         }
     }
+
 
     public static string GetBossBagSearch(DropRateInfo bossbag){
         if(_bossBagSearch.TryGetValue(bossbag.itemId, out string? s)) return s;
