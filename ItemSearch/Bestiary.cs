@@ -45,7 +45,9 @@ public sealed class Bestiary : ILoadable {
         On_ItemDropBestiaryInfoElement.GetSearchString += HookSearchBossBagText;
     }
 
-    public void Unload() {}
+    public void Unload() {
+        _bossBagSearch.Clear();
+    }
 
 
     private void HookDarkenEntryButton(On_UIBestiaryEntryButton.orig_ctor orig, UIBestiaryEntryButton self, BestiaryEntry entry, bool isAPrettyPortrait) {
@@ -215,7 +217,10 @@ public sealed class Bestiary : ILoadable {
     }
 
     private string HookSearchBossBagText(On_ItemDropBestiaryInfoElement.orig_GetSearchString orig, ItemDropBestiaryInfoElement self, ref BestiaryUICollectionInfo info) {
-        return orig(self, ref info);
+        DropRateInfo dropRateInfo = Reflection.ItemDropBestiaryInfoElement._droprateInfo.GetValue(self);
+        string s = orig(self, ref info);
+        if(!ItemID.Sets.BossBag[dropRateInfo.itemId]) return s;
+        return $"{s}|{GetBossBagSearch(dropRateInfo)}";
     }
 
 
@@ -289,10 +294,25 @@ public sealed class Bestiary : ILoadable {
         }
     }
 
+    public static string GetBossBagSearch(DropRateInfo bossbag){
+        if(_bossBagSearch.TryGetValue(bossbag.itemId, out string? s)) return s;
+        List<DropRateInfo> drops = new();
+        DropRateInfoChainFeed ratesInfo = new(1f);
+        List<string> names = new();
+        foreach (IItemDropRule itemDropRule in Main.ItemDropsDB.GetRulesForItemID(bossbag.itemId)) itemDropRule.ReportDroprates(drops, ratesInfo);
+        foreach (DropRateInfo drop in drops) {
+            if (!drop.itemId.InRange(ItemID.CopperCoin, ItemID.PlatinumCoin)) names.Add(Lang.GetItemNameValue(drop.itemId));
+        }
+        return _bossBagSearch[bossbag.itemId] = string.Join('|', names);
+    }
+
+
     public const float PageDark = 0.7f;
     public const float IconDark = 0.5f;
 
     private static int s_bestiaryDelayedType;
 
     private static bool s_darkPage = false;
+
+    private static readonly Dictionary<int, string> _bossBagSearch = new();
 }

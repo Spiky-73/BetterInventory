@@ -9,6 +9,8 @@ using TIcon = Terraria.GameContent.UI.Elements.UIBestiaryEntryIcon;
 using TButton = Terraria.GameContent.UI.Elements.UIBestiaryEntryButton;
 using TPage = Terraria.GameContent.UI.Elements.UIBestiaryEntryInfoPage;
 using TFilterGrid = Terraria.GameContent.UI.Elements.UIBestiaryFilteringOptionsGrid;
+using TItemDropE = Terraria.GameContent.Bestiary.ItemDropBestiaryInfoElement;
+using Terraria.GameContent.ItemDropRules;
 
 namespace BetterInventory.Reflection;
 
@@ -43,4 +45,8 @@ public static class UIBestiaryFilteringOptionsGrid {
 
 public static class GroupOptionButton<T> {
     public static readonly Field<Terraria.GameContent.UI.Elements.GroupOptionButton<T>, Color> _color = new(nameof(_color));
+}
+
+public static class ItemDropBestiaryInfoElement {
+    public static readonly Field<TItemDropE, DropRateInfo> _droprateInfo = new(nameof(_droprateInfo));
 }
