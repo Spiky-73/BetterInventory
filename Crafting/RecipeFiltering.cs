@@ -113,6 +113,7 @@ public sealed class RecipeFiltering : ILoadable {
 
         // ++ <drawFilter>
         cursor.EmitLdloc(13);
+        cursor.EmitLdloc(141);
         cursor.EmitDelegate(DrawFilters);
 
         // ----- recBigList Scroll ----- 
@@ -227,9 +228,8 @@ public sealed class RecipeFiltering : ILoadable {
         Reflection.Recipe.VisuallyRepositionRecipes.Invoke(focusY);
     }
 
-
-    private static void DrawFilters(int yOffset) {
-        if (!Enabled) return;
+    private static void DrawFilters(int yOffset, int hammerY) {
+        if (!Enabled || hammerY == 0) return;
         Filters filters = LocalFilters;
         int x = 94;
         int y = 450 + yOffset + TextureAssets.CraftToggle[0].Height();

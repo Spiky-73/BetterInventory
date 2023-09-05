@@ -274,7 +274,7 @@ public sealed class Bestiary : ILoadable {
         }
         static void PlayNoise(string content) => SoundEngine.PlaySound(SoundID.Grab);
         UISearchBar searchBar = Reflection.UIBestiaryTest._searchBar.GetValue(Main.BestiaryUI);
-        BestiaryEntry? oldEntry = Reflection.UIBestiaryTest._selectedEntryButton.GetValue(Main.BestiaryUI).Entry;
+        BestiaryEntry? oldEntry = Reflection.UIBestiaryTest._selectedEntryButton.GetValue(Main.BestiaryUI)?.Entry;
         searchBar.OnContentsChanged += PlayNoise;
         searchBar.SetContents(Lang.GetItemNameValue(type), true);
         if (searchBar.IsWritingText) searchBar.ToggleTakingText();

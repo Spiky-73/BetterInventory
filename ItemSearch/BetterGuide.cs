@@ -1,4 +1,5 @@
 using System.IO;
+using Microsoft.Xna.Framework;
 using MonoMod.Cil;
 using Terraria;
 using Terraria.Audio;
@@ -16,7 +17,8 @@ public sealed class BetterGuide : ILoadable {
     public void Load(Mod mod){
         SearchItem = KeybindLoader.RegisterKeybind(mod, "SearchItem", Microsoft.Xna.Framework.Input.Keys.N);
         On_Main.DrawInterface_36_Cursor += HookDrawCursor;
-
+        On_Main.DrawInterface += HookClickOverride;
+        
         On_ItemSlot.OverrideHover_ItemArray_int_int += HookOverrideHover;
         On_ItemSlot.OverrideLeftClick += HookOverrideLeftClick;
         On_ItemSlot.RightClick_ItemArray_int_int += HookRightClick;
@@ -28,40 +30,52 @@ public sealed class BetterGuide : ILoadable {
         
         IL_Main.DrawInventory += IlDrawInventory;
     }
+
+
     public void Unload(){}
 
-
     private static void HookDrawCursor(On_Main.orig_DrawInterface_36_Cursor orig) {
-        if(!Enabled && !Bestiary.Enabled){
-            orig();
-            return;
+        if ((Enabled || Bestiary.Enabled) && SearchItem.Current && !Main.HoverItem.IsAir) {
+            _allowClick = true;
+            Main.cursorOverride = CursorOverrideID.Magnifiers;
         }
-        if (SearchItem.Current) {
-            if (Main.HoverItem.IsAir) {
-                if (Main.cursorOverride == CursorOverrideID.Magnifiers) Main.cursorOverride = -1;
-            } else {
-                Main.cursorOverride = CursorOverrideID.Magnifiers;
-                if (Enabled && Main.mouseLeft && Main.mouseLeftRelease) {
-                    s_searchItemTimer = 30;
+        orig();
+    }
+    private void HookClickOverride(On_Main.orig_DrawInterface orig, Main self, GameTime time) {
+        bool interceptClicks = (Enabled || Bestiary.Enabled) && SearchItem.Current;
+        bool left; bool right;
+        if (interceptClicks) {
+            (left, right) = (Main.mouseLeft, Main.mouseRight);
+            (Main.mouseLeft, Main.mouseRight) = (false, false);
+        } else (left, right) = (false, false);
+
+        orig(self, time);
+        if (interceptClicks) {
+            if (_allowClick) {
+                if (Enabled && left && Main.mouseLeftRelease) {
+                    s_searchItemTimer = 15;
                     bool? rec = Main.HoverItem.type == Main.guideItem.type ? Main.recBigList : null;
                     SetGuideItem(Main.HoverItem.type);
                     ToggleRecipeList(true);
-                    if(rec.HasValue && rec != Main.recBigList) SoundEngine.PlaySound(SoundID.Grab);
-                } else if (Bestiary.Enabled && Main.mouseRight && Main.mouseRightRelease) {
+                    if (rec.HasValue && rec != Main.recBigList) SoundEngine.PlaySound(SoundID.Grab);
+                } else if (Bestiary.Enabled && right && Main.mouseRightRelease) {
                     bool delay = Main.InGameUI.CurrentState != Main.BestiaryUI;
                     Bestiary.ToggleBestiary(true);
                     Bestiary.SetBestiaryItem(Main.HoverItem.type, delay);
-                    s_searchItemTimer = 30;
+                    s_searchItemTimer = 15;
                 }
             }
-        } else if (!Main.playerInventory && Main.cursorOverride == CursorOverrideID.Magnifiers) Main.cursorOverride = -1;
-        orig();
+            (Main.mouseLeft, Main.mouseRight) = (left, right);
+            _allowClick = false;
+            Main.cursorOverride = -1;
+        }
+
     }
     public static void ProcessSearchTap() {
         if (!Enabled && !Bestiary.Enabled) return;
         s_searchItemTimer++;
         if (SearchItem.JustReleased) {
-            if (s_searchItemTimer <= 15) {
+            if (s_searchItemTimer <= 10) {
                 if (Main.InGameUI.CurrentState == Main.BestiaryUI) {
                         Bestiary.ToggleBestiary();
                         SoundEngine.PlaySound(SoundID.MenuTick);
@@ -82,7 +96,7 @@ public sealed class BetterGuide : ILoadable {
         }
 
         if (SearchItem.JustPressed) {
-            if (s_searchItemTimer > 15) s_searchItemTaps = 0;
+            if (s_searchItemTimer > 10) s_searchItemTaps = 0;
             s_searchItemTimer = 0;
         }
     }
@@ -252,5 +266,6 @@ public sealed class BetterGuide : ILoadable {
     }
 
     public static ModKeybind SearchItem { get; private set; } = null!;
+    private static bool _allowClick = false;
     private static int s_searchItemTimer = 0, s_searchItemTaps = 0;
 }
