@@ -7,29 +7,44 @@ namespace BetterInventory.Crafting;
 
 public sealed class Filters {
 
-    public bool MatchShowAll(Recipe recipe, bool craftable) => FavoriteRecipes.GetValueOrDefault(recipe.RecipeIndex) switch {
-        FavoriteState.Favorited => true,
-        FavoriteState.Blacklisted => ShowAllRecipes,
-        _ => ShowAllRecipes || craftable,
-    };
+    private void SetFlag(FilterFlags flag, bool set) {
+        if (set) rawFilters |= flag;
+        else rawFilters &= ~flag;
+    }
 
-    public bool ShowAllRecipes => (raw & (Main.guideItem.IsAir ? ShowNoGuideFlag : ShowGuideFlag)) != 0;
+    public static FilterFlags CurrentVisibility => ItemSearch.BetterGuide.CraftingStations.Contains(Main.guideItem.createTile) ? FilterFlags.ShowAllTile : Main.guideItem.IsAir ? FilterFlags.ShowAllAir : FilterFlags.ShowAllGuide;
+    public bool ShowAllRecipes {
+        get => rawFilters.HasFlag(CurrentVisibility);
+        set => SetFlag(CurrentVisibility, value);
+    }
+    public bool TileMode { 
+        get => CurrentVisibility == FilterFlags.ShowAllTile && rawFilters.HasFlag(FilterFlags.TileMode);
+        set => SetFlag(FilterFlags.TileMode, value);
+    }
 
     public readonly Dictionary<int, FavoriteState> FavoriteRecipes = new();
     public readonly List<(RawRecipe, byte)> MissingRecipes = new();
 
-    public byte raw = ShowGuideFlag;
-
-    public const byte ShowGuideFlag = 0b01;
-    public const byte ShowNoGuideFlag = 0b10;
+    public FilterFlags rawFilters = FilterFlags.Default;
 }
+
+[System.Flags]
+public enum FilterFlags {
+    Default = TileMode | ShowAllTile | ShowAllGuide,
+    ShowAllAir = 0b0001,
+    ShowAllGuide =   0b0010,
+    ShowAllTile =    0b0100,
+    TileMode =       0b1000,
+}
+
+public enum FavoriteState : byte { Default, Blacklisted, Favorited }
 
 public sealed class RecipeFiltersSerialiser : TagSerializer<Filters, TagCompound> {
 
     public override TagCompound Serialize(Filters value) {
         TagCompound tag = new();
 
-        if (value.raw != Filters.ShowGuideFlag) tag[FiltersTag] = value.raw;
+        if (value.rawFilters != FilterFlags.Default) tag[FiltersTag] = (byte)value.rawFilters;
 
         List<RawRecipe> recipes = new();
         List<byte> favorites = new();
@@ -52,7 +67,7 @@ public sealed class RecipeFiltersSerialiser : TagSerializer<Filters, TagCompound
     public override Filters Deserialize(TagCompound tag) {
         Filters value = new();
 
-        if (tag.TryGet(FiltersTag, out byte raw)) value.raw = raw;
+        if (tag.TryGet(FiltersTag, out byte raw)) value.rawFilters = (FilterFlags)raw;
 
         if (tag.TryGet(RecipesTag, out List<RawRecipe> recipes)) {
             List<byte> favorites = tag.Get<List<byte>>(FavoritesTag);
@@ -69,8 +84,6 @@ public sealed class RecipeFiltersSerialiser : TagSerializer<Filters, TagCompound
     public const string RecipesTag = "recipes";
     public const string FavoritesTag = "favorites";
 }
-
-public enum FavoriteState { Default, Blacklisted, Favorited }
 
 
 public sealed class RawRecipe {

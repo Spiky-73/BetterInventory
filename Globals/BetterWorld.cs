@@ -4,6 +4,6 @@ namespace BetterInventory.Globals;
 
 public sealed class BetterWorld : ModSystem {
     public override void PostAddRecipes() {
-        Crafting.RecipeFiltering.PostAddRecipes();
+        ItemSearch.BetterGuide.PostAddRecipes();
     }
 } 

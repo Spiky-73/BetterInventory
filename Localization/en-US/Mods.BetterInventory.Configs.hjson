@@ -39,11 +39,7 @@ ClientConfig: {
 
 	recipeFiltering: {
 		Label: Recipe Filtering
-		Tooltip:
-			'''
-			Show all recipes
-			Favorite or Hide recipes
-			'''
+		Tooltip: ""
 	}
 
 	craftOverride: {
@@ -61,8 +57,9 @@ ClientConfig: {
 		Tooltip:
 			'''
 			Access guide Anywhere
-			Put any Item
-			HotKey
+			Put any Item and HotKey
+			Favorite or Blacklist Recipes
+			Show all recipes
 			'''
 	}
 

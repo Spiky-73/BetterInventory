@@ -1,4 +1,6 @@
 UI: {
-	ShowRecipes: Show All Recipes
+	ShowAvailable: Available Recipes
+	ShowTile: Recipes Crafted at Station
+	ShowAll: All Recipes
 	FullUnlock: Non fully Unlocked
 }

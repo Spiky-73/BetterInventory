@@ -36,8 +36,6 @@ public sealed class Bestiary : ILoadable {
         IL_UIBestiaryFilteringOptionsGrid.UpdateAvailability += ILFakeUnlockFilters;
         On_UIBestiaryFilteringOptionsGrid.UpdateButtonSelections += HookDarkenFilters;
         
-        On_UIBestiaryTest.Recalculate += HookDelaySearch;
-
         On_UIBestiaryTest.FilterEntries += HookBestiaryUnkownNPCBehaviourFilter;
 
         On_FewFromOptionsNotScaledWithLuckDropRule.ReportDroprates += HookFixDropRates;
@@ -225,14 +223,6 @@ public sealed class Bestiary : ILoadable {
     }
 
 
-    private static void HookDelaySearch(On_UIBestiaryTest.orig_Recalculate orig, UIBestiaryTest self) {
-        orig(self);
-        if (s_bestiaryDelayedType == ItemID.None) return;
-        SetBestiaryItem(s_bestiaryDelayedType);
-        s_bestiaryDelayedType = ItemID.None;
-    }
-
-
     public static void DarkenElement(UIElement element, float dark, int depth = -1){
         if (element is UIHorizontalSeparator sep) sep.Color.ApplyRGB(dark);
         else if (element is UIBestiaryNPCEntryPortrait portrait) ((UIImage)portrait.Children.Last()).Color.ApplyRGB(dark);
@@ -252,49 +242,6 @@ public sealed class Bestiary : ILoadable {
         }
     }
 
-
-    public static void ToggleBestiary(bool? enabled = null) {
-        if (Main.InGameUI.CurrentState == Main.BestiaryUI) {
-            if (enabled == true) return;
-            IngameFancyUI.Close();
-        } else {
-            if (enabled == false) return;
-            Main.LocalPlayer.SetTalkNPC(-1, false);
-            Main.npcChatCornerItem = 0;
-            Main.npcChatText = "";
-            Main.mouseLeftRelease = false;
-            IngameFancyUI.OpenUIState(Main.BestiaryUI);
-            Main.BestiaryUI.OnOpenPage();
-        }
-    }
-    public static void SetBestiaryItem(int type, bool delayed = false) {
-        if (delayed) {
-            s_bestiaryDelayedType = type;
-            return;
-        }
-        static void PlayNoise(string content) => SoundEngine.PlaySound(SoundID.Grab);
-        UISearchBar searchBar = Reflection.UIBestiaryTest._searchBar.GetValue(Main.BestiaryUI);
-        BestiaryEntry? oldEntry = Reflection.UIBestiaryTest._selectedEntryButton.GetValue(Main.BestiaryUI)?.Entry;
-        searchBar.OnContentsChanged += PlayNoise;
-        searchBar.SetContents(Lang.GetItemNameValue(type), true);
-        if (searchBar.IsWritingText) searchBar.ToggleTakingText();
-        searchBar.OnContentsChanged -= PlayNoise;
-        UIBestiaryEntryGrid grid = Reflection.UIBestiaryTest._entryGrid.GetValue(Main.BestiaryUI);
-        if (oldEntry is not null) {
-            foreach (UIElement element in grid.Children) {
-                if (element is not UIBestiaryEntryButton button || button.Entry != oldEntry) continue;
-                Reflection.UIBestiaryTest.SelectEntryButton.Invoke(Main.BestiaryUI, button);
-                return;
-            }
-        }
-        foreach (UIElement element in grid.Children) {
-            if (element is not UIBestiaryEntryButton button) continue;
-            Reflection.UIBestiaryTest.SelectEntryButton.Invoke(Main.BestiaryUI, button);
-            break;
-        }
-    }
-
-
     public static string GetBossBagSearch(DropRateInfo bossbag){
         if(_bossBagSearch.TryGetValue(bossbag.itemId, out string? s)) return s;
         List<DropRateInfo> drops = new();
@@ -310,8 +257,6 @@ public sealed class Bestiary : ILoadable {
 
     public const float PageDark = 0.7f;
     public const float IconDark = 0.5f;
-
-    private static int s_bestiaryDelayedType;
 
     private static bool s_darkPage = false;
 

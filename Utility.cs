@@ -103,7 +103,7 @@ public static class Utility {
     public static ReadOnlyDictionary<int, int> OwnedItems => Data.ownedItems;
     
     private class Data : ILoadable {
-        public void Load(Mod mod) => ownedItems = new(Reflection.Recipe._ownedItems.GetValue(null));
+        public void Load(Mod mod) => ownedItems = new(Reflection.Recipe._ownedItems.GetValue());
         public void Unload() => ownedItems = null!;
         public static ReadOnlyDictionary<int, int> ownedItems = null!;
     }

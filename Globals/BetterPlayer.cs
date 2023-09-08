@@ -32,6 +32,8 @@ public sealed record class BuilderAccToggle {
 
 public sealed class BetterPlayer : ModPlayer {
 
+    public static BetterPlayer LocalPlayer => Main.LocalPlayer.GetModPlayer<BetterPlayer>();
+
     public static ModKeybind FavoritedBuffKb { get; private set; } = null!;
     public static readonly BuilderAccToggle[] BuilderAccToggles = new BuilderAccToggle[] {
         new("RulerLine", player => player.rulerLine, 0),
@@ -79,7 +81,7 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public override void ProcessTriggers(TriggersSet triggersSet) {
-        ItemSearch.BetterGuide.ProcessSearchTap();
+        ItemSearch.SearchItem.ProcessSearchTap();
         if (FavoritedBuffKb.JustPressed) FavoritedBuff(Player);
         foreach (BuilderAccToggle bat in BuilderAccToggles) bat.Process(Player);
     }
@@ -164,5 +166,6 @@ public sealed class BetterPlayer : ModPlayer {
 
     public override void SaveData(TagCompound tag) => tag["filters"] = RecipeFilters;
     public override void LoadData(TagCompound tag) => RecipeFilters = tag.Get<Crafting.Filters>("filters");
+    
     public Crafting.Filters RecipeFilters { get; set; } = new();
 }
