@@ -12,7 +12,7 @@ public sealed class Filters {
         else rawFilters &= ~flag;
     }
 
-    public static FilterFlags CurrentVisibility => ItemSearch.BetterGuide.CraftingStations.Contains(Main.guideItem.createTile) ? FilterFlags.ShowAllTile : Main.guideItem.IsAir ? FilterFlags.ShowAllAir : FilterFlags.ShowAllGuide;
+    public static FilterFlags CurrentVisibility => ItemSearch.BetterGuide.CraftingStations.ContainsKey(Main.guideItem.createTile) ? FilterFlags.ShowAllTile : Main.guideItem.IsAir ? FilterFlags.ShowAllAir : FilterFlags.ShowAllGuide;
     public bool ShowAllRecipes {
         get => rawFilters.HasFlag(CurrentVisibility);
         set => SetFlag(CurrentVisibility, value);

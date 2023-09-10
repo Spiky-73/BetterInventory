@@ -1,15 +1,18 @@
 using System.Collections.Generic;
+using System.Linq;
 using BetterInventory.Crafting;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using ReLogic.Content;
+using ReLogic.Graphics;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
 using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.Localization;
+using Terraria.Map;
 using Terraria.ModLoader;
 using Terraria.UI;
 
@@ -24,23 +27,85 @@ public sealed class BetterGuide : ILoadable {
 
     public void Load(Mod mod){
         IL_Main.DrawInventory += IlDrawInventory;
+        On_Main.DrawGuideCraftText += HookGuideText;
 
         On_Main.HoverOverCraftingItemButton += HookOverrideCraftHover;
-
 
         IL_Recipe.FindRecipes += ILFindRecipes;
         On_Recipe.AddToAvailableRecipes += HookAddAvailableRecipe;
         IL_Recipe.CollectGuideRecipes += ILOverrideGuideRecipes;
-        
 
         s_inventoryBack4 = TextureAssets.InventoryBack4;
     }
 
     public void Unload() => s_inventoryBack4 = null!;
 
+    private void HookGuideText(On_Main.orig_DrawGuideCraftText orig, int adjY, Color craftingTipColor, out int inventoryX, out int inventoryY) {
+        if(!Enabled) {
+            orig(adjY, craftingTipColor, out inventoryX, out inventoryY);
+            return;
+        }
+        inventoryX = 73;
+        inventoryY = 331 + adjY;
+        List<string> conditions = new();
+        Recipe recipe = Main.recipe[Main.availableRecipe[Main.focusRecipe]];
+
+        if (recipe.RecipeIndex != _focusRecipe) {
+            _focusRecipe = recipe.RecipeIndex;
+            _craftingTiles = new Item[recipe.requiredTile.Count];
+            for (int i = 0; i < recipe.requiredTile.Count; i++) {
+                if (recipe.requiredTile[i] == -1) break;
+                else if (CraftingStations.TryGetValue(recipe.requiredTile[i], out int type) && type != ItemID.None) _craftingTiles[i] = new(type);
+            }
+        }
+
+        Main.inventoryScale *= 0.5f;
+        Vector2 position = new(inventoryX + 50, inventoryY + 12 - 14 + 24);
+        for (int i = 0; i < recipe.requiredTile.Count; i++) {
+            if (recipe.requiredTile[i] == -1) break;
+            if(_craftingTiles[i] is null) {
+                string mapObjectName = Lang.GetMapObjectName(MapHelper.TileToLookup(recipe.requiredTile[i], Recipe.GetRequiredTileStyle(recipe.requiredTile[i])));
+                conditions.Add(mapObjectName);
+                continue;
+            }
+            Color inventoryBack = Main.inventoryBack;
+            OverrideRecipeTexture(FavoriteState.Default, false, Main.LocalPlayer.adjTile[recipe.requiredTile[i]]);
+            ItemSlot.Draw(Main.spriteBatch, ref _craftingTiles[i], ItemSlot.Context.CraftingMaterial, position);
+            TextureAssets.InventoryBack4 = s_inventoryBack4;
+            float size = TextureAssets.InventoryBack.Width() * Main.inventoryScale;
+            if(new Rectangle((int)position.X, (int)position.Y, (int)size, (int)size).Contains(Main.mouseX, Main.mouseY)){
+                Main.LocalPlayer.mouseInterface = true;
+                ItemSlot.MouseHover(ref _craftingTiles[i], ItemSlot.Context.CraftingMaterial);
+            }
+            Main.inventoryBack = inventoryBack;
+            position.X += size * 1.1f;
+        }
+        Main.inventoryScale *= 2;
+
+        if (Reflection.Recipe.needWater.GetValue(recipe)) conditions.Add(Lang.inter[53].Value);
+        if (Reflection.Recipe.needHoney.GetValue(recipe)) conditions.Add(Lang.inter[58].Value);
+        if (Reflection.Recipe.needLava.GetValue(recipe)) conditions.Add(Lang.inter[56].Value);
+        if (Reflection.Recipe.needSnowBiome.GetValue(recipe)) conditions.Add(Lang.inter[123].Value);
+        if (Reflection.Recipe.needGraveyardBiome.GetValue(recipe)) conditions.Add(Lang.inter[124].Value);
+        conditions.AddRange(from x in recipe.Conditions select x.Description.Value);
+
+
+        position = new(inventoryX + 50, inventoryY + 12 - 14);
+        if (conditions.Count > 0)
+            DynamicSpriteFontExtensionMethods.DrawString(Main.spriteBatch, FontAssets.MouseText.Value, string.Join(", ", conditions), position, new(Main.mouseTextColor, Main.mouseTextColor, Main.mouseTextColor, Main.mouseTextColor), 0f, Vector2.Zero, 1f, 0, 0f);
+    }
+
     public static void PostAddRecipes() {
         for (int r = 0; r < Recipe.numRecipes; r++){
-            foreach(int tile in Main.recipe[r].requiredTile) CraftingStations.Add(tile);
+            foreach(int tile in Main.recipe[r].requiredTile) CraftingStations[tile] = 0;
+        }
+        SetStations();
+    }
+
+    public static void SetStations() {
+        for (int type = 0; type < ItemLoader.ItemCount; type++){
+            Item item = new(type);
+            if(CraftingStations.ContainsKey(item.createTile) && CraftingStations[item.createTile] == ItemID.None) CraftingStations[item.createTile] = item.type;
         }
     }
 
@@ -424,7 +489,7 @@ public sealed class BetterGuide : ILoadable {
     private static Rectangle _hitBox;
 
     public static readonly HashSet<int> AvailableRecipes = new();
-    public static readonly HashSet<int> CraftingStations = new();
+    public static readonly Dictionary<int, int> CraftingStations = new();
 
     public static readonly Asset<Texture2D>[] DefaultRecipeTextures = new Asset<Texture2D>[] { TextureAssets.InventoryBack4, TextureAssets.InventoryBack5, TextureAssets.InventoryBack10 };
     public static readonly Asset<Texture2D>[] SelectedRecipeTextures = new Asset<Texture2D>[] { TextureAssets.InventoryBack14, TextureAssets.InventoryBack11, TextureAssets.InventoryBack17 };
@@ -432,6 +497,9 @@ public sealed class BetterGuide : ILoadable {
 
     private static int _recDelay = 0;
     private static Asset<Texture2D> s_inventoryBack4 = null!;
+
+    private static int _focusRecipe;
+    private static Item?[] _craftingTiles = System.Array.Empty<Item>();
 
     private static bool _adding = true;
     private static List<int> _favRecipes = new(), _blackRecipes = new(), _otherRecipes = new();

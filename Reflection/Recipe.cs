@@ -5,6 +5,11 @@ namespace BetterInventory.Reflection;
 
 public static class Recipe {
     public static readonly Property<TRecipe, bool> Disabled = new(nameof(TRecipe.Disabled));
+    public static readonly Field<TRecipe, bool> needWater = new(nameof(needWater));
+    public static readonly Field<TRecipe, bool> needHoney = new(nameof(needHoney));
+    public static readonly Field<TRecipe, bool> needLava = new(nameof(needLava));
+    public static readonly Field<TRecipe, bool> needSnowBiome = new(nameof(needSnowBiome));
+    public static readonly Field<TRecipe, bool> needGraveyardBiome = new(nameof(needGraveyardBiome));
 
     public static readonly StaticField<Dictionary<int, int>> _ownedItems = new(typeof(TRecipe), nameof(_ownedItems));
     public static readonly StaticMethod<object?> CollectGuideRecipes = new(typeof(TRecipe), nameof(CollectGuideRecipes));
