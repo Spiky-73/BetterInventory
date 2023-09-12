@@ -17,6 +17,8 @@ public sealed class SearchItem : ILoadable {
 
     public void Load(Mod mod) {
         Keybind = KeybindLoader.RegisterKeybind(mod, "SearchItem", Microsoft.Xna.Framework.Input.Keys.N);
+        On_Main.DrawCursor += HookRedirectCursor;
+        On_Main.DrawThickCursor += HookRedirectThickCursor;
         On_Main.DrawInterface_36_Cursor += HookDrawCursor;
         On_Main.DrawInterface += HookClickOverride;
 
@@ -29,15 +31,33 @@ public sealed class SearchItem : ILoadable {
 
         On_UIBestiaryTest.Recalculate += HookDelaySearch;
     }
+
+
     public void Unload() {}
 
+    private void HookRedirectCursor(On_Main.orig_DrawCursor orig, Vector2 bonus, bool smart) {
+        if(Enabled && _redir) Reflection.Main.DrawInterface_36_Cursor.Invoke();
+        else orig(bonus, smart);
+    }
+
+    private Vector2 HookRedirectThickCursor(On_Main.orig_DrawThickCursor orig, bool smart) {
+        if (Enabled && _redir) {
+            Reflection.Main.DrawInterface_36_Cursor.Invoke();
+            return Vector2.Zero;
+        } else return orig(smart);
+    }
+
+
+    private static bool _redir;
 
     private static void HookDrawCursor(On_Main.orig_DrawInterface_36_Cursor orig) {
+        _redir = false;
         if (Enabled && Keybind.Current && !Main.HoverItem.IsAir) {
             _allowClick = true;
             Main.cursorOverride = CursorOverrideID.Magnifiers;
         }
         orig();
+        _redir = true;
     }
     private void HookClickOverride(On_Main.orig_DrawInterface orig, Main self, GameTime time) {
         bool interceptClicks = Enabled && Keybind.Current;
