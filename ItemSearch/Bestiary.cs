@@ -3,7 +3,6 @@ using System.Linq;
 using Microsoft.Xna.Framework;
 using MonoMod.Cil;
 using Terraria;
-using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.GameContent.Bestiary;
 using Terraria.GameContent.ItemDropRules;

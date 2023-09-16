@@ -3,48 +3,51 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader.IO;
 
-namespace BetterInventory.Crafting;
+namespace BetterInventory.ItemSearch;
 
-public sealed class Filters {
+public sealed class VisibilityFilters {
+    
+    public Flags Visibility { get; set; } = Flags.Default;
 
-    private void SetFlag(FilterFlags flag, bool set) {
-        if (set) rawFilters |= flag;
-        else rawFilters &= ~flag;
-    }
-
-    public static FilterFlags CurrentVisibility => ItemSearch.BetterGuide.CraftingStations.ContainsKey(Main.guideItem.createTile) ? FilterFlags.ShowAllTile : Main.guideItem.IsAir ? FilterFlags.ShowAllAir : FilterFlags.ShowAllGuide;
+    public static Flags CurrentVisibility => BetterGuide.CraftingStations.ContainsKey(Main.guideItem.createTile) ? Flags.ShowAllTile : Main.guideItem.IsAir ? Flags.ShowAllAir : Flags.ShowAllGuide;
     public bool ShowAllRecipes {
-        get => rawFilters.HasFlag(CurrentVisibility);
+        get => Visibility.HasFlag(CurrentVisibility);
         set => SetFlag(CurrentVisibility, value);
     }
-    public bool TileMode { 
-        get => CurrentVisibility == FilterFlags.ShowAllTile && rawFilters.HasFlag(FilterFlags.TileMode);
-        set => SetFlag(FilterFlags.TileMode, value);
+    public bool TileMode {
+        get => CurrentVisibility == Flags.ShowAllTile && Visibility.HasFlag(Flags.TileMode);
+        set => SetFlag(Flags.TileMode, value);
     }
 
     public readonly Dictionary<int, FavoriteState> FavoriteRecipes = new();
     public readonly List<(RawRecipe, byte)> MissingRecipes = new();
 
-    public FilterFlags rawFilters = FilterFlags.Default;
+    
+    private void SetFlag(Flags flag, bool set) {
+        if (set) Visibility |= flag;
+        else Visibility &= ~flag;
+    }
+
+    [System.Flags]
+    public enum Flags {
+        Default = TileMode | ShowAllTile | ShowAllGuide,
+
+        ShowAllAir =   1 << 0,
+        ShowAllGuide = 1 << 1,
+        ShowAllTile =  1 << 2,
+        TileMode =     1 << 3,
+    }
 }
 
-[System.Flags]
-public enum FilterFlags {
-    Default = TileMode | ShowAllTile | ShowAllGuide,
-    ShowAllAir = 0b0001,
-    ShowAllGuide =   0b0010,
-    ShowAllTile =    0b0100,
-    TileMode =       0b1000,
-}
 
 public enum FavoriteState : byte { Default, Blacklisted, Favorited }
 
-public sealed class RecipeFiltersSerialiser : TagSerializer<Filters, TagCompound> {
+public sealed class VisibilityFiltersSerialiser : TagSerializer<VisibilityFilters, TagCompound> {
 
-    public override TagCompound Serialize(Filters value) {
+    public override TagCompound Serialize(VisibilityFilters value) {
         TagCompound tag = new();
 
-        if (value.rawFilters != FilterFlags.Default) tag[FiltersTag] = (byte)value.rawFilters;
+        if (value.Visibility != VisibilityFilters.Flags.Default) tag[FiltersTag] = (byte)value.Visibility;
 
         List<RawRecipe> recipes = new();
         List<byte> favorites = new();
@@ -64,10 +67,10 @@ public sealed class RecipeFiltersSerialiser : TagSerializer<Filters, TagCompound
         return tag;
     }
 
-    public override Filters Deserialize(TagCompound tag) {
-        Filters value = new();
+    public override VisibilityFilters Deserialize(TagCompound tag) {
+        VisibilityFilters value = new();
 
-        if (tag.TryGet(FiltersTag, out byte raw)) value.rawFilters = (FilterFlags)raw;
+        if (tag.TryGet(FiltersTag, out byte raw)) value.Visibility = (VisibilityFilters.Flags)raw;
 
         if (tag.TryGet(RecipesTag, out List<RawRecipe> recipes)) {
             List<byte> favorites = tag.Get<List<byte>>(FavoritesTag);

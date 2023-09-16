@@ -164,8 +164,19 @@ public sealed class BetterPlayer : ModPlayer {
     public static void CycleAccState(Player player, int index, int cycle = 2) => player.builderAccStatus[index] = (player.builderAccStatus[index] + 1) % cycle;
     public static void FavoritedBuff(Player player) => Utility.RunWithHiddenItems(player.inventory, i => !i.favorited, player.QuickBuff);
 
-    public override void SaveData(TagCompound tag) => tag["filters"] = RecipeFilters;
-    public override void LoadData(TagCompound tag) => RecipeFilters = tag.Get<Crafting.Filters>("filters");
-    
-    public Crafting.Filters RecipeFilters { get; set; } = new();
+    public override void SaveData(TagCompound tag) {
+        tag[VisibilityTag] = VisibilityFilters;
+        tag[RecipesTag] = RecipeFilters;
+    }
+
+    public override void LoadData(TagCompound tag) {
+        VisibilityFilters = tag.Get<ItemSearch.VisibilityFilters>(VisibilityTag);
+        RecipeFilters = tag.Get<Crafting.RecipeFilters>(RecipesTag);
+    }
+
+    public Crafting.RecipeFilters RecipeFilters { get; set; } = null!;
+    public ItemSearch.VisibilityFilters VisibilityFilters { get; set; } = new();
+
+    public const string VisibilityTag = "visibility";
+    public const string RecipesTag = "recipes";
 }

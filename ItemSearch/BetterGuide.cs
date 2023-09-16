@@ -23,7 +23,7 @@ public sealed class BetterGuide : ILoadable {
 
     public static bool Enabled => Configs.ClientConfig.Instance.betterGuide;
 
-    public static Filters LocalFilters => Globals.BetterPlayer.LocalPlayer.RecipeFilters;
+    public static VisibilityFilters LocalFilters => Globals.BetterPlayer.LocalPlayer.VisibilityFilters;
 
     public void Load(Mod mod){
         IL_Main.DrawInventory += IlDrawInventory;
@@ -32,6 +32,7 @@ public sealed class BetterGuide : ILoadable {
         On_Main.HoverOverCraftingItemButton += HookOverrideCraftHover;
 
         IL_Recipe.FindRecipes += ILFindRecipes;
+        // On_Recipe.FindRecipes += HookCollectRecipes;
         On_Recipe.AddToAvailableRecipes += HookAddAvailableRecipe;
         IL_Recipe.CollectGuideRecipes += ILOverrideGuideRecipes;
 
@@ -321,11 +322,11 @@ public sealed class BetterGuide : ILoadable {
 
         Main.player[Main.myPlayer].mouseInterface = true;
         if (Main.mouseLeft && Main.mouseLeftRelease) {
-            Filters filters = LocalFilters;
+            VisibilityFilters filters = LocalFilters;
             if (filters.TileMode) filters.TileMode = false;
             else {
                 filters.ShowAllRecipes = !filters.ShowAllRecipes;
-                if (Filters.CurrentVisibility == FilterFlags.ShowAllTile && filters.ShowAllRecipes) filters.TileMode = true;
+                if (VisibilityFilters.CurrentVisibility == VisibilityFilters.Flags.ShowAllTile && filters.ShowAllRecipes) filters.TileMode = true;
             }
             SoundEngine.PlaySound(SoundID.MenuTick);
             Recipe.FindRecipes();
@@ -333,7 +334,7 @@ public sealed class BetterGuide : ILoadable {
         return true;
     }
     public static void DrawVisibility(){
-        Filters filters = LocalFilters;
+        VisibilityFilters filters = LocalFilters;
         Asset<Texture2D> tick = filters.TileMode ? InventoryTickForced : filters.ShowAllRecipes ? TextureAssets.InventoryTickOn : TextureAssets.InventoryTickOff;
         Color color = Color.White * 0.7f;
         Main.spriteBatch.Draw(tick.Value, _hitBox.Center(), null, color, 0f, tick.Value.Size() / 2, Main.inventoryScale, 0, 0f);
@@ -391,10 +392,9 @@ public sealed class BetterGuide : ILoadable {
         // ++ if (Enabled) goto skipGuide;
         ILLabel skipGuide = cursor.DefineLabel();
         cursor.EmitDelegate(() => {
-            if(!Enabled) return false;
+            if (!Enabled) return false;
             AvailableRecipes.Clear();
-            _adding = false;
-            return true;
+            return _collectingAvaiblable = true;
         });
         cursor.EmitBrtrue(skipGuide);
 
@@ -409,32 +409,44 @@ public sealed class BetterGuide : ILoadable {
         // ...
 
         cursor.GotoNext(i => i.MatchCall(Reflection.Recipe.TryRefocusingRecipe));
-        cursor.EmitDelegate(() => { if(Enabled) AddRecipes(); });
-    }
-    public static void AddRecipes(){
-        List<int> fav = new(), black = new(), others = new();
-
-        _adding = true;
-        Reflection.Recipe.CollectGuideRecipes.Invoke();
-        for (int i = 0; i < Main.numAvailableRecipes; i++){
-            (LocalFilters.FavoriteRecipes.GetValueOrDefault(Main.availableRecipe[i]) switch {
-                FavoriteState.Favorited => fav,
-                FavoriteState.Blacklisted => black,
-                _ => others,
-            }).Add(Main.availableRecipe[i]);
-        }
-
-        Recipe.ClearAvailableRecipes();
-        bool showAll = LocalFilters.ShowAllRecipes;
-        foreach(int i in fav) Reflection.Recipe.AddToAvailableRecipes.Invoke(i);
-        foreach(int i in others) if(showAll || AvailableRecipes.Contains(i)) Reflection.Recipe.AddToAvailableRecipes.Invoke(i);
-        if(showAll) foreach (int i in black) Reflection.Recipe.AddToAvailableRecipes.Invoke(i);
-
+        cursor.EmitDelegate(() => { 
+            GuideRecipes.Clear();
+            if(!Enabled) {
+                GuideRecipes.AddRange(Main.availableRecipe[..Main.numAvailableRecipes]);
+                return;
+            }
+            _collectingAvaiblable = false;
+            Recipe.ClearAvailableRecipes();
+            Reflection.Recipe.CollectGuideRecipes.Invoke();
+            GuideRecipes.AddRange(Main.availableRecipe[..Main.numAvailableRecipes]);
+        });
     }
 
     private static void HookAddAvailableRecipe(On_Recipe.orig_AddToAvailableRecipes orig, int recipeIndex) {
-        if (!_adding) AvailableRecipes.Add(recipeIndex);
-        else orig(recipeIndex);
+        if (_collectingAvaiblable) AvailableRecipes.Add(recipeIndex);
+        orig(recipeIndex);
+    }
+
+
+    public static IEnumerable<int> GetRecipesInOrder(){
+        if(!Enabled) {
+            foreach (int i in GuideRecipes) yield return i;
+        } else {
+            List<int> fav = new(), black = new(), others = new();
+
+            foreach (int i in GuideRecipes) {
+                (LocalFilters.FavoriteRecipes.GetValueOrDefault(Main.availableRecipe[i]) switch {
+                    FavoriteState.Favorited => fav,
+                    FavoriteState.Blacklisted => black,
+                    _ => others,
+                }).Add(i);
+            }
+
+            bool showAll = LocalFilters.ShowAllRecipes;
+            foreach (int i in fav) yield return i;
+            foreach (int i in others) if (showAll || AvailableRecipes.Contains(i)) yield return i;
+            if (showAll) foreach (int i in black) yield return i;
+        }
     }
 
 
@@ -488,6 +500,7 @@ public sealed class BetterGuide : ILoadable {
     private static bool _hover;
     private static Rectangle _hitBox;
 
+    public static readonly List<int> GuideRecipes = new();
     public static readonly HashSet<int> AvailableRecipes = new();
     public static readonly Dictionary<int, int> CraftingStations = new();
 
@@ -501,6 +514,5 @@ public sealed class BetterGuide : ILoadable {
     private static int _focusRecipe;
     private static Item?[] _craftingTiles = System.Array.Empty<Item>();
 
-    private static bool _adding = true;
-    private static List<int> _favRecipes = new(), _blackRecipes = new(), _otherRecipes = new();
+    private static bool _collectingAvaiblable;
 }

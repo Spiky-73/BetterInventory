@@ -38,5 +38,8 @@ public sealed class ClientConfig : ModConfig {
     public override ConfigScope Mode => ConfigScope.ClientSide;
     public static ClientConfig Instance = null!;
 
-    public override void OnChanged() => ItemSearch.SearchItem.UpdateMouseItem();
+    public override void OnChanged() {
+        ItemSearch.SearchItem.UpdateMouseItem();
+        if(!Main.gameMenu) Crafting.RecipeFiltering.FilterRecipes();
+    }
 }

@@ -5,6 +5,8 @@ using TPlayer = Terraria.Player;
 namespace BetterInventory.Reflection;
 
 public static class Main {
+
+    public static readonly StaticField<bool> InGuideCraftMenu = new(typeof(TMain), nameof(TMain.InGuideCraftMenu));
     public static readonly StaticMethod<object?> DrawInterface_36_Cursor = new(typeof(TMain), nameof(DrawInterface_36_Cursor));
 }
 

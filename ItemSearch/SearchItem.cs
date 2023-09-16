@@ -137,7 +137,6 @@ public sealed class SearchItem : ILoadable {
         if (context == ItemSlot.Context.GuideItem) {
             if (Main.cursorOverride == CursorOverrideID.TrashCan) {
                 SetGuideItem(ItemID.None);
-                ToggleRecipeList(false);
             } else {
                 SetGuideItem(Main.mouseItem.type);
                 ToggleRecipeList(true);
@@ -156,7 +155,6 @@ public sealed class SearchItem : ILoadable {
         if (Keybind.Current) return;
         if (BetterGuide.Enabled && context == ItemSlot.Context.GuideItem && Main.mouseRight && Main.mouseRightRelease) {
             SetGuideItem(ItemID.None);
-            ToggleRecipeList(false);
             return;
         }
         orig(inv, context, slot);
