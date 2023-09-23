@@ -132,8 +132,37 @@ public sealed class BetterGuide : ILoadable {
         cursor.MarkLabel(recipe);
 
 
-        // -----Recipes createItem -----
+        // ----- Recipe fast scroll -----
         //     for (<recipeIndex>) {
+        //         ...
+        for (int j = 0; j < 2; j++) { // Up and Down
+
+            //     if(<scrool>) {
+            //         if(...) SoundEngine.PlaySound(...);
+            //         Main.availableRecipeY[num63] += 6.5f;
+            cursor.GotoNext(i => i.MatchCall(typeof(SoundEngine), nameof(SoundEngine.PlaySound)));
+            cursor.GotoNext(i => i.MatchLdsfld(typeof(Main), nameof(Main.recFastScroll)));
+
+            // ++ <custom scroll>
+            cursor.EmitLdloc(126);
+            int s = j == 0 ? -1 : 1;
+            cursor.EmitDelegate((int r) => {
+                Main.availableRecipeY[r] += s * 6.5f;
+                float d = Main.availableRecipeY[r] - (r - Main.focusRecipe)*65;
+                if (Main.recFastScroll) {
+                    Main.availableRecipeY[r] += 130000f * s;
+                    d *= 3;
+                }
+                // Main.recFastScroll = false;
+                Main.availableRecipeY[r] -= s == 1 ? MathF.Max(s*6.5f, d/10) : MathF.Min(s*6.5f, d/10);
+            });
+
+            //         if (Main.recFastScroll) ...
+            //         ...
+            //     }
+        }
+
+        // ----- Recipes createItem -----
         //         ...
         //         if(<visible>) {
         //             ...
@@ -161,13 +190,39 @@ public sealed class BetterGuide : ILoadable {
         //         }
         //     }
 
-        // ----- Recipe requiredItems -----
-        //     if (Main.numAvailableRecipes > 0) {
-        //         for (<focusRecipeMaterialIndex>) {
-        //             ...
-        //             Item tempItem = ...;
+        // ----- Unknown recipes -----
+        //     if (++<known> && Main.numAvailableRecipes > 0) {
         cursor.GotoNext(MoveType.After, i => i.MatchLdsfld(Reflection.Main.numAvailableRecipes));
         cursor.EmitDelegate((int num) => num == 0 || KnownRecipes.Contains(Main.availableRecipe[Main.focusRecipe]) ? num : 0);
+
+        // ----- Material wrapping -----
+        //         for (<focusRecipeMaterialIndex>) {
+        //             ...
+        //             int num69 = 80 + num68 * 40;
+        //             int num70 = 380 + num51;
+        cursor.GotoNext(MoveType.Before, i => i.MatchStloc(133));
+        
+        //             ++ <wrapping>
+        cursor.EmitLdloc(132);
+        cursor.EmitDelegate((int x, int i) => {
+            if (!Enabled) return x;
+            if (!Main.recBigList) return x - 2*i;
+            x -= i*40;
+            if(i >= MaterialsPerLine[0]) i = MaterialsPerLine[0]-MaterialsPerLine[1]  + (i - MaterialsPerLine[0]) % MaterialsPerLine[1];
+            return x+38*i;
+        });
+        
+        cursor.GotoNext(MoveType.Before, i => i.MatchStloc(134));
+        cursor.EmitLdloc(132);
+        cursor.EmitDelegate((int y, int i) => {
+            if (!Enabled || !Main.recBigList) return y;
+            i = i < MaterialsPerLine[0] ? 0 : ((i - MaterialsPerLine[0]) / MaterialsPerLine[1] + 1);
+            return y + 38 * i;
+        });
+
+        // ----- Recipe requiredItems -----
+        //             ...
+        //             Item tempItem = ...;
         cursor.GotoNext(i => i.MatchCall(typeof(Main), "SetRecipeMaterialDisplayName"));
         cursor.GotoNext(MoveType.Before, i => i.MatchCall(typeof(ItemSlot), nameof(ItemSlot.Draw)));
 
@@ -195,10 +250,9 @@ public sealed class BetterGuide : ILoadable {
         //     ...
         // }
 
+        // ----- recBigList Scroll ----- 
         // Main.hidePlayerCraftingMenu = false;
         cursor.GotoNext(MoveType.After, i => i.MatchStsfld(typeof(Main), nameof(Main.hidePlayerCraftingMenu)));
-
-        // ----- recBigList Scroll ----- 
         // if(<recBigListVisible>) {
         //     ...
         for (int i = 0; i < 2; i++) {
@@ -232,30 +286,25 @@ public sealed class BetterGuide : ILoadable {
         //         if (<mouseHover>) {
         //             Main.player[Main.myPlayer].mouseInterface = true;
         cursor.GotoNext(i => i.MatchCall(typeof(Main), nameof(Main.LockCraftingForThisCraftClickDuration)));
-        cursor.GotoPrev(i => i.MatchLdsfld(typeof(Main), nameof(Main.mouseLeft)));
-        ILLabel? noClick = null;
-        cursor.GotoNext(i => i.MatchBrfalse(out noClick));
         cursor.GotoPrev(MoveType.After, i => i.MatchStfld(typeof(Player), nameof(Player.mouseInterface)));
+        ILLabel? noClick = null;
+        cursor.GotoPrev(i => i.MatchBrtrue(out noClick));
+        cursor.GotoNext(MoveType.After, i => i.MatchStfld(typeof(Player), nameof(Player.mouseInterface)));
 
-        //             ++ if(<overrideHover>) goto noClick;
+        //             ++ if(<enabled>) goto noClick;
         cursor.EmitLdloc(155);
         cursor.EmitDelegate((int i) => {
-            if (!KnownRecipes.Contains(Main.availableRecipe[i])) _hideRecBigListTooltip = true;
-            return Enabled && OverrideRecipeHover(i);
+            if (!Enabled) return false;
+            Reflection.Main.HoverOverCraftingItemButton.Invoke(i);
+            Main.recFastScroll = true;
+            Main.craftingHide = false;
+            return true;
         });
         cursor.EmitBrtrue(noClick!);
         //             if(<click>) <scrollList>
-        //             ++ noClick:
-
-        // ----- Force recBigList On -----
-        //             ...
-        //             ItemSlot.MouseHover(22);
-        cursor.GotoNext(i => i.MatchCall(typeof(ItemSlot), nameof(ItemSlot.MouseHover)));
-
-        //             ++ <forceListOn>
-        cursor.EmitDelegate<System.Action>(() => Main.recBigList |= Enabled);
         //             ...
         //         }
+        //         ++ noClick:
 
         // ----- Recipe big list -----
         //         if (Main.numAvailableRecipes > 0) {
@@ -267,13 +316,7 @@ public sealed class BetterGuide : ILoadable {
         cursor.EmitLdloc(155);
         cursor.EmitDelegate((int i) => {
             if (!Enabled) return;
-            if(_hideRecBigListTooltip) {
-                _hideRecBigListTooltip = false;
-                _unknownTooltip = true;
-                Main.HoverItem.TurnToAir();
-                Main.hoverItemName = "???";
-            }
-            OverrideRecipeTexture(LocalFilters.FavoriteRecipes.GetValueOrDefault(Main.availableRecipe[i]), false, AvailableRecipes.Contains(Main.availableRecipe[i]));
+            OverrideRecipeTexture(LocalFilters.FavoriteRecipes.GetValueOrDefault(Main.availableRecipe[i]), Main.focusRecipe == i, AvailableRecipes.Contains(Main.availableRecipe[i]));
             if (!KnownRecipes.Contains(Main.availableRecipe[i])) _hideItem = true;
         });
 
@@ -613,5 +656,7 @@ public sealed class BetterGuide : ILoadable {
     private static bool _collectingAvaiblable;
     private static bool _unknownTooltip;
     private static bool _hideItem;
-    private static bool _hideRecBigListTooltip;
+
+    public static readonly int[] MaterialsPerLine = new int[] { 6, 4 };
+
 }
