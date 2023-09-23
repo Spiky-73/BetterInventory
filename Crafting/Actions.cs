@@ -50,7 +50,7 @@ public sealed class Actions : ILoadable {
             cursor.GotoNext(i => i.MatchLdsfld(typeof(Main), nameof(Main.recFastScroll)));
 
             // ++ <custom scroll>
-            cursor.EmitLdloc(126);
+            cursor.EmitLdloc(124);
             int s = j == 0 ? -1 : 1;
             cursor.EmitDelegate((int r) => {
                 if (!Enabled) return;
@@ -75,10 +75,10 @@ public sealed class Actions : ILoadable {
         //             int num69 = 80 + num68 * 40;
         //             int num70 = 380 + num51;
         cursor.GotoNext(i => i.MatchCall(typeof(Main), "HoverOverCraftingItemButton"));
-        cursor.GotoNext(MoveType.Before, i => i.MatchStloc(133));
+        cursor.GotoNext(MoveType.Before, i => i.MatchStloc(131));
 
         //             ++ <wrappingX>
-        cursor.EmitLdloc(132);
+        cursor.EmitLdloc(130);
         cursor.EmitDelegate((int x, int i) => {
             if (!Enabled) return x;
             if (!Main.recBigList) return x - 2 * i;
@@ -88,8 +88,8 @@ public sealed class Actions : ILoadable {
         });
 
         //             ++ <wrappingY>
-        cursor.GotoNext(MoveType.Before, i => i.MatchStloc(134));
-        cursor.EmitLdloc(132);
+        cursor.GotoNext(MoveType.Before, i => i.MatchStloc(132));
+        cursor.EmitLdloc(130);
         cursor.EmitDelegate((int y, int i) => {
             if (!Enabled || !Main.recBigList) return y;
             i = i < MaterialsPerLine[0] ? 0 : ((i - MaterialsPerLine[0]) / MaterialsPerLine[1] + 1);
@@ -144,7 +144,7 @@ public sealed class Actions : ILoadable {
         cursor.GotoNext(MoveType.After, i => i.MatchStfld(typeof(Player), nameof(Player.mouseInterface)));
 
         //             ++ if(<enabled>) goto noClick;
-        cursor.EmitLdloc(155);
+        cursor.EmitLdloc(153);
         cursor.EmitDelegate((int i) => {
             if (Enabled) {
                 int f = Main.focusRecipe;

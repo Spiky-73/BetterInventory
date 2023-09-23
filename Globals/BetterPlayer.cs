@@ -180,7 +180,13 @@ public sealed class BetterPlayer : ModPlayer {
     public override void LoadData(TagCompound tag) {
         VisibilityFilters = tag.Get<ItemSearch.VisibilityFilters>(VisibilityTag);
         foreach(Item item in Player.inventory) if(!item.IsAir) VisibilityFilters.AddOwnedItems(item);
+
         RecipeFilters = tag.Get<Crafting.RecipeFilters>(RecipesTag);
+    }
+
+    public override void OnEnterWorld() {
+        RecipeFilters ??= new();
+        VisibilityFilters ??= new();
     }
 
     public Crafting.RecipeFilters RecipeFilters { get; set; } = null!;

@@ -92,13 +92,13 @@ public sealed class BetterGuide : ILoadable {
         //         Main.DrawGuideCraftText(...);
         cursor.GotoNext(MoveType.After, i => i.MatchCall(typeof(Main), "DrawGuideCraftText"));
         ILLabel? noHover = null;
-        cursor.FindNext(out var cursors, i => i.MatchBlt(out noHover));
+        cursor.FindNext(out _, i => i.MatchBlt(out noHover));
 
         // ----- Visibility Filters -----
         //         ++ if(<visibilityHover>) HandleVisibility();
         //         ++ else {
-        cursor.EmitLdloc(124);
-        cursor.EmitLdloc(125);
+        cursor.EmitLdloc(122);
+        cursor.EmitLdloc(123);
         cursor.EmitDelegate(HandleVisibility);
         cursor.EmitBrtrue(noHover!);
 
@@ -144,7 +144,7 @@ public sealed class BetterGuide : ILoadable {
         cursor.GotoNext(MoveType.Before, i => i.MatchCall(typeof(ItemSlot), nameof(ItemSlot.Draw)));
 
         //                 ++ <overrideBackground>
-        cursor.EmitLdloc(126);
+        cursor.EmitLdloc(124);
         cursor.EmitDelegate((int i) => {
             if (!Enabled) return;
             OverrideRecipeTexture(LocalFilters.FavoriteRecipes.GetValueOrDefault(Main.availableRecipe[i]), ItemSlot.DrawGoldBGForCraftingMaterial, AvailableRecipes.Contains(Main.availableRecipe[i]));
@@ -174,7 +174,7 @@ public sealed class BetterGuide : ILoadable {
         cursor.GotoNext(MoveType.Before, i => i.MatchCall(typeof(ItemSlot), nameof(ItemSlot.Draw)));
 
         //             ++ <overrideBackground>
-        cursor.EmitLdloc(132);
+        cursor.EmitLdloc(130);
         cursor.EmitDelegate((int matI) => {
             if (!Enabled) return;
             bool canCraft = AvailableRecipes.Contains(Main.availableRecipe[Main.focusRecipe]);
@@ -211,7 +211,7 @@ public sealed class BetterGuide : ILoadable {
         cursor.GotoNext(MoveType.Before, i => i.MatchCall(typeof(ItemSlot), nameof(ItemSlot.Draw)));
 
         //             ++ <overrideBackground>
-        cursor.EmitLdloc(155);
+        cursor.EmitLdloc(153);
         cursor.EmitDelegate((int i) => {
             if (Crafting.Actions.Enabled && !Configs.ClientConfig.Instance.recipeListBehaviour.HasFlag(Configs.RecipeListBehaviour.Focus) && Main.focusRecipe == i) ItemSlot.DrawGoldBGForCraftingMaterial = true;
             if (Enabled) {

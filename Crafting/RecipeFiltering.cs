@@ -31,13 +31,26 @@ public sealed class RecipeFiltering : ILoadable {
         ILCursor cursor = new(il);
 
         // Mark + Apply noHammer
+        // ...
+        // if(<showRecipes>){
+        //     ...
+        //     if(Main.numAvailableRecipes == 0) ...
+        //     else {
+        //         int num73 = 94;
+        //         int num74 = 450 + num51;
         ILLabel? postHammer = null;
-        cursor.GotoNext(i => i.MatchStloc(138));
-        cursor.GotoNext(i => i.MatchLdsfld(Reflection.Main.InGuideCraftMenu) && i.Next.MatchBrfalse(out postHammer));
+        cursor.GotoNext(i => i.MatchCall(typeof(Main), "SetRecipeMaterialDisplayName"));
+
+        // if (++false && Main.InGuideCraftMenu) num74 -= 150;
+        cursor.GotoNext(i => i.MatchLdsfld(Reflection.Main.InGuideCraftMenu));
+        cursor.GotoNext(i => i.MatchBrfalse(out postHammer));
+        cursor.GotoPrev(i => i.MatchLdsfld(Reflection.Main.InGuideCraftMenu));
         cursor.EmitBr(postHammer!);
+
+        // ++<drawFilters>
         cursor.GotoLabel(postHammer!, MoveType.After);
-        cursor.EmitLdloc(140);
-        cursor.EmitLdloc(141);
+        cursor.EmitLdloc(138); // Hammer
+        cursor.EmitLdloc(139); // HammerY
         cursor.EmitDelegate(DrawFilters);
     }
 
