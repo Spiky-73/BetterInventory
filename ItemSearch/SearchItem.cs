@@ -72,14 +72,21 @@ public sealed class SearchItem : ILoadable {
 
         orig(self, time);
         if (interceptClicks) {
+            bool forcedLeft = false;
+            bool forcedRight = false;
+            if(Main.mouseMiddle && Main.mouseMiddleRelease) {
+                if (Main.InGameUI.CurrentState == Main.BestiaryUI) forcedRight = true;
+                else forcedLeft = true;
+                _allowClick = true;
+            }
             if (_allowClick) {
-                if (BetterGuide.Enabled && left && Main.mouseLeftRelease) {
+                if (BetterGuide.Enabled && (forcedLeft || left && Main.mouseLeftRelease)) {
                     s_searchItemTimer = 15;
                     bool? rec = Main.HoverItem.type == Main.guideItem.type ? Main.recBigList : null;
                     SetGuideItem(Main.HoverItem.type);
                     ToggleRecipeList(true);
                     if (rec.HasValue && rec != Main.recBigList) SoundEngine.PlaySound(SoundID.Grab);
-                } else if (Bestiary.Enabled && right && Main.mouseRightRelease) {
+                } else if (Bestiary.Enabled && (forcedRight || right && Main.mouseRightRelease)) {
                     bool delay = Main.InGameUI.CurrentState != Main.BestiaryUI;
                     ToggleBestiary(true);
                     SetBestiaryItem(Main.HoverItem.type, delay);
