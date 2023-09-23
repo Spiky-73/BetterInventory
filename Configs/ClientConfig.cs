@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel;
 using Terraria;
 using Terraria.ModLoader.Config;
@@ -11,6 +12,8 @@ public enum SmartPickupLevel {
 }
 
 public enum UnknownSearchBehaviour { Hidden, Unknown, Known}
+[Flags]
+public enum RecipeListBehaviour { Vanilla = 0b00, Scroll = 0b01, Focus = 0b10, FocusScroll = 0b11}
 
 public sealed class ClientConfig : ModConfig {
 
@@ -25,6 +28,7 @@ public sealed class ClientConfig : ModConfig {
     [Header("Crafting")]
     [DefaultValue(true)] public bool recipeFiltering;
     [DefaultValue(true)] public bool craftOverride;
+    [DefaultValue(RecipeListBehaviour.FocusScroll)] public RecipeListBehaviour recipeListBehaviour;
     [Header("ItemSearch")]
     [DefaultValue(true)] public bool betterGuide;
     [DefaultValue(true)] public bool searchDrops;

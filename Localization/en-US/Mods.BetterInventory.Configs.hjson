@@ -49,6 +49,9 @@ ClientConfig: {
 			LeftClick: Bulk craft
 			Shift + LeftClick: Bulk craft and go in inventory
 			Rigth: Default
+
+			Faster recipe and recipes list scrolling
+			Allows crafting on the list
 			'''
 	}
 
@@ -72,6 +75,11 @@ ClientConfig: {
 		Label: Unknown Recipe or NPCs Behaviours
 		Tooltip: ""
 	}
+
+	recipeListBehaviour: {
+		Label: Recipe List Behaviour
+		Tooltip: ""
+	}
 }
 
 SmartPickupLevel: {
@@ -86,4 +94,12 @@ UnknownSearchBehaviour: {
 	Hidden.Label: Hidden
 	Unknown.Label: Unknown
 	Known.Label: Known
+}
+
+RecipeListBehaviour: {
+	Tooltip: ""
+	Vanilla.Label: Vanilla
+	Scroll.Label: Scroll
+	Focus.Label: Focus
+	FocusScroll.Label: Focus Scroll
 }

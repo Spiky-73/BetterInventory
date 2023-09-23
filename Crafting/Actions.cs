@@ -1,9 +1,13 @@
+using System;
 using System.Collections.Generic;
+using BetterInventory.Configs;
+using Extensions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using ReLogic.Content;
 using Terraria;
+using Terraria.Audio;
 using Terraria.ModLoader;
 using Terraria.UI;
 
@@ -18,10 +22,148 @@ public sealed class Actions : ILoadable {
         On_Main.HoverOverCraftingItemButton += OverrideHover;
         On_Main.TryAllowingToCraftRecipe += TryAllowingToCraftRecipe;
 
+        IL_Main.DrawInventory += ILScrolls;
         IL_Main.CraftItem += ILCraftItem;
         IL_Recipe.Create += ILCreateRecipe;
     }
+
+
     public void Unload(){}
+
+    private static void ILScrolls(ILContext il) {
+        ILCursor cursor = new(il);
+
+        // ----- Recipe fast scroll -----
+        // ...
+        // if(<showRecipes>){
+        cursor.GotoNext(MoveType.After, i => i.MatchCall(typeof(Main), "DrawGuideCraftText"));
+        cursor.GotoNext(i => i.MatchStsfld(typeof(Terraria.UI.Gamepad.UILinkPointNavigator.Shortcuts), nameof(Terraria.UI.Gamepad.UILinkPointNavigator.Shortcuts.CRAFT_CurrentRecipeBig)));
+
+        //     for (<recipeIndex>) {
+        //         ...
+        for (int j = 0; j < 2; j++) { // Up and Down
+
+            //     if(<scrool>) {
+            //         if(...) SoundEngine.PlaySound(...);
+            //         Main.availableRecipeY[num63] += 6.5f;
+            cursor.GotoNext(i => i.MatchCall(typeof(SoundEngine), nameof(SoundEngine.PlaySound)));
+            cursor.GotoNext(i => i.MatchLdsfld(typeof(Main), nameof(Main.recFastScroll)));
+
+            // ++ <custom scroll>
+            cursor.EmitLdloc(126);
+            int s = j == 0 ? -1 : 1;
+            cursor.EmitDelegate((int r) => {
+                if (!Enabled) return;
+                Main.availableRecipeY[r] += s * 6.5f;
+                float d = Main.availableRecipeY[r] - (r - Main.focusRecipe) * 65;
+                if (Main.recFastScroll && ClientConfig.Instance.recipeListBehaviour.HasFlag(RecipeListBehaviour.Scroll)) {
+                    Main.availableRecipeY[r] += 130000f * s;
+                    d *= 3;
+                }
+                Main.availableRecipeY[r] -= s == 1 ? MathF.Max(s * 6.5f, d / 10) : MathF.Min(s * 6.5f, d / 10);
+            });
+            //         ...
+            //     }
+        }
+        //         ...
+        //     }
+
+        // ----- Material wrapping -----
+        //     if (Main.numAvailableRecipes > 0) {
+        //         for (<focusRecipeMaterialIndex>) {
+        //             ...
+        //             int num69 = 80 + num68 * 40;
+        //             int num70 = 380 + num51;
+        cursor.GotoNext(i => i.MatchCall(typeof(Main), "HoverOverCraftingItemButton"));
+        cursor.GotoNext(MoveType.Before, i => i.MatchStloc(133));
+
+        //             ++ <wrappingX>
+        cursor.EmitLdloc(132);
+        cursor.EmitDelegate((int x, int i) => {
+            if (!Enabled) return x;
+            if (!Main.recBigList) return x - 2 * i;
+            x -= i * 40;
+            if (i >= MaterialsPerLine[0]) i = MaterialsPerLine[0] - MaterialsPerLine[1] + (i - MaterialsPerLine[0]) % MaterialsPerLine[1];
+            return x + 38 * i;
+        });
+
+        //             ++ <wrappingY>
+        cursor.GotoNext(MoveType.Before, i => i.MatchStloc(134));
+        cursor.EmitLdloc(132);
+        cursor.EmitDelegate((int y, int i) => {
+            if (!Enabled || !Main.recBigList) return y;
+            i = i < MaterialsPerLine[0] ? 0 : ((i - MaterialsPerLine[0]) / MaterialsPerLine[1] + 1);
+            return y + 38 * i;
+        });
+
+        //             ...
+        //         }
+        //     }
+        //     ...
+        // }
+
+        // ----- recBigList Scroll ----- 
+        // Main.hidePlayerCraftingMenu = false;
+        cursor.GotoNext(MoveType.After, i => i.MatchStsfld(typeof(Main), nameof(Main.hidePlayerCraftingMenu)));
+        // if(<recBigListVisible>) {
+        //     ...
+        for (int i = 0; i < 2; i++) {
+
+            // if (<upVisible> / <downVisible>) {
+            //     if(<hover>) {
+            //         Main.player[Main.myPlayer].mouseInterface = true;
+            cursor.GotoNext(i => i.MatchCallvirt(typeof(SpriteBatch), nameof(SpriteBatch.Draw)));
+            cursor.GotoPrev(MoveType.After, i => i.MatchStfld(typeof(Player), nameof(Player.mouseInterface)));
+
+            //         ++ <autoScroll>
+            cursor.EmitDelegate(() => {
+                if (!Enabled || !Main.mouseLeft) return;
+                if (Main.mouseLeftRelease || _recDelay == 0) {
+                    Main.mouseLeftRelease = true;
+                    _recDelay = 1;
+                } else _recDelay--;
+            });
+
+            //         ...
+            //     }
+            //     Main.spriteBatch.Draw(...);
+            cursor.GotoNext(MoveType.After, i => i.MatchCallvirt(typeof(SpriteBatch), nameof(SpriteBatch.Draw)));
+            // }
+        }
+
+        // ----- Cursor override for recBigList -----
+        //     ...
+        //     while (<showingRecipes>) {
+        //         ...
+        //         if (<mouseHover>) {
+        //             Main.player[Main.myPlayer].mouseInterface = true;
+        cursor.GotoNext(i => i.MatchCall(typeof(Main), nameof(Main.LockCraftingForThisCraftClickDuration)));
+        cursor.GotoPrev(i => i.MatchStfld(typeof(Player), nameof(Player.mouseInterface)));
+        ILLabel? noClick = null;
+        cursor.GotoPrev(i => i.MatchBrtrue(out noClick));
+        cursor.GotoNext(MoveType.After, i => i.MatchStfld(typeof(Player), nameof(Player.mouseInterface)));
+
+        //             ++ if(<enabled>) goto noClick;
+        cursor.EmitLdloc(155);
+        cursor.EmitDelegate((int i) => {
+            if (!Enabled) return false;
+            int f = Main.focusRecipe;
+            if(ClientConfig.Instance.recipeListBehaviour.HasFlag(RecipeListBehaviour.Focus)) Main.focusRecipe = i;
+            Reflection.Main.HoverOverCraftingItemButton.Invoke(i);
+            if(f != Main.focusRecipe) Main.recFastScroll = true;
+            Main.craftingHide = false;
+            return true;
+        });
+        cursor.EmitBrtrue(noClick!);
+        //             if(<click>) <scrollList>
+        //             ...
+        //         }
+        //         ++ noClick:
+        //         ...
+        //     }
+        // }
+        // ...
+    }
 
     private static void OverrideHover(On_Main.orig_HoverOverCraftingItemButton orig, int recipeIndex) {
         if (Enabled && (!ItemSearch.BetterGuide.Enabled || ItemSearch.BetterGuide.AvailableRecipes.Contains(Main.availableRecipe[recipeIndex])) && recipeIndex == Main.focusRecipe && ItemSlot.ShiftInUse) Main.cursorOverride = CraftCursorID;
@@ -172,4 +314,8 @@ public sealed class Actions : ILoadable {
 
     public const int CraftCursorID = 22;
     public static Asset<Texture2D> CursorCraft => ModContent.Request<Texture2D>($"BetterInventory/Assets/Cursor_Craft");
+
+    private static int _recDelay = 0;
+    public static readonly int[] MaterialsPerLine = new int[] { 6, 4 };
+
 }
