@@ -101,7 +101,7 @@ public sealed class RecipeFiltering : ILoadable {
     }
 
     public static void FilterRecipes(bool saveFilters = false){
-        int oldRecipe = Main.focusRecipe;
+        int oldRecipe = Main.availableRecipe[Main.focusRecipe];
         float focusY = Main.availableRecipeY[Main.focusRecipe];
 
         EntryFilterer<Item, CreativeFilterWrapper> filterer = LocalFilters.Filterer;

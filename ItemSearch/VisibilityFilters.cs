@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
+using Terraria.ModLoader.Config;
 using Terraria.ModLoader.IO;
 
 namespace BetterInventory.ItemSearch;
@@ -10,18 +11,36 @@ public sealed class VisibilityFilters {
     public Flags Visibility { get; set; } = Flags.Default;
 
     public static Flags CurrentVisibility => BetterGuide.CraftingStations.ContainsKey(Main.guideItem.createTile) ? Flags.ShowAllTile : Main.guideItem.IsAir ? Flags.ShowAllAir : Flags.ShowAllGuide;
+    public static Flags CurrentTileMode => CurrentVisibility switch {
+        Flags.ShowAllTile => Flags.TileModeAir,
+        Flags.ShowAllAir => Flags.TileMode,
+        _ => Flags.TileModeGuide
+    };
     public bool ShowAllRecipes {
         get => Visibility.HasFlag(CurrentVisibility);
         set => SetFlag(CurrentVisibility, value);
     }
     public bool TileMode {
-        get => CurrentVisibility == Flags.ShowAllTile && Visibility.HasFlag(Flags.TileMode);
-        set => SetFlag(Flags.TileMode, value);
+        get => Visibility.HasFlag(CurrentTileMode);
+        set => SetFlag(CurrentTileMode, value);
+    }
+
+    public bool HasOwnedItems(Item item) => OwnedItems.TryGetValue(item.ModItem?.Mod.Name ?? "Terraria", out var items) && items.Contains(item.type);
+    public bool HasOwnedItems(int type) {
+        foreach(DataStructures.RangeSet set in OwnedItems.Values) if(set.Contains(type)) return true;
+        return false;
+    }
+    public void AddOwnedItems(Item item) => AddOwnedItems(item.ModItem?.Mod.Name ?? "Terraria", item.type);
+    public void AddOwnedItems(string mod, int type) {
+        if(!OwnedItems.ContainsKey(mod)) OwnedItems.Add(mod, new());
+        OwnedItems[mod].Add(type);
     }
 
     public readonly Dictionary<int, FavoriteState> FavoriteRecipes = new();
     public readonly List<(RawRecipe, byte)> MissingRecipes = new();
 
+    public readonly Dictionary<string, DataStructures.RangeSet> OwnedItems = new();
+    public readonly List<ItemDefinition> UnloadedItems = new();
     
     private void SetFlag(Flags flag, bool set) {
         if (set) Visibility |= flag;
@@ -32,10 +51,12 @@ public sealed class VisibilityFilters {
     public enum Flags {
         Default = TileMode | ShowAllTile | ShowAllGuide,
 
-        ShowAllAir =   1 << 0,
-        ShowAllGuide = 1 << 1,
-        ShowAllTile =  1 << 2,
-        TileMode =     1 << 3,
+        ShowAllAir =    1 << 0,
+        ShowAllGuide =  1 << 1,
+        ShowAllTile =   1 << 2,
+        TileMode =      1 << 3,
+        TileModeAir =   1 << 4,
+        TileModeGuide = 1 << 5,
     }
 }
 
@@ -64,6 +85,16 @@ public sealed class VisibilityFiltersSerialiser : TagSerializer<VisibilityFilter
             tag[RecipesTag] = recipes;
             tag[FavoritesTag] = favorites;
         }
+
+        List<ItemDefinition> items = new();
+        foreach((string mod, DataStructures.RangeSet set) in value.OwnedItems) {
+            foreach (DataStructures.Range range in set) {
+                items.Add(new(range.Start));
+                items.Add(new(range.End));
+            }
+        }
+        items.AddRange(value.UnloadedItems);
+        if(items.Count != 0) tag[ItemsTag] = items;
         return tag;
     }
 
@@ -72,12 +103,23 @@ public sealed class VisibilityFiltersSerialiser : TagSerializer<VisibilityFilter
 
         if (tag.TryGet(FiltersTag, out byte raw)) value.Visibility = (VisibilityFilters.Flags)raw;
 
-        if (tag.TryGet(RecipesTag, out List<RawRecipe> recipes)) {
-            List<byte> favorites = tag.Get<List<byte>>(FavoritesTag);
+        if (tag.TryGet(RecipesTag, out IList<RawRecipe> recipes)) {
+            IList<byte> favorites = tag.Get<IList<byte>>(FavoritesTag);
             for (int r = 0; r < recipes.Count; r++) {
                 Recipe? recipe = recipes[r].GetRecipe();
                 if (recipe is null) value.MissingRecipes.Add((recipes[r], favorites[r]));
                 else value.FavoriteRecipes[recipe.RecipeIndex] = (FavoriteState)favorites[r];
+            }
+        }
+        if (tag.TryGet(ItemsTag, out IList<ItemDefinition> items)) {
+            for (int i = 0; i < items.Count; i+=2) {
+                if (items[i].IsUnloaded) {
+                    value.UnloadedItems.Add(items[i]);
+                    value.UnloadedItems.Add(items[i+1]);
+                } else {
+                    if (!value.OwnedItems.ContainsKey(items[i].Mod)) value.OwnedItems.Add(items[i].Mod, new());
+                    value.OwnedItems[items[i].Mod].Add(new DataStructures.Range(items[i].Type, items[i+1].Type));
+                }
             }
         }
         return value;
@@ -86,6 +128,7 @@ public sealed class VisibilityFiltersSerialiser : TagSerializer<VisibilityFilter
     public const string FiltersTag = "filters";
     public const string RecipesTag = "recipes";
     public const string FavoritesTag = "favorites";
+    public const string ItemsTag = "items";
 }
 
 

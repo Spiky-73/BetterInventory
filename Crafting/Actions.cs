@@ -15,7 +15,6 @@ public sealed class Actions : ILoadable {
 
     public void Load(Mod mod) {
         On_Main.DrawInterface_36_Cursor += DrawCustomCursor;
-
         On_Main.HoverOverCraftingItemButton += OverrideHover;
         On_Main.TryAllowingToCraftRecipe += TryAllowingToCraftRecipe;
 
@@ -25,7 +24,7 @@ public sealed class Actions : ILoadable {
     public void Unload(){}
 
     private static void OverrideHover(On_Main.orig_HoverOverCraftingItemButton orig, int recipeIndex) {
-        if (Enabled && recipeIndex == Main.focusRecipe && ItemSlot.ShiftInUse) Main.cursorOverride = CraftCursorID;
+        if (Enabled && (!ItemSearch.BetterGuide.Enabled || ItemSearch.BetterGuide.AvailableRecipes.Contains(Main.availableRecipe[recipeIndex])) && recipeIndex == Main.focusRecipe && ItemSlot.ShiftInUse) Main.cursorOverride = CraftCursorID;
         orig(recipeIndex);
     }
     private static void DrawCustomCursor(On_Main.orig_DrawInterface_36_Cursor orig) {

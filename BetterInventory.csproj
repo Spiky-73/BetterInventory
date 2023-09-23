@@ -5,7 +5,6 @@
     <AssemblyName>BetterInventory</AssemblyName>
     <TargetFramework>net6.0</TargetFramework>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <LangVersion>latest</LangVersion>
     <nullable>enable</nullable>
   </PropertyGroup>
   <ItemGroup>

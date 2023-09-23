@@ -14,13 +14,15 @@ namespace BetterInventory.ItemSearch;
 public sealed class SearchItem : ILoadable {
 
     public static bool Enabled => BetterGuide.Enabled || Bestiary.Enabled;
+    private static bool _lastGuideEnabled = false;
+
 
     public void Load(Mod mod) {
         Keybind = KeybindLoader.RegisterKeybind(mod, "SearchItem", Microsoft.Xna.Framework.Input.Keys.N);
         On_Main.DrawCursor += HookRedirectCursor;
         On_Main.DrawThickCursor += HookRedirectThickCursor;
         On_Main.DrawInterface_36_Cursor += HookDrawCursor;
-        On_Main.DrawInterface += HookClickOverride;
+        On_Main.DrawInterface += HookClickOverrideInterface;
 
         On_ItemSlot.OverrideHover_ItemArray_int_int += HookOverrideHover;
         On_ItemSlot.OverrideLeftClick += HookOverrideLeftClick;
@@ -30,6 +32,7 @@ public sealed class SearchItem : ILoadable {
         On_Player.SaveTemporaryItemSlotContents += HookSaveTemporaryItemSlotContents;
 
         On_UIBestiaryTest.Recalculate += HookDelaySearch;
+        _lastGuideEnabled = BetterGuide.Enabled;
     }
 
 
@@ -59,7 +62,7 @@ public sealed class SearchItem : ILoadable {
         orig();
         _redir = true;
     }
-    private void HookClickOverride(On_Main.orig_DrawInterface orig, Main self, GameTime time) {
+    private void HookClickOverrideInterface(On_Main.orig_DrawInterface orig, Main self, GameTime time) {
         bool interceptClicks = Enabled && Keybind.Current;
         bool left; bool right;
         if (interceptClicks) {
@@ -180,11 +183,14 @@ public sealed class SearchItem : ILoadable {
         Main.guideItem.stack = 1;
     }
     public static void UpdateMouseItem() {
+        if(_lastGuideEnabled == BetterGuide.Enabled) return;
         if (!BetterGuide.Enabled) Main.guideItem.TurnToAir();
         else if (!Main.guideItem.IsAir) {
             Main.LocalPlayer.GetDropItem(ref Main.guideItem);
             Main.guideItem = new(Main.guideItem.type);
         }
+        _lastGuideEnabled = BetterGuide.Enabled;
+        Recipe.FindRecipes();
     }
 
 
@@ -200,7 +206,7 @@ public sealed class SearchItem : ILoadable {
             } else {
                 Main.CreativeMenu.CloseMenu();
                 Main.LocalPlayer.tileEntityAnchor.Clear();
-                if (!Main.InGuideCraftMenu) Main.LocalPlayer.SetTalkNPC(-1); // Not if talking to guide
+                if (!Main.InGuideCraftMenu) Main.LocalPlayer.SetTalkNPC(-1);
             }
             Main.recBigList = Main.numAvailableRecipes > 0;
         }

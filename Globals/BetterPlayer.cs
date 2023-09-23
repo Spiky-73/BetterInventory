@@ -67,7 +67,8 @@ public sealed class BetterPlayer : ModPlayer {
         foreach(BuilderAccToggle bat in BuilderAccToggles) bat.AddKeybind(Mod);
         On_ItemSlot.TryOpenContainer += HookTryOpenContainer;
 
-        // On_Player.GetItem += HookGetItem;
+        On_Player.GetItem += HookGetItem;
+        On_Player.OpenChest += HookOpenChest;
         // On_ChestUI.TryPlacingInChest += HookPlaceInChest;
     }
 
@@ -118,47 +119,54 @@ public sealed class BetterPlayer : ModPlayer {
         }
     }
 
-    // private static Item HookGetItem(On_Player.orig_GetItem orig, Player self, int plr, Item newItem, GetItemSettings settings) {
-    //     if (!Configs.ClientConfig.SmartPickupEnabled(newItem)) return orig(self, plr, newItem, settings);
-    //     BetterPlayer betterPlayer = self.GetModPlayer<BetterPlayer>();
-    //     bool gotItems = false;
-    //     int slot;
-    //     if (self.InChest(out Item[]? chest) && (settings is GetItemSettings { NoText: false, CanGoIntoVoidVault: true } || newItem == Main.mouseItem)
-    //             && (slot = System.Array.IndexOf(betterPlayer._lastTypeChest, newItem.type)) != -1 /* && chest[slot] != newItem */) {
-    //         object[] args = new object[] { plr, chest, newItem, settings, newItem, slot };
-    //         if (chest[slot].type == ItemID.None) gotItems = (bool)FillEmptVoidMethod.Invoke(self, args)!;
-    //         else if (chest[slot].type == newItem.type && newItem.maxStack > 1) gotItems = (bool)FillOccupiedVoidMethod.Invoke(self, args)!;
-    //         else if (newItem.favorited || !chest[slot].favorited) (chest[slot], newItem) = (newItem, chest[slot]);
-    //         if (Main.netMode == NetmodeID.MultiplayerClient && self.chest > -1) NetMessage.SendData(MessageID.SyncChestItem, number: self.chest, number2: slot);
-    //     } else if ((slot = System.Array.IndexOf(betterPlayer._lastTypeInv, newItem.type)) != -1) {
-    //         object[] args = new object[] { plr, newItem, settings, newItem, slot };
-    //         if (self.inventory[slot].type == ItemID.None) gotItems = (bool)FillEmptyMethod.Invoke(self, args)!;
-    //         else if (self.inventory[slot].type == newItem.type && newItem.maxStack > 1) gotItems = (bool)FillOccupiedMethod.Invoke(self, args)!;
-    //         else if (newItem.favorited || !self.inventory[slot].favorited) {
-    //             (newItem, self.inventory[slot]) = (self.inventory[slot], newItem);
-    //         }
-    //     }
-    //     if (gotItems) return new();
-    //     return orig(self, plr, newItem, settings);
-    // }
-    // private bool HookPlaceInChest(On_ChestUI.orig_TryPlacingInChest orig, Item I, bool justCheck, int itemSlotContext) {
-    //     ChestUI.GetContainerUsageInfo(out var sync, out Item[]? chest);
-    //     if (ChestUI.IsBlockedFromTransferIntoChest(I, chest) || !Configs.ClientConfig.SmartPickupEnabled(I)) return orig(I, justCheck, itemSlotContext);
-    //     BetterPlayer betterPlayer = Main.LocalPlayer.GetModPlayer<BetterPlayer>();
-    //     bool gotItems = false;
-    //     int slot;
-    //     if ((slot = System.Array.IndexOf(betterPlayer._lastTypeChest, I.type)) != -1 /* && chest[slot] != I */) {
-    //         if(justCheck) return true;
-    //         if (chest[slot].type == ItemID.None) {
-    //             Item i = I.Clone();
-    //             gotItems = (bool)FillEmptVoidMethod.Invoke(Main.LocalPlayer, new object[] { Main.myPlayer, chest, i, GetItemSettings.InventoryUIToInventorySettings, i, slot })!;
-    //         } else if (chest[slot].type == I.type && I.maxStack > 1) gotItems = (bool)FillOccupiedVoidMethod.Invoke(Main.LocalPlayer, new object[] { Main.myPlayer, chest, I, GetItemSettings.InventoryUIToInventorySettings, I, slot })!;
-    //         else if (I.favorited || !chest[slot].favorited) (chest[slot], I) = (I, chest[slot]);
-    //         if (sync) NetMessage.SendData(MessageID.SyncChestItem, number: Main.LocalPlayer.chest, number2: slot);
-    //     }
-    //     if(gotItems) I.TurnToAir();
-    //     return gotItems || orig(I, justCheck, itemSlotContext);
-    // }
+    private void HookOpenChest(On_Player.orig_OpenChest orig, Player self, int x, int y, int newChest) {
+        foreach (Item item in Player.Chest(newChest)) if (!item.IsAir) VisibilityFilters.AddOwnedItems(item);
+        orig(self, x, y, newChest);
+    }
+
+
+    private static Item HookGetItem(On_Player.orig_GetItem orig, Player self, int plr, Item newItem, GetItemSettings settings) {
+        self.GetModPlayer<BetterPlayer>().VisibilityFilters.AddOwnedItems(newItem);
+        return orig(self, plr, newItem, settings);
+        //     if (!Configs.ClientConfig.SmartPickupEnabled(newItem)) return orig(self, plr, newItem, settings);
+        //     bool gotItems = false;
+        //     int slot;
+        //     if (self.InChest(out Item[]? chest) && (settings is GetItemSettings { NoText: false, CanGoIntoVoidVault: true } || newItem == Main.mouseItem)
+        //             && (slot = System.Array.IndexOf(betterPlayer._lastTypeChest, newItem.type)) != -1 /* && chest[slot] != newItem */) {
+        //         object[] args = new object[] { plr, chest, newItem, settings, newItem, slot };
+        //         if (chest[slot].type == ItemID.None) gotItems = (bool)FillEmptVoidMethod.Invoke(self, args)!;
+        //         else if (chest[slot].type == newItem.type && newItem.maxStack > 1) gotItems = (bool)FillOccupiedVoidMethod.Invoke(self, args)!;
+        //         else if (newItem.favorited || !chest[slot].favorited) (chest[slot], newItem) = (newItem, chest[slot]);
+        //         if (Main.netMode == NetmodeID.MultiplayerClient && self.chest > -1) NetMessage.SendData(MessageID.SyncChestItem, number: self.chest, number2: slot);
+        //     } else if ((slot = System.Array.IndexOf(betterPlayer._lastTypeInv, newItem.type)) != -1) {
+        //         object[] args = new object[] { plr, newItem, settings, newItem, slot };
+        //         if (self.inventory[slot].type == ItemID.None) gotItems = (bool)FillEmptyMethod.Invoke(self, args)!;
+        //         else if (self.inventory[slot].type == newItem.type && newItem.maxStack > 1) gotItems = (bool)FillOccupiedMethod.Invoke(self, args)!;
+        //         else if (newItem.favorited || !self.inventory[slot].favorited) {
+        //             (newItem, self.inventory[slot]) = (self.inventory[slot], newItem);
+        //         }
+        //     }
+        //     if (gotItems) return new();
+        //     return orig(self, plr, newItem, settings);
+        // }
+        // private bool HookPlaceInChest(On_ChestUI.orig_TryPlacingInChest orig, Item I, bool justCheck, int itemSlotContext) {
+        //     ChestUI.GetContainerUsageInfo(out var sync, out Item[]? chest);
+        //     if (ChestUI.IsBlockedFromTransferIntoChest(I, chest) || !Configs.ClientConfig.SmartPickupEnabled(I)) return orig(I, justCheck, itemSlotContext);
+        //     BetterPlayer betterPlayer = Main.LocalPlayer.GetModPlayer<BetterPlayer>();
+        //     bool gotItems = false;
+        //     int slot;
+        //     if ((slot = System.Array.IndexOf(betterPlayer._lastTypeChest, I.type)) != -1 /* && chest[slot] != I */) {
+        //         if(justCheck) return true;
+        //         if (chest[slot].type == ItemID.None) {
+        //             Item i = I.Clone();
+        //             gotItems = (bool)FillEmptVoidMethod.Invoke(Main.LocalPlayer, new object[] { Main.myPlayer, chest, i, GetItemSettings.InventoryUIToInventorySettings, i, slot })!;
+        //         } else if (chest[slot].type == I.type && I.maxStack > 1) gotItems = (bool)FillOccupiedVoidMethod.Invoke(Main.LocalPlayer, new object[] { Main.myPlayer, chest, I, GetItemSettings.InventoryUIToInventorySettings, I, slot })!;
+        //         else if (I.favorited || !chest[slot].favorited) (chest[slot], I) = (I, chest[slot]);
+        //         if (sync) NetMessage.SendData(MessageID.SyncChestItem, number: Main.LocalPlayer.chest, number2: slot);
+        //     }
+        //     if(gotItems) I.TurnToAir();
+        //     return gotItems || orig(I, justCheck, itemSlotContext);
+    }
 
 
     public static void CycleAccState(Player player, int index, int cycle = 2) => player.builderAccStatus[index] = (player.builderAccStatus[index] + 1) % cycle;
@@ -171,6 +179,7 @@ public sealed class BetterPlayer : ModPlayer {
 
     public override void LoadData(TagCompound tag) {
         VisibilityFilters = tag.Get<ItemSearch.VisibilityFilters>(VisibilityTag);
+        foreach(Item item in Player.inventory) if(!item.IsAir) VisibilityFilters.AddOwnedItems(item);
         RecipeFilters = tag.Get<Crafting.RecipeFilters>(RecipesTag);
     }
 

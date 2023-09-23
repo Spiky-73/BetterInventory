@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using BetterInventory.Crafting;
+using BetterInventory.Items;
+using FullSerializer.Internal;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
@@ -25,89 +27,49 @@ public sealed class BetterGuide : ILoadable {
 
     public static VisibilityFilters LocalFilters => Globals.BetterPlayer.LocalPlayer.VisibilityFilters;
 
-    public void Load(Mod mod){
+    public void Load(Mod mod) {
         IL_Main.DrawInventory += IlDrawInventory;
-        On_Main.DrawGuideCraftText += HookGuideText;
+        On_Main.DrawGuideCraftText += HookGuideCraftText;
 
         On_Main.HoverOverCraftingItemButton += HookOverrideCraftHover;
 
         IL_Recipe.FindRecipes += ILFindRecipes;
-        // On_Recipe.FindRecipes += HookCollectRecipes;
         On_Recipe.AddToAvailableRecipes += HookAddAvailableRecipe;
         IL_Recipe.CollectGuideRecipes += ILOverrideGuideRecipes;
+
+        On_ItemSlot.Draw_SpriteBatch_refItem_int_Vector2_Color += HookHideItem;
+        On_Main.DrawPendingMouseText += HookFakePendingTooltip;
+        MonoModHooks.Add(typeof(ItemLoader).GetMethod(nameof(ItemLoader.ModifyTooltips)), HookHideTooltip);
 
         s_inventoryBack4 = TextureAssets.InventoryBack4;
     }
 
     public void Unload() => s_inventoryBack4 = null!;
 
-    private void HookGuideText(On_Main.orig_DrawGuideCraftText orig, int adjY, Color craftingTipColor, out int inventoryX, out int inventoryY) {
-        if(!Enabled) {
-            orig(adjY, craftingTipColor, out inventoryX, out inventoryY);
-            return;
-        }
-        inventoryX = 73;
-        inventoryY = 331 + adjY;
-        List<string> conditions = new();
-        Recipe recipe = Main.recipe[Main.availableRecipe[Main.focusRecipe]];
-
-        if (recipe.RecipeIndex != _focusRecipe) {
-            _focusRecipe = recipe.RecipeIndex;
-            _craftingTiles = new Item[recipe.requiredTile.Count];
-            for (int i = 0; i < recipe.requiredTile.Count; i++) {
-                if (recipe.requiredTile[i] == -1) break;
-                else if (CraftingStations.TryGetValue(recipe.requiredTile[i], out int type) && type != ItemID.None) _craftingTiles[i] = new(type);
-            }
-        }
-
-        Main.inventoryScale *= 0.5f;
-        Vector2 position = new(inventoryX + 50, inventoryY + 12 - 14 + 24);
-        for (int i = 0; i < recipe.requiredTile.Count; i++) {
-            if (recipe.requiredTile[i] == -1) break;
-            if(_craftingTiles[i] is null) {
-                string mapObjectName = Lang.GetMapObjectName(MapHelper.TileToLookup(recipe.requiredTile[i], Recipe.GetRequiredTileStyle(recipe.requiredTile[i])));
-                conditions.Add(mapObjectName);
-                continue;
-            }
-            Color inventoryBack = Main.inventoryBack;
-            OverrideRecipeTexture(FavoriteState.Default, false, Main.LocalPlayer.adjTile[recipe.requiredTile[i]]);
-            ItemSlot.Draw(Main.spriteBatch, ref _craftingTiles[i], ItemSlot.Context.CraftingMaterial, position);
-            TextureAssets.InventoryBack4 = s_inventoryBack4;
-            float size = TextureAssets.InventoryBack.Width() * Main.inventoryScale;
-            if(new Rectangle((int)position.X, (int)position.Y, (int)size, (int)size).Contains(Main.mouseX, Main.mouseY)){
-                Main.LocalPlayer.mouseInterface = true;
-                ItemSlot.MouseHover(ref _craftingTiles[i], ItemSlot.Context.CraftingMaterial);
-            }
-            Main.inventoryBack = inventoryBack;
-            position.X += size * 1.1f;
-        }
-        Main.inventoryScale *= 2;
-
-        if (Reflection.Recipe.needWater.GetValue(recipe)) conditions.Add(Lang.inter[53].Value);
-        if (Reflection.Recipe.needHoney.GetValue(recipe)) conditions.Add(Lang.inter[58].Value);
-        if (Reflection.Recipe.needLava.GetValue(recipe)) conditions.Add(Lang.inter[56].Value);
-        if (Reflection.Recipe.needSnowBiome.GetValue(recipe)) conditions.Add(Lang.inter[123].Value);
-        if (Reflection.Recipe.needGraveyardBiome.GetValue(recipe)) conditions.Add(Lang.inter[124].Value);
-        conditions.AddRange(from x in recipe.Conditions select x.Description.Value);
-
-
-        position = new(inventoryX + 50, inventoryY + 12 - 14);
-        if (conditions.Count > 0)
-            DynamicSpriteFontExtensionMethods.DrawString(Main.spriteBatch, FontAssets.MouseText.Value, string.Join(", ", conditions), position, new(Main.mouseTextColor, Main.mouseTextColor, Main.mouseTextColor, Main.mouseTextColor), 0f, Vector2.Zero, 1f, 0, 0f);
-    }
-
     public static void PostAddRecipes() {
-        for (int r = 0; r < Recipe.numRecipes; r++){
-            foreach(int tile in Main.recipe[r].requiredTile) CraftingStations[tile] = 0;
+        for (int r = 0; r < Recipe.numRecipes; r++) {
+            foreach (int tile in Main.recipe[r].requiredTile) CraftingStations[tile] = 0;
         }
         SetStations();
     }
 
     public static void SetStations() {
-        for (int type = 0; type < ItemLoader.ItemCount; type++){
+        for (int type = 0; type < ItemLoader.ItemCount; type++) {
             Item item = new(type);
-            if(CraftingStations.ContainsKey(item.createTile) && CraftingStations[item.createTile] == ItemID.None) CraftingStations[item.createTile] = item.type;
+            if (CraftingStations.ContainsKey(item.createTile) && CraftingStations[item.createTile] == ItemID.None) CraftingStations[item.createTile] = item.type;
         }
+    }
+
+
+    private void HookHideItem(On_ItemSlot.orig_Draw_SpriteBatch_refItem_int_Vector2_Color orig, SpriteBatch spriteBatch, ref Item inv, int context, Vector2 position, Color lightColor){
+        Item? old = null;
+        if (_hideItem) {
+            _hideItem = false;
+            old = inv;
+            inv = UnknownItem.Instance;
+        }
+        orig(spriteBatch, ref inv, context, position, lightColor);
+        if (old is not null) inv = old;
     }
 
     private static void IlDrawInventory(ILContext il) {
@@ -170,7 +132,7 @@ public sealed class BetterGuide : ILoadable {
         cursor.MarkLabel(recipe);
 
 
-        // ----- Background for recipes -----
+        // -----Recipes createItem -----
         //     for (<recipeIndex>) {
         //         ...
         //         if(<visible>) {
@@ -187,6 +149,7 @@ public sealed class BetterGuide : ILoadable {
             if (!Enabled) return;
             OverrideRecipeTexture(LocalFilters.FavoriteRecipes.GetValueOrDefault(Main.availableRecipe[i]), ItemSlot.DrawGoldBGForCraftingMaterial, AvailableRecipes.Contains(Main.availableRecipe[i]));
             ItemSlot.DrawGoldBGForCraftingMaterial = false;
+            if (i >= KnownRecipesCount) _hideItem = true;
         });
 
         //                 ItemSlot.Draw(...);
@@ -198,7 +161,7 @@ public sealed class BetterGuide : ILoadable {
         //         }
         //     }
 
-        // ----- Background for materials -----
+        // ----- Recipe requiredItems -----
         //     if (Main.numAvailableRecipes > 0) {
         //         for (<focusRecipeMaterialIndex>) {
         //             ...
@@ -289,7 +252,7 @@ public sealed class BetterGuide : ILoadable {
         //             ...
         //         }
 
-        // ----- Background of recipes -----
+        // ----- Recipe big list -----
         //         if (Main.numAvailableRecipes > 0) {
         //             ...
         //             Main.inventoryBack = ...;
@@ -312,11 +275,77 @@ public sealed class BetterGuide : ILoadable {
         // }
     }
 
+
+    private void HookGuideCraftText(On_Main.orig_DrawGuideCraftText orig, int adjY, Color craftingTipColor, out int inventoryX, out int inventoryY) {
+        if (!Enabled) {
+            orig(adjY, craftingTipColor, out inventoryX, out inventoryY);
+            return;
+        }
+        inventoryX = 73;
+        inventoryY = 331 + adjY;
+        bool hideText = Main.focusRecipe >= KnownRecipesCount;
+
+        List<string> conditions = new();
+        Recipe recipe = Main.recipe[Main.availableRecipe[Main.focusRecipe]];
+
+        if (recipe.RecipeIndex != _focusRecipe) {
+            _focusRecipe = recipe.RecipeIndex;
+            _craftingTiles = new Item[recipe.requiredTile.Count];
+            for (int i = 0; i < recipe.requiredTile.Count; i++) {
+                if (recipe.requiredTile[i] == -1) break;
+                else if (CraftingStations.TryGetValue(recipe.requiredTile[i], out int type) && type != ItemID.None) _craftingTiles[i] = new(type);
+            }
+        }
+
+        Vector2 position;
+        if (!hideText) {
+            Main.inventoryScale *= 0.5f;
+            position = new(inventoryX + 50, inventoryY + 12 - 14 + 24);
+            for (int i = 0; i < recipe.requiredTile.Count; i++) {
+                if (recipe.requiredTile[i] == -1) break;
+                if (_craftingTiles[i] is null) {
+                    string mapObjectName = Lang.GetMapObjectName(MapHelper.TileToLookup(recipe.requiredTile[i], Recipe.GetRequiredTileStyle(recipe.requiredTile[i])));
+                    conditions.Add(mapObjectName);
+                    continue;
+                }
+                Color inventoryBack = Main.inventoryBack;
+                OverrideRecipeTexture(FavoriteState.Default, false, Main.LocalPlayer.adjTile[recipe.requiredTile[i]]);
+                ItemSlot.Draw(Main.spriteBatch, ref _craftingTiles[i], ItemSlot.Context.CraftingMaterial, position);
+                TextureAssets.InventoryBack4 = s_inventoryBack4;
+                float size = TextureAssets.InventoryBack.Width() * Main.inventoryScale;
+                if (new Rectangle((int)position.X, (int)position.Y, (int)size, (int)size).Contains(Main.mouseX, Main.mouseY)) {
+                    Main.LocalPlayer.mouseInterface = true;
+                    ItemSlot.MouseHover(ref _craftingTiles[i], ItemSlot.Context.CraftingMaterial);
+                }
+                Main.inventoryBack = inventoryBack;
+                position.X += size * 1.1f;
+            }
+            Main.inventoryScale *= 2;
+
+            if (Reflection.Recipe.needWater.GetValue(recipe)) conditions.Add(Lang.inter[53].Value);
+            if (Reflection.Recipe.needHoney.GetValue(recipe)) conditions.Add(Lang.inter[58].Value);
+            if (Reflection.Recipe.needLava.GetValue(recipe)) conditions.Add(Lang.inter[56].Value);
+            if (Reflection.Recipe.needSnowBiome.GetValue(recipe)) conditions.Add(Lang.inter[123].Value);
+            if (Reflection.Recipe.needGraveyardBiome.GetValue(recipe)) conditions.Add(Lang.inter[124].Value);
+            conditions.AddRange(from x in recipe.Conditions select x.Description.Value);
+            position = new(inventoryX + 50, inventoryY + 12 - 14);
+        } else {
+            conditions.Add("???");
+            position = new(inventoryX + 50, inventoryY + 12);
+        }
+        if (conditions.Count > 0)
+            DynamicSpriteFontExtensionMethods.DrawString(Main.spriteBatch, FontAssets.MouseText.Value, string.Join(", ", conditions), position, new(Main.mouseTextColor, Main.mouseTextColor, Main.mouseTextColor, Main.mouseTextColor), 0f, Vector2.Zero, 1f, 0, 0f);
+
+
+
+    }
+
+
     public static bool HandleVisibility(int x, int y) {
         x += (int)((TextureAssets.InventoryBack.Width() - 2) * Main.inventoryScale);
         y += (int)(4 * Main.inventoryScale);
         Vector2 size = InventoryTickBorder.Size() * Main.inventoryScale;
-        _hitBox = new(x - (int)(size.X/2f), y - (int)(size.Y / 2f), (int)size.X, (int)size.Y);
+        _hitBox = new(x - (int)(size.X / 2f), y - (int)(size.Y / 2f), (int)size.X, (int)size.Y);
 
         if (!(_hover = _hitBox.Contains(Main.mouseX, Main.mouseY)) || PlayerInput.IgnoreMouseInterface) return false;
 
@@ -326,14 +355,14 @@ public sealed class BetterGuide : ILoadable {
             if (filters.TileMode) filters.TileMode = false;
             else {
                 filters.ShowAllRecipes = !filters.ShowAllRecipes;
-                if (VisibilityFilters.CurrentVisibility == VisibilityFilters.Flags.ShowAllTile && filters.ShowAllRecipes) filters.TileMode = true;
+                if (VisibilityFilters.CurrentVisibility != VisibilityFilters.Flags.ShowAllGuide && filters.ShowAllRecipes) filters.TileMode = true;
             }
             SoundEngine.PlaySound(SoundID.MenuTick);
             Recipe.FindRecipes();
         }
         return true;
     }
-    public static void DrawVisibility(){
+    public static void DrawVisibility() {
         VisibilityFilters filters = LocalFilters;
         Asset<Texture2D> tick = filters.TileMode ? InventoryTickForced : filters.ShowAllRecipes ? TextureAssets.InventoryTickOn : TextureAssets.InventoryTickOff;
         Color color = Color.White * 0.7f;
@@ -362,21 +391,17 @@ public sealed class BetterGuide : ILoadable {
         //     ++     continue;
         //     ++ }
         cursor.EmitLdloc1();
-        cursor.EmitDelegate<System.Func<int, bool>>(i => {
+        cursor.EmitDelegate<Func<int, bool>>(i => {
             if (!Enabled) return false;
-            if (Main.guideItem.IsAir) {
-                Reflection.Recipe.AddToAvailableRecipes.Invoke(i);
-                return true;
-            }
+            Recipe recipe = Main.recipe[i];
+
             if (LocalFilters.TileMode) {
-                if (Main.recipe[i].requiredTile.Contains(Main.guideItem.createTile)) Reflection.Recipe.AddToAvailableRecipes.Invoke(i);
-                return true;
+                if (Main.guideItem.IsAir ? recipe.requiredTile.Count == 0 : recipe.HasTile(Main.guideItem.createTile)) Reflection.Recipe.AddToAvailableRecipes.Invoke(i);
             }
-            if (Main.recipe[i].createItem.type == Main.guideItem.type) {
-                Reflection.Recipe.AddToAvailableRecipes.Invoke(i);
-                return true;
-            }
-            return false;
+            else if (Main.guideItem.IsAir) Reflection.Recipe.AddToAvailableRecipes.Invoke(i);
+            else if (Main.recipe[i].HasResult(Main.guideItem.type)) Reflection.Recipe.AddToAvailableRecipes.Invoke(i);
+            else return false;
+            return true;
         });
         cursor.EmitBrtrue(endLoop!);
         // }
@@ -409,16 +434,37 @@ public sealed class BetterGuide : ILoadable {
         // ...
 
         cursor.GotoNext(i => i.MatchCall(Reflection.Recipe.TryRefocusingRecipe));
-        cursor.EmitDelegate(() => { 
+        cursor.EmitDelegate(() => {
             GuideRecipes.Clear();
-            if(!Enabled) {
+            List<int> unknownRecipes = new();
+            if (!Enabled) {
                 GuideRecipes.AddRange(Main.availableRecipe[..Main.numAvailableRecipes]);
+                KnownRecipesCount = GuideRecipes.Count;
                 return;
             }
             _collectingAvaiblable = false;
             Recipe.ClearAvailableRecipes();
             Reflection.Recipe.CollectGuideRecipes.Invoke();
-            GuideRecipes.AddRange(Main.availableRecipe[..Main.numAvailableRecipes]);
+            VisibilityFilters filters = LocalFilters;
+            for (int i = 0; i < Main.numAvailableRecipes; i++) {
+                Recipe recipe = Main.recipe[Main.availableRecipe[i]];
+                bool known = Configs.ClientConfig.Instance.unknownBehaviour == Configs.UnknownSearchBehaviour.Known || filters.HasOwnedItems(recipe.createItem) || recipe.requiredItem.Exists(i => filters.HasOwnedItems(i));
+                if (!known)
+                {
+                    foreach (int g in recipe.acceptedGroups) {
+                        foreach (int type in RecipeGroup.recipeGroups[g].ValidItems) {
+                            if (!filters.HasOwnedItems(type)) continue;
+                            known = true;
+                            goto known;
+                        }
+                    }
+                }
+            known:
+                if(known) GuideRecipes.Add(Main.availableRecipe[i]);
+                else if(Configs.ClientConfig.Instance.unknownBehaviour == Configs.UnknownSearchBehaviour.Unknown) unknownRecipes.Add(Main.availableRecipe[i]);
+            }
+            KnownRecipesCount = GuideRecipes.Count;
+            GuideRecipes.AddRange(unknownRecipes);
         });
     }
 
@@ -434,18 +480,21 @@ public sealed class BetterGuide : ILoadable {
         } else {
             List<int> fav = new(), black = new(), others = new();
 
-            foreach (int i in GuideRecipes) {
-                (LocalFilters.FavoriteRecipes.GetValueOrDefault(Main.availableRecipe[i]) switch {
+            for (int i = 0; i < KnownRecipesCount; i++) {
+                (LocalFilters.FavoriteRecipes.GetValueOrDefault(GuideRecipes[i]) switch {
                     FavoriteState.Favorited => fav,
                     FavoriteState.Blacklisted => black,
                     _ => others,
-                }).Add(i);
+                }).Add(GuideRecipes[i]);
             }
 
             bool showAll = LocalFilters.ShowAllRecipes;
             foreach (int i in fav) yield return i;
             foreach (int i in others) if (showAll || AvailableRecipes.Contains(i)) yield return i;
-            if (showAll) foreach (int i in black) yield return i;
+            if (showAll) {
+                foreach (int i in black) yield return i;
+                for (int i = KnownRecipesCount; i < GuideRecipes.Count; i++) yield return GuideRecipes[i];
+            }
         }
     }
 
@@ -455,14 +504,46 @@ public sealed class BetterGuide : ILoadable {
             orig(recipeIndex);
             return;
         }
-        if (OverrideRecipeHover(recipeIndex) || (recipeIndex == Main.focusRecipe && !AvailableRecipes.Contains(Main.availableRecipe[recipeIndex]))) {
+        if (recipeIndex >= KnownRecipesCount) _unknownTooltip = true;
+        if(_unknownTooltip && recipeIndex != Main.focusRecipe) orig(recipeIndex);
+        else if (_unknownTooltip || OverrideRecipeHover(recipeIndex) || (recipeIndex == Main.focusRecipe && !AvailableRecipes.Contains(Main.availableRecipe[recipeIndex]))) {
             (bool lstate, bool rstate) = (Main.mouseLeft, Main.mouseRight);
             (Main.mouseLeft, Main.mouseRight) = (false, false);
             orig(recipeIndex);
             (Main.mouseLeft, Main.mouseRight) = (lstate, rstate);
         } else orig(recipeIndex);
+        
+        if(_unknownTooltip) {
+            Main.HoverItem.TurnToAir();
+            Main.hoverItemName = "???";
+        }
+        
+    }
+    private void HookFakePendingTooltip(On_Main.orig_DrawPendingMouseText orig) {
+        if(Main.gameMenu) {
+            orig();
+            return;
+        }
+        Item old = Main.HoverItem;
+        if ((bool)Reflection.Main._mouseTextCache_isValid.GetValue(Reflection.Main._mouseTextCache.GetValue(Main.instance))! && _unknownTooltip) Main.HoverItem = UnknownItem.Instance;
+        orig();
+        Main.HoverItem = old;
+        _unknownTooltip = false;
     }
 
+    public delegate List<TooltipLine> ModifyTooltipsFn(Item item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out Color?[] overrideColor, int prefixlineIndex);
+    private static List<TooltipLine> HookHideTooltip(ModifyTooltipsFn orig, Item item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out Color?[] overrideColor, int prefixlineIndex) {
+        if (!_unknownTooltip) return orig.Invoke(item, ref numTooltips, names, ref text, ref modifier, ref badModifier, ref oneDropLogo, out overrideColor, prefixlineIndex);
+        List<TooltipLine> tooltips = new() { new(BetterInventory.Instance, names[0], "???") };
+        numTooltips = 1;
+        text = new string[] { tooltips[0].Text
+        };
+        modifier = new bool[] { tooltips[0].IsModifier };
+        badModifier = new bool[] { tooltips[0].IsModifierBad };
+        oneDropLogo = -1;
+        overrideColor = new Color?[] { null };
+        return tooltips;
+    }
     public static bool OverrideRecipeHover(int recipeIndex) {
         bool click = Main.mouseLeft && Main.mouseLeftRelease;
         Dictionary<int, FavoriteState> favorites = LocalFilters.FavoriteRecipes;
@@ -501,12 +582,12 @@ public sealed class BetterGuide : ILoadable {
     private static Rectangle _hitBox;
 
     public static readonly List<int> GuideRecipes = new();
+    public static int KnownRecipesCount { get; private set; }
     public static readonly HashSet<int> AvailableRecipes = new();
     public static readonly Dictionary<int, int> CraftingStations = new();
 
     public static readonly Asset<Texture2D>[] DefaultRecipeTextures = new Asset<Texture2D>[] { TextureAssets.InventoryBack4, TextureAssets.InventoryBack5, TextureAssets.InventoryBack10 };
     public static readonly Asset<Texture2D>[] SelectedRecipeTextures = new Asset<Texture2D>[] { TextureAssets.InventoryBack14, TextureAssets.InventoryBack11, TextureAssets.InventoryBack17 };
-
 
     private static int _recDelay = 0;
     private static Asset<Texture2D> s_inventoryBack4 = null!;
@@ -515,4 +596,6 @@ public sealed class BetterGuide : ILoadable {
     private static Item?[] _craftingTiles = System.Array.Empty<Item>();
 
     private static bool _collectingAvaiblable;
+    private static bool _unknownTooltip;
+    private static bool _hideItem;
 }

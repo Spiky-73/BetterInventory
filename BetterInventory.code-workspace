@@ -6,7 +6,7 @@
         },
         {
             "name": "Configs",
-            "path": "../../../tModLoader/ModConfigs"
+            "path": "../../ModConfigs"
         },
         {
             "name": "Configs Preview",

@@ -55,9 +55,10 @@ public static class Utility {
         Both = Min | Max
     }
 
-    public static bool InRange<T>(this T self, T min, T max, InclusionFlag flags = InclusionFlag.Both) where T : System.IComparable<T> {
-        int l = self.CompareTo(min);
-        int r = self.CompareTo(max);
+    public static bool InRange<T>(this T self, T min, T max, InclusionFlag flags = InclusionFlag.Both) where T : System.IComparable<T> => InRange(Comparer<T>.Default, self, min, max, flags);
+    public static bool InRange<T>(this IComparer<T> comparer, T value, T min, T max, InclusionFlag flags = InclusionFlag.Both) {
+        int l = comparer.Compare(value, min);
+        int r = comparer.Compare(value, max);
         return (l > 0 || (flags.HasFlag(InclusionFlag.Min) && l == 0)) && (r < 0 || (flags.HasFlag(InclusionFlag.Max) && r == 0));
     }
 
