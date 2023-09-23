@@ -200,7 +200,7 @@ public sealed class BetterGuide : ILoadable {
         // ----- Recipe big list -----
         // Main.hidePlayerCraftingMenu = false;
         cursor.GotoNext(MoveType.After, i => i.MatchStsfld(typeof(Main), nameof(Main.hidePlayerCraftingMenu)));
-        
+
         // if(<recBigListVisible>) {
         //     ...
         //     while (<showingRecipes>) {
@@ -214,9 +214,16 @@ public sealed class BetterGuide : ILoadable {
         cursor.EmitLdloc(155);
         cursor.EmitDelegate((int i) => {
             if (Crafting.Actions.Enabled && !Configs.ClientConfig.Instance.recipeListBehaviour.HasFlag(Configs.RecipeListBehaviour.Focus) && Main.focusRecipe == i) ItemSlot.DrawGoldBGForCraftingMaterial = true;
-            if (Enabled) OverrideRecipeTexture(LocalFilters.FavoriteRecipes.GetValueOrDefault(Main.availableRecipe[i]), ItemSlot.DrawGoldBGForCraftingMaterial, AvailableRecipes.Contains(Main.availableRecipe[i]));
-            else if (ItemSlot.DrawGoldBGForCraftingMaterial) OverrideRecipeTexture(FavoriteState.Default, ItemSlot.DrawGoldBGForCraftingMaterial, true);
-            if (!KnownRecipes.Contains(Main.availableRecipe[i])) _hideItem = true;
+            if (Enabled) {
+                OverrideRecipeTexture(LocalFilters.FavoriteRecipes.GetValueOrDefault(Main.availableRecipe[i]), ItemSlot.DrawGoldBGForCraftingMaterial, AvailableRecipes.Contains(Main.availableRecipe[i]));
+                if (_hideRecBigListTooltip) {
+                    _hideRecBigListTooltip = false;
+                    _unknownTooltip = true;
+                    Main.HoverItem.TurnToAir();
+                    Main.hoverItemName = "???";
+                }
+                if (!KnownRecipes.Contains(Main.availableRecipe[i])) _hideItem = true;
+            } else if (ItemSlot.DrawGoldBGForCraftingMaterial) OverrideRecipeTexture(FavoriteState.Default, ItemSlot.DrawGoldBGForCraftingMaterial, true);
             ItemSlot.DrawGoldBGForCraftingMaterial = false;
         });
 
@@ -229,6 +236,11 @@ public sealed class BetterGuide : ILoadable {
         //         ...
         //     }
         // }
+    }
+
+    internal static bool HideRecList(int i) {
+        if (!KnownRecipes.Contains(Main.availableRecipe[i])) _hideRecBigListTooltip = true;
+        return Enabled && OverrideRecipeHover(i);
     }
 
 
@@ -547,7 +559,6 @@ public sealed class BetterGuide : ILoadable {
     public static readonly Asset<Texture2D>[] DefaultRecipeTextures = new Asset<Texture2D>[] { TextureAssets.InventoryBack4, TextureAssets.InventoryBack5, TextureAssets.InventoryBack10 };
     public static readonly Asset<Texture2D>[] SelectedRecipeTextures = new Asset<Texture2D>[] { TextureAssets.InventoryBack14, TextureAssets.InventoryBack11, TextureAssets.InventoryBack17 };
 
-    // private static int _recDelay = 0;
     private static Asset<Texture2D> s_inventoryBack4 = null!;
 
     private static int _focusRecipe;
@@ -556,7 +567,5 @@ public sealed class BetterGuide : ILoadable {
     private static bool _collectingAvaiblable;
     private static bool _unknownTooltip;
     private static bool _hideItem;
-
-    // public static readonly int[] MaterialsPerLine = new int[] { 6, 4 };
-
+    private static bool _hideRecBigListTooltip;
 }

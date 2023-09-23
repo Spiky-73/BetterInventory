@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using BetterInventory.Configs;
-using Extensions;
+using BetterInventory.ItemSearch;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
@@ -146,13 +146,15 @@ public sealed class Actions : ILoadable {
         //             ++ if(<enabled>) goto noClick;
         cursor.EmitLdloc(155);
         cursor.EmitDelegate((int i) => {
-            if (!Enabled) return false;
-            int f = Main.focusRecipe;
-            if(ClientConfig.Instance.recipeListBehaviour.HasFlag(RecipeListBehaviour.Focus)) Main.focusRecipe = i;
-            Reflection.Main.HoverOverCraftingItemButton.Invoke(i);
-            if(f != Main.focusRecipe) Main.recFastScroll = true;
-            Main.craftingHide = false;
-            return true;
+            if (Enabled) {
+                int f = Main.focusRecipe;
+                if (ClientConfig.Instance.recipeListBehaviour.HasFlag(RecipeListBehaviour.Focus)) Main.focusRecipe = i;
+                Reflection.Main.HoverOverCraftingItemButton.Invoke(i);
+                if (f != Main.focusRecipe) Main.recFastScroll = true;
+                Main.craftingHide = false;
+                return true;
+            } else if (BetterGuide.Enabled) return BetterGuide.HideRecList(i);
+            return false;
         });
         cursor.EmitBrtrue(noClick!);
         //             if(<click>) <scrollList>

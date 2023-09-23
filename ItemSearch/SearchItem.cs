@@ -55,7 +55,7 @@ public sealed class SearchItem : ILoadable {
 
     private static void HookDrawCursor(On_Main.orig_DrawInterface_36_Cursor orig) {
         _redir = false;
-        if (Enabled && Keybind.Current && !Main.HoverItem.IsAir) {
+        if (Enabled && Keybind.Current && !Main.HoverItem.IsAir && Main.HoverItem.type != Items.UnknownItem.Instance.type) {
             _allowClick = true;
             Main.cursorOverride = CursorOverrideID.Magnifiers;
         }
@@ -202,7 +202,7 @@ public sealed class SearchItem : ILoadable {
 
 
     public static void ToggleRecipeList(bool? enabled = null) {
-        if (Main.playerInventory && Main.recBigList) {
+        if (Main.playerInventory && Main.recBigList && !Main.CreativeMenu.Enabled) {
             if (enabled == true) return;
             Main.recBigList = false;
         } else {
