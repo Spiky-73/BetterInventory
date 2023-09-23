@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using BetterInventory.DataStructures;
 using BetterInventory.Items;
-using FullSerializer.Internal;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
@@ -149,7 +149,7 @@ public sealed class BetterGuide : ILoadable {
             if (!Enabled) return;
             OverrideRecipeTexture(LocalFilters.FavoriteRecipes.GetValueOrDefault(Main.availableRecipe[i]), ItemSlot.DrawGoldBGForCraftingMaterial, AvailableRecipes.Contains(Main.availableRecipe[i]));
             ItemSlot.DrawGoldBGForCraftingMaterial = false;
-            if (i >= KnownRecipesCount) _hideItem = true;
+            if (!KnownRecipes.Contains(Main.availableRecipe[i])) _hideItem = true;
         });
 
         //                 ItemSlot.Draw(...);
@@ -166,6 +166,8 @@ public sealed class BetterGuide : ILoadable {
         //         for (<focusRecipeMaterialIndex>) {
         //             ...
         //             Item tempItem = ...;
+        cursor.GotoNext(MoveType.After, i => i.MatchLdsfld(Reflection.Main.numAvailableRecipes));
+        cursor.EmitDelegate((int num) => num == 0 || KnownRecipes.Contains(Main.availableRecipe[Main.focusRecipe]) ? num : 0);
         cursor.GotoNext(i => i.MatchCall(typeof(Main), "SetRecipeMaterialDisplayName"));
         cursor.GotoNext(MoveType.Before, i => i.MatchCall(typeof(ItemSlot), nameof(ItemSlot.Draw)));
 
@@ -237,7 +239,10 @@ public sealed class BetterGuide : ILoadable {
 
         //             ++ if(<overrideHover>) goto noClick;
         cursor.EmitLdloc(155);
-        cursor.EmitDelegate((int i) => Enabled && OverrideRecipeHover(i));
+        cursor.EmitDelegate((int i) => {
+            if (!KnownRecipes.Contains(Main.availableRecipe[i])) _hideRecBigListTooltip = true;
+            return Enabled && OverrideRecipeHover(i);
+        });
         cursor.EmitBrtrue(noClick!);
         //             if(<click>) <scrollList>
         //             ++ noClick:
@@ -261,7 +266,15 @@ public sealed class BetterGuide : ILoadable {
         //             ++ <overrideBackground>
         cursor.EmitLdloc(155);
         cursor.EmitDelegate((int i) => {
-            if (Enabled) OverrideRecipeTexture(LocalFilters.FavoriteRecipes.GetValueOrDefault(Main.availableRecipe[i]), false, AvailableRecipes.Contains(Main.availableRecipe[i]));
+            if (!Enabled) return;
+            if(_hideRecBigListTooltip) {
+                _hideRecBigListTooltip = false;
+                _unknownTooltip = true;
+                Main.HoverItem.TurnToAir();
+                Main.hoverItemName = "???";
+            }
+            OverrideRecipeTexture(LocalFilters.FavoriteRecipes.GetValueOrDefault(Main.availableRecipe[i]), false, AvailableRecipes.Contains(Main.availableRecipe[i]));
+            if (!KnownRecipes.Contains(Main.availableRecipe[i])) _hideItem = true;
         });
 
         //             ItemSlot.Draw(...);
@@ -283,7 +296,7 @@ public sealed class BetterGuide : ILoadable {
         }
         inventoryX = 73;
         inventoryY = 331 + adjY;
-        bool hideText = Main.focusRecipe >= KnownRecipesCount;
+        bool hideText = !KnownRecipes.Contains(Main.availableRecipe[Main.focusRecipe]);
 
         List<string> conditions = new();
         Recipe recipe = Main.recipe[Main.availableRecipe[Main.focusRecipe]];
@@ -436,10 +449,11 @@ public sealed class BetterGuide : ILoadable {
         cursor.GotoNext(i => i.MatchCall(Reflection.Recipe.TryRefocusingRecipe));
         cursor.EmitDelegate(() => {
             GuideRecipes.Clear();
+            KnownRecipes.Clear();
             List<int> unknownRecipes = new();
             if (!Enabled) {
+                KnownRecipes.AddRange(Main.availableRecipe[..Main.numAvailableRecipes]);
                 GuideRecipes.AddRange(Main.availableRecipe[..Main.numAvailableRecipes]);
-                KnownRecipesCount = GuideRecipes.Count;
                 return;
             }
             _collectingAvaiblable = false;
@@ -460,10 +474,11 @@ public sealed class BetterGuide : ILoadable {
                     }
                 }
             known:
-                if(known) GuideRecipes.Add(Main.availableRecipe[i]);
-                else if(Configs.ClientConfig.Instance.unknownBehaviour == Configs.UnknownSearchBehaviour.Unknown) unknownRecipes.Add(Main.availableRecipe[i]);
+                if (known) {
+                    GuideRecipes.Add(Main.availableRecipe[i]);
+                    KnownRecipes.Add(Main.availableRecipe[i]);
+                } else if (Configs.ClientConfig.Instance.unknownBehaviour != Configs.UnknownSearchBehaviour.Hidden) unknownRecipes.Add(Main.availableRecipe[i]);
             }
-            KnownRecipesCount = GuideRecipes.Count;
             GuideRecipes.AddRange(unknownRecipes);
         });
     }
@@ -480,7 +495,7 @@ public sealed class BetterGuide : ILoadable {
         } else {
             List<int> fav = new(), black = new(), others = new();
 
-            for (int i = 0; i < KnownRecipesCount; i++) {
+            for (int i = 0; i < KnownRecipes.Count; i++) {
                 (LocalFilters.FavoriteRecipes.GetValueOrDefault(GuideRecipes[i]) switch {
                     FavoriteState.Favorited => fav,
                     FavoriteState.Blacklisted => black,
@@ -493,7 +508,7 @@ public sealed class BetterGuide : ILoadable {
             foreach (int i in others) if (showAll || AvailableRecipes.Contains(i)) yield return i;
             if (showAll) {
                 foreach (int i in black) yield return i;
-                for (int i = KnownRecipesCount; i < GuideRecipes.Count; i++) yield return GuideRecipes[i];
+                for (int i = KnownRecipes.Count; i < GuideRecipes.Count; i++) yield return GuideRecipes[i];
             }
         }
     }
@@ -504,7 +519,7 @@ public sealed class BetterGuide : ILoadable {
             orig(recipeIndex);
             return;
         }
-        if (recipeIndex >= KnownRecipesCount) _unknownTooltip = true;
+        if (!KnownRecipes.Contains(Main.availableRecipe[recipeIndex])) _unknownTooltip = true;
         if(_unknownTooltip && recipeIndex != Main.focusRecipe) orig(recipeIndex);
         else if (_unknownTooltip || OverrideRecipeHover(recipeIndex) || (recipeIndex == Main.focusRecipe && !AvailableRecipes.Contains(Main.availableRecipe[recipeIndex]))) {
             (bool lstate, bool rstate) = (Main.mouseLeft, Main.mouseRight);
@@ -582,7 +597,7 @@ public sealed class BetterGuide : ILoadable {
     private static Rectangle _hitBox;
 
     public static readonly List<int> GuideRecipes = new();
-    public static int KnownRecipesCount { get; private set; }
+    public static readonly RangeSet KnownRecipes = new();
     public static readonly HashSet<int> AvailableRecipes = new();
     public static readonly Dictionary<int, int> CraftingStations = new();
 
@@ -598,4 +613,5 @@ public sealed class BetterGuide : ILoadable {
     private static bool _collectingAvaiblable;
     private static bool _unknownTooltip;
     private static bool _hideItem;
+    private static bool _hideRecBigListTooltip;
 }
