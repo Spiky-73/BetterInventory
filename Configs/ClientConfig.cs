@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using Terraria;
+using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 
 namespace BetterInventory.Configs;
@@ -29,6 +30,7 @@ public sealed class ClientConfig : ModConfig {
     [DefaultValue(true)] public bool recipeFiltering;
     [DefaultValue(true)] public bool craftOverride;
     [DefaultValue(RecipeListBehaviour.FocusScroll)] public RecipeListBehaviour recipeListBehaviour;
+
     [Header("ItemSearch")]
     [DefaultValue(true)] public bool betterGuide;
     [DefaultValue(true)] public bool searchDrops;

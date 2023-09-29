@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using log4net.Util;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameInput;
@@ -6,7 +9,7 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
 
-namespace BetterInventory.Globals;
+namespace BetterInventory.InventoryManagement;
 
 public sealed record class BuilderAccToggle {
     public BuilderAccToggle(string name, System.Predicate<Player> available, int number) : this(name, available, player => BetterPlayer.CycleAccState(player, number)) {}
@@ -49,18 +52,6 @@ public sealed class BetterPlayer : ModPlayer {
         new("BlockSwap", player => true, 10),
         new("BiomeTorches", player => player.unlockedBiomeTorches, 11)
     };
-    public static readonly string[] SwapSlots = new[] {
-        "Hotbar1",
-        "Hotbar2",
-        "Hotbar3",
-        "Hotbar4",
-        "Hotbar5",
-        "Hotbar6",
-        "Hotbar7",
-        "Hotbar8",
-        "Hotbar9",
-        "Hotbar10"
-    };
 
     public override void Load() {
         FavoritedBuffKb = KeybindLoader.RegisterKeybind(Mod, "FavoritedQuickBuff", Microsoft.Xna.Framework.Input.Keys.N);
@@ -87,17 +78,7 @@ public sealed class BetterPlayer : ModPlayer {
         foreach (BuilderAccToggle bat in BuilderAccToggles) bat.Process(Player);
     }
 
-    public override bool HoverSlot(Item[] inventory, int context, int slot) {
-        if (Configs.ClientConfig.Instance.itemSwap && context == ItemSlot.Context.InventoryItem) { // TODO swap from chest and mouse item and full inventory
-            for (int destSlot = 0; destSlot < SwapSlots.Length; destSlot++) {
-                if (!PlayerInput.Triggers.JustPressed.KeyStatus[SwapSlots[destSlot]]) continue;
-                (Player.inventory[destSlot], Player.inventory[slot]) = (Player.inventory[slot], Player.inventory[destSlot]);
-                SoundEngine.PlaySound(SoundID.Grab);
-                break;
-            }
-        }
-        return false;
-    }
+    public override bool HoverSlot(Item[] inventory, int context, int slot) => ItemSwap.HoverSlot(Player, inventory, context, slot);
 
     public override bool PreItemCheck() {
         if (Configs.ClientConfig.Instance.itemRightClick && Player.controlUseTile && Player.releaseUseItem && !Player.controlUseItem && !Player.tileInteractionHappened

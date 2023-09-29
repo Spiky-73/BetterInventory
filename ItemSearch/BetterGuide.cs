@@ -21,13 +21,13 @@ using Terraria.UI;
 namespace BetterInventory.ItemSearch;
 
 
-public sealed class BetterGuide : ILoadable {
+public sealed class BetterGuide : ModSystem {
 
     public static bool Enabled => Configs.ClientConfig.Instance.betterGuide;
 
-    public static VisibilityFilters LocalFilters => Globals.BetterPlayer.LocalPlayer.VisibilityFilters;
+    public static VisibilityFilters LocalFilters => InventoryManagement.BetterPlayer.LocalPlayer.VisibilityFilters;
 
-    public void Load(Mod mod) {
+    public override void Load() {
         IL_Main.DrawInventory += IlDrawInventory;
         On_Main.DrawGuideCraftText += HookGuideCraftText;
 
@@ -44,9 +44,9 @@ public sealed class BetterGuide : ILoadable {
         s_inventoryBack4 = TextureAssets.InventoryBack4;
     }
 
-    public void Unload() => s_inventoryBack4 = null!;
+    public override void Unload() => s_inventoryBack4 = null!;
 
-    public static void PostAddRecipes() {
+    public override void PostAddRecipes() {
         for (int r = 0; r < Recipe.numRecipes; r++) {
             foreach (int tile in Main.recipe[r].requiredTile) CraftingStations[tile] = 0;
         }

@@ -81,15 +81,15 @@ public sealed class SearchItem : ILoadable {
             }
             if (_allowClick) {
                 if (BetterGuide.Enabled && (forcedLeft || left && Main.mouseLeftRelease)) {
-                    s_searchItemTimer = 15;
                     bool? rec = Main.HoverItem.type == Main.guideItem.type ? Main.recBigList : null;
-                    SetGuideItem(Main.HoverItem.type);
+                    SetGuideItem(forcedLeft ? 0 : Main.HoverItem.type);
                     ToggleRecipeList(true);
                     if (rec.HasValue && rec != Main.recBigList) SoundEngine.PlaySound(SoundID.Grab);
+                    s_searchItemTimer = 15;
                 } else if (Bestiary.Enabled && (forcedRight || right && Main.mouseRightRelease)) {
                     bool delay = Main.InGameUI.CurrentState != Main.BestiaryUI;
                     ToggleBestiary(true);
-                    SetBestiaryItem(Main.HoverItem.type, delay);
+                    SetBestiaryItem(forcedRight ? 0 : Main.HoverItem.type, delay);
                     s_searchItemTimer = 15;
                 }
             }

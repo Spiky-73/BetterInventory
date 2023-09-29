@@ -39,13 +39,12 @@ public static class Utility {
         Main.mouseItem.position = player.Center;
         Item rem = player.GetItem(player.whoAmI, item, GetItemSettings.GetItemInDropItemCheck);
         if (rem.stack > 0) {
-            int i = Item.NewItem(new EntitySource_OverfullInventory(player, null), (int)player.position.X, (int)player.position.Y, player.width, player.height, rem.type, rem.stack, false, item.prefix, true, false);
+            int i = Item.NewItem(new EntitySource_OverfullInventory(player, null), (int)player.position.X, (int)player.position.Y, player.width, player.height, rem.type, rem.stack, false, rem.prefix, true, false);
             Main.item[i] = rem.Clone();
             Main.item[i].newAndShiny = false;
             if (Main.netMode == NetmodeID.MultiplayerClient) NetMessage.SendData(MessageID.SyncItem, -1, -1, null, i, 1f, 0f, 0f, 0, 0, 0);
         }
-        Main.mouseItem = new Item();
-        Main.LocalPlayer.inventory[58] = new Item();
+        item = new();
         Recipe.FindRecipes(false);
     }
 
