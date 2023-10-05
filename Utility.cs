@@ -34,7 +34,7 @@ public static class Utility {
         return currentMin;
     }
 
-    public static void GetDropItem(this Player player, ref Item item) {
+    public static void GetDropItem(this Player player, Item item) {
         if (item.IsAir) return;
         Main.mouseItem.position = player.Center;
         Item rem = player.GetItem(player.whoAmI, item, GetItemSettings.GetItemInDropItemCheck);
@@ -44,7 +44,7 @@ public static class Utility {
             Main.item[i].newAndShiny = false;
             if (Main.netMode == NetmodeID.MultiplayerClient) NetMessage.SendData(MessageID.SyncItem, -1, -1, null, i, 1f, 0f, 0f, 0, 0, 0);
         }
-        item = new();
+        item.TurnToAir();
         Recipe.FindRecipes(false);
     }
 

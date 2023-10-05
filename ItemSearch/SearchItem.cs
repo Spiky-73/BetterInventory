@@ -131,7 +131,7 @@ public sealed class SearchItem : ILoadable {
 
 
     private static void HookOverrideHover(On_ItemSlot.orig_OverrideHover_ItemArray_int_int orig, Item[] inv, int context, int slot) {
-        if (!Enabled) {
+        if (!BetterGuide.Enabled) {
             orig(inv, context, slot);
             return;
         }
@@ -150,7 +150,7 @@ public sealed class SearchItem : ILoadable {
             } else {
                 SetGuideItem(Main.mouseItem.type);
                 ToggleRecipeList(true);
-                Main.LocalPlayer.GetDropItem(ref Main.mouseItem);
+                Main.LocalPlayer.GetDropItem(Main.mouseItem);
             }
             return true;
         }
@@ -193,8 +193,9 @@ public sealed class SearchItem : ILoadable {
         if(_lastGuideEnabled == BetterGuide.Enabled) return;
         if (!BetterGuide.Enabled) Main.guideItem.TurnToAir();
         else if (!Main.guideItem.IsAir) {
-            Main.LocalPlayer.GetDropItem(ref Main.guideItem);
-            Main.guideItem = new(Main.guideItem.type);
+            int type = Main.guideItem.type;
+            Main.LocalPlayer.GetDropItem(Main.guideItem);
+            Main.guideItem = new(type);
         }
         _lastGuideEnabled = BetterGuide.Enabled;
         Recipe.FindRecipes();

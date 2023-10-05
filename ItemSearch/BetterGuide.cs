@@ -36,6 +36,7 @@ public sealed class BetterGuide : ModSystem {
         IL_Recipe.FindRecipes += ILFindRecipes;
         On_Recipe.AddToAvailableRecipes += HookAddAvailableRecipe;
         IL_Recipe.CollectGuideRecipes += ILOverrideGuideRecipes;
+        On_Recipe.CollectGuideRecipes += HookSaveGuideRecipes;
 
         On_ItemSlot.Draw_SpriteBatch_refItem_int_Vector2_Color += HookHideItem;
         On_Main.DrawPendingMouseText += HookFakePendingTooltip;
@@ -43,7 +44,6 @@ public sealed class BetterGuide : ModSystem {
 
         s_inventoryBack4 = TextureAssets.InventoryBack4;
     }
-
     public override void Unload() => s_inventoryBack4 = null!;
 
     public override void PostAddRecipes() {
@@ -251,7 +251,6 @@ public sealed class BetterGuide : ModSystem {
         }
         inventoryX = 73;
         inventoryY = 331 + adjY;
-        bool hideText = Main.numAvailableRecipes == 0 || !KnownRecipes.Contains(Main.availableRecipe[Main.focusRecipe]);
 
         List<string> conditions = new();
         Recipe recipe = Main.recipe[Main.availableRecipe[Main.focusRecipe]];
@@ -266,7 +265,14 @@ public sealed class BetterGuide : ModSystem {
         }
 
         Vector2 position;
-        if (!hideText) {
+        bool hideText = Main.numAvailableRecipes == 0 || !KnownRecipes.Contains(Main.availableRecipe[Main.focusRecipe]);
+        if(Main.numAvailableRecipes == 0) {
+            conditions.Add(Lang.inter[23].Value);
+            position = new(inventoryX + 50, inventoryY + 12);
+        } else if (!KnownRecipes.Contains(Main.availableRecipe[Main.focusRecipe])) {
+            conditions.Add("???");
+            position = new(inventoryX + 50, inventoryY + 12);
+        } else {
             Main.inventoryScale *= 0.5f;
             position = new(inventoryX + 50, inventoryY + 12 - 14 + 24);
             for (int i = 0; i < recipe.requiredTile.Count; i++) {
@@ -297,10 +303,8 @@ public sealed class BetterGuide : ModSystem {
             if (Reflection.Recipe.needGraveyardBiome.GetValue(recipe)) conditions.Add(Lang.inter[124].Value);
             conditions.AddRange(from x in recipe.Conditions select x.Description.Value);
             position = new(inventoryX + 50, inventoryY + 12 - 14);
-        } else {
-            conditions.Add("???");
-            position = new(inventoryX + 50, inventoryY + 12);
         }
+
         if (conditions.Count > 0)
             DynamicSpriteFontExtensionMethods.DrawString(Main.spriteBatch, FontAssets.MouseText.Value, string.Join(", ", conditions), position, new(Main.mouseTextColor, Main.mouseTextColor, Main.mouseTextColor, Main.mouseTextColor), 0f, Vector2.Zero, 1f, 0, 0f);
 
@@ -310,6 +314,7 @@ public sealed class BetterGuide : ModSystem {
 
 
     public static bool HandleVisibility(int x, int y) {
+        if (!Enabled) return false;
         x += (int)((TextureAssets.InventoryBack.Width() - 2) * Main.inventoryScale);
         y += (int)(4 * Main.inventoryScale);
         Vector2 size = InventoryTickBorder.Size() * Main.inventoryScale;
@@ -331,6 +336,7 @@ public sealed class BetterGuide : ModSystem {
         return true;
     }
     public static void DrawVisibility() {
+        if (!Enabled) return;
         VisibilityFilters filters = LocalFilters;
         Asset<Texture2D> tick = filters.TileMode ? InventoryTickForced : filters.ShowAllRecipes ? TextureAssets.InventoryTickOn : TextureAssets.InventoryTickOff;
         Color color = Color.White * 0.7f;
@@ -374,6 +380,36 @@ public sealed class BetterGuide : ModSystem {
         cursor.EmitBrtrue(endLoop!);
         // }
     }
+    private void HookSaveGuideRecipes(On_Recipe.orig_CollectGuideRecipes orig) {
+        orig();
+        GuideRecipes.Clear();
+        if (!Enabled) {
+            GuideRecipes.AddRange(Main.availableRecipe[..Main.numAvailableRecipes]);
+            return;
+        }
+        KnownRecipes.Clear();
+        List<int> unknownRecipes = new();
+        VisibilityFilters filters = LocalFilters;
+        for (int i = 0; i < Main.numAvailableRecipes; i++) {
+            Recipe recipe = Main.recipe[Main.availableRecipe[i]];
+            bool displayedAsKnown = Configs.ClientConfig.Instance.unknownBehaviour == Configs.UnknownSearchBehaviour.Known || filters.HasOwnedItems(recipe.createItem) || recipe.requiredItem.Exists(i => filters.HasOwnedItems(i));
+            if (!displayedAsKnown) {
+                foreach (int g in recipe.acceptedGroups) {
+                    foreach (int type in RecipeGroup.recipeGroups[g].ValidItems) {
+                        if (!filters.HasOwnedItems(type)) continue;
+                        displayedAsKnown = true;
+                        goto known;
+                    }
+                }
+            }
+        known:
+            if (displayedAsKnown) {
+                GuideRecipes.Add(Main.availableRecipe[i]);
+                KnownRecipes.Add(Main.availableRecipe[i]);
+            } else if (Configs.ClientConfig.Instance.unknownBehaviour != Configs.UnknownSearchBehaviour.Hidden) unknownRecipes.Add(Main.availableRecipe[i]);
+        }
+        GuideRecipes.AddRange(unknownRecipes);
+    }
 
     private void ILFindRecipes(ILContext il) {
         ILCursor cursor = new(il);
@@ -403,38 +439,14 @@ public sealed class BetterGuide : ModSystem {
 
         cursor.GotoNext(i => i.MatchCall(Reflection.Recipe.TryRefocusingRecipe));
         cursor.EmitDelegate(() => {
-            GuideRecipes.Clear();
-            KnownRecipes.Clear();
-            List<int> unknownRecipes = new();
             if (!Enabled) {
-                KnownRecipes.AddRange(Main.availableRecipe[..Main.numAvailableRecipes]);
+                GuideRecipes.Clear();
                 GuideRecipes.AddRange(Main.availableRecipe[..Main.numAvailableRecipes]);
                 return;
             }
             _collectingAvaiblable = false;
             Recipe.ClearAvailableRecipes();
             Reflection.Recipe.CollectGuideRecipes.Invoke();
-            VisibilityFilters filters = LocalFilters;
-            for (int i = 0; i < Main.numAvailableRecipes; i++) {
-                Recipe recipe = Main.recipe[Main.availableRecipe[i]];
-                bool known = Configs.ClientConfig.Instance.unknownBehaviour == Configs.UnknownSearchBehaviour.Known || filters.HasOwnedItems(recipe.createItem) || recipe.requiredItem.Exists(i => filters.HasOwnedItems(i));
-                if (!known)
-                {
-                    foreach (int g in recipe.acceptedGroups) {
-                        foreach (int type in RecipeGroup.recipeGroups[g].ValidItems) {
-                            if (!filters.HasOwnedItems(type)) continue;
-                            known = true;
-                            goto known;
-                        }
-                    }
-                }
-            known:
-                if (known) {
-                    GuideRecipes.Add(Main.availableRecipe[i]);
-                    KnownRecipes.Add(Main.availableRecipe[i]);
-                } else if (Configs.ClientConfig.Instance.unknownBehaviour != Configs.UnknownSearchBehaviour.Hidden) unknownRecipes.Add(Main.availableRecipe[i]);
-            }
-            GuideRecipes.AddRange(unknownRecipes);
         });
     }
 
