@@ -13,6 +13,11 @@ public record struct SubInventory(string LocalizationKey, Predicate<Item> Accept
 }
 
 
+public abstract class ModInventory<TInventory> : ModInventory where TInventory: ModInventory<TInventory> {
+    public static TInventory Instance { get; private set; } = null!;
+    public override void Load() => Instance = (TInventory)this;
+    public override void Unload() => Instance = null!;
+}
 public abstract class ModInventory : ModType, ILocalizedModType {
 
     public abstract HashSet<int> Contexts { get; }
@@ -32,30 +37,31 @@ public abstract class ModInventory : ModType, ILocalizedModType {
         return -1;
     }
 
+    public virtual bool SlotEnabled(Player player, int slot) => true;
     public virtual bool CanSlotAccepts(Player player, Item item, int slot, out IList<int> itemsToMove) {;
         itemsToMove = Array.Empty<int>();
         return true;
     }
 
     public virtual Item GetItem(Player player, Item item, GetItemSettings settings) {
-        // if (!CanPickup(player, item)) return item;
-
         IList<Item> items = Items(player);
         RangeSet slots = new(){ new DataStructures.Range(0, items.Count-1) };
+        void StackOnSlot(int slot){
+            if (!SlotEnabled(player, slot) || !CanSlotAccepts(player, item, slot, out _)) return;
+            items[slot].Stack(item, MaxStack);
+        }
 
         foreach (var sub in _subInventories) {
             bool ok = sub.Accepts(item);
             foreach(int slot in sub.Slots(player)) {
                 slots.Remove(slot);
-                if (!CanSlotAccepts(player, item, slot, out _) || !ok) continue;
-                items[slot].Stack(item, MaxStack);
+                StackOnSlot(slot);
                 if (item.IsAir) return item;
             }
         }
 
         foreach(int slot in slots.Values()) {
-            if (!CanSlotAccepts(player, item, slot, out _)) continue;
-            items[slot].Stack(item, MaxStack);
+            StackOnSlot(slot);
             if (item.IsAir) return item;
         }
 

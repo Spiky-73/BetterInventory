@@ -53,8 +53,8 @@ public sealed partial class QuickMove {
         _moveIndex %= _moveChain.Count;
         if (_moveChain[_moveIndex] is SubInventory sub) {
             // sub.Inventory.Focus(); // TODO re-add
-            IList<int> slots = sub.Slots(player);
-            _movedItems = Move(player, inventory[slot], sourceInventory!, sourceInventory!.ToIndex(player, context, slot), _moveChain[_moveIndex]!.Value.Inventory, slots[Math.Min(destSlot, slots.Count-1)]);
+            IList<int> slots = sub.Slots(player).Where(i => sub.Inventory.SlotEnabled(player, i)).ToArray();
+            _movedItems = Move(player, inventory[slot], sourceInventory!, sourceInventory!.ToIndex(player, context, slot), _moveChain[_moveIndex]!.Value.Inventory, slots[Math.Min(destSlot, slots.Count - 1)]);
         }
         _moveTime = 60; // TODO config
         _moveDest = destSlot ;

@@ -63,7 +63,7 @@ public sealed class Armor : ModInventory {
     public sealed override int ToIndex(Player player, int context, int slot) => context == ContextID.EquipArmorVanity ? slot - 10 : slot;
 }
 
-public sealed class Accessories : ModInventory {
+public sealed class Accessories : ModInventory<Accessories> {
 
     public sealed override HashSet<int> Contexts => new() { ContextID.EquipAccessory, ContextID.EquipAccessoryVanity, ContextID.ModdedAccessorySlot, ContextID.ModdedVanityAccessorySlot };
 
@@ -75,6 +75,7 @@ public sealed class Accessories : ModInventory {
         });
     }
 
+    public sealed override bool SlotEnabled(Player player, int slot) => (slot % (VanillaAccCount + ModdedAccCount(player)) < VanillaAccCount) ? player.IsItemSlotUnlockedAndUsable(slot + 3) : LoaderManager.Get<AccessorySlotLoader>().ModdedIsItemSlotUnlockedAndUsable(slot - VanillaAccCount, player);
     public sealed override bool CanSlotAccepts(Player player, Item item, int slot, out IList<int> itemsToMove) {
         if (!ItemLoader.CanEquipAccessory(item, slot, slot >= VanillaAccCount * 2) || slot >= VanillaAccCount * 2
                 && !LoaderManager.Get<AccessorySlotLoader>().CanAcceptItem(slot - VanillaAccCount * 2, item, (slot - VanillaAccCount * 2 < ModdedAccCount(player)) ? -10 : -11)) {
@@ -143,6 +144,8 @@ public sealed class Dyes : ModInventory {
     public sealed override int? MaxStack => 1;
 
     public sealed override HashSet<int> Contexts => new() { ContextID.EquipDye, ContextID.ModdedDyeSlot, ContextID.EquipMiscDye };
+
+    public sealed override bool SlotEnabled(Player player, int slot) => 3 >= slot || slot >= Accessories.VanillaAccCount + Accessories.ModdedAccCount(player) || Accessories.Instance.SlotEnabled(player, slot - 3);
 
     public sealed override void SetStaticDefaults() {
         SubInventory("ArmorDye", i => i.dye != 0, DataStructures.Range.FromCount(0, 3));
