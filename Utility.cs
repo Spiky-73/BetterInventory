@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
@@ -34,7 +35,7 @@ public static class Utility {
         return currentMin;
     }
 
-    public static void GetDropItem(this Player player, Item item) {
+    public static void GetDropItem(this Player player, ref Item item) {
         if (item.IsAir) return;
         Main.mouseItem.position = player.Center;
         Item rem = player.GetItem(player.whoAmI, item, GetItemSettings.GetItemInDropItemCheck);
@@ -44,7 +45,7 @@ public static class Utility {
             Main.item[i].newAndShiny = false;
             if (Main.netMode == NetmodeID.MultiplayerClient) NetMessage.SendData(MessageID.SyncItem, -1, -1, null, i, 1f, 0f, 0f, 0, 0, 0);
         }
-        item.TurnToAir();
+        item = new();
         Recipe.FindRecipes(false);
     }
 
@@ -59,12 +60,6 @@ public static class Utility {
         int l = comparer.Compare(value, min);
         int r = comparer.Compare(value, max);
         return (l > 0 || (flags.HasFlag(InclusionFlag.Min) && l == 0)) && (r < 0 || (flags.HasFlag(InclusionFlag.Max) && r == 0));
-    }
-
-    public enum SnapMode {
-        Round,
-        Ceiling,
-        Floor
     }
 
     public static bool InChest(this Player player, [MaybeNullWhen(false)] out Item[] chest) => (chest = player.Chest()) is not null;
@@ -98,6 +93,25 @@ public static class Utility {
         color.R = (byte)(color.R * mult);
         color.G = (byte)(color.G * mult);
         color.B = (byte)(color.B * mult);
+    }
+
+    public static void Stack(this Item item, Item toStack, int? maxStack = null) {
+        if (toStack.IsAir) return;
+
+        if (item.IsAir) {
+            int tranfered = maxStack.HasValue ? Math.Min(maxStack.Value, toStack.stack) : toStack.stack;
+            item.SetDefaults(toStack.type);
+            item.Prefix(item.prefix);
+            item.stack = tranfered;
+            toStack.stack -= tranfered;
+        } else if (item.type == toStack.type && item.stack < (maxStack ?? item.maxStack)) {
+            int oldStack = item.maxStack;
+            if (maxStack.HasValue) item.maxStack = maxStack.Value;
+            ItemLoader.TryStackItems(item, toStack, out _);
+            item.maxStack = oldStack;
+        }
+        if (toStack.IsAir) toStack.TurnToAir();
+
     }
 
     public static ReadOnlyDictionary<int, int> OwnedItems => Data.ownedItems;

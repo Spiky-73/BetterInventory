@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -10,6 +11,10 @@ public sealed class SmartConsumptionItem : GlobalItem {
     }
     public override void OnConsumedAsAmmo(Item ammo, Item weapon, Player player) {
         if (Configs.ClientConfig.Instance.smartAmmo) OnConsume(ammo, player.LastStack(ammo, true));
+    }
+
+    public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
+        QuickMove.AddMoveChainLine(item, tooltips);
     }
 
     public static void OnConsume(Item consumed, Item? stack) {

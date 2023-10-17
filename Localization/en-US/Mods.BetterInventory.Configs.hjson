@@ -22,9 +22,9 @@ ClientConfig: {
 		Tooltip: Items go to slot they were taken from
 	}
 
-	itemSwap: {
-		Label: "[i:3620] Item swap"
-		Tooltip: Hover or hold an item and press any hotbar hotkey to swap them both items
+	quickMove: {
+		Label: "[i:3620] Quick Item move"
+		Tooltip: Hover over an item and any hotbar hotkey to move it to this slot
 	}
 
 	fastRightClick: {

@@ -1,11 +1,35 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace BetterInventory.DataStructures;
 
-public readonly record struct Range(int Start, int End) {
+public readonly record struct Range(int Start, int End) : IList<int> {
+    public static Range FromCount(int start, int count) => new(start, start + count - 1);
     public readonly int Count => End - Start + 1;
+
+    public bool IsReadOnly => true;
+
+    public int this[int index] { get => Start + index; set => throw new NotSupportedException(); }
+
+    public int IndexOf(int item) => Contains(item) ? item-Start : -1;
+    public bool Contains(int item) => Start <= item && item <= End;
+
+    public void CopyTo(int[] array, int arrayIndex) {
+        for (int i = 0; i < Count; i++) array[i] = this[i];
+    }
+
+    public IEnumerator<int> GetEnumerator() {
+        for (int i = 0; i < Count; i++) yield return this[i];
+    }
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+    void ICollection<int>.Clear() => throw new NotSupportedException();
+    void IList<int>.Insert(int index, int item) => throw new NotSupportedException();
+    void ICollection<int>.Add(int item) => throw new NotSupportedException();
+    bool ICollection<int>.Remove(int item) => throw new NotSupportedException();
+    void IList<int>.RemoveAt(int index) => throw new NotSupportedException();
 }
 
 public sealed class RangeSet : IEnumerable<Range> {
@@ -66,6 +90,11 @@ public sealed class RangeSet : IEnumerable<Range> {
         Count = 0;
     }
 
+    public IEnumerable<int> Values() {
+        foreach(Range range in this){
+            foreach(int value in range) yield return value;
+        }
+    }
     public IEnumerator<Range> GetEnumerator() => _ranges.GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 

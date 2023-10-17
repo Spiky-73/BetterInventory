@@ -1,0 +1,23 @@
+Inventory: {
+	Hotbar: Hotbar
+	Coin: Coin
+	Ammo: Ammo
+}
+
+Armor: {
+	Armor: Armor
+	Vanity: Vanity
+}
+
+Accessories: {
+	Accessory: Accessory
+	Social: Social
+}
+
+Equipement.Equipement: Equipement
+
+Dyes: {
+	ArmorDye: Armor Dye
+	AccessoryDye: Accessory Dye
+	EquipementDye: Equipement Dye
+}

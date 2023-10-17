@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net.Http.Headers;
 using log4net.Util;
 using Terraria;
 using Terraria.Audio;
@@ -78,7 +79,10 @@ public sealed class BetterPlayer : ModPlayer {
         foreach (BuilderAccToggle bat in BuilderAccToggles) bat.Process(Player);
     }
 
-    public override bool HoverSlot(Item[] inventory, int context, int slot) => ItemSwap.HoverSlot(Player, inventory, context, slot);
+    public override bool HoverSlot(Item[] inventory, int context, int slot) {
+        QuickMove.TryMove(Player, inventory, context, slot);
+        return false;
+    }
 
     public override bool PreItemCheck() {
         if (Configs.ClientConfig.Instance.itemRightClick && Player.controlUseTile && Player.releaseUseItem && !Player.controlUseItem && !Player.tileInteractionHappened

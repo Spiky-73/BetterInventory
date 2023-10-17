@@ -150,7 +150,7 @@ public sealed class SearchItem : ILoadable {
             } else {
                 SetGuideItem(Main.mouseItem.type);
                 ToggleRecipeList(true);
-                Main.LocalPlayer.GetDropItem(Main.mouseItem);
+                Main.LocalPlayer.GetDropItem(ref Main.mouseItem);
             }
             return true;
         }
@@ -194,7 +194,7 @@ public sealed class SearchItem : ILoadable {
         if (!BetterGuide.Enabled) Main.guideItem.TurnToAir();
         else if (!Main.guideItem.IsAir) {
             int type = Main.guideItem.type;
-            Main.LocalPlayer.GetDropItem(Main.guideItem);
+            Main.LocalPlayer.GetDropItem(ref Main.guideItem);
             Main.guideItem = new(type);
         }
         _lastGuideEnabled = BetterGuide.Enabled;

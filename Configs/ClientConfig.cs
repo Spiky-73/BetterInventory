@@ -1,7 +1,6 @@
 using System;
 using System.ComponentModel;
 using Terraria;
-using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 
 namespace BetterInventory.Configs;
@@ -22,7 +21,7 @@ public sealed class ClientConfig : ModConfig {
     [DefaultValue(true)] public bool smartConsumption;
     [DefaultValue(true)] public bool smartAmmo;
     [DefaultValue(SmartPickupLevel.FavoriteOnly)] public SmartPickupLevel smartPickup;
-    [DefaultValue(true)] public bool itemSwap;
+    [DefaultValue(true)] public bool quickMove;
     [DefaultValue(true)] public bool fastRightClick;
     [DefaultValue(true)] public bool itemRightClick;
 
