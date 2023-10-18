@@ -54,13 +54,15 @@ public sealed class Armor : ModInventory {
         SubInventory("Armor", i => i.defense != 0 && i.headSlot != -1, new int[]{0});
         SubInventory("Armor", i => i.defense != 0 && i.bodySlot != -1, new int[]{1});
         SubInventory("Armor", i => i.defense != 0 && i.legSlot != -1, new int[]{2});
-        SubInventory("Vanity", i => i.vanity && i.headSlot != -1, new int[]{3});
-        SubInventory("Vanity", i => i.vanity && i.bodySlot != -1, new int[]{4});
-        SubInventory("Vanity", i => i.vanity && i.legSlot != -1, new int[]{5});
+        SubInventory("Vanity", i => i.headSlot != -1, new int[]{3});
+        SubInventory("Vanity", i => i.bodySlot != -1, new int[]{4});
+        SubInventory("Vanity", i => i.legSlot != -1, new int[]{5});
     }
-    public sealed override IList<Item> Items(Player player) => new JoinedList<Item>(new ArraySegment<Item>(player.armor, 0, 3), new ArraySegment<Item>(player.armor, 10, 3));
+    public sealed override IList<Item> Items(Player player) => new JoinedList<Item>(new ArraySegment<Item>(player.armor, 0, ArmorCount), new ArraySegment<Item>(player.armor, ArmorCount+Accessories.VanillaAccCount, ArmorCount));
 
-    public sealed override int ToIndex(Player player, int context, int slot) => context == ContextID.EquipArmorVanity ? slot - 10 : slot;
+    public sealed override int ToIndex(Player player, int context, int slot) => context == ContextID.EquipArmorVanity ? slot - Accessories.VanillaAccCount : slot;
+
+    public const int ArmorCount = 3;
 }
 
 public sealed class Accessories : ModInventory<Accessories> {
@@ -75,7 +77,7 @@ public sealed class Accessories : ModInventory<Accessories> {
         });
     }
 
-    public sealed override bool SlotEnabled(Player player, int slot) => (slot % (VanillaAccCount + ModdedAccCount(player)) < VanillaAccCount) ? player.IsItemSlotUnlockedAndUsable(slot + 3) : LoaderManager.Get<AccessorySlotLoader>().ModdedIsItemSlotUnlockedAndUsable(slot - VanillaAccCount, player);
+    public sealed override bool SlotEnabled(Player player, int slot) => (slot % (VanillaAccCount + ModdedAccCount(player)) < VanillaAccCount) ? player.IsItemSlotUnlockedAndUsable(slot + Armor.ArmorCount) : LoaderManager.Get<AccessorySlotLoader>().ModdedIsItemSlotUnlockedAndUsable(slot - VanillaAccCount, player);
     public sealed override bool CanSlotAccepts(Player player, Item item, int slot, out IList<int> itemsToMove) {
         if (!ItemLoader.CanEquipAccessory(item, slot, slot >= VanillaAccCount * 2) || slot >= VanillaAccCount * 2
                 && !LoaderManager.Get<AccessorySlotLoader>().CanAcceptItem(slot - VanillaAccCount * 2, item, (slot - VanillaAccCount * 2 < ModdedAccCount(player)) ? -10 : -11)) {
@@ -107,15 +109,15 @@ public sealed class Accessories : ModInventory<Accessories> {
     public sealed override IList<Item> Items(Player player) {
         Item[] accessories = Reflection.ModAccessorySlotPlayer.exAccessorySlot.GetValue(Main.LocalPlayer.GetModPlayer<ModAccessorySlotPlayer>());
         return new JoinedList<Item>(
-            new ArraySegment<Item>(player.armor, 3, VanillaAccCount), new ArraySegment<Item>(accessories, 0, accessories.Length/2),
-            new ArraySegment<Item>(player.armor, 13, VanillaAccCount), new ArraySegment<Item>(accessories, accessories.Length / 2, accessories.Length / 2)
+            new ArraySegment<Item>(player.armor, Armor.ArmorCount, VanillaAccCount), new ArraySegment<Item>(accessories, 0, accessories.Length/2),
+            new ArraySegment<Item>(player.armor, Armor.ArmorCount*2+VanillaAccCount, VanillaAccCount), new ArraySegment<Item>(accessories, accessories.Length / 2, accessories.Length / 2)
         );
     }
 
     public sealed override int ToIndex(Player player, int context, int slot) => context switch {
-        ContextID.EquipAccessory => slot - 3,
+        ContextID.EquipAccessory => slot-Armor.ArmorCount,
         ContextID.ModdedAccessorySlot => slot + VanillaAccCount,
-        ContextID.EquipAccessoryVanity => slot - 13 + VanillaAccCount + ModdedAccCount(player),
+        ContextID.EquipAccessoryVanity => slot - (2*Armor.ArmorCount-VanillaAccCount) + VanillaAccCount + ModdedAccCount(player),
         ContextID.ModdedVanityAccessorySlot => slot + 2*VanillaAccCount + ModdedAccCount(player),
         _ => slot
     };
@@ -145,12 +147,12 @@ public sealed class Dyes : ModInventory {
 
     public sealed override HashSet<int> Contexts => new() { ContextID.EquipDye, ContextID.ModdedDyeSlot, ContextID.EquipMiscDye };
 
-    public sealed override bool SlotEnabled(Player player, int slot) => 3 >= slot || slot >= Accessories.VanillaAccCount + Accessories.ModdedAccCount(player) || Accessories.Instance.SlotEnabled(player, slot - 3);
+    public sealed override bool SlotEnabled(Player player, int slot) => Armor.ArmorCount >= slot || slot >= Accessories.VanillaAccCount + Accessories.ModdedAccCount(player) || Accessories.Instance.SlotEnabled(player, slot - Armor.ArmorCount);
 
     public sealed override void SetStaticDefaults() {
-        SubInventory("ArmorDye", i => i.dye != 0, DataStructures.Range.FromCount(0, 3));
-        SubInventory("AccessoryDye", i => i.dye != 0, player => DataStructures.Range.FromCount(3, Items(player).Count-3-5));
-        SubInventory("EquipementDye", i => i.dye != 0, player => DataStructures.Range.FromCount(Items(player).Count-5, 5));
+        SubInventory("ArmorDye", i => i.dye != 0, DataStructures.Range.FromCount(0, Armor.ArmorCount));
+        SubInventory("AccessoryDye", i => i.dye != 0, player => DataStructures.Range.FromCount(Armor.ArmorCount, Accessories.VanillaAccCount + Accessories.ModdedAccCount(player)));
+        SubInventory("EquipementDye", i => i.dye != 0, player => DataStructures.Range.FromCount(Armor.ArmorCount + Accessories.VanillaAccCount + Accessories.ModdedAccCount(player), EquipementCount));
     }
     public sealed override IList<Item> Items(Player player) => new JoinedList<Item>(player.dye, Reflection.ModAccessorySlotPlayer.exDyesAccessory.GetValue(Main.LocalPlayer.GetModPlayer<ModAccessorySlotPlayer>()), player.miscDyes);
 
@@ -159,4 +161,6 @@ public sealed class Dyes : ModInventory {
         ContextID.EquipMiscDye => slot + 10 + Accessories.ModdedAccCount(player),
         _ => slot
     };
+
+    public const int EquipementCount = 5;
 }

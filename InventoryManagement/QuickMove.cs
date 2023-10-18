@@ -37,7 +37,8 @@ public sealed partial class QuickMove {
 
 
         ModInventory? sourceInventory = InventoryLoader.Inventories.FirstOrDefault(i => i.Contexts.Contains(context));
-        UpdateMoveChain(player, sourceInventory, inventory[slot]);
+        int index = sourceInventory!.ToIndex(player, context, slot);
+        UpdateMoveChain(player, sourceInventory, inventory[slot], index);
 
         int destSlot = Array.FindIndex(MoveKeys, key => PlayerInput.Triggers.JustPressed.KeyStatus[key]);
         if (destSlot == -1) return;
@@ -54,7 +55,7 @@ public sealed partial class QuickMove {
         if (_moveChain[_moveIndex] is SubInventory sub) {
             // sub.Inventory.Focus(); // TODO re-add
             IList<int> slots = sub.Slots(player).Where(i => sub.Inventory.SlotEnabled(player, i)).ToArray();
-            _movedItems = Move(player, inventory[slot], sourceInventory!, sourceInventory!.ToIndex(player, context, slot), _moveChain[_moveIndex]!.Value.Inventory, slots[Math.Min(destSlot, slots.Count - 1)]);
+            _movedItems = Move(player, inventory[slot], sourceInventory!, index, _moveChain[_moveIndex]!.Value.Inventory, slots[Math.Min(destSlot, slots.Count - 1)]);
         }
         _moveTime = 60; // TODO config
         _moveDest = destSlot ;
@@ -116,24 +117,25 @@ public sealed partial class QuickMove {
         return (null!, -1);
     }
 
-    public static void UpdateMoveChain(Player player, ModInventory? inventory, Item item) {
+    public static void UpdateMoveChain(Player player, ModInventory? inventory, Item item, int index) {
         if (inventory is null || item.IsAir) {
             _displayedChain.Clear();
             _displayedItem = ItemID.None;
         } else if (_displayedItem != item.type) {
             // TODO add variants
-            List<SubInventory?> chain = OrderChain(player, item, inventory);
+            List<SubInventory?> chain = OrderChain(player, item, inventory, index);
             if (true) chain.Add(null); // TODO  config
             _displayedChain = chain;
             _displayedItem = item.type;
         }
     }
 
-    private static List<SubInventory?> OrderChain(Player player, Item item, ModInventory source) {
+    private static List<SubInventory?> OrderChain(Player player, Item item, ModInventory source, int index) {
         List<SubInventory?> subs = new();
         foreach(ModInventory inventory in InventoryLoader.Inventories){
             foreach(SubInventory sub in inventory.SubInventories){
-                if (sub.Accepts(item) && (inventory != source || sub.Slots(player).Count > 1)) subs.Add(sub);
+                IList<int> slots = sub.Slots(player);
+                if (sub.Accepts(item) && (inventory != source || slots.Count > 1 || slots[0] != index)) subs.Add(sub);
             }
         }
         return subs;

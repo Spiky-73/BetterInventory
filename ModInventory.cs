@@ -46,23 +46,22 @@ public abstract class ModInventory : ModType, ILocalizedModType {
     public virtual Item GetItem(Player player, Item item, GetItemSettings settings) {
         IList<Item> items = Items(player);
         RangeSet slots = new(){ new DataStructures.Range(0, items.Count-1) };
-        void StackOnSlot(int slot){
-            if (!SlotEnabled(player, slot) || !CanSlotAccepts(player, item, slot, out _)) return;
+        bool StackOnSlot(int slot){
+            if (!SlotEnabled(player, slot) || !CanSlotAccepts(player, item, slot, out _)) return false;
             items[slot].Stack(item, MaxStack);
+            return item.IsAir;
         }
 
         foreach (var sub in _subInventories) {
             bool ok = sub.Accepts(item);
             foreach(int slot in sub.Slots(player)) {
                 slots.Remove(slot);
-                StackOnSlot(slot);
-                if (item.IsAir) return item;
+                if (ok && StackOnSlot(slot)) return item;
             }
         }
 
         foreach(int slot in slots.Values()) {
-            StackOnSlot(slot);
-            if (item.IsAir) return item;
+            if (StackOnSlot(slot)) return item;
         }
 
         return item;
