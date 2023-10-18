@@ -8,7 +8,7 @@ using Terraria.ModLoader;
 
 namespace BetterInventory;
 
-public record struct SubInventory(string LocalizationKey, Predicate<Item> Accepts, Func<Player, IList<int>> Slots){
+public record struct SubInventory(string LocalizationKey, Predicate<Item> Accepts, Func<Player, IList<int>> Slots, int Priority = 0){
     public ModInventory Inventory { get; internal set; } = null!;
 }
 
@@ -67,8 +67,8 @@ public abstract class ModInventory : ModType, ILocalizedModType {
         return item;
     }
 
-    protected void SubInventory(string locKey, Predicate<Item> accepts, IList<int> slots) => SubInventory(locKey, accepts, _ => slots);
-    protected void SubInventory(string locKey, Predicate<Item> accepts, Func<Player, IList<int>> slots) => SubInventory(new(locKey, accepts, slots));
+    protected void SubInventory(string locKey, Predicate<Item> accepts, IList<int> slots, int priority = 0) => SubInventory(locKey, accepts, _ => slots, priority);
+    protected void SubInventory(string locKey, Predicate<Item> accepts, Func<Player, IList<int>> slots, int priority = 0) => SubInventory(new(locKey, accepts, slots,priority));
     protected void SubInventory(SubInventory sub) {
         sub.Inventory = this;
         _subInventories.Add(sub);

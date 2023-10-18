@@ -16,7 +16,7 @@ public sealed class Inventory : ModInventory {
     public sealed override HashSet<int> Contexts => new() { ContextID.InventoryItem, ContextID.InventoryAmmo, ContextID.InventoryCoin };
 
     public sealed override void SetStaticDefaults() {
-        SubInventory("Hotbar", i => true, DataStructures.Range.FromCount(0, 10));
+        SubInventory("Hotbar", i => true, DataStructures.Range.FromCount(0, 10), -10);
         SubInventory("Coin", i => i.IsACoin, DataStructures.Range.FromCount(50, 4));
         SubInventory("Ammo", i => i.FitsAmmoSlot(), DataStructures.Range.FromCount(54, 4));
     }
@@ -117,7 +117,7 @@ public sealed class Accessories : ModInventory<Accessories> {
     public sealed override int ToIndex(Player player, int context, int slot) => context switch {
         ContextID.EquipAccessory => slot-Armor.ArmorCount,
         ContextID.ModdedAccessorySlot => slot + VanillaAccCount,
-        ContextID.EquipAccessoryVanity => slot - (2*Armor.ArmorCount-VanillaAccCount) + VanillaAccCount + ModdedAccCount(player),
+        ContextID.EquipAccessoryVanity => slot - (2*Armor.ArmorCount+VanillaAccCount) + VanillaAccCount + ModdedAccCount(player),
         ContextID.ModdedVanityAccessorySlot => slot + 2*VanillaAccCount + ModdedAccCount(player),
         _ => slot
     };

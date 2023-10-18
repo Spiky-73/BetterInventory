@@ -103,7 +103,6 @@ public sealed partial class QuickMove {
             if (slot == -1) (source, slot) = IndexOf(player, moved.Type, moved.Prefix);
             if (slot == -1) continue;
             Item item = source.Items(player)[slot];
-            // if (!moved.Inventory.CanSlotAccepts(player, item, moved.Slot)) continue;
             Move(player, item, source, slot, moved.Inventory, moved.Slot);
         }
         movedItems.Clear();
@@ -122,22 +121,33 @@ public sealed partial class QuickMove {
             _displayedChain.Clear();
             _displayedItem = ItemID.None;
         } else if (_displayedItem != item.type) {
-            // TODO add variants
-            List<SubInventory?> chain = OrderChain(player, item, inventory, index);
+            List<SubInventory?> chain = SmartishChain(player, item, inventory, index);
             if (true) chain.Add(null); // TODO  config
             _displayedChain = chain;
             _displayedItem = item.type;
         }
     }
 
-    private static List<SubInventory?> OrderChain(Player player, Item item, ModInventory source, int index) {
+    private static List<SubInventory?> DefaultChain(Player player, Item item, ModInventory source, int index) {
         List<SubInventory?> subs = new();
-        foreach(ModInventory inventory in InventoryLoader.Inventories){
-            foreach(SubInventory sub in inventory.SubInventories){
+        foreach (ModInventory inventory in InventoryLoader.Inventories) {
+            foreach (SubInventory sub in inventory.SubInventories) {
+                if (!sub.Accepts(item)) continue;
                 IList<int> slots = sub.Slots(player);
-                if (sub.Accepts(item) && (inventory != source || slots.Count > 1 || slots[0] != index)) subs.Add(sub);
+                if (inventory != source || slots.Count > 1 || slots[0] != index) subs.Add(sub);
             }
         }
+        return subs;
+    }
+    private static List<SubInventory?> SmartishChain(Player player, Item item, ModInventory source, int index) {
+        List<SubInventory?> subs = DefaultChain(player, item, source, index);
+        subs.Sort((a, b) => ((b?.Priority) ?? int.MinValue).CompareTo(a?.Priority ?? int.MinValue));
+        int i = subs.FindIndex(s => s!.Value.Inventory == source && s.Value.Slots(player).Contains(index));
+        if (i != -1){
+            SubInventory? self = subs[i];
+            subs.RemoveAt(i);
+            subs.Insert(0, self);
+        } 
         return subs;
     }
 
@@ -153,33 +163,6 @@ public sealed partial class QuickMove {
     private static ModInventory? _moveInventory;
     
     private static List<MovedItem> _movedItems = new();
-
-    // public List<(int slot, Item item)> PlaceItem(Player player, Item item, ref int slot) {
-    //     IList<int> itemsToMove = GetIncompatibleItems(player, item, out bool canPickup);
-    //     if (!canPickup) return new();
-
-    //     IList<Item> items = Items(player);
-    //     slot = ForcedSlot(item) ?? Math.Clamp(slot, 0, items.Count - 1);
-    //     if (!SlotAccepts(player, item, slot)) return new();
-
-
-    //     List<(int slot, Item item)> movedItems = new() { };
-
-    //     foreach (int s in itemsToMove) {
-    //         movedItems.Add((s, items[s]));
-    //         items[s] = new();
-    //     }
-    //     int fixedSlot = slot;
-    //     if (!movedItems.Exists(m => m.slot == fixedSlot)) {
-    //         movedItems.Insert(0, (slot, items[slot]));
-    //         items[slot] = new();
-    //     }
-
-    //     items[slot].Stack(item, MaxStack);
-    //     items[slot].Stack(movedItems[0].item, MaxStack);
-
-    //     return movedItems;
-    // }
 }
 public readonly record struct MovedItem(ModInventory Inventory, int Slot, int Type, int Prefix);
 
