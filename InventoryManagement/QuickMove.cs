@@ -67,7 +67,7 @@ public sealed partial class QuickMove {
         if (!target.CanSlotAccepts(player, item, targetSlot, out var itemsToMove)) return new();
 
         IList<Item> items = target.Items(player);
-        List<(int slot, Item item)> freeItems = new() { };
+        List<(int slot, Item item)> freeItems = new();
         foreach (int s in itemsToMove) {
             freeItems.Add((s, items[s]));
             items[s] = new();
@@ -78,10 +78,10 @@ public sealed partial class QuickMove {
         }
 
         (int type, int prefix) = (item.type, item.prefix);
+
+        // TODO keep favorite state
         items[targetSlot].Stack(item, target.MaxStack);
         items[targetSlot].Stack(freeItems[0].item, target.MaxStack);
-
-        // return movedItems;
 
         // if (!freeItems[destSlot].IsAir && item.IsAir) // TODO notify SmartPickup
 

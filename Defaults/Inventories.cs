@@ -77,7 +77,11 @@ public sealed class Accessories : ModInventory<Accessories> {
         });
     }
 
-    public sealed override bool SlotEnabled(Player player, int slot) => (slot % (VanillaAccCount + ModdedAccCount(player)) < VanillaAccCount) ? player.IsItemSlotUnlockedAndUsable(slot + Armor.ArmorCount) : LoaderManager.Get<AccessorySlotLoader>().ModdedIsItemSlotUnlockedAndUsable(slot - VanillaAccCount, player);
+    public sealed override bool SlotEnabled(Player player, int slot) {
+        slot %= VanillaAccCount + ModdedAccCount(player);
+        return (slot < VanillaAccCount) ? player.IsItemSlotUnlockedAndUsable(slot + Armor.ArmorCount) : LoaderManager.Get<AccessorySlotLoader>().ModdedIsItemSlotUnlockedAndUsable(slot - VanillaAccCount, player);
+    }
+
     public sealed override bool CanSlotAccepts(Player player, Item item, int slot, out IList<int> itemsToMove) {
         if (!ItemLoader.CanEquipAccessory(item, slot, slot >= VanillaAccCount * 2) || slot >= VanillaAccCount * 2
                 && !LoaderManager.Get<AccessorySlotLoader>().CanAcceptItem(slot - VanillaAccCount * 2, item, (slot - VanillaAccCount * 2 < ModdedAccCount(player)) ? -10 : -11)) {
