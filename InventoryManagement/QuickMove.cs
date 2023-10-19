@@ -78,8 +78,6 @@ public sealed partial class QuickMove {
         }
 
         List<MovedItem> movedItems = new() { new(source, sourceSlot, item.type, item.prefix, item.favorited) };
-        
-        // TODO keep favorite state
         int context = Math.Abs(target.ToContext(player, sourceSlot));
         items[targetSlot].Stack(item, target.MaxStack, canFavoriteAt[context]);
         items[targetSlot].Stack(item, target.MaxStack, canFavoriteAt[context]);
@@ -99,13 +97,14 @@ public sealed partial class QuickMove {
     private static void UndoMove(Player player, ModInventory source, List<MovedItem> movedItems) {
         foreach(MovedItem moved in movedItems) {
 
-            int slot = source.IndexOf(player, moved.Type, moved.Prefix);
-            if (slot == -1) (source, slot) = IndexOf(player, moved.Type, moved.Prefix);
+            ModInventory inventory = source;
+            int slot = inventory.IndexOf(player, moved.Type, moved.Prefix);
+            if (slot == -1) (inventory, slot) = IndexOf(player, moved.Type, moved.Prefix);
             if (slot == -1) continue;
-            Item item = source.Items(player)[slot];
+            Item item = inventory.Items(player)[slot];
             bool fav = item.favorited;
             item.favorited = moved.Favorited;
-            Move(player, item, source, slot, moved.Inventory, moved.Slot);
+            Move(player, item, inventory, slot, moved.Inventory, moved.Slot);
             item.favorited = fav;
         }
         movedItems.Clear();
