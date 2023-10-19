@@ -95,7 +95,7 @@ public static class Utility {
         color.B = (byte)(color.B * mult);
     }
 
-    public static void Stack(this Item item, Item toStack, int? maxStack = null) {
+    public static void Stack(this Item item, Item toStack, int? maxStack = null, bool canFavorite = true) {
         if (toStack.IsAir) return;
 
         if (item.IsAir) {
@@ -110,6 +110,7 @@ public static class Utility {
             ItemLoader.TryStackItems(item, toStack, out _);
             item.maxStack = oldStack;
         }
+        item.favorited = canFavorite && toStack.favorited;
         if (toStack.IsAir) toStack.TurnToAir();
 
     }

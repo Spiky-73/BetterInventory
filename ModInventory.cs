@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using BetterInventory.DataStructures;
 using Terraria;
 using Terraria.Localization;
@@ -29,6 +30,7 @@ public abstract class ModInventory : ModType, ILocalizedModType {
     public virtual void Focus() { }
 
     public virtual int ToIndex(Player player, int context, int slot) => slot;
+    public abstract int ToContext(Player player, int slot);
     public int IndexOf(Player player, int type, int prefix) {
         IList<Item> items = Items(player);
         for (int i = 0; i < items.Count; i++) {

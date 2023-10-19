@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using BetterInventory.InventoryManagement.Inventories;
 using Terraria;
 using Terraria.GameInput;
 using Terraria.ID;
@@ -65,6 +64,7 @@ public sealed partial class QuickMove {
 
     private static List<MovedItem> Move(Player player, Item item, ModInventory source, int sourceSlot, ModInventory target, int targetSlot) {
         if (!target.CanSlotAccepts(player, item, targetSlot, out var itemsToMove)) return new();
+        bool[] canFavoriteAt = Reflection.ItemSlot.canFavoriteAt.GetValue();
 
         IList<Item> items = target.Items(player);
         List<(int slot, Item item)> freeItems = new();
@@ -77,18 +77,18 @@ public sealed partial class QuickMove {
             items[targetSlot] = new();
         }
 
-        (int type, int prefix) = (item.type, item.prefix);
-
+        List<MovedItem> movedItems = new() { new(source, sourceSlot, item.type, item.prefix, item.favorited) };
+        
         // TODO keep favorite state
-        items[targetSlot].Stack(item, target.MaxStack);
-        items[targetSlot].Stack(freeItems[0].item, target.MaxStack);
+        int context = Math.Abs(target.ToContext(player, sourceSlot));
+        items[targetSlot].Stack(item, target.MaxStack, canFavoriteAt[context]);
+        items[targetSlot].Stack(item, target.MaxStack, canFavoriteAt[context]);
 
         // if (!freeItems[destSlot].IsAir && item.IsAir) // TODO notify SmartPickup
 
-        List<MovedItem> movedItems = new() { new(source, sourceSlot, type, prefix) };
         for (int i = 0; i < freeItems.Count; i++) {
             (int slot, Item free) = freeItems[i];
-            movedItems.Add(new(target, slot, free.type, free.prefix));
+            movedItems.Add(new(target, slot, free.type, free.prefix, free.favorited));
             free = source.GetItem(player, free, GetItemSettings.GetItemInDropItemCheck);
             player.GetDropItem(ref free);
         }
@@ -103,7 +103,10 @@ public sealed partial class QuickMove {
             if (slot == -1) (source, slot) = IndexOf(player, moved.Type, moved.Prefix);
             if (slot == -1) continue;
             Item item = source.Items(player)[slot];
+            bool fav = item.favorited;
+            item.favorited = moved.Favorited;
             Move(player, item, source, slot, moved.Inventory, moved.Slot);
+            item.favorited = fav;
         }
         movedItems.Clear();
     }
@@ -164,7 +167,7 @@ public sealed partial class QuickMove {
     
     private static List<MovedItem> _movedItems = new();
 }
-public readonly record struct MovedItem(ModInventory Inventory, int Slot, int Type, int Prefix);
+public readonly record struct MovedItem(ModInventory Inventory, int Slot, int Type, int Prefix, bool Favorited);
 
 public readonly record struct ArrayItem<T>(T[] Array, int Slot){
     public ref T Item => ref Array[Slot];
