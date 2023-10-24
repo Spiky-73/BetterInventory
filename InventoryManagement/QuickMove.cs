@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using BetterInventory.DataStructures;
 using Terraria;
+using Terraria.Audio;
 using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -28,7 +30,7 @@ public sealed partial class QuickMove {
         if (!Enabled || _displayedChain.Count == 0) return;
         tooltips.Add(new(
             BetterInventory.Instance, "QuickMove",
-            string.Join(" > ", from slots in _displayedChain where slots is not null select slots.Value.Inventory.GetLocalizedValue(slots.Value.LocalizationKey))
+            string.Join(" > ", from slots in _displayedChain where slots is not null select slots.Inventory.GetLocalizedValue(slots.LocalizationKey))
         ));
     }
 
@@ -37,14 +39,15 @@ public sealed partial class QuickMove {
 
         if (_moveTime > 0) _moveTime--;
         
-        InventorySlots sourceSlots = default;
+        InventorySlots? sourceSlots = default;
         int index = -1;
         foreach (ModInventory modInventory in InventoryLoader.Inventories) {
             foreach (InventorySlots invSlots in modInventory.Slots) {
-                var items = invSlots.Items(player);
-                if (invSlots.Context == context && (index = items.IndexOf(inventory[slot])) != -1) {
-                    sourceSlots = invSlots;
-                    goto found;
+                foreach((int c, Func<Player, ListIndices<Item>> s) in invSlots.Slots) {
+                    if(c == context && (index = s(player).FromInnerIndex(slot)) != -1){
+                        sourceSlots = invSlots;
+                        goto found;
+                    }
                 }
             }
         }
@@ -59,15 +62,17 @@ public sealed partial class QuickMove {
             _moveChain = new(_displayedChain);
             if (_moveChain.Count == 0) return;
         } else {
-            UndoMove(player, _moveInventory, _movedItems);
+            UndoMove(player, _moveInventory!, _movedItems);
             _moveIndex++;
         }
         _moveIndex %= _moveChain.Count;
         if (_moveChain[_moveIndex] is InventorySlots slots) {
             // s.Inventory.Focus(); // TODO re-add
-            int slotCount = slots.Items(player).Count; // TODO locked slots
-            _movedItems = Move(player, inventory[slot], sourceSlots, index, _moveChain[_moveIndex]!.Value, Math.Min(destSlot, slotCount - 1));
+            int slotCount = slots.Items(player).Count;
+            _movedItems = Move(player, inventory[slot], sourceSlots!, index, slots, Math.Min(destSlot, slotCount - 1));
         }
+        
+        SoundEngine.PlaySound(SoundID.Grab);
         _moveTime = 60; // TODO config
         _moveDest = destSlot ;
         _moveSlot = slot;
@@ -90,8 +95,7 @@ public sealed partial class QuickMove {
         }
 
         List<MovedItem> movedItems = new() { new(source, sourceSlot, item.type, item.prefix, item.favorited) };
-        int context = Math.Abs(target.Context);
-        items[targetSlot].Stack(item, target.Inventory.MaxStack, canFavoriteAt[context]);
+        items[targetSlot].Stack(item, target.Inventory.MaxStack, canFavoriteAt[Math.Abs(target.GetContext(player, targetSlot))]);
 
         // if (!freeItems[destSlot].IsAir && item.IsAir) // TODO notify SmartPickup
 
@@ -111,10 +115,10 @@ public sealed partial class QuickMove {
         foreach (MovedItem moved in movedItems) {
             Predicate<Item> predicate = i => i.type == moved.Type && i.prefix == moved.Prefix;
 
-            InventorySlots inventory = source;
+            InventorySlots? inventory = source;
             int slot = inventory.Items(player).FindIndex(predicate);
             if (slot == -1) (inventory, slot) = FindIndex(player, predicate);
-            if (slot == -1) continue;
+            if (inventory is null) continue;
             Item item = inventory.Items(player)[slot];
             bool fav = item.favorited;
             item.favorited = moved.Favorited;
@@ -124,18 +128,18 @@ public sealed partial class QuickMove {
         movedItems.Clear();
     }
 
-    public static (InventorySlots source, int slot) FindIndex(Player player, Predicate<Item> predicate){
+    public static (InventorySlots? source, int slot) FindIndex(Player player, Predicate<Item> predicate){
         foreach(ModInventory inventory in InventoryLoader.Inventories){
             foreach (InventorySlots slots in inventory.Slots) {
                 int slot = slots.Items(player).FindIndex(predicate);
                 if (slot != -1) return (slots, slot);
             }
         }
-        return (default, -1);
+        return (null, -1);
     }
 
-    public static void UpdateMoveChain(Player player, InventorySlots slots, Item item) {
-        if (slots.Inventory is null || item.IsAir) {
+    public static void UpdateMoveChain(Player player, InventorySlots? slots, Item item) {
+        if (slots is null || item.IsAir) {
             _displayedChain.Clear();
             _displayedItem = ItemID.None;
         } else if (_displayedItem != item.type) {
@@ -161,7 +165,7 @@ public sealed partial class QuickMove {
 
         targetSlots.Sort();
 
-        int i = targetSlots.FindIndex(s => s == source && s.Value.Items(player).Contains(item));
+        int i = targetSlots.FindIndex(s => s == source && s.Items(player).Contains(item));
         if (source.Accepts is not null && i != -1){
             var self = targetSlots[i];
             targetSlots.RemoveAt(i);
@@ -179,7 +183,7 @@ public sealed partial class QuickMove {
     private static int _moveTime;
     private static int _moveDest;
     private static int _moveSlot;
-    private static InventorySlots _moveInventory;
+    private static InventorySlots? _moveInventory;
     
     private static List<MovedItem> _movedItems = new();
 }

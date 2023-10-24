@@ -1,28 +1,45 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using BetterInventory.DataStructures;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using System.Linq;
 
 namespace BetterInventory;
 
-public record struct InventorySlots(string? LocalizationKey, int Context, Func<Player, IList<Item>> Items, Predicate<Item>? Accepts) : IComparable<InventorySlots>{
-    public ModInventory Inventory { get; internal set; } = null!;
+public class InventorySlots : IComparable<InventorySlots> {
 
-    public readonly int CompareTo(InventorySlots other) {
-            bool noCond = Accepts is null;
-            if (noCond == other.Accepts is null) return 0;
-            return !noCond ? -1 : 1;
+    public ModInventory Inventory { get; }
+    public string? LocalizationKey { get; }
+    public Predicate<Item>? Accepts { get; }
+    public ReadOnlyCollection<(int context, Func<Player, ListIndices<Item>> items)> Slots => new(_slots);
+
+    internal InventorySlots(ModInventory inventory, string? locKey, Predicate<Item>? accepts, params (int context, Func<Player, ListIndices<Item>> items)[] slots) {
+        Inventory = inventory;
+        LocalizationKey = locKey;
+        Accepts = accepts;
+        _slots = slots;
     }
+    
+    public JoinedList<Item> Items(Player player) => new((from slots in Slots select (IList<Item>)slots.items(player)).ToArray());
+
+    public int CompareTo(InventorySlots? other) {
+        if (other is null) return 1;
+        bool noCond = Accepts is null;
+        if (noCond == other.Accepts is null) return 0;
+        return !noCond ? -1 : 1;
+    }
+
+    public int GetContext(Player player, int targetSlot) {
+        foreach((int context, Func<Player, ListIndices<Item>> items) in Slots) if ((targetSlot -= items(player).Count) < 0) return context;
+        return 0;
+    }
+
+    private IList<(int context, Func<Player, ListIndices<Item>> items)> _slots;
 }
 
-
-public abstract class ModInventory<TInventory> : ModInventory where TInventory: ModInventory<TInventory> {
-    public static TInventory Instance { get; private set; } = null!;
-    public override void Load() => Instance = (TInventory)this;
-    public override void Unload() => Instance = null!;
-}
 public abstract class ModInventory : ModType, ILocalizedModType {
 
     public ReadOnlyCollection<InventorySlots> Slots => _slots.AsReadOnly();
@@ -35,15 +52,6 @@ public abstract class ModInventory : ModType, ILocalizedModType {
     public virtual int? MaxStack => null;
 
     public virtual void Focus() { }
-
-    public int GlobalIndex(Player player, InventorySlots slots, int index) {
-        int offset = 0;
-        foreach (InventorySlots s in Slots) {
-            if (s == slots) return offset + index;
-            offset += s.Items(player).Count;
-        }
-        return -1;
-    }
 
     public virtual bool FitsSlot(Player player, Item item, InventorySlots slots, int index, out IList<int> itemsToMove) {
         itemsToMove = Array.Empty<int>();
@@ -63,10 +71,8 @@ public abstract class ModInventory : ModType, ILocalizedModType {
         return item;
     }
 
-    public void AddSlots(InventorySlots slots) {
-        slots.Inventory = this;
-        _slots.Add(slots);
-    }
+    public void AddSlots(string? locKey, Predicate<Item>? accepts, int context, Func<Player, ListIndices<Item>> items) => AddSlots(locKey, accepts, (context, items));
+    public void AddSlots(string? locKey, Predicate<Item>? accepts, params (int context, Func<Player, ListIndices<Item>> items)[] slots) => _slots.Add(new(this, locKey, accepts, slots));
 
     protected sealed override void Register() {
         ModTypeLookup<ModInventory>.Register(this);
@@ -78,5 +84,6 @@ public abstract class ModInventory : ModType, ILocalizedModType {
     public string LocalizationCategory => "Inventories";
     public virtual LocalizedText DisplayName => this.GetLocalization("DisplayName", PrettyPrintName);
 
+    // private readonly List<InventorySlotsOld> _slots = new();
     private readonly List<InventorySlots> _slots = new();
 }

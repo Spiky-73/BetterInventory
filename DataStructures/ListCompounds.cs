@@ -41,22 +41,20 @@ public readonly record struct JoinedList<T> : IList<T>, IReadOnlyList<T> {
         }
     }
 
-    public JoinedList(params IList<T>[] lists) {
-        Lists = lists;
-    }
+    public JoinedList(params IList<T>[] lists) => Lists = lists;
 
     public bool Contains(T item) {
-        foreach (IList<T> list in Lists) {
-            if (list.Contains(item)) return true;
-        }
+        foreach (IList<T> list in Lists) if (list.Contains(item)) return true;
         return false;
     }
 
 
     public int IndexOf(T item) {
+        int s = 0;
         foreach (IList<T> list in Lists) {
             int i = list.IndexOf(item);
             if (i != -1) return i;
+            s += list.Count;
         }
         return -1;
     }
@@ -88,24 +86,33 @@ public readonly record struct ListIndices<T> : IList<T>, IReadOnlyList<T> {
     public IList<int> Indices { get; }
     public bool ExcludeIndices { get; }
 
+    public ListIndices(IList<T> list) : this(list, Array.Empty<int>(), true) { }
+    public ListIndices(IList<T> list, params int[] indices) : this(list, (IList<int>)indices) { }
+    public ListIndices(IList<T> list, bool excludeIndices, params int[] indices) : this (list, indices, excludeIndices) { }
     public ListIndices(IList<T> list, IList<int> indices, bool excludeIndices = false) {
         List = list;
         Indices = indices;
         ExcludeIndices = excludeIndices;
     }
-    public ListIndices(IList<T> list, bool excludeIndices = false, params int[] indices) : this (list, indices, excludeIndices) { }
 
-    public T this[int index] { get => List[InnerIndex(index)]; set => List[InnerIndex(index)] = value; }
+    public T this[int index] { get => List[ToInnerIndex(index)]; set => List[ToInnerIndex(index)] = value; }
 
     public int Count => ExcludeIndices ? (List.Count - Indices.Count) : Indices.Count;
 
     public bool IsReadOnly => List.IsReadOnly;
 
-    private int InnerIndex(int index) {
+    private int ToInnerIndex(int index) {
         if (!ExcludeIndices) return Indices[index];
         int i = 0;
-        while (Indices[i] <= index) i++;
+        while (i < Indices.Count && Indices[i] <= index) i++;
         return index + i;
+    }
+
+    public int FromInnerIndex(int index) {
+        if (!ExcludeIndices) return Indices.IndexOf(index);
+        int i = 0;
+        while (i < Indices.Count && Indices[i] <= index) i++;
+        return index - i;
     }
 
     public bool Contains(T item) => IndexOf(item) != -1;

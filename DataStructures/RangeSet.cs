@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 namespace BetterInventory.DataStructures;
 
 public readonly record struct Range(int Start, int End) : IList<int> {
+    public Range(int value) : this(value, value) {}
     public static Range FromCount(int start, int count) => new(start, start + count - 1);
     public readonly int Count => End - Start + 1;
 
