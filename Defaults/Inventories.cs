@@ -30,7 +30,7 @@ public sealed class Inventory : ModInventory {
 public sealed class Chest : ModInventory {
 
     public sealed override void Load() {
-        // AddSlots(null, null, ContextID.ChestItem, p => new(p.chest >= 0 ? Main.chest[p.chest].item : Array.Empty<Item>())); // TODO ContextID.ChestItemyc
+        AddSlots(null, null, ContextID.ChestItem, p => new(p.chest >= 0 ? Main.chest[p.chest].item : Array.Empty<Item>()));
         AddSlots(null, null, ContextID.BankItem, p => new(p.chest.InRange(-4, -2) ? p.Chest()! : Array.Empty<Item>()));
         AddSlots(null, null, ContextID.VoidItem, p => new(p.chest == -5 ? p.bank4.item : Array.Empty<Item>()));
     }
@@ -42,6 +42,10 @@ public sealed class Chest : ModInventory {
     public sealed override Item GetItem(Player player, Item item, GetItemSettings settings) {
         ChestUI.TryPlacingInChest(item, false, ChestsContext(player.chest));
         return item;
+    }
+
+    public override void OnSlotChange(Player player, InventorySlots slots, int index) {
+        if (slots.Slots[0].context == ContextID.ChestItem) NetMessage.SendData(MessageID.SyncChestItem, number: player.chest, number2: index);
     }
 
     public static int ChestsContext(int chest) => chest switch {

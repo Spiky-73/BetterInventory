@@ -88,14 +88,19 @@ public sealed partial class QuickMove {
         foreach (int s in itemsToMove) {
             freeItems.Add((s, items[s]));
             items[s] = new();
+            target.Inventory.OnSlotChange(player, target, s);
         }
         if (!freeItems.Exists(m => m.slot == targetSlot)) {
             freeItems.Insert(0, (targetSlot, items[targetSlot]));
             items[targetSlot] = new();
+            target.Inventory.OnSlotChange(player, target, targetSlot);
         }
 
         List<MovedItem> movedItems = new() { new(source, sourceSlot, item.type, item.prefix, item.favorited) };
-        items[targetSlot].Stack(item, target.Inventory.MaxStack, canFavoriteAt[Math.Abs(target.GetContext(player, targetSlot))]);
+        if (items[targetSlot].Stack(item, target.Inventory.MaxStack, canFavoriteAt[Math.Abs(target.GetContext(player, targetSlot))])) {
+            source.Inventory.OnSlotChange(player, source, sourceSlot);
+            target.Inventory.OnSlotChange(player, target, targetSlot);
+        }
 
         // if (!freeItems[destSlot].IsAir && item.IsAir) // TODO notify SmartPickup
 
@@ -113,11 +118,11 @@ public sealed partial class QuickMove {
     private static void UndoMove(Player player, InventorySlots source, List<MovedItem> movedItems) {
 
         foreach (MovedItem moved in movedItems) {
-            Predicate<Item> predicate = i => i.type == moved.Type && i.prefix == moved.Prefix;
+            bool Predicate(Item i) => i.type == moved.Type && i.prefix == moved.Prefix;
 
             InventorySlots? inventory = source;
-            int slot = inventory.Items(player).FindIndex(predicate);
-            if (slot == -1) (inventory, slot) = FindIndex(player, predicate);
+            int slot = inventory.Items(player).FindIndex(Predicate);
+            if (slot == -1) (inventory, slot) = FindIndex(player, Predicate);
             if (inventory is null) continue;
             Item item = inventory.Items(player)[slot];
             bool fav = item.favorited;

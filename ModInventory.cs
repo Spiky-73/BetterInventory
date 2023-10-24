@@ -63,13 +63,17 @@ public abstract class ModInventory : ModType, ILocalizedModType {
             IList<Item> items = slots.Items(player);
             for (int i = 0; i < items.Count; i++) {
                 if (!FitsSlot(player, item, slots, i, out _) || slots.Accepts is not null && !slots.Accepts(item)) continue;
-                items[i].Stack(item, MaxStack);
-                if (item.IsAir) return item;
+                if (items[i].Stack(item, MaxStack)) {
+                    OnSlotChange(player, slots, i);
+                    if (item.IsAir) return item;
+                }
 
             }
         }
         return item;
     }
+
+    public virtual void OnSlotChange(Player player, InventorySlots slots, int index) {}
 
     public void AddSlots(string? locKey, Predicate<Item>? accepts, int context, Func<Player, ListIndices<Item>> items) => AddSlots(locKey, accepts, (context, items));
     public void AddSlots(string? locKey, Predicate<Item>? accepts, params (int context, Func<Player, ListIndices<Item>> items)[] slots) => _slots.Add(new(this, locKey, accepts, slots));

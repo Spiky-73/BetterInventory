@@ -95,11 +95,12 @@ public static class Utility {
         color.B = (byte)(color.B * mult);
     }
 
-    public static void Stack(this Item item, Item toStack, int? maxStack = null, bool canFavorite = true) {
-        if (toStack.IsAir) return;
+    public static bool Stack(this Item item, Item toStack, int? maxStack = null, bool canFavorite = true) {
+        if (toStack.IsAir) return false;
 
+        int tranfered = 0;
         if (item.IsAir) {
-            int tranfered = maxStack.HasValue ? Math.Min(maxStack.Value, toStack.stack) : toStack.stack;
+            tranfered = maxStack.HasValue ? Math.Min(maxStack.Value, toStack.stack) : toStack.stack;
             item.SetDefaults(toStack.type);
             item.Prefix(item.prefix);
             item.stack = tranfered;
@@ -107,11 +108,12 @@ public static class Utility {
         } else if (item.type == toStack.type && item.stack < (maxStack ?? item.maxStack)) {
             int oldStack = item.maxStack;
             if (maxStack.HasValue) item.maxStack = maxStack.Value;
-            ItemLoader.TryStackItems(item, toStack, out _);
+            ItemLoader.TryStackItems(item, toStack, out tranfered);
             item.maxStack = oldStack;
         }
         item.favorited = canFavorite && toStack.favorited;
         if (toStack.IsAir) toStack.TurnToAir();
+        return tranfered != 0;
 
     }
 
