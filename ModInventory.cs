@@ -1,16 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using BetterInventory.DataStructures;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace BetterInventory;
 
-public record struct SubInventory(string LocalizationKey, Predicate<Item> Accepts, Func<Player, IList<int>> Slots, int Priority = 0){
+public record struct InventorySlots(string? LocalizationKey, int Context, Func<Player, IList<Item>> Items, Predicate<Item>? Accepts) : IComparable<InventorySlots>{
     public ModInventory Inventory { get; internal set; } = null!;
+
+    public readonly int CompareTo(InventorySlots other) {
+            bool noCond = Accepts is null;
+            if (noCond == other.Accepts is null) return 0;
+            return !noCond ? -1 : 1;
+    }
 }
 
 
@@ -21,59 +25,47 @@ public abstract class ModInventory<TInventory> : ModInventory where TInventory: 
 }
 public abstract class ModInventory : ModType, ILocalizedModType {
 
-    public abstract HashSet<int> Contexts { get; }
-    public abstract IList<Item> Items(Player player);
-    public ReadOnlyCollection<SubInventory> SubInventories => _subInventories.AsReadOnly();
+    public ReadOnlyCollection<InventorySlots> Slots => _slots.AsReadOnly();
+    public ReadOnlyCollection<InventorySlots> SlotsByPriority { get {
+        List<InventorySlots> slots = new(Slots);
+        slots.Sort();
+        return slots.AsReadOnly();
+    } }
 
     public virtual int? MaxStack => null;
 
     public virtual void Focus() { }
 
-    public virtual int ToIndex(Player player, int context, int slot) => slot;
-    public abstract int ToContext(Player player, int slot);
-    public int IndexOf(Player player, int type, int prefix) {
-        IList<Item> items = Items(player);
-        for (int i = 0; i < items.Count; i++) {
-            if (items[i].type == type && items[i].prefix == prefix) return i;
+    public int GlobalIndex(Player player, InventorySlots slots, int index) {
+        int offset = 0;
+        foreach (InventorySlots s in Slots) {
+            if (s == slots) return offset + index;
+            offset += s.Items(player).Count;
         }
         return -1;
     }
 
-    public virtual bool SlotEnabled(Player player, int slot) => true;
-    public virtual bool CanSlotAccepts(Player player, Item item, int slot, out IList<int> itemsToMove) {;
+    public virtual bool FitsSlot(Player player, Item item, InventorySlots slots, int index, out IList<int> itemsToMove) {
         itemsToMove = Array.Empty<int>();
         return true;
     }
 
     public virtual Item GetItem(Player player, Item item, GetItemSettings settings) {
-        IList<Item> items = Items(player);
-        RangeSet slots = new(){ new DataStructures.Range(0, items.Count-1) };
-        bool StackOnSlot(int slot){
-            if (!SlotEnabled(player, slot) || !CanSlotAccepts(player, item, slot, out _)) return false;
-            items[slot].Stack(item, MaxStack);
-            return item.IsAir;
-        }
+        foreach (InventorySlots slots in SlotsByPriority) {
+            IList<Item> items = slots.Items(player);
+            for (int i = 0; i < items.Count; i++) {
+                if (!FitsSlot(player, item, slots, i, out _) || slots.Accepts is not null && !slots.Accepts(item)) continue;
+                items[i].Stack(item, MaxStack);
+                if (item.IsAir) return item;
 
-        foreach (var sub in _subInventories) {
-            bool ok = sub.Accepts(item);
-            foreach(int slot in sub.Slots(player)) {
-                slots.Remove(slot);
-                if (ok && StackOnSlot(slot)) return item;
             }
         }
-
-        foreach(int slot in slots.Values()) {
-            if (StackOnSlot(slot)) return item;
-        }
-
         return item;
     }
 
-    protected void SubInventory(string locKey, Predicate<Item> accepts, IList<int> slots, int priority = 0) => SubInventory(locKey, accepts, _ => slots, priority);
-    protected void SubInventory(string locKey, Predicate<Item> accepts, Func<Player, IList<int>> slots, int priority = 0) => SubInventory(new(locKey, accepts, slots,priority));
-    protected void SubInventory(SubInventory sub) {
-        sub.Inventory = this;
-        _subInventories.Add(sub);
+    public void AddSlots(InventorySlots slots) {
+        slots.Inventory = this;
+        _slots.Add(slots);
     }
 
     protected sealed override void Register() {
@@ -81,10 +73,10 @@ public abstract class ModInventory : ModType, ILocalizedModType {
         InventoryLoader.Register(this);
     }
     public sealed override void SetupContent() => SetStaticDefaults();
-    public override void Unload() => _subInventories.Clear();
+    public override void Unload() => _slots.Clear();
 
     public string LocalizationCategory => "Inventories";
     public virtual LocalizedText DisplayName => this.GetLocalization("DisplayName", PrettyPrintName);
 
-    private readonly List<SubInventory> _subInventories = new();
+    private readonly List<InventorySlots> _slots = new();
 }

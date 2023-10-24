@@ -85,23 +85,24 @@ public readonly record struct JoinedList<T> : IList<T>, IReadOnlyList<T> {
 public readonly record struct ListIndices<T> : IList<T>, IReadOnlyList<T> {
 
     public IList<T> List { get; }
-    public int[] Indices { get; }
+    public IList<int> Indices { get; }
     public bool ExcludeIndices { get; }
 
-    public ListIndices(IList<T> array, bool excludeIndices, params int[] indices) {
-        List = array;
-        Array.Sort(indices);
+    public ListIndices(IList<T> list, IList<int> indices, bool excludeIndices = false) {
+        List = list;
         Indices = indices;
         ExcludeIndices = excludeIndices;
     }
+    public ListIndices(IList<T> list, bool excludeIndices = false, params int[] indices) : this (list, indices, excludeIndices) { }
+
     public T this[int index] { get => List[InnerIndex(index)]; set => List[InnerIndex(index)] = value; }
 
-    public int Count => ExcludeIndices ? (List.Count - Indices.Length) : Indices.Length;
+    public int Count => ExcludeIndices ? (List.Count - Indices.Count) : Indices.Count;
 
     public bool IsReadOnly => List.IsReadOnly;
 
     private int InnerIndex(int index) {
-        if (!ExcludeIndices) return Array.IndexOf(Indices, index);
+        if (!ExcludeIndices) return Indices[index];
         int i = 0;
         while (Indices[i] <= index) i++;
         return index + i;
@@ -110,8 +111,8 @@ public readonly record struct ListIndices<T> : IList<T>, IReadOnlyList<T> {
     public bool Contains(T item) => IndexOf(item) != -1;
     public int IndexOf(T item) {
         int i = 0;
-        foreach (T t in this) {
-            if (Equals(item, i)) return i;
+        foreach (int index in GetIndices()) {
+            if (Equals(item, List[index])) return i;
             i++;
         }
         return -1;
@@ -121,17 +122,21 @@ public readonly record struct ListIndices<T> : IList<T>, IReadOnlyList<T> {
         foreach (T item in this) array[arrayIndex++] = item;
     }
 
-    public IEnumerator<T> GetEnumerator() {
+    public IEnumerable<int> GetIndices() {
         if (!ExcludeIndices) {
-            foreach (int i in Indices) yield return List[i];
+            foreach (int i in Indices) yield return i;
         } else {
             int j = 0;
             for (int i = 0; i < List.Count; i++) {
-                if (j < Indices.Length && Indices[j] < i) j++;
-                if (j < Indices.Length && Indices[j] == i) continue;
-                yield return List[i];
+                if (j < Indices.Count && Indices[j] < i) j++;
+                if (j < Indices.Count && Indices[j] == i) continue;
+                yield return i;
             }
         }
+    }
+
+    public IEnumerator<T> GetEnumerator() {
+        foreach (int i in GetIndices()) yield return List[i]; 
     }
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 

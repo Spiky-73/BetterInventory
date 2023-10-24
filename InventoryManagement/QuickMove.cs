@@ -26,44 +26,56 @@ public sealed partial class QuickMove {
 
     public static void AddMoveChainLine(Item _, List<TooltipLine> tooltips){
         if (!Enabled || _displayedChain.Count == 0) return;
-        tooltips.Add(new(BetterInventory.Instance, "QuickMove", string.Join(" > ", from sub in _displayedChain where sub is not null select sub.Value.Inventory.GetLocalizedValue(sub.Value.LocalizationKey))));
+        tooltips.Add(new(
+            BetterInventory.Instance, "QuickMove",
+            string.Join(" > ", from slots in _displayedChain where slots is not null select slots.Value.Inventory.GetLocalizedValue(slots.Value.LocalizationKey))
+        ));
     }
 
     public static void TryMove(Player player, Item[] inventory, int context, int slot) {
         if (!Enabled) return;
 
         if (_moveTime > 0) _moveTime--;
-
-
-        ModInventory? sourceInventory = InventoryLoader.Inventories.FirstOrDefault(i => i.Contexts.Contains(context));
-        int index = sourceInventory!.ToIndex(player, context, slot);
-        UpdateMoveChain(player, sourceInventory, inventory[slot], index);
+        
+        InventorySlots sourceSlots = default;
+        int index = -1;
+        foreach (ModInventory modInventory in InventoryLoader.Inventories) {
+            foreach (InventorySlots invSlots in modInventory.Slots) {
+                var items = invSlots.Items(player);
+                if (invSlots.Context == context && (index = items.IndexOf(inventory[slot])) != -1) {
+                    sourceSlots = invSlots;
+                    goto found;
+                }
+            }
+        }
+    found:
+        UpdateMoveChain(player, sourceSlots, inventory[slot] /* , index */ );
 
         int destSlot = Array.FindIndex(MoveKeys, key => PlayerInput.Triggers.JustPressed.KeyStatus[key]);
         if (destSlot == -1) return;
 
-        if (_moveTime == 0 || _moveSlot != slot || _moveInventory != sourceInventory || _moveDest != destSlot) {
+        if (_moveTime == 0 || _moveSlot != slot || _moveInventory != sourceSlots || _moveDest != destSlot) {
             _moveIndex = 0;
             _moveChain = new(_displayedChain);
             if (_moveChain.Count == 0) return;
         } else {
-            UndoMove(player, _moveInventory!, _movedItems);
+            UndoMove(player, _moveInventory, _movedItems);
             _moveIndex++;
         }
         _moveIndex %= _moveChain.Count;
-        if (_moveChain[_moveIndex] is SubInventory sub) {
-            // sub.Inventory.Focus(); // TODO re-add
-            IList<int> slots = sub.Slots(player).Where(i => sub.Inventory.SlotEnabled(player, i)).ToArray();
-            _movedItems = Move(player, inventory[slot], sourceInventory!, index, _moveChain[_moveIndex]!.Value.Inventory, slots[Math.Min(destSlot, slots.Count - 1)]);
+        if (_moveChain[_moveIndex] is InventorySlots slots) {
+            // s.Inventory.Focus(); // TODO re-add
+            int slotCount = slots.Items(player).Count; // TODO locked slots
+            _movedItems = Move(player, inventory[slot], sourceSlots, index, _moveChain[_moveIndex]!.Value, Math.Min(destSlot, slotCount - 1));
         }
         _moveTime = 60; // TODO config
         _moveDest = destSlot ;
         _moveSlot = slot;
-        _moveInventory = sourceInventory;
+        _moveInventory = sourceSlots;
     }
 
-    private static List<MovedItem> Move(Player player, Item item, ModInventory source, int sourceSlot, ModInventory target, int targetSlot) {
-        if (!target.CanSlotAccepts(player, item, targetSlot, out var itemsToMove)) return new();
+    private static List<MovedItem> Move(Player player, Item item, InventorySlots source, int sourceSlot, InventorySlots target, int targetSlot) {
+        if (!target.Inventory.FitsSlot(player, item, target, targetSlot, out var itemsToMove)) return new();
         bool[] canFavoriteAt = Reflection.ItemSlot.canFavoriteAt.GetValue();
 
         IList<Item> items = target.Items(player);
@@ -78,28 +90,30 @@ public sealed partial class QuickMove {
         }
 
         List<MovedItem> movedItems = new() { new(source, sourceSlot, item.type, item.prefix, item.favorited) };
-        int context = Math.Abs(target.ToContext(player, sourceSlot));
-        items[targetSlot].Stack(item, target.MaxStack, canFavoriteAt[context]);
-        items[targetSlot].Stack(item, target.MaxStack, canFavoriteAt[context]);
+        int context = Math.Abs(target.Context);
+        items[targetSlot].Stack(item, target.Inventory.MaxStack, canFavoriteAt[context]);
 
         // if (!freeItems[destSlot].IsAir && item.IsAir) // TODO notify SmartPickup
 
         for (int i = 0; i < freeItems.Count; i++) {
             (int slot, Item free) = freeItems[i];
+            if (free.IsAir) continue;
             movedItems.Add(new(target, slot, free.type, free.prefix, free.favorited));
-            free = source.GetItem(player, free, GetItemSettings.GetItemInDropItemCheck);
+            free = source.Inventory.GetItem(player, free, GetItemSettings.GetItemInDropItemCheck);
             player.GetDropItem(ref free);
         }
 
         return movedItems;
     }
 
-    private static void UndoMove(Player player, ModInventory source, List<MovedItem> movedItems) {
-        foreach(MovedItem moved in movedItems) {
+    private static void UndoMove(Player player, InventorySlots source, List<MovedItem> movedItems) {
 
-            ModInventory inventory = source;
-            int slot = inventory.IndexOf(player, moved.Type, moved.Prefix);
-            if (slot == -1) (inventory, slot) = IndexOf(player, moved.Type, moved.Prefix);
+        foreach (MovedItem moved in movedItems) {
+            Predicate<Item> predicate = i => i.type == moved.Type && i.prefix == moved.Prefix;
+
+            InventorySlots inventory = source;
+            int slot = inventory.Items(player).FindIndex(predicate);
+            if (slot == -1) (inventory, slot) = FindIndex(player, predicate);
             if (slot == -1) continue;
             Item item = inventory.Items(player)[slot];
             bool fav = item.favorited;
@@ -110,63 +124,66 @@ public sealed partial class QuickMove {
         movedItems.Clear();
     }
 
-    public static (ModInventory source, int slot) IndexOf(Player player, int type, int prefix){
-        foreach(ModInventory context in InventoryLoader.Inventories){
-            int slot = context.IndexOf(player, type, prefix);
-            if (slot != -1) return (context, slot);
+    public static (InventorySlots source, int slot) FindIndex(Player player, Predicate<Item> predicate){
+        foreach(ModInventory inventory in InventoryLoader.Inventories){
+            foreach (InventorySlots slots in inventory.Slots) {
+                int slot = slots.Items(player).FindIndex(predicate);
+                if (slot != -1) return (slots, slot);
+            }
         }
-        return (null!, -1);
+        return (default, -1);
     }
 
-    public static void UpdateMoveChain(Player player, ModInventory? inventory, Item item, int index) {
-        if (inventory is null || item.IsAir) {
+    public static void UpdateMoveChain(Player player, InventorySlots slots, Item item) {
+        if (slots.Inventory is null || item.IsAir) {
             _displayedChain.Clear();
             _displayedItem = ItemID.None;
         } else if (_displayedItem != item.type) {
-            List<SubInventory?> chain = SmartishChain(player, item, inventory, index);
+            List<InventorySlots?> chain = SmartishChain(player, item, slots);
             if (true) chain.Add(null); // TODO  config
             _displayedChain = chain;
             _displayedItem = item.type;
         }
     }
 
-    private static List<SubInventory?> DefaultChain(Player player, Item item, ModInventory source, int index) {
-        List<SubInventory?> subs = new();
+    private static List<InventorySlots?> DefaultChain(Player player, Item item, InventorySlots source) {
+        List<InventorySlots?> targetSlots = new();
         foreach (ModInventory inventory in InventoryLoader.Inventories) {
-            foreach (SubInventory sub in inventory.SubInventories) {
-                if (!sub.Accepts(item)) continue;
-                IList<int> slots = sub.Slots(player);
-                if (inventory != source || slots.Count > 1 || slots[0] != index) subs.Add(sub);
+            foreach (InventorySlots slots in inventory.Slots) {
+                if (slots.LocalizationKey is null || slots.Accepts is not null && !slots.Accepts(item)) continue;
+                if (slots != source || slots.Items(player).Count > 1) targetSlots.Add(slots);
             }
         }
-        return subs;
+        return targetSlots;
     }
-    private static List<SubInventory?> SmartishChain(Player player, Item item, ModInventory source, int index) {
-        List<SubInventory?> subs = DefaultChain(player, item, source, index);
-        subs.Sort((a, b) => ((b?.Priority) ?? int.MinValue).CompareTo(a?.Priority ?? int.MinValue));
-        int i = subs.FindIndex(s => s!.Value.Inventory == source && s.Value.Slots(player).Contains(index));
-        if (i != -1){
-            SubInventory? self = subs[i];
-            subs.RemoveAt(i);
-            subs.Insert(0, self);
+    private static List<InventorySlots?> SmartishChain(Player player, Item item, InventorySlots source) {
+        List<InventorySlots?> targetSlots = DefaultChain(player, item, source);
+
+        targetSlots.Sort();
+
+        int i = targetSlots.FindIndex(s => s == source && s.Value.Items(player).Contains(item));
+        if (source.Accepts is not null && i != -1){
+            var self = targetSlots[i];
+            targetSlots.RemoveAt(i);
+            targetSlots.Insert(0, self);
         } 
-        return subs;
+        return targetSlots;
     }
 
     private static int _displayedItem = ItemID.None;
-    private static List<SubInventory?> _displayedChain = new();
+    private static List<InventorySlots?> _displayedChain = new();
     
     private static int _moveIndex;
-    private static List<SubInventory?> _moveChain = new();
+    private static List<InventorySlots?> _moveChain = new();
 
     private static int _moveTime;
     private static int _moveDest;
     private static int _moveSlot;
-    private static ModInventory? _moveInventory;
+    private static InventorySlots _moveInventory;
     
     private static List<MovedItem> _movedItems = new();
 }
-public readonly record struct MovedItem(ModInventory Inventory, int Slot, int Type, int Prefix, bool Favorited);
+public readonly record struct MovedItem(InventorySlots Inventory, int Slot, int Type, int Prefix, bool Favorited);
 
 public readonly record struct ArrayItem<T>(T[] Array, int Slot){
     public ref T Item => ref Array[Slot];
