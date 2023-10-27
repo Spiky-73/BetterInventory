@@ -25,6 +25,10 @@ public sealed class Inventory : ModInventory {
         return !player.preventAllItemPickups;
     }
     public sealed override Item GetItem(Player player, Item item, GetItemSettings settings) => player.GetItem(player.whoAmI, item, settings);
+
+    public override void PostMove(Player player, InventorySlots slots, int slot) {
+        if (slots == Slots[0]) player.selectedItem = slot;
+    }
 }
 
 public sealed class Chest : ModInventory {
@@ -71,7 +75,7 @@ public sealed class Armor : ModInventory {
 
 public sealed class Accessories : ModInventory {
 
-    public sealed override void Load() { // TODO add modded slots
+    public sealed override void Load() {
         AddSlots("Accessory", i => i.accessory,
             (ContextID.EquipAccessory, p => new ListIndices<Item>(p.armor, UnlockedVanillaSlots(p))),
             (ContextID.ModdedAccessorySlot, p => new ListIndices<Item>(ModdedAccessories(p), UnlockedModdedSlots(p)))

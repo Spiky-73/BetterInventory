@@ -74,13 +74,14 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public override void ProcessTriggers(TriggersSet triggersSet) {
+        QuickMove.ProcessTriggers(Player);
         ItemSearch.SearchItem.ProcessSearchTap();
         if (FavoritedBuffKb.JustPressed) FavoritedBuff(Player);
         foreach (BuilderAccToggle bat in BuilderAccToggles) bat.Process(Player);
     }
 
     public override bool HoverSlot(Item[] inventory, int context, int slot) {
-        QuickMove.TryMove(Player, inventory, context, slot);
+        QuickMove.HoverItem(Player, inventory, context, slot);
         return false;
     }
 

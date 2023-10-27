@@ -21,7 +21,10 @@
             "name": "tModLoader - Attach",
             "type": "coreclr",
             "request": "attach",
-            "processName": "tModLoader"
+            // "preLaunchTask": "launch",
+            "requireExactSource": false,
+            "enableStepFiltering": false,
+            "justMyCode": false
         },
         {
             "name": "tModLoader Server",

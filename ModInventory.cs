@@ -51,7 +51,7 @@ public abstract class ModInventory : ModType, ILocalizedModType {
 
     public virtual int? MaxStack => null;
 
-    public virtual void Focus() { }
+    public virtual void PostMove(Player player, InventorySlots slots, int slot) { }
 
     public virtual bool FitsSlot(Player player, Item item, InventorySlots slots, int index, out IList<int> itemsToMove) {
         itemsToMove = Array.Empty<int>();
