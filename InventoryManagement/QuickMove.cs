@@ -10,7 +10,15 @@ using Terraria.ModLoader;
 
 namespace BetterInventory.InventoryManagement;
 
-public sealed partial class QuickMove {
+public sealed class QuickMove : ILoadable {
+
+    public void Load(Mod mod) {
+        On_Main.DrawInterface_36_Cursor += HookAlternateChain;
+
+    }
+
+    public void Unload() {}
+
     public static bool Enabled => Configs.ClientConfig.Instance.quickMove;
 
     public static readonly string[] MoveKeys = new[] {
@@ -36,11 +44,12 @@ public sealed partial class QuickMove {
 
     public static void ProcessTriggers(Player player) {
         if (_moveTime == 0) _selectedItem[0] = player.selectedItem;
+        _hover = false;
     }
 
     public static void HoverItem(Player player, Item[] inventory, int context, int slot) {
         if (!Enabled) return;
-
+        _hover = true;
         InventorySlots? source = null;
         int sourceSlot = -1;
         foreach (ModInventory modInventory in InventoryLoader.Inventories) {
@@ -55,41 +64,59 @@ public sealed partial class QuickMove {
         }
     found:
         UpdateDisplayedMoveChain(player, source, inventory[slot]);
-        TryMove(player, source, sourceSlot);
+        UpdateChain(player, source, sourceSlot);
     }
 
-    private static void TryMove(Player player, InventorySlots? source, int slot){
+    private static void HookAlternateChain(On_Main.orig_DrawInterface_36_Cursor orig) {
+        if (_moveTime > 0 && !_hover) {
+            Main.LocalPlayer.selectedItem = _selectedItem[1];
+            if (PlayerInput.Triggers.JustPressed.KeyStatus[MoveKeys[_moveTargetSlot]]) ContinueChain(Main.LocalPlayer);
+        }
+
+        orig();
+    }
+
+    public static void UpdateChain(Player player, InventorySlots? inventory, int slot) {
+
         if (_moveTime > 0) {
             _moveTime--;
-            if (_moveSource != source || _moveSourceSlot != slot) _moveTime = 0;
+            if (inventory is null) _moveTime = 0;
+            else if (_moveTime == MaxTime - 1) _validSlots[inventory] = slot;
+            else if (!_validSlots.TryGetValue(inventory, out int index) || index != slot) _moveTime = 0;
             player.selectedItem = _selectedItem[1];
         }
 
         int targetSlot = Array.FindIndex(MoveKeys, key => PlayerInput.Triggers.JustPressed.KeyStatus[key]);
-        if (targetSlot == -1 || source is null) return;
+        if (targetSlot == -1) return;
 
-        if (_moveTime == 0 || _moveTargetSlot != targetSlot) {
-            _moveSourceSlot = slot;
-            _moveSource = source;
-            _moveTargetSlot = targetSlot;
-            _moveIndex = 0;
-            _moveChain = new(_displayedChain);
-        } else {
-            UndoMove(player, source, _movedItems);
-            _moveIndex = (_moveIndex+1) % (_moveChain.Count+1);
-        }
-
+        if (_moveTime == 0 || _moveTargetSlot != targetSlot) SetupChain(inventory, slot, targetSlot);
+        ContinueChain(player);
+    }
+    private static void SetupChain(InventorySlots? inventory, int slot, int targetSlot) {
+        _moveSourceSlot = slot;
+        _moveSource = inventory!;
+        _moveTargetSlot = targetSlot;
+        _moveIndex = 0;
+        _moveChain = new(_displayedChain);
+        _validSlots.Clear();
+        _validSlots[inventory!] = slot;
+    }
+    private static void ContinueChain(Player player) {
+        UndoMove(player, _movedItems);
+        
+        player.selectedItem = _selectedItem[0];
         if (_moveIndex < _moveChain.Count) {
-            targetSlot = Math.Min(targetSlot, _moveChain[_moveIndex].Items(player).Count - 1);
-            _movedItems = Move(player, source.Items(player)[slot], source, slot, _moveChain[_moveIndex], targetSlot);
+            int targetSlot = Math.Min(_moveTargetSlot, _moveChain[_moveIndex].Items(player).Count - 1);
+            _movedItems = Move(player, _moveSource.Items(player)[_moveSourceSlot], _moveSource, _moveSourceSlot, _moveChain[_moveIndex], targetSlot);
 
-            player.selectedItem = _selectedItem[0];
-            _moveChain[_moveIndex].Inventory.PostMove(player, _moveChain[_moveIndex], targetSlot); // TODO re-add
-            _selectedItem[1] = player.selectedItem;
-        } else _selectedItem[1] = _selectedItem[0];
-
+            _moveChain[_moveIndex].Inventory.PostMove(player, _moveChain[_moveIndex], targetSlot);
+        } else {
+            _moveSource.Inventory.PostMove(player, _moveSource, _moveSourceSlot);
+        }
+        _selectedItem[1] = player.selectedItem;
         SoundEngine.PlaySound(SoundID.Grab);
-        _moveTime = 60;
+        _moveTime = MaxTime;
+        _moveIndex = (_moveIndex + 1) % (_moveChain.Count + 1);
     }
 
     private static List<MovedItem> Move(Player player, Item item, InventorySlots source, int sourceSlot, InventorySlots target, int targetSlot) {
@@ -97,20 +124,23 @@ public sealed partial class QuickMove {
         bool[] canFavoriteAt = Reflection.ItemSlot.canFavoriteAt.GetValue();
 
         IList<Item> items = target.Items(player);
-        List<(int slot, Item item)> freeItems = new();
-        foreach (int s in itemsToMove) {
-            freeItems.Add((s, items[s]));
-            items[s] = new();
-            target.Inventory.OnSlotChange(player, target, s);
-        }
-        if (!freeItems.Exists(m => m.slot == targetSlot)) {
-            freeItems.Insert(0, (targetSlot, items[targetSlot]));
-            items[targetSlot] = new();
-            target.Inventory.OnSlotChange(player, target, targetSlot);
+        List<Item> freeItems = new();
+        List<MovedItem> movedItems = new() { new(source, sourceSlot, target, item.type, item.prefix, item.favorited) };
+        
+        void FreeTargetItem(int slot) {
+            freeItems.Add(items[slot]);
+            movedItems.Add(new(target, slot, source, items[slot].type, items[slot].prefix, items[slot].favorited));
+            items[slot] = new();
+            target.Inventory.OnSlotChange(player, target, slot);            
         }
 
-        List<MovedItem> movedItems = new() { new(source, sourceSlot, item.type, item.prefix, item.favorited) };
-        if (items[targetSlot].Stack(item, target.Inventory.MaxStack, canFavoriteAt[Math.Abs(target.GetContext(player, targetSlot))])) {
+        FreeTargetItem(targetSlot);
+        foreach (int slot in itemsToMove) FreeTargetItem(slot);
+
+        bool canFavorite = canFavoriteAt[Math.Abs(target.GetContext(player, targetSlot))];
+        bool moved = items[targetSlot].Stack(item, target.Inventory.MaxStack, canFavorite);
+        items[targetSlot].Stack(freeItems[0], target.Inventory.MaxStack, canFavorite);
+        if (moved) {
             source.Inventory.OnSlotChange(player, source, sourceSlot);
             target.Inventory.OnSlotChange(player, target, targetSlot);
         }
@@ -118,28 +148,27 @@ public sealed partial class QuickMove {
         // if (!freeItems[destSlot].IsAir && item.IsAir) // TODO notify SmartPickup
 
         for (int i = 0; i < freeItems.Count; i++) {
-            (int slot, Item free) = freeItems[i];
+            Item free = freeItems[i];
             if (free.IsAir) continue;
-            movedItems.Add(new(target, slot, free.type, free.prefix, free.favorited));
             free = source.Inventory.GetItem(player, free, GetItemSettings.GetItemInDropItemCheck);
             player.GetDropItem(ref free);
         }
 
         return movedItems;
     }
-    private static void UndoMove(Player player, InventorySlots oldTarget, List<MovedItem> movedItems) {
+    private static void UndoMove(Player player, List<MovedItem> movedItems) {
 
         foreach (MovedItem moved in movedItems) {
             bool Predicate(Item i) => i.type == moved.Type && i.prefix == moved.Prefix;
 
-            InventorySlots? inventory = oldTarget;
+            InventorySlots? inventory = moved.To;
             int slot = inventory.Items(player).FindIndex(Predicate);
             if (slot == -1) (inventory, slot) = FindIndex(player, Predicate);
             if (inventory is null) continue;
             Item item = inventory.Items(player)[slot];
             bool fav = item.favorited;
             item.favorited = moved.Favorited;
-            Move(player, item, inventory, slot, moved.Inventory, moved.Slot);
+            Move(player, item, inventory, slot, moved.From, moved.Slot);
             item.favorited = fav;
         }
         movedItems.Clear();
@@ -196,15 +225,19 @@ public sealed partial class QuickMove {
     private static List<InventorySlots> _moveChain = new();
 
     private static int _moveTime;
-    private static InventorySlots? _moveSource;
+    private static InventorySlots _moveSource = null!;
     private static int _moveSourceSlot;
     private static int _moveTargetSlot;
+    private static readonly Dictionary<InventorySlots, int> _validSlots = new();
     
     private static List<MovedItem> _movedItems = new();
 
     private static int[] _selectedItem = new int[2];
+    private static bool _hover;
+
+    public const int MaxTime = 3600;
 }
-public readonly record struct MovedItem(InventorySlots Inventory, int Slot, int Type, int Prefix, bool Favorited);
+public readonly record struct MovedItem(InventorySlots From, int Slot, InventorySlots To, int Type, int Prefix, bool Favorited);
 
 public readonly record struct ArrayItem<T>(T[] Array, int Slot){
     public ref T Item => ref Array[Slot];

@@ -69,6 +69,7 @@ public sealed class Armor : ModInventory {
         AddSlots("Vanity", i => i.bodySlot != -1, ContextID.EquipArmorVanity, p => new ListIndices<Item>(p.armor, Count + AccessorySlotLoader.MaxVanillaSlotCount + 1));
         AddSlots("Vanity", i => i.legSlot != -1, ContextID.EquipArmorVanity, p => new ListIndices<Item>(p.armor, Count + AccessorySlotLoader.MaxVanillaSlotCount + 2));
     }
+    public sealed override void PostMove(Player player, InventorySlots slots, int slot) => Main.EquipPageSelected = 0;
 
     public const int Count = 3;
 }
@@ -109,6 +110,8 @@ public sealed class Accessories : ModInventory {
         return canAllMove;
     }
 
+    public sealed override void PostMove(Player player, InventorySlots slots, int slot) => Main.EquipPageSelected = 0;
+
     public IList<int> GetIncompatibleItems(Player player, Item item, InventorySlots slots, out bool canAllMove) {
         canAllMove = true;
 
@@ -137,6 +140,8 @@ public sealed class Equipement : ModInventory {
         AddSlots("Equipement", i => i.mountType != -1 && !MountID.Sets.Cart[i.mountType], ContextID.EquipMount, p => new ListIndices<Item>(p.miscEquips, 3));
         AddSlots("Equipement", i => Main.projHook[i.shoot], ContextID.EquipGrapple, p => new ListIndices<Item>(p.miscEquips, 4));
     }
+
+    public sealed override void PostMove(Player player, InventorySlots slots, int slot) => Main.EquipPageSelected = 2;
 }
 
 public sealed class Dyes : ModInventory {
@@ -151,5 +156,8 @@ public sealed class Dyes : ModInventory {
         );
         AddSlots("EquipementDye", i => i.dye != 0, ContextID.EquipMiscDye, p => new(p.miscDyes));
     }
+
+    public sealed override void PostMove(Player player, InventorySlots slots, int slot) => Main.EquipPageSelected = slots != Slots[2] ? 0 : 2;
+
     public static Item[] ModdedDyes(Player player) => Reflection.ModAccessorySlotPlayer.exDyesAccessory.GetValue(player.GetModPlayer<ModAccessorySlotPlayer>());
 }

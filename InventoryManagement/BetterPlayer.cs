@@ -1,11 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Net.Http.Headers;
-using log4net.Util;
 using Terraria;
-using Terraria.Audio;
 using Terraria.GameInput;
-using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
