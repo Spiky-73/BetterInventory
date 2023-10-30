@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using BetterInventory.Crafting;
 using BetterInventory.DataStructures;
 using BetterInventory.Items;
 using Microsoft.Xna.Framework;
@@ -213,7 +214,7 @@ public sealed class BetterGuide : ModSystem {
         //             ++ <overrideBackground>
         cursor.EmitLdloc(153);
         cursor.EmitDelegate((int i) => {
-            if (Crafting.Actions.Enabled && !Configs.ClientConfig.Instance.recipeListBehaviour.HasFlag(Configs.RecipeListBehaviour.Focus) && Main.focusRecipe == i) ItemSlot.DrawGoldBGForCraftingMaterial = true;
+            if (BetterCrafting.Enabled && !BetterCrafting.Config.customScroll.HasFlag(Configs.BetterCrafting.RecListScroll.Focus) && Main.focusRecipe == i) ItemSlot.DrawGoldBGForCraftingMaterial = true;
             if (Enabled) {
                 OverrideRecipeTexture(LocalFilters.FavoriteRecipes.GetValueOrDefault(Main.availableRecipe[i]), ItemSlot.DrawGoldBGForCraftingMaterial, AvailableRecipes.Contains(Main.availableRecipe[i]));
                 if (_hideRecBigListTooltip) {
@@ -238,7 +239,7 @@ public sealed class BetterGuide : ModSystem {
         // }
     }
 
-    internal static bool HideRecList(int i) {
+    internal static bool NoRecipeListClick(int i) {
         if (!KnownRecipes.Contains(Main.availableRecipe[i])) _hideRecBigListTooltip = true;
         return Enabled && OverrideRecipeHover(i);
     }

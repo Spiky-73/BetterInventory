@@ -19,7 +19,8 @@ public sealed class QuickMove : ILoadable {
 
     public void Unload() {}
 
-    public static bool Enabled => Configs.ClientConfig.Instance.quickMove;
+    public static bool Enabled => Configs.ClientConfig.Instance.quickMove.Parent;
+    public static Configs.QuickMove Config => Configs.ClientConfig.Instance.quickMove.Value;
 
     public static readonly string[] MoveKeys = new[] {
         "Hotbar1",
@@ -35,7 +36,7 @@ public sealed class QuickMove : ILoadable {
     };
 
     public static void AddMoveChainLine(Item _, List<TooltipLine> tooltips){
-        if (!Enabled || _displayedChain.Count == 0) return;
+        if (!Enabled || !Config.Tooltip || _displayedChain.Count == 0) return;
         tooltips.Add(new(
             BetterInventory.Instance, "QuickMove",
             string.Join(" > ", from slots in _displayedChain where slots is not null select slots.Inventory.GetLocalizedValue(slots.LocalizationKey))
@@ -81,7 +82,7 @@ public sealed class QuickMove : ILoadable {
         if (_moveTime > 0) {
             _moveTime--;
             if (inventory is null) _moveTime = 0;
-            else if (_moveTime == MaxTime - 1) _validSlots[inventory] = slot;
+            else if (_moveTime == Config.ChainTime - 1) _validSlots[inventory] = slot;
             else if (!_validSlots.TryGetValue(inventory, out int index) || index != slot) _moveTime = 0;
             player.selectedItem = _selectedItem[1];
         }
@@ -115,8 +116,8 @@ public sealed class QuickMove : ILoadable {
         }
         _selectedItem[1] = player.selectedItem;
         SoundEngine.PlaySound(SoundID.Grab);
-        _moveTime = MaxTime;
-        _moveIndex = (_moveIndex + 1) % (_moveChain.Count + 1);
+        _moveTime = Config.ChainTime;
+        _moveIndex = (_moveIndex + 1) % (_moveChain.Count + (Config.Return ? 1 : 0));
     }
 
     private static List<MovedItem> Move(Player player, Item item, InventorySlots source, int sourceSlot, InventorySlots target, int targetSlot) {
@@ -221,10 +222,10 @@ public sealed class QuickMove : ILoadable {
     private static int _displayedItem = ItemID.None;
     private static List<InventorySlots> _displayedChain = new();
     
+    private static int _moveTime;
     private static int _moveIndex;
     private static List<InventorySlots> _moveChain = new();
 
-    private static int _moveTime;
     private static InventorySlots _moveSource = null!;
     private static int _moveSourceSlot;
     private static int _moveTargetSlot;
@@ -234,11 +235,5 @@ public sealed class QuickMove : ILoadable {
 
     private static int[] _selectedItem = new int[2];
     private static bool _hover;
-
-    public const int MaxTime = 3600;
 }
 public readonly record struct MovedItem(InventorySlots From, int Slot, InventorySlots To, int Type, int Prefix, bool Favorited);
-
-public readonly record struct ArrayItem<T>(T[] Array, int Slot){
-    public ref T Item => ref Array[Slot];
-}

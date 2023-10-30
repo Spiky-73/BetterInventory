@@ -80,6 +80,16 @@ ClientConfig: {
 		Label: Recipe List Behaviour
 		Tooltip: ""
 	}
+
+	smartItems: {
+		Label: smart Items
+		Tooltip: ""
+	}
+
+	betterCrafting: {
+		Label: better Crafting
+		Tooltip: ""
+	}
 }
 
 SmartPickupLevel: {
@@ -100,6 +110,93 @@ RecipeListBehaviour: {
 	Tooltip: ""
 	Vanilla.Label: Vanilla
 	Scroll.Label: Scroll
+	Focus.Label: Focus
+	FocusScroll.Label: Focus Scroll
+}
+
+QuickMove: {
+	Tooltip: {
+		Label: Tooltip
+		Tooltip: Tooltip
+	}
+
+	Return: {
+		Label: Return
+		Tooltip: Return
+	}
+
+	ChainTime: {
+		Label: Chain Time
+		Tooltip: Chain Time
+	}
+
+	Slots: {
+		Label: Slots
+		Tooltip: Slots
+	}
+}
+
+SmartItems: {
+	Tooltip: ""
+
+	consumption: {
+		Label: consumption
+		Tooltip: ""
+	}
+
+	ammo: {
+		Label: ammo
+		Tooltip: ""
+	}
+
+	pickup: {
+		Label: pickup
+		Tooltip: ""
+	}
+
+	autoEquip: {
+		Label: auto Equip
+		Tooltip: ""
+	}
+}
+
+BetterCrafting: {
+	Tooltip: ""
+
+	customScroll: {
+		Label: custom Scroll
+		Tooltip: ""
+	}
+
+	craftingOverrides: {
+		Label: crafting Overrides
+		Tooltip: ""
+	}
+
+	craftingOnRecList: {
+		Label: crafting On Rec List
+		Tooltip: ""
+	}
+}
+
+Toggle`1.Tooltip: ""
+
+ChildValue`2: {
+	Parent: {
+		Label: Parent
+		Tooltip: ""
+	}
+
+	Value: {
+		Label: Value
+		Tooltip: ""
+	}
+}
+
+CustomScroll: {
+	Tooltip: ""
+	Vanilla.Label: Vanilla
+	FastScroll.Label: Fast Scroll
 	Focus.Label: Focus
 	FocusScroll.Label: Focus Scroll
 }

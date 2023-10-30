@@ -6,11 +6,14 @@ namespace BetterInventory.InventoryManagement;
 
 public sealed class SmartConsumptionItem : GlobalItem {
 
+    public static bool Enabled => Configs.ClientConfig.Instance.smartItems.Parent;
+    public static Configs.SmartItems Config => Configs.ClientConfig.Instance.smartItems.Value;
+
     public override void OnConsumeItem(Item item, Player player) {
-        if (Configs.ClientConfig.Instance.smartConsumption) OnConsume(item, player.SmallestStack(item, true));
+        if (Enabled && Config.consumption) OnConsume(item, player.SmallestStack(item, true));
     }
     public override void OnConsumedAsAmmo(Item ammo, Item weapon, Player player) {
-        if (Configs.ClientConfig.Instance.smartAmmo) OnConsume(ammo, player.LastStack(ammo, true));
+        if (Enabled && Config.ammo) OnConsume(ammo, player.LastStack(ammo, true));
     }
 
     public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {

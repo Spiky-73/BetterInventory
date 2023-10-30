@@ -12,34 +12,24 @@ public enum SmartPickupLevel {
 }
 
 public enum UnknownSearchBehaviour { Hidden, Unknown, Known}
-[Flags]
-public enum RecipeListBehaviour { Vanilla = 0b00, Scroll = 0b01, Focus = 0b10, FocusScroll = 0b11}
 
 public sealed class ClientConfig : ModConfig {
 
     [Header("InventoryManagement")]
-    [DefaultValue(true)] public bool smartConsumption;
-    [DefaultValue(true)] public bool smartAmmo;
-    [DefaultValue(SmartPickupLevel.FavoriteOnly)] public SmartPickupLevel smartPickup;
-    [DefaultValue(true)] public bool quickMove;
+    public Toggle<SmartItems> smartItems = new(true);
+    public Toggle<QuickMove> quickMove = new(true);
     [DefaultValue(true)] public bool fastRightClick;
     [DefaultValue(true)] public bool itemRightClick;
 
     [Header("Crafting")]
     [DefaultValue(true)] public bool recipeFiltering;
-    [DefaultValue(true)] public bool craftOverride;
-    [DefaultValue(RecipeListBehaviour.FocusScroll)] public RecipeListBehaviour recipeListBehaviour;
+    public Toggle<BetterCrafting> betterCrafting = new(true);
 
     [Header("ItemSearch")]
     [DefaultValue(true)] public bool betterGuide;
     [DefaultValue(true)] public bool searchDrops;
     [DefaultValue(UnknownSearchBehaviour.Known)] public UnknownSearchBehaviour unknownBehaviour;
 
-    public static bool SmartPickupEnabled(Item item) => Instance.smartPickup switch {
-        SmartPickupLevel.AllItems => true,
-        SmartPickupLevel.FavoriteOnly => item.favorited,
-        SmartPickupLevel.Off or _ => false
-    };
     public override ConfigScope Mode => ConfigScope.ClientSide;
     public static ClientConfig Instance = null!;
 

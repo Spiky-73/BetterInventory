@@ -13,9 +13,10 @@ using Terraria.UI;
 
 namespace BetterInventory.Crafting;
 
-public sealed class Actions : ILoadable {
+public sealed class BetterCrafting : ILoadable {
 
-    public static bool Enabled => Configs.ClientConfig.Instance.craftOverride;
+    public static bool Enabled => ClientConfig.Instance.betterCrafting.Parent;
+    public static Configs.BetterCrafting Config => ClientConfig.Instance.betterCrafting.Value;
 
     public void Load(Mod mod) {
         On_Main.DrawInterface_36_Cursor += DrawCustomCursor;
@@ -56,7 +57,7 @@ public sealed class Actions : ILoadable {
                 if (!Enabled) return;
                 Main.availableRecipeY[r] += s * 6.5f;
                 float d = Main.availableRecipeY[r] - (r - Main.focusRecipe) * 65;
-                if (Main.recFastScroll && ClientConfig.Instance.recipeListBehaviour.HasFlag(RecipeListBehaviour.Scroll)) {
+                if (Main.recFastScroll && Config.customScroll.HasFlag(Configs.BetterCrafting.RecListScroll.Fast)) {
                     Main.availableRecipeY[r] += 130000f * s;
                     d *= 3;
                 }
@@ -102,7 +103,7 @@ public sealed class Actions : ILoadable {
         //     ...
         // }
 
-        // ----- recBigList Scroll ----- 
+        // ----- recBigList Scroll Fix ----- 
         // Main.hidePlayerCraftingMenu = false;
         cursor.GotoNext(MoveType.After, i => i.MatchStsfld(typeof(Main), nameof(Main.hidePlayerCraftingMenu)));
         // if(<recBigListVisible>) {
@@ -146,14 +147,18 @@ public sealed class Actions : ILoadable {
         //             ++ if(<enabled>) goto noClick;
         cursor.EmitLdloc(153);
         cursor.EmitDelegate((int i) => {
-            if (Enabled) {
+            if (Enabled && Config.customScroll.HasFlag(Configs.BetterCrafting.RecListScroll.Focus)) {
+                Main.focusRecipe = i;
+                Main.recFastScroll = true;
+            }
+            if (Enabled && Config.craftingOnRecList) {
                 int f = Main.focusRecipe;
-                if (ClientConfig.Instance.recipeListBehaviour.HasFlag(RecipeListBehaviour.Focus)) Main.focusRecipe = i;
                 Reflection.Main.HoverOverCraftingItemButton.Invoke(i);
                 if (f != Main.focusRecipe) Main.recFastScroll = true;
                 Main.craftingHide = false;
                 return true;
-            } else if (BetterGuide.Enabled) return BetterGuide.HideRecList(i);
+            }
+            else if (BetterGuide.Enabled) return BetterGuide.NoRecipeListClick(i);
             return false;
         });
         cursor.EmitBrtrue(noClick!);
@@ -168,7 +173,7 @@ public sealed class Actions : ILoadable {
     }
 
     private static void OverrideHover(On_Main.orig_HoverOverCraftingItemButton orig, int recipeIndex) {
-        if (Enabled && (!ItemSearch.BetterGuide.Enabled || ItemSearch.BetterGuide.AvailableRecipes.Contains(Main.availableRecipe[recipeIndex])) && recipeIndex == Main.focusRecipe && ItemSlot.ShiftInUse) Main.cursorOverride = CraftCursorID;
+        if (Enabled && Config.craftingOverrides && (!BetterGuide.Enabled || BetterGuide.AvailableRecipes.Contains(Main.availableRecipe[recipeIndex])) && recipeIndex == Main.focusRecipe && ItemSlot.ShiftInUse) Main.cursorOverride = CraftCursorID;
         orig(recipeIndex);
     }
     private static void DrawCustomCursor(On_Main.orig_DrawInterface_36_Cursor orig) {
@@ -180,7 +185,7 @@ public sealed class Actions : ILoadable {
     }
 
     private static bool TryAllowingToCraftRecipe(On_Main.orig_TryAllowingToCraftRecipe orig, Recipe currentRecipe, bool tryFittingItemInInventoryToAllowCrafting, out bool movedAnItemToAllowCrafting) {
-        if (Enabled) {
+        if (Enabled && Config.craftingOverrides) {
             movedAnItemToAllowCrafting = false;
             if (Main.mouseLeft && !Main.mouseLeftRelease) return false;
             if (Main.cursorOverride == CraftCursorID && Main.mouseLeft) return Main.LocalPlayer.ItemSpace(currentRecipe.createItem).CanTakeItem;
@@ -221,7 +226,7 @@ public sealed class Actions : ILoadable {
         cursor.EmitLdarg0();
         cursor.EmitDelegate((Recipe r) => {
             craftMultiplier = 1;
-            if (Enabled && Main.mouseLeft) {
+            if (Enabled && Config.craftingOverrides && Main.mouseLeft) {
                 int amount = GetMaxCraftAmount(r);
                 if (Main.cursorOverride == CraftCursorID) craftMultiplier = System.Math.Min(amount, GetMaxPickupAmount(r.createItem) / r.createItem.stack);
                 else craftMultiplier = System.Math.Min(amount, (r.createItem.maxStack - Main.mouseItem.stack) / r.createItem.stack);
