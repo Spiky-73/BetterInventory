@@ -19,8 +19,7 @@ public sealed class QuickMove : ILoadable {
 
     public void Unload() {}
 
-    public static bool Enabled => Configs.ClientConfig.Instance.quickMove.Parent;
-    public static Configs.QuickMove Config => Configs.ClientConfig.Instance.quickMove.Value;
+    public static Configs.QuickMove Config => Configs.InventoryManagement.Instance.quickMove.Value;
 
     public static readonly string[] MoveKeys = new[] {
         "Hotbar1",
@@ -36,7 +35,7 @@ public sealed class QuickMove : ILoadable {
     };
 
     public static void AddMoveChainLine(Item _, List<TooltipLine> tooltips){
-        if (!Enabled || !Config.Tooltip || _displayedChain.Count == 0) return;
+        if (!_hover || !Config.showTooltip || _displayedChain.Count == 0) return;
         tooltips.Add(new(
             BetterInventory.Instance, "QuickMove",
             string.Join(" > ", from slots in _displayedChain where slots is not null select slots.Inventory.GetLocalizedValue(slots.LocalizationKey))
@@ -49,7 +48,7 @@ public sealed class QuickMove : ILoadable {
     }
 
     public static void HoverItem(Player player, Item[] inventory, int context, int slot) {
-        if (!Enabled) return;
+        if (!Configs.InventoryManagement.Instance.quickMove) return;
         _hover = true;
         InventorySlots? source = null;
         int sourceSlot = -1;
@@ -82,7 +81,7 @@ public sealed class QuickMove : ILoadable {
         if (_moveTime > 0) {
             _moveTime--;
             if (inventory is null) _moveTime = 0;
-            else if (_moveTime == Config.ChainTime - 1) _validSlots[inventory] = slot;
+            else if (_moveTime == Config.chainTime - 1) _validSlots[inventory] = slot;
             else if (!_validSlots.TryGetValue(inventory, out int index) || index != slot) _moveTime = 0;
             player.selectedItem = _selectedItem[1];
         }
@@ -116,8 +115,8 @@ public sealed class QuickMove : ILoadable {
         }
         _selectedItem[1] = player.selectedItem;
         SoundEngine.PlaySound(SoundID.Grab);
-        _moveTime = Config.ChainTime;
-        _moveIndex = (_moveIndex + 1) % (_moveChain.Count + (Config.Return ? 1 : 0));
+        _moveTime = Config.chainTime;
+        _moveIndex = (_moveIndex + 1) % (_moveChain.Count + (Config.returnToSlot ? 1 : 0));
     }
 
     private static List<MovedItem> Move(Player player, Item item, InventorySlots source, int sourceSlot, InventorySlots target, int targetSlot) {

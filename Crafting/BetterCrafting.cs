@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using BetterInventory.Configs;
 using BetterInventory.ItemSearch;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -15,9 +14,8 @@ namespace BetterInventory.Crafting;
 
 public sealed class BetterCrafting : ILoadable {
 
-    public static bool Enabled => ClientConfig.Instance.betterCrafting.Parent;
-    public static Configs.BetterCrafting Config => ClientConfig.Instance.betterCrafting.Value;
-
+    public static Configs.Crafting Config => Configs.Crafting.Instance;
+    
     public void Load(Mod mod) {
         On_Main.DrawInterface_36_Cursor += DrawCustomCursor;
         On_Main.HoverOverCraftingItemButton += OverrideHover;
@@ -54,10 +52,10 @@ public sealed class BetterCrafting : ILoadable {
             cursor.EmitLdloc(124);
             int s = j == 0 ? -1 : 1;
             cursor.EmitDelegate((int r) => {
-                if (!Enabled) return;
+                if (!Configs.Crafting.Instance.recipeScroll) return;
                 Main.availableRecipeY[r] += s * 6.5f;
                 float d = Main.availableRecipeY[r] - (r - Main.focusRecipe) * 65;
-                if (Main.recFastScroll && Config.customScroll.HasFlag(Configs.BetterCrafting.RecListScroll.Fast)) {
+                if (Main.recFastScroll && Config.recipeScroll.Value.listScroll) {
                     Main.availableRecipeY[r] += 130000f * s;
                     d *= 3;
                 }
@@ -81,7 +79,7 @@ public sealed class BetterCrafting : ILoadable {
         //             ++ <wrappingX>
         cursor.EmitLdloc(130);
         cursor.EmitDelegate((int x, int i) => {
-            if (!Enabled) return x;
+            if (!Config.tweeks) return x;
             if (!Main.recBigList) return x - 2 * i;
             x -= i * 40;
             if (i >= MaterialsPerLine[0]) i = MaterialsPerLine[0] - MaterialsPerLine[1] + (i - MaterialsPerLine[0]) % MaterialsPerLine[1];
@@ -92,7 +90,7 @@ public sealed class BetterCrafting : ILoadable {
         cursor.GotoNext(MoveType.Before, i => i.MatchStloc(132));
         cursor.EmitLdloc(130);
         cursor.EmitDelegate((int y, int i) => {
-            if (!Enabled || !Main.recBigList) return y;
+            if (!Config.tweeks || !Main.recBigList) return y;
             i = i < MaterialsPerLine[0] ? 0 : ((i - MaterialsPerLine[0]) / MaterialsPerLine[1] + 1);
             return y + 38 * i;
         });
@@ -118,7 +116,7 @@ public sealed class BetterCrafting : ILoadable {
 
             //         ++ <autoScroll>
             cursor.EmitDelegate(() => {
-                if (!Enabled || !Main.mouseLeft) return;
+                if (!Config.tweeks || !Main.mouseLeft) return;
                 if (Main.mouseLeftRelease || _recDelay == 0) {
                     Main.mouseLeftRelease = true;
                     _recDelay = 1;
@@ -147,11 +145,11 @@ public sealed class BetterCrafting : ILoadable {
         //             ++ if(<enabled>) goto noClick;
         cursor.EmitLdloc(153);
         cursor.EmitDelegate((int i) => {
-            if (Enabled && Config.customScroll.HasFlag(Configs.BetterCrafting.RecListScroll.Focus)) {
+            if (Config.focusRecipe) {
                 Main.focusRecipe = i;
                 Main.recFastScroll = true;
             }
-            if (Enabled && Config.craftingOnRecList) {
+            if (Config.craftingOnRecList) {
                 int f = Main.focusRecipe;
                 Reflection.Main.HoverOverCraftingItemButton.Invoke(i);
                 if (f != Main.focusRecipe) Main.recFastScroll = true;
@@ -173,7 +171,7 @@ public sealed class BetterCrafting : ILoadable {
     }
 
     private static void OverrideHover(On_Main.orig_HoverOverCraftingItemButton orig, int recipeIndex) {
-        if (Enabled && Config.craftingOverrides && (!BetterGuide.Enabled || BetterGuide.AvailableRecipes.Contains(Main.availableRecipe[recipeIndex])) && recipeIndex == Main.focusRecipe && ItemSlot.ShiftInUse) Main.cursorOverride = CraftCursorID;
+        if (Config.craftOverrides && (!BetterGuide.Enabled || BetterGuide.AvailableRecipes.Contains(Main.availableRecipe[recipeIndex])) && recipeIndex == Main.focusRecipe && ItemSlot.ShiftInUse) Main.cursorOverride = CraftCursorID;
         orig(recipeIndex);
     }
     private static void DrawCustomCursor(On_Main.orig_DrawInterface_36_Cursor orig) {
@@ -185,12 +183,12 @@ public sealed class BetterCrafting : ILoadable {
     }
 
     private static bool TryAllowingToCraftRecipe(On_Main.orig_TryAllowingToCraftRecipe orig, Recipe currentRecipe, bool tryFittingItemInInventoryToAllowCrafting, out bool movedAnItemToAllowCrafting) {
-        if (Enabled && Config.craftingOverrides) {
+        if (Config.craftOverrides) {
             movedAnItemToAllowCrafting = false;
             if (Main.mouseLeft && !Main.mouseLeftRelease) return false;
             if (Main.cursorOverride == CraftCursorID && Main.mouseLeft) return Main.LocalPlayer.ItemSpace(currentRecipe.createItem).CanTakeItem;
         }
-        return orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting || Enabled, out movedAnItemToAllowCrafting);
+        return orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting || Config.tweeks, out movedAnItemToAllowCrafting);
     }
 
     private static void ILCraftItem(ILContext il) {
@@ -204,7 +202,7 @@ public sealed class BetterCrafting : ILoadable {
         ILLabel skipCheck = cursor.DefineLabel();
         ILLabel vanillaCheck = cursor.DefineLabel();
         cursor.EmitLdarg0();
-        cursor.EmitDelegate((Recipe r) => Enabled && Main.cursorOverride == CraftCursorID && Main.mouseLeft);
+        cursor.EmitDelegate((Recipe r) => Config.craftOverrides && Main.cursorOverride == CraftCursorID && Main.mouseLeft);
         cursor.EmitBrfalse(vanillaCheck);
         cursor.EmitLdarg0();
         cursor.EmitDelegate((Recipe r) => Main.LocalPlayer.ItemSpace(r.createItem).CanTakeItem);
@@ -226,10 +224,10 @@ public sealed class BetterCrafting : ILoadable {
         cursor.EmitLdarg0();
         cursor.EmitDelegate((Recipe r) => {
             craftMultiplier = 1;
-            if (Enabled && Config.craftingOverrides && Main.mouseLeft) {
+            if (Config.craftOverrides && Main.mouseLeft) {
                 int amount = GetMaxCraftAmount(r);
-                if (Main.cursorOverride == CraftCursorID) craftMultiplier = System.Math.Min(amount, GetMaxPickupAmount(r.createItem) / r.createItem.stack);
-                else craftMultiplier = System.Math.Min(amount, (r.createItem.maxStack - Main.mouseItem.stack) / r.createItem.stack);
+                if (Main.cursorOverride == CraftCursorID) craftMultiplier = Math.Min(amount, GetMaxPickupAmount(r.createItem) / r.createItem.stack);
+                else craftMultiplier = Math.Min(amount, (r.createItem.maxStack - Main.mouseItem.stack) / r.createItem.stack);
             } else craftMultiplier = 1;
         });
 
@@ -246,7 +244,7 @@ public sealed class BetterCrafting : ILoadable {
         cursor.EmitLdloc0();
         cursor.EmitDelegate((Item crafted) => {
             crafted.stack *= craftMultiplier;
-            if (!Enabled || Main.cursorOverride != CraftCursorID || !Main.mouseLeft) return false;
+            if (!Config.craftOverrides || Main.cursorOverride != CraftCursorID || !Main.mouseLeft) return false;
             craftMultiplier = 1;
             Main.LocalPlayer.GetItem(Main.myPlayer, crafted, GetItemSettings.InventoryUIToInventorySettingsShowAsNew);
             return true;
@@ -303,13 +301,13 @@ public sealed class BetterCrafting : ILoadable {
         int free = GetFreeSpace(Main.LocalPlayer.inventory, item, 58);
         if (Main.LocalPlayer.InChest(out Item[]? chest)) free += GetFreeSpace(chest, item);
         if (Main.LocalPlayer.useVoidBag() && Main.LocalPlayer.chest != -5) free += GetFreeSpace(Main.LocalPlayer.bank4.item, item);
-        return System.Math.Min(max, free);
+        return Math.Min(max, free);
     }
 
     public static int GetFreeSpace(Item[] inv, Item item, params int[] ignored) {
         int free = 0;
         for (int i = 0; i < inv.Length; i++) {
-            if (System.Array.IndexOf(ignored, i) != -1) continue;
+            if (Array.IndexOf(ignored, i) != -1) continue;
             Item slot = inv[i];
             if (slot.IsAir) free += item.maxStack;
             if (slot.type == item.type) free += item.maxStack - slot.stack;

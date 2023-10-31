@@ -17,7 +17,7 @@ namespace BetterInventory.ItemSearch;
 
 public sealed class Bestiary : ILoadable {
 
-    public static bool Enabled => Configs.ClientConfig.Instance.searchDrops;
+    public static bool Enabled => Configs.ItemSearch.Instance.searchDrops;
 
     public void Load(Mod mod) {
         On_UIBestiaryEntryButton.ctor += HookDarkenEntryButton;
@@ -63,7 +63,7 @@ public sealed class Bestiary : ILoadable {
 
         // ++ <fakeUnlock> 
         cursor.EmitDelegate((BestiaryUICollectionInfo info) => {
-            if (Enabled && Configs.ClientConfig.Instance.unknownBehaviour == Configs.UnknownSearchBehaviour.Known) info.UnlockState = BestiaryEntryUnlockState.CanShowDropsWithDropRates_4;
+            if (Enabled && Configs.ItemSearch.Instance.unknownDisplay == Configs.ItemSearch.UnknownDisplay.Known) info.UnlockState = BestiaryEntryUnlockState.CanShowDropsWithDropRates_4;
             return info;
         });
         // ...
@@ -76,7 +76,7 @@ public sealed class Bestiary : ILoadable {
         cursor.GotoNext(MoveType.After, i => i.MatchCallvirt(typeof(IEntryIcon), nameof(IEntryIcon.GetUnlockState)));
 
         // ++ <changeVisibleState>
-        cursor.EmitDelegate((bool unlocked) => unlocked || (Enabled && Configs.ClientConfig.Instance.unknownBehaviour == Configs.UnknownSearchBehaviour.Known));
+        cursor.EmitDelegate((bool unlocked) => unlocked || (Enabled && Configs.ItemSearch.Instance.unknownDisplay == Configs.ItemSearch.UnknownDisplay.Known));
     }
     
 
@@ -89,7 +89,7 @@ public sealed class Bestiary : ILoadable {
         // ++ <fakeUnlock> 
         cursor.EmitDelegate((BestiaryUICollectionInfo info) => {
             if(!Enabled) return info;
-            if (Configs.ClientConfig.Instance.unknownBehaviour == Configs.UnknownSearchBehaviour.Known) info.UnlockState = BestiaryEntryUnlockState.CanShowDropsWithDropRates_4;
+            if (Configs.ItemSearch.Instance.unknownDisplay == Configs.ItemSearch.UnknownDisplay.Known) info.UnlockState = BestiaryEntryUnlockState.CanShowDropsWithDropRates_4;
             else if(BestiaryEntryUnlockState.NotKnownAtAll_0 < info.UnlockState && info.UnlockState < BestiaryEntryUnlockState.CanShowDropsWithoutDropRates_3) info.UnlockState = BestiaryEntryUnlockState.CanShowDropsWithoutDropRates_3;
             return info;
         });
@@ -109,7 +109,7 @@ public sealed class Bestiary : ILoadable {
 
     private void HookBestiaryUnkownNPCBehaviourFilter(On_UIBestiaryTest.orig_FilterEntries orig, UIBestiaryTest self) {
         orig(self);
-        if (!Enabled || Configs.ClientConfig.Instance.unknownBehaviour != Configs.UnknownSearchBehaviour.Hidden) return;
+        if (!Enabled || Configs.ItemSearch.Instance.unknownDisplay != Configs.ItemSearch.UnknownDisplay.Hidden) return;
         List<BestiaryEntry> entries = Reflection.UIBestiaryTest._workingSetEntries.GetValue(Main.BestiaryUI);
         for (int i = entries.Count - 1; i >= 0; i--) {
             if (entries[i].UIInfoProvider.GetEntryUICollectionInfo().UnlockState == BestiaryEntryUnlockState.NotKnownAtAll_0) entries.RemoveAt(i);
@@ -149,7 +149,7 @@ public sealed class Bestiary : ILoadable {
         cursor.EmitLdloc(14);
         cursor.EmitDelegate((bool on, IBestiaryEntryFilter filter, List<BestiaryEntry> entries) => {
             if(filter.ForcedDisplay.HasValue) return on;
-            if (Enabled && Configs.ClientConfig.Instance.unknownBehaviour == Configs.UnknownSearchBehaviour.Known) {
+            if (Enabled && Configs.ItemSearch.Instance.unknownDisplay == Configs.ItemSearch.UnknownDisplay.Known) {
                 for (int i = 0; i < entries.Count; i++) if (filter.FitsFilter(entries[i])) return true;
             }
             return on;

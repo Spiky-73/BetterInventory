@@ -1,11 +1,63 @@
-ClientConfig: {
-	DisplayName: Client Config
+Crafting: {
+	DisplayName: Crafting
 
-	Headers: {
-		InventoryManagement: Inventory Management
-		Crafting: Crafting
-		ItemSearch: Item Search
+	tweeks: {
+		Label: Tweeks
+		Tooltip:
+			'''
+			Fix recipe list scroll buttons and material wrapping
+			Allows crafting when holding another item
+			'''
 	}
+
+	recipeFiltering: {
+		Label: Recipe Filtering
+		Tooltip:
+			'''
+			Adds recipes filters
+			Left Click to select a single filter
+			Right Click to select multiple filters
+			'''
+	}
+
+	craftOverrides: {
+		Label: Recipe Crafting Overrides
+		Tooltip:
+			'''
+			Makes crafting consistent with inventory movements
+			Left Click to craft a stack of items
+			Shift Left Click to craft and tranfer a stack of items inside your inventory
+			Right Click to craft the recipe once
+			'''
+	}
+
+	craftingOnRecList: {
+		Label: Craft on Recipe List
+		Tooltip: Allows you to craft items directly from the recipe list
+	}
+
+	recipeScroll: {
+		Label: Faster Recipe Scroll
+		Tooltip: ""
+	}
+
+	focusRecipe: {
+		Label: Focus Hovered Recipe
+		Tooltip: Automaticaly selects the hovered recipe on the recipe list
+	}
+}
+
+RecipeScroll: {
+	Tooltip: ""
+
+	listScroll: {
+		Label: Scroll in Recipe List
+		Tooltip: "Disable instant recipe scroll when selecting a recipe on the recipe list "
+	}
+}
+
+InventoryManagement: {
+	DisplayName: Inventory Management
 
 	smartConsumption: {
 		Label: "[i:42] Smart item consumption"
@@ -13,90 +65,122 @@ ClientConfig: {
 	}
 
 	smartAmmo: {
-		Label: "[i:40] Smart ammo consumption"
+		Label: "[i:40] Smart Ammo Consumption"
 		Tooltip: Consumes ammo from the last stack in the inventory
 	}
 
 	smartPickup: {
-		Label: "[i:75] Smart item pickup"
+		Label: "[i:75] Smart Item Pickup"
 		Tooltip: Items go to slot they were taken from
 	}
 
+	autoEquip: {
+		Label: Auto Equip Items
+		Tooltip: Automaticaly equips items such as Armors and Accessories
+	}
+
 	quickMove: {
-		Label: "[i:3620] Quick Item move"
-		Tooltip: Hover over an item and any hotbar hotkey to move it to this slot
+		Label: "[i:3620] Quick Move"
+		Tooltip: Hover over an item and press a hotbar hotkey to move it between different contexts
 	}
 
 	fastRightClick: {
-		Label: "[i:5075] Fast right click"
-		Tooltip: Hold rick click to rapidly right click an item
+		Label: "[i:5075] Fast Container Opening"
+		Tooltip: Hold rick click to rapidly open containnrs
 	}
 
 	itemRightClick: {
-		Label: "[i:1503] Extra item right click"
+		Label: "[i:1503] Extra Item Right Click"
 		Tooltip: Item that can be right clicked in the inventory can be right clicked when held
-	}
-
-	recipeFiltering: {
-		Label: Recipe Filtering
-		Tooltip: ""
-	}
-
-	craftOverride: {
-		Label: Craft Override
-		Tooltip:
-			'''
-			LeftClick: Bulk craft
-			Shift + LeftClick: Bulk craft and go in inventory
-			Rigth: Default
-
-			Faster recipe and recipes list scrolling
-			Allows crafting on the list
-			'''
-	}
-
-	betterGuide: {
-		Label: Better Guide
-		Tooltip:
-			'''
-			Access guide Anywhere
-			Put any Item and HotKey
-			Favorite or Blacklist Recipes
-			Show all recipes
-			'''
-	}
-
-	searchDrops: {
-		Label: Search Drops
-		Tooltip: HotKey
-	}
-
-	unknownBehaviour: {
-		Label: Unknown Recipe or NPCs Behaviours
-		Tooltip: ""
-	}
-
-	recipeListBehaviour: {
-		Label: Recipe List Behaviour
-		Tooltip: ""
-	}
-
-	smartItems: {
-		Label: smart Items
-		Tooltip: ""
-	}
-
-	betterCrafting: {
-		Label: better Crafting
-		Tooltip: ""
 	}
 }
 
 SmartPickupLevel: {
 	Tooltip: ""
 	Off.Label: Off
-	FavoriteOnly.Label: Favorite Only
+	FavoriteOnly.Label: Favorite Items Only
 	AllItems.Label: All Items
+}
+
+QuickMove: {
+	Tooltip: ""
+
+	chainTime: {
+		Label: Chain Interval
+		Tooltip: Frame interval to move to the next context in the chain
+	}
+
+	showTooltip: {
+		Label: Show Tooltip
+		Tooltip: Displays the chain in the item tooltip
+	}
+
+	highlightSlots: {
+		Label: Highlight Slots
+		Tooltip: Highlight the next slots in the chain
+	}
+
+	returnToSlot: {
+		Label: Return to Original Slot
+		Tooltip: Return the item to its original slot at the end of the chain
+	}
+}
+
+ItemSearch: {
+	DisplayName: Item Search
+
+	betterGuide: {
+		Label: Better Guide
+		Tooltip: Adds a toggle to change the between available recipes, tile recipes and all recipes
+	}
+
+	searchRecipes: {
+		Label: Search Recipes
+		Tooltip: Hold the "Search Item" key and Left Click an item to search its recipe
+	}
+
+	searchDrops: {
+		Label: Search Drops
+		Tooltip: Hold the "Search Item" key and Right Click an item to search its drops
+	}
+
+	unknownDisplay: {
+		Label: Unknown Recipe or NPCs display
+		Tooltip:
+			'''
+			Changed how Recipes and NPCs you have not discovered are displayed in the Recipe list and Bestiary 
+			Hidden : Not displayed
+			Unknown : Displayed as '?'
+			Known : Displayed as fully known. Does not affect Bestiary completion
+			'''
+	}
+
+	SearchItemKeybind: {
+		Label: Search Item
+		Tooltip:
+			'''
+			Tap the "Search Item" key to close the current menu or open the Recipe list
+			Double tap the "Search Item" key to open the Bestiary
+			'''
+	}
+}
+
+BetterGuide: {
+	Tooltip: ""
+
+	favoriteRecipes: {
+		Label: Favorite Recipes
+		Tooltip: Allows you to Favorite or Blacklist recipes
+	}
+}
+
+SearchKey: {
+	Tooltip: ""
+
+	Keybind: {
+		Label: Keybind
+		Tooltip: ""
+	}
 }
 
 UnknownSearchBehaviour: {
@@ -104,79 +188,6 @@ UnknownSearchBehaviour: {
 	Hidden.Label: Hidden
 	Unknown.Label: Unknown
 	Known.Label: Known
-}
-
-RecipeListBehaviour: {
-	Tooltip: ""
-	Vanilla.Label: Vanilla
-	Scroll.Label: Scroll
-	Focus.Label: Focus
-	FocusScroll.Label: Focus Scroll
-}
-
-QuickMove: {
-	Tooltip: {
-		Label: Tooltip
-		Tooltip: Tooltip
-	}
-
-	Return: {
-		Label: Return
-		Tooltip: Return
-	}
-
-	ChainTime: {
-		Label: Chain Time
-		Tooltip: Chain Time
-	}
-
-	Slots: {
-		Label: Slots
-		Tooltip: Slots
-	}
-}
-
-SmartItems: {
-	Tooltip: ""
-
-	consumption: {
-		Label: consumption
-		Tooltip: ""
-	}
-
-	ammo: {
-		Label: ammo
-		Tooltip: ""
-	}
-
-	pickup: {
-		Label: pickup
-		Tooltip: ""
-	}
-
-	autoEquip: {
-		Label: auto Equip
-		Tooltip: ""
-	}
-}
-
-BetterCrafting: {
-	Tooltip: ""
-
-	customScroll: {
-		Label: custom Scroll
-		Tooltip: ""
-	}
-
-	craftingOverrides: {
-		Label: crafting Overrides
-		Tooltip: ""
-	}
-
-	craftingOnRecList: {
-		Label: crafting On Rec List
-		Tooltip: ""
-	}
 }
 
 Toggle`1.Tooltip: ""
@@ -193,10 +204,9 @@ ChildValue`2: {
 	}
 }
 
-CustomScroll: {
+UnknownDisplay: {
 	Tooltip: ""
-	Vanilla.Label: Vanilla
-	FastScroll.Label: Fast Scroll
-	Focus.Label: Focus
-	FocusScroll.Label: Focus Scroll
+	Hidden.Label: Hidden
+	Unknown.Label: Unknown
+	Known.Label: Known
 }

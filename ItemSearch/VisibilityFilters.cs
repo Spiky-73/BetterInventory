@@ -36,6 +36,12 @@ public sealed class VisibilityFilters {
         OwnedItems[mod].Add(type);
     }
 
+    public FavoriteState GetFavoriteState(int recipe) => BetterGuide.Config.favoriteRecipes ? FavoriteRecipes.GetValueOrDefault(recipe) : FavoriteState.Default;
+    public void SetFavoriteState(int recipe, FavoriteState state) {
+        if (state == FavoriteState.Default) FavoriteRecipes.Remove(recipe);
+        else FavoriteRecipes[recipe] = state;
+    }
+
     public readonly Dictionary<int, FavoriteState> FavoriteRecipes = new();
     public readonly List<(RawRecipe, byte)> MissingRecipes = new();
 

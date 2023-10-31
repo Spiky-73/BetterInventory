@@ -23,6 +23,8 @@ public class ChildValue<TParent, TValue> : IChildValue where TParent: struct whe
     [Expand(false, false)]
     object IChildValue.Parent { get => Parent; set => Parent = (TParent)value!; }
     object IChildValue.Value { get => Value; set => Value = (TValue)value!; }
+
+    public static implicit operator TParent(ChildValue<TParent, TValue> self) => self.Parent;
 }
 
 public sealed class Toggle<T> : ChildValue<bool, T> where T: class, new() {

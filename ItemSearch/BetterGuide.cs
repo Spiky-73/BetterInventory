@@ -24,7 +24,8 @@ namespace BetterInventory.ItemSearch;
 
 public sealed class BetterGuide : ModSystem {
 
-    public static bool Enabled => Configs.ClientConfig.Instance.betterGuide;
+    public static bool Enabled => Configs.ItemSearch.Instance.betterGuide.Parent;
+    public static Configs.BetterGuide Config => Configs.ItemSearch.Instance.betterGuide.Value;
 
     public static VisibilityFilters LocalFilters => InventoryManagement.BetterPlayer.LocalPlayer.VisibilityFilters;
 
@@ -148,7 +149,7 @@ public sealed class BetterGuide : ModSystem {
         cursor.EmitLdloc(124);
         cursor.EmitDelegate((int i) => {
             if (!Enabled) return;
-            OverrideRecipeTexture(LocalFilters.FavoriteRecipes.GetValueOrDefault(Main.availableRecipe[i]), ItemSlot.DrawGoldBGForCraftingMaterial, AvailableRecipes.Contains(Main.availableRecipe[i]));
+            OverrideRecipeTexture(LocalFilters.GetFavoriteState(Main.availableRecipe[i]), ItemSlot.DrawGoldBGForCraftingMaterial, AvailableRecipes.Contains(Main.availableRecipe[i]));
             ItemSlot.DrawGoldBGForCraftingMaterial = false;
             if (!KnownRecipes.Contains(Main.availableRecipe[i])) _hideItem = true;
         });
@@ -179,7 +180,7 @@ public sealed class BetterGuide : ModSystem {
         cursor.EmitDelegate((int matI) => {
             if (!Enabled) return;
             bool canCraft = AvailableRecipes.Contains(Main.availableRecipe[Main.focusRecipe]);
-            FavoriteState state = LocalFilters.FavoriteRecipes.GetValueOrDefault(Main.availableRecipe[Main.focusRecipe]);
+            FavoriteState state = LocalFilters.GetFavoriteState(Main.availableRecipe[Main.focusRecipe]);
             if (!canCraft) {
                 Item material = Main.recipe[Main.availableRecipe[Main.focusRecipe]].requiredItem[matI];
                 canCraft = Utility.OwnedItems.GetValueOrDefault(material.type, 0) >= material.stack;
@@ -214,9 +215,9 @@ public sealed class BetterGuide : ModSystem {
         //             ++ <overrideBackground>
         cursor.EmitLdloc(153);
         cursor.EmitDelegate((int i) => {
-            if (BetterCrafting.Enabled && !BetterCrafting.Config.customScroll.HasFlag(Configs.BetterCrafting.RecListScroll.Focus) && Main.focusRecipe == i) ItemSlot.DrawGoldBGForCraftingMaterial = true;
+            if (!BetterCrafting.Config.focusRecipe && Main.focusRecipe == i) ItemSlot.DrawGoldBGForCraftingMaterial = true;
             if (Enabled) {
-                OverrideRecipeTexture(LocalFilters.FavoriteRecipes.GetValueOrDefault(Main.availableRecipe[i]), ItemSlot.DrawGoldBGForCraftingMaterial, AvailableRecipes.Contains(Main.availableRecipe[i]));
+                OverrideRecipeTexture(LocalFilters.GetFavoriteState(Main.availableRecipe[i]), ItemSlot.DrawGoldBGForCraftingMaterial, AvailableRecipes.Contains(Main.availableRecipe[i]));
                 if (_hideRecBigListTooltip) {
                     _hideRecBigListTooltip = false;
                     _unknownTooltip = true;
@@ -393,7 +394,7 @@ public sealed class BetterGuide : ModSystem {
         VisibilityFilters filters = LocalFilters;
         for (int i = 0; i < Main.numAvailableRecipes; i++) {
             Recipe recipe = Main.recipe[Main.availableRecipe[i]];
-            bool displayedAsKnown = Configs.ClientConfig.Instance.unknownBehaviour == Configs.UnknownSearchBehaviour.Known || filters.HasOwnedItems(recipe.createItem) || recipe.requiredItem.Exists(i => filters.HasOwnedItems(i));
+            bool displayedAsKnown = Configs.ItemSearch.Instance.unknownDisplay == Configs.ItemSearch.UnknownDisplay.Known || filters.HasOwnedItems(recipe.createItem) || recipe.requiredItem.Exists(i => filters.HasOwnedItems(i));
             if (!displayedAsKnown) {
                 foreach (int g in recipe.acceptedGroups) {
                     foreach (int type in RecipeGroup.recipeGroups[g].ValidItems) {
@@ -407,7 +408,7 @@ public sealed class BetterGuide : ModSystem {
             if (displayedAsKnown) {
                 GuideRecipes.Add(Main.availableRecipe[i]);
                 KnownRecipes.Add(Main.availableRecipe[i]);
-            } else if (Configs.ClientConfig.Instance.unknownBehaviour != Configs.UnknownSearchBehaviour.Hidden) unknownRecipes.Add(Main.availableRecipe[i]);
+            } else if (Configs.ItemSearch.Instance.unknownDisplay != Configs.ItemSearch.UnknownDisplay.Hidden) unknownRecipes.Add(Main.availableRecipe[i]);
         }
         GuideRecipes.AddRange(unknownRecipes);
     }
@@ -464,7 +465,7 @@ public sealed class BetterGuide : ModSystem {
             List<int> fav = new(), black = new(), others = new();
 
             for (int i = 0; i < KnownRecipes.Count; i++) {
-                (LocalFilters.FavoriteRecipes.GetValueOrDefault(GuideRecipes[i]) switch {
+                (LocalFilters.GetFavoriteState(GuideRecipes[i]) switch {
                     FavoriteState.Favorited => fav,
                     FavoriteState.Blacklisted => black,
                     _ => others,
@@ -528,26 +529,26 @@ public sealed class BetterGuide : ModSystem {
         return tooltips;
     }
     public static bool OverrideRecipeHover(int recipeIndex) {
+        if (!Config.favoriteRecipes) return false;
         bool click = Main.mouseLeft && Main.mouseLeftRelease;
-        Dictionary<int, FavoriteState> favorites = LocalFilters.FavoriteRecipes;
         if (Main.keyState.IsKeyDown(Main.FavoriteKey)) {
             Main.cursorOverride = CursorOverrideID.FavoriteStar;
             if (click) {
-                FavoriteState state = favorites.GetValueOrDefault(Main.availableRecipe[recipeIndex]);
-                if (state == FavoriteState.Favorited) favorites.Remove(Main.availableRecipe[recipeIndex]);
-                else favorites[Main.availableRecipe[recipeIndex]] = FavoriteState.Favorited;
+                FavoriteState state = LocalFilters.GetFavoriteState(Main.availableRecipe[recipeIndex]);
+                LocalFilters.SetFavoriteState(Main.availableRecipe[recipeIndex], state == FavoriteState.Default ? FavoriteState.Favorited : FavoriteState.Default);
                 Recipe.FindRecipes(true);
                 return true;
             }
         } else if (ItemSlot.ControlInUse) {
+            FavoriteState state = LocalFilters.GetFavoriteState(Main.availableRecipe[recipeIndex]);
+            if (state == FavoriteState.Favorited) return click;
             Main.cursorOverride = CursorOverrideID.TrashCan;
             if (click) {
-                FavoriteState state = favorites.GetValueOrDefault(Main.availableRecipe[recipeIndex]);
-                if (state == FavoriteState.Blacklisted) favorites.Remove(Main.availableRecipe[recipeIndex]);
-                else favorites[Main.availableRecipe[recipeIndex]] = FavoriteState.Blacklisted;
+                LocalFilters.SetFavoriteState(Main.availableRecipe[recipeIndex], state == FavoriteState.Default ? FavoriteState.Blacklisted : FavoriteState.Default);
                 Recipe.FindRecipes(true);
                 return true;
             }
+            return false;
         }
         return false;
     }
@@ -575,7 +576,7 @@ public sealed class BetterGuide : ModSystem {
     private static Asset<Texture2D> s_inventoryBack4 = null!;
 
     private static int _focusRecipe;
-    private static Item?[] _craftingTiles = System.Array.Empty<Item>();
+    private static Item?[] _craftingTiles = Array.Empty<Item>();
 
     private static bool _collectingAvaiblable;
     private static bool _unknownTooltip;

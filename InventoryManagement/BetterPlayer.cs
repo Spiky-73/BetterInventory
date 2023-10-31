@@ -1,3 +1,4 @@
+using BetterInventory.Crafting;
 using Terraria;
 using Terraria.GameInput;
 using Terraria.ModLoader;
@@ -29,6 +30,8 @@ public sealed record class BuilderAccToggle {
 }
 
 public sealed class BetterPlayer : ModPlayer {
+
+    public static Configs.InventoryManagement Config => Configs.InventoryManagement.Instance;
 
     public static BetterPlayer LocalPlayer => Main.LocalPlayer.GetModPlayer<BetterPlayer>();
 
@@ -64,7 +67,7 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public override void SetControls() {
-        if (Configs.ClientConfig.Instance.fastRightClick && Main.mouseRight && Main.stackSplit == 1) Main.mouseRightRelease = true;
+        if (Config.fastRightClick && Main.mouseRight && Main.stackSplit == 1) Main.mouseRightRelease = true;
     }
 
     public override void ProcessTriggers(TriggersSet triggersSet) {
@@ -80,7 +83,7 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public override bool PreItemCheck() {
-        if (Configs.ClientConfig.Instance.itemRightClick && Player.controlUseTile && Player.releaseUseItem && !Player.controlUseItem && !Player.tileInteractionHappened
+        if (Config.itemRightClick && Player.controlUseTile && Player.releaseUseItem && !Player.controlUseItem && !Player.tileInteractionHappened
                 && !Player.mouseInterface && !Terraria.Graphics.Capture.CaptureManager.Instance.Active && !Main.HoveringOverAnNPC && !Main.SmartInteractShowingGenuine
                 && Main.HoverItem.IsAir && Player.altFunctionUse == 0 && Player.selectedItem < 10) {
             if(Main.stackSplit == 1) Main.stackSplit = 31;
@@ -93,7 +96,7 @@ public sealed class BetterPlayer : ModPlayer {
     private static void HookTryOpenContainer(On_ItemSlot.orig_TryOpenContainer orig, Item item, Player player) {
         int split = Main.stackSplit;
         orig(item, player);
-        if (Configs.ClientConfig.Instance.fastRightClick) {
+        if (Config.fastRightClick) {
             Main.stackSplit = split == 31 ? 1 : split;
             ItemSlot.RefreshStackSplitCooldown();
         }

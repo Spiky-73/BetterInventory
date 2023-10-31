@@ -15,7 +15,7 @@ namespace BetterInventory.Crafting;
 
 public sealed class RecipeFiltering : ILoadable {
 
-    public static bool Enabled => Configs.ClientConfig.Instance.recipeFiltering;
+    public static bool Enabled => Configs.Crafting.Instance.recipeFiltering;
     public static RecipeFilters LocalFilters => InventoryManagement.BetterPlayer.LocalPlayer.RecipeFilters;
 
     public void Load(Mod mod) {
