@@ -95,7 +95,7 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public override IEnumerable<Item> AddMaterialsForCrafting(out ItemConsumedCallback itemConsumedCallback) {
-        return BetterGuide.AddMaterials(out itemConsumedCallback);
+        return Guide.AddMaterials(out itemConsumedCallback);
     }
 
     private static void HookTryOpenContainer(On_ItemSlot.orig_TryOpenContainer orig, Item item, Player player) {

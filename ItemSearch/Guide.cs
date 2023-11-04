@@ -17,14 +17,13 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.Map;
 using Terraria.ModLoader;
-using Terraria.ModLoader.Exceptions;
 using Terraria.UI;
 using ContextID = Terraria.UI.ItemSlot.Context;
 
 namespace BetterInventory.ItemSearch;
 
 
-public sealed class BetterGuide : ModSystem {
+public sealed class Guide : ModSystem {
     public static bool Enabled => Configs.ItemSearch.Instance.betterGuide;
     public static Configs.BetterGuide Config => Configs.ItemSearch.Instance.betterGuide.Value;
 
@@ -99,7 +98,7 @@ public sealed class BetterGuide : ModSystem {
 
         Vector2 position = new(inventoryX + 50, inventoryY + 12 - 14 + 24);
         Main.inventoryScale *= 0.5f;
-        for (int i = 0; i < s_craftingTiles.Count; i++) {
+        for (int i = 0; i < s_craftingTiles.Count; i++) { // TODO wrapping
             Item tile = s_craftingTiles[i];
             Color inventoryBack = Main.inventoryBack;
             OverrideRecipeTexture(FavoriteState.Default, false, tile.type == ItemID.HandOfCreation || Main.LocalPlayer.adjTile[tile.createTile]);

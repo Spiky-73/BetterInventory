@@ -155,7 +155,7 @@ public sealed class BetterCrafting : ILoadable {
                 Main.craftingHide = false;
                 return true;
             }
-            BetterGuide.RecipeListHover(i);
+            Guide.RecipeListHover(i);
             return false;
         });
         cursor.EmitBrtrue(noClick!);

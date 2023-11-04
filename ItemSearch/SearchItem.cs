@@ -92,10 +92,10 @@ public sealed class SearchItem : ILoadable {
                     s_searchItemTaps = -1;
                 } else {
                     if (s_searchItemTaps % 2 == 0) {
-                        BetterGuide.ToggleRecipeList();
+                        Guide.ToggleRecipeList();
                         SoundEngine.PlaySound(SoundID.MenuTick);
                     } else {
-                        BetterGuide.ToggleRecipeList(false);
+                        Guide.ToggleRecipeList(false);
                         Bestiary.ToggleBestiary();
                         SoundEngine.PlaySound(SoundID.MenuTick);
                     }
@@ -159,10 +159,12 @@ public sealed class SearchItem : ILoadable {
     public static void SetGuideItem(Item item) {
         (Item mouse, Main.mouseItem) = (Main.mouseItem, item);
         (int cursor, Main.cursorOverride) = (Main.cursorOverride, 0);
+        (bool left, Main.mouseLeft, bool rel, Main.mouseLeftRelease) = (Main.mouseLeft, true, Main.mouseLeftRelease, true);
         ItemSlot.LeftClick(ref Main.guideItem, ContextID.GuideItem);
         Recipe.FindRecipes();
         Main.mouseItem = mouse;
         Main.cursorOverride = cursor;
+        (Main.mouseLeft, Main.mouseLeftRelease) = (left, rel);
     }
 
     public static bool OverrideHover(Item[] inv, int context, int slot) {

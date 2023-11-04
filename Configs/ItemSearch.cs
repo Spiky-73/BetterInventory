@@ -8,9 +8,10 @@ namespace BetterInventory.Configs;
 
 public sealed class ItemSearch : ModConfig {  
     public Toggle<BetterGuide> betterGuide = new(true);
+    public Toggle<BetterBestiary> betterBestiary = new(true);
     [DefaultValue(true)] public bool searchRecipes;
-    [DefaultValue(true)] public bool searchDrops; // TODO split
-    [DefaultValue(UnknownDisplay.Known)] public UnknownDisplay unknownDisplay;
+    [DefaultValue(true)] public bool searchDrops;
+    [DefaultValue(UnknownDisplay.Unknown)] public UnknownDisplay unknownDisplay;
 
     [JsonIgnore, ShowDespiteJsonIgnore]
     public string SearchItemKeybind {
@@ -31,4 +32,9 @@ public class BetterGuide {
     [DefaultValue(true)] public bool favoriteRecipes = true;
     [DefaultValue(true)] public bool craftInMenu = true;
     [DefaultValue(true)] public bool guideTile = true; // TODO implement
+}
+
+public class BetterBestiary {
+    [DefaultValue(true)] public bool showBagContent = true;
+    [DefaultValue(true)] public bool unlockFilter = true;
 }

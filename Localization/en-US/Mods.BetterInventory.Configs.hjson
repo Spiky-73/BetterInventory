@@ -2,7 +2,7 @@ Crafting: {
 	DisplayName: Crafting
 
 	tweeks: {
-		Label: Tweeks
+		Label: "[i:509] Tweeks"
 		Tooltip:
 			'''
 			Fix recipe list scroll buttons and material wrapping
@@ -11,7 +11,7 @@ Crafting: {
 	}
 
 	recipeFiltering: {
-		Label: Recipe Filtering
+		Label: "[i: 38] Recipe Filtering"
 		Tooltip:
 			'''
 			Adds recipes filters
@@ -21,7 +21,7 @@ Crafting: {
 	}
 
 	craftOverrides: {
-		Label: Recipe Crafting Overrides
+		Label: "[i:36] Recipe Crafting Overrides"
 		Tooltip:
 			'''
 			Makes crafting consistent with inventory movements
@@ -32,17 +32,17 @@ Crafting: {
 	}
 
 	craftingOnRecList: {
-		Label: Craft on Recipe List
+		Label: "[i:3617] Craft on Recipe List"
 		Tooltip: Allows you to craft items directly from the recipe list
 	}
 
 	recipeScroll: {
-		Label: Faster Recipe Scroll
+		Label: "[i:3285] Faster Recipe Scroll"
 		Tooltip: ""
 	}
 
 	focusRecipe: {
-		Label: Focus Hovered Recipe
+		Label: "[i:1248] Focus Hovered Recipe"
 		Tooltip: Automaticaly selects the hovered recipe on the recipe list
 	}
 }
@@ -75,7 +75,7 @@ InventoryManagement: {
 	}
 
 	autoEquip: {
-		Label: Auto Equip Items
+		Label: "[i:83] Auto Equip Items"
 		Tooltip: Automaticaly equips items such as Armors and Accessories
 	}
 
@@ -86,7 +86,7 @@ InventoryManagement: {
 
 	fastRightClick: {
 		Label: "[i:5075] Fast Container Opening"
-		Tooltip: Hold rick click to rapidly open containnrs
+		Tooltip: Hold rick click to rapidly open containers
 	}
 
 	itemRightClick: {
@@ -129,50 +129,62 @@ QuickMove: {
 ItemSearch: {
 	DisplayName: Item Search
 
-	// searchRecipes: ghost item + hotkey
-	// v betterGuide: More Recipes + Tooltip + Available recipes / materials
-	//     v favorite
-	//     v craftInMenu
-	//     guideTile
-	//     progression
-	
-	
 	betterGuide: {
-		Label: Better Guide
-		Tooltip: Adds a toggle to change the between available recipes, tile recipes and all recipes
+		Label: "[i:267] {$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Name}"
+		Name: Better Guide
+		Tooltip:
+			'''
+			Allows you to searched the recipes of any item
+			Adds recipes crafting the selected item
+			Shows missing materials in non craftable recipes
+			Visualy overrides unknown recipes.
+			'''
+	}
+
+	betterBestiary: {
+		Label: "[i:4767] {$Mods.BetterInventory.Configs.ItemSearch.betterBestiary.Name}"
+		Name: Better Bestiary
+		Tooltip:
+			'''
+			Search includes locked entries
+			Visualy overrides the unlock state of entries (does not affect completion)
+			'''
 	}
 
 	searchRecipes: {
-		Label: Search Recipes
+		Label: "[i:3549] Search Recipes"
 		Tooltip:
 			'''
-			Hold the "Search Item" key and Left Click an item to search its recipe
-			Hold the "Search Item" key and Middle Click to clear the searched item
+			Allows you to access the guide anywhere
+			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Left Click an item to search its recipe
+			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Middle Click in the inventory to clear the searched item
 			'''
 	}
 
 	searchDrops: {
-		Label: Search Drops
+		Label: "[i:2903] Search Drops"
 		Tooltip:
 			'''
-			Hold the "Search Item" key and Right Click an item to search its drops
-			Hold the "Search Item" key and Middle Click to clear the searched item
+			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Right Click an item to search its drops
+			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Middle Click in the Bestiary to clear the searched item
 			'''
 	}
 
 	unknownDisplay: {
-		Label: Unknown Recipe or NPCs display
+		Label: "[i:BetterInventory/UnknownItem] Unknown Recipe or NPCs display"
 		Tooltip:
 			'''
-			Changed how Recipes and NPCs you have not discovered are displayed in the Recipe list and Bestiary 
-			{$Mods.BetterInventory.Configs.UnknownSearchBehaviour.Hidden}: Not displayed
-			{$Mods.BetterInventory.Configs.UnknownSearchBehaviour.Unknown}: Displayed as '?'
-			{$Mods.BetterInventory.Configs.UnknownSearchBehaviour.Known}: Displayed as fully known. Does not affect Bestiary completion
+			Changed how Recipes and NPCs you have not discovered are displayed in the Recipe list and Bestiary
+			Requires "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Name}" and "{$Mods.BetterInventory.Configs.ItemSearch.betterBestiary.Name}" respectively to be On
+			{$Mods.BetterInventory.Configs.UnknownDisplay.Hidden.Label}: Not displayed
+			{$Mods.BetterInventory.Configs.UnknownDisplay.Unknown.Label}: Displayed as '?'
+			{$Mods.BetterInventory.Configs.UnknownDisplay.Known.Label}: Displayed as fully known. Does not affect Bestiary completion
 			'''
 	}
 
 	SearchItemKeybind: {
-		Label: Search Item
+		Label: "[i:487] {$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}"
+		Name: Search Item
 		Tooltip:
 			'''
 			Tap this key to close the current menu or open the Recipe list
@@ -186,31 +198,25 @@ BetterGuide: {
 
 	favoriteRecipes: {
 		Label: Favorite Recipes
-		Tooltip: Allows you to Favorite recipes
+		Tooltip: Allows you to favorite or blacklist recipes
 	}
 
 	guideTile: {
-		Label: guide Tile
-		Tooltip: ""
-	}
-
-	unknownDisplay: {
-		Label: unknown Display
-		Tooltip: ""
+		Label: Guide Tile
+		Tooltip: Adds a second slot next to the guide item to filter by crafting station
 	}
 
 	craftInMenu: {
-		Label: craft In Menu
-		Tooltip: ""
-	}
-
-	progression: {
-		Label: progression
-		Tooltip: ""
+		Label: Craft in Guide Menu
+		Tooltip:
+			'''
+			Allow you to craft items when talking to the guide
+			Add an icon to toggle between "All Recipes" and "Available Recipes"
+			'''
 	}
 }
 
-UnknownSearchBehaviour: {
+UnknownDisplay: {
 	Tooltip: ""
 	Hidden.Label: Hidden
 	Unknown.Label: Unknown
@@ -231,18 +237,16 @@ ChildValue`2: {
 	}
 }
 
-UnknownDisplay: {
-	Tooltip: ""
-	Hidden.Label: Hidden
-	Unknown.Label: Unknown
-	Known.Label: Known
-}
-
-SearchRecipes: {
+BetterBestiary: {
 	Tooltip: ""
 
-	craftInMenu: {
-		Label: craft In Menu
+	showBagContent: {
+		Label: Show Treasure Bag Content
 		Tooltip: ""
+	}
+
+	unlockFilter: {
+		Label: Override Unlock Filter
+		Tooltip: Replace the filter "{$BestiaryInfo.IfUnlocked}" with "{$Mods.BetterInventory.UI.FullUnlock}"
 	}
 }
