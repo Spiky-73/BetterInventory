@@ -51,7 +51,7 @@ public abstract class ModInventory : ModType, ILocalizedModType {
 
     public virtual int? MaxStack => null;
 
-    public virtual void PostMove(Player player, InventorySlots slots, int slot) { }
+    public virtual void Focus(Player player, InventorySlots slots, int slot) { }
 
     public virtual bool FitsSlot(Player player, Item item, InventorySlots slots, int index, out IList<int> itemsToMove) {
         itemsToMove = Array.Empty<int>();
@@ -75,8 +75,8 @@ public abstract class ModInventory : ModType, ILocalizedModType {
 
     public virtual void OnSlotChange(Player player, InventorySlots slots, int index) {}
 
-    public void AddSlots(string? locKey, Predicate<Item>? accepts, int context, Func<Player, ListIndices<Item>> items) => AddSlots(locKey, accepts, (context, items));
-    public void AddSlots(string? locKey, Predicate<Item>? accepts, params (int context, Func<Player, ListIndices<Item>> items)[] slots) => _slots.Add(new(this, locKey, accepts, slots));
+    protected void AddSlots(string? locKey, Predicate<Item>? accepts, int context, Func<Player, ListIndices<Item>> items) => AddSlots(locKey, accepts, (context, items));
+    protected void AddSlots(string? locKey, Predicate<Item>? accepts, params (int context, Func<Player, ListIndices<Item>> items)[] slots) => _slots.Add(new(this, locKey, accepts, slots));
 
     protected sealed override void Register() {
         ModTypeLookup<ModInventory>.Register(this);
@@ -88,6 +88,5 @@ public abstract class ModInventory : ModType, ILocalizedModType {
     public string LocalizationCategory => "Inventories";
     public virtual LocalizedText DisplayName => this.GetLocalization("DisplayName", PrettyPrintName);
 
-    // private readonly List<InventorySlotsOld> _slots = new();
     private readonly List<InventorySlots> _slots = new();
 }

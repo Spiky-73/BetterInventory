@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using BetterInventory.ItemSearch;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
@@ -54,12 +56,13 @@ public sealed class RecipeFiltering : ILoadable {
     }
 
     public static void DrawFilters(int hammerX, int hammerY){
+        if(!Enabled) return;
+
         static void OnFilterChanges() {
             FilterRecipes();
             SoundEngine.PlaySound(SoundID.MenuTick);
         }
-        
-        if(!Enabled) return;
+
         int i = 0;
         int x = hammerX - TextureAssets.InfoIcon[0].Width() - 1;
 
@@ -109,36 +112,41 @@ public sealed class RecipeFiltering : ILoadable {
     
     private void HookFilterRecipes(On_Recipe.orig_FindRecipes orig, bool canDelayCheck) {
         orig(canDelayCheck);
-        if(!canDelayCheck) FilterRecipes(true);
-    }
+        if (canDelayCheck) return;
 
-    public static void FilterRecipes(bool saveFilters = false){
         int oldRecipe = Main.availableRecipe[Main.focusRecipe];
         float focusY = Main.availableRecipeY[Main.focusRecipe];
 
-        EntryFilterer<Item, CreativeFilterWrapper> filterer = LocalFilters.Filterer;
-        Recipe.ClearAvailableRecipes();
-        if(saveFilters) RecipesInFilter.Clear();
-        for (int i = 0; i < filterer.AvailableFilters.Count; i++) RecipesInFilter.Add(0);
-        
-        if(saveFilters) {
-            foreach(int index in ItemSearch.BetterGuide.GetRecipesInOrder()) {
-                for (int i = 0; i < filterer.AvailableFilters.Count; i++) if(filterer.AvailableFilters[i].FitsFilter(Main.recipe[index].createItem)) RecipesInFilter[i]++;
-            }
-            for (int i = 0; i < filterer.AvailableFilters.Count; i++) {
-                if(RecipesInFilter[i] == 0 && filterer.IsFilterActive(i)) filterer.ToggleFilter(i);
-            }
-        }
-        foreach(int index in ItemSearch.BetterGuide.GetRecipesInOrder()) {
-            if (Enabled && !filterer.FitsFilter(Main.recipe[index].createItem)) continue;
-            Reflection.Recipe.AddToAvailableRecipes.Invoke(index);
-        }
+        FilterRecipes(true);
 
         Reflection.Recipe.TryRefocusingRecipe.Invoke(oldRecipe);
         Reflection.Recipe.VisuallyRepositionRecipes.Invoke(focusY);
     }
 
+    public static void FilterRecipes(bool saveRecipes = false){
+        if (!Enabled) return;
+        EntryFilterer<Item, CreativeFilterWrapper> filterer = LocalFilters.Filterer;
+
+        if (saveRecipes) {
+            Recipes = Main.availableRecipe[..Main.numAvailableRecipes];
+            RecipesInFilter.Clear();
+            for (int i = 0; i < filterer.AvailableFilters.Count; i++) RecipesInFilter.Add(0);
+        }
+
+        Recipe.ClearAvailableRecipes();
+        foreach(int r in Recipes) {
+            for (int i = 0; i < filterer.AvailableFilters.Count; i++) {
+                if(filterer.AvailableFilters[i].FitsFilter(Main.recipe[r].createItem)) {
+                    if (saveRecipes) RecipesInFilter[i]++;
+                    Reflection.Recipe.AddToAvailableRecipes.Invoke(r);
+                    break;
+                }
+            }
+        }
+    }
+
     public static readonly List<int> RecipesInFilter = new();
+    public static int[] Recipes = Array.Empty<int>();
 
     public static Asset<Texture2D> RecipeFilterBack => ModContent.Request<Texture2D>($"BetterInventory/Assets/Recipe_Filter_Back");
     public static Asset<Texture2D> RecipeFilters => ModContent.Request<Texture2D>($"BetterInventory/Assets/Recipe_Filters");

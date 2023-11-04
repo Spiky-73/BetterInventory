@@ -18,7 +18,6 @@ public sealed class BetterCrafting : ILoadable {
     
     public void Load(Mod mod) {
         On_Main.DrawInterface_36_Cursor += DrawCustomCursor;
-        On_Main.HoverOverCraftingItemButton += OverrideHover;
         On_Main.TryAllowingToCraftRecipe += TryAllowingToCraftRecipe;
 
         IL_Main.DrawInventory += ILScrolls;
@@ -156,7 +155,7 @@ public sealed class BetterCrafting : ILoadable {
                 Main.craftingHide = false;
                 return true;
             }
-            else if (BetterGuide.Enabled) return BetterGuide.NoRecipeListClick(i);
+            BetterGuide.RecipeListHover(i);
             return false;
         });
         cursor.EmitBrtrue(noClick!);
@@ -170,9 +169,8 @@ public sealed class BetterCrafting : ILoadable {
         // ...
     }
 
-    private static void OverrideHover(On_Main.orig_HoverOverCraftingItemButton orig, int recipeIndex) {
-        if (Config.craftOverrides && (!BetterGuide.Enabled || BetterGuide.AvailableRecipes.Contains(Main.availableRecipe[recipeIndex])) && recipeIndex == Main.focusRecipe && ItemSlot.ShiftInUse) Main.cursorOverride = CraftCursorID;
-        orig(recipeIndex);
+    public static void OverrideHover(int recipeIndex) {
+        if (Config.craftOverrides && recipeIndex == Main.focusRecipe && ItemSlot.ShiftInUse) Main.cursorOverride = CraftCursorID;
     }
     private static void DrawCustomCursor(On_Main.orig_DrawInterface_36_Cursor orig) {
         if (Main.cursorOverride == CraftCursorID) {

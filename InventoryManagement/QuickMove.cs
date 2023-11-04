@@ -109,9 +109,9 @@ public sealed class QuickMove : ILoadable {
             int targetSlot = Math.Min(_moveTargetSlot, _moveChain[_moveIndex].Items(player).Count - 1);
             _movedItems = Move(player, _moveSource.Items(player)[_moveSourceSlot], _moveSource, _moveSourceSlot, _moveChain[_moveIndex], targetSlot);
 
-            _moveChain[_moveIndex].Inventory.PostMove(player, _moveChain[_moveIndex], targetSlot);
+            _moveChain[_moveIndex].Inventory.Focus(player, _moveChain[_moveIndex], targetSlot);
         } else {
-            _moveSource.Inventory.PostMove(player, _moveSource, _moveSourceSlot);
+            _moveSource.Inventory.Focus(player, _moveSource, _moveSourceSlot);
         }
         _selectedItem[1] = player.selectedItem;
         SoundEngine.PlaySound(SoundID.Grab);

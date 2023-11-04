@@ -52,7 +52,7 @@ RecipeScroll: {
 
 	listScroll: {
 		Label: Scroll in Recipe List
-		Tooltip: "Disable instant recipe scroll when selecting a recipe on the recipe list "
+		Tooltip: Replace the instant recipe list scroll with a fast scroll
 	}
 }
 
@@ -129,6 +129,14 @@ QuickMove: {
 ItemSearch: {
 	DisplayName: Item Search
 
+	// searchRecipes: ghost item + hotkey
+	// v betterGuide: More Recipes + Tooltip + Available recipes / materials
+	//     v favorite
+	//     v craftInMenu
+	//     guideTile
+	//     progression
+	
+	
 	betterGuide: {
 		Label: Better Guide
 		Tooltip: Adds a toggle to change the between available recipes, tile recipes and all recipes
@@ -136,12 +144,20 @@ ItemSearch: {
 
 	searchRecipes: {
 		Label: Search Recipes
-		Tooltip: Hold the "Search Item" key and Left Click an item to search its recipe
+		Tooltip:
+			'''
+			Hold the "Search Item" key and Left Click an item to search its recipe
+			Hold the "Search Item" key and Middle Click to clear the searched item
+			'''
 	}
 
 	searchDrops: {
 		Label: Search Drops
-		Tooltip: Hold the "Search Item" key and Right Click an item to search its drops
+		Tooltip:
+			'''
+			Hold the "Search Item" key and Right Click an item to search its drops
+			Hold the "Search Item" key and Middle Click to clear the searched item
+			'''
 	}
 
 	unknownDisplay: {
@@ -149,9 +165,9 @@ ItemSearch: {
 		Tooltip:
 			'''
 			Changed how Recipes and NPCs you have not discovered are displayed in the Recipe list and Bestiary 
-			Hidden : Not displayed
-			Unknown : Displayed as '?'
-			Known : Displayed as fully known. Does not affect Bestiary completion
+			{$Mods.BetterInventory.Configs.UnknownSearchBehaviour.Hidden}: Not displayed
+			{$Mods.BetterInventory.Configs.UnknownSearchBehaviour.Unknown}: Displayed as '?'
+			{$Mods.BetterInventory.Configs.UnknownSearchBehaviour.Known}: Displayed as fully known. Does not affect Bestiary completion
 			'''
 	}
 
@@ -159,8 +175,8 @@ ItemSearch: {
 		Label: Search Item
 		Tooltip:
 			'''
-			Tap the "Search Item" key to close the current menu or open the Recipe list
-			Double tap the "Search Item" key to open the Bestiary
+			Tap this key to close the current menu or open the Recipe list
+			Double tap this key to open the Bestiary
 			'''
 	}
 }
@@ -170,15 +186,26 @@ BetterGuide: {
 
 	favoriteRecipes: {
 		Label: Favorite Recipes
-		Tooltip: Allows you to Favorite or Blacklist recipes
+		Tooltip: Allows you to Favorite recipes
 	}
-}
 
-SearchKey: {
-	Tooltip: ""
+	guideTile: {
+		Label: guide Tile
+		Tooltip: ""
+	}
 
-	Keybind: {
-		Label: Keybind
+	unknownDisplay: {
+		Label: unknown Display
+		Tooltip: ""
+	}
+
+	craftInMenu: {
+		Label: craft In Menu
+		Tooltip: ""
+	}
+
+	progression: {
+		Label: progression
 		Tooltip: ""
 	}
 }
@@ -209,4 +236,13 @@ UnknownDisplay: {
 	Hidden.Label: Hidden
 	Unknown.Label: Unknown
 	Known.Label: Known
+}
+
+SearchRecipes: {
+	Tooltip: ""
+
+	craftInMenu: {
+		Label: craft In Menu
+		Tooltip: ""
+	}
 }

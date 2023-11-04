@@ -30,6 +30,6 @@ public sealed class InventoryManagement : ModConfig {
 public sealed class QuickMove {
     [Range(0, 3600), DefaultValue(60)] public int chainTime = 60;
     [DefaultValue(true)] public bool showTooltip = true;
-    [DefaultValue(false)] public bool highlightSlots = false; // TODO impl
+    [DefaultValue(false)] public bool highlightSlots = false; // TODO implement
     [DefaultValue(true)] public bool returnToSlot = true;
 }

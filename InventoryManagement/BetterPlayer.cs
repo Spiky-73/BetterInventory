@@ -1,4 +1,5 @@
-using BetterInventory.Crafting;
+using System.Collections.Generic;
+using BetterInventory.ItemSearch;
 using Terraria;
 using Terraria.GameInput;
 using Terraria.ModLoader;
@@ -91,6 +92,10 @@ public sealed class BetterPlayer : ModPlayer {
             return false;
         }
         return true;
+    }
+
+    public override IEnumerable<Item> AddMaterialsForCrafting(out ItemConsumedCallback itemConsumedCallback) {
+        return BetterGuide.AddMaterials(out itemConsumedCallback);
     }
 
     private static void HookTryOpenContainer(On_ItemSlot.orig_TryOpenContainer orig, Item item, Player player) {

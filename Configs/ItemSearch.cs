@@ -8,8 +8,8 @@ namespace BetterInventory.Configs;
 
 public sealed class ItemSearch : ModConfig {  
     public Toggle<BetterGuide> betterGuide = new(true);
-    [DefaultValue(true)] public bool searchRecipes; // TODO impl
-    [DefaultValue(true)] public bool searchDrops;
+    [DefaultValue(true)] public bool searchRecipes;
+    [DefaultValue(true)] public bool searchDrops; // TODO split
     [DefaultValue(UnknownDisplay.Known)] public UnknownDisplay unknownDisplay;
 
     [JsonIgnore, ShowDespiteJsonIgnore]
@@ -22,13 +22,13 @@ public sealed class ItemSearch : ModConfig {
     public override ConfigScope Mode => ConfigScope.ClientSide;
     public static ItemSearch Instance = null!;
 
+    public override void OnChanged() => SearchItem.UpdateGuide();
+
     public enum UnknownDisplay { Hidden, Unknown, Known }
 }
 
-public sealed class BetterGuide {
+public class BetterGuide {
     [DefaultValue(true)] public bool favoriteRecipes = true;
-}
-
-
-public sealed class SearchKey {
+    [DefaultValue(true)] public bool craftInMenu = true;
+    [DefaultValue(true)] public bool guideTile = true; // TODO implement
 }

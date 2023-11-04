@@ -33,7 +33,15 @@ public readonly record struct Range(int Start, int End) : IList<int> {
     void IList<int>.RemoveAt(int index) => throw new NotSupportedException();
 }
 
-public sealed class RangeSet : IEnumerable<Range> {
+public sealed class RangeSet : IEnumerable<int> {
+
+    public RangeSet() {
+        Count = 0;
+        _ranges = new();
+    }
+
+    public RangeSet(IEnumerable<int> values) :this() => AddRange(values);
+
 
     public ReadOnlyCollection<Range> Ranges => new(_ranges);
 
@@ -91,13 +99,13 @@ public sealed class RangeSet : IEnumerable<Range> {
         Count = 0;
     }
 
-    public IEnumerable<int> Values() {
-        foreach(Range range in this){
-            foreach(int value in range) yield return value;
+    public IEnumerable<Range> GetRanges() => _ranges;
+    public IEnumerator<int> GetEnumerator() {
+        foreach (Range range in GetRanges()){
+            foreach (int value in range) yield return value;
         }
     }
-    public IEnumerator<Range> GetEnumerator() => _ranges.GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    private readonly List<Range> _ranges = new();
+    private readonly List<Range> _ranges;
 }

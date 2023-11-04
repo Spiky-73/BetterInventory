@@ -10,19 +10,20 @@ public sealed class VisibilityFilters {
     
     public Flags Visibility { get; set; } = Flags.Default;
 
-    public static Flags CurrentVisibility => BetterGuide.CraftingStations.ContainsKey(Main.guideItem.createTile) ? Flags.ShowAllTile : Main.guideItem.IsAir ? Flags.ShowAllAir : Flags.ShowAllGuide;
-    public static Flags CurrentTileMode => CurrentVisibility switch {
-        Flags.ShowAllTile => Flags.TileModeAir,
-        Flags.ShowAllAir => Flags.TileMode,
-        _ => Flags.TileModeGuide
-    };
+    public static Flags CurrentVisibility => Main.guideItem.IsAir ? Flags.ShowAllAir : Flags.ShowAllGuide;
     public bool ShowAllRecipes {
         get => Visibility.HasFlag(CurrentVisibility);
         set => SetFlag(CurrentVisibility, value);
     }
-    public bool TileMode {
-        get => Visibility.HasFlag(CurrentTileMode);
-        set => SetFlag(CurrentTileMode, value);
+
+    public bool IsKnownRecipe(Recipe recipe) {
+        if (HasOwnedItems(recipe.createItem) || recipe.requiredItem.Exists(i => HasOwnedItems(i))) return true;
+        foreach (int group in recipe.acceptedGroups) {
+            foreach (int type in RecipeGroup.recipeGroups[group].ValidItems) {
+                if (HasOwnedItems(type)) return true;
+            }
+        }
+        return false;
     }
 
     public bool HasOwnedItems(Item item) => OwnedItems.TryGetValue(item.ModItem?.Mod.Name ?? "Terraria", out var items) && items.Contains(item.type);
@@ -36,7 +37,7 @@ public sealed class VisibilityFilters {
         OwnedItems[mod].Add(type);
     }
 
-    public FavoriteState GetFavoriteState(int recipe) => BetterGuide.Config.favoriteRecipes ? FavoriteRecipes.GetValueOrDefault(recipe) : FavoriteState.Default;
+    public FavoriteState GetFavoriteState(int recipe) => FavoriteRecipes.GetValueOrDefault(recipe);
     public void SetFavoriteState(int recipe, FavoriteState state) {
         if (state == FavoriteState.Default) FavoriteRecipes.Remove(recipe);
         else FavoriteRecipes[recipe] = state;
@@ -55,14 +56,9 @@ public sealed class VisibilityFilters {
 
     [System.Flags]
     public enum Flags {
-        Default = TileMode | ShowAllTile | ShowAllGuide,
-
+        Default = ShowAllGuide,
         ShowAllAir =    1 << 0,
         ShowAllGuide =  1 << 1,
-        ShowAllTile =   1 << 2,
-        TileMode =      1 << 3,
-        TileModeAir =   1 << 4,
-        TileModeGuide = 1 << 5,
     }
 }
 
@@ -94,7 +90,7 @@ public sealed class VisibilityFiltersSerialiser : TagSerializer<VisibilityFilter
 
         List<ItemDefinition> items = new();
         foreach((string mod, DataStructures.RangeSet set) in value.OwnedItems) {
-            foreach (DataStructures.Range range in set) {
+            foreach (DataStructures.Range range in set.GetRanges()) {
                 items.Add(new(range.Start));
                 items.Add(new(range.End));
             }
