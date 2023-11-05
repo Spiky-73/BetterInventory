@@ -3,6 +3,7 @@ using BetterInventory.ItemSearch;
 using Terraria;
 using Terraria.GameInput;
 using Terraria.ModLoader;
+using Terraria.ModLoader.Config;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
 
@@ -73,7 +74,7 @@ public sealed class BetterPlayer : ModPlayer {
 
     public override void ProcessTriggers(TriggersSet triggersSet) {
         QuickMove.ProcessTriggers(Player);
-        ItemSearch.SearchItem.ProcessSearchTap();
+        SearchItem.ProcessSearchTap();
         if (FavoritedBuffKb.JustPressed) FavoritedBuff(Player);
         foreach (BuilderAccToggle bat in BuilderAccToggles) bat.Process(Player);
     }
@@ -163,12 +164,13 @@ public sealed class BetterPlayer : ModPlayer {
     public override void SaveData(TagCompound tag) {
         tag[VisibilityTag] = VisibilityFilters;
         tag[RecipesTag] = RecipeFilters;
+        if (!Guide.guideTile.IsAir) tag[GuideTileTag] = Guide.guideTile;
     }
 
     public override void LoadData(TagCompound tag) {
-        VisibilityFilters = tag.Get<ItemSearch.VisibilityFilters>(VisibilityTag);
+        VisibilityFilters = tag.Get<VisibilityFilters>(VisibilityTag);
         foreach(Item item in Player.inventory) if(!item.IsAir) VisibilityFilters.AddOwnedItems(item);
-
+        if (tag.TryGet(GuideTileTag, out Item guide)) Guide.guideTile = guide;
         RecipeFilters = tag.Get<Crafting.RecipeFilters>(RecipesTag);
     }
 
@@ -178,8 +180,9 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public Crafting.RecipeFilters RecipeFilters { get; set; } = null!;
-    public ItemSearch.VisibilityFilters VisibilityFilters { get; set; } = new();
+    public VisibilityFilters VisibilityFilters { get; set; } = new();
 
     public const string VisibilityTag = "visibility";
     public const string RecipesTag = "recipes";
+    public const string GuideTileTag = "guideTile";
 }

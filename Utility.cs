@@ -3,14 +3,31 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.ObjectData;
 
 namespace BetterInventory;
 
 public static class Utility {
+
+    public static void DrawTileFrame(SpriteBatch spriteBatch, int tile, Vector2 position, Vector2 origin, float scale) {
+        Main.instance.LoadTiles(tile);
+
+        TileObjectData tileObjectData = TileObjectData.GetTileData(tile, 0);
+        (int width, int height, int padding) = tileObjectData is null ? (1, 1, 0) : (tileObjectData.Width, tileObjectData.Height, tileObjectData.CoordinatePadding);
+
+        Vector2 topLeft = position - new Vector2(width, height) * 16 * origin * scale;
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                spriteBatch.Draw(TextureAssets.Tile[tile].Value, topLeft + new Vector2(i * 16, j * 16) * scale, new Rectangle(i * 16 + i * padding, j * 16 + j * padding, 16, 16), Color.White, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
+            }
+        }
+    }
 
     public static Item? LastStack(this Player player, Item item, bool notArg = false) {
         for (int i = player.inventory.Length - 1 - 8; i >= 0; i--) {

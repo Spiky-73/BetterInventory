@@ -79,10 +79,10 @@ public sealed class BetterCrafting : ILoadable {
         cursor.EmitLdloc(130);
         cursor.EmitDelegate((int x, int i) => {
             if (!Config.tweeks) return x;
-            if (!Main.recBigList) return x - 2 * i;
-            x -= i * 40;
+            if (!Main.recBigList) return x + VanillaCurrection * i;
+            x -= i * VanillaMaterialSpcacing;
             if (i >= MaterialsPerLine[0]) i = MaterialsPerLine[0] - MaterialsPerLine[1] + (i - MaterialsPerLine[0]) % MaterialsPerLine[1];
-            return x + 38 * i;
+            return x + (VanillaMaterialSpcacing + VanillaCurrection) * i;
         });
 
         //             ++ <wrappingY>
@@ -91,7 +91,7 @@ public sealed class BetterCrafting : ILoadable {
         cursor.EmitDelegate((int y, int i) => {
             if (!Config.tweeks || !Main.recBigList) return y;
             i = i < MaterialsPerLine[0] ? 0 : ((i - MaterialsPerLine[0]) / MaterialsPerLine[1] + 1);
-            return y + 38 * i;
+            return y + (VanillaMaterialSpcacing + VanillaCurrection) * i;
         });
 
         //             ...
@@ -320,5 +320,8 @@ public sealed class BetterCrafting : ILoadable {
 
     private static int _recDelay = 0;
     public static readonly int[] MaterialsPerLine = new int[] { 6, 4 };
+
+    public const int VanillaMaterialSpcacing = 40;
+    public const int VanillaCurrection = -2;
 
 }

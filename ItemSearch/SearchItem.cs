@@ -1,5 +1,4 @@
-using System;
-using System.IO;
+using BetterInventory.Items;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
@@ -43,7 +42,7 @@ public sealed class SearchItem : ILoadable {
     private Vector2 HookRedirectThickCursor(On_Main.orig_DrawThickCursor orig, bool smart) => Enabled && s_redir ? Vector2.Zero : orig(smart);
     private static void HookDrawInterfaceCursor(On_Main.orig_DrawInterface_36_Cursor orig) {
         s_redir = false;
-        if (Enabled && Keybind.Current && !Main.HoverItem.IsAir && Main.HoverItem.type != Items.UnknownItem.Instance.type) {
+        if (Enabled && Keybind.Current && !Main.HoverItem.IsAir && Main.HoverItem.type != Items.UnknownItem.ID) {
             s_allowClick = true;
             Main.cursorOverride = CursorOverrideID.Magnifiers;
         }
@@ -121,11 +120,13 @@ public sealed class SearchItem : ILoadable {
     private static void OndropItems(On_Player.orig_dropItemCheck orig, Player self) {
         if (!Config.searchRecipes) {
             orig(self);
+            Guide.dropItemCheck(self);
             return;
         }
         bool old = Main.InGuideCraftMenu;
         Main.InGuideCraftMenu = true;
         orig(self);
+        Guide.dropItemCheck(self);
         Main.InGuideCraftMenu = old;
     }
 
@@ -160,22 +161,45 @@ public sealed class SearchItem : ILoadable {
         (Item mouse, Main.mouseItem) = (Main.mouseItem, item);
         (int cursor, Main.cursorOverride) = (Main.cursorOverride, 0);
         (bool left, Main.mouseLeft, bool rel, Main.mouseLeftRelease) = (Main.mouseLeft, true, Main.mouseLeftRelease, true);
-        ItemSlot.LeftClick(ref Main.guideItem, ContextID.GuideItem);
-        Recipe.FindRecipes();
+
+        Item[] items = new Item[] { Main.guideItem, Guide.guideTile };
+        int slot = Guide.Config.guideTile && Guide.IsCraftingTileItem(Main.mouseItem) ? 1 : 0;
+        if (slot == 1) {
+            bool flag;
+            if (item.type == CraftingItem.ID) {
+                if (item.createTile == -1) flag = false;
+                else if (item.createTile != -1) flag = item.createTile == items[slot].createTile;
+                else flag = (item.ModItem as CraftingItem)!.condition?.Description.Key == (items[slot].ModItem as CraftingItem)?.condition?.Description.Key;
+            } else flag = items[1].type == item.type;
+            
+            if (flag) {
+                slot = 0;
+                items[1].TurnToAir();
+            } else if (items[0].type == item.type) items[0].TurnToAir();
+        }
+        ItemSlot.LeftClick(items, ContextID.GuideItem, slot);
+        (Main.guideItem, Guide.guideTile) = (items[0], items[1]);
+
         Main.mouseItem = mouse;
         Main.cursorOverride = cursor;
         (Main.mouseLeft, Main.mouseLeftRelease) = (left, rel);
+        Recipe.FindRecipes();
     }
 
     public static bool OverrideHover(Item[] inv, int context, int slot) {
         if (!Config.searchRecipes || context != ContextID.GuideItem) return false;
-        if (Main.mouseItem.IsAir) Main.cursorOverride = CursorOverrideID.TrashCan;
+        if (Main.mouseItem.IsAir && !inv[slot].IsAir) Main.cursorOverride = CursorOverrideID.TrashCan;
         return true;
     }
     public static bool OverrideLeftClick(Item[] inv, int context, int slot) {
         if (!Config.searchRecipes || context != ContextID.GuideItem) return false;
         if (ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) != 0) return true;
         inv[slot] = new(Main.mouseItem.type, 1);
+        if(Main.mouseItem.type == CraftingItem.ID) {
+            inv[slot].createTile = Main.mouseItem.createTile;
+            (inv[slot].ModItem as CraftingItem)!.condition = (Main.mouseItem.ModItem as CraftingItem)!.condition;
+        }
+
         SoundEngine.PlaySound(SoundID.Grab);
         return true;
     }

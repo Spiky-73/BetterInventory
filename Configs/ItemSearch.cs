@@ -31,7 +31,7 @@ public sealed class ItemSearch : ModConfig {
 public class BetterGuide {
     [DefaultValue(true)] public bool favoriteRecipes = true;
     [DefaultValue(true)] public bool craftInMenu = true;
-    [DefaultValue(true)] public bool guideTile = true; // TODO implement
+    [DefaultValue(true)] public bool guideTile = true;
 }
 
 public class BetterBestiary {

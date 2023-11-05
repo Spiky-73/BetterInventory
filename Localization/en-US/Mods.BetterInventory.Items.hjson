@@ -2,3 +2,8 @@ UnknownItem: {
 	DisplayName: ???
 	Tooltip: ""
 }
+
+CraftingItem: {
+	DisplayName: By Hand
+	Tooltip: ""
+}

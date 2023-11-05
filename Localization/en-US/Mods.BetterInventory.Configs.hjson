@@ -203,7 +203,11 @@ BetterGuide: {
 
 	guideTile: {
 		Label: Guide Tile
-		Tooltip: Adds a second slot next to the guide item to filter by crafting station
+		Tooltip:
+			'''
+			Adds a second slot next to the guide item to filter by crafting station or conditions
+			Click it when empty to filter by created By Hand
+			'''
 	}
 
 	craftInMenu: {
