@@ -7,8 +7,8 @@ namespace BetterInventory.Configs;
 public sealed class InventoryManagement : ModConfig {
     [DefaultValue(true)] public bool smartConsumption;
     [DefaultValue(true)] public bool smartAmmo;
-    [DefaultValue(SmartPickupLevel.AllItems)] public SmartPickupLevel smartPickup = SmartPickupLevel.AllItems;
-    [DefaultValue(false)] public bool autoEquip = false;
+    [DefaultValue(SmartPickupLevel.AllItems)] public SmartPickupLevel smartPickup = SmartPickupLevel.AllItems; // TODO implement
+    [DefaultValue(false)] public bool autoEquip = false; // TODO implement
 
     public Toggle<QuickMove> quickMove = new(true);
     [DefaultValue(true)] public bool fastRightClick;
