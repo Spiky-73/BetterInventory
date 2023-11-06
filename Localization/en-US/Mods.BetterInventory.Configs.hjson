@@ -81,7 +81,7 @@ InventoryManagement: {
 
 	quickMove: {
 		Label: "[i:3620] Quick Move"
-		Tooltip: Hover over an item and press a hotbar hotkey to move it between different contexts
+		Tooltip: Hover over an item and press a hotbar keybind to move it between different contexts
 	}
 
 	fastRightClick: {
@@ -95,12 +95,12 @@ InventoryManagement: {
 	}
 
 	builderKeys: {
-		Label: Builder Keybinds
+		Label: "[i:3061] Builder Keybinds"
 		Tooltip: Enables keybinds to toggles the builder toggles
 	}
 
 	FavoriteBuffKeybind: {
-		Label: Favorite Quick Buff
+		Label: "[i:2348] Favorite Quick Buff"
 		Tooltip: Similar to Quick Buff, but only consumes favorite items
 	}
 }

@@ -88,7 +88,7 @@ public sealed class Guide : ModSystem {
         Vector2 position = new(minX, inventoryY - delta.Y);
         int slot = 0;
         void MovePosition() {
-            if (++slot % TilesPerLine == 0) {
+            if (BetterCrafting.Config.tweeks && ++slot % TilesPerLine == 0) {
                 position.X = minX;
                 position.Y += delta.Y;
                 if (slot == TilesPerLine) MovePosition();
