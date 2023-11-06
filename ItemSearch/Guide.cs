@@ -584,11 +584,15 @@ public sealed class Guide : ModSystem {
             return true;
         }
         if (context == ContextID.GuideItem && slot == 1) {
-            if (inv[slot].type == CraftingItem.ID) inv[slot].TurnToAir();
-            else if (inv[slot].IsAir && Main.mouseItem.IsAir) {
+            if (inv[slot].type == CraftingItem.ID) {
+                inv[slot].TurnToAir();
+                Recipe.FindRecipes();
+                SoundEngine.PlaySound(SoundID.Grab);
+            } else if (inv[slot].IsAir && Main.mouseItem.IsAir) {
                 inv[slot] = new(CraftingItem.ID);
                 guideTile = Main.mouseItem;
                 Recipe.FindRecipes();
+                SoundEngine.PlaySound(SoundID.Grab);
                 return true;
             }
             guideTile = Main.mouseItem;

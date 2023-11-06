@@ -1,3 +1,4 @@
+using System;
 using BetterInventory.Items;
 using Microsoft.Xna.Framework;
 using Terraria;
@@ -29,9 +30,10 @@ public sealed class SearchItem : ILoadable {
 
         On_UIBestiaryTest.Recalculate += HookDelaySearch;
 
+        On_ItemSlot.RightClick_ItemArray_int_int += HookOverrideRightClick;
+
         On_Player.dropItemCheck += OndropItems;
     }
-
 
     public void Unload() {}
 
@@ -193,7 +195,7 @@ public sealed class SearchItem : ILoadable {
     }
     public static bool OverrideLeftClick(Item[] inv, int context, int slot) {
         if (!Config.searchRecipes || context != ContextID.GuideItem) return false;
-        if (ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) != 0) return true;
+        if (inv[slot].IsAir && Main.mouseItem.IsAir || ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) != 0) return true;
         inv[slot] = new(Main.mouseItem.type, 1);
         if(Main.mouseItem.type == CraftingItem.ID) {
             inv[slot].createTile = Main.mouseItem.createTile;
@@ -203,6 +205,17 @@ public sealed class SearchItem : ILoadable {
         SoundEngine.PlaySound(SoundID.Grab);
         return true;
     }
+
+    private void HookOverrideRightClick(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
+        if (!Config.searchRecipes || context != ContextID.GuideItem || !Main.mouseRight || !Main.mouseRightRelease){
+            orig(inv, context, slot);
+            return;
+        }
+        if (inv[slot].IsAir) return;
+        inv[slot].TurnToAir();
+        SoundEngine.PlaySound(SoundID.Grab);
+    }
+
 
     public static void UpdateGuide() {
         if (Config.searchDrops && (Main.guideItem.stack >= 1 || Main.guideItem.prefix != 0)) {
