@@ -16,7 +16,7 @@ public sealed class ItemSearch : ModConfig {
     [JsonIgnore, ShowDespiteJsonIgnore]
     public string SearchItemKeybind {
         get {
-            var keys = SearchItem.Keybind.GetAssignedKeys();
+            var keys = SearchItem.Keybind?.GetAssignedKeys() ?? new();
             return keys.Count == 0 ? Lang.inter[23].Value : keys[0];
         }
     }    

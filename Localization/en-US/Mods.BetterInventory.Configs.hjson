@@ -93,6 +93,16 @@ InventoryManagement: {
 		Label: "[i:1503] Extra Item Right Click"
 		Tooltip: Item that can be right clicked in the inventory can be right clicked when held
 	}
+
+	builderKeys: {
+		Label: Builder Keybinds
+		Tooltip: Enables keybinds to toggles the builder toggles
+	}
+
+	FavoriteBuffKeybind: {
+		Label: Favorite Quick Buff
+		Tooltip: Similar to Quick Buff, but only consumes favorite items
+	}
 }
 
 SmartPickupLevel: {

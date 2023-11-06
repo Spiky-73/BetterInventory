@@ -3,7 +3,6 @@ using BetterInventory.ItemSearch;
 using Terraria;
 using Terraria.GameInput;
 using Terraria.ModLoader;
-using Terraria.ModLoader.Config;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
 
@@ -76,7 +75,7 @@ public sealed class BetterPlayer : ModPlayer {
         QuickMove.ProcessTriggers(Player);
         SearchItem.ProcessSearchTap();
         if (FavoritedBuffKb.JustPressed) FavoritedBuff(Player);
-        foreach (BuilderAccToggle bat in BuilderAccToggles) bat.Process(Player);
+        if(Config.builderKeys) foreach (BuilderAccToggle bat in BuilderAccToggles) bat.Process(Player);
     }
 
     public override bool HoverSlot(Item[] inventory, int context, int slot) {

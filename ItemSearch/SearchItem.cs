@@ -205,9 +205,14 @@ public sealed class SearchItem : ILoadable {
     }
 
     public static void UpdateGuide() {
-        if (Config.searchDrops || (Main.guideItem.stack <= 1 && Main.guideItem.prefix == 0)) return;
-        (Item item, Main.guideItem) = (Main.guideItem, new(Main.guideItem.type));
-        Main.LocalPlayer.GetDropItem(ref item);
+        if (Config.searchDrops && (Main.guideItem.stack >= 1 || Main.guideItem.prefix != 0)) {
+            (Item item, Main.guideItem) = (Main.guideItem, new(Main.guideItem.type));
+            Main.LocalPlayer.GetDropItem(ref item);
+        }
+        if (Config.searchDrops && (Guide.guideTile.stack >= 1 || Guide.guideTile.prefix != 0)) {
+            (Item item, Guide.guideTile) = (Guide.guideTile, new(Guide.guideTile.type));
+            Main.LocalPlayer.GetDropItem(ref item);
+        }
     }
 
     private static Item? s_bestiaryDelayedItem;
