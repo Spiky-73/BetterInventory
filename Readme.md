@@ -4,7 +4,7 @@ This mods adds small features designed to improve the player Inventory and all t
 I STRONGLY ADVISE you to read the mod configs to learn about all the features and enable/disable them.
 Feel free to suggest new feature in the Steam Workshop page or by creating a new issues on Gihtub. 
 
-Keep in mind, this mod is still in developement. If you find a bug, please report it in the Steam Workshop page or Gihtub.
+Keep in mind, this mod is still in developement. If you find a bug, please report it on the Steam Workshop page or Gihtub.
 
 ## Major Features: 
  - More item actions in the invnetory
