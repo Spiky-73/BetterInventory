@@ -584,18 +584,19 @@ public sealed class Guide : ModSystem {
             return true;
         }
         if (context == ContextID.GuideItem && slot == 1) {
-            if (inv[slot].type == CraftingItem.ID) {
+            if (inv[slot].type == CraftingItem.ID && Main.mouseItem.IsAir) {
                 inv[slot].TurnToAir();
+                guideTile.TurnToAir();
                 Recipe.FindRecipes();
                 SoundEngine.PlaySound(SoundID.Grab);
             } else if (inv[slot].IsAir && Main.mouseItem.IsAir) {
                 inv[slot] = new(CraftingItem.ID);
-                guideTile = Main.mouseItem;
+                guideTile = new(CraftingItem.ID);
                 Recipe.FindRecipes();
                 SoundEngine.PlaySound(SoundID.Grab);
                 return true;
             }
-            guideTile = Main.mouseItem;
+            if(ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) != 0) guideTile = Main.mouseItem;
         }
         if (SearchItem.OverrideLeftClick(inv, context, slot)) return true;
         return orig(inv, context, slot);
