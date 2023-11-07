@@ -7,7 +7,7 @@ Feel free to suggest new feature in the Steam Workshop page or by creating a new
 Keep in mind, this mod is still in developement. If you find a bug, please report it on the Steam Workshop page or Gihtub.
 
 ## Key Featuress: 
- - More item actions in the invnetory
+ - More item actions in the inventory
  - A way to quickly move item between various inventory slots
  - Smarter item consumption and pickup
  - Various keybinds to toggle Builder Accessories or Quick Buff favorites items
@@ -18,6 +18,9 @@ Keep in mind, this mod is still in developement. If you find a bug, please repor
  - And more...
 
 ## Changelog
+
+### v0.2
+- Auto Equip items
 
 ### v0.1
 - Initial Pre-Release

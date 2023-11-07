@@ -9,7 +9,7 @@ public sealed class InventoryManagement : ModConfig {
     [DefaultValue(true)] public bool smartConsumption;
     [DefaultValue(true)] public bool smartAmmo;
     // [DefaultValue(SmartPickupLevel.AllItems)] public SmartPickupLevel smartPickup = SmartPickupLevel.AllItems; // TODO implement
-    // [DefaultValue(false)] public bool autoEquip = false; // TODO implement
+    [DefaultValue(AutoEquipLevel.MainSlots)] public AutoEquipLevel autoEquip;
 
     public Toggle<QuickMove> quickMove = new(true);
     [DefaultValue(true)] public bool fastRightClick;
@@ -24,6 +24,7 @@ public sealed class InventoryManagement : ModConfig {
     }
 
 
+    public enum AutoEquipLevel { Off, MainSlots, AllSlots }
     // public enum SmartPickupLevel { Off, FavoriteOnly, AllItems }
     // public bool SmartPickupEnabled(Item item) => smartPickup switch {
     //     SmartPickupLevel.AllItems => true,

@@ -115,6 +115,12 @@ public sealed class BetterPlayer : ModPlayer {
 
     private static Item HookGetItem(On_Player.orig_GetItem orig, Player self, int plr, Item newItem, GetItemSettings settings) {
         self.GetModPlayer<BetterPlayer>().VisibilityFilters.AddOwnedItems(newItem);
+        if (Config.autoEquip != Configs.InventoryManagement.AutoEquipLevel.Off) {
+            foreach (ModInventory inventory in InventoryLoader.Inventories) {
+                newItem = inventory.GetItem(self, newItem, settings, Config.autoEquip == Configs.InventoryManagement.AutoEquipLevel.MainSlots);
+                if (newItem.IsAir) return new();
+            }
+        }
         return orig(self, plr, newItem, settings);
         //     if (!Configs.ClientConfig.SmartPickupEnabled(newItem)) return orig(self, plr, newItem, settings);
         //     bool gotItems = false;

@@ -6,20 +6,25 @@ using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using System.Linq;
+using Terraria.Audio;
+using Terraria.ID;
 
 namespace BetterInventory;
 
-public class InventorySlots : IComparable<InventorySlots> {
+public sealed class InventorySlots : IComparable<InventorySlots> {
 
     public ModInventory Inventory { get; }
     public string? LocalizationKey { get; }
     public Predicate<Item>? Accepts { get; }
+    public Predicate<Item> IsMainSlot { get; }
+
     public ReadOnlyCollection<(int context, Func<Player, ListIndices<Item>> items)> Slots => new(_slots);
 
-    internal InventorySlots(ModInventory inventory, string? locKey, Predicate<Item>? accepts, params (int context, Func<Player, ListIndices<Item>> items)[] slots) {
+    internal InventorySlots(ModInventory inventory, string? locKey = null, Predicate<Item>? accepts = null, Predicate<Item>? mainSlot = null, params (int context, Func<Player, ListIndices<Item>> items)[] slots) {
         Inventory = inventory;
         LocalizationKey = locKey;
         Accepts = accepts;
+        IsMainSlot = mainSlot ?? (_ => true);
         _slots = slots;
     }
     
@@ -37,6 +42,19 @@ public class InventorySlots : IComparable<InventorySlots> {
         return 0;
     }
 
+    public Item GetItem(Player player, Item item, GetItemSettings settings, PopupTextContext textContext = PopupTextContext.RegularItemPickup) {
+        IList<Item> items = Items(player);
+        if (Accepts?.Invoke(item) == false) return item;
+        for (int i = 0; i < items.Count  && !item.IsAir; i++) {
+            if (!Inventory.FitsSlot(player, item, this, i, out var itemsToMove) || itemsToMove.Count != 0 || !items[i].Stack(item, out int tranfered, Inventory.MaxStack)) continue;
+            SoundEngine.PlaySound(SoundID.Grab);
+            items[i].position = player.position;
+            if (!settings.NoText) PopupText.NewText(textContext, items[i], tranfered, false, settings.LongText);
+            Inventory.OnSlotChange(player, this, i);
+        }
+        return item;
+    }
+
     private IList<(int context, Func<Player, ListIndices<Item>> items)> _slots;
 }
 
@@ -45,7 +63,7 @@ public abstract class ModInventory : ModType, ILocalizedModType {
     public ReadOnlyCollection<InventorySlots> Slots => _slots.AsReadOnly();
     public ReadOnlyCollection<InventorySlots> SlotsByPriority { get {
         List<InventorySlots> slots = new(Slots);
-        slots.Sort();
+        slots.SortSlots();
         return slots.AsReadOnly();
     } }
 
@@ -58,25 +76,19 @@ public abstract class ModInventory : ModType, ILocalizedModType {
         return true;
     }
 
-    public virtual Item GetItem(Player player, Item item, GetItemSettings settings) {
-        foreach (InventorySlots slots in SlotsByPriority) {
-            IList<Item> items = slots.Items(player);
-            for (int i = 0; i < items.Count; i++) {
-                if (!FitsSlot(player, item, slots, i, out _) || slots.Accepts is not null && !slots.Accepts(item)) continue;
-                if (items[i].Stack(item, MaxStack)) {
-                    OnSlotChange(player, slots, i);
-                    if (item.IsAir) return item;
-                }
-
-            }
+    public virtual Item GetItem(Player player, Item item, GetItemSettings settings, bool mainSlots = false) {
+        foreach (InventorySlots slots in Slots) {
+            if (slots.Accepts is null || (mainSlots && !slots.IsMainSlot(item))) continue;
+            item = slots.GetItem(player, item, settings, mainSlots ? PopupTextContext.ItemPickupToVoidContainer : PopupTextContext.RegularItemPickup);
+            if (item.IsAir) return new();
         }
         return item;
     }
 
     public virtual void OnSlotChange(Player player, InventorySlots slots, int index) {}
 
-    protected void AddSlots(string? locKey, Predicate<Item>? accepts, int context, Func<Player, ListIndices<Item>> items) => AddSlots(locKey, accepts, (context, items));
-    protected void AddSlots(string? locKey, Predicate<Item>? accepts, params (int context, Func<Player, ListIndices<Item>> items)[] slots) => _slots.Add(new(this, locKey, accepts, slots));
+    protected void AddSlots(int context, Func<Player, ListIndices<Item>> items, string? locKey = null, Predicate<Item>? accepts = null, Predicate<Item>? mainSlot = null) => AddSlots(locKey, accepts, mainSlot, (context, items));
+    protected void AddSlots(string? locKey = null, Predicate<Item>? accepts = null, Predicate<Item>? mainSlot = null, params (int context, Func<Player, ListIndices<Item>> items)[] slots) => _slots.Add(new(this, locKey, accepts, mainSlot, slots));
 
     protected sealed override void Register() {
         ModTypeLookup<ModInventory>.Register(this);

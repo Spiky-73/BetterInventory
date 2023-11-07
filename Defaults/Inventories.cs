@@ -14,17 +14,17 @@ namespace BetterInventory.InventoryManagement.Inventories;
 public sealed class Inventory : ModInventory {
 
     public sealed override void Load() {
-        AddSlots("Hotbar", null, (ContextID.InventoryItem, p => new ListIndices<Item>(p.inventory, new DataStructures.Range(0, 9))));
-        AddSlots(null, null, (ContextID.InventoryItem, p => new ListIndices<Item>(p.inventory, new DataStructures.Range(10, 49))));
-        AddSlots("Coin", i => i.IsACoin, (ContextID.InventoryCoin, p => new ListIndices<Item>(p.inventory, new DataStructures.Range(50, 53))));
-        AddSlots("Ammo", i => i.FitsAmmoSlot(), (ContextID.InventoryAmmo, p => new ListIndices<Item>(p.inventory, new DataStructures.Range(54, 57))));
+        AddSlots(ContextID.InventoryItem, p => new ListIndices<Item>(p.inventory, new DataStructures.Range(0, 9)), "Hotbar");
+        AddSlots(ContextID.InventoryItem, p => new ListIndices<Item>(p.inventory, new DataStructures.Range(10, 49)));
+        AddSlots(ContextID.InventoryCoin, p => new ListIndices<Item>(p.inventory, new DataStructures.Range(50, 53)), "Coin", i => i.IsACoin);
+        AddSlots(ContextID.InventoryAmmo, p => new ListIndices<Item>(p.inventory, new DataStructures.Range(54, 57)), "Ammo", i => i.FitsAmmoSlot());
     }
 
     public sealed override bool FitsSlot(Player player, Item item, InventorySlots slots, int index, out IList<int> itemsToMove) {
         itemsToMove = Array.Empty<int>();
         return !player.preventAllItemPickups;
     }
-    public sealed override Item GetItem(Player player, Item item, GetItemSettings settings) => player.GetItem(player.whoAmI, item, settings);
+    public sealed override Item GetItem(Player player, Item item, GetItemSettings settings, bool mainSlot = false) => item;
 
     public override void Focus(Player player, InventorySlots slots, int slot) {
         if (slots == Slots[0]) player.selectedItem = slot;
@@ -34,17 +34,17 @@ public sealed class Inventory : ModInventory {
 public sealed class Chest : ModInventory {
 
     public sealed override void Load() {
-        AddSlots(null, null, ContextID.ChestItem, p => new(p.chest >= 0 ? Main.chest[p.chest].item : Array.Empty<Item>()));
-        AddSlots(null, null, ContextID.BankItem, p => new(p.chest.InRange(-4, -2) ? p.Chest()! : Array.Empty<Item>()));
-        AddSlots(null, null, ContextID.VoidItem, p => new(p.chest == -5 ? p.bank4.item : Array.Empty<Item>()));
+        AddSlots(ContextID.ChestItem, p => new(p.chest >= 0 ? Main.chest[p.chest].item : Array.Empty<Item>()));
+        AddSlots(ContextID.BankItem, p => new(p.chest.InRange(-4, -2) ? p.Chest()! : Array.Empty<Item>()));
+        AddSlots(ContextID.VoidItem, p => new(p.chest == -5 ? p.bank4.item : Array.Empty<Item>()));
     }
 
     public sealed override bool FitsSlot(Player player, Item item, InventorySlots slots, int index, out IList<int> itemsToMove) {
         itemsToMove = Array.Empty<int>();
         return !ChestUI.IsBlockedFromTransferIntoChest(item, player.Chest()!);
     }
-    public sealed override Item GetItem(Player player, Item item, GetItemSettings settings) {
-        ChestUI.TryPlacingInChest(item, false, ChestsContext(player.chest));
+    public sealed override Item GetItem(Player player, Item item, GetItemSettings settings, bool mainSlot = false) {
+        if(player.InChest(out _)) ChestUI.TryPlacingInChest(item, false, ChestsContext(player.chest));
         return item;
     }
 
@@ -62,12 +62,12 @@ public sealed class Chest : ModInventory {
 public sealed class Armor : ModInventory {
 
     public sealed override void Load() {
-        AddSlots("Armor", i => i.defense != 0 && i.headSlot != -1, ContextID.EquipArmor, p => new ListIndices<Item>(p.armor, 0));
-        AddSlots("Armor", i => i.defense != 0 && i.bodySlot != -1, ContextID.EquipArmor, p => new ListIndices<Item>(p.armor, 1));
-        AddSlots("Armor", i => i.defense != 0 && i.legSlot != -1, ContextID.EquipArmor, p => new ListIndices<Item>(p.armor, 2));
-        AddSlots("Vanity", i => i.headSlot != -1, ContextID.EquipArmorVanity, p => new ListIndices<Item>(p.armor, Count + AccessorySlotLoader.MaxVanillaSlotCount + 0));
-        AddSlots("Vanity", i => i.bodySlot != -1, ContextID.EquipArmorVanity, p => new ListIndices<Item>(p.armor, Count + AccessorySlotLoader.MaxVanillaSlotCount + 1));
-        AddSlots("Vanity", i => i.legSlot != -1, ContextID.EquipArmorVanity, p => new ListIndices<Item>(p.armor, Count + AccessorySlotLoader.MaxVanillaSlotCount + 2));
+        AddSlots(ContextID.EquipArmor, p => new ListIndices<Item>(p.armor, 0), "Armor", i => i.defense != 0 && i.headSlot != -1);
+        AddSlots(ContextID.EquipArmor, p => new ListIndices<Item>(p.armor, 1), "Armor", i => i.defense != 0 && i.bodySlot != -1);
+        AddSlots(ContextID.EquipArmor, p => new ListIndices<Item>(p.armor, 2), "Armor", i => i.defense != 0 && i.legSlot != -1);
+        AddSlots(ContextID.EquipArmorVanity, p => new ListIndices<Item>(p.armor, Count + AccessorySlotLoader.MaxVanillaSlotCount + 0), "Vanity", i => i.headSlot != -1, i => i.vanity);
+        AddSlots(ContextID.EquipArmorVanity, p => new ListIndices<Item>(p.armor, Count + AccessorySlotLoader.MaxVanillaSlotCount + 1), "Vanity", i => i.bodySlot != -1, i => i.vanity);
+        AddSlots(ContextID.EquipArmorVanity, p => new ListIndices<Item>(p.armor, Count + AccessorySlotLoader.MaxVanillaSlotCount + 2), "Vanity", i => i.legSlot != -1, i => i.vanity);
     }
     public sealed override void Focus(Player player, InventorySlots slots, int slot) => Main.EquipPageSelected = 0;
 
@@ -77,11 +77,11 @@ public sealed class Armor : ModInventory {
 public sealed class Accessories : ModInventory {
 
     public sealed override void Load() {
-        AddSlots("Accessory", i => i.accessory,
+        AddSlots("Accessory", i => i.accessory && !i.vanity, i => true,
             (ContextID.EquipAccessory, p => new ListIndices<Item>(p.armor, UnlockedVanillaSlots(p))),
             (ContextID.ModdedAccessorySlot, p => new ListIndices<Item>(ModdedAccessories(p), UnlockedModdedSlots(p)))
         );
-        AddSlots("Social", i => i.accessory && i.FitsAccessoryVanitySlot,
+        AddSlots("Social", i => i.accessory && i.FitsAccessoryVanitySlot, i => i.vanity && i.FitsAccessoryVanitySlot,
             (ContextID.EquipAccessoryVanity, p => new ListIndices<Item>(p.armor, UnlockedVanillaSlots(p, Armor.Count + AccessorySlotLoader.MaxVanillaSlotCount))),
             (ContextID.ModdedVanityAccessorySlot, p => new ListIndices<Item>(ModdedAccessories(p), UnlockedModdedSlots(p, ModdedAccessories(p).Length/2)))
         );
@@ -134,11 +134,11 @@ public sealed class Accessories : ModInventory {
 
 public sealed class Equipement : ModInventory {
     public sealed override void Load() {
-        AddSlots("Equipement", i => i.buffType > 0 && Main.vanityPet[i.buffType], ContextID.EquipPet, p => new ListIndices<Item>(p.miscEquips, 0));
-        AddSlots("Equipement", i => i.buffType > 0 && Main.lightPet[i.buffType], ContextID.EquipLight, p => new ListIndices<Item>(p.miscEquips, 1));
-        AddSlots("Equipement", i => i.mountType != -1 && MountID.Sets.Cart[i.mountType], ContextID.EquipMinecart, p => new ListIndices<Item>(p.miscEquips, 2));
-        AddSlots("Equipement", i => i.mountType != -1 && !MountID.Sets.Cart[i.mountType], ContextID.EquipMount, p => new ListIndices<Item>(p.miscEquips, 3));
-        AddSlots("Equipement", i => Main.projHook[i.shoot], ContextID.EquipGrapple, p => new ListIndices<Item>(p.miscEquips, 4));
+        AddSlots(ContextID.EquipPet, p => new ListIndices<Item>(p.miscEquips, 0), "Equipement", i => i.buffType > 0 && Main.vanityPet[i.buffType]);
+        AddSlots(ContextID.EquipLight, p => new ListIndices<Item>(p.miscEquips, 1), "Equipement", i => i.buffType > 0 && Main.lightPet[i.buffType]);
+        AddSlots(ContextID.EquipMinecart, p => new ListIndices<Item>(p.miscEquips, 2), "Equipement", i => i.mountType != -1 && MountID.Sets.Cart[i.mountType]);
+        AddSlots(ContextID.EquipMount, p => new ListIndices<Item>(p.miscEquips, 3), "Equipement", i => i.mountType != -1 && !MountID.Sets.Cart[i.mountType]);
+        AddSlots(ContextID.EquipGrapple, p => new ListIndices<Item>(p.miscEquips, 4), "Equipement", i => Main.projHook[i.shoot]);
     }
 
     public sealed override void Focus(Player player, InventorySlots slots, int slot) => Main.EquipPageSelected = 2;
@@ -149,12 +149,12 @@ public sealed class Dyes : ModInventory {
     public sealed override int? MaxStack => 1;
 
     public sealed override void Load() {
-        AddSlots("ArmorDye", i => i.dye != 0, ContextID.EquipDye, p => new ListIndices<Item>(p.dye, DataStructures.Range.FromCount(0, Armor.Count)));
-        AddSlots("AccessoryDye", i => i.dye != 0,
+        AddSlots(ContextID.EquipDye, p => new ListIndices<Item>(p.dye, DataStructures.Range.FromCount(0, Armor.Count)), "ArmorDye", i => i.dye != 0, i => false);
+        AddSlots("AccessoryDye", i => i.dye != 0, i => false,
             (ContextID.EquipDye, p => new ListIndices<Item>(p.dye, Accessories.UnlockedVanillaSlots(p))),
             (ContextID.ModdedDyeSlot, p => new ListIndices<Item>(ModdedDyes(p), Accessories.UnlockedModdedSlots(p)))
         );
-        AddSlots("EquipementDye", i => i.dye != 0, ContextID.EquipMiscDye, p => new(p.miscDyes));
+        AddSlots(ContextID.EquipMiscDye, p => new(p.miscDyes), "EquipementDye", i => i.dye != 0, i => false);
     }
 
     public sealed override void Focus(Player player, InventorySlots slots, int slot) => Main.EquipPageSelected = slots != Slots[2] ? 0 : 2;

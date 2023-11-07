@@ -112,10 +112,9 @@ public static class Utility {
         color.B = (byte)(color.B * mult);
     }
 
-    public static bool Stack(this Item item, Item toStack, int? maxStack = null, bool canFavorite = true) {
+    public static bool Stack(this Item item, Item toStack, out int tranfered, int? maxStack = null, bool canFavorite = true) {
+        tranfered = 0;
         if (toStack.IsAir) return false;
-
-        int tranfered = 0;
         if (item.IsAir) {
             tranfered = maxStack.HasValue ? Math.Min(maxStack.Value, toStack.stack) : toStack.stack;
             item.SetDefaults(toStack.type);
@@ -131,7 +130,6 @@ public static class Utility {
         item.favorited = canFavorite && toStack.favorited;
         if (toStack.IsAir) toStack.TurnToAir();
         return tranfered != 0;
-
     }
 
     public static int FindIndex<T>(this IList<T> list, Predicate<T> predicate) {

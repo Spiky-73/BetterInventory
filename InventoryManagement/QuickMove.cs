@@ -138,8 +138,8 @@ public sealed class QuickMove : ILoadable {
         foreach (int slot in itemsToMove) FreeTargetItem(slot);
 
         bool canFavorite = canFavoriteAt[Math.Abs(target.GetContext(player, targetSlot))];
-        bool moved = items[targetSlot].Stack(item, target.Inventory.MaxStack, canFavorite);
-        items[targetSlot].Stack(freeItems[0], target.Inventory.MaxStack, canFavorite);
+        bool moved = items[targetSlot].Stack(item, out _, target.Inventory.MaxStack, canFavorite);
+        items[targetSlot].Stack(freeItems[0], out _, target.Inventory.MaxStack, canFavorite);
         if (moved) {
             source.Inventory.OnSlotChange(player, source, sourceSlot);
             target.Inventory.OnSlotChange(player, target, targetSlot);
@@ -207,7 +207,7 @@ public sealed class QuickMove : ILoadable {
     private static List<InventorySlots> SmartishChain(Player player, Item item, InventorySlots source) {
         List<InventorySlots> targetSlots = DefaultChain(player, item, source);
 
-        targetSlots.Sort();
+        targetSlots.SortSlots();
 
         int i = targetSlots.FindIndex(s => s == source && s.Items(player).Contains(item));
         if (source.Accepts is not null && i != -1){

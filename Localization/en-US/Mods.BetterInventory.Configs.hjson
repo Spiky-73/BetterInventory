@@ -76,7 +76,12 @@ InventoryManagement: {
 
 	autoEquip: {
 		Label: "[i:83] Auto Equip Items"
-		Tooltip: Automaticaly equips items such as Armors and Accessories
+		Tooltip:
+			'''
+			Automaticaly equips items such as Armors, Accessories or Equipement
+			{$Mods.BetterInventory.Configs.AutoEquipLevel.MainSlots.Label}: Equipement go to their default slots if available
+			{$Mods.BetterInventory.Configs.AutoEquipLevel.AllSlots.Label}: Inluces Dyes. Armor and Accessories items can go to social slots.
+			'''
 	}
 
 	quickMove: {
@@ -263,4 +268,11 @@ BetterBestiary: {
 		Label: Override Unlock Filter
 		Tooltip: Replace the filter "{$BestiaryInfo.IfUnlocked}" with "{$Mods.BetterInventory.UI.FullUnlock}"
 	}
+}
+
+AutoEquipLevel: {
+	Tooltip: ""
+	Off.Label: Off
+	MainSlots.Label: Default slots
+	AllSlots.Label: All Slots
 }
