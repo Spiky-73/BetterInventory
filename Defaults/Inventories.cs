@@ -24,7 +24,7 @@ public sealed class Inventory : ModInventory {
         itemsToMove = Array.Empty<int>();
         return !player.preventAllItemPickups;
     }
-    public sealed override Item GetItem(Player player, Item item, GetItemSettings settings, bool mainSlot = false) => item;
+    public sealed override Item GetItem(Player player, Item item, GetItemSettings settings, bool? mainSlot = null) => item;
 
     public override void Focus(Player player, InventorySlots slots, int slot) {
         if (slots == Slots[0]) player.selectedItem = slot;
@@ -43,7 +43,7 @@ public sealed class Chest : ModInventory {
         itemsToMove = Array.Empty<int>();
         return !ChestUI.IsBlockedFromTransferIntoChest(item, player.Chest()!);
     }
-    public sealed override Item GetItem(Player player, Item item, GetItemSettings settings, bool mainSlot = false) {
+    public sealed override Item GetItem(Player player, Item item, GetItemSettings settings, bool? mainSlot = null) {
         if(player.InChest(out _)) ChestUI.TryPlacingInChest(item, false, ChestsContext(player.chest));
         return item;
     }
