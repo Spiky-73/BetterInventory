@@ -111,7 +111,7 @@ InventoryManagement: {
 
 	favoriteInBanks: {
 		Label: "[i:75] Favorite Items in Personal Storages"
-		Tooltip: Allow you to favorite items in your personal storages
+		Tooltip: Allows you to favorite items in your personal storages
 	}
 }
 
