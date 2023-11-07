@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using BetterInventory.ItemSearch;
+using MonoMod.Cil;
 using Terraria;
 using Terraria.GameInput;
 using Terraria.ModLoader;
@@ -57,9 +58,13 @@ public sealed class BetterPlayer : ModPlayer {
         foreach(BuilderAccToggle bat in BuilderAccToggles) bat.AddKeybind(Mod);
         On_ItemSlot.TryOpenContainer += HookTryOpenContainer;
 
-        On_Player.GetItem += HookGetItem;
         On_Player.OpenChest += HookOpenChest;
+        On_Player.GetItem += HookGetItem;
         // On_ChestUI.TryPlacingInChest += HookPlaceInChest;
+
+        On_ChestUI.LootAll += HookLootAll;
+        On_ChestUI.Restock += HookRestock;
+        IL_ItemSlot.LeftClick_ItemArray_int_int += ILKeepFavoriteInChest;
     }
 
     public override void Unload() {
@@ -110,6 +115,28 @@ public sealed class BetterPlayer : ModPlayer {
     private void HookOpenChest(On_Player.orig_OpenChest orig, Player self, int x, int y, int newChest) {
         foreach (Item item in Player.Chest(newChest)) if (!item.IsAir) VisibilityFilters.AddOwnedItems(item);
         orig(self, x, y, newChest);
+    }
+
+    private static void ILKeepFavoriteInChest(ILContext il) {
+        ILCursor cursor = new(il);
+        cursor.GotoNext(i => i.MatchStfld(Reflection.Item.favorited));
+        cursor.EmitLdarg0();
+        cursor.EmitLdarg1();
+        cursor.EmitLdarg2();
+        cursor.EmitDelegate((bool fav, Item[] inv, int context, int slot) => {
+            if(context == ItemSlot.Context.BankItem) fav = inv[slot].favorited;
+            return fav;
+        });
+    }
+    private static void HookRestock(On_ChestUI.orig_Restock orig) {
+        ChestUI.GetContainerUsageInfo(out bool sync, out Item[] items);
+        if (!sync && Config.favoriteInBanks) Utility.RunWithHiddenItems(items, i => i.favorited, () => orig());
+        else orig();
+    }
+    private static void HookLootAll(On_ChestUI.orig_LootAll orig) {
+        ChestUI.GetContainerUsageInfo(out bool sync, out Item[] items);
+        if (!sync && Config.favoriteInBanks) Utility.RunWithHiddenItems(items, i => i.favorited, () => orig());
+        else orig();
     }
 
 

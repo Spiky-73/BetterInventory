@@ -108,6 +108,11 @@ InventoryManagement: {
 		Label: "[i:2348] Favorite Quick Buff"
 		Tooltip: Similar to Quick Buff, but only consumes favorite items
 	}
+
+	favoriteInBanks: {
+		Label: Favorite Items in Personal Storages
+		Tooltip: Allow you to favorite items in your personal storages
+	}
 }
 
 SmartPickupLevel: {

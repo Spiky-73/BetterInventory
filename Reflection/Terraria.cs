@@ -29,4 +29,5 @@ public static class Player {
 
 public static class Item {
     public static readonly Property<TItem, bool> IsAir = new(nameof(TItem.IsAir));
+    public static readonly Field<TItem, bool> favorited = new(nameof(TItem.favorited));
 }

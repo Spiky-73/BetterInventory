@@ -2,6 +2,7 @@ using System.ComponentModel;
 using BetterInventory.InventoryManagement;
 using Terraria;
 using Terraria.ModLoader.Config;
+using Terraria.UI;
 
 namespace BetterInventory.Configs;
 
@@ -10,6 +11,8 @@ public sealed class InventoryManagement : ModConfig {
     [DefaultValue(true)] public bool smartAmmo;
     // [DefaultValue(SmartPickupLevel.AllItems)] public SmartPickupLevel smartPickup = SmartPickupLevel.AllItems; // TODO implement
     [DefaultValue(AutoEquipLevel.MainSlots)] public AutoEquipLevel autoEquip;
+    [DefaultValue(true)] public bool favoriteInBanks;
+    
 
     public Toggle<QuickMove> quickMove = new(true);
     [DefaultValue(true)] public bool fastRightClick;
@@ -21,6 +24,10 @@ public sealed class InventoryManagement : ModConfig {
             var keys = BetterPlayer.FavoritedBuffKb?.GetAssignedKeys() ?? new();
             return keys.Count == 0 ? Lang.inter[23].Value : keys[0];
         }
+    }
+
+    public override void OnChanged() {
+        Reflection.ItemSlot.canFavoriteAt.GetValue()[ItemSlot.Context.BankItem] = favoriteInBanks;
     }
 
 
