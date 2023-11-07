@@ -21,6 +21,7 @@ Keep in mind, this mod is still in developement. If you find a bug, please repor
 
 ### v0.2
 - Auto Equip items
+- Fixed QuickMove losing item prefix
 
 ### v0.1
 - Initial Pre-Release

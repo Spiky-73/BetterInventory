@@ -118,9 +118,8 @@ public static class Utility {
         if (item.IsAir) {
             tranfered = maxStack.HasValue ? Math.Min(maxStack.Value, toStack.stack) : toStack.stack;
             item.SetDefaults(toStack.type);
-            item.Prefix(item.prefix);
-            item.stack = tranfered;
-            toStack.stack -= tranfered;
+            item.Prefix(toStack.prefix);
+            ItemLoader.SplitStack(item, toStack, tranfered);
         } else if (item.type == toStack.type && item.stack < (maxStack ?? item.maxStack)) {
             int oldStack = item.maxStack;
             if (maxStack.HasValue) item.maxStack = maxStack.Value;

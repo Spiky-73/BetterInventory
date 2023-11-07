@@ -117,6 +117,13 @@ SmartPickupLevel: {
 	AllItems.Label: All Items
 }
 
+AutoEquipLevel: {
+	Tooltip: ""
+	Off.Label: Off
+	MainSlots.Label: Default slots
+	AllSlots.Label: All Slots
+}
+
 QuickMove: {
 	Tooltip: ""
 
@@ -268,11 +275,4 @@ BetterBestiary: {
 		Label: Override Unlock Filter
 		Tooltip: Replace the filter "{$BestiaryInfo.IfUnlocked}" with "{$Mods.BetterInventory.UI.FullUnlock}"
 	}
-}
-
-AutoEquipLevel: {
-	Tooltip: ""
-	Off.Label: Off
-	MainSlots.Label: Default slots
-	AllSlots.Label: All Slots
 }
