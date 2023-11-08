@@ -140,11 +140,18 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
 
+    public static Item GetItem_Inner(Player self, int plr, Item newItem, GetItemSettings settings) {
+        innerGetItem = true;
+        Item i = self.GetItem(plr, newItem, settings);
+        innerGetItem = false;
+        return i;
+    }
     private static Item HookGetItem(On_Player.orig_GetItem orig, Player self, int plr, Item newItem, GetItemSettings settings) {
+        if (innerGetItem) return orig(self, plr, newItem, settings);
         self.GetModPlayer<BetterPlayer>().VisibilityFilters.AddOwnedItems(newItem);
         if (Config.autoEquip != Configs.InventoryManagement.AutoEquipLevel.Off) {
             foreach (ModInventory inventory in InventoryLoader.Inventories) {
-                newItem = inventory.GetItem(self, newItem, settings, Config.autoEquip == Configs.InventoryManagement.AutoEquipLevel.MainSlots);
+                newItem = inventory.GetItem(self, newItem, settings, Config.autoEquip);
                 if (newItem.IsAir) return new();
             }
         }
@@ -213,6 +220,8 @@ public sealed class BetterPlayer : ModPlayer {
 
     public Crafting.RecipeFilters RecipeFilters { get; set; } = null!;
     public VisibilityFilters VisibilityFilters { get; set; } = new();
+
+    private static bool innerGetItem;
 
     public const string VisibilityTag = "visibility";
     public const string RecipesTag = "recipes";

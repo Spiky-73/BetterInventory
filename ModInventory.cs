@@ -76,10 +76,12 @@ public abstract class ModInventory : ModType, ILocalizedModType {
         return true;
     }
 
-    public virtual Item GetItem(Player player, Item item, GetItemSettings settings, bool? mainSlots = null) {
+    public virtual Item GetItem(Player player, Item item, GetItemSettings settings, Configs.InventoryManagement.AutoEquipLevel filterSlots = Configs.InventoryManagement.AutoEquipLevel.Off) {
         foreach (InventorySlots slots in Slots) {
-            if (slots.Accepts is null || (mainSlots == true && !slots.IsMainSlot(item))) continue;
-            item = slots.GetItem(player, item, settings, mainSlots is not null ? PopupTextContext.ItemPickupToVoidContainer : PopupTextContext.RegularItemPickup);
+            if(filterSlots != Configs.InventoryManagement.AutoEquipLevel.Off) {
+                if (slots.Accepts is null || !slots.IsMainSlot(item) && filterSlots == Configs.InventoryManagement.AutoEquipLevel.MainSlots) continue;
+            }
+            item = slots.GetItem(player, item, settings, filterSlots == Configs.InventoryManagement.AutoEquipLevel.MainSlots ? PopupTextContext.ItemPickupToVoidContainer : PopupTextContext.RegularItemPickup);
             if (item.IsAir) return new();
         }
         return item;
