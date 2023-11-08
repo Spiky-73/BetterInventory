@@ -138,13 +138,18 @@ public sealed class RecipeFiltering : ILoadable {
 
         Recipe.ClearAvailableRecipes();
         foreach(int r in Recipes) {
-            for (int i = 0; i < filterer.AvailableFilters.Count; i++) {
-                if(filterer.AvailableFilters[i].FitsFilter(Main.recipe[r].createItem)) {
-                    if (saveRecipes) RecipesInFilter[i]++;
-                    Reflection.Recipe.AddToAvailableRecipes.Invoke(r);
-                    break;
+            if (saveRecipes) {
+                bool added = false;
+                for (int i = 0; i < filterer.AvailableFilters.Count; i++) {
+                    if (filterer.AvailableFilters[i].FitsFilter(Main.recipe[r].createItem)) {
+                        RecipesInFilter[i]++;
+                        if (!added && (filterer.ActiveFilters.Count == 0 || filterer.IsFilterActive(i))) {
+                            Reflection.Recipe.AddToAvailableRecipes.Invoke(r);
+                            added = true;
+                        }
+                    }
                 }
-            }
+            } else if(filterer.ActiveFilters.Count == 0 || filterer.FitsFilter(Main.recipe[r].createItem)) Reflection.Recipe.AddToAvailableRecipes.Invoke(r);
         }
     }
 

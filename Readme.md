@@ -25,6 +25,7 @@ Keep in mind, this mod is still in developement. If you find a bug, please repor
 - Fixed a possible endless loop when picking up an item
 - Fixed an error when guideTile is a tile and not an item			
 - Fixed a null reference error when trying to open personal containers
+- Fixed Recipe filters doing nothing
 - Fixed some items not been counted as known
 - Fixed Quick Move chain not ending when closing the inventory
 - Fixed recipes sometimes not been updated when guideTile changes

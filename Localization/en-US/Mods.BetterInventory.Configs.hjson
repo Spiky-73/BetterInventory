@@ -302,6 +302,7 @@ Version: {
 			'''
 			- Fixed a possible endless loop when picking up an item
 			- Fixed a null reference error when trying to open personal containers
+			- Fixed Recipe filters doing nothing
 			- Added Version config
 			- Added on-update chat message
 			- Fixed an error when guideTile is a tile and not an item			
