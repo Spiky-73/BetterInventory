@@ -1,8 +1,11 @@
+using System;
 using System.Collections.Generic;
 using BetterInventory.ItemSearch;
 using MonoMod.Cil;
 using Terraria;
 using Terraria.GameInput;
+using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
@@ -70,6 +73,24 @@ public sealed class BetterPlayer : ModPlayer {
     public override void Unload() {
         FavoritedBuffKb = null!;
         foreach (BuilderAccToggle bat in BuilderAccToggles) bat.UnloadKeybind();
+    }
+
+    public override void OnEnterWorld() {
+        RecipeFilters ??= new();
+        VisibilityFilters ??= new();
+
+        string version = Configs.Version.Instance.lastPlayedVersion;
+        if (version.Length == 0 && Mod.Version == new Version(0, 2)) version = new Version(0, 1).ToString();
+
+        if (version.Length == 0) Main.NewText(Language.GetTextValue($"Mods.BetterInventory.Chat.Download", Mod.Version.ToString()), Colors.RarityCyan);
+        else if (Mod.Version > new Version(version)) Main.NewText(Language.GetTextValue($"Mods.BetterInventory.Chat.Update", Mod.Version.ToString()), Colors.RarityCyan);
+        else return;
+        Main.NewText(Language.GetTextValue($"Mods.BetterInventory.Chat.Warn"), Colors.RarityCyan);
+        string important = Language.GetTextValue($"Mods.BetterInventory.Chat.Important");
+        if(important.Length != 0) Main.NewText(Language.GetTextValue($"Mods.BetterInventory.Chat.Important", Mod.Version.ToString()), Colors.RarityAmber);
+
+        Configs.Version.Instance.lastPlayedVersion = Mod.Version.ToString();
+        Configs.Version.Instance.SaveConfig();
     }
 
     public override void SetControls() {
@@ -211,11 +232,6 @@ public sealed class BetterPlayer : ModPlayer {
         foreach(Item item in Player.inventory) if(!item.IsAir) VisibilityFilters.AddOwnedItems(item);
         if (tag.TryGet(GuideTileTag, out Item guide)) Guide.guideTile = guide;
         RecipeFilters = tag.Get<Crafting.RecipeFilters>(RecipesTag);
-    }
-
-    public override void OnEnterWorld() {
-        RecipeFilters ??= new();
-        VisibilityFilters ??= new();
     }
 
     public Crafting.RecipeFilters RecipeFilters { get; set; } = null!;

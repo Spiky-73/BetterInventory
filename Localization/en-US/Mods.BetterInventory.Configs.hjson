@@ -75,7 +75,8 @@ InventoryManagement: {
 	}
 
 	autoEquip: {
-		Label: "[i:83] Auto Equip Items"
+		Label: "[i:83] {$Mods.BetterInventory.Configs.InventoryManagement.autoEquip.Name}"
+		Name: Auto Equip Items
 		Tooltip:
 			'''
 			Automaticaly equips items such as Armors, Accessories or Equipement
@@ -281,3 +282,29 @@ BetterBestiary: {
 		Tooltip: Replace the filter "{$BestiaryInfo.IfUnlocked}" with "{$Mods.BetterInventory.UI.FullUnlock}"
 	}
 }
+
+Version: {
+	DisplayName: Version 0.2.0.1
+
+	Info: {
+		Label:
+			'''
+			Quick update to attempt to fix a freeze caused by {$Mods.BetterInventory.Configs.InventoryManagement.autoEquip.Name}.
+			As I could not replicate this bug, I am not sure if it is fixed.
+			[c/ff0000:If you still encounter this bug, please report it!]
+			'''
+		Tooltip: ""
+	}
+
+	ChangeLog: {
+		Label:
+			'''
+			- Fixed a possible endless loop when picking up an item
+			- Added Version info config 
+			- Added an on-update chat message
+			'''
+		Tooltip: ""
+	}
+}
+
+Text.Tooltip: ""

@@ -9,6 +9,7 @@ using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.ModLoader.Config;
 using Terraria.ObjectData;
 
 namespace BetterInventory;
@@ -135,6 +136,9 @@ public static class Utility {
         for (int i = 0; i < list.Count; i++) if (predicate(list[i])) return i;
         return -1;
     }
+
+    public static void SaveConfig(this ModConfig config) => Reflection.ConfigManager.Save.Invoke(config);
+
 
     public static ReadOnlyDictionary<int, int> OwnedItems => Data.ownedItems;
     
