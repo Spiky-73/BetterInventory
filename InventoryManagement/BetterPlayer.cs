@@ -80,7 +80,7 @@ public sealed class BetterPlayer : ModPlayer {
         VisibilityFilters ??= new();
 
         string version = Configs.Version.Instance.lastPlayedVersion;
-        if (version.Length == 0 && Mod.Version == new Version(0, 2)) version = new Version(0, 1).ToString();
+        if (version.Length == 0 && Mod.Version == new Version(0, 2, 0, 1)) version = new Version(0, 2).ToString();
 
         if (version.Length == 0) Main.NewText(Language.GetTextValue($"Mods.BetterInventory.Chat.Download", Mod.Version.ToString()), Colors.RarityCyan);
         else if (Mod.Version > new Version(version)) Main.NewText(Language.GetTextValue($"Mods.BetterInventory.Chat.Update", Mod.Version.ToString()), Colors.RarityCyan);
