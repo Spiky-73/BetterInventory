@@ -284,7 +284,7 @@ BetterBestiary: {
 }
 
 Version: {
-	DisplayName: Version 0.2.0.1
+	DisplayName: Version 0.2.1
 
 	Info: {
 		Label:
@@ -292,6 +292,7 @@ Version: {
 			Quick update to attempt to fix a freeze caused by {$Mods.BetterInventory.Configs.InventoryManagement.autoEquip.Name}.
 			As I could not replicate this bug, I am not sure if it is fixed.
 			[c/ff0000:If you still encounter this bug, please report it!] Setting {$Mods.BetterInventory.Configs.InventoryManagement.autoEquip.Name} to {$Mods.BetterInventory.Configs.AutoEquipLevel.Off.Label} should temporarily solve it.
+
 			'''
 		Tooltip: ""
 	}

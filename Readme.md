@@ -19,7 +19,7 @@ Keep in mind, this mod is still in developement. If you find a bug, please repor
 
 ## Changelog
 
-### v0.2.0.1
+### v0.2.1
 - Added Version config
 - Added on-update chat message
 - Fixed possible endless loop when picking up an item

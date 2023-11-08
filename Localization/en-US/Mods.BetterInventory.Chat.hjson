@@ -4,5 +4,5 @@ Warn: This mod is still in developement. If you found a bug, please report it on
 Important:
 	'''
 	As I could not replicate the freeze when picking up an item, I am not sure if it is fixed.
-	   [c/ff0000:If you still encounter this bug, please report it!] Setting {$Mods.BetterInventory.Configs.InventoryManagement.autoEquip.Name} to {$Mods.BetterInventory.Configs.AutoEquipLevel.Off.Label} should temporarily solve it.
+	[c/ff0000:If you still encounter this bug, please report it!] Setting {$Mods.BetterInventory.Configs.InventoryManagement.autoEquip.Name} to {$Mods.BetterInventory.Configs.AutoEquipLevel.Off.Label} should temporarily solve it.
 	'''
