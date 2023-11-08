@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using BetterInventory.ItemSearch;
+using BetterInventory.InventoryManagement;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
@@ -111,6 +111,9 @@ public sealed class RecipeFiltering : ILoadable {
 
     
     private void HookFilterRecipes(On_Recipe.orig_FindRecipes orig, bool canDelayCheck) {
+        if (!Main.mouseItem.IsAir) BetterPlayer.LocalPlayer.VisibilityFilters.AddOwnedItems(Main.mouseItem);
+        foreach (Item item in Main.LocalPlayer.inventory) if (!item.IsAir) BetterPlayer.LocalPlayer.VisibilityFilters.AddOwnedItems(item);
+        
         orig(canDelayCheck);
         if (canDelayCheck) return;
 

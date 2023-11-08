@@ -301,8 +301,15 @@ Version: {
 		Label:
 			'''
 			- Fixed a possible endless loop when picking up an item
-			- Added Version info config 
-			- Added an on-update chat message
+			- Fixed a null reference error when trying to open personal containers
+			- Added Version config
+			- Added on-update chat message
+			- Fixed an error when guideTile is a tile and not an item			
+			- Fixed items not been counted as known when click in the inventory
+			- Fixed Quick Move chain not ending when closing the inventory
+			- Fixed recipes sometimes not been updated when guideTile changes
+			- Fixed guideItem duplication when saving configs
+			- Fixed wierd behaviour with Quick Move
 			'''
 		Tooltip: ""
 	}

@@ -80,7 +80,7 @@ public sealed class BetterPlayer : ModPlayer {
         VisibilityFilters ??= new();
 
         string version = Configs.Version.Instance.lastPlayedVersion;
-        if (version.Length == 0 && Mod.Version == new Version(0, 2, 1, 0)) version = new Version(0, 2).ToString();
+        if (version.Length == 0 && Mod.Version == new Version(0, 2, 1)) version = new Version(0, 2).ToString();
 
         if (version.Length == 0) Main.NewText(Language.GetTextValue($"Mods.BetterInventory.Chat.Download", Mod.Version.ToString()), Colors.RarityCyan);
         else if (Mod.Version > new Version(version)) Main.NewText(Language.GetTextValue($"Mods.BetterInventory.Chat.Update", Mod.Version.ToString()), Colors.RarityCyan);
@@ -133,8 +133,8 @@ public sealed class BetterPlayer : ModPlayer {
         }
     }
 
-    private void HookOpenChest(On_Player.orig_OpenChest orig, Player self, int x, int y, int newChest) {
-        foreach (Item item in Player.Chest(newChest)) if (!item.IsAir) VisibilityFilters.AddOwnedItems(item);
+    private static void HookOpenChest(On_Player.orig_OpenChest orig, Player self, int x, int y, int newChest) {
+        foreach (Item item in self.Chest(newChest)) if (!item.IsAir) self.GetModPlayer<BetterPlayer>().VisibilityFilters.AddOwnedItems(item);
         orig(self, x, y, newChest);
     }
 
@@ -167,7 +167,7 @@ public sealed class BetterPlayer : ModPlayer {
         innerGetItem = false;
         return i;
     }
-    private static Item HookGetItem(On_Player.orig_GetItem orig, Player self, int plr, Item newItem, GetItemSettings settings) {
+    private static Item HookGetItem(On_Player.orig_GetItem orig, Player self, int plr, Item newItem, GetItemSettings settings) { // TODO >>> lag and loads of sounds
         if (innerGetItem) return orig(self, plr, newItem, settings);
         self.GetModPlayer<BetterPlayer>().VisibilityFilters.AddOwnedItems(newItem);
         if (Config.autoEquip != Configs.InventoryManagement.AutoEquipLevel.Off) {
@@ -229,7 +229,6 @@ public sealed class BetterPlayer : ModPlayer {
 
     public override void LoadData(TagCompound tag) {
         VisibilityFilters = tag.Get<VisibilityFilters>(VisibilityTag);
-        foreach(Item item in Player.inventory) if(!item.IsAir) VisibilityFilters.AddOwnedItems(item);
         if (tag.TryGet(GuideTileTag, out Item guide)) Guide.guideTile = guide;
         RecipeFilters = tag.Get<Crafting.RecipeFilters>(RecipesTag);
     }

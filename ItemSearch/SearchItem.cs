@@ -1,4 +1,5 @@
 using System;
+using BetterInventory.Configs;
 using BetterInventory.Items;
 using Microsoft.Xna.Framework;
 using Terraria;
@@ -166,7 +167,7 @@ public sealed class SearchItem : ILoadable {
 
         Item[] items = new Item[] { Main.guideItem, Guide.guideTile };
         int slot = Guide.Config.guideTile && Guide.IsCraftingTileItem(Main.mouseItem) ? 1 : 0;
-        if (slot == 1) {
+        if (slot == 1 && !items[slot].IsAir) {
             bool flag;
             if (item.type == CraftingItem.ID) {
                 if (item.createTile == -1) flag = false;
@@ -196,11 +197,9 @@ public sealed class SearchItem : ILoadable {
     public static bool OverrideLeftClick(Item[] inv, int context, int slot) {
         if (!Config.searchRecipes || context != ContextID.GuideItem) return false;
         if (inv[slot].IsAir && Main.mouseItem.IsAir || ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) != 0) return true;
-        inv[slot] = new(Main.mouseItem.type, 1);
         if(Main.mouseItem.type == CraftingItem.ID) {
-            inv[slot].createTile = Main.mouseItem.createTile;
-            (inv[slot].ModItem as CraftingItem)!.condition = (Main.mouseItem.ModItem as CraftingItem)!.condition;
-        }
+            inv[slot] = CraftingItem.WithTile(Main.mouseItem.createTile, Main.mouseItem.placeStyle);
+        } else inv[slot] = new(Main.mouseItem.type, 1);
 
         SoundEngine.PlaySound(SoundID.Grab);
         return true;
@@ -218,11 +217,11 @@ public sealed class SearchItem : ILoadable {
 
 
     public static void UpdateGuide() {
-        if (Config.searchDrops && (Main.guideItem.stack >= 1 || Main.guideItem.prefix != 0)) {
+        if (Config.searchDrops && (Main.guideItem.stack > 1 || Main.guideItem.prefix != 0)) {
             (Item item, Main.guideItem) = (Main.guideItem, new(Main.guideItem.type));
             Main.LocalPlayer.GetDropItem(ref item);
         }
-        if (Config.searchDrops && (Guide.guideTile.stack >= 1 || Guide.guideTile.prefix != 0)) {
+        if (Config.searchDrops && (Guide.guideTile.stack > 1 || Guide.guideTile.prefix != 0)) {
             (Item item, Guide.guideTile) = (Guide.guideTile, new(Guide.guideTile.type));
             Main.LocalPlayer.GetDropItem(ref item);
         }

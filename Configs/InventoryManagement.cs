@@ -15,7 +15,7 @@ public sealed class InventoryManagement : ModConfig {
     
 
     public Toggle<QuickMove> quickMove = new(true);
-    [DefaultValue(true)] public bool fastRightClick;
+    [DefaultValue(true)] public bool fastRightClick; // TODO fast extractinator
     [DefaultValue(true)] public bool itemRightClick;
 
     [DefaultValue(true)] public bool builderKeys; // TODO check new api

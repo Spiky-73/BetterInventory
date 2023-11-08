@@ -22,7 +22,14 @@ Keep in mind, this mod is still in developement. If you find a bug, please repor
 ### v0.2.1
 - Added Version config
 - Added on-update chat message
-- Fixed possible endless loop when picking up an item
+- Fixed a possible endless loop when picking up an item
+- Fixed an error when guideTile is a tile and not an item			
+- Fixed a null reference error when trying to open personal containers
+- Fixed some items not been counted as known
+- Fixed Quick Move chain not ending when closing the inventory
+- Fixed recipes sometimes not been updated when guideTile changes
+- Fixed guideItem duplication when saving configs
+- Fixed wierd behaviour with Quick Move
 
 ### v0.2
 - Auto Equip items

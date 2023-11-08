@@ -24,11 +24,8 @@ public sealed class Inventory : ModInventory {
         itemsToMove = Array.Empty<int>();
         return !player.preventAllItemPickups;
     }
-    public sealed override Item GetItem(Player player, Item item, GetItemSettings settings, Configs.InventoryManagement.AutoEquipLevel filterSlots = Configs.InventoryManagement.AutoEquipLevel.Off) {
-        if (filterSlots != Configs.InventoryManagement.AutoEquipLevel.Off) return base.GetItem(player, item, settings, filterSlots);
-        Item i = BetterPlayer.GetItem_Inner(player, player.whoAmI, item, settings);
-        return i;
-    }
+    public sealed override Item GetItem(Player player, Item item, GetItemSettings settings, Configs.InventoryManagement.AutoEquipLevel filterSlots = Configs.InventoryManagement.AutoEquipLevel.Off) 
+        => filterSlots != Configs.InventoryManagement.AutoEquipLevel.Off ? item : BetterPlayer.GetItem_Inner(player, player.whoAmI, item, settings);
 
     public override void Focus(Player player, InventorySlots slots, int slot) {
         if (slots == Slots[0]) player.selectedItem = slot;
