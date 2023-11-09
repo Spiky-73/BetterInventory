@@ -171,7 +171,7 @@ public sealed class Guide : ModSystem {
 
                 if (guideTile.type == CraftingItem.ID && guideTile.createTile == -1) {
                     if (recipe.requiredTile.Count != 0) return true; // By Hand
-                } else if (CraftingStationsItems.ContainsKey(guideTile.createTile)) {
+                } else if (guideTile.createTile != -1) {
                     if (!recipe.requiredTile.Contains(guideTile.createTile)) return true; // Tile
                 } else {
                     string key = string.Empty;
@@ -596,7 +596,7 @@ public sealed class Guide : ModSystem {
                 SoundEngine.PlaySound(SoundID.Grab);
                 return true;
             }
-            if(ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) != 0) guideTile = Main.mouseItem;
+            if(ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) != -1) guideTile = Main.mouseItem;
         }
         if (SearchItem.OverrideLeftClick(inv, context, slot)) return true;
         return orig(inv, context, slot);

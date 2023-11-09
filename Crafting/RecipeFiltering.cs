@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using BetterInventory.ItemSearch;
+using BetterInventory.InventoryManagement;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
@@ -111,6 +111,9 @@ public sealed class RecipeFiltering : ILoadable {
 
     
     private void HookFilterRecipes(On_Recipe.orig_FindRecipes orig, bool canDelayCheck) {
+        if (!Main.mouseItem.IsAir) BetterPlayer.LocalPlayer.VisibilityFilters.AddOwnedItems(Main.mouseItem);
+        foreach (Item item in Main.LocalPlayer.inventory) if (!item.IsAir) BetterPlayer.LocalPlayer.VisibilityFilters.AddOwnedItems(item);
+        
         orig(canDelayCheck);
         if (canDelayCheck) return;
 
@@ -135,13 +138,18 @@ public sealed class RecipeFiltering : ILoadable {
 
         Recipe.ClearAvailableRecipes();
         foreach(int r in Recipes) {
-            for (int i = 0; i < filterer.AvailableFilters.Count; i++) {
-                if(filterer.AvailableFilters[i].FitsFilter(Main.recipe[r].createItem)) {
-                    if (saveRecipes) RecipesInFilter[i]++;
-                    Reflection.Recipe.AddToAvailableRecipes.Invoke(r);
-                    break;
+            if (saveRecipes) {
+                bool added = false;
+                for (int i = 0; i < filterer.AvailableFilters.Count; i++) {
+                    if (filterer.AvailableFilters[i].FitsFilter(Main.recipe[r].createItem)) {
+                        RecipesInFilter[i]++;
+                        if (!added && (filterer.ActiveFilters.Count == 0 || filterer.IsFilterActive(i))) {
+                            Reflection.Recipe.AddToAvailableRecipes.Invoke(r);
+                            added = true;
+                        }
+                    }
                 }
-            }
+            } else if(filterer.ActiveFilters.Count == 0 || filterer.FitsFilter(Main.recipe[r].createItem)) Reflection.Recipe.AddToAvailableRecipes.Invoke(r);
         }
     }
 

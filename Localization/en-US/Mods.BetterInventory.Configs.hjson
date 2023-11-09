@@ -75,7 +75,8 @@ InventoryManagement: {
 	}
 
 	autoEquip: {
-		Label: "[i:83] Auto Equip Items"
+		Label: "[i:83] {$Mods.BetterInventory.Configs.InventoryManagement.autoEquip.Name}"
+		Name: Auto Equip Items
 		Tooltip:
 			'''
 			Automaticaly equips items such as Armors, Accessories or Equipement
@@ -281,3 +282,38 @@ BetterBestiary: {
 		Tooltip: Replace the filter "{$BestiaryInfo.IfUnlocked}" with "{$Mods.BetterInventory.UI.FullUnlock}"
 	}
 }
+
+Version: {
+	DisplayName: Version 0.2.1
+
+	Info: {
+		Label:
+			'''
+			Quick update to attempt to fix a freeze caused by {$Mods.BetterInventory.Configs.InventoryManagement.autoEquip.Name}.
+			As I could not replicate this bug, I am not sure if it is fixed.
+			[c/ff0000:If you still encounter this bug, please report it!] Setting {$Mods.BetterInventory.Configs.InventoryManagement.autoEquip.Name} to {$Mods.BetterInventory.Configs.AutoEquipLevel.Off.Label} should temporarily solve it.
+
+			'''
+		Tooltip: ""
+	}
+
+	ChangeLog: {
+		Label:
+			'''
+			- Fixed a possible endless loop when picking up an item
+			- Fixed a null reference error when trying to open personal containers
+			- Fixed Recipe filters doing nothing
+			- Fixed an error when guideTile is a tile and not an item
+			- Added Version config
+			- Added on-update chat message
+			- Fixed some items not been counted as known
+			- Fixed Quick Move chain not ending when closing the inventory
+			- Fixed recipes sometimes not been updated when guideTile changes
+			- Fixed guideItem duplication when saving configs
+			- Fixed wierd behaviour with Quick Move
+			'''
+		Tooltip: ""
+	}
+}
+
+Text.Tooltip: ""

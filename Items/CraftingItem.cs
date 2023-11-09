@@ -5,7 +5,6 @@ using Terraria;
 using Terraria.ID;
 using Terraria.Map;
 using Terraria.ModLoader;
-using Terraria.ObjectData;
 using Terraria.UI;
 
 namespace BetterInventory.Items;
@@ -13,9 +12,11 @@ namespace BetterInventory.Items;
 public sealed class CraftingItem : ModItem {
     public static int ID => ModContent.ItemType<CraftingItem>();
 
+    public override void SetDefaults() => Item.maxStack = 1;
+
     public Condition? condition = null;
 
-    public static Item WithTile(int tile, int style) => new(ID) { createTile = tile, placeStyle = style };
+    public static Item WithTile(int tile, int style = 0) => new(ID) { createTile = tile, placeStyle = style };
     public static Item WithCondition(Condition condition) {
         Item item =  new(ID);
         (item.ModItem as CraftingItem)!.condition = condition;

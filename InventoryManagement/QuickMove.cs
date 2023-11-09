@@ -69,10 +69,12 @@ public sealed class QuickMove : ILoadable {
 
     private static void HookAlternateChain(On_Main.orig_DrawInterface_36_Cursor orig) {
         if (_moveTime > 0 && !_hover) {
-            Main.LocalPlayer.selectedItem = _selectedItem[1];
-            if (PlayerInput.Triggers.JustPressed.KeyStatus[MoveKeys[_moveTargetSlot]]) ContinueChain(Main.LocalPlayer);
+            if (!Main.playerInventory) _moveTime = 0;
+            else {
+                Main.LocalPlayer.selectedItem = _selectedItem[1];
+                if (PlayerInput.Triggers.JustPressed.KeyStatus[MoveKeys[_moveTargetSlot]]) ContinueChain(Main.LocalPlayer);
+            }
         }
-
         orig();
     }
 
@@ -100,6 +102,7 @@ public sealed class QuickMove : ILoadable {
         _moveChain = new(_displayedChain);
         _validSlots.Clear();
         _validSlots[inventory!] = slot;
+        _movedItems.Clear();
     }
     private static void ContinueChain(Player player) {
         UndoMove(player, _movedItems);
