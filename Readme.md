@@ -19,6 +19,11 @@ Keep in mind, this mod is still in developement. If you find a bug, please repor
 
 ## Changelog
 
+
+### v0.2.2
+- No Auto Equips when tranfering items from inside your inventory (e.g. Accessories -> Inventory)
+- Tried to fix the freeze when picking up item (again...)
+
 ### v0.2.1
 - Added Version config
 - Added on-update chat message

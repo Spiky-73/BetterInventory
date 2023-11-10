@@ -24,8 +24,8 @@ public sealed class Inventory : ModInventory {
         itemsToMove = Array.Empty<int>();
         return !player.preventAllItemPickups;
     }
-    public sealed override Item GetItem(Player player, Item item, GetItemSettings settings, Configs.InventoryManagement.AutoEquipLevel filterSlots = Configs.InventoryManagement.AutoEquipLevel.Off) 
-        => filterSlots != Configs.InventoryManagement.AutoEquipLevel.Off ? item : BetterPlayer.GetItem_Inner(player, player.whoAmI, item, settings);
+    public sealed override Item GetItem(Player player, Item item, GetItemSettings settings) => item; 
+    // public sealed override Item GetItem(Player player, Item item, GetItemSettings settings) => settings.NoText ? BetterPlayer.GetItem_Inner(player, player.whoAmI, item, settings) : item;
 
     public override void Focus(Player player, InventorySlots slots, int slot) {
         if (slots == Slots[0]) player.selectedItem = slot;
@@ -44,8 +44,8 @@ public sealed class Chest : ModInventory {
         itemsToMove = Array.Empty<int>();
         return !ChestUI.IsBlockedFromTransferIntoChest(item, player.Chest()!);
     }
-    public sealed override Item GetItem(Player player, Item item, GetItemSettings settings, Configs.InventoryManagement.AutoEquipLevel filterSlots = Configs.InventoryManagement.AutoEquipLevel.Off) {
-        if(player.InChest(out _) && filterSlots == Configs.InventoryManagement.AutoEquipLevel.Off) ChestUI.TryPlacingInChest(item, false, ChestsContext(player.chest));
+    public sealed override Item GetItem(Player player, Item item, GetItemSettings settings) {
+        if(player.InChest(out _) && settings.NoText) ChestUI.TryPlacingInChest(item, false, ChestsContext(player.chest));
         return item;
     }
 

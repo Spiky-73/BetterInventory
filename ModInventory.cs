@@ -42,14 +42,14 @@ public sealed class InventorySlots : IComparable<InventorySlots> {
         return 0;
     }
 
-    public Item GetItem(Player player, Item item, GetItemSettings settings, PopupTextContext textContext = PopupTextContext.RegularItemPickup) {
+    public Item GetItem(Player player, Item item, GetItemSettings settings) {
         IList<Item> items = Items(player);
         if (Accepts?.Invoke(item) == false) return item;
-        for (int i = 0; i < items.Count  && !item.IsAir; i++) {
+        for (int i = 0; i < items.Count && !item.IsAir; i++) {
             if (!Inventory.FitsSlot(player, item, this, i, out var itemsToMove) || itemsToMove.Count != 0 || !items[i].Stack(item, out int tranfered, Inventory.MaxStack)) continue;
             SoundEngine.PlaySound(SoundID.Grab);
             items[i].position = player.position;
-            if (!settings.NoText) PopupText.NewText(textContext, items[i], tranfered, false, settings.LongText);
+            if (!settings.NoText) PopupText.NewText(PopupTextContext.ItemPickupToVoidContainer, items[i], tranfered, false, settings.LongText);
             Inventory.OnSlotChange(player, this, i);
         }
         return item;
@@ -76,12 +76,13 @@ public abstract class ModInventory : ModType, ILocalizedModType {
         return true;
     }
 
-    public virtual Item GetItem(Player player, Item item, GetItemSettings settings, Configs.InventoryManagement.AutoEquipLevel filterSlots = Configs.InventoryManagement.AutoEquipLevel.Off) {
+    public virtual Item GetItem(Player player, Item item, GetItemSettings settings) {
+        Configs.InventoryManagement.AutoEquipLevel autoEquip = Configs.InventoryManagement.Instance.autoEquip;
+        bool checkSlot = !settings.NoText && autoEquip != Configs.InventoryManagement.AutoEquipLevel.Off;
+
         foreach (InventorySlots slots in Slots) {
-            if(filterSlots != Configs.InventoryManagement.AutoEquipLevel.Off) {
-                if (slots.Accepts is null || !slots.IsMainSlot(item) && filterSlots == Configs.InventoryManagement.AutoEquipLevel.MainSlots) continue;
-            }
-            item = slots.GetItem(player, item, settings, filterSlots == Configs.InventoryManagement.AutoEquipLevel.MainSlots ? PopupTextContext.ItemPickupToVoidContainer : PopupTextContext.RegularItemPickup);
+            if (checkSlot && (slots.Accepts is null || !slots.IsMainSlot(item) && autoEquip == Configs.InventoryManagement.AutoEquipLevel.MainSlots)) continue;
+            item = slots.GetItem(player, item, settings);
             if (item.IsAir) return new();
         }
         return item;
