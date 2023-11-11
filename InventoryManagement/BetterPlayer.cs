@@ -173,7 +173,7 @@ public sealed class BetterPlayer : ModPlayer {
     private static Item HookGetItem(On_Player.orig_GetItem orig, Player self, int plr, Item newItem, GetItemSettings settings) {
         if (innerGetItem) return orig(self, plr, newItem, settings);
         self.GetModPlayer<BetterPlayer>().VisibilityFilters.AddOwnedItems(newItem);
-         if (!settings.NoText && Config.autoEquip != Configs.InventoryManagement.AutoEquipLevel.Off) { // BUG Fixed ? freeze when picking up items
+         if (!settings.NoText && Config.autoEquip != Configs.InventoryManagement.AutoEquipLevel.Off) {
             foreach (ModInventory inventory in InventoryLoader.Inventories) {
                 newItem = inventory.GetItem(self, newItem, settings);
                 if (newItem.IsAir) return new();
