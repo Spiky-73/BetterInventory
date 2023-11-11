@@ -59,7 +59,8 @@ public sealed class QuickMove : ILoadable {
                 foreach((int c, Func<Player, ListIndices<Item>> s) in invSlots.Slots) {
                     bool accessory = context == ItemSlot.Context.EquipAccessoryVanity || context == ItemSlot.Context.EquipAccessory;
                     ListIndices<Item> items = s(player);
-                    if ((c == context || (accessory && c == -context)) && (sourceSlot = items.FromInnerIndex(slot)) != -1){
+                    // if ((accessory ? items.List == inventory :  c == context) && (sourceSlot = items.FromInnerIndex(slot)) != -1){
+                    if (items.List == inventory && (sourceSlot = items.FromInnerIndex(slot)) != -1){
                         source = invSlots;
                         sourceSlot += slotOffset;
                         goto found;
