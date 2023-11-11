@@ -284,33 +284,20 @@ BetterBestiary: {
 }
 
 Version: {
-	DisplayName: Version 0.2.1
+	DisplayName: Version 0.2.1.1
 
 	Info: {
-		Label:
-			'''
-			Quick update to attempt to fix a freeze caused by {$Mods.BetterInventory.Configs.InventoryManagement.autoEquip.Name}.
-			As I could not replicate this bug, I am not sure if it is fixed.
-			[c/ff0000:If you still encounter this bug, please report it!] Setting {$Mods.BetterInventory.Configs.InventoryManagement.autoEquip.Name} to {$Mods.BetterInventory.Configs.AutoEquipLevel.Off.Label} should temporarily solve it.
-
-			'''
+		Label: Fixed the player freeze when picking up accessories and bugs with modded accessory slots
 		Tooltip: ""
 	}
 
 	ChangeLog: {
 		Label:
 			'''
-			- Fixed a possible endless loop when picking up an item
-			- Fixed a null reference error when trying to open personal containers
-			- Fixed Recipe filters doing nothing
-			- Fixed an error when guideTile is a tile and not an item
-			- Added Version config
-			- Added on-update chat message
-			- Fixed some items not been counted as known
-			- Fixed Quick Move chain not ending when closing the inventory
-			- Fixed recipes sometimes not been updated when guideTile changes
-			- Fixed guideItem duplication when saving configs
-			- Fixed wierd behaviour with Quick Move
+			- No Auto Equips when tranfering items from inside your inventory (e.g. Accessories -> Inventory)
+			- Fixed modded accessory slots causing a freeze when picking up items
+			- Fixed modded accessory slots Quick Move
+			
 			'''
 		Tooltip: ""
 	}

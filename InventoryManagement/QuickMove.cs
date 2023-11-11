@@ -7,6 +7,7 @@ using Terraria.Audio;
 using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.UI;
 
 namespace BetterInventory.InventoryManagement;
 
@@ -54,11 +55,17 @@ public sealed class QuickMove : ILoadable {
         int sourceSlot = -1;
         foreach (ModInventory modInventory in InventoryLoader.Inventories) {
             foreach (InventorySlots invSlots in modInventory.Slots) {
+                int slotOffset = 0;
                 foreach((int c, Func<Player, ListIndices<Item>> s) in invSlots.Slots) {
-                    if(c == context && (sourceSlot = s(player).FromInnerIndex(slot)) != -1){
+                    bool accessory = context == ItemSlot.Context.EquipAccessoryVanity || context == ItemSlot.Context.EquipAccessory;
+                    ListIndices<Item> items = s(player);
+                    // if ((accessory ? items.List == inventory :  c == context) && (sourceSlot = items.FromInnerIndex(slot)) != -1){
+                    if (items.List == inventory && (sourceSlot = items.FromInnerIndex(slot)) != -1){
                         source = invSlots;
+                        sourceSlot += slotOffset;
                         goto found;
                     }
+                    slotOffset += items.Count;
                 }
             }
         }
@@ -89,7 +96,7 @@ public sealed class QuickMove : ILoadable {
         }
 
         int targetSlot = Array.FindIndex(MoveKeys, key => PlayerInput.Triggers.JustPressed.KeyStatus[key]);
-        if (targetSlot == -1) return;
+        if (targetSlot == -1 || inventory is null) return;
 
         if (_moveTime == 0 || _moveTargetSlot != targetSlot) SetupChain(inventory, slot, targetSlot);
         ContinueChain(player);
