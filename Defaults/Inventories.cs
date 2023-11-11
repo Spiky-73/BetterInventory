@@ -24,8 +24,7 @@ public sealed class Inventory : ModInventory {
         itemsToMove = Array.Empty<int>();
         return !player.preventAllItemPickups;
     }
-    public sealed override Item GetItem(Player player, Item item, GetItemSettings settings) => item; 
-    // public sealed override Item GetItem(Player player, Item item, GetItemSettings settings) => settings.NoText ? BetterPlayer.GetItem_Inner(player, player.whoAmI, item, settings) : item;
+    public sealed override Item GetItem(Player player, Item item, GetItemSettings settings) => settings.NoText ? BetterPlayer.GetItem_Inner(player, player.whoAmI, item, settings) : item;
 
     public override void Focus(Player player, InventorySlots slots, int slot) {
         if (slots == Slots[0]) player.selectedItem = slot;
@@ -95,15 +94,18 @@ public sealed class Accessories : ModInventory {
     }
     public static List<int> UnlockedModdedSlots(Player player, int offset = 0) {
         List<int> unlocked = new();
-        int length = ModdedAccessories(player).Length;
+        int length = ModdedAccessories(player).Length / 2;
         for (int i = 0; i < length; i++) if (LoaderManager.Get<AccessorySlotLoader>().ModdedIsItemSlotUnlockedAndUsable(i, player)) unlocked.Add(i + offset);
         return unlocked;
     }
 
     public sealed override bool FitsSlot(Player player, Item item, InventorySlots slots, int index, out IList<int> itemsToMove) {
-        if (!(index < AccessorySlotLoader.MaxVanillaSlotCount ?
+        List<int> vanillaSlots = UnlockedVanillaSlots(player);
+        List<int> moddedSlots = UnlockedVanillaSlots(player);
+
+        if (!(index < vanillaSlots.Count ?
                 ItemLoader.CanEquipAccessory(item, index + 3, false) :
-                ItemLoader.CanEquipAccessory(item, index - AccessorySlotLoader.MaxVanillaSlotCount, true) && LoaderManager.Get<AccessorySlotLoader>().CanAcceptItem(index - AccessorySlotLoader.MaxVanillaSlotCount, item, slots == Slots[0] ? -10 : -11))) {
+                ItemLoader.CanEquipAccessory(item, moddedSlots[index - vanillaSlots.Count], true) && LoaderManager.Get<AccessorySlotLoader>().CanAcceptItem(moddedSlots[index-vanillaSlots.Count], item, slots == Slots[0] ? -10 : -11))) {
             itemsToMove = Array.Empty<int>();
             return false;
         }

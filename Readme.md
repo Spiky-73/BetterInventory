@@ -20,9 +20,10 @@ Keep in mind, this mod is still in developement. If you find a bug, please repor
 ## Changelog
 
 
-### v0.2.2
+### v0.2.1.1
 - No Auto Equips when tranfering items from inside your inventory (e.g. Accessories -> Inventory)
-- Tried to fix the freeze when picking up item (again...)
+- Fixed modded accessory slots causing a free when picking up items
+- Fixed modded accessory slots Quick Move
 
 ### v0.2.1
 - Added Version config

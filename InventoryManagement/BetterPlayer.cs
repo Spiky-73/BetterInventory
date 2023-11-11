@@ -82,12 +82,15 @@ public sealed class BetterPlayer : ModPlayer {
         string version = Configs.Version.Instance.lastPlayedVersion;
         if (version.Length == 0 && Mod.Version == new Version(0, 2, 1)) version = new Version(0, 2).ToString();
 
-        if (version.Length == 0) Main.NewText(Language.GetTextValue($"Mods.BetterInventory.Chat.Download", Mod.Version.ToString()), Colors.RarityCyan);
-        else if (Mod.Version > new Version(version)) Main.NewText(Language.GetTextValue($"Mods.BetterInventory.Chat.Update", Mod.Version.ToString()), Colors.RarityCyan);
-        else return;
-        Main.NewText(Language.GetTextValue($"Mods.BetterInventory.Chat.Warn"), Colors.RarityCyan);
-        string important = Language.GetTextValue($"Mods.BetterInventory.Chat.Important");
-        if(important.Length != 0) Main.NewText(Language.GetTextValue($"Mods.BetterInventory.Chat.Important", Mod.Version.ToString()), Colors.RarityAmber);
+        if (version.Length == 0) {
+            Main.NewText(Language.GetTextValue($"Mods.BetterInventory.Chat.Download", Mod.Version.ToString()), Colors.RarityCyan);
+            Main.NewText(Language.GetTextValue($"Mods.BetterInventory.Chat.Warn"), Colors.RarityCyan);
+        } else if (Mod.Version > new Version(version)) {
+            Main.NewText(Language.GetTextValue($"Mods.BetterInventory.Chat.Update", Mod.Version.ToString()), Colors.RarityCyan);
+            Main.NewText(Language.GetTextValue($"Mods.BetterInventory.Chat.Warn"), Colors.RarityCyan);
+            string important = Language.GetTextValue($"Mods.BetterInventory.Chat.Important");
+            if (important.Length != 0) Main.NewText(Language.GetTextValue($"Mods.BetterInventory.Chat.Important", Mod.Version.ToString()), Colors.RarityAmber);
+        } else return;
 
         Configs.Version.Instance.lastPlayedVersion = Mod.Version.ToString();
         Configs.Version.Instance.SaveConfig();
