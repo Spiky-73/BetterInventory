@@ -199,6 +199,7 @@ ItemSearch: {
 	}
 
 	unknownDisplay: {
+		// TODO fix image
 		Label: "[i:BetterInventory/UnknownItem] Unknown Recipe or NPCs display"
 		Tooltip:
 			'''
@@ -297,7 +298,7 @@ Version: {
 			- No Auto Equips when tranfering items from inside your inventory (e.g. Accessories -> Inventory)
 			- Fixed modded accessory slots causing a freeze when picking up items
 			- Fixed modded accessory slots Quick Move
-			
+
 			'''
 		Tooltip: ""
 	}

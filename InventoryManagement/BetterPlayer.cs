@@ -172,6 +172,12 @@ public sealed class BetterPlayer : ModPlayer {
     }
     private static Item HookGetItem(On_Player.orig_GetItem orig, Player self, int plr, Item newItem, GetItemSettings settings) {
         if (innerGetItem) return orig(self, plr, newItem, settings);
+
+        if (Config.smartPickup != Configs.InventoryManagement.SmartPickupLevel.Off) {
+            newItem = SmartPickup.SmartGetItem(self, newItem, settings);
+            if (newItem.IsAir) return new();
+        }
+
         self.GetModPlayer<BetterPlayer>().VisibilityFilters.AddOwnedItems(newItem);
          if (!settings.NoText && Config.autoEquip != Configs.InventoryManagement.AutoEquipLevel.Off) {
             foreach (ModInventory inventory in InventoryLoader.Inventories) {

@@ -155,7 +155,7 @@ public sealed class QuickMove : ILoadable {
             target.Inventory.OnSlotChange(player, target, targetSlot);
         }
 
-        // if (!freeItems[destSlot].IsAir && item.IsAir) // TODO notify SmartPickup
+        if(!freeItems[0].IsAir) freeItems[0] = source.GetItem(player, freeItems[0], GetItemSettings.GetItemInDropItemCheck, sourceSlot);
 
         for (int i = 0; i < freeItems.Count; i++) {
             Item free = freeItems[i];

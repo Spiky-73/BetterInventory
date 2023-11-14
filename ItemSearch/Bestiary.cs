@@ -25,7 +25,7 @@ public sealed class Bestiary : ILoadable {
         IL_Filters.BySearch.FitsFilter += ILSearchAddEntries;
         
         On_UIBestiaryInfoItemLine.ctor += HookShowBagContent;
-        On_ItemDropBestiaryInfoElement.GetSearchString += HookSearcBagText;
+        On_ItemDropBestiaryInfoElement.GetSearchString += HookSearchBagText;
 
         On_Filters.ByUnlockState.GetDisplayNameKey += HookCustomUnlockFilterName;
         On_Filters.ByUnlockState.FitsFilter += HookCustomUnlockFilter;
@@ -104,7 +104,7 @@ public sealed class Bestiary : ILoadable {
             self.Height.Pixels += uIList.GetTotalHeight() + uIList.PaddingBottom;
         }
     }
-    private static string HookSearcBagText(On_ItemDropBestiaryInfoElement.orig_GetSearchString orig, ItemDropBestiaryInfoElement self, ref BestiaryUICollectionInfo info) {
+    private static string HookSearchBagText(On_ItemDropBestiaryInfoElement.orig_GetSearchString orig, ItemDropBestiaryInfoElement self, ref BestiaryUICollectionInfo info) {
         string s = orig(self, ref info);
         if (!Enabled || !Config.showBagContent) return s;
         DropRateInfo dropRateInfo = Reflection.ItemDropBestiaryInfoElement._droprateInfo.GetValue(self);

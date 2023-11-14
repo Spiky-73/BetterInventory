@@ -45,14 +45,23 @@ public sealed class InventorySlots : IComparable<InventorySlots> {
     public Item GetItem(Player player, Item item, GetItemSettings settings) {
         IList<Item> items = Items(player);
         if (Accepts?.Invoke(item) == false) return item;
-        for (int i = 0; i < items.Count && !item.IsAir; i++) {
-            if (!Inventory.FitsSlot(player, item, this, i, out var itemsToMove) || itemsToMove.Count != 0 || !items[i].Stack(item, out int tranfered, Inventory.MaxStack)) continue;
-            SoundEngine.PlaySound(SoundID.Grab);
-            items[i].position = player.position;
-            if (!settings.NoText) PopupText.NewText(PopupTextContext.ItemPickupToVoidContainer, items[i], tranfered, false, settings.LongText);
-            Inventory.OnSlotChange(player, this, i);
-        }
+        for (int i = 0; i < items.Count && !item.IsAir; i++) TryStackItem(player, item, settings, i, items);
         return item;
+    }
+    
+    public Item GetItem(Player player, Item item, GetItemSettings settings, int slot) {
+        TryStackItem(player, item, settings, slot, Items(player));
+        return item;
+    }
+
+    private void TryStackItem(Player player, Item item, GetItemSettings settings, int slot, IList<Item> items) {
+        if (Accepts?.Invoke(item) == false || !Inventory.FitsSlot(player, item, this, slot, out var itemsToMove) || itemsToMove.Count != 0) return;
+        if (!items[slot].Stack(item, out int tranfered, Inventory.MaxStack)) return;
+        SoundEngine.PlaySound(SoundID.Grab);
+        items[slot].position = player.position;
+        if (!settings.NoText) PopupText.NewText(PopupTextContext.ItemPickupToVoidContainer, items[slot], tranfered, false, settings.LongText);
+        Inventory.OnSlotChange(player, this, slot);
+        return;
     }
 
     private IList<(int context, Func<Player, ListIndices<Item>> items)> _slots;

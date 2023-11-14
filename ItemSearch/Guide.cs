@@ -41,7 +41,8 @@ public sealed class Guide : ModSystem {
         On_ItemSlot.OverrideHover_ItemArray_int_int += HookOverrideHover;
         On_ItemSlot.OverrideLeftClick += HookOverrideLeftClick;
 
-        On_ItemSlot.Draw_SpriteBatch_refItem_int_Vector2_Color += HookHideItem;
+        On_ItemSlot.Draw_SpriteBatch_refItem_int_Vector2_Color += HookHideItemStack;
+        On_ItemSlot.DrawItemIcon += HookHideItemIcon;
         MonoModHooks.Add(typeof(ItemLoader).GetMethod(nameof(ItemLoader.ModifyTooltips)), HookHideTooltip);
 
         s_inventoryBack4 = TextureAssets.InventoryBack4;
@@ -119,7 +120,7 @@ public sealed class Guide : ModSystem {
             Rectangle hitbox = new((int)position.X, (int)position.Y, (int)(TextureAssets.InventoryBack.Width() * Main.inventoryScale), (int)(TextureAssets.InventoryBack.Height() * Main.inventoryScale));
             if (hitbox.Contains(Main.mouseX, Main.mouseY)) {
                 Main.LocalPlayer.mouseInterface = true;
-                if(item.type != CraftingItem.ID)s_forceToolip = condition.Description;
+                if(item.type != CraftingItem.ID)ForcedToolip = condition.Description;
                 ItemSlot.MouseHover(ref item, ContextID.CraftingMaterial);
             }
             Main.inventoryBack = inventoryBack;
@@ -504,7 +505,7 @@ public sealed class Guide : ModSystem {
         cursor.EmitLdarg0();
         cursor.EmitDelegate((int recipeIndex) => {
             if (!Enabled) return false;
-            if (IsUnknown(Main.availableRecipe[recipeIndex])) s_forceToolip = Lang.GetItemName(UnknownItem.ID);
+            if (IsUnknown(Main.availableRecipe[recipeIndex])) ForcedToolip = Language.GetText("Mods.BetterInventory.UI.Unknown");
             if (!Config.favoriteRecipes) return false;
             bool click = Main.mouseLeft && Main.mouseLeftRelease;
             if (Main.keyState.IsKeyDown(Main.FavoriteKey)) {
@@ -603,35 +604,38 @@ public sealed class Guide : ModSystem {
     }
 
     public delegate List<TooltipLine> ModifyTooltipsFn(Item item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out Color?[] overrideColor, int prefixlineIndex);
-    private void HookHideItem(On_ItemSlot.orig_Draw_SpriteBatch_refItem_int_Vector2_Color orig, SpriteBatch spriteBatch, ref Item inv, int context, Vector2 position, Color lightColor) {
+    private void HookHideItemStack(On_ItemSlot.orig_Draw_SpriteBatch_refItem_int_Vector2_Color orig, SpriteBatch spriteBatch, ref Item inv, int context, Vector2 position, Color lightColor) {
         if (s_hideNextItem) {
-            Item item = UnknownItem.Instance;
+            Item item = FakeItem;
             orig(spriteBatch, ref item, context, position, lightColor);
             s_hideNextItem = false;
         } else {
             orig(spriteBatch, ref inv, context, position, lightColor);
         }
     }
+    private static float HookHideItemIcon(On_ItemSlot.orig_DrawItemIcon orig, Item item, int context, SpriteBatch spriteBatch, Vector2 screenPositionForItemCenter, float scale, float sizeLimit, Color environmentColor) {
+        if (!s_hideNextItem) return orig(item, context, spriteBatch, screenPositionForItemCenter, scale, sizeLimit, environmentColor);
+        Texture2D value = UnknownTexture.Value;
+        Rectangle frame = value.Frame(1, 1, 0, 0, 0, 0);
+        if (frame.Width > sizeLimit || frame.Height > sizeLimit) scale *= (frame.Width <= frame.Height) ? (sizeLimit / frame.Height) : (sizeLimit / frame.Width);
+        spriteBatch.Draw(value, screenPositionForItemCenter, new Rectangle?(frame), item.GetAlpha(environmentColor), 0f, frame.Size() / 2f, scale, 0, 0f);
+        return scale;
+    }
     private static List<TooltipLine> HookHideTooltip(ModifyTooltipsFn orig, Item item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out Color?[] overrideColor, int prefixlineIndex) {
-
-        if (s_forceToolip is not null) { 
-            List<TooltipLine> tooltips = new() { new(BetterInventory.Instance, names[0], s_forceToolip.Value) };
-            numTooltips = 1;
-            text = new string[] { tooltips[0].Text };
-            modifier = new bool[] { tooltips[0].IsModifier };
-            badModifier = new bool[] { tooltips[0].IsModifierBad };
-            oneDropLogo = -1;
-            overrideColor = new Color?[] { null };
-            s_forceToolip = null;
-            return tooltips;
-        }
-
-        return orig.Invoke(item, ref numTooltips, names, ref text, ref modifier, ref badModifier, ref oneDropLogo, out overrideColor, prefixlineIndex);
+        if (ForcedToolip is null) return orig.Invoke(item, ref numTooltips, names, ref text, ref modifier, ref badModifier, ref oneDropLogo, out overrideColor, prefixlineIndex);
+        List<TooltipLine> tooltips = new() { new(BetterInventory.Instance, names[0], ForcedToolip.Value) };
+        numTooltips = 1;
+        text = new string[] { tooltips[0].Text };
+        modifier = new bool[] { tooltips[0].IsModifier };
+        badModifier = new bool[] { tooltips[0].IsModifierBad };
+        oneDropLogo = -1;
+        overrideColor = new Color?[] { null };
+        return tooltips;
     }
 
     internal static void RecipeListHover(int recipe) {
         if (!Enabled || !IsUnknown(Main.availableRecipe[recipe])) return;
-        s_forceToolip = Lang.GetItemName(UnknownItem.ID);
+        ForcedToolip = Language.GetText("Mods.BetterInventory.UI.Unknown");
     }
 
 
@@ -674,6 +678,8 @@ public sealed class Guide : ModSystem {
         else self.GetDropItem(ref guideTile);
     }
 
+    public static readonly Item FakeItem = new(ItemID.DirtBlock);
+
     public static readonly Dictionary<int, int> CraftingStationsItems = new(); // tile -> item
     public static readonly Dictionary<string, int> ConditionItems = new(); // descrition -> id
 
@@ -686,6 +692,7 @@ public sealed class Guide : ModSystem {
     public static readonly Asset<Texture2D>[] ConditionTextures = new Asset<Texture2D>[] { TextureAssets.InventoryBack12, TextureAssets.InventoryBack8 };
 
     public static Asset<Texture2D> InventoryTickBorder => ModContent.Request<Texture2D>($"BetterInventory/Assets/Inventory_Tick_Border");
+    public static Asset<Texture2D> UnknownTexture => ModContent.Request<Texture2D>($"BetterInventory/Assets/Unknown_Item");
 
     private static Asset<Texture2D> s_inventoryBack4 = null!;
 
@@ -700,7 +707,7 @@ public sealed class Guide : ModSystem {
     private static readonly List<(Item item, Condition condition)> s_craftingConditions = new();
 
     private static bool s_hideNextItem;
-    private static LocalizedText? s_forceToolip;
+    public static LocalizedText? ForcedToolip;
 
     public const int TilesPerLine = 7;
     public const float TileScale = 0.46f;

@@ -9,7 +9,7 @@ namespace BetterInventory.Configs;
 public sealed class InventoryManagement : ModConfig {
     [DefaultValue(true)] public bool smartConsumption;
     [DefaultValue(true)] public bool smartAmmo;
-    // [DefaultValue(SmartPickupLevel.AllItems)] public SmartPickupLevel smartPickup = SmartPickupLevel.AllItems; // TODO implement
+    [DefaultValue(SmartPickupLevel.AllItems)] public SmartPickupLevel smartPickup = SmartPickupLevel.AllItems;
     [DefaultValue(AutoEquipLevel.MainSlots)] public AutoEquipLevel autoEquip;
     [DefaultValue(true)] public bool favoriteInBanks;
     
@@ -32,12 +32,7 @@ public sealed class InventoryManagement : ModConfig {
 
 
     public enum AutoEquipLevel { Off, MainSlots, AllSlots }
-    // public enum SmartPickupLevel { Off, FavoriteOnly, AllItems }
-    // public bool SmartPickupEnabled(Item item) => smartPickup switch {
-    //     SmartPickupLevel.AllItems => true,
-    //     SmartPickupLevel.FavoriteOnly => item.favorited,
-    //     SmartPickupLevel.Off or _ => false
-    // };
+    public enum SmartPickupLevel { Off, FavoriteOnly, AllItems }
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
     public static InventoryManagement Instance = null!;

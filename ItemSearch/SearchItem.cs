@@ -1,5 +1,3 @@
-using System;
-using BetterInventory.Configs;
 using BetterInventory.Items;
 using Microsoft.Xna.Framework;
 using Terraria;
@@ -45,7 +43,7 @@ public sealed class SearchItem : ILoadable {
     private Vector2 HookRedirectThickCursor(On_Main.orig_DrawThickCursor orig, bool smart) => Enabled && s_redir ? Vector2.Zero : orig(smart);
     private static void HookDrawInterfaceCursor(On_Main.orig_DrawInterface_36_Cursor orig) {
         s_redir = false;
-        if (Enabled && Keybind.Current && !Main.HoverItem.IsAir && Main.HoverItem.type != Items.UnknownItem.ID) {
+        if (Enabled && Keybind.Current && !Main.HoverItem.IsAir && Guide.ForcedToolip is null) {
             s_allowClick = true;
             Main.cursorOverride = CursorOverrideID.Magnifiers;
         }
@@ -82,6 +80,7 @@ public sealed class SearchItem : ILoadable {
             s_allowClick = false;
             Main.cursorOverride = -1;
         }
+        Guide.ForcedToolip = null;
     }
 
     public static void ProcessSearchTap() {
