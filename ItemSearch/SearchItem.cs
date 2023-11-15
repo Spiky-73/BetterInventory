@@ -1,4 +1,3 @@
-using BetterInventory.Items;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
@@ -43,7 +42,7 @@ public sealed class SearchItem : ILoadable {
     private Vector2 HookRedirectThickCursor(On_Main.orig_DrawThickCursor orig, bool smart) => Enabled && s_redir ? Vector2.Zero : orig(smart);
     private static void HookDrawInterfaceCursor(On_Main.orig_DrawInterface_36_Cursor orig) {
         s_redir = false;
-        if (Enabled && Keybind.Current && !Main.HoverItem.IsAir && Guide.ForcedToolip is null) {
+        if (Enabled && Keybind.Current && !Main.HoverItem.IsAir && Guide.ForcedToolip?.Key != "Mods.BetterInventory.UI.Unknown") {
             s_allowClick = true;
             Main.cursorOverride = CursorOverrideID.Magnifiers;
         }
@@ -167,13 +166,15 @@ public sealed class SearchItem : ILoadable {
         Item[] items = new Item[] { Main.guideItem, Guide.guideTile };
         int slot = Guide.Config.guideTile && Guide.IsCraftingTileItem(Main.mouseItem) ? 1 : 0;
         if (slot == 1 && !items[slot].IsAir) {
-            bool flag;
-            if (item.type == CraftingItem.ID) {
-                if (item.createTile == -1) flag = false;
-                else if (item.createTile != -1) flag = item.createTile == items[slot].createTile;
-                else flag = (item.ModItem as CraftingItem)!.condition?.Description.Key == (items[slot].ModItem as CraftingItem)?.condition?.Description.Key;
-            } else flag = items[1].type == item.type;
-            
+            bool flag = false;
+            switch (Guide.GetPlaceholderType(item)) {
+            case PlaceholderType.Condition:
+                flag = Guide.GetPlaceholderType(Guide.guideTile) == PlaceholderType.Condition && item.Name == Guide.guideTile.Name;
+                break;
+            case PlaceholderType.Tile:
+                flag = item.createTile != -1 && item.createTile == items[slot].createTile;
+                break;
+            }
             if (flag) {
                 slot = 0;
                 items[1].TurnToAir();
@@ -196,8 +197,9 @@ public sealed class SearchItem : ILoadable {
     public static bool OverrideLeftClick(Item[] inv, int context, int slot) {
         if (!Config.searchRecipes || context != ContextID.GuideItem) return false;
         if (inv[slot].IsAir && Main.mouseItem.IsAir || ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) != 0) return true;
-        if(Main.mouseItem.type == CraftingItem.ID) {
-            inv[slot] = CraftingItem.WithTile(Main.mouseItem.createTile, Main.mouseItem.placeStyle);
+        if (Guide.GetPlaceholderType(Main.mouseItem) != PlaceholderType.None) {
+            inv[slot] = new(Guide.CraftingItem.type) { createTile = Main.mouseItem.createTile};
+            if (Main.mouseItem.BestiaryNotes?.StartsWith(Guide.ConditionMark) == true) inv[slot].BestiaryNotes = Main.mouseItem.BestiaryNotes;
         } else inv[slot] = new(Main.mouseItem.type, 1);
 
         SoundEngine.PlaySound(SoundID.Grab);
