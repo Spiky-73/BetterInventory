@@ -199,8 +199,7 @@ ItemSearch: {
 	}
 
 	unknownDisplay: {
-		// TODO fix image
-		Label: "[i:BetterInventory/UnknownItem] Unknown Recipe or NPCs display"
+		Label: "[i:236] Unknown Recipe or NPCs display"
 		Tooltip:
 			'''
 			Changed how Recipes and NPCs you have not discovered are displayed in the Recipe list and Bestiary
