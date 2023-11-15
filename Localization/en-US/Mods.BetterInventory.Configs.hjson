@@ -71,7 +71,12 @@ InventoryManagement: {
 
 	smartPickup: {
 		Label: "[i:75] Smart Item Pickup"
-		Tooltip: Items go to slot they were taken from
+		Tooltip:
+			'''
+			Items go their previous slot in your inventory when picked up
+			{$Mods.BetterInventory.Configs.SmartPickupLevel.FavoriteOnly.Label}: Applies to Favorited items only
+			{$Mods.BetterInventory.Configs.SmartPickupLevel.AllItems.Label}: Applies to all items
+			'''
 	}
 
 	autoEquip: {
@@ -113,6 +118,20 @@ InventoryManagement: {
 	favoriteInBanks: {
 		Label: "[i:75] Favorite Items in Personal Storages"
 		Tooltip: Allows you to favorite items in your personal storages
+	}
+}
+
+SmartPickup: {
+	Tooltip: ""
+
+	shiftClicks: {
+		Label: "[i:48] Shift Clicked Items"
+		Tooltip: Applies to items Shift Clicked into
+	}
+
+	mediumCore: {
+		Label: "[i:1174] Items Dropped on Death"
+		Tooltip: Applies to items dropped on death
 	}
 }
 
@@ -267,6 +286,8 @@ ChildValue`2: {
 		Label: Value
 		Tooltip: ""
 	}
+
+	Tooltip: ""
 }
 
 BetterBestiary: {

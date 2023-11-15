@@ -13,8 +13,8 @@ using Terraria.UI;
 namespace BetterInventory.InventoryManagement;
 
 public sealed record class BuilderAccToggle {
-    public BuilderAccToggle(string name, System.Predicate<Player> available, int number) : this(name, available, player => BetterPlayer.CycleAccState(player, number)) {}
-    public BuilderAccToggle(string name, System.Predicate<Player> available, System.Action<Player> toggle) {
+    public BuilderAccToggle(string name, Predicate<Player> available, int number) : this(name, available, player => BetterPlayer.CycleAccState(player, number)) {}
+    public BuilderAccToggle(string name, Predicate<Player> available, Action<Player> toggle) {
         Name = name;
         IsAvailable = available;
         Toggle = toggle;
@@ -30,8 +30,8 @@ public sealed record class BuilderAccToggle {
 
     public string Name { get; }
     public ModKeybind Keybind { get; private set; }
-    public System.Predicate<Player> IsAvailable { get; }
-    public System.Action<Player> Toggle { get; }
+    public Predicate<Player> IsAvailable { get; }
+    public Action<Player> Toggle { get; }
 }
 
 public sealed class BetterPlayer : ModPlayer {
@@ -186,44 +186,6 @@ public sealed class BetterPlayer : ModPlayer {
             }
         }
         return orig(self, plr, newItem, settings);
-        //     if (!Configs.ClientConfig.SmartPickupEnabled(newItem)) return orig(self, plr, newItem, settings);
-        //     bool gotItems = false;
-        //     int slot;
-        //     if (self.InChest(out Item[]? chest) && (settings is GetItemSettings { NoText: false, CanGoIntoVoidVault: true } || newItem == Main.mouseItem)
-        //             && (slot = System.Array.IndexOf(betterPlayer._lastTypeChest, newItem.type)) != -1 /* && chest[slot] != newItem */) {
-        //         object[] args = new object[] { plr, chest, newItem, settings, newItem, slot };
-        //         if (chest[slot].type == ItemID.None) gotItems = (bool)FillEmptVoidMethod.Invoke(self, args)!;
-        //         else if (chest[slot].type == newItem.type && newItem.maxStack > 1) gotItems = (bool)FillOccupiedVoidMethod.Invoke(self, args)!;
-        //         else if (newItem.favorited || !chest[slot].favorited) (chest[slot], newItem) = (newItem, chest[slot]);
-        //         if (Main.netMode == NetmodeID.MultiplayerClient && self.chest > -1) NetMessage.SendData(MessageID.SyncChestItem, number: self.chest, number2: slot);
-        //     } else if ((slot = System.Array.IndexOf(betterPlayer._lastTypeInv, newItem.type)) != -1) {
-        //         object[] args = new object[] { plr, newItem, settings, newItem, slot };
-        //         if (self.inventory[slot].type == ItemID.None) gotItems = (bool)FillEmptyMethod.Invoke(self, args)!;
-        //         else if (self.inventory[slot].type == newItem.type && newItem.maxStack > 1) gotItems = (bool)FillOccupiedMethod.Invoke(self, args)!;
-        //         else if (newItem.favorited || !self.inventory[slot].favorited) {
-        //             (newItem, self.inventory[slot]) = (self.inventory[slot], newItem);
-        //         }
-        //     }
-        //     if (gotItems) return new();
-        //     return orig(self, plr, newItem, settings);
-        // }
-        // private bool HookPlaceInChest(On_ChestUI.orig_TryPlacingInChest orig, Item I, bool justCheck, int itemSlotContext) {
-        //     ChestUI.GetContainerUsageInfo(out var sync, out Item[]? chest);
-        //     if (ChestUI.IsBlockedFromTransferIntoChest(I, chest) || !Configs.ClientConfig.SmartPickupEnabled(I)) return orig(I, justCheck, itemSlotContext);
-        //     BetterPlayer betterPlayer = Main.LocalPlayer.GetModPlayer<BetterPlayer>();
-        //     bool gotItems = false;
-        //     int slot;
-        //     if ((slot = System.Array.IndexOf(betterPlayer._lastTypeChest, I.type)) != -1 /* && chest[slot] != I */) {
-        //         if(justCheck) return true;
-        //         if (chest[slot].type == ItemID.None) {
-        //             Item i = I.Clone();
-        //             gotItems = (bool)FillEmptVoidMethod.Invoke(Main.LocalPlayer, new object[] { Main.myPlayer, chest, i, GetItemSettings.InventoryUIToInventorySettings, i, slot })!;
-        //         } else if (chest[slot].type == I.type && I.maxStack > 1) gotItems = (bool)FillOccupiedVoidMethod.Invoke(Main.LocalPlayer, new object[] { Main.myPlayer, chest, I, GetItemSettings.InventoryUIToInventorySettings, I, slot })!;
-        //         else if (I.favorited || !chest[slot].favorited) (chest[slot], I) = (I, chest[slot]);
-        //         if (sync) NetMessage.SendData(MessageID.SyncChestItem, number: Main.LocalPlayer.chest, number2: slot);
-        //     }
-        //     if(gotItems) I.TurnToAir();
-        //     return gotItems || orig(I, justCheck, itemSlotContext);
     }
 
 

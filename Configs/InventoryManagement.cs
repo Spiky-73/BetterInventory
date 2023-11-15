@@ -9,7 +9,7 @@ namespace BetterInventory.Configs;
 public sealed class InventoryManagement : ModConfig {
     [DefaultValue(true)] public bool smartConsumption;
     [DefaultValue(true)] public bool smartAmmo;
-    [DefaultValue(SmartPickupLevel.AllItems)] public SmartPickupLevel smartPickup = SmartPickupLevel.AllItems;
+    public ChildValue<SmartPickupLevel, SmartPickup> smartPickup = new(SmartPickupLevel.AllItems);
     [DefaultValue(AutoEquipLevel.MainSlots)] public AutoEquipLevel autoEquip;
     [DefaultValue(true)] public bool favoriteInBanks;
     
@@ -39,6 +39,10 @@ public sealed class InventoryManagement : ModConfig {
 
 }
 
+public sealed class SmartPickup {
+    [DefaultValue(false)] public bool shiftClicks = false;
+    [DefaultValue(true)] public bool mediumCore = true;
+}
 public sealed class QuickMove {
     [Range(0, 3600), DefaultValue(60)] public int chainTime = 60;
     [DefaultValue(true)] public bool showTooltip = true;

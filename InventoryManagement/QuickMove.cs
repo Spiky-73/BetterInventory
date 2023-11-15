@@ -43,7 +43,7 @@ public sealed class QuickMove : ILoadable {
         ));
     }
 
-    public static void ProcessTriggers(Player player) {
+    public static void ProcessTriggers(Player player) { // TODO remove unnecessary Player player as it must be Main.LocalPlayer
         if (_moveTime == 0) _selectedItem[0] = player.selectedItem;
         _hover = false;
     }
@@ -51,25 +51,24 @@ public sealed class QuickMove : ILoadable {
     public static void HoverItem(Player player, Item[] inventory, int context, int slot) {
         if (!Configs.InventoryManagement.Instance.quickMove) return;
         _hover = true;
-        InventorySlots? source = null;
-        int sourceSlot = -1;
-        foreach (ModInventory modInventory in InventoryLoader.Inventories) {
-            foreach (InventorySlots invSlots in modInventory.Slots) {
-                int slotOffset = 0;
-                foreach((int c, Func<Player, ListIndices<Item>> s) in invSlots.Slots) {
-                    bool accessory = context == ItemSlot.Context.EquipAccessoryVanity || context == ItemSlot.Context.EquipAccessory;
-                    ListIndices<Item> items = s(player);
-                    // if ((accessory ? items.List == inventory :  c == context) && (sourceSlot = items.FromInnerIndex(slot)) != -1){
-                    if (items.List == inventory && (sourceSlot = items.FromInnerIndex(slot)) != -1){
-                        source = invSlots;
-                        sourceSlot += slotOffset;
-                        goto found;
-                    }
-                    slotOffset += items.Count;
-                }
-            }
-        }
-    found:
+        (InventorySlots? source, int sourceSlot) = InventoryLoader.GetInventorySlot(player, inventory, context, slot);
+        // InventorySlots? source = null;
+        // int sourceSlot = -1;
+        // foreach (ModInventory modInventory in InventoryLoader.Inventories) {
+        //     foreach (InventorySlots invSlots in modInventory.Slots) {
+        //         int slotOffset = 0;
+        //         foreach((int c, Func<Player, ListIndices<Item>> s) in invSlots.Slots) {
+        //             ListIndices<Item> items = s(player);
+        //             if (items.List == inventory && (sourceSlot = items.FromInnerIndex(slot)) != -1){
+        //                 source = invSlots;
+        //                 sourceSlot += slotOffset;
+        //                 goto found;
+        //             }
+        //             slotOffset += items.Count;
+        //         }
+        //     }
+        // }
+    // found:
         UpdateDisplayedMoveChain(player, source, inventory[slot]);
         UpdateChain(player, source, sourceSlot);
     }

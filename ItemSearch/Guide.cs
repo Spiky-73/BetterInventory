@@ -139,7 +139,7 @@ public sealed class Guide : ModSystem {
             else {
                 for (int i = 0; i < recipe.requiredTile.Count && recipe.requiredTile[i] != -1; i++) {
                     if (CraftingStationsItems.TryGetValue(recipe.requiredTile[i], out int type) && type != ItemID.None) s_craftingTiles.Add(new(type));
-                    else s_craftingTiles.Add(new(CraftingItem.type) { createTile = recipe.requiredTile[i] }); // TODO custom sprite
+                    else s_craftingTiles.Add(new(CraftingItem.type) { createTile = recipe.requiredTile[i] });
                 }
             }
 
@@ -568,7 +568,7 @@ public sealed class Guide : ModSystem {
     }
     private static void HookOverrideHover(On_ItemSlot.orig_OverrideHover_ItemArray_int_int orig, Item[] inv, int context, int slot) {
         if (SearchItem.OverrideHover(inv, context, slot)) return;
-        if ((Enabled ? InventoryContexts.Contains(context) : context == ContextID.InventoryItem) && ItemSlot.ShiftInUse && !ItemSlot.ShiftForcedOn && Main.InGuideCraftMenu && !inv[slot].IsAir && ItemSlot.PickItemMovementAction(inv, ContextID.GuideItem, 0, inv[slot]) == 0) Main.cursorOverride = CursorOverrideID.InventoryToChest;
+        if (!inv[slot].favorited && (Enabled ? InventoryContexts.Contains(context) : context == ContextID.InventoryItem) && ItemSlot.ShiftInUse && !ItemSlot.ShiftForcedOn && Main.InGuideCraftMenu && !inv[slot].IsAir && ItemSlot.PickItemMovementAction(inv, ContextID.GuideItem, 0, inv[slot]) == 0) Main.cursorOverride = CursorOverrideID.InventoryToChest;
         else orig(inv, context, slot);
     }
     private static bool HookOverrideLeftClick(On_ItemSlot.orig_OverrideLeftClick orig, Item[] inv, int context, int slot) {
