@@ -45,7 +45,8 @@ public sealed class SmartPickup : ILoadable {
             Unmark(item.type);
 
             JoinedList<Item> items = mark.items.Items(player);
-            
+
+            if (mark.slot >= items.Count) return item;
             if (item.favorited || !items[mark.slot].favorited) {
                 (Item moved, items[mark.slot]) = (items[mark.slot], new());
                 item = mark.items.GetItem(player, item, settings, mark.slot);
