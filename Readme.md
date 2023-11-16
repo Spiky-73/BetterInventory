@@ -6,6 +6,9 @@ Feel free to suggest new feature in the Steam Workshop page or by creating a new
 
 Keep in mind, this mod is still in developement. If you find a bug, please report it on the Steam Workshop page or Gihtub.
 
+Visit the [Workshop Page](https://steamcommunity.com/sharedfiles/filedetails/?id=3074374647) if you with to download and use this mod.
+
+
 ## Key Features
  - More item actions in the inventory
  - A way to quickly move item between various inventory slots
@@ -17,8 +20,15 @@ Keep in mind, this mod is still in developement. If you find a bug, please repor
  - The possibility to search an item's recipes on NPCs dropping it
  - And more...
 
+
 ## Changelog
 
+### v0.3
+- Added Smart Pickup
+- Small Config label / tooltip changes
+- Searching guideItem now properly swaps with guideTile if possible
+- Fixed bugged drops in multiplayer by recoding ModsItems
+- Fixed displayed requiredTiles when no recipes are available
 
 ### v0.2.1.1
 - No Auto Equips when tranfering items from inside your inventory (e.g. Accessories -> Inventory)

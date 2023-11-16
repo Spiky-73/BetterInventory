@@ -18,13 +18,13 @@ public sealed class Text {
     [JsonIgnore] public string? Tooltip { get; }
 }
 
-public sealed class TextElement : ConfigElement<Text> {
+public sealed class TextElement : ConfigElement<Text?> {
 
     public override void OnBind() {
         base.OnBind();
-        Text value = Value ??= new();
-        if(value.Label is not null) TextDisplayFunction = () => Value.Label;
-        if(value.Tooltip is not null) TooltipFunction = () => Value.Tooltip;
+        Text? value = Value;
+        if(value?.Label is not null) TextDisplayFunction = () => Value!.Label;
+        if(value?.Tooltip is not null) TooltipFunction = () => Value!.Tooltip;
         Height.Set(30, 0);
     }
 

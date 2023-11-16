@@ -43,35 +43,17 @@ public sealed class QuickMove : ILoadable {
         ));
     }
 
-    public static void ProcessTriggers(Player player) {
-        if (_moveTime == 0) _selectedItem[0] = player.selectedItem;
+    public static void RecordSelectedSlot() {
+        if (_moveTime == 0) _selectedItem[0] = Main.LocalPlayer.selectedItem;
         _hover = false;
     }
 
-    public static void HoverItem(Player player, Item[] inventory, int context, int slot) {
+    public static void HoverItem(Item[] inventory, int context, int slot) {
         if (!Configs.InventoryManagement.Instance.quickMove) return;
         _hover = true;
-        InventorySlots? source = null;
-        int sourceSlot = -1;
-        foreach (ModInventory modInventory in InventoryLoader.Inventories) {
-            foreach (InventorySlots invSlots in modInventory.Slots) {
-                int slotOffset = 0;
-                foreach((int c, Func<Player, ListIndices<Item>> s) in invSlots.Slots) {
-                    bool accessory = context == ItemSlot.Context.EquipAccessoryVanity || context == ItemSlot.Context.EquipAccessory;
-                    ListIndices<Item> items = s(player);
-                    // if ((accessory ? items.List == inventory :  c == context) && (sourceSlot = items.FromInnerIndex(slot)) != -1){
-                    if (items.List == inventory && (sourceSlot = items.FromInnerIndex(slot)) != -1){
-                        source = invSlots;
-                        sourceSlot += slotOffset;
-                        goto found;
-                    }
-                    slotOffset += items.Count;
-                }
-            }
-        }
-    found:
-        UpdateDisplayedMoveChain(player, source, inventory[slot]);
-        UpdateChain(player, source, sourceSlot);
+        (InventorySlots? source, int sourceSlot) = InventoryLoader.GetInventorySlot(Main.LocalPlayer, inventory, context, slot);
+        UpdateDisplayedMoveChain(source, inventory[slot]);
+        UpdateChain(source, sourceSlot);
     }
 
     private static void HookAlternateChain(On_Main.orig_DrawInterface_36_Cursor orig) {
@@ -79,27 +61,27 @@ public sealed class QuickMove : ILoadable {
             if (!Main.playerInventory) _moveTime = 0;
             else {
                 Main.LocalPlayer.selectedItem = _selectedItem[1];
-                if (PlayerInput.Triggers.JustPressed.KeyStatus[MoveKeys[_moveTargetSlot]]) ContinueChain(Main.LocalPlayer);
+                if (PlayerInput.Triggers.JustPressed.KeyStatus[MoveKeys[_moveTargetSlot]]) ContinueChain();
             }
         }
         orig();
     }
 
-    public static void UpdateChain(Player player, InventorySlots? inventory, int slot) {
+    public static void UpdateChain(InventorySlots? inventory, int slot) {
 
         if (_moveTime > 0) {
             _moveTime--;
             if (inventory is null) _moveTime = 0;
             else if (_moveTime == Config.chainTime - 1) _validSlots[inventory] = slot;
             else if (!_validSlots.TryGetValue(inventory, out int index) || index != slot) _moveTime = 0;
-            player.selectedItem = _selectedItem[1];
+            Main.LocalPlayer.selectedItem = _selectedItem[1];
         }
 
         int targetSlot = Array.FindIndex(MoveKeys, key => PlayerInput.Triggers.JustPressed.KeyStatus[key]);
         if (targetSlot == -1 || inventory is null) return;
 
         if (_moveTime == 0 || _moveTargetSlot != targetSlot) SetupChain(inventory, slot, targetSlot);
-        ContinueChain(player);
+        ContinueChain();
     }
     private static void SetupChain(InventorySlots? inventory, int slot, int targetSlot) {
         _moveSourceSlot = slot;
@@ -111,7 +93,8 @@ public sealed class QuickMove : ILoadable {
         _validSlots[inventory!] = slot;
         _movedItems.Clear();
     }
-    private static void ContinueChain(Player player) {
+    private static void ContinueChain() {
+        Player player = Main.LocalPlayer;
         UndoMove(player, _movedItems);
         
         player.selectedItem = _selectedItem[0];
@@ -155,7 +138,7 @@ public sealed class QuickMove : ILoadable {
             target.Inventory.OnSlotChange(player, target, targetSlot);
         }
 
-        // if (!freeItems[destSlot].IsAir && item.IsAir) // TODO notify SmartPickup
+        if(!freeItems[0].IsAir) freeItems[0] = source.GetItem(player, freeItems[0], GetItemSettings.GetItemInDropItemCheck, sourceSlot);
 
         for (int i = 0; i < freeItems.Count; i++) {
             Item free = freeItems[i];
@@ -194,12 +177,12 @@ public sealed class QuickMove : ILoadable {
         return (null, -1);
     }
 
-    public static void UpdateDisplayedMoveChain(Player player, InventorySlots? slots, Item item) {
+    public static void UpdateDisplayedMoveChain(InventorySlots? slots, Item item) {
         if (slots is null || item.IsAir) {
             _displayedChain.Clear();
             _displayedItem = ItemID.None;
         } else if (_displayedItem != item.type) {
-            _displayedChain = SmartishChain(player, item, slots);
+            _displayedChain = SmartishChain(Main.LocalPlayer, item, slots);
             _displayedItem = item.type;
         }
     }

@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using BetterInventory.DataStructures;
+using Terraria;
 
 namespace BetterInventory;
 
@@ -13,6 +16,21 @@ public static class InventoryLoader {
 
     internal static void Unload(){
         _inventories.Clear();
+    }
+
+    public static (InventorySlots? slots, int index) GetInventorySlot(Player player, Item[] inventory, int context, int slot) {
+        foreach (ModInventory modInventory in Inventories) {
+            foreach (InventorySlots slots in modInventory.Slots) {
+                int slotOffset = 0;
+                foreach ((int c, Func<Player, ListIndices<Item>> s) in slots.Slots) {
+                    ListIndices<Item> items = s(player);
+                    int index = items.FromInnerIndex(slot);
+                    if (items.List == inventory && index != -1) return (slots, index);
+                    slotOffset += items.Count;
+                }
+            }
+        }
+        return (null, -1);
     }
 
     public static void SortSlots(this IList<InventorySlots> slots) {

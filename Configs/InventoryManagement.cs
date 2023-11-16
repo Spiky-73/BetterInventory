@@ -9,7 +9,7 @@ namespace BetterInventory.Configs;
 public sealed class InventoryManagement : ModConfig {
     [DefaultValue(true)] public bool smartConsumption;
     [DefaultValue(true)] public bool smartAmmo;
-    // [DefaultValue(SmartPickupLevel.AllItems)] public SmartPickupLevel smartPickup = SmartPickupLevel.AllItems; // TODO implement
+    public ChildValue<SmartPickupLevel, SmartPickup> smartPickup = new(SmartPickupLevel.AllItems);
     [DefaultValue(AutoEquipLevel.MainSlots)] public AutoEquipLevel autoEquip;
     [DefaultValue(true)] public bool favoriteInBanks;
     
@@ -32,18 +32,17 @@ public sealed class InventoryManagement : ModConfig {
 
 
     public enum AutoEquipLevel { Off, MainSlots, AllSlots }
-    // public enum SmartPickupLevel { Off, FavoriteOnly, AllItems }
-    // public bool SmartPickupEnabled(Item item) => smartPickup switch {
-    //     SmartPickupLevel.AllItems => true,
-    //     SmartPickupLevel.FavoriteOnly => item.favorited,
-    //     SmartPickupLevel.Off or _ => false
-    // };
+    public enum SmartPickupLevel { Off, FavoriteOnly, AllItems }
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
     public static InventoryManagement Instance = null!;
 
 }
 
+public sealed class SmartPickup {
+    [DefaultValue(false)] public bool shiftClicks = false;
+    [DefaultValue(true)] public bool mediumCore = true;
+}
 public sealed class QuickMove {
     [Range(0, 3600), DefaultValue(60)] public int chainTime = 60;
     [DefaultValue(true)] public bool showTooltip = true;

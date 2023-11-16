@@ -1,4 +1,4 @@
 Download: Thanks for downloading Better Inventory!
 Update: Better Inventory was updated to v{0}! View the 'Version {0}' config to learn more about the update.
 Warn: This mod is still in developement. If you found a bug, please report it on the Steam workshop page or GitHub.
-Important: I finally fixed the freeze caused by picking up Accessories. If you disabled {$Mods.BetterInventory.Configs.InventoryManagement.autoEquip.Name} because of this bug, you can re-enable it!
+Important: ""

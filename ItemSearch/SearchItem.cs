@@ -1,6 +1,3 @@
-using System;
-using BetterInventory.Configs;
-using BetterInventory.Items;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
@@ -45,7 +42,7 @@ public sealed class SearchItem : ILoadable {
     private Vector2 HookRedirectThickCursor(On_Main.orig_DrawThickCursor orig, bool smart) => Enabled && s_redir ? Vector2.Zero : orig(smart);
     private static void HookDrawInterfaceCursor(On_Main.orig_DrawInterface_36_Cursor orig) {
         s_redir = false;
-        if (Enabled && Keybind.Current && !Main.HoverItem.IsAir && Main.HoverItem.type != Items.UnknownItem.ID) {
+        if (Enabled && Keybind.Current && !Main.HoverItem.IsAir && Guide.ForcedToolip?.Key != "Mods.BetterInventory.UI.Unknown") {
             s_allowClick = true;
             Main.cursorOverride = CursorOverrideID.Magnifiers;
         }
@@ -82,6 +79,7 @@ public sealed class SearchItem : ILoadable {
             s_allowClick = false;
             Main.cursorOverride = -1;
         }
+        Guide.ForcedToolip = null;
     }
 
     public static void ProcessSearchTap() {
@@ -164,23 +162,36 @@ public sealed class SearchItem : ILoadable {
         (Item mouse, Main.mouseItem) = (Main.mouseItem, item);
         (int cursor, Main.cursorOverride) = (Main.cursorOverride, 0);
         (bool left, Main.mouseLeft, bool rel, Main.mouseLeftRelease) = (Main.mouseLeft, true, Main.mouseLeftRelease, true);
-
         Item[] items = new Item[] { Main.guideItem, Guide.guideTile };
-        int slot = Guide.Config.guideTile && Guide.IsCraftingTileItem(Main.mouseItem) ? 1 : 0;
-        if (slot == 1 && !items[slot].IsAir) {
-            bool flag;
-            if (item.type == CraftingItem.ID) {
-                if (item.createTile == -1) flag = false;
-                else if (item.createTile != -1) flag = item.createTile == items[slot].createTile;
-                else flag = (item.ModItem as CraftingItem)!.condition?.Description.Key == (items[slot].ModItem as CraftingItem)?.condition?.Description.Key;
-            } else flag = items[1].type == item.type;
-            
-            if (flag) {
-                slot = 0;
-                items[1].TurnToAir();
-            } else if (items[0].type == item.type) items[0].TurnToAir();
+
+        if (item.IsAir) {
+            ItemSlot.LeftClick(items, ContextID.GuideItem, 0);
+            if(!items[1].IsAir) ItemSlot.LeftClick(items, ContextID.GuideItem, 1);
+        } else {
+            int slot = Guide.Config.guideTile && Guide.IsCraftingTileItem(Main.mouseItem) ? 1 : 0;
+            if (slot == 1 && !items[slot].IsAir) {
+                bool flag = false;
+                switch (Guide.GetPlaceholderType(item)) {
+                case PlaceholderType.Condition:
+                    flag = Guide.GetPlaceholderType(Guide.guideTile) == PlaceholderType.Condition && item.Name == Guide.guideTile.Name;
+                    break;
+                case PlaceholderType.Tile:
+                    flag = item.createTile != -1 && item.createTile == items[slot].createTile;
+                    break;
+                case PlaceholderType.None:
+                    flag = item.type == items[1].type;
+                    break;
+                }
+                if (flag) {
+                    slot = 0;
+                    items[1].TurnToAir();
+                } else if (items[0].type == item.type) items[0].TurnToAir();
+            } else if (items[0].type == item.type) {
+                slot = 1;
+                items[0].TurnToAir();
+            }
+            ItemSlot.LeftClick(items, ContextID.GuideItem, slot);
         }
-        ItemSlot.LeftClick(items, ContextID.GuideItem, slot);
         (Main.guideItem, Guide.guideTile) = (items[0], items[1]);
 
         Main.mouseItem = mouse;
@@ -197,8 +208,9 @@ public sealed class SearchItem : ILoadable {
     public static bool OverrideLeftClick(Item[] inv, int context, int slot) {
         if (!Config.searchRecipes || context != ContextID.GuideItem) return false;
         if (inv[slot].IsAir && Main.mouseItem.IsAir || ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) != 0) return true;
-        if(Main.mouseItem.type == CraftingItem.ID) {
-            inv[slot] = CraftingItem.WithTile(Main.mouseItem.createTile, Main.mouseItem.placeStyle);
+        if (Guide.GetPlaceholderType(Main.mouseItem) != PlaceholderType.None) {
+            inv[slot] = new(Guide.CraftingItem.type) { createTile = Main.mouseItem.createTile};
+            if (Main.mouseItem.BestiaryNotes?.StartsWith(Guide.ConditionMark) == true) inv[slot].BestiaryNotes = Main.mouseItem.BestiaryNotes;
         } else inv[slot] = new(Main.mouseItem.type, 1);
 
         SoundEngine.PlaySound(SoundID.Grab);

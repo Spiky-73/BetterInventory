@@ -2,7 +2,7 @@ Crafting: {
 	DisplayName: Crafting
 
 	tweeks: {
-		Label: "[i:509] Tweeks"
+		Label: "[i:509] General Tweeks"
 		Tooltip:
 			'''
 			Fix recipe list scroll buttons and material wrapping
@@ -70,8 +70,13 @@ InventoryManagement: {
 	}
 
 	smartPickup: {
-		Label: "[i:75] Smart Item Pickup"
-		Tooltip: Items go to slot they were taken from
+		Label: "[i:4131] Smart Item Pickup"
+		Tooltip:
+			'''
+			Items go their previous slot in your inventory when picked up
+			{$Mods.BetterInventory.Configs.SmartPickupLevel.FavoriteOnly.Label}: Applies to Favorited items only
+			{$Mods.BetterInventory.Configs.SmartPickupLevel.AllItems.Label}: Applies to all items
+			'''
 	}
 
 	autoEquip: {
@@ -91,12 +96,12 @@ InventoryManagement: {
 	}
 
 	fastRightClick: {
-		Label: "[i:5075] Fast Container Opening"
+		Label: "[i:5002] Fast Container Opening"
 		Tooltip: Hold rick click to rapidly open containers
 	}
 
 	itemRightClick: {
-		Label: "[i:1503] Extra Item Right Click"
+		Label: "[i:5075] Extra Item Right Click"
 		Tooltip: Item that can be right clicked in the inventory can be right clicked when held
 	}
 
@@ -113,6 +118,20 @@ InventoryManagement: {
 	favoriteInBanks: {
 		Label: "[i:75] Favorite Items in Personal Storages"
 		Tooltip: Allows you to favorite items in your personal storages
+	}
+}
+
+SmartPickup: {
+	Tooltip: ""
+
+	shiftClicks: {
+		Label: "[i:48] Shift Clicked Items"
+		Tooltip: Applies to items Shift Clicked into
+	}
+
+	mediumCore: {
+		Label: "[i:1174] Items Dropped on Death"
+		Tooltip: Applies to items dropped on death
 	}
 }
 
@@ -184,6 +203,7 @@ ItemSearch: {
 		Tooltip:
 			'''
 			Allows you to access the guide anywhere
+			With {$Mods.BetterInventory.Configs.BetterGuide.guideTile.Label} On, searching the guide tile will move it into the guide item and vice-versa
 			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Left Click an item to search its recipe
 			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Middle Click in the inventory to clear the searched item
 			'''
@@ -199,7 +219,7 @@ ItemSearch: {
 	}
 
 	unknownDisplay: {
-		Label: "[i:BetterInventory/UnknownItem] Unknown Recipe or NPCs display"
+		Label: "[i:236] Unknown Recipe or NPCs display"
 		Tooltip:
 			'''
 			Changed how Recipes and NPCs you have not discovered are displayed in the Recipe list and Bestiary
@@ -267,6 +287,8 @@ ChildValue`2: {
 		Label: Value
 		Tooltip: ""
 	}
+
+	Tooltip: ""
 }
 
 BetterBestiary: {
@@ -274,7 +296,7 @@ BetterBestiary: {
 
 	showBagContent: {
 		Label: Show Treasure Bag Content
-		Tooltip: ""
+		Tooltip: Displays info about the items dropped by Treasure bags in the Bestiary
 	}
 
 	unlockFilter: {
@@ -284,20 +306,21 @@ BetterBestiary: {
 }
 
 Version: {
-	DisplayName: Version 0.2.1.1
+	DisplayName: Version 0.3
 
 	Info: {
-		Label: Fixed the player freeze when picking up accessories and bugs with modded accessory slots
+		Label: Added a new feature: Smart Pickup
 		Tooltip: ""
 	}
 
 	ChangeLog: {
 		Label:
 			'''
-			- No Auto Equips when tranfering items from inside your inventory (e.g. Accessories -> Inventory)
-			- Fixed modded accessory slots causing a freeze when picking up items
-			- Fixed modded accessory slots Quick Move
-			
+			- Added Smart Pickup
+			- Small Config label / tooltip changes
+			- Searching guideItem now properly swaps with guideTile if possible
+			- Fixed bugged drops in multiplayer
+			- Fixed displayed requiredTiles when no recipes are available
 			'''
 		Tooltip: ""
 	}

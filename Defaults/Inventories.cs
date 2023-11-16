@@ -35,8 +35,12 @@ public sealed class Chest : ModInventory {
 
     public sealed override void Load() {
         AddSlots(ContextID.ChestItem, p => new(p.chest >= 0 ? Main.chest[p.chest].item : Array.Empty<Item>()));
-        AddSlots(ContextID.BankItem, p => new(p.chest.InRange(-4, -2) ? p.Chest()! : Array.Empty<Item>()));
-        AddSlots(ContextID.VoidItem, p => new(p.chest == -5 ? p.bank4.item : Array.Empty<Item>()));
+        AddSlots(null, null, null, 
+            (ContextID.BankItem, p => new(p.bank.item)),
+            (ContextID.BankItem, p => new(p.bank2.item)),
+            (ContextID.BankItem, p => new(p.bank3.item))
+        );
+        AddSlots(ContextID.VoidItem, p => new(p.bank4.item));
     }
 
     public sealed override bool FitsSlot(Player player, Item item, InventorySlots slots, int index, out IList<int> itemsToMove) {
@@ -133,6 +137,19 @@ public sealed class Accessories : ModInventory {
     }
 
     public static Item[] ModdedAccessories(Player player) => Reflection.ModAccessorySlotPlayer.exAccessorySlot.GetValue(player.GetModPlayer<ModAccessorySlotPlayer>());
+}
+
+public sealed class Loadouts : ModInventory {
+    public override void Load() {
+        for (int i = 0; i < 3-1; i++){
+            int index = i;
+            AddSlots(null, null, null,
+                (ContextID.EquipAccessory, (Player p) => new ListIndices<Item>(p.Loadouts[p.CurrentLoadoutIndex <= index ? (index+1) : index].Armor)),
+                (ContextID.EquipDye, (Player p) => new ListIndices<Item>(p.Loadouts[p.CurrentLoadoutIndex <= index ? (index+1) : index].Dye))
+            );
+        }
+    }
+    public override int? MaxStack => 1;
 }
 
 public sealed class Equipement : ModInventory {
