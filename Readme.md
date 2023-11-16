@@ -6,6 +6,8 @@ Feel free to suggest new feature in the Steam Workshop page or by creating a new
 
 Keep in mind, this mod is still in developement. If you find a bug, please report it on the Steam Workshop page or Gihtub.
 
+Visit the [Workshop Page](https://steamcommunity.com/sharedfiles/filedetails/?id=3074374647) if you with to download and use this mod.
+
 
 ## Key Features
  - More item actions in the inventory

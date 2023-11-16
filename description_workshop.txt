@@ -4,10 +4,10 @@ Feel free to suggest new feature in the Steam Workshop or by creating new issues
 
 Keep in mind, this mod is still in developement. If you find a bug, please report it on the Steam Workshop page or Gihtub.
 
-Visit the homepage for more info.
+Visit the [url=https://github.com/Spiky-73/BetterInventory/tree/master]homepage[/url] for more info.
 
----------- Key Features ---------- 
 
+[h2]Key Features[/h2]
  - More item actions in the inventory
  - A way to quickly move item between various inventory slots
  - Smarter item consumption and pickup
@@ -17,3 +17,5 @@ Visit the homepage for more info.
  - An Enhanced Crafting interface with the ability to craft on the recipe list, filter recipes and craft item in stacks 
  - The possibility to search an item's recipes on NPCs dropping it
  - And more...
+
+[quote=tModLoader]Developed By Spiky[/quote]
