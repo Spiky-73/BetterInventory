@@ -2,7 +2,7 @@ Crafting: {
 	DisplayName: Crafting
 
 	tweeks: {
-		Label: "[i:509] Tweeks"
+		Label: "[i:509] General Tweeks"
 		Tooltip:
 			'''
 			Fix recipe list scroll buttons and material wrapping
@@ -70,7 +70,7 @@ InventoryManagement: {
 	}
 
 	smartPickup: {
-		Label: "[i:75] Smart Item Pickup"
+		Label: "[i:4131] Smart Item Pickup"
 		Tooltip:
 			'''
 			Items go their previous slot in your inventory when picked up
@@ -96,12 +96,12 @@ InventoryManagement: {
 	}
 
 	fastRightClick: {
-		Label: "[i:5075] Fast Container Opening"
+		Label: "[i:5002] Fast Container Opening"
 		Tooltip: Hold rick click to rapidly open containers
 	}
 
 	itemRightClick: {
-		Label: "[i:1503] Extra Item Right Click"
+		Label: "[i:5075] Extra Item Right Click"
 		Tooltip: Item that can be right clicked in the inventory can be right clicked when held
 	}
 
@@ -203,6 +203,7 @@ ItemSearch: {
 		Tooltip:
 			'''
 			Allows you to access the guide anywhere
+			With {$Mods.BetterInventory.Configs.BetterGuide.guideTile.Label} On, searching the guide tile will move it into the guide item and vice-versa
 			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Left Click an item to search its recipe
 			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Middle Click in the inventory to clear the searched item
 			'''
@@ -295,7 +296,7 @@ BetterBestiary: {
 
 	showBagContent: {
 		Label: Show Treasure Bag Content
-		Tooltip: ""
+		Tooltip: Displays info about the items dropped by Treasure bags in the Bestiary
 	}
 
 	unlockFilter: {
@@ -316,6 +317,8 @@ Version: {
 		Label:
 			'''
 			- Added Smart Pickup
+			- Small Config label / tooltip changes
+			- Searching guideItem now properly swaps with guideTile if possible
 			- Fixed bugged drops in multiplayer
 			- Fixed displayed requiredTiles when no recipes are available
 			'''

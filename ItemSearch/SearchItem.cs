@@ -162,25 +162,36 @@ public sealed class SearchItem : ILoadable {
         (Item mouse, Main.mouseItem) = (Main.mouseItem, item);
         (int cursor, Main.cursorOverride) = (Main.cursorOverride, 0);
         (bool left, Main.mouseLeft, bool rel, Main.mouseLeftRelease) = (Main.mouseLeft, true, Main.mouseLeftRelease, true);
-
         Item[] items = new Item[] { Main.guideItem, Guide.guideTile };
-        int slot = Guide.Config.guideTile && Guide.IsCraftingTileItem(Main.mouseItem) ? 1 : 0;
-        if (slot == 1 && !items[slot].IsAir) {
-            bool flag = false;
-            switch (Guide.GetPlaceholderType(item)) {
-            case PlaceholderType.Condition:
-                flag = Guide.GetPlaceholderType(Guide.guideTile) == PlaceholderType.Condition && item.Name == Guide.guideTile.Name;
-                break;
-            case PlaceholderType.Tile:
-                flag = item.createTile != -1 && item.createTile == items[slot].createTile;
-                break;
+
+        if (item.IsAir) {
+            ItemSlot.LeftClick(items, ContextID.GuideItem, 0);
+            if(!items[1].IsAir) ItemSlot.LeftClick(items, ContextID.GuideItem, 1);
+        } else {
+            int slot = Guide.Config.guideTile && Guide.IsCraftingTileItem(Main.mouseItem) ? 1 : 0;
+            if (slot == 1 && !items[slot].IsAir) {
+                bool flag = false;
+                switch (Guide.GetPlaceholderType(item)) {
+                case PlaceholderType.Condition:
+                    flag = Guide.GetPlaceholderType(Guide.guideTile) == PlaceholderType.Condition && item.Name == Guide.guideTile.Name;
+                    break;
+                case PlaceholderType.Tile:
+                    flag = item.createTile != -1 && item.createTile == items[slot].createTile;
+                    break;
+                case PlaceholderType.None:
+                    flag = item.type == items[1].type;
+                    break;
+                }
+                if (flag) {
+                    slot = 0;
+                    items[1].TurnToAir();
+                } else if (items[0].type == item.type) items[0].TurnToAir();
+            } else if (items[0].type == item.type) {
+                slot = 1;
+                items[0].TurnToAir();
             }
-            if (flag) {
-                slot = 0;
-                items[1].TurnToAir();
-            } else if (items[0].type == item.type) items[0].TurnToAir();
+            ItemSlot.LeftClick(items, ContextID.GuideItem, slot);
         }
-        ItemSlot.LeftClick(items, ContextID.GuideItem, slot);
         (Main.guideItem, Guide.guideTile) = (items[0], items[1]);
 
         Main.mouseItem = mouse;

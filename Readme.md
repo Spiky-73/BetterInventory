@@ -25,6 +25,8 @@ Visit the [Workshop Page](https://steamcommunity.com/sharedfiles/filedetails/?id
 
 ### v0.3
 - Added Smart Pickup
+- Small Config label / tooltip changes
+- Searching guideItem now properly swaps with guideTile if possible
 - Fixed bugged drops in multiplayer by recoding ModsItems
 - Fixed displayed requiredTiles when no recipes are available
 
