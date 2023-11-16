@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using BetterInventory.DataStructures;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -15,7 +17,7 @@ public sealed class SmartPickup : ILoadable {
     public void Load(Mod mod) {
         On_ItemSlot.LeftClick_ItemArray_int_int += HookLeftClick;
         On_ItemSlot.RightClick_ItemArray_int_int += HookRightClick;
-        // On_ChestUI.TryPlacingInChest += HookPlaceInChest;
+        On_Player.DropItems += HookMarkItemsOnDeath;
     }
     public void Unload() { }
 
@@ -30,8 +32,10 @@ public sealed class SmartPickup : ILoadable {
         (int type, int mouse) = (inv[slot].type, Main.mouseItem.type);
         bool fav = inv[slot].favorited;
         orig(inv, context, slot);
-        if (mouse != ItemID.None && Main.mouseItem.type != mouse && inv[slot].type == mouse) Unmark(mouse, type, fav);
-        else if (SmartPickupEnabled(fav) && type != ItemID.None && (inv[slot].type != type && Main.mouseItem.type == type || Config.shiftClicks && inv[slot].IsAir)) Mark(type, inv, context, slot, fav);
+        if (mouse != ItemID.None && Main.mouseItem.type != mouse && inv[slot].type == mouse) {
+            if(SmartPickupEnabled(fav)) Remark(mouse, type, fav);
+            else Unmark(mouse);
+        } else if (SmartPickupEnabled(fav) && type != ItemID.None && (inv[slot].type != type && Main.mouseItem.type == type || Config.shiftClicks && inv[slot].IsAir)) Mark(type, inv, context, slot, fav);
     }
 
     public static Item SmartGetItem(Player player, Item item, GetItemSettings settings) {
@@ -40,7 +44,7 @@ public sealed class SmartPickup : ILoadable {
             item.favorited |= _marksData[item.type];
             Unmark(item.type);
 
-            DataStructures.JoinedList<Item> items = mark.items.Items(player);
+            JoinedList<Item> items = mark.items.Items(player);
             
             if (item.favorited || !items[mark.slot].favorited) {
                 (Item moved, items[mark.slot]) = (items[mark.slot], new());
@@ -66,7 +70,7 @@ public sealed class SmartPickup : ILoadable {
         _marks[type] = mark;
         _marksData[type] = favorited;
     }
-    public static void Unmark(int oldType, int newType, bool? favorite = null) {
+    public static void Remark(int oldType, int newType, bool? favorite = null) {
         if (newType == ItemID.None) Unmark(oldType);
         else if (IsMarked(oldType)) Mark(newType, _marks[oldType], favorite ?? _marksData[oldType]);
     }
@@ -75,24 +79,24 @@ public sealed class SmartPickup : ILoadable {
         _marksData.Remove(type);
     }
 
-    // private bool HookPlaceInChest(On_ChestUI.orig_TryPlacingInChest orig, Item I, bool justCheck, int itemSlotContext) {
-    //     ChestUI.GetContainerUsageInfo(out var sync, out Item[]? chest);
-    //     if (ChestUI.IsBlockedFromTransferIntoChest(I, chest) || ! Configs.ClientConfig.SmartPickupEnabled(I)) return orig(I, justCheck, itemSlotContext);
-    //     BetterPlayer betterPlayer = Main.LocalPlayer.GetModPlayer<BetterPlayer>();
-    //     bool gotItems = false;
-    //     int slot;
-    //     if ((slot = Array.IndexOf(betterPlayer._lastTypeChest, I.type)) != -1 /* && chest[slot] != I */) {
-    //         if (justCheck) return true;
-    //         if (chest[slot].type == ItemID.None) {
-    //             Item i = I.Clone();
-    //             gotItems = (bool)FillEmptVoidMethod.Invoke(Main.LocalPlayer, new object[] { Main.myPlayer, chest, i, GetItemSettings.InventoryUIToInventorySettings, i, slot })!;
-    //         } else if (chest[slot].type == I.type && I.maxStack > 1) gotItems = (bool)FillOccupiedVoidMethod.Invoke(Main.LocalPlayer, new object[] { Main.myPlayer, chest, I, GetItemSettings.InventoryUIToInventorySettings, I, slot })!;
-    //         else if (I.favorited || !chest[slot].favorited) (chest[slot], I) = (I, chest[slot]);
-    //         if (sync) NetMessage.SendData(MessageID.SyncChestItem, number: Main.LocalPlayer.chest, number2: slot);
-    //     }
-    //     if (gotItems) I.TurnToAir();
-    //     return gotItems || orig(I, justCheck, itemSlotContext);
-    // }
+    private void HookMarkItemsOnDeath(On_Player.orig_DropItems orig, Player self) {
+        if(Level == Configs.InventoryManagement.SmartPickupLevel.Off || !Config.mediumCore){
+            orig(self);
+            return;
+        }
+        foreach (ModInventory modInventory in InventoryLoader.Inventories) {
+            foreach (InventorySlots slots in modInventory.Slots) {
+                foreach ((int c, Func<Player, ListIndices<Item>> s) in slots.Slots) {
+                    ListIndices<Item> items = s(self);
+                    for (int i = 0; i < items.Count; i++) {
+                        if(!items[i].IsAir && SmartPickupEnabled(items[i].favorited)) Mark(items[i].type, (slots, i), items[i].favorited);
+                    }
+                }
+            }
+        }
+        
+        orig(self);
+    }
 
     public static bool SmartPickupEnabled(bool favorited) => Level switch {
         Configs.InventoryManagement.SmartPickupLevel.AllItems => true,

@@ -81,7 +81,7 @@ public sealed class Guide : ModSystem {
 
         Recipe recipe = Main.recipe[Main.availableRecipe[Main.focusRecipe]];
 
-        if (recipe.RecipeIndex != s_focusRecipe) UpdateCraftTiles(recipe);
+        if (s_focusRecipe != (Main.numAvailableRecipes == 0 ? -1 : recipe.RecipeIndex)) UpdateCraftTiles(recipe);
 
         float minX = inventoryX + TextureAssets.InventoryBack.Width() * Main.inventoryScale * (1 + TileScacingRatio);
         Vector2 delta = new(TextureAssets.InventoryBack.Width() * (TileScale + TileScacingRatio), -TextureAssets.InventoryBack.Height() * (TileScale + TileScacingRatio));
@@ -149,7 +149,7 @@ public sealed class Guide : ModSystem {
                 else item = new(CraftingItem.type) { BestiaryNotes = ConditionMark + condition.Description.Key };
                 s_craftingConditions.Add((item, condition));
             }
-        }
+        } else s_focusRecipe = -1;
     }
     private static void ILOverrideGuideRecipes(ILContext il) {
         ILCursor cursor = new(il);

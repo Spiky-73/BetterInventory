@@ -135,6 +135,19 @@ public sealed class Accessories : ModInventory {
     public static Item[] ModdedAccessories(Player player) => Reflection.ModAccessorySlotPlayer.exAccessorySlot.GetValue(player.GetModPlayer<ModAccessorySlotPlayer>());
 }
 
+public sealed class Loadouts : ModInventory {
+    public override void Load() {
+        for (int i = 0; i < 3-1; i++){
+            int index = i;
+            AddSlots(null, null, null,
+                (ContextID.EquipAccessory, (Player p) => new ListIndices<Item>(p.Loadouts[p.CurrentLoadoutIndex <= index ? (index+1) : index].Armor)),
+                (ContextID.EquipDye, (Player p) => new ListIndices<Item>(p.Loadouts[p.CurrentLoadoutIndex <= index ? (index+1) : index].Dye))
+            );
+        }
+    }
+    public override int? MaxStack => 1;
+}
+
 public sealed class Equipement : ModInventory {
     public sealed override void Load() {
         AddSlots(ContextID.EquipPet, p => new ListIndices<Item>(p.miscEquips, 0), "Equipement", i => i.buffType > 0 && Main.vanityPet[i.buffType]);

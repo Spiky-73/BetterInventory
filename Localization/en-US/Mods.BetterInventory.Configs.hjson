@@ -305,20 +305,19 @@ BetterBestiary: {
 }
 
 Version: {
-	DisplayName: Version 0.2.1.1
+	DisplayName: Version 0.3
 
 	Info: {
-		Label: Fixed the player freeze when picking up accessories and bugs with modded accessory slots
+		Label: Added a new feature: Smart Pickup
 		Tooltip: ""
 	}
 
 	ChangeLog: {
 		Label:
 			'''
-			- No Auto Equips when tranfering items from inside your inventory (e.g. Accessories -> Inventory)
-			- Fixed modded accessory slots causing a freeze when picking up items
-			- Fixed modded accessory slots Quick Move
-
+			- Added Smart Pickup
+			- Fixed bugged drops in multiplayer
+			- Fixed displayed requiredTiles when no recipes are available
 			'''
 		Tooltip: ""
 	}
