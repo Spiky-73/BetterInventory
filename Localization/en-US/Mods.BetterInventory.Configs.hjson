@@ -95,9 +95,13 @@ InventoryManagement: {
 		Tooltip: Hover over an item and press a hotbar keybind to move it between different contexts
 	}
 
-	fastRightClick: {
+	fastContainerOpening: {
 		Label: "[i:5002] Fast Container Opening"
-		Tooltip: Hold rick click to rapidly open containers
+		Tooltip:
+			'''
+			Hold rick click to rapidly open containers
+			Faster Extractinator
+			'''
 	}
 
 	itemRightClick: {
@@ -171,7 +175,52 @@ QuickMove: {
 		Label: Return to Original Slot
 		Tooltip: Return the item to its original slot at the end of the chain
 	}
+
+	hotkeyMode: {
+		Label: Hotkey Mapping
+		Tooltip:
+			'''
+			Changes the mapping of hotkeys depending of the number of target slots
+			{$Mods.BetterInventory.Configs.HotkeyMode.Default.Label}: Hotbar #1 maps to slot 1, Hotbar #10 to slot 10
+			{$Mods.BetterInventory.Configs.HotkeyMode.FromEnd.Label}: Hotbar #10 maps to the last slot, Hotbar #1 to 10 slot from the end
+			{$Mods.BetterInventory.Configs.HotkeyMode.Reversed.Label}: Hotbar #10 maps to slot 1, Hotbar #1 to slot 10
+			'''
+	}
+
+	hotkeyDisplay: {
+		Label: hotkey Display
+		Tooltip:
+			'''
+			Displays hotkeys on the slots where an item can be moved to
+			{$Mods.BetterInventory.Configs.HotkeyDisplayMode.First.Label}: Displays the hotkeys of the next context in the chain
+			{$Mods.BetterInventory.Configs.HotkeyDisplayMode.All.Label}: Displays the hotkey of the all contexts in the chain
+			'''
+	}
 }
+
+HotkeyDisplay: {
+	Tooltip: ""
+
+	highlightIntensity: {
+		Label: Slot Highlight Intensity
+		Tooltip: Highlight the slots where an item can be quick moved to
+	}
+}
+
+HotkeyMode: {
+	Tooltip: ""
+	Default.Label: Default
+	FromEnd.Label: From End
+	Reversed.Label: Reversed
+}
+
+HotkeyDisplayMode: {
+	Tooltip: ""
+	Off.Label: Off
+	First.Label: First
+	All.Label: All
+}
+
 
 ItemSearch: {
 	DisplayName: Item Search
@@ -306,21 +355,20 @@ BetterBestiary: {
 }
 
 Version: {
-	DisplayName: Version 0.3
+	DisplayName: Version 0.3.1
 
 	Info: {
-		Label: Added a new feature: Smart Pickup
+		Label: Improved some features
 		Tooltip: ""
 	}
 
 	ChangeLog: {
 		Label:
 			'''
-			- Added Smart Pickup
-			- Small Config label / tooltip changes
-			- Searching guideItem now properly swaps with guideTile if possible
-			- Fixed bugged drops in multiplayer
-			- Fixed displayed requiredTiles when no recipes are available
+			- Fast Container Opening now applies to the Extractinator
+			- Added Different Quick Move hotkey layouts
+			- Displays the hotkey and highlights the slots where an item can be quick moved to
+			- Fix Quick move changing the favorite state of items
 			'''
 		Tooltip: ""
 	}

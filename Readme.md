@@ -6,7 +6,7 @@ Feel free to suggest new feature in the Steam Workshop page or by creating a new
 
 Keep in mind, this mod is still in developement. If you find a bug, please report it on the Steam Workshop page or Gihtub.
 
-Visit the [Workshop Page](https://steamcommunity.com/sharedfiles/filedetails/?id=3074374647) if you with to download and use this mod.
+Visit the [Steam Workshop Page](https://steamcommunity.com/sharedfiles/filedetails/?id=3074374647) if you wish to download and use this mod.
 
 
 ## Key Features
@@ -22,6 +22,12 @@ Visit the [Workshop Page](https://steamcommunity.com/sharedfiles/filedetails/?id
 
 
 ## Changelog
+
+### v0.3.1
+- Fast Container Opening now applies to the Extractinator
+- Added Different Quick Move hotkey layouts
+- Displays the hotkey and highlights the slots where an item can be quick moved to
+- Fix Quick move changing the favorite state of items
 
 ### v0.3
 - Added Smart Pickup

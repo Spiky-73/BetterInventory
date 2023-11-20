@@ -60,10 +60,10 @@ public sealed class BetterPlayer : ModPlayer {
         FavoritedBuffKb = KeybindLoader.RegisterKeybind(Mod, "FavoritedQuickBuff", Microsoft.Xna.Framework.Input.Keys.N);
         foreach(BuilderAccToggle bat in BuilderAccToggles) bat.AddKeybind(Mod);
         On_ItemSlot.TryOpenContainer += HookTryOpenContainer;
+        On_Player.DropItemFromExtractinator += HookFastExtractinator;
 
         On_Player.OpenChest += HookOpenChest;
         On_Player.GetItem += HookGetItem;
-        // On_ChestUI.TryPlacingInChest += HookPlaceInChest;
 
         On_ChestUI.LootAll += HookLootAll;
         On_ChestUI.Restock += HookRestock;
@@ -97,7 +97,7 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public override void SetControls() {
-        if (Config.fastRightClick && Main.mouseRight && Main.stackSplit == 1) Main.mouseRightRelease = true;
+        if (Config.fastContainerOpening && Main.mouseRight && Main.stackSplit == 1) Main.mouseRightRelease = true;
     }
 
     public override void ProcessTriggers(TriggersSet triggersSet) {
@@ -130,10 +130,14 @@ public sealed class BetterPlayer : ModPlayer {
     private static void HookTryOpenContainer(On_ItemSlot.orig_TryOpenContainer orig, Item item, Player player) {
         int split = Main.stackSplit;
         orig(item, player);
-        if (Config.fastRightClick) {
+        if (Config.fastContainerOpening) {
             Main.stackSplit = split == 31 ? 1 : split;
             ItemSlot.RefreshStackSplitCooldown();
         }
+    }
+    private void HookFastExtractinator(On_Player.orig_DropItemFromExtractinator orig, Player self, int itemType, int stack) {
+        orig(self, itemType, stack);
+        if (Config.fastContainerOpening) self.itemTime = self.itemTimeMax = self.itemTime/5;
     }
 
     private static void HookOpenChest(On_Player.orig_OpenChest orig, Player self, int x, int y, int newChest) {

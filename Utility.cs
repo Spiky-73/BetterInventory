@@ -127,9 +127,10 @@ public static class Utility {
             ItemLoader.TryStackItems(item, toStack, out tranfered);
             item.maxStack = oldStack;
         }
+        if (tranfered == 0) return false;
         item.favorited = canFavorite && toStack.favorited;
         if (toStack.IsAir) toStack.TurnToAir();
-        return tranfered != 0;
+        return true;
     }
 
     public static int FindIndex<T>(this IList<T> list, Predicate<T> predicate) {
