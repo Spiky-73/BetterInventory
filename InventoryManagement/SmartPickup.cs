@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using BetterInventory.DataStructures;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using MonoMod.Cil;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -18,6 +21,8 @@ public sealed class SmartPickup : ILoadable {
         On_ItemSlot.LeftClick_ItemArray_int_int += HookLeftClick;
         On_ItemSlot.RightClick_ItemArray_int_int += HookRightClick;
         On_Player.DropItems += HookMarkItemsOnDeath;
+
+        IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += ILDrawMark;
     }
     public void Unload() { }
 
@@ -60,7 +65,32 @@ public sealed class SmartPickup : ILoadable {
         return item;
     }
 
+    private void ILDrawMark(ILContext il) {
+        ILCursor cursor = new(il);
+
+        // ...
+        // int num9 = context switch { ... };
+        // if ((item.type <= 0 || item.stack <= 0) && ++[!<drawMark> && num9 != -1]) <drawSlotTexture>
+        cursor.GotoNext(MoveType.After, i => i.MatchLdloc(11));
+        cursor.EmitLdarg0();
+        cursor.EmitLdarg1();
+        cursor.EmitLdarg2();
+        cursor.EmitLdarg3();
+        cursor.EmitLdarg(4);
+        cursor.EmitLdloc2();
+        cursor.EmitLdloc(7);
+        cursor.EmitLdloc(3);
+        cursor.EmitDelegate((int num9, SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, float scale, Texture2D texture, Color color) => {
+            if (Level == Configs.InventoryManagement.SmartPickupLevel.Off || Config.markIntensity == 0 || !QuickMove.IsInventorySlot(inv, context, slot, out InventorySlots? slots, out int index)) return num9;
+            if (!IsMarked((slots, index))) return num9;
+            float scale2 = ItemSlot.DrawItemIcon(_markedSlots[(slots, index)], context, spriteBatch, position + texture.Size() / 2f * scale, scale, 32f, color * Config.markIntensity * Main.cursorAlpha);
+            return -1;
+        });
+    }
+
+
     public static bool IsMarked(int type) => _marks.ContainsKey(type);
+    public static bool IsMarked((InventorySlots, int) mark) => _markedSlots.ContainsKey(mark);
 
     public static void Mark(int type, Item[] inv, int context, int slot, bool favorited) {
         (InventorySlots? slots, int index) = InventoryLoader.GetInventorySlot(Main.LocalPlayer, inv, context, slot);
@@ -70,12 +100,15 @@ public sealed class SmartPickup : ILoadable {
         Unmark(_marks.FirstOrDefault(kvp => kvp.Value == mark).Key);
         _marks[type] = mark;
         _marksData[type] = favorited;
+        _markedSlots[mark] = new(type);
     }
     public static void Remark(int oldType, int newType, bool? favorite = null) {
         if (newType == ItemID.None) Unmark(oldType);
         else if (IsMarked(oldType)) Mark(newType, _marks[oldType], favorite ?? _marksData[oldType]);
     }
     public static void Unmark(int type) {
+        if (!IsMarked(type)) return;
+        _markedSlots.Remove(_marks[type]);
         _marks.Remove(type);
         _marksData.Remove(type);
     }
@@ -105,6 +138,7 @@ public sealed class SmartPickup : ILoadable {
         Configs.InventoryManagement.SmartPickupLevel.Off or _ => false
     };
 
+    private static readonly Dictionary<(InventorySlots items, int slot), Item> _markedSlots = new();
     private static readonly Dictionary<int, (InventorySlots items, int slot)> _marks = new();
     private static readonly Dictionary<int, bool> _marksData = new();
 }

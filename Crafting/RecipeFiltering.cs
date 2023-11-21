@@ -21,14 +21,14 @@ public sealed class RecipeFiltering : ILoadable {
     public static RecipeFilters LocalFilters => InventoryManagement.BetterPlayer.LocalPlayer.RecipeFilters;
 
     public void Load(Mod mod) {
-        IL_Main.DrawInventory += IlDrawFilters;
+        IL_Main.DrawInventory += ILDrawFilters;
 
         On_Recipe.FindRecipes += HookFilterRecipes;
     }
 
     public void Unload() {}
 
-    private static void IlDrawFilters(ILContext il) {
+    private static void ILDrawFilters(ILContext il) {
         ILCursor cursor = new(il);
 
         // Mark + Apply noHammer

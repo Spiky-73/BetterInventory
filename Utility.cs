@@ -113,24 +113,25 @@ public static class Utility {
         color.B = (byte)(color.B * mult);
     }
 
-    public static bool Stack(this Item item, Item toStack, out int tranfered, int? maxStack = null, bool canFavorite = true) {
+    public static Item MoveInto(Item item, Item toMove, out int tranfered, int? maxStack = null, bool canFavorite = true) {
         tranfered = 0;
-        if (toStack.IsAir) return false;
+        if (toMove.IsAir) return item;
         if (item.IsAir) {
-            tranfered = maxStack.HasValue ? Math.Min(maxStack.Value, toStack.stack) : toStack.stack;
-            item.SetDefaults(toStack.type);
-            item.Prefix(toStack.prefix);
-            ItemLoader.SplitStack(item, toStack, tranfered);
-        } else if (item.type == toStack.type && item.stack < (maxStack ?? item.maxStack)) {
+            tranfered = maxStack.HasValue ? Math.Min(maxStack.Value, toMove.stack) : toMove.stack;
+            item = toMove.Clone();
+            item.stack = 0;
+            ItemLoader.SplitStack(item, toMove, tranfered);
+        } else if (item.type == toMove.type && item.stack < (maxStack ?? item.maxStack)) {
             int oldStack = item.maxStack;
             if (maxStack.HasValue) item.maxStack = maxStack.Value;
-            ItemLoader.TryStackItems(item, toStack, out tranfered);
+            ItemLoader.TryStackItems(item, toMove, out tranfered);
             item.maxStack = oldStack;
         }
-        if (tranfered == 0) return false;
-        item.favorited = canFavorite && toStack.favorited;
-        if (toStack.IsAir) toStack.TurnToAir();
-        return true;
+        if (tranfered != 0) {
+            item.favorited = item.favorited || canFavorite && toMove.favorited;
+            if (toMove.IsAir) toMove.TurnToAir();
+        }
+        return item;
     }
 
     public static int FindIndex<T>(this IList<T> list, Predicate<T> predicate) {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
@@ -21,7 +22,7 @@ public sealed class QuickMove : ILoadable {
 
     public void Load(Mod mod) {
         On_Main.DrawInterface_36_Cursor += HookAlternateChain;
-        IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += HookHighlightSlot;
+        IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += ILHighlightSlot;
     }
     public void Unload() {}
 
@@ -151,9 +152,9 @@ public sealed class QuickMove : ILoadable {
         foreach (int slot in itemsToMove) FreeTargetItem(slot);
 
         bool canFavorite = canFavoriteAt[Math.Abs(target.GetContext(player, targetSlot))];
-        bool moved = items[targetSlot].Stack(item, out _, target.Inventory.MaxStack, canFavorite);
-        items[targetSlot].Stack(freeItems[0], out _, target.Inventory.MaxStack, canFavorite);
-        if (moved) {
+        items[targetSlot] = Utility.MoveInto(items[targetSlot], item, out int moved, target.Inventory.MaxStack, canFavorite);
+        items[targetSlot] = Utility.MoveInto(items[targetSlot], freeItems[0], out _, target.Inventory.MaxStack, canFavorite);
+        if (moved != 0) {
             source.Inventory.OnSlotChange(player, source, sourceSlot);
             target.Inventory.OnSlotChange(player, target, targetSlot);
         }
@@ -188,7 +189,7 @@ public sealed class QuickMove : ILoadable {
     }
 
 
-    private void HookHighlightSlot(ILContext il) {
+    private void ILHighlightSlot(ILContext il) {
         ILCursor cursor = new(il);
 
         // ...
@@ -202,9 +203,9 @@ public sealed class QuickMove : ILoadable {
         cursor.EmitLdarg(4);
         cursor.EmitLdloc2();
         cursor.EmitDelegate((SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, float scale) => {
-            if (!Enabled || Config.hotkeyDisplay == Configs.QuickMove.HotkeyDisplayMode.Off || Config.hotkeyDisplay.Value.highlightIntensity == 0) return;
-            if (!IsTargetableSlot(inv, context, slot, out int number, out int key) || (Config.hotkeyDisplay == Configs.QuickMove.HotkeyDisplayMode.First ? number != 1 : number == 0)) return;
-            spriteBatch.Draw(TextureAssets.InventoryBack18.Value, position, null, Main.OurFavoriteColor * (Config.hotkeyDisplay.Value.highlightIntensity / number) * Main.cursorAlpha, 0f, default, scale, 0, 0f);
+            if (!Enabled || Config.displayHotkeys == Configs.QuickMove.HotkeyDisplayMode.Off || Config.displayHotkeys.Value.highlightIntensity == 0) return;
+            if (!IsTargetableSlot(inv, context, slot, out int number, out int key) || (Config.displayHotkeys == Configs.QuickMove.HotkeyDisplayMode.First ? number != 1 : number == 0)) return;
+            spriteBatch.Draw(TextureAssets.InventoryBack18.Value, position, null, Main.OurFavoriteColor * (Config.displayHotkeys.Value.highlightIntensity / number) * Main.cursorAlpha, 0f, default, scale, 0, 0f);
         });
         // }
 
@@ -231,8 +232,8 @@ public sealed class QuickMove : ILoadable {
         cursor.EmitLdarg(4);
         cursor.EmitLdloc2();
         cursor.EmitDelegate((SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, float scale) => {
-            if (!Enabled || Config.hotkeyDisplay == Configs.QuickMove.HotkeyDisplayMode.Off) return;
-            if (!IsTargetableSlot(inv, context, slot, out int number, out int key) || (Config.hotkeyDisplay == Configs.QuickMove.HotkeyDisplayMode.First ? number != 1 : number == 0)) return;
+            if (!Enabled || Config.displayHotkeys == Configs.QuickMove.HotkeyDisplayMode.Off) return;
+            if (!IsTargetableSlot(inv, context, slot, out int number, out int key) || (Config.displayHotkeys == Configs.QuickMove.HotkeyDisplayMode.First ? number != 1 : number == 0)) return;
             key = (key + 1) % 10;
             StringBuilder text = new();
             text.Append(key);
@@ -248,19 +249,25 @@ public sealed class QuickMove : ILoadable {
 
         cursor.GotoNext(MoveType.After, i => i.MatchLdarg3());
         cursor.EmitDelegate((int slot) => {
-            if (!Enabled || Config.hotkeyDisplay == Configs.QuickMove.HotkeyDisplayMode.Off) return slot;
+            if (!Enabled || Config.displayHotkeys == Configs.QuickMove.HotkeyDisplayMode.Off) return slot;
             if (_moveTime > 0) return 10;
             if (_lastHover && _displayedChain.Count != 0) return 10;
             return slot;
         });
     }
 
+    public static bool IsInventorySlot(Item[] inv, int context, int slot, [NotNullWhen(true)] out InventorySlots? slots, out int index) {
+        CacheInv(inv, context, slot);
+        slots = _ilCachedInv.slots;
+        index = _ilCachedInv.index;
+        return slots is not null;
+    }
+
     public static bool IsTargetableSlot(Item[] inv, int context, int slot, out int numberInChain, out int key) {
         numberInChain = -1;
         key = -1;
         if (_moveTime == 0 && (!_lastHover || _displayedChain.Count == 0)) return false;
-        (InventorySlots? slots, int index) = InventoryLoader.GetInventorySlot(Main.LocalPlayer, inv, context, slot);
-        if (slots is null) return false;
+        if (!IsInventorySlot(inv, context, slot, out InventorySlots? slots, out int index)) return false;
 
         if (Config.returnToSlot && _moveTime > 0 && slots == _moveSource && index == _moveSourceSlot) {
             int mod = _moveChain.Count + (Config.returnToSlot ? 1 : 0);
@@ -279,6 +286,11 @@ public sealed class QuickMove : ILoadable {
         return true;
     }
 
+    private static void CacheInv(Item[] inv, int context, int slot) {
+        if (inv == _ilCachedInv.inv && context == _ilCachedInv.context && slot == _ilCachedInv.slot) return;
+        (InventorySlots? slots, int index) = InventoryLoader.GetInventorySlot(Main.LocalPlayer, inv, context, slot);
+        _ilCachedInv = (inv, context, slot, slots, index);
+    }
     private static void CacheSlots(InventorySlots slots) {
         if (slots == _ilCachedSlots.slots) return;
         _ilCachedSlots = (slots, -1, -1);
@@ -301,7 +313,7 @@ public sealed class QuickMove : ILoadable {
         if (_moveTime > 0 && key != _moveTargetSlot) return;
         _ilCachedIndex.key = key;
     }
-
+    private static (Item[] inv, int context, int slot, InventorySlots? slots, int index) _ilCachedInv;
     private static (InventorySlots slots, int number, int count) _ilCachedSlots;
     private static (int index, int key) _ilCachedIndex;
 

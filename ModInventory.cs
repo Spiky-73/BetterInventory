@@ -56,7 +56,8 @@ public sealed class InventorySlots : IComparable<InventorySlots> {
 
     private void TryStackItem(Player player, Item item, GetItemSettings settings, int slot, IList<Item> items) {
         if (Accepts?.Invoke(item) == false || !Inventory.FitsSlot(player, item, this, slot, out var itemsToMove) || itemsToMove.Count != 0) return;
-        if (!items[slot].Stack(item, out int tranfered, Inventory.MaxStack)) return;
+        items[slot] = Utility.MoveInto(items[slot], item, out int tranfered, Inventory.MaxStack);
+        if (tranfered == 0) return;
         SoundEngine.PlaySound(SoundID.Grab);
         items[slot].position = player.position;
         if (!settings.NoText) PopupText.NewText(PopupTextContext.ItemPickupToVoidContainer, items[slot], tranfered, false, settings.LongText);

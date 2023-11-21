@@ -27,7 +27,11 @@ Visit the [Steam Workshop Page](https://steamcommunity.com/sharedfiles/filedetai
 - Fast Container Opening now applies to the Extractinator
 - Added Different Quick Move hotkey layouts
 - Displays the hotkey and highlights the slots where an item can be quick moved to
-- Fix Quick move changing the favorite state of items
+- Displays Smart pickup ghosts
+- Added Shift Right Click Crafting override
+- Added options to invert crafting override clicks 
+- Fixed Quick Move and Smart Pickup losing modded item data
+- Fixed Quick move changing the favorite state of items
 
 ### v0.3
 - Added Smart Pickup

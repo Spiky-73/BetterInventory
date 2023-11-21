@@ -183,8 +183,8 @@ public sealed class BetterCrafting : ILoadable {
     private static bool TryAllowingToCraftRecipe(On_Main.orig_TryAllowingToCraftRecipe orig, Recipe currentRecipe, bool tryFittingItemInInventoryToAllowCrafting, out bool movedAnItemToAllowCrafting) {
         if (Config.craftOverrides) {
             movedAnItemToAllowCrafting = false;
-            if (Main.mouseLeft && !Main.mouseLeftRelease) return false;
-            if (Main.cursorOverride == CraftCursorID && Main.mouseLeft) return Main.LocalPlayer.ItemSpace(currentRecipe.createItem).CanTakeItem;
+            if (Config.craftOverrides.Value.invertClicks ? (Main.mouseRight && !Main.mouseRightRelease) : (Main.mouseLeft && !Main.mouseLeftRelease)) return false;
+            if (Main.cursorOverride == CraftCursorID) return Main.LocalPlayer.ItemSpace(currentRecipe.createItem).CanTakeItem;
         }
         return orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting || Config.tweeks, out movedAnItemToAllowCrafting);
     }
@@ -192,7 +192,7 @@ public sealed class BetterCrafting : ILoadable {
     private static void ILCraftItem(ILContext il) {
         ILCursor cursor = new(il);
 
-        // ++ if(<Shift+LeftClick>){
+        // ++ if(<Shift>){
         // ++     if(!<canTakeItem>) return;
         // ++     goto skipCheck;
         // ++ }
@@ -200,7 +200,7 @@ public sealed class BetterCrafting : ILoadable {
         ILLabel skipCheck = cursor.DefineLabel();
         ILLabel vanillaCheck = cursor.DefineLabel();
         cursor.EmitLdarg0();
-        cursor.EmitDelegate((Recipe r) => Config.craftOverrides && Main.cursorOverride == CraftCursorID && Main.mouseLeft);
+        cursor.EmitDelegate((Recipe r) => Config.craftOverrides && Main.cursorOverride == CraftCursorID);
         cursor.EmitBrfalse(vanillaCheck);
         cursor.EmitLdarg0();
         cursor.EmitDelegate((Recipe r) => Main.LocalPlayer.ItemSpace(r.createItem).CanTakeItem);
@@ -222,7 +222,7 @@ public sealed class BetterCrafting : ILoadable {
         cursor.EmitLdarg0();
         cursor.EmitDelegate((Recipe r) => {
             craftMultiplier = 1;
-            if (Config.craftOverrides && Main.mouseLeft) {
+            if (Config.craftOverrides && (Config.craftOverrides.Value.invertClicks ? Main.mouseRight : Main.mouseLeft)) {
                 int amount = GetMaxCraftAmount(r);
                 if (Main.cursorOverride == CraftCursorID) craftMultiplier = Math.Min(amount, GetMaxPickupAmount(r.createItem) / r.createItem.stack);
                 else craftMultiplier = Math.Min(amount, (r.createItem.maxStack - Main.mouseItem.stack) / r.createItem.stack);
@@ -242,7 +242,7 @@ public sealed class BetterCrafting : ILoadable {
         cursor.EmitLdloc0();
         cursor.EmitDelegate((Item crafted) => {
             crafted.stack *= craftMultiplier;
-            if (!Config.craftOverrides || Main.cursorOverride != CraftCursorID || !Main.mouseLeft) return false;
+            if (!Config.craftOverrides || Main.cursorOverride != CraftCursorID) return false;
             craftMultiplier = 1;
             Main.LocalPlayer.GetItem(Main.myPlayer, crafted, GetItemSettings.InventoryUIToInventorySettingsShowAsNew);
             return true;

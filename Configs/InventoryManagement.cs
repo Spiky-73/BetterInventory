@@ -42,6 +42,7 @@ public sealed class InventoryManagement : ModConfig {
 public sealed class SmartPickup {
     [DefaultValue(false)] public bool shiftClicks = false;
     [DefaultValue(true)] public bool mediumCore = true;
+    [DefaultValue(0.33f)] public float markIntensity = 0.33f;
 }
 
 public sealed class QuickMove {
@@ -49,11 +50,11 @@ public sealed class QuickMove {
     [DefaultValue(true)] public bool returnToSlot = true;
     [DefaultValue(false)] public bool showTooltip = false;
     [DefaultValue(HotkeyMode.Default)] public HotkeyMode hotkeyMode = HotkeyMode.Default;
-    public ChildValue<HotkeyDisplayMode, HotkeyDisplay> hotkeyDisplay = new(HotkeyDisplayMode.All);
+    public ChildValue<HotkeyDisplayMode, HotkeyDisplay> displayHotkeys = new(HotkeyDisplayMode.All);
     
     public enum HotkeyDisplayMode { Off, First, All }
     public enum HotkeyMode { Default, FromEnd, Reversed }
 }
 public sealed class HotkeyDisplay {
-    [DefaultValue(0.33f)] public float highlightIntensity = 0.33f;
+    [DefaultValue(0f)] public float highlightIntensity = 0f;
 }

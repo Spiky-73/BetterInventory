@@ -21,13 +21,14 @@ Crafting: {
 	}
 
 	craftOverrides: {
+		// TODO Apply to item slot clicks
 		Label: "[i:36] Recipe Crafting Overrides"
 		Tooltip:
 			'''
 			Makes crafting consistent with inventory movements
 			Left Click to craft a stack of items
-			Shift Left Click to craft and tranfer a stack of items inside your inventory
 			Right Click to craft the recipe once
+			Hold Shift to tranfer the crafted items in your inventory
 			'''
 	}
 
@@ -38,7 +39,7 @@ Crafting: {
 
 	recipeScroll: {
 		Label: "[i:3285] Faster Recipe Scroll"
-		Tooltip: ""
+		Tooltip: Make the recipe scoll very fast
 	}
 
 	focusRecipe: {
@@ -47,12 +48,21 @@ Crafting: {
 	}
 }
 
+CraftOverrides: {
+	Tooltip: ""
+
+	invertClicks: {
+		Label: Invert Clicks
+		Tooltip: Invert the behaviour of the clicks when crafting items
+	}
+}
+
 RecipeScroll: {
 	Tooltip: ""
 
 	listScroll: {
 		Label: Scroll in Recipe List
-		Tooltip: Replace the instant recipe list scroll with a fast scroll
+		Tooltip: Replace the instant recipe list scroll with a non instant scroll
 	}
 }
 
@@ -70,6 +80,7 @@ InventoryManagement: {
 	}
 
 	smartPickup: {
+		// TODO allows mutiples dyes
 		Label: "[i:4131] Smart Item Pickup"
 		Tooltip:
 			'''
@@ -129,13 +140,18 @@ SmartPickup: {
 	Tooltip: ""
 
 	shiftClicks: {
-		Label: "[i:48] Shift Clicked Items"
+		Label: Shift Clicked Items
 		Tooltip: Applies to items Shift Clicked into
 	}
 
 	mediumCore: {
-		Label: "[i:1174] Items Dropped on Death"
+		Label: Items Dropped on Death
 		Tooltip: Applies to items dropped on death
+	}
+
+	markIntensity: {
+		Label: Old Items Opacity
+		Tooltip: The opacity of the ghost displayed on the old item slots
 	}
 }
 
@@ -166,11 +182,6 @@ QuickMove: {
 		Tooltip: Displays the chain in the item tooltip
 	}
 
-	highlightSlots: {
-		Label: Highlight Slots
-		Tooltip: Highlight the next slots in the chain
-	}
-
 	returnToSlot: {
 		Label: Return to Original Slot
 		Tooltip: Return the item to its original slot at the end of the chain
@@ -187,8 +198,8 @@ QuickMove: {
 			'''
 	}
 
-	hotkeyDisplay: {
-		Label: hotkey Display
+	displayHotkeys: {
+		Label: Display Hotkeys
 		Tooltip:
 			'''
 			Displays hotkeys on the slots where an item can be moved to
@@ -221,8 +232,8 @@ HotkeyDisplayMode: {
 	All.Label: All
 }
 
-
 ItemSearch: {
+	// TODO search history
 	DisplayName: Item Search
 
 	betterGuide: {
@@ -324,22 +335,6 @@ UnknownDisplay: {
 	Known.Label: Known
 }
 
-Toggle`1.Tooltip: ""
-
-ChildValue`2: {
-	Parent: {
-		Label: Parent
-		Tooltip: ""
-	}
-
-	Value: {
-		Label: Value
-		Tooltip: ""
-	}
-
-	Tooltip: ""
-}
-
 BetterBestiary: {
 	Tooltip: ""
 
@@ -367,11 +362,31 @@ Version: {
 			'''
 			- Fast Container Opening now applies to the Extractinator
 			- Added Different Quick Move hotkey layouts
-			- Displays the hotkey and highlights the slots where an item can be quick moved to
-			- Fix Quick move changing the favorite state of items
+			- Displays the quick move hotkeys and highlights slots where an item can be moved to
+			- Displays Smart Pickup old items
+			- Added Shift Right Click Crafting override
+			- Added options to invert crafting override clicks 
+			- Fixed Quick Move and Smart Pickup losing modded item data
+			- Fixed Quick move changing the favorite state of items
 			'''
 		Tooltip: ""
 	}
+}
+
+Toggle`1.Tooltip: ""
+
+ChildValue`2: {
+	Parent: {
+		Label: Parent
+		Tooltip: ""
+	}
+
+	Value: {
+		Label: Value
+		Tooltip: ""
+	}
+
+	Tooltip: ""
 }
 
 Text.Tooltip: ""

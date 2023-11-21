@@ -6,7 +6,7 @@ namespace BetterInventory.Configs;
 public sealed class Crafting : ModConfig {
     [DefaultValue(true)] public bool tweeks;
     [DefaultValue(true)] public bool recipeFiltering;
-    [DefaultValue(true)] public bool craftOverrides;
+    public Toggle<CraftOverrides> craftOverrides = new(true);
     [DefaultValue(true)] public bool craftingOnRecList;
 
     public Toggle<RecipeScroll> recipeScroll = new(true);
@@ -16,6 +16,9 @@ public sealed class Crafting : ModConfig {
     public static Crafting Instance = null!;
 }
 
+public sealed class CraftOverrides {
+    [DefaultValue(false)] public bool invertClicks = false;
+}
 public sealed class RecipeScroll {
     [DefaultValue(true)] public bool listScroll = true;
 }
