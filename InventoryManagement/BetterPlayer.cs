@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using BetterInventory.ItemSearch;
 using MonoMod.Cil;
 using Terraria;
@@ -184,8 +185,8 @@ public sealed class BetterPlayer : ModPlayer {
 
         self.GetModPlayer<BetterPlayer>().VisibilityFilters.AddOwnedItems(newItem);
          if (!settings.NoText && Config.autoEquip != Configs.InventoryManagement.AutoEquipLevel.Off) {
-            foreach (ModInventory inventory in InventoryLoader.Inventories) {
-                newItem = inventory.GetItem(self, newItem, settings);
+            foreach (ModSubInventory slots in InventoryLoader.GetInventories(newItem, Config.autoEquip == Configs.InventoryManagement.AutoEquipLevel.MainSlots ? SubInventoryType.RightClickTarget : SubInventoryType.WithCondition).ToArray()) {
+                newItem = slots.GetItem(self, newItem, settings);
                 if (newItem.IsAir) return new();
             }
         }

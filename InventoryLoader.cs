@@ -1,49 +1,90 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using BetterInventory.DataStructures;
 using Terraria;
+using Terraria.ModLoader;
+using Terraria.ModLoader.Core;
 
 namespace BetterInventory;
 
-public static class InventoryLoader {
+public enum SubInventoryType {
+    NoCondition,
+    LooseCondition,
+    WithCondition,
+    RightClickTarget
+}
 
-    public static ReadOnlyCollection<ModInventory> Inventories => _inventories.AsReadOnly();
+public class InventoryLoader : ILoadable {
 
-    internal static void Register(ModInventory inventory){
-        _inventories.Add(inventory);
+    public static IEnumerable<ModSubInventory> Inventories {
+        get {
+            foreach (var inventory in _condition) yield return inventory;
+            foreach (var inventory in _looseCondition) yield return inventory;
+            foreach (var inventory in _noCondition) yield return inventory;
+        }
     }
 
-    internal static void Unload(){
-        _inventories.Clear();
+    public void Load(Mod mod) {}
+
+    public void Unload() {
+        static void Clear(IList<ModSubInventory> list) {
+            foreach(var inventory in list) Utility.SetInstance(inventory, true);
+            list.Clear();
+        }
+        Clear(_condition);
+        Clear(_looseCondition);
+        Clear(_noCondition);
     }
 
-    public static (InventorySlots? slots, int index) GetInventorySlot(Player player, Item[] inventory, int context, int slot) {
-        foreach (ModInventory modInventory in Inventories) {
-            foreach (InventorySlots slots in modInventory.Slots) {
-                int slotOffset = 0;
-                foreach ((int c, Func<Player, ListIndices<Item>> s) in slots.Slots) {
-                    ListIndices<Item> items = s(player);
-                    int index = items.FromInnerIndex(slot);
-                    if (items.List == inventory && index != -1) return (slots, index);
-                    slotOffset += items.Count;
-                }
+    internal static void Register(ModSubInventory inventory){
+        Utility.SetInstance(inventory);
+        inventory.HasCondition = LoaderUtils.HasOverride(inventory.GetType(), Reflection.ModSubInventory.Accepts);
+        if(!inventory.HasCondition) _noCondition.Add(inventory);
+        else if(inventory.Accepts(new()))_looseCondition.Add(inventory);
+        else _condition.Add(inventory);
+    }
+
+    public static Slot? FindItem(Player player, Predicate<Item> predicate) {
+        foreach (ModSubInventory slots in Inventories) {
+            int slot = slots.Items(player).FindIndex(predicate);
+            if (slot != -1) return new(slots, slot);
+        }
+        return null;
+    }
+
+    public static Slot? GetInventorySlot(Player player, Item[] inventory, int context, int slot) {
+        foreach (ModSubInventory slots in Inventories) {
+            int slotOffset = 0;
+            foreach (ListIndices<Item> items in slots.Items(player).Lists) {
+                int index = items.FromInnerIndex(slot);
+                if (items.List == inventory && index != -1) return new(slots, index + slotOffset);
+                slotOffset += items.Count;
             }
         }
-        return (null, -1);
+        return null;
     }
 
-    public static void SortSlots(this IList<InventorySlots> slots) {
-        List<InventorySlots> low = new();
-        List<InventorySlots> high = new();
-        foreach(InventorySlots slot in slots) {
-            if (slot.Accepts is null) low.Add(slot);
-            else high.Add(slot);
+    public static IEnumerable<ModSubInventory> GetInventories(Item item, SubInventoryType level) {
+        List<ModSubInventory> withCondition  = new();
+        foreach(var inv in _condition) {
+            if (!inv.Accepts(item)) continue;
+            if (inv.IsRightClickTarget(item)) yield return inv;
+            else if (level <= SubInventoryType.WithCondition) withCondition.Add(inv);
         }
-        for (int i = 0; i < high.Count; i++) slots[i] = high[i];
-        for (int i = 0; i < low.Count; i++) slots[i+high.Count] = low[i];
+        foreach (var inv in withCondition) yield return inv;
+        if (level <= SubInventoryType.LooseCondition) {
+            foreach (var inv in _looseCondition) {
+                if (level <= SubInventoryType.WithCondition && inv.Accepts(item)) yield return inv;
+            }
+        }
+        if (level <= SubInventoryType.NoCondition) {
+            foreach (var inv in _noCondition) {
+                if (level <= SubInventoryType.WithCondition && inv.Accepts(item)) yield return inv;
+            }
+        }
     }
 
-
-    private readonly static List<ModInventory> _inventories = new();
+    private readonly static List<ModSubInventory> _condition = new();
+    private readonly static List<ModSubInventory> _looseCondition = new();
+    private readonly static List<ModSubInventory> _noCondition = new();
 }

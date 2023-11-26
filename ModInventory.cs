@@ -1,117 +1,70 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using BetterInventory.DataStructures;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
-using System.Linq;
 using Terraria.Audio;
 using Terraria.ID;
 
 namespace BetterInventory;
 
-public sealed class InventorySlots : IComparable<InventorySlots> {
+public readonly record struct Slot(ModSubInventory Inventory, int Index) {
+    public Item Item(Player player) => Inventory.Items(player)[Index];
+    public Item GetItem(Player player, Item item, GetItemSettings settings) => Inventory.GetItem(player, item, Index, settings);
+}
 
-    public ModInventory Inventory { get; }
-    public string? LocalizationKey { get; }
-    public Predicate<Item>? Accepts { get; }
-    public Predicate<Item> IsMainSlot { get; }
+public abstract class ModSubInventory<TInventory> : ModSubInventory where TInventory : ModSubInventory<TInventory> {
+    public static TInventory Instance = null!;
+}
 
-    public ReadOnlyCollection<(int context, Func<Player, ListIndices<Item>> items)> Slots => new(_slots);
+public abstract class ModSubInventory : ModType, ILocalizedModType {
+    public abstract int Context { get; }
+    public virtual int? MaxStack => null;
 
-    internal InventorySlots(ModInventory inventory, string? locKey = null, Predicate<Item>? accepts = null, Predicate<Item>? mainSlot = null, params (int context, Func<Player, ListIndices<Item>> items)[] slots) {
-        Inventory = inventory;
-        LocalizationKey = locKey;
-        Accepts = accepts;
-        IsMainSlot = mainSlot ?? (_ => true);
-        _slots = slots;
-    }
-    
-    public JoinedList<Item> Items(Player player) => new((from slots in Slots select (IList<Item>)slots.items(player)).ToArray());
+    public bool HasCondition { get; internal set; }
+    public virtual bool Accepts(Item item) => true;
+    public virtual bool IsRightClickTarget(Item item) => false;
 
-    public int CompareTo(InventorySlots? other) {
-        if (other is null) return 1;
-        bool noCond = Accepts is null;
-        if (noCond == other.Accepts is null) return 0;
-        return !noCond ? -1 : 1;
+    public abstract Joined<ListIndices<Item>, Item> Items(Player player);
+    public virtual bool FitsSlot(Player player, Item item, int slot, out IList<Slot> itemsToMove) {
+        itemsToMove = Array.Empty<Slot>();
+        return true;
     }
 
-    public int GetContext(Player player, int targetSlot) {
-        foreach((int context, Func<Player, ListIndices<Item>> items) in Slots) if ((targetSlot -= items(player).Count) < 0) return context;
-        return 0;
-    }
+    public virtual void Focus(Player player, int slot) { }
+    public virtual void OnSlotChange(Player player, int slot) { }
 
-    public Item GetItem(Player player, Item item, GetItemSettings settings) {
+    public virtual Item GetItem(Player player, Item item, GetItemSettings settings) {
+        if (!Accepts(item)) return item;
         IList<Item> items = Items(player);
-        if (Accepts?.Invoke(item) == false) return item;
-        for (int i = 0; i < items.Count && !item.IsAir; i++) TryStackItem(player, item, settings, i, items);
+        for (int i = 0; i < items.Count && !item.IsAir; i++) TryStackItem(player, item, i, settings, items);
         return item;
     }
     
-    public Item GetItem(Player player, Item item, GetItemSettings settings, int slot) {
-        TryStackItem(player, item, settings, slot, Items(player));
+    public Item GetItem(Player player, Item item, int slot, GetItemSettings settings) {
+        if (!Accepts(item)) return item;
+        TryStackItem(player, item, slot, settings, Items(player));
         return item;
     }
 
-    private void TryStackItem(Player player, Item item, GetItemSettings settings, int slot, IList<Item> items) {
-        if (Accepts?.Invoke(item) == false || !Inventory.FitsSlot(player, item, this, slot, out var itemsToMove) || itemsToMove.Count != 0) return;
-        items[slot] = Utility.MoveInto(items[slot], item, out int tranfered, Inventory.MaxStack);
+    private void TryStackItem(Player player, Item item, int slot, GetItemSettings settings, IList<Item> items) {
+        if (!FitsSlot(player, item, slot, out var itemsToMove) || itemsToMove.Count != 0) return;
+        items[slot] = Utility.MoveInto(items[slot], item, out int tranfered, MaxStack);
         if (tranfered == 0) return;
         SoundEngine.PlaySound(SoundID.Grab);
         items[slot].position = player.position;
         if (!settings.NoText) PopupText.NewText(PopupTextContext.ItemPickupToVoidContainer, items[slot], tranfered, false, settings.LongText);
-        Inventory.OnSlotChange(player, this, slot);
+        OnSlotChange(player, slot);
         return;
     }
 
-    private IList<(int context, Func<Player, ListIndices<Item>> items)> _slots;
-}
-
-public abstract class ModInventory : ModType, ILocalizedModType {
-
-    public ReadOnlyCollection<InventorySlots> Slots => _slots.AsReadOnly();
-    public ReadOnlyCollection<InventorySlots> SlotsByPriority { get {
-        List<InventorySlots> slots = new(Slots);
-        slots.SortSlots();
-        return slots.AsReadOnly();
-    } }
-
-    public virtual int? MaxStack => null;
-
-    public virtual void Focus(Player player, InventorySlots slots, int slot) { }
-
-    public virtual bool FitsSlot(Player player, Item item, InventorySlots slots, int index, out IList<int> itemsToMove) {
-        itemsToMove = Array.Empty<int>();
-        return true;
-    }
-
-    public virtual Item GetItem(Player player, Item item, GetItemSettings settings) {
-        Configs.InventoryManagement.AutoEquipLevel autoEquip = Configs.InventoryManagement.Instance.autoEquip;
-        bool checkSlot = !settings.NoText && autoEquip != Configs.InventoryManagement.AutoEquipLevel.Off;
-
-        foreach (InventorySlots slots in Slots) {
-            if (checkSlot && (slots.Accepts is null || !slots.IsMainSlot(item) && autoEquip == Configs.InventoryManagement.AutoEquipLevel.MainSlots)) continue;
-            item = slots.GetItem(player, item, settings);
-            if (item.IsAir) return new();
-        }
-        return item;
-    }
-
-    public virtual void OnSlotChange(Player player, InventorySlots slots, int index) {}
-
-    protected void AddSlots(int context, Func<Player, ListIndices<Item>> items, string? locKey = null, Predicate<Item>? accepts = null, Predicate<Item>? mainSlot = null) => AddSlots(locKey, accepts, mainSlot, (context, items));
-    protected void AddSlots(string? locKey = null, Predicate<Item>? accepts = null, Predicate<Item>? mainSlot = null, params (int context, Func<Player, ListIndices<Item>> items)[] slots) => _slots.Add(new(this, locKey, accepts, mainSlot, slots));
-
     protected sealed override void Register() {
-        ModTypeLookup<ModInventory>.Register(this);
+        ModTypeLookup<ModSubInventory>.Register(this);
         InventoryLoader.Register(this);
     }
     public sealed override void SetupContent() => SetStaticDefaults();
-    public override void Unload() => _slots.Clear();
 
     public string LocalizationCategory => "Inventories";
     public virtual LocalizedText DisplayName => this.GetLocalization("DisplayName", PrettyPrintName);
-
-    private readonly List<InventorySlots> _slots = new();
 }

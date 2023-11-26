@@ -4,8 +4,8 @@ using System.Collections.Generic;
 
 namespace BetterInventory.DataStructures;
 
-public readonly record struct JoinedList<T> : IList<T>, IReadOnlyList<T> {
-    public IList<T>[] Lists { get; }
+public readonly record struct Joined<TList, T> : IList<T>, IReadOnlyList<T> where TList: IList<T> {
+    public TList[] Lists { get; }
 
     public T this[int index] {
         get {
@@ -27,31 +27,31 @@ public readonly record struct JoinedList<T> : IList<T>, IReadOnlyList<T> {
     public int Count {
         get {
             int c = 0;
-            foreach (IList<T> list in Lists) c += list.Count;
+            foreach (TList list in Lists) c += list.Count;
             return c;
         }
     }
 
     public bool IsReadOnly {
         get {
-            foreach (IList<T> list in Lists) {
+            foreach (TList list in Lists) {
                 if (!list.IsReadOnly) return false;
             }
             return true;
         }
     }
 
-    public JoinedList(params IList<T>[] lists) => Lists = lists;
+    public Joined(params TList[] lists) => Lists = lists;
 
     public bool Contains(T item) {
-        foreach (IList<T> list in Lists) if (list.Contains(item)) return true;
+        foreach (TList list in Lists) if (list.Contains(item)) return true;
         return false;
     }
 
 
     public int IndexOf(T item) {
         int s = 0;
-        foreach (IList<T> list in Lists) {
+        foreach (TList list in Lists) {
             int i = list.IndexOf(item);
             if (i != -1) return i;
             s += list.Count;
@@ -60,14 +60,14 @@ public readonly record struct JoinedList<T> : IList<T>, IReadOnlyList<T> {
     }
 
     public void CopyTo(T[] array, int arrayIndex) {
-        foreach (IList<T> list in Lists) {
+        foreach (TList list in Lists) {
             list.CopyTo(array, arrayIndex);
             arrayIndex += list.Count;
         }
     }
 
     public IEnumerator<T> GetEnumerator() {
-        foreach(IList<T> list in Lists){
+        foreach(TList list in Lists){
             foreach (T item in list) yield return item;
         }
     }
@@ -79,6 +79,7 @@ public readonly record struct JoinedList<T> : IList<T>, IReadOnlyList<T> {
     bool ICollection<T>.Remove(T item) => throw new NotSupportedException();
     void IList<T>.RemoveAt(int index) => throw new NotSupportedException();
 
+    public static implicit operator Joined<TList, T>(TList list) => new(list);
 }
 public readonly record struct ListIndices<T> : IList<T>, IReadOnlyList<T> {
 

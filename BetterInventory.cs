@@ -9,7 +9,6 @@ public sealed class BetterInventory : Mod {
     }
 
     public override void Unload() {
-        InventoryLoader.Unload();
         Instance = null!;
     }
 }

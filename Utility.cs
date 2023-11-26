@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -140,6 +141,8 @@ public static class Utility {
     }
 
     public static void SaveConfig(this ModConfig config) => Reflection.ConfigManager.Save.Invoke(config);
+
+    public static void SetInstance<T>(T instance, bool unload = false) where T: notnull => instance.GetType().GetField("Instance", BindingFlags.FlattenHierarchy | BindingFlags.Static | BindingFlags.Public)?.SetValue(null, unload ? null : instance);
 
 
     public static ReadOnlyDictionary<int, int> OwnedItems => Data.ownedItems;

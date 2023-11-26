@@ -29,7 +29,7 @@ Visit the [Steam Workshop Page](https://steamcommunity.com/sharedfiles/filedetai
 - Displays the hotkey and highlights the slots where an item can be quick moved to
 - Displays Smart pickup ghosts
 - Added Shift Right Click Crafting override
-- Added options to invert crafting override clicks 
+- Added options to invert Crafting override clicks 
 - Fixed Quick Move and Smart Pickup losing modded item data
 - Fixed Quick move changing the favorite state of items
 

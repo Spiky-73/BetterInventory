@@ -80,7 +80,6 @@ InventoryManagement: {
 	}
 
 	smartPickup: {
-		// TODO allows mutiples dyes
 		Label: "[i:4131] Smart Item Pickup"
 		Tooltip:
 			'''
@@ -365,7 +364,7 @@ Version: {
 			- Displays the quick move hotkeys and highlights slots where an item can be moved to
 			- Displays Smart Pickup old items
 			- Added Shift Right Click Crafting override
-			- Added options to invert crafting override clicks 
+			- Added options to invert Crafting override clicks 
 			- Fixed Quick Move and Smart Pickup losing modded item data
 			- Fixed Quick move changing the favorite state of items
 			'''
