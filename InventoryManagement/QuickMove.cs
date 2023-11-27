@@ -308,8 +308,8 @@ public sealed class QuickMove : ILoadable {
 
         int number = chain.IndexOf(_ilCachedSlots.slots);
         if (number < 0) return;
-        int mod = chain.Count + (Config.returnToSlot ? 1 : 0);
-        _ilCachedSlots.number = (number - offset + mod) % mod;
+        _ilCachedSlots.number = number - offset;
+        if (_ilCachedSlots.number < 0) _ilCachedSlots.number += chain.Count + (Config.returnToSlot ? 1 : 0);
         _ilCachedSlots.count = _ilCachedSlots.slots.Items(Main.LocalPlayer).Count;
     }
     private static void CacheIndex(int index) {

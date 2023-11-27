@@ -28,7 +28,7 @@ public sealed class Coin : ModSubInventory {
 }
 public sealed class Ammo : ModSubInventory {
     public override int Context => ContextID.InventoryAmmo;
-    public sealed override bool Accepts(Item item) => item.FitsAmmoSlot();
+    public sealed override bool Accepts(Item item) => !item.IsAir && item.FitsAmmoSlot();
     public override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.inventory, DataStructures.Range.FromCount(54, 4));
 }
 

@@ -68,6 +68,7 @@ public sealed class SearchItem : ILoadable {
             }
             if (s_allowClick) {
                 if (Config.searchRecipes && (forcedLeft || left && Main.mouseLeftRelease)) {
+                    Guide.ToggleRecipeList(true);
                     SetGuideItem(forcedLeft ? new() : Main.HoverItem);
                     s_searchItemTimer = 15;
                 } else if (Config.searchDrops && (forcedRight || right && Main.mouseRightRelease)) {
@@ -169,26 +170,28 @@ public sealed class SearchItem : ILoadable {
             if(!items[1].IsAir) ItemSlot.LeftClick(items, ContextID.GuideItem, 1);
         } else {
             int slot = Guide.Config.guideTile && Guide.IsCraftingTileItem(Main.mouseItem) ? 1 : 0;
-            if (slot == 1 && !items[slot].IsAir) {
-                bool flag = false;
-                switch (Guide.GetPlaceholderType(item)) {
-                case PlaceholderType.Condition:
-                    flag = Guide.GetPlaceholderType(Guide.guideTile) == PlaceholderType.Condition && item.Name == Guide.guideTile.Name;
-                    break;
-                case PlaceholderType.Tile:
-                    flag = item.createTile != -1 && item.createTile == items[slot].createTile;
-                    break;
-                case PlaceholderType.None:
-                    flag = item.type == items[1].type;
-                    break;
+            if (slot == 1) {
+                if(!items[slot].IsAir) {
+                    bool flag = false;
+                    switch (Guide.GetPlaceholderType(item)) {
+                        case PlaceholderType.Condition:
+                        flag = Guide.GetPlaceholderType(Guide.guideTile) == PlaceholderType.Condition && item.Name == Guide.guideTile.Name;
+                        break;
+                        case PlaceholderType.Tile:
+                        flag = item.createTile != -1 && item.createTile == items[slot].createTile;
+                        break;
+                        case PlaceholderType.None:
+                        flag = item.type == items[1].type;
+                        break;
+                    }
+                    if (flag) {
+                        slot = 0;
+                        items[1].TurnToAir();
+                    } else if (items[0].type == item.type) items[0].TurnToAir();
+                } else if (items[0].type == item.type) {
+                    slot = 1;
+                    items[0].TurnToAir();
                 }
-                if (flag) {
-                    slot = 0;
-                    items[1].TurnToAir();
-                } else if (items[0].type == item.type) items[0].TurnToAir();
-            } else if (items[0].type == item.type) {
-                slot = 1;
-                items[0].TurnToAir();
             }
             ItemSlot.LeftClick(items, ContextID.GuideItem, slot);
         }
