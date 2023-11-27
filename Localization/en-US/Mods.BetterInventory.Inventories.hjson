@@ -1,0 +1,27 @@
+Hotbar.DisplayName: Hotbar
+Inventory.DisplayName: Inventory
+Coin.DisplayName: Coin
+Ammo.DisplayName: Ammo
+Chest.DisplayName: Chest
+PiggyBank.DisplayName: Piggy Bank
+Safe.DisplayName: Safe
+DefenderForge.DisplayName: Defender's Forge
+VoidBag.DisplayName: Void Bag
+HeadArmor.DisplayName: Armor
+BodyArmor.DisplayName: Armor
+LegArmor.DisplayName: Armor
+HeadVanityArmor.DisplayName: Vanity
+BodyVanityArmor.DisplayName: Vanity
+LegVanityArmor.DisplayName: Vanity
+Accessories.DisplayName: Accessory
+VanityAccessories.DisplayName: Social
+Loadout1.DisplayName: Loadout1
+Loadout2.DisplayName: Loadout2
+Pet.DisplayName: Equipement
+LightPet.DisplayName: Equipement
+Minecart.DisplayName: Equipement
+Mount.DisplayName: Equipement
+Hook.DisplayName: Equipement
+ArmorDyes.DisplayName: Armor Dye
+AccessoryDyes.DisplayName: Accessory Dye
+EquipementDyes.DisplayName: Equipement Dye

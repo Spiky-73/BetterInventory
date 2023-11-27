@@ -130,7 +130,7 @@ public static class Utility {
         }
         if (tranfered != 0) {
             item.favorited = item.favorited || canFavorite && toMove.favorited;
-            if (toMove.IsAir) toMove.TurnToAir();
+            if (toMove.IsAir) toMove.TurnToAir(true);
         }
         return item;
     }

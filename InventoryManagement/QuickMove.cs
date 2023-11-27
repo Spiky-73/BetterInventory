@@ -79,7 +79,7 @@ public sealed class QuickMove : ILoadable {
         orig();
     }
 
-    public static void UpdateChain(Slot source) { // TODO test
+    public static void UpdateChain(Slot source) {
         if (_moveTime > 0) {
             _moveTime--;
             if (_moveTime == Config.chainTime - 1) _validSlots[source.Inventory] = source.Index;
@@ -115,12 +115,14 @@ public sealed class QuickMove : ILoadable {
             Slot target = new(_moveChain[_moveIndex], targetSlot);
             _movedItems = Move(player, _moveSource, target);
             _moveChain[_moveIndex].Focus(player, target.Index);
+            _moveTime = Config.chainTime;
         } else {
             _moveSource.Inventory.Focus(player, _moveSource.Index);
+            _moveTime = 0;
         }
         _selectedItem[1] = player.selectedItem;
         SoundEngine.PlaySound(SoundID.Grab);
-        _moveTime = Config.chainTime;
+        Recipe.FindRecipes();
     }
 
     public static int HotkeyToSlot(int hotkey, int slotCount) => Math.Clamp(
@@ -355,4 +357,4 @@ public sealed class QuickMove : ILoadable {
     private static int[] _selectedItem = new int[2];
     private static bool _hover, _lastHover;
 }
-public readonly record struct MovedItem(Slot From, ModSubInventory To, int Type, int Prefix, bool Favorited); // TODO use slot
+public readonly record struct MovedItem(Slot From, ModSubInventory To, int Type, int Prefix, bool Favorited);

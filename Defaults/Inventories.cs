@@ -57,7 +57,7 @@ public sealed class Safe : Container {
     public override int Context => ContextID.BankItem;
     public override Item[] ChestItems(Player player) => player.bank2.item;
 }
-public sealed class Forge : Container {
+public sealed class DefenderForge : Container {
     public override int Context => ContextID.BankItem;
     public override Item[] ChestItems(Player player) => player.bank3.item;
 }
@@ -165,7 +165,7 @@ public sealed class Accessories : AAccessories<Accessories> {
         new ListIndices<Item>(ModdedAccessories(player), UnlockedModdedSlots(player))
     );
 }
-public sealed class VanityAccessories : AAccessories<VanityAccessories> { // TODO test with modded slots
+public sealed class VanityAccessories : AAccessories<VanityAccessories> {
     public override bool Accepts(Item item) => item.accessory;
     public override bool IsRightClickTarget(Item item) => item.vanity && item.FitsAccessoryVanitySlot;
     public override int Context => ContextID.EquipAccessoryVanity;

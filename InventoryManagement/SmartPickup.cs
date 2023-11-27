@@ -42,26 +42,20 @@ public sealed class SmartPickup : ILoadable {
     }
 
     public static Item SmartGetItem(Player player, Item item, GetItemSettings settings) {
-        if (player.whoAmI == Main.myPlayer && IsMarked(item.type)) {
+        if (player.whoAmI != Main.myPlayer || !IsMarked(item.type)) return item;
 
-            Slot mark; bool favorited;
-            Joined<ListIndices<Item>, Item> items;
-            do {
-                if (_marks[item.type].Count == 0) return item;
-                (mark,favorited) = ConsumeMark(item.type);
-                items = mark.Inventory.Items(player);    
-            } while (mark.Index >= items.Count);
+        while (_marks[item.type].Count > 0) {
+            (Slot mark, bool favorited) = ConsumeMark(item.type);
+            Joined<ListIndices<Item>, Item> items = mark.Inventory.Items(player);
+            if (mark.Index >= items.Count) continue;
+            if (!item.favorited && !favorited && items[mark.Index].favorited) continue;
 
-            if (item.favorited || favorited || !items[mark.Index].favorited) {
-                item.favorited |= favorited;
-                (Item moved, items[mark.Index]) = (items[mark.Index], new());
-                item = mark.Inventory.GetItem(player, item, mark.Index, settings);
-                moved = mark.GetItem(player, moved, settings);
-                if (item.IsAir) return moved;
-                player.GetDropItem(ref moved);
-                return item;
-            }
-            return mark.Inventory.GetItem(player, item, mark.Index, settings);
+            item.favorited |= favorited;
+            (Item moved, items[mark.Index]) = (items[mark.Index], new());
+            item = mark.GetItem(player, item, settings);
+            moved = mark.GetItem(player, moved, settings);
+            if (item.IsAir) return moved;
+            player.GetDropItem(ref moved);
         }
         return item;
     }
