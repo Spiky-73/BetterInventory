@@ -200,7 +200,7 @@ public sealed class SearchItem : ILoadable {
         if (!Config.searchRecipes || context != ContextID.GuideItem) return false;
         if (inv[slot].IsAir && Main.mouseItem.IsAir || ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) != 0) return true;
         
-        if (!inv[slot].IsAir)_guideHistory[slot].Add(inv[slot].Clone());
+        if (!inv[slot].IsAir && Config.searchHistory) _guideHistory[slot].Add(inv[slot].Clone());
         
         if (Guide.GetPlaceholderType(Main.mouseItem) != PlaceholderType.None) {
             inv[slot] = new(Guide.CraftingItem.type) { createTile = Main.mouseItem.createTile};
@@ -228,7 +228,7 @@ public sealed class SearchItem : ILoadable {
         }
         else if(!inv[slot].IsAir) {
             SetGuideItem(new(), slot);
-            _guideHistory[slot].RemoveAt(_guideHistory[slot].Count - 1);
+            if(Config.searchHistory) _guideHistory[slot].RemoveAt(_guideHistory[slot].Count - 1);
         }
         SoundEngine.PlaySound(SoundID.Grab);
     }
@@ -236,18 +236,20 @@ public sealed class SearchItem : ILoadable {
     public static void PostAddRecipes() {
         _npcSearchBar = Reflection.UIBestiaryTest._searchBar.GetValue(Main.BestiaryUI);
         _npcSearchBar.Parent.OnRightClick += (_, _) => {
-            if (_npcHistory.Count != 0) {
+            if (!Config.searchDrops) return;
+            if (Config.searchHistory && _npcHistory.Count != 0) {
                 string text = _npcHistory[^1];
                 _npcHistory.RemoveAt(_npcHistory.Count - 1);
                 int count = _npcHistory.Count;
                 SetBestiaryText(text);
                 if (count != _npcHistory.Count) _npcHistory.RemoveAt(_npcHistory.Count - 1);
-            } else if(_npcSearchBar.HasContents) {
+            } else if (_npcSearchBar.HasContents) {
                 SetBestiaryText("");
-                _npcHistory.RemoveAt(_npcHistory.Count - 1);
+                if (Config.searchHistory) _npcHistory.RemoveAt(_npcHistory.Count - 1);
             }
         };
         _npcSearchBar.OnStartTakingInput += () => {
+            if (!Config.searchDrops || !Config.searchHistory) return;
             string? text = Reflection.UISearchBar.actualContents.GetValue(_npcSearchBar);
             if (text is null || text.Length == 0 || (_npcHistory.Count > 0 && _npcHistory[^1] == text)) return;
             _npcHistory.Add(text);

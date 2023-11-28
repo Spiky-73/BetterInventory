@@ -232,7 +232,6 @@ HotkeyDisplayMode: {
 }
 
 ItemSearch: {
-	// TODO search history
 	DisplayName: Item Search
 
 	betterGuide: {
@@ -254,6 +253,7 @@ ItemSearch: {
 			'''
 			Search includes locked entries
 			Visualy overrides the unlock state of entries (does not affect completion)
+			RightClick the search field to clear it
 			'''
 	}
 
@@ -265,6 +265,7 @@ ItemSearch: {
 			With {$Mods.BetterInventory.Configs.BetterGuide.guideTile.Label} On, searching the guide tile will move it into the guide item and vice-versa
 			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Left Click an item to search its recipe
 			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Middle Click in the inventory to clear the searched item
+			Right Click the Guide item to clear it
 			'''
 	}
 
@@ -275,6 +276,16 @@ ItemSearch: {
 			'''
 			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Right Click an item to search its drops
 			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Middle Click in the Bestiary to clear the searched item
+			Right Click Bestiary text field to clear it
+			'''
+	}
+
+	searchHistory: {
+		Label: "[i:346] Search History"
+		Tooltip:
+			'''
+			Right Clicking the Guide item or Bestiary text field searchs the previous value instead of clearing it
+			Requires {$Mods.BetterInventory.Configs.BetterGuide.searchRecipes.Label} and {$Mods.BetterInventory.Configs.ItemSearch.searchDrops.Name} respectively to be On
 			'''
 	}
 
@@ -297,15 +308,6 @@ ItemSearch: {
 			'''
 			Tap this key to close the current menu or open the Recipe list
 			Double tap this key to open the Bestiary
-			'''
-	}
-
-	searchHistory: {
-		Label: Search History
-		Tooltip:
-			'''
-			Right Click the Guide item or Bestiary text field to search the previous value
-			Requires {$Mods.BetterInventory.Configs.BetterGuide.searchRecipes.Label} and {$Mods.BetterInventory.Configs.ItemSearch.searchDrops.Name} respectively to be On
 			'''
 	}
 }
@@ -376,6 +378,7 @@ Version: {
 			- Added Shift Right Click Crafting override
 			- Added options to invert Crafting override clicks
 			- Allows items to have ghosts in multiple slots
+			- Added Search History for Guide and Bestiary
 			- Fixed Guide Item be removed when searching the same item
 			- Fixed Quick Moving accessories keeping the effect of some items
 			- Fixed Quick Move and Smart Pickup losing modded item data

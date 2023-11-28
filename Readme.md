@@ -31,6 +31,7 @@ Visit the [Steam Workshop Page](https://steamcommunity.com/sharedfiles/filedetai
 - Added Shift Right Click Crafting override
 - Added options to invert Crafting override clicks
 - Allows items to have ghosts in multiple slots
+- Added Search History for Guide and Bestiary
 - Fixed Guide Item be removed when searching the same item
 - Fixed Quick Moving accessories keeping the effect of some items
 - Fixed Quick Move and Smart Pickup losing modded item data
