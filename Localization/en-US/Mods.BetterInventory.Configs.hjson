@@ -258,7 +258,7 @@ ItemSearch: {
 	}
 
 	searchRecipes: {
-		Label: "[i:3549] Search Recipes"
+		Label: Search Recipes
 		Tooltip:
 			'''
 			Allows you to access the guide anywhere
@@ -269,7 +269,8 @@ ItemSearch: {
 	}
 
 	searchDrops: {
-		Label: "[i:2903] Search Drops"
+		Label: "[i:2903] {$Mods.BetterInventory.Configs.ItemSearch.searchDrops.Name}"
+		Name: Search Drops
 		Tooltip:
 			'''
 			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Right Click an item to search its drops
@@ -296,6 +297,15 @@ ItemSearch: {
 			'''
 			Tap this key to close the current menu or open the Recipe list
 			Double tap this key to open the Bestiary
+			'''
+	}
+
+	searchHistory: {
+		Label: Search History
+		Tooltip:
+			'''
+			Right Click the Guide item or Bestiary text field to search the previous value
+			Requires {$Mods.BetterInventory.Configs.BetterGuide.searchRecipes.Label} and {$Mods.BetterInventory.Configs.ItemSearch.searchDrops.Name} respectively to be On
 			'''
 	}
 }
