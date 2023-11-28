@@ -11,6 +11,7 @@ public sealed class ItemSearch : ModConfig {
     public Toggle<BetterBestiary> betterBestiary = new(true);
     [DefaultValue(true)] public bool searchRecipes;
     [DefaultValue(true)] public bool searchDrops;
+    [DefaultValue(true)] public bool searchHistory;
     [DefaultValue(UnknownDisplay.Unknown)] public UnknownDisplay unknownDisplay;
 
     [JsonIgnore, ShowDespiteJsonIgnore]
