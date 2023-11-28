@@ -143,6 +143,7 @@ public sealed class SearchItem : ILoadable {
             s_bestiaryDelayed = text;
             return;
         }
+        if (text == Reflection.UISearchBar.actualContents.GetValue(_npcSearchBar)) return;
         BestiaryEntry? oldEntry = Reflection.UIBestiaryTest._selectedEntryButton.GetValue(Main.BestiaryUI)?.Entry;
         if (!_npcSearchBar.IsWritingText) _npcSearchBar.ToggleTakingText();
         _npcSearchBar.SetContents(text, true);
@@ -175,7 +176,7 @@ public sealed class SearchItem : ILoadable {
         } else {
             if(slot == -1) slot = Guide.Config.guideTile && Guide.IsCraftingTileItem(Main.mouseItem) ? 1 : 0;
             if (Guide.GetPlaceholderType(item) == PlaceholderType.None) {
-                if (items[slot].type == item.type) {
+                if (items[slot].type == item.type && Guide.IsCraftingTileItem(Main.mouseItem)) {
                     SetGuideItem(new(), slot);
                     slot = 1 - slot;
                 } else if (items[1 - slot].type == item.type) SetGuideItem(new(), 1 - slot);
@@ -199,7 +200,8 @@ public sealed class SearchItem : ILoadable {
     public static bool OverrideLeftClick(Item[] inv, int context, int slot) {
         if (!Config.searchRecipes || context != ContextID.GuideItem) return false;
         if (inv[slot].IsAir && Main.mouseItem.IsAir || ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) != 0) return true;
-        
+
+        if (Guide.AreSame(inv[slot], Main.mouseItem)) return true;
         if (!inv[slot].IsAir && Config.searchHistory) _guideHistory[slot].Add(inv[slot].Clone());
         
         if (Guide.GetPlaceholderType(Main.mouseItem) != PlaceholderType.None) {
@@ -223,14 +225,13 @@ public sealed class SearchItem : ILoadable {
             int count = _guideHistory[slot].Count;
             SetGuideItem(item, slot);
             if(count != _guideHistory[slot].Count) _guideHistory[slot].RemoveAt(_guideHistory[slot].Count - 1);
-            inv[0] = Main.guideItem;
-            if(inv.Length > 1) inv[1] = Guide.guideTile;
         }
         else if(!inv[slot].IsAir) {
             SetGuideItem(new(), slot);
             if(Config.searchHistory) _guideHistory[slot].RemoveAt(_guideHistory[slot].Count - 1);
         }
-        SoundEngine.PlaySound(SoundID.Grab);
+        inv[0] = Main.guideItem;
+        if (inv.Length > 1) inv[1] = Guide.guideTile;
     }
 
     public static void PostAddRecipes() {

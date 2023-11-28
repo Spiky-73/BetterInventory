@@ -710,8 +710,20 @@ public sealed class Guide : ModSystem {
         else self.GetDropItem(ref guideTile);
     }
 
+    public static bool AreSame(Item item, Item other) {
+        PlaceholderType a = GetPlaceholderType(item);
+        PlaceholderType b = GetPlaceholderType(other);
+        if (a != b) return false;
+        return a switch {
+            PlaceholderType.ByHand => true,
+            PlaceholderType.Tile => item.createTile == other.createTile,
+            PlaceholderType.Condition => item.BestiaryNotes == other.BestiaryNotes,
+            PlaceholderType.None or _ => item.type == other.type,
+        };
+    }
+
     public static readonly Item CraftingItem = new(ItemID.Lens);
-    public const string ConditionMark = "@BE:";
+    public const string ConditionMark = "@BI:";
 
     public static readonly Dictionary<int, int> CraftingStationsItems = new(); // tile -> item
     public static readonly Dictionary<string, int> ConditionItems = new(); // descrition -> id

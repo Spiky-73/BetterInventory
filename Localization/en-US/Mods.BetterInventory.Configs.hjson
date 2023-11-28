@@ -258,7 +258,8 @@ ItemSearch: {
 	}
 
 	searchRecipes: {
-		Label: Search Recipes
+		Label: "[i:3549] {$Mods.BetterInventory.Configs.ItemSearch.searchRecipes.Name}"
+		Name: Search Recipes
 		Tooltip:
 			'''
 			Allows you to access the guide anywhere
@@ -285,7 +286,7 @@ ItemSearch: {
 		Tooltip:
 			'''
 			Right Clicking the Guide item or Bestiary text field searchs the previous value instead of clearing it
-			Requires {$Mods.BetterInventory.Configs.BetterGuide.searchRecipes.Label} and {$Mods.BetterInventory.Configs.ItemSearch.searchDrops.Name} respectively to be On
+			Requires {$Mods.BetterInventory.Configs.ItemSearch.searchRecipes.Name} and {$Mods.BetterInventory.Configs.ItemSearch.searchDrops.Name} respectively to be On
 			'''
 	}
 
