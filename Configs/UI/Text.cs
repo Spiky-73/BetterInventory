@@ -1,5 +1,6 @@
 using System.Linq;
 using Newtonsoft.Json;
+using Terraria.GameContent;
 using Terraria.GameContent.UI.States;
 using Terraria.ModLoader.Config;
 using Terraria.ModLoader.Config.UI;
@@ -30,7 +31,7 @@ public sealed class TextElement : ConfigElement<Text?> {
 
     public override void Recalculate() {
         base.Recalculate();
-        Height.Pixels = 30 + Label.Count(c => c == '\n') * 19.3f;
+        Height.Pixels = 30 + Label.Count(c => c == '\n') * FontAssets.ItemStack.Value.LineSpacing * 0.8f;
         if (Parent != null && Parent is UISortableElement) Parent.Height.Set(Height.Pixels, 0f);
     }
 }

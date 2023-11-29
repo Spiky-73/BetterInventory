@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using BetterInventory.Configs.UI;
 using BetterInventory.ItemSearch;
 using MonoMod.Cil;
 using Terraria;
 using Terraria.GameInput;
-using Terraria.ID;
-using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
@@ -59,7 +58,7 @@ public sealed class BetterPlayer : ModPlayer {
 
     public override void Load() {
         FavoritedBuffKb = KeybindLoader.RegisterKeybind(Mod, "FavoritedQuickBuff", Microsoft.Xna.Framework.Input.Keys.N);
-        foreach(BuilderAccToggle bat in BuilderAccToggles) bat.AddKeybind(Mod);
+        foreach (BuilderAccToggle bat in BuilderAccToggles) bat.AddKeybind(Mod);
         On_ItemSlot.TryOpenContainer += HookTryOpenContainer;
         On_Player.DropItemFromExtractinator += HookFastExtractinator;
 
@@ -80,19 +79,18 @@ public sealed class BetterPlayer : ModPlayer {
         RecipeFilters ??= new();
         VisibilityFilters ??= new();
 
-        string version = Configs.Version.Instance.lastPlayedVersion;
-        if (version.Length == 0 && Mod.Version == new Version(0, 2, 1)) version = new Version(0, 2).ToString();
-
-        if (version.Length == 0) {
-            Main.NewText(Language.GetTextValue($"Mods.BetterInventory.Chat.Download", Mod.Version.ToString()), Colors.RarityCyan);
-            Main.NewText(Language.GetTextValue($"Mods.BetterInventory.Chat.Warn"), Colors.RarityCyan);
-        } else if (Mod.Version > new Version(version)) {
-            Main.NewText(Language.GetTextValue($"Mods.BetterInventory.Chat.Update", Mod.Version.ToString()), Colors.RarityCyan);
-            Main.NewText(Language.GetTextValue($"Mods.BetterInventory.Chat.Warn"), Colors.RarityCyan);
-            string important = Language.GetTextValue($"Mods.BetterInventory.Chat.Important");
-            if (important.Length != 0) Main.NewText(Language.GetTextValue($"Mods.BetterInventory.Chat.Important", Mod.Version.ToString()), Colors.RarityAmber);
+        List<NotificationLine> lines = new();
+        if (Configs.Version.Instance.lastPlayedVersion.Length == 0) {
+            lines.Add(NotificationLine.Download);
+            lines.Add(NotificationLine.Bug);
+        } else if (Mod.Version > new Version(Configs.Version.Instance.lastPlayedVersion)) {
+            lines.Add(NotificationLine.Update);
+            lines.Add(NotificationLine.Bug);
+            var important = NotificationLine.Important;
+            if (important.Text.Length != 0) lines.Add(important);
         } else return;
 
+        InGameNotificationsTracker.AddNotification(new UpdateNotification(lines));
         Configs.Version.Instance.lastPlayedVersion = Mod.Version.ToString();
         Configs.Version.Instance.SaveConfig();
     }
