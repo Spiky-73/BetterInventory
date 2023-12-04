@@ -21,7 +21,6 @@ Crafting: {
 	}
 
 	craftOverrides: {
-		// TODO Apply to item slot clicks
 		Label: "[i:36] Recipe Crafting Overrides"
 		Tooltip:
 			'''
@@ -132,6 +131,11 @@ InventoryManagement: {
 	favoriteInBanks: {
 		Label: "[i:75] Favorite Items in Personal Storages"
 		Tooltip: Allows you to favorite items in your personal storages
+	}
+
+	clickOverrides: {
+		Label: click Overrides
+		Tooltip: ""
 	}
 }
 
@@ -406,3 +410,22 @@ ChildValue`2: {
 }
 
 Text.Tooltip: ""
+
+ClickOverride: {
+	Tooltip: ""
+
+	crafting: {
+		Label: crafting
+		Tooltip: ""
+	}
+
+	shops: {
+		Label: shops
+		Tooltip: ""
+	}
+
+	invertClicks: {
+		Label: invert Clicks
+		Tooltip: ""
+	}
+}

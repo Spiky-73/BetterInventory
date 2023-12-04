@@ -41,11 +41,11 @@ public sealed class SearchItem : ILoadable {
         _npcHistory.Clear();
     }
 
-    private void HookRedirectCursor(On_Main.orig_DrawCursor orig, Vector2 bonus, bool smart) {
+    private static void HookRedirectCursor(On_Main.orig_DrawCursor orig, Vector2 bonus, bool smart) {
         if(Enabled && s_redir) Reflection.Main.DrawInterface_36_Cursor.Invoke();
         else orig(bonus, smart);
     }
-    private Vector2 HookRedirectThickCursor(On_Main.orig_DrawThickCursor orig, bool smart) => Enabled && s_redir ? Vector2.Zero : orig(smart);
+    private static Vector2 HookRedirectThickCursor(On_Main.orig_DrawThickCursor orig, bool smart) => Enabled && s_redir ? Vector2.Zero : orig(smart);
     private static void HookDrawInterfaceCursor(On_Main.orig_DrawInterface_36_Cursor orig) {
         s_redir = false;
         if (Enabled && Keybind.Current && !Main.HoverItem.IsAir && Guide.ForcedToolip?.Key != "Mods.BetterInventory.UI.Unknown") {
@@ -55,7 +55,7 @@ public sealed class SearchItem : ILoadable {
         orig();
         s_redir = true;
     }
-    private void HookClickOverrideInterface(On_Main.orig_DrawInterface orig, Main self, GameTime time) {
+    private static void HookClickOverrideInterface(On_Main.orig_DrawInterface orig, Main self, GameTime time) {
         bool interceptClicks = Enabled && Keybind.Current;
         bool left, right;
         if (interceptClicks) (left, Main.mouseLeft, right, Main.mouseRight) = (Main.mouseLeft, false, Main.mouseRight, false);
@@ -213,7 +213,7 @@ public sealed class SearchItem : ILoadable {
         return true;
     }
 
-    private void HookOverrideRightClick(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
+    internal static void HookOverrideRightClick(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
         if (!Config.searchRecipes || context != ContextID.GuideItem || !Main.mouseRight){
             orig(inv, context, slot);
             return;

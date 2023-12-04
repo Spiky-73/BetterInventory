@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using BetterInventory.Crafting;
 using BetterInventory.DataStructures;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -90,7 +89,7 @@ public sealed class Guide : ModSystem {
         Vector2 position = new(minX, inventoryY - delta.Y);
         int slot = 0;
         void MovePosition() {
-            if (BetterCrafting.Config.tweeks && ++slot % TilesPerLine == 0) {
+            if (Crafting.Tweeks.Config.tweeks && ++slot % TilesPerLine == 0) {
                 position.X = minX;
                 position.Y += delta.Y;
                 if (slot == TilesPerLine) MovePosition();
@@ -371,7 +370,7 @@ public sealed class Guide : ModSystem {
         //             ++ <overrideBackground>
         cursor.EmitLdloc(153);
         cursor.EmitDelegate((int i) => {
-            if (!BetterCrafting.Config.focusRecipe && Main.focusRecipe == i) ItemSlot.DrawGoldBGForCraftingMaterial = true;
+            if (!Crafting.Tweeks.Config.focusRecipe && Main.focusRecipe == i) ItemSlot.DrawGoldBGForCraftingMaterial = true;
             if (!Enabled) return;
             OverrideRecipeTexture(GetFavoriteState(Main.availableRecipe[i]), ItemSlot.DrawGoldBGForCraftingMaterial, s_availableRecipes.Contains(Main.availableRecipe[i]));
             ItemSlot.DrawGoldBGForCraftingMaterial = false;
@@ -548,7 +547,7 @@ public sealed class Guide : ModSystem {
         cursor.EmitLdarg0();
         cursor.EmitDelegate((bool prevent, int recipe) => {
             if (prevent || Enabled && !s_availableRecipes.Contains(Main.availableRecipe[recipe])) return true;
-            BetterCrafting.OverrideHover(recipe);
+            InventoryManagement.ClickOverride.OverrideHover(recipe);
             return false;
         });
         //     ...

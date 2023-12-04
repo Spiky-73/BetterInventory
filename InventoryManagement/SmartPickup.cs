@@ -16,29 +16,32 @@ public sealed class SmartPickup : ILoadable {
     public static Configs.SmartPickup Config => Configs.InventoryManagement.Instance.smartPickup.Value;
 
     public void Load(Mod mod) {
-        On_ItemSlot.LeftClick_ItemArray_int_int += HookLeftClick;
-        On_ItemSlot.RightClick_ItemArray_int_int += HookRightClick;
+        On_ItemSlot.LeftClick_ItemArray_int_int += HookLeftSaveType;
+        On_ItemSlot.RightClick_ItemArray_int_int += HookRightSaveType;
         On_Player.DropItems += HookMarkItemsOnDeath;
 
         IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += ILDrawMark;
     }
     public void Unload() { }
 
-    private static void HookRightClick(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
-        int type = inv[slot].type;
-        bool fav = inv[slot].favorited;
+    private static void HookRightSaveType(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
+        (int type, bool fav) = (inv[slot].type, inv[slot].favorited);
         orig(inv, context, slot);
-        if (SmartPickupEnabled(fav) && type != ItemID.None && inv[slot].IsAir && Main.mouseItem.type == type) Mark(type, inv, context, slot, fav);
+        UpdateMark(inv, context, slot, type, fav);
     }
 
-    private static void HookLeftClick(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
-        (int type, int mouse) = (inv[slot].type, Main.mouseItem.type);
-        bool fav = inv[slot].favorited;
+    private static void HookLeftSaveType(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
+        (int type, bool fav) = (inv[slot].type, inv[slot].favorited);
         orig(inv, context, slot);
-        if (mouse != ItemID.None && Main.mouseItem.type != mouse && inv[slot].type == mouse) {
-            if(SmartPickupEnabled(fav)) Remark(mouse, type, fav);
-            else Unmark(mouse);
-        } else if (SmartPickupEnabled(fav) && type != ItemID.None && (inv[slot].type != type && Main.mouseItem.type == type || Config.shiftClicks && inv[slot].IsAir)) Mark(type, inv, context, slot, fav);
+        UpdateMark(inv, context, slot, type, fav);
+    }
+
+    public static void UpdateMark(Item[] inv, int context, int slot, int oldType, bool oldFav) {
+        if (inv[slot].type == oldType) return;
+        if (Main.guideItem.type != oldType && Main.guideItem.type != inv[slot].type && !Config.shiftClicks) return;
+        if (oldType == ItemID.None) Unmark(inv[slot].type);
+        else if (inv[slot].type == ItemID.None) Mark(oldType, inv, context, slot, oldFav);
+        else Remark(inv[slot].type, oldType, oldFav);
     }
 
     public static Item SmartGetItem(Player player, Item item, GetItemSettings settings) {

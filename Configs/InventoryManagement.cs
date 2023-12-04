@@ -11,13 +11,13 @@ public sealed class InventoryManagement : ModConfig {
     [DefaultValue(true)] public bool smartAmmo;
     public ChildValue<SmartPickupLevel, SmartPickup> smartPickup = new(SmartPickupLevel.AllItems);
     [DefaultValue(AutoEquipLevel.MainSlots)] public AutoEquipLevel autoEquip;
-    [DefaultValue(true)] public bool favoriteInBanks;
     
-
-    public Toggle<QuickMove> quickMove = new(true);
+    [DefaultValue(true)] public bool favoriteInBanks;
     [DefaultValue(true)] public bool fastContainerOpening;
     [DefaultValue(true)] public bool itemRightClick;
+    public Toggle<ClickOverride> clickOverrides = new(true);
 
+    public Toggle<QuickMove> quickMove = new(true);
     [DefaultValue(true)] public bool builderKeys; // TODO check new api
     public string FavoriteBuffKeybind {
         get {
@@ -30,13 +30,18 @@ public sealed class InventoryManagement : ModConfig {
         Reflection.ItemSlot.canFavoriteAt.GetValue()[ItemSlot.Context.BankItem] = favoriteInBanks;
     }
 
-
     public enum AutoEquipLevel { Off, MainSlots, AllSlots }
     public enum SmartPickupLevel { Off, FavoriteOnly, AllItems }
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
     public static InventoryManagement Instance = null!;
 
+}
+
+public sealed class ClickOverride {
+    [DefaultValue(true)] public bool crafting = true;
+    [DefaultValue(true)] public bool shops = true;
+    [DefaultValue(false)] public bool invertClicks = false;
 }
 
 public sealed class SmartPickup {

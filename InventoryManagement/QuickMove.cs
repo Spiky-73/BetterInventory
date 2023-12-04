@@ -229,7 +229,7 @@ public sealed class QuickMove : ILoadable {
         cursor.GotoNext(i => i.MatchCall(typeof(UILinkPointNavigator), nameof(UILinkPointNavigator.SetPosition)));
         cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdloc(6));
 
-        cursor.EmitLdarg0(); // BUG not calls for modded slots
+        cursor.EmitLdarg0(); // BUG not called for modded slots
         cursor.EmitLdarg1();
         cursor.EmitLdarg2();
         cursor.EmitLdarg3();
