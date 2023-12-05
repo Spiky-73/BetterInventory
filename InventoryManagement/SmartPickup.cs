@@ -25,20 +25,20 @@ public sealed class SmartPickup : ILoadable {
     public void Unload() { }
 
     private static void HookRightSaveType(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
-        (int type, bool fav) = (inv[slot].type, inv[slot].favorited);
+        (int type, int mouse, bool fav) = (inv[slot].type, Main.mouseItem.type, inv[slot].favorited);
         orig(inv, context, slot);
-        UpdateMark(inv, context, slot, type, fav);
+        if(Main.mouseRight) UpdateMark(inv, context, slot, type, mouse, fav);
     }
 
     private static void HookLeftSaveType(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
-        (int type, bool fav) = (inv[slot].type, inv[slot].favorited);
+        (int type, int mouse, bool fav) = (inv[slot].type, Main.mouseItem.type, inv[slot].favorited);
         orig(inv, context, slot);
-        UpdateMark(inv, context, slot, type, fav);
+        if (Main.mouseLeft && Main.mouseLeftRelease) UpdateMark(inv, context, slot, type, mouse, fav);
     }
 
-    public static void UpdateMark(Item[] inv, int context, int slot, int oldType, bool oldFav) {
-        if (inv[slot].type == oldType) return;
-        if (Main.guideItem.type != oldType && Main.guideItem.type != inv[slot].type && !Config.shiftClicks) return;
+    public static void UpdateMark(Item[] inv, int context, int slot, int oldType, int oldMouse, bool oldFav) {
+        if (inv[slot].type == oldType && Main.mouseItem.type == oldMouse) return;
+        if (Main.mouseItem.type == oldMouse && !Config.shiftClicks) return;
         if (oldType == ItemID.None) Unmark(inv[slot].type);
         else if (inv[slot].type == ItemID.None) Mark(oldType, inv, context, slot, oldFav);
         else Remark(inv[slot].type, oldType, oldFav);

@@ -20,17 +20,6 @@ Crafting: {
 			'''
 	}
 
-	craftOverrides: {
-		Label: "[i:36] Recipe Crafting Overrides"
-		Tooltip:
-			'''
-			Makes crafting consistent with inventory movements
-			Left Click to craft a stack of items
-			Right Click to craft the recipe once
-			Hold Shift to tranfer the crafted items in your inventory
-			'''
-	}
-
 	craftingOnRecList: {
 		Label: "[i:3617] Craft on Recipe List"
 		Tooltip: Allows you to craft items directly from the recipe list
@@ -44,15 +33,6 @@ Crafting: {
 	focusRecipe: {
 		Label: "[i:1248] Focus Hovered Recipe"
 		Tooltip: Automaticaly selects the hovered recipe on the recipe list
-	}
-}
-
-CraftOverrides: {
-	Tooltip: ""
-
-	invertClicks: {
-		Label: Invert Clicks
-		Tooltip: Invert the behaviour of the clicks when crafting items
 	}
 }
 
@@ -114,7 +94,7 @@ InventoryManagement: {
 	}
 
 	itemRightClick: {
-		Label: "[i:5075] Extra Item Right Click"
+		Label: "[i:1503] Extra Item Right Click"
 		Tooltip: Item that can be right clicked in the inventory can be right clicked when held
 	}
 
@@ -134,8 +114,12 @@ InventoryManagement: {
 	}
 
 	clickOverrides: {
-		Label: click Overrides
-		Tooltip: ""
+		Label: "[i:5075] Click Overrides"
+		Tooltip:
+			'''
+			Shift + Right Click an item to tranfer 1 in your inventory (same as Shift + Left)
+			Makes shops and crafting consistent with inventory movements
+			'''
 	}
 }
 
@@ -170,6 +154,37 @@ AutoEquipLevel: {
 	Off.Label: Off
 	MainSlots.Label: Default slots
 	AllSlots.Label: All Slots
+}
+
+ClickOverride: {
+	Tooltip: ""
+
+	crafting: {
+		Label: Crafting
+		Tooltip:
+			'''
+			Makes crafting consistent with inventory movements
+			Left Click to craft a stack of items
+			Right Click to craft the recipe once
+			Hold Shift to tranfer the crafted items in your inventory
+			'''
+	}
+
+	shops: {
+		Label: Shops
+		Tooltip:
+			'''
+			Makes shops consistent with inventory movements
+			Left Click to buy a stack of items
+			Right Click to buy once
+			Hold Shift to tranfer the buyed items in your inventory
+			'''
+	}
+
+	invertClicks: {
+		Label: Invert Clicks
+		Tooltip: Invert the behaviour of the left and right clicks when crafting or buying items
+	}
 }
 
 QuickMove: {
@@ -366,7 +381,7 @@ BetterBestiary: {
 }
 
 Version: {
-	DisplayName: Version 0.3.1
+	DisplayName: Version 0.4
 
 	Info: {
 		Label: Improved some features
@@ -376,6 +391,8 @@ Version: {
 	ChangeLog: {
 		Label:
 			'''
+			- Replaced chat message with notification
+			- Added click overrides for shops
 			- Fast Container Opening now applies to the Extractinator
 			- Added Different Quick Move hotkey layouts
 			- Displays the hotkey and highlights the slots where an item can be quick moved to
@@ -410,22 +427,3 @@ ChildValue`2: {
 }
 
 Text.Tooltip: ""
-
-ClickOverride: {
-	Tooltip: ""
-
-	crafting: {
-		Label: crafting
-		Tooltip: ""
-	}
-
-	shops: {
-		Label: shops
-		Tooltip: ""
-	}
-
-	invertClicks: {
-		Label: invert Clicks
-		Tooltip: ""
-	}
-}

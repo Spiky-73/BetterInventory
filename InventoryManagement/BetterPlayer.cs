@@ -108,7 +108,8 @@ public sealed class BetterPlayer : ModPlayer {
 
     public override bool HoverSlot(Item[] inventory, int context, int slot) {
         QuickMove.HoverItem(inventory, context, slot);
-        return false;
+        QuickMove.HoverItem(inventory, context, slot);
+        return ClickOverride.OverrideHover(inventory, context, slot);
     }
 
     public override bool PreItemCheck() {

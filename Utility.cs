@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent;
+using Terraria.GameContent.UI;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
@@ -144,6 +145,25 @@ public static class Utility {
 
     public static void SetInstance<T>(T instance, bool unload = false) where T: notnull => instance.GetType().GetField("Instance", BindingFlags.FlattenHierarchy | BindingFlags.Static | BindingFlags.Public)?.SetValue(null, unload ? null : instance);
 
+    public static long CountCurrency(Player player, int currencyIndex = -1) {
+        if (currencyIndex != -1) {
+            CustomCurrencyManager.TryGetCurrencySystem(currencyIndex, out CustomCurrencySystem customCurrencySystem);
+            return customCurrencySystem.CombineStacks(out _, new long[] {
+                customCurrencySystem.CountCurrency(out _, player.inventory, new int[] { 58, 57, 56, 55, 54 }),
+                customCurrencySystem.CountCurrency(out _, player.bank.item, Array.Empty<int>()),
+                customCurrencySystem.CountCurrency(out _, player.bank2.item, Array.Empty<int>()),
+                customCurrencySystem.CountCurrency(out _, player.bank3.item, Array.Empty<int>()),
+                customCurrencySystem.CountCurrency(out _, player.bank4.item, Array.Empty<int>())
+            });
+        }
+        return Utils.CoinsCombineStacks(out _, new long[] {
+            Utils.CoinsCount(out _, player.inventory, new int[] { 58, 57, 56, 55, 54 }),
+            Utils.CoinsCount(out _, player.bank.item, Array.Empty<int>()),
+            Utils.CoinsCount(out _, player.bank2.item, Array.Empty<int>()),
+            Utils.CoinsCount(out _, player.bank3.item, Array.Empty<int>()),
+            Utils.CoinsCount(out _, player.bank4.item, Array.Empty<int>())
+        });
+    }
 
     public static ReadOnlyDictionary<int, int> OwnedItems => Data.ownedItems;
     

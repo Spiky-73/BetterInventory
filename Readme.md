@@ -23,7 +23,9 @@ Visit the [Steam Workshop Page](https://steamcommunity.com/sharedfiles/filedetai
 
 ## Changelog
 
-### v0.3.1
+### v0.4
+- Replaced chat message with notification
+- Added click overrides for shops
 - Fast Container Opening now applies to the Extractinator
 - Added Different Quick Move hotkey layouts
 - Displays the hotkey and highlights the slots where an item can be quick moved to

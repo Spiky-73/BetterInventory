@@ -22,7 +22,9 @@ public readonly record struct NotificationLine(string Text, Color? Color, Dictio
         { "Steam Workshop page", $"c/{Colors.RarityCyan.Hex3()}"},
         { "GitHub", $"c/{Colors.RarityCyan.Hex3()}"}
     });
-    public static NotificationLine Important => new(Language.GetTextValue("Mods.BetterInventory.Chat.Important"), Colors.RarityAmber, null);
+    public static NotificationLine Important => new(Language.GetTextValue("Mods.BetterInventory.Chat.Important"), Colors.RarityAmber, new(){
+        // {"I highly advise you to look at the configs and adject them", $"c/ff0000"}
+    });
 }
 
 
@@ -100,7 +102,7 @@ public class UpdateNotification : IInGameNotification {
     private readonly List<LineInfo> _lines;
     private Vector2 _textSize;
 
-    public const int MaxLifeSpan = 5 * 60;
+    public const int MaxLifeSpan = 15 * 60;
     public static Asset<Texture2D> ModIcon => ModContent.Request<Texture2D>($"BetterInventory/icon");
     public static readonly Vector2 Padding = new(7, 5);
 

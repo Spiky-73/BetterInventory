@@ -547,7 +547,7 @@ public sealed class Guide : ModSystem {
         cursor.EmitLdarg0();
         cursor.EmitDelegate((bool prevent, int recipe) => {
             if (prevent || Enabled && !s_availableRecipes.Contains(Main.availableRecipe[recipe])) return true;
-            InventoryManagement.ClickOverride.OverrideHover(recipe);
+            InventoryManagement.ClickOverride.OverrideCraftHover(recipe);
             return false;
         });
         //     ...
