@@ -6,6 +6,7 @@ using BetterInventory.ItemSearch;
 using MonoMod.Cil;
 using Terraria;
 using Terraria.GameInput;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
@@ -79,17 +80,16 @@ public sealed class BetterPlayer : ModPlayer {
         RecipeFilters ??= new();
         VisibilityFilters ??= new();
 
-        List<NotificationLine> lines = new();
+        List<(LocalizedText text, TagKeyFormat format)> lines = new();
         if (Configs.Version.Instance.lastPlayedVersion.Length == 0) {
-            lines.Add(NotificationLine.Download);
-            lines.Add(NotificationLine.Bug);
+            lines.Add((Language.GetText("Mods.BetterInventory.Chat.Download"), new()));
+            lines.Add((Language.GetText("Mods.BetterInventory.Chat.Bug"), UpdateNotification.BugTags));
         } else if (Mod.Version > new Version(Configs.Version.Instance.lastPlayedVersion)) {
-            lines.Add(NotificationLine.Update);
-            lines.Add(NotificationLine.Bug);
-            var important = NotificationLine.Important;
-            if (important.Text.Length != 0) lines.Add(important);
+            lines.Add((Language.GetText("Mods.BetterInventory.Chat.Update"), new()));
+            lines.Add((Language.GetText("Mods.BetterInventory.Chat.Bug"), UpdateNotification.BugTags));
+            (LocalizedText text, TagKeyFormat format) important = (Language.GetText("Mods.BetterInventory.Chat.Important"), UpdateNotification.ImportantTags);
+            if (important.text.Value.Length != 0) lines.Add(important);
         } else return;
-
         InGameNotificationsTracker.AddNotification(new UpdateNotification(lines));
         Configs.Version.Instance.lastPlayedVersion = Mod.Version.ToString();
         Configs.Version.Instance.SaveConfig();

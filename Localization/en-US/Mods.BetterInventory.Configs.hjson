@@ -381,14 +381,38 @@ BetterBestiary: {
 }
 
 Version: {
-	DisplayName: Version 0.4
+	Highlights: {
+		Homepage: GitHub
+		Workshop: Steam Workshop page
+	}
+
+	DisplayName: Version {$Mods.BetterInventory.Configs.Version.Number}
+	Headers.Changelog: Changelog
 
 	Info: {
-		Label: Improved some features
+		Label: Improved various features
 		Tooltip: ""
 	}
 
-	ChangeLog: {
+	Important: {
+		Label:
+			'''
+			{$Mods.BetterInventory.Chat.Important}
+
+			'''
+		Tooltip: ""
+	}
+
+	Bug: {
+		Label:
+			'''
+			{$Mods.BetterInventory.Chat.Bug}
+
+			'''
+		Tooltip: ""
+	}
+
+	Changelog: {
 		Label:
 			'''
 			- Replaced chat message with notification
@@ -408,6 +432,8 @@ Version: {
 			'''
 		Tooltip: ""
 	}
+
+	Number: "0.4"
 }
 
 Toggle`1.Tooltip: ""

@@ -12,39 +12,28 @@ using Terraria.UI;
 
 namespace BetterInventory.Configs.UI;
 
-public readonly record struct NotificationLine(string Text, Color? Color, Dictionary<string, string>? Tags){
-
-    public static NotificationLine Download => new(Language.GetTextValue("Mods.BetterInventory.Chat.Download"), null, null);
-    public static NotificationLine Update => new(Language.GetTextValue($"Mods.BetterInventory.Chat.Update", BetterInventory.Instance.Version), null, new(){
-        { $"Version { BetterInventory.Instance.Version}", $"c/{Colors.RarityCyan.Hex3()}" }
-    });
-    public static NotificationLine Bug => new(Language.GetTextValue("Mods.BetterInventory.Chat.Bug"), null, new(){
-        { "Steam Workshop page", $"c/{Colors.RarityCyan.Hex3()}"},
-        { "GitHub", $"c/{Colors.RarityCyan.Hex3()}"}
-    });
-    public static NotificationLine Important => new(Language.GetTextValue("Mods.BetterInventory.Chat.Important"), Colors.RarityAmber, new(){
-        // {"I highly advise you to look at the configs and adject them", $"c/ff0000"}
-    });
-}
-
-
 public class UpdateNotification : IInGameNotification {
 
+    public static TagKeyFormat UpdateTags => new(null, new(){
+        ("Mods.BetterInventory.Configs.Version.DisplayName", $"c/{Colors.RarityCyan.Hex3()}")
+    });
+    public static TagKeyFormat BugTags => new(null, new(){
+        ("Mods.BetterInventory.Configs.Version.Highlights.Workshop", $"c/{Colors.RarityCyan.Hex3()}"),
+        ("Mods.BetterInventory.Configs.Version.Highlights.Homepage", $"c/{Colors.RarityCyan.Hex3()}")
+    });
+    public static TagKeyFormat ImportantTags => new(Colors.RarityAmber, new());
 
-    public UpdateNotification(List<NotificationLine> lines) {
+
+    public UpdateNotification(List<(LocalizedText text, TagKeyFormat format)> lines) {
         LifeSpan = MaxLifeSpan;
         
         _lines = new();
         _textSize = new(0, FontAssets.MouseText.Value.LineSpacing * lines.Count);
-        foreach(NotificationLine line in lines) {
-            Vector2 size = FontAssets.MouseText.Value.MeasureString(line.Text);
+        foreach((LocalizedText text, TagKeyFormat format) in lines) {
+            string line = text.Value;
+            Vector2 size = FontAssets.MouseText.Value.MeasureString(line);
             if (size.X > _textSize.X) _textSize.X = size.X;
-
-            string text = line.Text;
-            if (line.Tags is not null) {
-                foreach ((string word, string tag) in line.Tags) text = text.Replace(word, $"[{tag}:{word}]");
-            }
-            _lines.Add(new(text, size, line.Color));
+            _lines.Add(new(line.FormatTagKeys(format.Tags), size, format.Color));
         }
     }
 

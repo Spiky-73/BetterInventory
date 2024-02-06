@@ -10,6 +10,7 @@ using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.GameContent.UI;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 using Terraria.ObjectData;
@@ -17,6 +18,15 @@ using Terraria.ObjectData;
 namespace BetterInventory;
 
 public static class Utility {
+
+    public static string FormatTagKeys(this string format, List<(string, string)> Tags) {
+        if (Tags.Count == 0) return format;
+        foreach ((string key, string tag) in Tags) {
+            string word = Language.GetTextValue(key);
+            format = format.Replace(word, $"[{tag}:{word}]");
+        }
+        return format;
+    }
 
     public static void DrawTileFrame(SpriteBatch spriteBatch, int tile, Vector2 position, Vector2 origin, float scale) {
         Main.instance.LoadTiles(tile);

@@ -265,7 +265,6 @@ public sealed class ClickOverride : ILoadable {
     public const int CraftCursorID = 22;
     public static Asset<Texture2D> CursorCraft => ModContent.Request<Texture2D>($"BetterInventory/Assets/Cursor_Craft");
 
-    private static int _recDelay = 0;
     public static readonly int[] MaterialsPerLine = new int[] { 6, 4 };
 
     public const int VanillaMaterialSpcacing = 40;
