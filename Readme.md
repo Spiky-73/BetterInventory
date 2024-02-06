@@ -2,11 +2,11 @@
 
 This mods adds small features designed to improve the player Inventory and all the systems around it.
 I STRONGLY ADVISE you to read the mod configs to learn about all the features and enable/disable them.
-Feel free to suggest new feature in the Steam Workshop page or by creating a new issues on Gihtub. 
+Feel free to suggest new features I you think of any! 
 
-Keep in mind, this mod is still in developement. If you find a bug, please report it on the Steam Workshop page or Gihtub.
+Keep in mind, this mod is still in developement. If you find a bug, please report it here or on the Steam Workshop page.
 
-Visit the [Steam Workshop Page](https://steamcommunity.com/sharedfiles/filedetails/?id=3074374647) if you wish to download and use this mod.
+Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetails/?id=3074374647) if you wish to download and use this mod.
 
 
 ## Key Features
@@ -17,7 +17,7 @@ Visit the [Steam Workshop Page](https://steamcommunity.com/sharedfiles/filedetai
  - An improved Guide allowing you to Favorite or Blacklist recipes and filter by crating station
  - An improved Bestiary showing the content of Treasure Bag 
  - An Enhanced Crafting interface with the ability to craft on the recipe list, filter recipes and craft item in stacks 
- - The possibility to search an item's recipes on NPCs dropping it
+ - The possibility to search an item's recipes or NPCs dropping it
  - And more...
 
 
