@@ -82,10 +82,10 @@ public sealed class BetterPlayer : ModPlayer {
 
         List<(LocalizedText text, TagKeyFormat format)> lines = new();
         if (Configs.Version.Instance.lastPlayedVersion.Length == 0) {
-            lines.Add((Language.GetText("Mods.BetterInventory.Chat.Download"), new()));
+            lines.Add((Language.GetText("Mods.BetterInventory.Chat.Download"), UpdateNotification.DownloadTags));
             lines.Add((Language.GetText("Mods.BetterInventory.Chat.Bug"), UpdateNotification.BugTags));
         } else if (Mod.Version > new Version(Configs.Version.Instance.lastPlayedVersion)) {
-            lines.Add((Language.GetText("Mods.BetterInventory.Chat.Update"), new()));
+            lines.Add((Language.GetText("Mods.BetterInventory.Chat.Update"), UpdateNotification.UpdateTags));
             lines.Add((Language.GetText("Mods.BetterInventory.Chat.Bug"), UpdateNotification.BugTags));
             (LocalizedText text, TagKeyFormat format) important = (Language.GetText("Mods.BetterInventory.Chat.Important"), UpdateNotification.ImportantTags);
             if (important.text.Value.Length != 0) lines.Add(important);

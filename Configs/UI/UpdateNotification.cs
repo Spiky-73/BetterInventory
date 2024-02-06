@@ -14,6 +14,7 @@ namespace BetterInventory.Configs.UI;
 
 public class UpdateNotification : IInGameNotification {
 
+    public static TagKeyFormat DownloadTags => new(null, new());
     public static TagKeyFormat UpdateTags => new(null, new(){
         ("Mods.BetterInventory.Configs.Version.DisplayName", $"c/{Colors.RarityCyan.Hex3()}")
     });
