@@ -73,7 +73,7 @@ public sealed class QuickMove : ILoadable {
             if (!Main.playerInventory) _moveTime = 0;
             else {
                 Main.LocalPlayer.selectedItem = _selectedItem[1];
-                if (PlayerInput.Triggers.JustPressed.KeyStatus[MoveKeys[_moveTargetSlot]]) ContinueChain();
+                if (PlayerInput.Triggers.JustPressed.KeyStatus[MoveKeys[_moveKey]]) ContinueChain();
             }
         }
         orig();
@@ -87,15 +87,15 @@ public sealed class QuickMove : ILoadable {
             Main.LocalPlayer.selectedItem = _selectedItem[1];
         }
 
-        int targetSlot = Array.FindIndex(MoveKeys, key => PlayerInput.Triggers.JustPressed.KeyStatus[key]);
-        if (targetSlot == -1) return;
+        int targetKey = Array.FindIndex(MoveKeys, key => PlayerInput.Triggers.JustPressed.KeyStatus[key]);
+        if (targetKey == -1) return;
 
-        if (_moveTime == 0 || _moveTargetSlot != targetSlot) SetupChain(source, targetSlot);
+        if (_moveTime == 0 || _moveKey != targetKey) SetupChain(source, targetKey);
         if(_moveChain.Count != 0) ContinueChain();
     }
-    private static void SetupChain(Slot source, int targetSlot) {
+    private static void SetupChain(Slot source, int targetKey) {
         _moveSource = source;
-        _moveTargetSlot = targetSlot;
+        _moveKey = targetKey;
         _moveIndex = -1;
         _moveChain = new(_displayedChain);
         _validSlots.Clear();
@@ -111,7 +111,7 @@ public sealed class QuickMove : ILoadable {
 
         if (_moveIndex < _moveChain.Count) {
             int targetSlotCount = _moveChain[_moveIndex].Items(player).Count;
-            int targetSlot = HotkeyToSlot(_moveTargetSlot, targetSlotCount);
+            int targetSlot = HotkeyToSlot(_moveKey, targetSlotCount);
             Slot target = new(_moveChain[_moveIndex], targetSlot);
             _movedItems = Move(player, _moveSource, target);
             _moveChain[_moveIndex].Focus(player, target.Index);
@@ -279,7 +279,7 @@ public sealed class QuickMove : ILoadable {
         if (Config.returnToSlot && _moveTime > 0 && itemSlot == _moveSource) {
             int mod = _moveChain.Count + (Config.returnToSlot ? 1 : 0);
             numberInChain = (_moveChain.Count - _moveIndex + mod) % mod;
-            key = _moveTargetSlot;
+            key = _moveKey;
             return true;
         }
 
@@ -299,7 +299,7 @@ public sealed class QuickMove : ILoadable {
     }
     private static void CacheSlots(ModSubInventory slots) {
         if (slots == _ilCachedSlots.slots) return;
-        _ilCachedSlots = (slots, -1, -1);
+        _ilCachedSlots = (slots, -1, -1, -1);
         
         List<ModSubInventory> chain; int offset;
         if (_moveTime > 0) (chain, offset) = (_moveChain, _moveIndex);
@@ -311,16 +311,20 @@ public sealed class QuickMove : ILoadable {
         _ilCachedSlots.number = number - offset;
         if (_ilCachedSlots.number < 0) _ilCachedSlots.number += chain.Count + (Config.returnToSlot ? 1 : 0);
         _ilCachedSlots.count = _ilCachedSlots.slots.Items(Main.LocalPlayer).Count;
+        _ilCachedSlots.moveSlot = HotkeyToSlot(_moveKey, _ilCachedSlots.count);
     }
     private static void CacheIndex(int index) {
         if (_ilCachedIndex.index == index) return;
         _ilCachedIndex = (index, -1);
         int key = SlotToHotkey(index, _ilCachedSlots.count);
-        if (_moveTime > 0 && key != _moveTargetSlot) return;
+        if (_moveTime > 0 && key != _moveKey) {
+            if(_ilCachedSlots.moveSlot == index) _ilCachedIndex.key = _moveKey;
+            return;
+        }
         _ilCachedIndex.key = key;
     }
     private static (Item[] inv, int context, int slot, Slot? itemSlot) _ilCachedInv;
-    private static (ModSubInventory slots, int number, int count) _ilCachedSlots;
+    private static (ModSubInventory slots, int number, int count, int moveSlot) _ilCachedSlots;
     private static (int index, int key) _ilCachedIndex;
 
     public static void UpdateDisplayedMoveChain(ModSubInventory slots, Item item) {
@@ -349,7 +353,7 @@ public sealed class QuickMove : ILoadable {
     private static List<ModSubInventory> _moveChain = new();
 
     private static Slot _moveSource;
-    private static int _moveTargetSlot;
+    private static int _moveKey;
     private static readonly Dictionary<ModSubInventory, int> _validSlots = new();
     
     private static List<MovedItem> _movedItems = new();

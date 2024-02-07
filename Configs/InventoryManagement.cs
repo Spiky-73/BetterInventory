@@ -51,7 +51,7 @@ public sealed class SmartPickup {
 }
 
 public sealed class QuickMove {
-    [Range(0, 3600), DefaultValue(60)] public int chainTime = 60;
+    [Range(0, 3600), DefaultValue(60*3)] public int chainTime = 60*3;
     [DefaultValue(true)] public bool returnToSlot = true;
     [DefaultValue(false)] public bool showTooltip = false;
     [DefaultValue(HotkeyMode.Default)] public HotkeyMode hotkeyMode = HotkeyMode.Default;
