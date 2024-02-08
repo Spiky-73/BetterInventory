@@ -256,23 +256,13 @@ ItemSearch: {
 	betterGuide: {
 		Label: "[i:267] {$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Name}"
 		Name: Better Guide
-		Tooltip:
-			'''
-			Allows you to search the recipes of any item
-			Adds recipes crafting the selected item
-			Shows missing materials in non craftable recipes
-			Enables sub-settings
-			'''
+		Tooltip: Improves various aspects of the Guide
 	}
 
 	betterBestiary: {
 		Label: "[i:4767] {$Mods.BetterInventory.Configs.ItemSearch.betterBestiary.Name}"
 		Name: Better Bestiary
-		Tooltip:
-			'''
-			Includes locked entries in search
-			Enables sub-settings
-			'''
+		Tooltip: Improves various aspects of the Bestiary
 	}
 
 	searchRecipes: {
@@ -312,11 +302,11 @@ ItemSearch: {
 		Label: "[i:236] Unknown Recipe or NPCs display"
 		Tooltip:
 			'''
-			Changed how Recipes and NPCs you have not discovered are displayed in the Recipe list and Bestiary
+			Changes how Recipes and NPCs you have not discovered are displayed in the Recipe list and Bestiary
 			Requires "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Name}" and "{$Mods.BetterInventory.Configs.ItemSearch.betterBestiary.Name}" respectively to be On
 			{$Mods.BetterInventory.Configs.UnknownDisplay.Hidden.Label}: Not displayed
 			{$Mods.BetterInventory.Configs.UnknownDisplay.Unknown.Label}: Displayed as '?'
-			{$Mods.BetterInventory.Configs.UnknownDisplay.Known.Label}: Displayed as known. Does not affect Bestiary completion
+			{$Mods.BetterInventory.Configs.UnknownDisplay.Known.Label}: Counts as discovered. 
 			'''
 	}
 
@@ -331,8 +321,20 @@ ItemSearch: {
 	}
 }
 
+UnknownDisplay: {
+	Tooltip: ""
+	Hidden.Label: Hidden
+	Unknown.Label: Unknown
+	Known.Label: Known
+}
+
 BetterGuide: {
 	Tooltip: ""
+
+	anyItem: {
+		Label: Search Any Item
+		Tooltip: Allows you to search the recipe of any item
+	}
 
 	favoriteRecipes: {
 		Label: Favorite Recipes
@@ -358,25 +360,31 @@ BetterGuide: {
 	}
 }
 
-UnknownDisplay: {
-	Tooltip: ""
-	Hidden.Label: Hidden
-	Unknown.Label: Unknown
-	Known.Label: Known
-}
-
 BetterBestiary: {
 	Tooltip: ""
 
 	showBagContent: {
 		Label: Show Treasure Bag Content
-		Tooltip: Displays info about the items dropped by Treasure bags in the Bestiary
+		Tooltip: Displays items dropped by Treasure Bags in the Bestiary
 	}
 
 	unlockFilter: {
 		Label: Override Unlock Filter
 		Tooltip: Replace the filter "{$BestiaryInfo.IfUnlocked}" with "{$Mods.BetterInventory.UI.FullUnlock}"
 	}
+
+	displayedUnlock: {
+		Label: Minimum Displayed Values
+		Tooltip: Forces the minimal displayed stats for discovered entries
+	}
+}
+
+UnlockLevel: {
+	Tooltip: ""
+	Unchanged.Label: Unchanged
+	Stats.Label: Detailed Stats
+	Drops.Label: Drops
+	DropRates.Label: Drop Rates
 }
 
 Version: {

@@ -561,7 +561,7 @@ public sealed class Guide : ModSystem {
 
 
     private int HookAllowGuideItem(On_ItemSlot.orig_PickItemMovementAction orig, Item[] inv, int context, int slot, Item checkItem) {
-        if (!Enabled || context != ContextID.GuideItem) return orig(inv, context, slot, checkItem);
+        if (!Enabled || !Config.anyItem || context != ContextID.GuideItem) return orig(inv, context, slot, checkItem);
         if (slot == 0 && GetPlaceholderType(Main.mouseItem) == PlaceholderType.None) return 0;
         if (slot == 1 && IsCraftingTileItem(Main.mouseItem)) return 0;
         return -1;

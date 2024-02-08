@@ -30,7 +30,7 @@ public sealed class InventoryManagement : ModConfig {
         Reflection.ItemSlot.canFavoriteAt.GetValue()[ItemSlot.Context.BankItem] = favoriteInBanks;
     }
 
-    public enum AutoEquipLevel { Off, DefaultSlots, AllSlots }
+    public enum AutoEquipLevel { Off, DefaultSlots, AnySlot }
     public enum SmartPickupLevel { Off, FavoriteOnly, AllItems }
 
     public override ConfigScope Mode => ConfigScope.ClientSide;

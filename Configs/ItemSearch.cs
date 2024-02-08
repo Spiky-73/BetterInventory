@@ -30,12 +30,16 @@ public sealed class ItemSearch : ModConfig {
 }
 
 public class BetterGuide {
+    [DefaultValue(true)] public bool anyItem = true;
     [DefaultValue(true)] public bool favoriteRecipes = true;
     [DefaultValue(true)] public bool craftInMenu = true;
     [DefaultValue(true)] public bool guideTile = true;
 }
 
 public class BetterBestiary {
+    [DefaultValue(UnlockLevel.Drops)] public UnlockLevel displayedUnlock = UnlockLevel.Drops;
     [DefaultValue(true)] public bool showBagContent = true;
     [DefaultValue(true)] public bool unlockFilter = true;
+
+    public enum UnlockLevel { Unchanged, Stats, Drops, DropRates }
 }
