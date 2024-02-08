@@ -28,6 +28,7 @@ public sealed class Coin : ModSubInventory {
 }
 public sealed class Ammo : ModSubInventory {
     public override int Context => ContextID.InventoryAmmo;
+    public override bool IsDefault(Item item) => true;
     public sealed override bool Accepts(Item item) => !item.IsAir && item.FitsAmmoSlot();
     public override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.inventory, DataStructures.Range.FromCount(54, 4));
 }
@@ -72,7 +73,7 @@ public abstract class Armor : ModSubInventory {
 
     public override int Context => ContextID.EquipArmor;
     public override bool Accepts(Item item) => IsArmor(item) && item.defense != 0;
-    public override bool IsRightClickTarget(Item item) => true;
+    public override bool IsDefault(Item item) => true;
     public override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.armor, Index);
 
     public sealed override void Focus(Player player, int slot) => Main.EquipPageSelected = 0;
@@ -81,7 +82,7 @@ public abstract class Armor : ModSubInventory {
 public abstract class AVanityArmor : Armor {
     public sealed override int Context => ContextID.EquipArmorVanity;
     public override bool Accepts(Item item) => IsArmor(item);
-    public override bool IsRightClickTarget(Item item) => item.vanity;
+    public override bool IsDefault(Item item) => item.vanity;
     public sealed override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.armor, Index + Count + AccessorySlotLoader.MaxVanillaSlotCount);
 }
 public sealed class HeadArmor : Armor {
@@ -158,7 +159,7 @@ public abstract class AAccessories<T> : ModSubInventory<T> where T: AAccessories
 }
 public sealed class Accessories : AAccessories<Accessories> {
     public override bool Accepts(Item item) => item.accessory && !item.vanity;
-    public override bool IsRightClickTarget(Item item) => true;
+    public override bool IsDefault(Item item) => true;
     public override int Context => ContextID.EquipAccessory;
     public override Joined<ListIndices<Item>, Item> Items(Player player) => new(
         new ListIndices<Item>(player.armor, UnlockedVanillaSlots(player)),
@@ -167,7 +168,7 @@ public sealed class Accessories : AAccessories<Accessories> {
 }
 public sealed class VanityAccessories : AAccessories<VanityAccessories> {
     public override bool Accepts(Item item) => item.accessory;
-    public override bool IsRightClickTarget(Item item) => item.vanity && item.FitsAccessoryVanitySlot;
+    public override bool IsDefault(Item item) => item.vanity && item.FitsAccessoryVanitySlot;
     public override int Context => ContextID.EquipAccessoryVanity;
     public override Joined<ListIndices<Item>, Item> Items(Player player) => new(
         new ListIndices<Item>(player.armor, UnlockedVanillaSlots(player, Armor.Count + AccessorySlotLoader.MaxVanillaSlotCount)),
@@ -190,7 +191,7 @@ public abstract class Loadout2 : ALoadout {
 public abstract class Equipement : ModSubInventory {
     public abstract int Index { get; }
     public sealed override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.miscEquips, Index);
-    public sealed override bool IsRightClickTarget(Item item) => true;
+    public sealed override bool IsDefault(Item item) => true;
     public sealed override void Focus(Player player, int slot) => Main.EquipPageSelected = 2;
 }
 public sealed class Pet : Equipement {

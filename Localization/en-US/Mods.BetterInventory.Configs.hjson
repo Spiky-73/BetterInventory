@@ -74,8 +74,8 @@ InventoryManagement: {
 		Tooltip:
 			'''
 			Automaticaly equips items such as Armors, Accessories or Equipement
-			{$Mods.BetterInventory.Configs.AutoEquipLevel.MainSlots.Label}: Equipement go to their default slots if available
-			{$Mods.BetterInventory.Configs.AutoEquipLevel.AllSlots.Label}: Inluces Dyes. Armor and Accessories items can go to social slots.
+			{$Mods.BetterInventory.Configs.AutoEquipLevel.DefaultSlots.Label}: Equipement go to their default slots if available
+			{$Mods.BetterInventory.Configs.AutoEquipLevel.AnySlot.Label}: Equipement go to any slot they can go in. Includes Dyes. Armors and Accessories can go to social slots.
 			'''
 	}
 
@@ -152,8 +152,8 @@ SmartPickupLevel: {
 AutoEquipLevel: {
 	Tooltip: ""
 	Off.Label: Off
-	MainSlots.Label: Default slots
-	AllSlots.Label: All Slots
+	DefaultSlots.Label: Default slots
+	AnySlot.Label: Any Slots
 }
 
 ClickOverride: {
@@ -192,7 +192,7 @@ QuickMove: {
 
 	chainTime: {
 		Label: Chain Interval
-		Tooltip: Frame interval to move to the next context in the chain
+		Tooltip: Frame interval to move to the next context in the chain (60 = 1s)
 	}
 
 	showTooltip: {
@@ -258,10 +258,10 @@ ItemSearch: {
 		Name: Better Guide
 		Tooltip:
 			'''
-			Allows you to searched the recipes of any item
+			Allows you to search the recipes of any item
 			Adds recipes crafting the selected item
 			Shows missing materials in non craftable recipes
-			Visualy overrides unknown recipes.
+			Enables sub-settings
 			'''
 	}
 
@@ -270,9 +270,8 @@ ItemSearch: {
 		Name: Better Bestiary
 		Tooltip:
 			'''
-			Search includes locked entries
-			Visualy overrides the unlock state of entries (does not affect completion)
-			RightClick the search field to clear it
+			Includes locked entries in search
+			Enables sub-settings
 			'''
 	}
 
@@ -282,9 +281,9 @@ ItemSearch: {
 		Tooltip:
 			'''
 			Allows you to access the guide anywhere
-			With {$Mods.BetterInventory.Configs.BetterGuide.guideTile.Label} On, searching the guide tile will move it into the guide item and vice-versa
 			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Left Click an item to search its recipe
 			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Middle Click in the inventory to clear the searched item
+			With {$Mods.BetterInventory.Configs.BetterGuide.guideTile.Label} On, searching the guide tile will move it into the guide item and vice-versa
 			Right Click the Guide item to clear it
 			'''
 	}
@@ -304,8 +303,8 @@ ItemSearch: {
 		Label: "[i:346] Search History"
 		Tooltip:
 			'''
-			Right Clicking the Guide item or Bestiary text field searchs the previous value instead of clearing it
-			Requires {$Mods.BetterInventory.Configs.ItemSearch.searchRecipes.Name} and {$Mods.BetterInventory.Configs.ItemSearch.searchDrops.Name} respectively to be On
+			Right Click the Guide item or Bestiary text field to search the previous value instead of clearing it
+			Requires "{$Mods.BetterInventory.Configs.ItemSearch.searchRecipes.Name}" and "{$Mods.BetterInventory.Configs.ItemSearch.searchDrops.Name}" respectively to be On
 			'''
 	}
 
@@ -317,7 +316,7 @@ ItemSearch: {
 			Requires "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Name}" and "{$Mods.BetterInventory.Configs.ItemSearch.betterBestiary.Name}" respectively to be On
 			{$Mods.BetterInventory.Configs.UnknownDisplay.Hidden.Label}: Not displayed
 			{$Mods.BetterInventory.Configs.UnknownDisplay.Unknown.Label}: Displayed as '?'
-			{$Mods.BetterInventory.Configs.UnknownDisplay.Known.Label}: Displayed as fully known. Does not affect Bestiary completion
+			{$Mods.BetterInventory.Configs.UnknownDisplay.Known.Label}: Displayed as known. Does not affect Bestiary completion
 			'''
 	}
 

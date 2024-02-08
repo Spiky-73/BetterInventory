@@ -138,7 +138,7 @@ public sealed class SmartPickup : ILoadable {
             return;
         }
 
-        foreach (ModSubInventory inventory in InventoryLoader.Inventories) {
+        foreach (ModSubInventory inventory in InventoryLoader.SubInventories) {
             IList<Item> items = inventory.Items(self);
             for (int i = 0; i < items.Count; i++) {
                 if(!items[i].IsAir && SmartPickupEnabled(items[i].favorited)) Mark(items[i].type, new(inventory, i), items[i].favorited);

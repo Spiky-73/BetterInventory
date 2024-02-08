@@ -8,19 +8,19 @@ using Terraria.ModLoader.Core;
 namespace BetterInventory;
 
 public enum SubInventoryType {
-    NoCondition,
-    LooseCondition,
-    WithCondition,
-    RightClickTarget
+    Classic,
+    NonClassic,
+    Secondary,
+    Default
 }
 
 public class InventoryLoader : ILoadable {
 
-    public static IEnumerable<ModSubInventory> Inventories {
+    public static IEnumerable<ModSubInventory> SubInventories {
         get {
-            foreach (var inventory in _condition) yield return inventory;
-            foreach (var inventory in _looseCondition) yield return inventory;
-            foreach (var inventory in _noCondition) yield return inventory;
+            foreach (var inventory in _special) yield return inventory;
+            foreach (var inventory in _nonClassic) yield return inventory;
+            foreach (var inventory in _classic) yield return inventory;
         }
     }
 
@@ -31,21 +31,20 @@ public class InventoryLoader : ILoadable {
             foreach(var inventory in list) Utility.SetInstance(inventory, true);
             list.Clear();
         }
-        Clear(_condition);
-        Clear(_looseCondition);
-        Clear(_noCondition);
+        Clear(_special);
+        Clear(_nonClassic);
+        Clear(_classic);
     }
 
     internal static void Register(ModSubInventory inventory){
         Utility.SetInstance(inventory);
-        inventory.HasCondition = LoaderUtils.HasOverride(inventory.GetType(), Reflection.ModSubInventory.Accepts);
-        if(!inventory.HasCondition) _noCondition.Add(inventory);
-        else if(inventory.Accepts(new()))_looseCondition.Add(inventory);
-        else _condition.Add(inventory);
+        if(!LoaderUtils.HasOverride(inventory.GetType(), Reflection.ModSubInventory.Accepts)) _classic.Add(inventory);
+        else if(inventory.Accepts(new()))_nonClassic.Add(inventory);
+        else _special.Add(inventory);
     }
 
     public static Slot? FindItem(Player player, Predicate<Item> predicate) {
-        foreach (ModSubInventory slots in Inventories) {
+        foreach (ModSubInventory slots in SubInventories) {
             int slot = slots.Items(player).FindIndex(predicate);
             if (slot != -1) return new(slots, slot);
         }
@@ -53,7 +52,7 @@ public class InventoryLoader : ILoadable {
     }
 
     public static Slot? GetInventorySlot(Player player, Item[] inventory, int context, int slot) {
-        foreach (ModSubInventory slots in Inventories) {
+        foreach (ModSubInventory slots in SubInventories) {
             int slotOffset = 0;
             foreach (ListIndices<Item> items in slots.Items(player).Lists) {
                 int index = items.FromInnerIndex(slot);
@@ -64,27 +63,26 @@ public class InventoryLoader : ILoadable {
         return null;
     }
 
-    public static IEnumerable<ModSubInventory> GetInventories(Item item, SubInventoryType level) {
-        List<ModSubInventory> withCondition  = new();
-        foreach(var inv in _condition) {
+    public static IEnumerable<ModSubInventory> GetSubInventories(Item item, SubInventoryType level) {
+        List<ModSubInventory> secondary = new();
+        foreach(var inv in _special) {
             if (!inv.Accepts(item)) continue;
-            if (inv.IsRightClickTarget(item)) yield return inv;
-            else if (level <= SubInventoryType.WithCondition) withCondition.Add(inv);
+            if (inv.IsDefault(item)) yield return inv;
+            else if (level <= SubInventoryType.Secondary) secondary.Add(inv);
         }
-        foreach (var inv in withCondition) yield return inv;
-        if (level <= SubInventoryType.LooseCondition) {
-            foreach (var inv in _looseCondition) {
-                if (level <= SubInventoryType.WithCondition && inv.Accepts(item)) yield return inv;
+        foreach (var inv in secondary) yield return inv;
+
+        if (level <= SubInventoryType.NonClassic) {
+            foreach (var inv in _nonClassic) {
+                if (inv.Accepts(item)) yield return inv;
             }
-        }
-        if (level <= SubInventoryType.NoCondition) {
-            foreach (var inv in _noCondition) {
-                if (level <= SubInventoryType.WithCondition && inv.Accepts(item)) yield return inv;
+            if (level <= SubInventoryType.Classic) {
+                foreach (var inv in _classic) yield return inv;
             }
         }
     }
 
-    private readonly static List<ModSubInventory> _condition = new();
-    private readonly static List<ModSubInventory> _looseCondition = new();
-    private readonly static List<ModSubInventory> _noCondition = new();
+    private readonly static List<ModSubInventory> _special = new();
+    private readonly static List<ModSubInventory> _nonClassic = new();
+    private readonly static List<ModSubInventory> _classic = new();
 }

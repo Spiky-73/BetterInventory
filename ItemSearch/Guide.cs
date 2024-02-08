@@ -170,7 +170,7 @@ public sealed class Guide : ModSystem {
         cursor.EmitDelegate<Func<int, bool>>(i => {
             if (!Enabled) return false;
             Recipe recipe = Main.recipe[i];
-            if (!guideTile.IsAir) {
+            if (Config.guideTile && !guideTile.IsAir) {
                 switch (GetPlaceholderType(guideTile)) {
                 case PlaceholderType.None: // Read Item
                     if (guideTile.createTile != -1) { // Tile

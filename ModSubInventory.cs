@@ -22,9 +22,8 @@ public abstract class ModSubInventory : ModType, ILocalizedModType {
     public abstract int Context { get; }
     public virtual int? MaxStack => null;
 
-    public bool HasCondition { get; internal set; }
     public virtual bool Accepts(Item item) => true;
-    public virtual bool IsRightClickTarget(Item item) => false;
+    public virtual bool IsDefault(Item item) => false;
 
     public abstract Joined<ListIndices<Item>, Item> Items(Player player);
     public virtual bool FitsSlot(Player player, Item item, int slot, out IList<Slot> itemsToMove) {

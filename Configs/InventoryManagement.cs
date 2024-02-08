@@ -10,7 +10,7 @@ public sealed class InventoryManagement : ModConfig {
     [DefaultValue(true)] public bool smartConsumption;
     [DefaultValue(true)] public bool smartAmmo;
     public ChildValue<SmartPickupLevel, SmartPickup> smartPickup = new(SmartPickupLevel.AllItems);
-    [DefaultValue(AutoEquipLevel.MainSlots)] public AutoEquipLevel autoEquip;
+    [DefaultValue(AutoEquipLevel.DefaultSlots)] public AutoEquipLevel autoEquip;
     
     [DefaultValue(true)] public bool favoriteInBanks;
     [DefaultValue(true)] public bool fastContainerOpening;
@@ -30,7 +30,7 @@ public sealed class InventoryManagement : ModConfig {
         Reflection.ItemSlot.canFavoriteAt.GetValue()[ItemSlot.Context.BankItem] = favoriteInBanks;
     }
 
-    public enum AutoEquipLevel { Off, MainSlots, AllSlots }
+    public enum AutoEquipLevel { Off, DefaultSlots, AllSlots }
     public enum SmartPickupLevel { Off, FavoriteOnly, AllItems }
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
@@ -61,5 +61,5 @@ public sealed class QuickMove {
     public enum HotkeyMode { Default, FromEnd, Reversed }
 }
 public sealed class HotkeyDisplay {
-    [DefaultValue(0f)] public float highlightIntensity = 0f;
+    [DefaultValue(0.2f)] public float highlightIntensity = 0.2f;
 }

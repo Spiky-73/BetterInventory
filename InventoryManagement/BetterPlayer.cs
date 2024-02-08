@@ -182,8 +182,8 @@ public sealed class BetterPlayer : ModPlayer {
         }
 
         self.GetModPlayer<BetterPlayer>().VisibilityFilters.AddOwnedItems(newItem);
-         if (!settings.NoText && Config.autoEquip != Configs.InventoryManagement.AutoEquipLevel.Off) {
-            foreach (ModSubInventory slots in InventoryLoader.GetInventories(newItem, Config.autoEquip == Configs.InventoryManagement.AutoEquipLevel.MainSlots ? SubInventoryType.RightClickTarget : SubInventoryType.WithCondition).ToArray()) {
+        if (!settings.NoText && Config.autoEquip != Configs.InventoryManagement.AutoEquipLevel.Off) {
+            foreach (ModSubInventory slots in InventoryLoader.GetSubInventories(newItem, Config.autoEquip == Configs.InventoryManagement.AutoEquipLevel.DefaultSlots ? SubInventoryType.Default : SubInventoryType.Secondary).ToArray()) {
                 newItem = slots.GetItem(self, newItem, settings);
                 if (newItem.IsAir) return new();
             }
