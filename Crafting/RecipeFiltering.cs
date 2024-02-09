@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using BetterInventory.InventoryManagement;
-using BetterInventory.ItemSearch;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
@@ -32,26 +31,21 @@ public sealed class RecipeFiltering : ILoadable {
     private static void ILDrawFilters(ILContext il) {
         ILCursor cursor = new(il);
 
-        // Mark + Apply noHammer
         // ...
         // if(<showRecipes>){
-        //     ...
-        //     if(Main.numAvailableRecipes == 0) {
-        //         recBigList = false;
-        cursor.GotoNext(i => i.MatchCall(typeof(Main), "SetRecipeMaterialDisplayName"));
+        cursor.GotoNext(i => i.MatchStsfld(typeof(Terraria.UI.Gamepad.UILinkPointNavigator.Shortcuts), nameof(Terraria.UI.Gamepad.UILinkPointNavigator.Shortcuts.CRAFT_CurrentRecipeBig)));
+        cursor.GotoPrev(MoveType.AfterLabel);
 
-        //         ++<drawFilters>
-        cursor.GotoNext(MoveType.Before, i => i.MatchStsfld(Reflection.Main.recBigList));
-        
+        //     ++<drawFilters>
         cursor.EmitLdloc(13); // screen position
         cursor.EmitDelegate((int num54) => {
-            int num76 = 94;
-            int num77 = 450 + num54;
-            if (!Main.guideItem.IsAir || (Guide.Enabled && Guide.Config.guideTile && !Guide.guideTile.IsAir))DrawFilters(num76, num77);
+            if (!Enabled || Recipes.Length == 0) return;
+            DrawFilters(94, 450 + num54);
         });
-        //     }
 
-        //     else 
+        //     ...
+        //     if(Main.numAvailableRecipes == 0) ...
+        //     else {
         //         int num73 = 94;
         //         int num74 = 450 + num51;
         //         if (++false && Main.InGuideCraftMenu) num74 -= 150;
@@ -61,18 +55,11 @@ public sealed class RecipeFiltering : ILoadable {
         cursor.GotoPrev(i => i.MatchLdsfld(Reflection.Main.InGuideCraftMenu));
         cursor.EmitBr(postHammer!);
 
-        //         ++<drawFilters>
-        cursor.GotoLabel(postHammer!, MoveType.After);
-        cursor.EmitLdloc(138); // HammerX
-        cursor.EmitLdloc(139); // HammerY
-        cursor.EmitDelegate(DrawFilters);
         //         ...
         //     }
     }
 
     public static void DrawFilters(int hammerX, int hammerY){
-        if(!Enabled) return;
-
         static void OnFilterChanges() {
             FilterRecipes();
             SoundEngine.PlaySound(SoundID.MenuTick);
@@ -114,8 +101,7 @@ public sealed class RecipeFiltering : ILoadable {
                 }
 
                 Color color = RecipesInFilter[i] != 0 ? Color.White : Color.Gray;
-                if (!active) color *= 0.33f;
-                if (RecipesInFilter[i] == 0) color *= 0.66f;
+                if (!active) color *= 0.5f;
                 
                 Main.spriteBatch.Draw(RecipeFilterBack.Value, hitbox.Center(), null, color, 0, RecipeFilterBack.Size() / 2, 1, SpriteEffects.None, 0);
                 Rectangle frame = filters.AvailableFilters[i].GetSourceFrame();
@@ -129,7 +115,7 @@ public sealed class RecipeFiltering : ILoadable {
     }
 
     
-    private void HookFilterRecipes(On_Recipe.orig_FindRecipes orig, bool canDelayCheck) {
+    private static void HookFilterRecipes(On_Recipe.orig_FindRecipes orig, bool canDelayCheck) {
         if (!Main.mouseItem.IsAir) BetterPlayer.LocalPlayer.VisibilityFilters.AddOwnedItems(Main.mouseItem);
         foreach (Item item in Main.LocalPlayer.inventory) if (!item.IsAir) BetterPlayer.LocalPlayer.VisibilityFilters.AddOwnedItems(item);
         

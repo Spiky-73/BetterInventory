@@ -24,8 +24,7 @@ public static class Main {
 }
 
 public static class Player {
-    public static readonly Method<TPlayer, int, TItem, GetItemSettings, TItem, int> GetItem_FillEmptyInventorySlot_VoidBag = new(nameof(GetItem_FillEmptyInventorySlot_VoidBag));
-    public static readonly Method<TPlayer, int, TItem, GetItemSettings, TItem, int> GetItem_FillIntoOccupiedSlot_VoidBag = new(nameof(GetItem_FillIntoOccupiedSlot_VoidBag));
+    public static readonly Field<TPlayer, TItem> trashItem = new(nameof(TPlayer.trashItem));
 }
 
 public static class Item {

@@ -63,7 +63,7 @@ public sealed class SmartPickup : ILoadable {
         return item;
     }
 
-    private void ILDrawMark(ILContext il) {
+    private static void ILDrawMark(ILContext il) {
         ILCursor cursor = new(il);
 
         // ...
@@ -132,7 +132,7 @@ public sealed class SmartPickup : ILoadable {
         return (mark, favorited);
     }
 
-    private void HookMarkItemsOnDeath(On_Player.orig_DropItems orig, Player self) {
+    private static void HookMarkItemsOnDeath(On_Player.orig_DropItems orig, Player self) {
         if(Level == Configs.InventoryManagement.SmartPickupLevel.Off || !Config.mediumCore){
             orig(self);
             return;

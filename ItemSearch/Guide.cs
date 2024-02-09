@@ -71,7 +71,7 @@ public sealed class Guide : ModSystem {
     }
 
 
-    private void HookGuideCraftText(On_Main.orig_DrawGuideCraftText orig, int adjY, Color craftingTipColor, out int inventoryX, out int inventoryY) {
+    private static void HookGuideCraftText(On_Main.orig_DrawGuideCraftText orig, int adjY, Color craftingTipColor, out int inventoryX, out int inventoryY) {
         if (!Enabled) {
             orig(adjY, craftingTipColor, out inventoryX, out inventoryY);
             return;
@@ -431,7 +431,7 @@ public sealed class Guide : ModSystem {
         if (!Enabled || SearchItem.Config.searchRecipes) return null!;
         return new Item[] { Main.guideItem };
     }
-    private void ILFindRecipes(ILContext il) {
+    private static void ILFindRecipes(ILContext il) {
         ILCursor cursor = new(il);
 
         // ...
@@ -560,7 +560,7 @@ public sealed class Guide : ModSystem {
     }
 
 
-    private int HookAllowGuideItem(On_ItemSlot.orig_PickItemMovementAction orig, Item[] inv, int context, int slot, Item checkItem) {
+    private static int HookAllowGuideItem(On_ItemSlot.orig_PickItemMovementAction orig, Item[] inv, int context, int slot, Item checkItem) {
         if (!Enabled || !Config.anyItem || context != ContextID.GuideItem) return orig(inv, context, slot, checkItem);
         if (slot == 0 && GetPlaceholderType(Main.mouseItem) == PlaceholderType.None) return 0;
         if (slot == 1 && IsCraftingTileItem(Main.mouseItem)) return 0;
@@ -606,7 +606,7 @@ public sealed class Guide : ModSystem {
         return orig(inv, context, slot);
     }
 
-    private void HookHideItemStack(On_ItemSlot.orig_Draw_SpriteBatch_refItem_int_Vector2_Color orig, SpriteBatch spriteBatch, ref Item inv, int context, Vector2 position, Color lightColor) {
+    private static void HookHideItemStack(On_ItemSlot.orig_Draw_SpriteBatch_refItem_int_Vector2_Color orig, SpriteBatch spriteBatch, ref Item inv, int context, Vector2 position, Color lightColor) {
         if (s_hideNextItem) {
             Item item = CraftingItem;
             orig(spriteBatch, ref item, context, position, lightColor);

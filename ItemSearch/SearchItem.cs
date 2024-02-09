@@ -218,7 +218,7 @@ public sealed class SearchItem : ILoadable {
         return true;
     }
 
-    internal static void HookOverrideRightClick(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
+    private static void HookOverrideRightClick(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
         if (!Config.searchRecipes || context != ContextID.GuideItem || !Main.mouseRight){
             orig(inv, context, slot);
             return;

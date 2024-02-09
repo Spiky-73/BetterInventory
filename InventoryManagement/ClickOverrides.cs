@@ -27,6 +27,9 @@ public sealed class ClickOverride : ILoadable {
         On_ItemSlot.LeftClick_ItemArray_int_int += HookOverrideLeft;
         On_ItemSlot.RightClick_ItemArray_int_int += HookOverrideRight;
 
+        IL_ItemSlot.SellOrTrash += ILStackStrash;
+        On_Chest.AddItemToShop += HookStackSold;
+
     }
 
 
@@ -40,7 +43,7 @@ public sealed class ClickOverride : ILoadable {
         return false;
     }
 
-    private void ILShop(ILContext il) {
+    private static void ILShop(ILContext il) {
         ILCursor cursor = new(il);
         cursor.GotoNext(MoveType.After, i => i.MatchCallvirt(typeof(Player), nameof(Player.GetItemExpectedPrice)));
         cursor.EmitLdarg0();
@@ -53,8 +56,9 @@ public sealed class ClickOverride : ILoadable {
                 _shopMultiplier = 1;
                 return price;
             }
-            _shopMultiplier = (int)Math.Max(1, Math.Min(Utility.CountCurrency(Main.LocalPlayer, inv[slot].shopSpecialCurrency) / price, inv[slot].maxStack - Main.mouseItem.stack));
-            inv[slot].stack = _shopMultiplier;
+            _shopMultiplier = (int)Math.Clamp(Utility.CountCurrency(Main.LocalPlayer, inv[slot].shopSpecialCurrency) / price, 1, inv[slot].maxStack - Main.mouseItem.stack);
+            if (inv[slot].buyOnce) _shopMultiplier = Math.Min(_shopMultiplier, inv[slot].stack);
+            else inv[slot].stack = _shopMultiplier;
             return price * _shopMultiplier;
         });
         cursor.EmitStloc(4);
@@ -69,12 +73,13 @@ public sealed class ClickOverride : ILoadable {
         cursor.EmitLdarg0();
         cursor.EmitLdarg1();
         cursor.EmitDelegate((Item[] inv, int slot) => {
-            if (_shopMultiplier != 1) inv[slot].stack = 1;
+            if (!inv[slot].buyOnce) inv[slot].stack /= _shopMultiplier;
+            else inv[slot].stack -= _shopMultiplier-1;
             _shopMultiplier = 1;
         });
     }
 
-    private void HookOverrideLeft(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
+    private static void HookOverrideLeft(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
         if (!Enabled || !Main.mouseLeft) {
             orig(inv, context, slot);
             return;
@@ -103,7 +108,9 @@ public sealed class ClickOverride : ILoadable {
             orig(inv, context, slot);
 
             (bool left, bool leftR, Main.mouseLeft, Main.mouseLeftRelease) = (Main.mouseLeft, Main.mouseLeftRelease, true, true);
-            (int cursor, Main.cursorOverride) = (Main.cursorOverride, context <= ItemSlot.Context.InventoryAmmo ? CursorOverrideID.InventoryToChest : CursorOverrideID.ChestToInventory);
+            int cursor = Main.cursorOverride;
+            if(Main.cursorOverride != CursorOverrideID.TrashCan && Main.cursorOverride != CursorOverrideID.QuickSell) Main.cursorOverride = context <= ItemSlot.Context.InventoryAmmo ? CursorOverrideID.InventoryToChest : CursorOverrideID.ChestToInventory;
+
             ItemSlot.LeftClick(ref Main.mouseItem, context <= ItemSlot.Context.InventoryAmmo ? ItemSlot.Context.InventoryItem : ItemSlot.Context.ChestItem);
             (Main.mouseLeft, Main.mouseLeftRelease) = (left, leftR);
             Main.cursorOverride = cursor;
@@ -223,6 +230,46 @@ public sealed class ClickOverride : ILoadable {
         // }
         // ...
     }
+
+
+    private static void ILStackStrash(ILContext il) {
+        ILCursor cursor = new(il);
+        // if (<shop>){
+        //     ...
+        // }
+
+        // else if (!inv[slot].favorited) {
+        //     SoundEngine.PlaySound(7, -1, -1, 1, 1f, 0f);
+        cursor.GotoNext(MoveType.Before, i => i.MatchStfld(Reflection.Player.trashItem));
+
+        //     ++<stackTrash>
+        cursor.EmitDelegate((Item trash) => {
+            if(Enabled && trash.type == Main.LocalPlayer.trashItem.type) {
+                if (ItemLoader.TryStackItems(Main.LocalPlayer.trashItem, trash, out int transfered)) return Main.LocalPlayer.trashItem;
+            }
+            return trash;
+        });
+
+
+        //     player.trashItem = inv[slot].Clone();
+        //     ...
+        // }
+        // ...
+    }
+
+    private static int HookStackSold(On_Chest.orig_AddItemToShop orig, Chest self, Item newItem) {
+        int baught = Main.shopSellbackHelper.GetAmount(newItem);
+        if (!Enabled || baught >= newItem.stack) return orig(self, newItem);
+        newItem.stack -= Main.shopSellbackHelper.Remove(newItem);
+        for (int i = 0; i < self.item.Length; i++) {
+            if (self.item[i].IsAir || self.item[i].type != newItem.type || !self.item[i].buyOnce) continue;
+            if (!ItemLoader.TryStackItems(self.item[i], newItem, out int transfered)) continue;
+            if (newItem.IsAir) return i;
+        }
+
+        return orig(self, newItem);
+    }
+
 
 
     public static int GetMaxCraftAmount(Recipe recipe) {

@@ -193,7 +193,7 @@ public sealed class QuickMove : ILoadable {
     }
 
 
-    private void ILHighlightSlot(ILContext il) {
+    private static void ILHighlightSlot(ILContext il) {
         ILCursor cursor = new(il);
 
         // ...

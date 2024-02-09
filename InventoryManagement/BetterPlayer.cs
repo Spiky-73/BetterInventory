@@ -134,7 +134,7 @@ public sealed class BetterPlayer : ModPlayer {
             ItemSlot.RefreshStackSplitCooldown();
         }
     }
-    private void HookFastExtractinator(On_Player.orig_DropItemFromExtractinator orig, Player self, int itemType, int stack) {
+    private static void HookFastExtractinator(On_Player.orig_DropItemFromExtractinator orig, Player self, int itemType, int stack) {
         orig(self, itemType, stack);
         if (Config.fastContainerOpening) self.itemTime = self.itemTimeMax = self.itemTime/5;
     }
@@ -173,7 +173,7 @@ public sealed class BetterPlayer : ModPlayer {
         innerGetItem = false;
         return i;
     }
-    private static Item HookGetItem(On_Player.orig_GetItem orig, Player self, int plr, Item newItem, GetItemSettings settings) {
+    private static Item HookGetItem(On_Player.orig_GetItem orig, Player self, int plr, Item newItem, GetItemSettings settings) { // TODO alter for a more logical behaviour
         if (innerGetItem) return orig(self, plr, newItem, settings);
 
         if (Config.smartPickup != Configs.InventoryManagement.SmartPickupLevel.Off) {
