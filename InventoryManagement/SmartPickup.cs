@@ -37,8 +37,7 @@ public sealed class SmartPickup : ILoadable {
     }
 
     public static void UpdateMark(Item[] inv, int context, int slot, int oldType, int oldMouse, bool oldFav) {
-        if (inv[slot].type == oldType && Main.mouseItem.type == oldMouse) return;
-        if (Main.mouseItem.type == oldMouse && !Config.shiftClicks) return;
+        if (Main.mouseItem.type == oldMouse && (inv[slot].type == oldType || !Config.shiftClicks)) return;
         if (oldType == ItemID.None) Unmark(inv[slot].type);
         else if (inv[slot].type == ItemID.None) Mark(oldType, inv, context, slot, oldFav);
         else Remark(inv[slot].type, oldType, oldFav);
@@ -55,7 +54,10 @@ public sealed class SmartPickup : ILoadable {
 
             item.favorited |= favorited;
             (Item moved, items[mark.Index]) = (items[mark.Index], new());
-            item = mark.GetItem(player, item, settings);
+            Item toMove = item.Clone();
+            toMove.stack = 1;
+            item.stack--;
+            mark.GetItem(player, toMove, settings);
             moved = mark.GetItem(player, moved, settings);
             if (item.IsAir) return moved;
             player.GetDropItem(ref moved);

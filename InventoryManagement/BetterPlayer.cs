@@ -64,7 +64,7 @@ public sealed class BetterPlayer : ModPlayer {
         On_Player.DropItemFromExtractinator += HookFastExtractinator;
 
         On_Player.OpenChest += HookOpenChest;
-        On_Player.GetItem += HookGetItem;
+        IL_Player.GetItem += ILGetItem;
 
         On_ChestUI.LootAll += HookLootAll;
         On_ChestUI.Restock += HookRestock;
@@ -173,22 +173,63 @@ public sealed class BetterPlayer : ModPlayer {
         innerGetItem = false;
         return i;
     }
-    private static Item HookGetItem(On_Player.orig_GetItem orig, Player self, int plr, Item newItem, GetItemSettings settings) { // TODO alter for a more logical behaviour
-        if (innerGetItem) return orig(self, plr, newItem, settings);
+    private static void ILGetItem(ILContext il){
+        ILCursor cursor = new(il);
 
-        if (Config.smartPickup != Configs.InventoryManagement.SmartPickupLevel.Off) {
-            newItem = SmartPickup.SmartGetItem(self, newItem, settings);
-            if (newItem.IsAir) return new();
-        }
+        // ...
+        // if (newItem.uniqueStack && this.HasItem(newItem.type)) return item;
+        cursor.GotoNext(i => i.MatchCallvirt(Reflection.Item.FitsAmmoSlot));
+        cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdloc0());
 
-        self.GetModPlayer<BetterPlayer>().VisibilityFilters.AddOwnedItems(newItem);
-        if (!settings.NoText && Config.autoEquip != Configs.InventoryManagement.AutoEquipLevel.Off) {
+        // ++<smartPickup>
+        cursor.EmitLdarg0();
+        cursor.EmitLdarg2();
+        cursor.EmitLdarg3();
+        cursor.EmitDelegate((Player self, Item newItem, GetItemSettings settings) => {
+            if (innerGetItem || Config.smartPickup == Configs.InventoryManagement.SmartPickupLevel.Off) return newItem;
+            else return SmartPickup.SmartGetItem(self, newItem, settings);
+        });
+        cursor.EmitStarg(2);
+
+        // ++if (newItem.IsAir) return new()
+        cursor.EmitLdarg2();
+        cursor.EmitDelegate((Item item) => item.IsAir);
+        ILLabel skip = cursor.DefineLabel();
+        cursor.EmitBrfalse(skip);
+        cursor.EmitDelegate(() => new Item());
+        cursor.EmitRet();
+        cursor.MarkLabel(skip);
+
+        // if (isACoin) ...
+        // if (item.FitsAmmoSlot()) ...
+        // for(...) ...
+        cursor.GotoNext(i => i.MatchLdloc3());
+        cursor.GotoNext(MoveType.AfterLabel, i => i.MatchLdloc0());
+
+        // ++<autoEquip>
+        cursor.EmitLdarg0();
+        cursor.EmitLdarg2();
+        cursor.EmitLdarg3();
+        cursor.EmitDelegate((Player self, Item newItem, GetItemSettings settings) => {
+            if (innerGetItem || settings.NoText || Config.autoEquip == Configs.InventoryManagement.AutoEquipLevel.Off) return newItem;
             foreach (ModSubInventory slots in InventoryLoader.GetSubInventories(newItem, Config.autoEquip == Configs.InventoryManagement.AutoEquipLevel.DefaultSlots ? SubInventoryType.Default : SubInventoryType.Secondary).ToArray()) {
                 newItem = slots.GetItem(self, newItem, settings);
-                if (newItem.IsAir) return new();
+                if (newItem.IsAir) return newItem;
             }
-        }
-        return orig(self, plr, newItem, settings);
+            return newItem;
+        });
+        cursor.EmitStarg(2);
+
+        // ++if (newItem.IsAir) return new()
+        cursor.EmitLdarg2();
+        cursor.EmitDelegate((Item item) => item.IsAir);
+        ILLabel skip2 = cursor.DefineLabel();
+        cursor.EmitBrfalse(skip2);
+        cursor.EmitDelegate(() => new Item());
+        cursor.EmitRet();
+        cursor.MarkLabel(skip2);
+
+        // ...
     }
 
 
