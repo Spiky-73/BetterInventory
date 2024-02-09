@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using BetterInventory.InventoryManagement;
+using BetterInventory.ItemSearch;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
@@ -26,7 +27,7 @@ public sealed class RecipeFiltering : ILoadable {
         On_Recipe.FindRecipes += HookFilterRecipes;
     }
 
-    public void Unload() {}
+    public void Unload() { }
 
     private static void ILDrawFilters(ILContext il) {
         ILCursor cursor = new(il);
@@ -35,24 +36,38 @@ public sealed class RecipeFiltering : ILoadable {
         // ...
         // if(<showRecipes>){
         //     ...
-        //     if(Main.numAvailableRecipes == 0) ...
-        //     else {
-        //         int num73 = 94;
-        //         int num74 = 450 + num51;
-        ILLabel? postHammer = null;
+        //     if(Main.numAvailableRecipes == 0) {
+        //         recBigList = false;
         cursor.GotoNext(i => i.MatchCall(typeof(Main), "SetRecipeMaterialDisplayName"));
 
-        // if (++false && Main.InGuideCraftMenu) num74 -= 150;
+        //         ++<drawFilters>
+        cursor.GotoNext(MoveType.Before, i => i.MatchStsfld(Reflection.Main.recBigList));
+        
+        cursor.EmitLdloc(13); // screen position
+        cursor.EmitDelegate((int num54) => {
+            int num76 = 94;
+            int num77 = 450 + num54;
+            if (!Main.guideItem.IsAir || (Guide.Enabled && Guide.Config.guideTile && !Guide.guideTile.IsAir))DrawFilters(num76, num77);
+        });
+        //     }
+
+        //     else 
+        //         int num73 = 94;
+        //         int num74 = 450 + num51;
+        //         if (++false && Main.InGuideCraftMenu) num74 -= 150;
+        ILLabel? postHammer = null;
         cursor.GotoNext(i => i.MatchLdsfld(Reflection.Main.InGuideCraftMenu));
         cursor.GotoNext(i => i.MatchBrfalse(out postHammer));
         cursor.GotoPrev(i => i.MatchLdsfld(Reflection.Main.InGuideCraftMenu));
         cursor.EmitBr(postHammer!);
 
-        // ++<drawFilters>
+        //         ++<drawFilters>
         cursor.GotoLabel(postHammer!, MoveType.After);
-        cursor.EmitLdloc(138); // Hammer
+        cursor.EmitLdloc(138); // HammerX
         cursor.EmitLdloc(139); // HammerY
         cursor.EmitDelegate(DrawFilters);
+        //         ...
+        //     }
     }
 
     public static void DrawFilters(int hammerX, int hammerY){
@@ -75,11 +90,13 @@ public sealed class RecipeFiltering : ILoadable {
             do {
                 bool active = filters.IsFilterActive(i);
                 Rectangle hitbox = new(x, y, RecipeFilterBack.Width(), RecipeFilterBack.Height());
+
+
                 if (hitbox.Contains(Main.mouseX, Main.mouseY)) {
                     Main.LocalPlayer.mouseInterface = true;
                     int rare = 0;
                     string name = Language.GetTextValue(filters.AvailableFilters[i].GetDisplayNameKey());
-                    if(RecipesInFilter[i] != 0) {
+                    if(true) {
                         if (Main.mouseLeft && Main.mouseLeftRelease) {
                             bool keepOn = !active || filters.ActiveFilters.Count > 1;
                             filters.ActiveFilters.Clear();
@@ -91,13 +108,13 @@ public sealed class RecipeFiltering : ILoadable {
                         }
                         name = Language.GetTextValue("Mods.BetterInventory.UI.Filter", name, RecipesInFilter[i]);
                         Main.spriteBatch.Draw(TextureAssets.InfoIcon[13].Value, hitbox.Center(), null, Main.OurFavoriteColor, 0, TextureAssets.InfoIcon[13].Size() / 2, 1, SpriteEffects.None, 0);
-                    } else rare = -1;
+                    }
+                    if (RecipesInFilter[i] == 0) rare = -1;
                     Main.instance.MouseText(name, rare);
-
                 }
 
-                Color color = active ? Color.White : Color.Gray;
-                if(RecipesInFilter[i] == 0) color *= 0.33f;
+                Color color = RecipesInFilter[i] != 0 ? Color.White : Color.Gray;
+                if (!active) color *= 0.33f;
                 Main.spriteBatch.Draw(RecipeFilterBack.Value, hitbox.Center(), null, color, 0, RecipeFilterBack.Size() / 2, 1, SpriteEffects.None, 0);
                 Rectangle frame = filters.AvailableFilters[i].GetSourceFrame();
                 Main.spriteBatch.Draw(RecipeFilters.Value, hitbox.Center(), frame, color, 0, frame.Size() / 2, 1, SpriteEffects.None, 0);
