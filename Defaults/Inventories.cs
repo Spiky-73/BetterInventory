@@ -113,7 +113,7 @@ public sealed class LegVanityArmor : AVanityArmor {
 public abstract class AAccessories<T> : ModSubInventory<T> where T: AAccessories<T> {
     public sealed override bool FitsSlot(Player player, Item item, int slot, out IList<Slot> itemsToMove) {
         List<int> vanillaSlots = UnlockedVanillaSlots(player);
-        List<int> moddedSlots = UnlockedVanillaSlots(player);
+        List<int> moddedSlots = UnlockedModdedSlots(player);
 
         if (!(slot < vanillaSlots.Count ?
                 ItemLoader.CanEquipAccessory(item, slot + 3, false) :
