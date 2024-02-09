@@ -19,7 +19,7 @@ namespace BetterInventory.Crafting;
 public sealed class RecipeFiltering : ILoadable {
 
     public static bool Enabled => Configs.Crafting.Instance.recipeFiltering;
-    public static RecipeFilters LocalFilters => InventoryManagement.BetterPlayer.LocalPlayer.RecipeFilters;
+    public static RecipeFilters LocalFilters => BetterPlayer.LocalPlayer.RecipeFilters;
 
     public void Load(Mod mod) {
         IL_Main.DrawInventory += ILDrawFilters;
@@ -96,7 +96,7 @@ public sealed class RecipeFiltering : ILoadable {
                     Main.LocalPlayer.mouseInterface = true;
                     int rare = 0;
                     string name = Language.GetTextValue(filters.AvailableFilters[i].GetDisplayNameKey());
-                    if(true) {
+                    if(RecipesInFilter[i] != 0 || active) {
                         if (Main.mouseLeft && Main.mouseLeftRelease) {
                             bool keepOn = !active || filters.ActiveFilters.Count > 1;
                             filters.ActiveFilters.Clear();
@@ -115,6 +115,8 @@ public sealed class RecipeFiltering : ILoadable {
 
                 Color color = RecipesInFilter[i] != 0 ? Color.White : Color.Gray;
                 if (!active) color *= 0.33f;
+                if (RecipesInFilter[i] == 0) color *= 0.66f;
+                
                 Main.spriteBatch.Draw(RecipeFilterBack.Value, hitbox.Center(), null, color, 0, RecipeFilterBack.Size() / 2, 1, SpriteEffects.None, 0);
                 Rectangle frame = filters.AvailableFilters[i].GetSourceFrame();
                 Main.spriteBatch.Draw(RecipeFilters.Value, hitbox.Center(), frame, color, 0, frame.Size() / 2, 1, SpriteEffects.None, 0);
