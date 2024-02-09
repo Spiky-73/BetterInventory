@@ -36,7 +36,7 @@ public sealed class ClickOverride : ILoadable {
     public void Unload() { }
 
     public static bool OverrideHover(Item[] inv, int context, int slot) {
-        if(Enabled && Config.shops && context == ItemSlot.Context.ShopItem && ItemSlot.ShiftInUse && Main.LocalPlayer.ItemSpace(inv[slot]).CanTakeItem){
+        if(Enabled && Config.shops && context == ItemSlot.Context.ShopItem && ItemSlot.ShiftInUse && !inv[slot].IsAir && Main.LocalPlayer.ItemSpace(inv[slot]).CanTakeItem){
             Main.cursorOverride = CursorOverrideID.QuickSell;
             return true;
         }
@@ -84,12 +84,12 @@ public sealed class ClickOverride : ILoadable {
             orig(inv, context, slot);
             return;
         }
-        if(Main.cursorOverride != -1 && (context == ItemSlot.Context.ShopItem || context == ItemSlot.Context.CreativeInfinite)){
+        if (Main.cursorOverride != -1 && (context == ItemSlot.Context.ShopItem || context == ItemSlot.Context.CreativeInfinite)){
             (Item mouse, Main.mouseItem) = (Main.mouseItem, new());
             orig(inv, context, slot);
             (bool left, bool leftR, Main.mouseLeft, Main.mouseLeftRelease) = (Main.mouseLeft, Main.mouseLeftRelease, true, true);
-            (int cursor, Main.cursorOverride) = (Main.cursorOverride, context <= ItemSlot.Context.InventoryAmmo ? CursorOverrideID.InventoryToChest : CursorOverrideID.ChestToInventory);
-            ItemSlot.LeftClick(ref Main.mouseItem, context <= ItemSlot.Context.InventoryAmmo ? ItemSlot.Context.InventoryItem : ItemSlot.Context.ChestItem);
+            (int cursor, Main.cursorOverride) = (Main.cursorOverride, CursorOverrideID.ChestToInventory);
+            ItemSlot.LeftClick(ref Main.mouseItem, ItemSlot.Context.ChestItem);
             (Main.mouseLeft, Main.mouseLeftRelease) = (left, leftR);
             Main.cursorOverride = cursor;
             if(Main.mouseItem.stack != 0) Utility.MoveInto(inv[slot], Main.mouseItem, out _);
@@ -103,15 +103,18 @@ public sealed class ClickOverride : ILoadable {
             orig(inv, context, slot);
             return;
         }
-        if(Main.cursorOverride != -1){
+        if(Main.cursorOverride != -1) {
             (Item mouse, Main.mouseItem) = (Main.mouseItem, new());
             orig(inv, context, slot);
 
             (bool left, bool leftR, Main.mouseLeft, Main.mouseLeftRelease) = (Main.mouseLeft, Main.mouseLeftRelease, true, true);
             int cursor = Main.cursorOverride;
-            if(Main.cursorOverride != CursorOverrideID.TrashCan && Main.cursorOverride != CursorOverrideID.QuickSell) Main.cursorOverride = context <= ItemSlot.Context.InventoryAmmo ? CursorOverrideID.InventoryToChest : CursorOverrideID.ChestToInventory;
+            if (context > ItemSlot.Context.InventoryAmmo) {
+                context = ItemSlot.Context.ChestItem;
+                Main.cursorOverride = CursorOverrideID.ChestToInventory;
+            }
 
-            ItemSlot.LeftClick(ref Main.mouseItem, context <= ItemSlot.Context.InventoryAmmo ? ItemSlot.Context.InventoryItem : ItemSlot.Context.ChestItem);
+            ItemSlot.LeftClick(ref Main.mouseItem, context);
             (Main.mouseLeft, Main.mouseLeftRelease) = (left, leftR);
             Main.cursorOverride = cursor;
             if(Main.mouseItem.stack != 0) Utility.MoveInto(inv[slot], Main.mouseItem, out _);
