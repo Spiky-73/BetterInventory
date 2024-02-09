@@ -54,7 +54,7 @@ public sealed class Guide : ModSystem {
     }
 
     public override void PostAddRecipes() {
-        SearchItem.PostAddRecipes();
+        SearchItem.HooksBestiaryUI();
         for (int r = 0; r < Recipe.numRecipes; r++) {
             foreach (int tile in Main.recipe[r].requiredTile) CraftingStationsItems[tile] = 0;
         }

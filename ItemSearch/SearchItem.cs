@@ -28,6 +28,7 @@ public sealed class SearchItem : ILoadable {
         On_Main.DrawInterface += HookClickOverrideInterface;
 
         On_UIBestiaryTest.Recalculate += HookDelaySearch;
+        On_UIBestiaryTest.searchCancelButton_OnClick += HookCancelSearch;
 
         On_ItemSlot.RightClick_ItemArray_int_int += HookOverrideRightClick;
 
@@ -123,6 +124,10 @@ public sealed class SearchItem : ILoadable {
         if (s_bestiaryDelayed is null) return;
         SetBestiaryText(s_bestiaryDelayed);
         s_bestiaryDelayed = null;
+    }
+    private static void HookCancelSearch(On_UIBestiaryTest.orig_searchCancelButton_OnClick orig, UIBestiaryTest self, UIMouseEvent evt, UIElement listeningElement) {
+        if (Config.searchDrops && Config.searchHistory && _npcSearchBar.HasContents) _npcHistory.Add(Reflection.UISearchBar.actualContents.GetValue(_npcSearchBar));
+        orig(self, evt, listeningElement);
     }
 
     private static void OndropItems(On_Player.orig_dropItemCheck orig, Player self) {
@@ -234,7 +239,7 @@ public sealed class SearchItem : ILoadable {
         if (inv.Length > 1) inv[1] = Guide.guideTile;
     }
 
-    public static void PostAddRecipes() {
+    public static void HooksBestiaryUI() {
         _npcSearchBar = Reflection.UIBestiaryTest._searchBar.GetValue(Main.BestiaryUI);
         _npcSearchBar.Parent.OnRightClick += (_, _) => {
             if (!Config.searchDrops) return;
@@ -244,10 +249,7 @@ public sealed class SearchItem : ILoadable {
                 int count = _npcHistory.Count;
                 SetBestiaryText(text);
                 if (count != _npcHistory.Count) _npcHistory.RemoveAt(_npcHistory.Count - 1);
-            } else if (_npcSearchBar.HasContents) {
-                SetBestiaryText("");
-                if (Config.searchHistory) _npcHistory.RemoveAt(_npcHistory.Count - 1);
-            }
+            } else if (_npcSearchBar.HasContents) SetBestiaryText(null!);
         };
         _npcSearchBar.OnStartTakingInput += () => {
             if (!Config.searchDrops || !Config.searchHistory) return;
