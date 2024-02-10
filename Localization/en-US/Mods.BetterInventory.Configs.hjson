@@ -177,13 +177,13 @@ ClickOverride: {
 			Makes shops consistent with inventory movements
 			Left Click to buy a stack of items
 			Right Click to buy once
-			Hold Shift to tranfer the buyed items in your inventory
+			Hold Shift to tranfer the baught items in your inventory
 			'''
 	}
 
-	invertClicks: {
-		Label: Invert Clicks
-		Tooltip: Invert the behaviour of the left and right clicks when crafting or buying items
+	shiftRight: {
+		Label: Shift Right Click
+		Tooltip: Allows you to Shift or Control Right Click
 	}
 
 	stacking: {
@@ -193,6 +193,11 @@ ClickOverride: {
 			Items sold multiple times will stack a single one slot
 			Items trashed multiple in a row times will stack instead of replacing the old one
 			'''
+	}
+
+	invertClicks: {
+		Label: Invert Clicks
+		Tooltip: Invert the behaviour of the left and right clicks when crafting or buying items
 	}
 }
 

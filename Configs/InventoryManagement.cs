@@ -41,8 +41,9 @@ public sealed class InventoryManagement : ModConfig {
 public sealed class ClickOverride {
     [DefaultValue(true)] public bool crafting = true;
     [DefaultValue(true)] public bool shops = true;
-    [DefaultValue(false)] public bool invertClicks = false;
+    [DefaultValue(true)] public bool shiftRight = true;
     [DefaultValue(true)] public bool stacking = true;
+    [DefaultValue(false)] public bool invertClicks = false;
 }
 
 public sealed class SmartPickup {

@@ -99,29 +99,23 @@ public sealed class ClickOverride : ILoadable {
         orig(inv, context, slot);
     }
     private static void HookOverrideRight(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
-        if (!Enabled || !Main.mouseRight) {
+        if (!Enabled || !Main.mouseRight || !Config.shiftRight || Main.cursorOverride == -1) {
             orig(inv, context, slot);
             return;
         }
-        if(Main.cursorOverride != -1) {
-            (Item mouse, Main.mouseItem) = (Main.mouseItem, new());
-            orig(inv, context, slot);
-
-            (bool left, bool leftR, Main.mouseLeft, Main.mouseLeftRelease) = (Main.mouseLeft, Main.mouseLeftRelease, true, true);
-            int cursor = Main.cursorOverride;
-            if (context > ItemSlot.Context.InventoryAmmo) {
-                context = ItemSlot.Context.ChestItem;
-                Main.cursorOverride = CursorOverrideID.ChestToInventory;
-            }
-
-            ItemSlot.LeftClick(ref Main.mouseItem, context);
-            (Main.mouseLeft, Main.mouseLeftRelease) = (left, leftR);
-            Main.cursorOverride = cursor;
-            if(Main.mouseItem.stack != 0) Utility.MoveInto(inv[slot], Main.mouseItem, out _);
-            Main.mouseItem = mouse;
-            return;
-        }
+        (Item mouse, Main.mouseItem) = (Main.mouseItem, new());
         orig(inv, context, slot);
+
+        (bool left, bool leftR, Main.mouseLeft, Main.mouseLeftRelease) = (Main.mouseLeft, Main.mouseLeftRelease, true, true);
+        int cursor = Main.cursorOverride;
+        if (context == ItemSlot.Context.ShopItem || context == ItemSlot.Context.CreativeInfinite) (context, Main.cursorOverride) = (CursorOverrideID.ChestToInventory, ItemSlot.Context.ChestItem);
+        ItemSlot.LeftClick(ref Main.mouseItem, context);
+        (Main.mouseLeft, Main.mouseLeftRelease) = (left, leftR);
+        Main.cursorOverride = cursor;
+
+        if(Main.mouseItem.stack != 0) Utility.MoveInto(inv[slot], Main.mouseItem, out _);
+        Main.mouseItem = mouse;
+        return;
     }
 
 
