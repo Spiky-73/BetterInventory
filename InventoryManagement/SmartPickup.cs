@@ -46,6 +46,7 @@ public sealed class SmartPickup : ILoadable {
     public static Item SmartGetItem(Player player, Item item, GetItemSettings settings) {
         if (player.whoAmI != Main.myPlayer || !IsMarked(item.type)) return item;
 
+        List<Slot> slots = new();
         while (_marks[item.type].Count > 0) {
             (Slot mark, bool favorited) = ConsumeMark(item.type);
             Joined<ListIndices<Item>, Item> items = mark.Inventory.Items(player);
@@ -57,10 +58,15 @@ public sealed class SmartPickup : ILoadable {
             Item toMove = item.Clone();
             toMove.stack = 1;
             item.stack--;
-            mark.GetItem(player, toMove, settings);
+            if (!mark.GetItem(player, toMove, settings).IsAir) item.stack++;
             moved = mark.GetItem(player, moved, settings);
             if (item.IsAir) return moved;
+            slots.Add(mark);
             player.GetDropItem(ref moved);
+        }
+        foreach (Slot slot in slots) {
+            item = slot.GetItem(player, item, settings);
+            if (item.IsAir) return item;
         }
         return item;
     }
