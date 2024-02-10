@@ -222,14 +222,14 @@ public sealed class QuickMove : ILoadable {
         // if (context == 0 && ++[!<hideKeys> && slot < 10]) {
         //     ...
         // }
-        // ++ <drawSlotNumbers>
         // if (gamepadPointForSlot != -1) {
         //     UILinkPointNavigator.SetPosition(gamepadPointForSlot, position + vector * 0.75f);
         // }
+        // ++ <drawSlotNumbers>
         cursor.GotoNext(i => i.MatchCall(typeof(UILinkPointNavigator), nameof(UILinkPointNavigator.SetPosition)));
-        cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdloc(6));
+        cursor.GotoNext(MoveType.AfterLabel, i => i.MatchRet());
 
-        cursor.EmitLdarg0(); // BUG not called for modded slots
+        cursor.EmitLdarg0();
         cursor.EmitLdarg1();
         cursor.EmitLdarg2();
         cursor.EmitLdarg3();
