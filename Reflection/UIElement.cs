@@ -1,10 +1,9 @@
 using System;
 using System.Reflection;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 using TElement = Terraria.ModLoader.Config.UI.ConfigElement;
-// using TObject = Terraria.ModLoader.Config.UI.ObjectElement;
-
 namespace BetterInventory.Reflection;
 
 public static class ConfigElement {
@@ -12,6 +11,7 @@ public static class ConfigElement {
     public static readonly Property<TElement, Func<string>> TooltipFunction = new(nameof(TooltipFunction));
     public static readonly Property<TElement, bool> DrawLabel = new(nameof(DrawLabel));
     public static readonly Field<TElement, Color> backgroundColor = new(nameof(backgroundColor));
+    public static readonly Method<TElement, SpriteBatch, object?> DrawSelf = new(nameof(DrawSelf));
 }
 
 public static class UIModConfig {

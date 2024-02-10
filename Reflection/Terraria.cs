@@ -1,5 +1,4 @@
 using System.Reflection;
-using Terraria;
 using TMain = Terraria.Main;
 using TPlayer = Terraria.Player;
 using TItem = Terraria.Item;
