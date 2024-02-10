@@ -37,7 +37,8 @@ public sealed class SmartPickup : ILoadable {
     }
 
     public static void UpdateMark(Item[] inv, int context, int slot, int oldType, int oldMouse, bool oldFav) {
-        if (Main.mouseItem.type == oldMouse && (inv[slot].type == oldType || !Config.shiftClicks)) return;
+        // if (Main.mouseItem.type == oldMouse && (inv[slot].type == oldType || !Config.shiftClicks)) return;
+        if (Main.mouseItem.type == oldMouse) return;
         if (oldType == ItemID.None) Unmark(inv[slot].type);
         else if (inv[slot].type == ItemID.None) Mark(oldType, inv, context, slot, oldFav);
         else Remark(inv[slot].type, oldType, oldFav);

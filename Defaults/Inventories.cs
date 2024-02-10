@@ -240,5 +240,5 @@ public sealed class AccessoryDyes : Dyes {
 public sealed class EquipementDyes : Dyes {
     public sealed override int Context => ContextID.EquipMiscDye;
     public sealed override void Focus(Player player, int slot) => Main.EquipPageSelected = 2;
-    public sealed override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.miscDyes, DataStructures.Range.FromCount(0, Armor.Count));
+    public sealed override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.miscDyes);
 }

@@ -47,7 +47,6 @@ public sealed class ClickOverride {
 }
 
 public sealed class SmartPickup {
-    [DefaultValue(false)] public bool shiftClicks = false;
     [DefaultValue(true)] public bool mediumCore = true;
     [DefaultValue(0.33f)] public float markIntensity = 0.33f;
 }

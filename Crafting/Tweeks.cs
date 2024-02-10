@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using Terraria;
 using Terraria.Audio;
+using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace BetterInventory.Crafting;
@@ -44,11 +45,12 @@ public sealed class Tweeks : ILoadable {
                 if (!Configs.Crafting.Instance.recipeScroll) return;
                 Main.availableRecipeY[r] += s * 6.5f;
                 float d = Main.availableRecipeY[r] - (r - Main.focusRecipe) * 65;
-                if (Main.recFastScroll && Config.recipeScroll.Value.listScroll) {
-                    Main.availableRecipeY[r] += 130000f * s;
-                    d *= 3;
-                }
+                bool recFast = Main.recFastScroll && Config.recipeScroll.Value.listScroll;
+                if (recFast) d *= 3;
+                float old = Main.availableRecipeY[r];
                 Main.availableRecipeY[r] -= s == 1 ? MathF.Max(s * 6.5f, d / 10) : MathF.Min(s * 6.5f, d / 10);
+                if (old * Main.availableRecipeY[r] < 0) SoundEngine.PlaySound(SoundID.MenuTick);
+                if (recFast) Main.availableRecipeY[r] += 130000f * s;
             });
             //         ...
             //     }
@@ -104,7 +106,7 @@ public sealed class Tweeks : ILoadable {
             cursor.GotoPrev(MoveType.After, i => i.MatchStfld(typeof(Player), nameof(Player.mouseInterface)));
 
             //         ++ <autoScroll>
-            cursor.EmitDelegate(() => {
+            cursor.EmitDelegate(() => { // TODO add audio
                 if (!Config.tweeks || !Main.mouseLeft) return;
                 if (Main.mouseLeftRelease || _recDelay == 0) {
                     Main.mouseLeftRelease = true;

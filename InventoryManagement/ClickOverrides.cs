@@ -108,7 +108,7 @@ public sealed class ClickOverride : ILoadable {
 
         (bool left, bool leftR, Main.mouseLeft, Main.mouseLeftRelease) = (Main.mouseLeft, Main.mouseLeftRelease, true, true);
         int cursor = Main.cursorOverride;
-        if (context == ItemSlot.Context.ShopItem || context == ItemSlot.Context.CreativeInfinite) (context, Main.cursorOverride) = (CursorOverrideID.ChestToInventory, ItemSlot.Context.ChestItem);
+        if (context == ItemSlot.Context.ShopItem || context == ItemSlot.Context.CreativeInfinite) (context, Main.cursorOverride) = (ItemSlot.Context.ChestItem, CursorOverrideID.ChestToInventory);
         ItemSlot.LeftClick(ref Main.mouseItem, context);
         (Main.mouseLeft, Main.mouseLeftRelease) = (left, leftR);
         Main.cursorOverride = cursor;

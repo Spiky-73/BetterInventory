@@ -29,8 +29,10 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 - Displays Smart pickup ghosts
 - Allows items to have ghosts in multiple slots
 - Improved SmartPickup and AutoEquip pickup order
+- Removes Smart Pickup on Shift Click
 - Fast Container Opening now applies to the Extractinator
 - Improved recipe filters display
+- Fixed recipe scroll SFX
 - Added Shift Right click override
 - Added click overrides for shops
 - Added options to invert Crafting override clicks

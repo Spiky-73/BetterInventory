@@ -17,7 +17,8 @@ namespace BetterInventory.Crafting;
 
 public sealed class RecipeFiltering : ILoadable {
 
-    public static bool Enabled => Configs.Crafting.Instance.recipeFiltering;
+    public static bool Enabled => Configs.Crafting.Instance.recipeFiltering.Parent;
+    public static Configs.RecipeFiltering Config => Configs.Crafting.Instance.recipeFiltering.Value;
     public static RecipeFilters LocalFilters => BetterPlayer.LocalPlayer.RecipeFilters;
 
     public void Load(Mod mod) {
@@ -65,31 +66,33 @@ public sealed class RecipeFiltering : ILoadable {
             SoundEngine.PlaySound(SoundID.MenuTick);
         }
 
-        int i = 0;
-        int x = hammerX - TextureAssets.InfoIcon[0].Width() - 1;
-
-        int delta = TextureAssets.InfoIcon[13].Width() + 2;
-
         EntryFilterer<Item, CreativeFilterWrapper> filters = LocalFilters.Filterer;
+        
+        int i = 0;
+        int delta = TextureAssets.InfoIcon[13].Width() + 2;
+        int y = hammerY + TextureAssets.CraftToggle[0].Height() - TextureAssets.InfoIcon[0].Width()/2;
         while (i < LocalFilters.Filterer.AvailableFilters.Count) {
-            int y = hammerY + TextureAssets.CraftToggle[0].Height() - TextureAssets.InfoIcon[0].Width()/2;
-            int j = 0;
-            do {
+            int x = hammerX - TextureAssets.InfoIcon[0].Width() - 1;
+            for(int d = 0; i < filters.AvailableFilters.Count && d < Config.width; i++){
                 bool active = filters.IsFilterActive(i);
+                if (Config.hideUnavailable && RecipesInFilter[i] == 0 && !active) continue;
                 Rectangle hitbox = new(x, y, RecipeFilterBack.Width(), RecipeFilterBack.Height());
-
-
-                if (hitbox.Contains(Main.mouseX, Main.mouseY)) {
+                if (hitbox.Contains(Main.mouseX, Main.mouseY))
+                {
                     Main.LocalPlayer.mouseInterface = true;
                     int rare = 0;
                     string name = Language.GetTextValue(filters.AvailableFilters[i].GetDisplayNameKey());
-                    if(RecipesInFilter[i] != 0 || active) {
-                        if (Main.mouseLeft && Main.mouseLeftRelease) {
+                    if (RecipesInFilter[i] != 0 || active)
+                    {
+                        if (Main.mouseLeft && Main.mouseLeftRelease)
+                        {
                             bool keepOn = !active || filters.ActiveFilters.Count > 1;
                             filters.ActiveFilters.Clear();
                             if (keepOn) filters.ActiveFilters.Add(filters.AvailableFilters[i]);
                             OnFilterChanges();
-                        } else if (Main.mouseRight && Main.mouseRightRelease) {
+                        }
+                        else if (Main.mouseRight && Main.mouseRightRelease)
+                        {
                             filters.ToggleFilter(i);
                             OnFilterChanges();
                         }
@@ -100,17 +103,26 @@ public sealed class RecipeFiltering : ILoadable {
                     Main.instance.MouseText(name, rare);
                 }
 
-                Color color = RecipesInFilter[i] != 0 ? Color.White : Color.Gray;
-                if (!active) color *= 0.5f;
-                
+                Color color;
+                if (RecipesInFilter[i] != 0)
+                {
+                    color = Color.White;
+                    if (!active) color *= 0.2f;
+                }
+                else
+                {
+                    color = new(64, 64, 64);
+                    if (!active) color *= 0.05f;
+                }
+
                 Main.spriteBatch.Draw(RecipeFilterBack.Value, hitbox.Center(), null, color, 0, RecipeFilterBack.Size() / 2, 1, SpriteEffects.None, 0);
                 Rectangle frame = filters.AvailableFilters[i].GetSourceFrame();
                 Main.spriteBatch.Draw(RecipeFilters.Value, hitbox.Center(), frame, color, 0, frame.Size() / 2, 1, SpriteEffects.None, 0);
-                y += delta;
-                j++;
-                i++;
-            } while (y < Main.ScreenSize.Y && i < filters.AvailableFilters.Count && j < 6);
-            x += delta;
+
+                x += delta;
+                d++;
+            }
+            y += delta;
         }
     }
 

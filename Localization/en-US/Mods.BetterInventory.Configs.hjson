@@ -36,12 +36,26 @@ Crafting: {
 	}
 }
 
+RecipeFiltering: {
+	Tooltip: ""
+
+	hideUnavailable: {
+		Label: Hide Unavailable Filters
+		Tooltip: Hides filter with no recipes
+	}
+
+	width: {
+		Label: Width
+		Tooltip: The number of filters per line
+	}
+}
+
 RecipeScroll: {
 	Tooltip: ""
 
 	listScroll: {
 		Label: Scroll in Recipe List
-		Tooltip: Replace the instant recipe list scroll with a non instant scroll
+		Tooltip: Replaces the instant scroll with an extremely fast one when the recipe list is open
 	}
 }
 
@@ -125,11 +139,6 @@ InventoryManagement: {
 
 SmartPickup: {
 	Tooltip: ""
-
-	shiftClicks: {
-		Label: Shift Clicked Items
-		Tooltip: Applies to items Shift Clicked into
-	}
 
 	mediumCore: {
 		Label: Items Dropped on Death
@@ -411,7 +420,7 @@ Version: {
 	Headers.Changelog: Changelog
 
 	Info: {
-		Label: Improved various features
+		Label: Added Click Overrides, Search History and improved various features
 		Tooltip: ""
 	}
 
@@ -441,8 +450,10 @@ Version: {
 			- Displays Smart pickup ghosts
 			- Allows items to have ghosts in multiple slots
 			- Improved SmartPickup and AutoEquip pickup order
+			- Removes Smart Pickup on Shift Click
 			- Fast Container Opening now applies to the Extractinator
 			- Improved recipe filters display
+			- Fixed recipe scroll SFX
 			- Added Shift Right click override
 			- Added click overrides for shops
 			- Added options to invert Crafting override clicks
