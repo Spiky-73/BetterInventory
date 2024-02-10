@@ -42,6 +42,7 @@ public sealed class ClickOverride {
     [DefaultValue(true)] public bool crafting = true;
     [DefaultValue(true)] public bool shops = true;
     [DefaultValue(false)] public bool invertClicks = false;
+    [DefaultValue(true)] public bool stacking = true;
 }
 
 public sealed class SmartPickup {

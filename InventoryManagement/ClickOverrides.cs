@@ -247,7 +247,7 @@ public sealed class ClickOverride : ILoadable {
 
         //     ++<stackTrash>
         cursor.EmitDelegate((Item trash) => {
-            if(Enabled && trash.type == Main.LocalPlayer.trashItem.type) {
+            if(Enabled && Config.stacking && trash.type == Main.LocalPlayer.trashItem.type) {
                 if (ItemLoader.TryStackItems(Main.LocalPlayer.trashItem, trash, out int transfered)) return Main.LocalPlayer.trashItem;
             }
             return trash;
@@ -262,7 +262,7 @@ public sealed class ClickOverride : ILoadable {
 
     private static int HookStackSold(On_Chest.orig_AddItemToShop orig, Chest self, Item newItem) {
         int baught = Main.shopSellbackHelper.GetAmount(newItem);
-        if (!Enabled || baught >= newItem.stack) return orig(self, newItem);
+        if (!Enabled || !Config.stacking || baught >= newItem.stack) return orig(self, newItem);
         newItem.stack -= Main.shopSellbackHelper.Remove(newItem);
         for (int i = 0; i < self.item.Length; i++) {
             if (self.item[i].IsAir || self.item[i].type != newItem.type || !self.item[i].buyOnce) continue;

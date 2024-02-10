@@ -25,16 +25,22 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 
 ### v0.4
 - Replaced chat message with notification
-- Added click overrides for shops
+- Added Chat message to Version Config
+- Displays Smart pickup ghosts
+- Allows items to have ghosts in multiple slots
+- Improved SmartPickup and AutoEquip pickup order
 - Fast Container Opening now applies to the Extractinator
+- Improved recipe filters display
+- Added Shift Right click override
+- Added click overrides for shops
+- Added options to invert Crafting override clicks
+- Added item stacking for shops and trash
+- Added More Better Bestiary and Guide settings
+- Added Search History for Guide and Bestiary
+- Fixed guideTile applied when disabled
+- Fixed Guide Item removed when searching the same item
 - Added Different Quick Move hotkey layouts
 - Displays the hotkey and highlights the slots where an item can be quick moved to
-- Displays Smart pickup ghosts
-- Added Shift Right Click Crafting override
-- Added options to invert Crafting override clicks
-- Allows items to have ghosts in multiple slots
-- Added Search History for Guide and Bestiary
-- Fixed Guide Item be removed when searching the same item
 - Fixed Quick Moving accessories keeping the effect of some items
 - Fixed Quick Move and Smart Pickup losing modded item data
 - Fixed Quick move changing the favorite state of items
