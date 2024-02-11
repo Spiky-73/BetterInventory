@@ -69,6 +69,8 @@ public sealed class BetterPlayer : ModPlayer {
         On_ChestUI.LootAll += HookLootAll;
         On_ChestUI.Restock += HookRestock;
         IL_ItemSlot.LeftClick_ItemArray_int_int += ILKeepFavoriteInChest;
+
+        On_ItemSlot.PickupItemIntoMouse += HookNoPickupMouse;
     }
 
     public override void Unload() {
@@ -115,12 +117,20 @@ public sealed class BetterPlayer : ModPlayer {
         if (Config.itemRightClick && Player.controlUseTile && Player.releaseUseItem && !Player.controlUseItem && !Player.tileInteractionHappened
                 && !Player.mouseInterface && !Terraria.Graphics.Capture.CaptureManager.Instance.Active && !Main.HoveringOverAnNPC && !Main.SmartInteractShowingGenuine
                 && Main.HoverItem.IsAir && Player.altFunctionUse == 0 && Player.selectedItem < 10) {
-            if(Main.stackSplit == 1) Main.stackSplit = 31;
+            Player.itemAnimation--;
+            if(Main.stackSplit == 1) Player.itemAnimation = 0;
+            if (!Config.itemRightClick.Value.stackableItems) _noMousePickup = true;
             ItemSlot.RightClick(Player.inventory, ItemSlot.Context.InventoryItem, Player.selectedItem);
+            _noMousePickup = false;
+            if (!Main.mouseItem.IsAir) Player.DropSelectedItem();
             return false;
         }
         return true;
     }
+    private static void HookNoPickupMouse(On_ItemSlot.orig_PickupItemIntoMouse orig, Item[] inv, int context, int slot, Player player) {
+        if (!Config.itemRightClick || !_noMousePickup) orig(inv, context, slot, player);
+    }
+
 
     public override IEnumerable<Item> AddMaterialsForCrafting(out ItemConsumedCallback itemConsumedCallback) {
         return Guide.AddMaterials(out itemConsumedCallback);
@@ -129,10 +139,9 @@ public sealed class BetterPlayer : ModPlayer {
     private static void HookTryOpenContainer(On_ItemSlot.orig_TryOpenContainer orig, Item item, Player player) {
         int split = Main.stackSplit;
         orig(item, player);
-        if (Config.fastContainerOpening) {
-            Main.stackSplit = split == 31 ? 1 : split;
-            ItemSlot.RefreshStackSplitCooldown();
-        }
+        if (!Config.fastContainerOpening) return;
+        Main.stackSplit = split;
+        ItemSlot.RefreshStackSplitCooldown();
     }
     private static void HookFastExtractinator(On_Player.orig_DropItemFromExtractinator orig, Player self, int itemType, int stack) {
         orig(self, itemType, stack);
@@ -252,6 +261,8 @@ public sealed class BetterPlayer : ModPlayer {
     public VisibilityFilters VisibilityFilters { get; set; } = new();
 
     private static bool innerGetItem;
+
+    private static bool _noMousePickup;
 
     public const string VisibilityTag = "visibility";
     public const string RecipesTag = "recipes";

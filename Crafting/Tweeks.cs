@@ -106,7 +106,7 @@ public sealed class Tweeks : ILoadable {
             cursor.GotoPrev(MoveType.After, i => i.MatchStfld(typeof(Player), nameof(Player.mouseInterface)));
 
             //         ++ <autoScroll>
-            cursor.EmitDelegate(() => { // TODO add audio
+            cursor.EmitDelegate(() => {
                 if (!Config.tweeks || !Main.mouseLeft) return;
                 if (Main.mouseLeftRelease || _recDelay == 0) {
                     Main.mouseLeftRelease = true;

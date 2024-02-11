@@ -14,7 +14,7 @@ public sealed class InventoryManagement : ModConfig {
     
     [DefaultValue(true)] public bool favoriteInBanks;
     [DefaultValue(true)] public bool fastContainerOpening;
-    [DefaultValue(true)] public bool itemRightClick;
+    public Toggle<ItemRightClick> itemRightClick = new(true);
     public Toggle<ClickOverride> clickOverrides = new(true);
 
     public Toggle<QuickMove> quickMove = new(true);
@@ -38,6 +38,15 @@ public sealed class InventoryManagement : ModConfig {
 
 }
 
+public sealed class SmartPickup {
+    [DefaultValue(true)] public bool mediumCore = true;
+    [DefaultValue(0.33f)] public float markIntensity = 0.33f;
+}
+
+public sealed class ItemRightClick {
+    [DefaultValue(false)] public bool stackableItems = false;
+}
+
 public sealed class ClickOverride {
     [DefaultValue(true)] public bool crafting = true;
     [DefaultValue(true)] public bool shops = true;
@@ -46,10 +55,6 @@ public sealed class ClickOverride {
     [DefaultValue(false)] public bool invertClicks = false;
 }
 
-public sealed class SmartPickup {
-    [DefaultValue(true)] public bool mediumCore = true;
-    [DefaultValue(0.33f)] public float markIntensity = 0.33f;
-}
 
 public sealed class QuickMove {
     [Range(0, 3600), DefaultValue(60*3)] public int chainTime = 60*3;

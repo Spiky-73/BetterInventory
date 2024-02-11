@@ -165,6 +165,15 @@ AutoEquipLevel: {
 	AnySlot.Label: Any Slots
 }
 
+ItemRightClick: {
+	Tooltip: ""
+
+	stackableItems: {
+		Label: Stackable Items
+		Tooltip: Right Click a stackable item to throw an item of the stack
+	}
+}
+
 ClickOverride: {
 	Tooltip: ""
 
