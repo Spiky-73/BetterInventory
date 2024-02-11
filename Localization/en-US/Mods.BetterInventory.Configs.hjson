@@ -69,7 +69,7 @@ InventoryManagement: {
 
 	smartAmmo: {
 		Label: "[i:40] Smart Ammo Consumption"
-		Tooltip: Consumes ammo from the last stack in the inventory
+		Tooltip: Consumes ammo (arrows, baits, paints, ...) from the last stack in the inventory. Doesn't affect the selected ammo
 	}
 
 	smartPickup: {

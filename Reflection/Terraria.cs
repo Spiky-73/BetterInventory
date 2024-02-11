@@ -2,6 +2,8 @@ using System.Reflection;
 using TMain = Terraria.Main;
 using TPlayer = Terraria.Player;
 using TItem = Terraria.Item;
+using TNPC = Terraria.NPC;
+using Microsoft.Xna.Framework;
 
 namespace BetterInventory.Reflection;
 
@@ -27,7 +29,12 @@ public static class Player {
 }
 
 public static class Item {
+    public static readonly Field<TItem, int> stack = new(nameof(TItem.stack));
     public static readonly Property<TItem, bool> IsAir = new(nameof(TItem.IsAir));
     public static readonly Field<TItem, bool> favorited = new(nameof(TItem.favorited));
     public static readonly Method<TItem, bool> FitsAmmoSlot = new(nameof(TItem.FitsAmmoSlot));
+}
+
+public static class NPC {
+    public static readonly StaticMethod<Vector2, bool, object?> LadyBugKilled = new(typeof(TNPC), nameof(TNPC.LadyBugKilled));
 }
