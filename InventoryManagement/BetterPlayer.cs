@@ -133,7 +133,12 @@ public sealed class BetterPlayer : ModPlayer {
 
 
     public override IEnumerable<Item> AddMaterialsForCrafting(out ItemConsumedCallback itemConsumedCallback) {
-        return Guide.AddMaterials(out itemConsumedCallback);
+        List<Item> items = new();
+        Item? mat;
+        if((mat = Guide.GetGuideMaterials()) != null) items.Add(mat);
+        if((mat = Crafting.Tweeks.GetMouseMaterial()) != null) items.Add(mat);
+        itemConsumedCallback = (item, amount) => item.stack -= amount;
+        return items;
     }
 
     private static void HookTryOpenContainer(On_ItemSlot.orig_TryOpenContainer orig, Item item, Player player) {

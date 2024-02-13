@@ -15,6 +15,8 @@ public sealed class Tweeks : ILoadable {
     
     public void Load(Mod mod) {
         IL_Main.DrawInventory += ILScrolls;
+
+        On_Main.TryAllowingToCraftRecipe += HookTryAllowingToCraftRecipe;
     }
 
     public void Unload(){}
@@ -42,7 +44,7 @@ public sealed class Tweeks : ILoadable {
             cursor.EmitLdloc(124);
             int s = j == 0 ? -1 : 1;
             cursor.EmitDelegate((int r) => {
-                if (!Configs.Crafting.Instance.recipeScroll) return;
+                if (!Configs.Crafting.Instance.recipeScroll.Parent) return;
                 Main.availableRecipeY[r] += s * 6.5f;
                 float d = Main.availableRecipeY[r] - (r - Main.focusRecipe) * 65;
                 bool recFast = Main.recFastScroll && Config.recipeScroll.Value.listScroll;
@@ -136,12 +138,9 @@ public sealed class Tweeks : ILoadable {
         //             ++ if(<enabled>) goto noClick;
         cursor.EmitLdloc(153);
         cursor.EmitDelegate((int i) => {
-            if (Config.focusRecipe) {
-                Main.focusRecipe = i;
-                Main.recFastScroll = true;
-            }
-            if (Config.craftingOnRecList) {
+            if (Config.craftOnList.Parent) {
                 int f = Main.focusRecipe;
+                if (Config.craftOnList.Value.focusRecipe) Main.focusRecipe = i;
                 Reflection.Main.HoverOverCraftingItemButton.Invoke(i);
                 if (f != Main.focusRecipe) Main.recFastScroll = true;
                 Main.craftingHide = false;
@@ -161,8 +160,10 @@ public sealed class Tweeks : ILoadable {
         // ...
     }
 
-    private static bool TryAllowingToCraftRecipe(On_Main.orig_TryAllowingToCraftRecipe orig, Recipe currentRecipe, bool tryFittingItemInInventoryToAllowCrafting, out bool movedAnItemToAllowCrafting)
+    private static bool HookTryAllowingToCraftRecipe(On_Main.orig_TryAllowingToCraftRecipe orig, Recipe currentRecipe, bool tryFittingItemInInventoryToAllowCrafting, out bool movedAnItemToAllowCrafting)
         => orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting || Config.tweeks, out movedAnItemToAllowCrafting);
+
+    public static Item? GetMouseMaterial() => Config.tweeks ? Main.mouseItem : null;
 
     private static int _recDelay = 0;
     public static readonly int[] MaterialsPerLine = new int[] { 6, 4 };

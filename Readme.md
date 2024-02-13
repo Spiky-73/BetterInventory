@@ -46,6 +46,7 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 - Fixed Quick Moving accessories keeping the effect of some items
 - Fixed Quick Move and Smart Pickup losing modded item data
 - Fixed Quick move changing the favorite state of items
+- Fixed others bugs
 
 ### v0.3
 - Added Smart Pickup

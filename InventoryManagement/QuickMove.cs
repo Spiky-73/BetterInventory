@@ -11,6 +11,7 @@ using Terraria.Audio;
 using Terraria.GameContent;
 using Terraria.GameInput;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
 using Terraria.UI.Chat;
@@ -46,7 +47,7 @@ public sealed class QuickMove : ILoadable {
         if (!_hover || !Config.showTooltip || _displayedChain.Count == 0) return;
         tooltips.Add(new(
             BetterInventory.Instance, "QuickMove",
-            string.Join(" > ", from slots in _displayedChain where slots is not null select slots.DisplayName)
+            Language.GetTextValue("Mods.BetterInventory.UI.QuickMoveTooltip") + ": " + string.Join(" > ", from slots in _displayedChain where slots is not null select slots.DisplayName)
         ));
     }
 

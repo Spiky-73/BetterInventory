@@ -6,7 +6,7 @@ using Terraria.ModLoader.Config;
 namespace BetterInventory.Configs;
 
 public sealed class Version : ModConfig {
-    [DefaultValue(""), JsonProperty] internal string lastPlayedVersion { get; set; } = "";
+    [DefaultValue(""), JsonProperty] internal string lastPlayedVersion = "";
 
     [JsonIgnore, ShowDespiteJsonIgnore] public Text? Info;
     [JsonIgnore, ShowDespiteJsonIgnore] public Text? Important = new(UpdateNotification.ImportantTags);

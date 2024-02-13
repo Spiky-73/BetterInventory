@@ -20,7 +20,7 @@ Crafting: {
 			'''
 	}
 
-	craftingOnRecList: {
+	craftOnList: {
 		Label: "[i:3617] Craft on Recipe List"
 		Tooltip: Allows you to craft items directly from the recipe list
 	}
@@ -28,11 +28,6 @@ Crafting: {
 	recipeScroll: {
 		Label: "[i:3285] Faster Recipe Scroll"
 		Tooltip: Make the recipe scoll very fast
-	}
-
-	focusRecipe: {
-		Label: "[i:1248] Focus Hovered Recipe"
-		Tooltip: Automaticaly selects the hovered recipe on the recipe list
 	}
 }
 
@@ -47,6 +42,15 @@ RecipeFiltering: {
 	width: {
 		Label: Width
 		Tooltip: The number of filters per line
+	}
+}
+
+CraftOnList: {
+	Tooltip: ""
+
+	focusRecipe: {
+		Label: Focus Hovered Recipe
+		Tooltip: Automaticaly selects the hovered recipe
 	}
 }
 
@@ -476,6 +480,7 @@ Version: {
 			- Fixed Quick Moving accessories keeping the effect of some items
 			- Fixed Quick Move and Smart Pickup losing modded item data
 			- Fixed Quick move changing the favorite state of items
+			- Fixed others bugs
 			'''
 		Tooltip: ""
 	}

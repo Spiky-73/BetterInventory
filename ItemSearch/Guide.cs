@@ -79,6 +79,8 @@ public sealed class Guide : ModSystem {
         inventoryX = 73;
         inventoryY = 331 + adjY;
 
+        HandleVisibility(inventoryX, inventoryY);
+
         Recipe recipe = Main.recipe[Main.availableRecipe[Main.focusRecipe]];
 
         if (s_focusRecipe != (Main.numAvailableRecipes == 0 ? -1 : recipe.RecipeIndex)) UpdateCraftTiles(recipe);
@@ -211,7 +213,7 @@ public sealed class Guide : ModSystem {
         Main.inventoryScale *= TileScale;
         Rectangle hitbox = new((int)x, (int)y, (int)(TextureAssets.InventoryBack.Width() * Main.inventoryScale), (int)(TextureAssets.InventoryBack.Height() * Main.inventoryScale));
         Item[] items = new Item[] { Main.guideItem, guideTile };
-        if (hitbox.Contains(Main.mouseX, Main.mouseY) && !PlayerInput.IgnoreMouseInterface) {
+        if (!_ilVisibilityHover && hitbox.Contains(Main.mouseX, Main.mouseY) && !PlayerInput.IgnoreMouseInterface) {
             Main.player[Main.myPlayer].mouseInterface = true;
             Main.craftingHide = true;
             ItemSlot.OverrideHover(items, 7, 1);
@@ -250,11 +252,8 @@ public sealed class Guide : ModSystem {
         // ----- Visibility Filters -----
         ILLabel? noHover = null;
         cursor.FindNext(out _, i => i.MatchBlt(out noHover));
-        //         ++ if(<visibilityHover>) HandleVisibility();
-        //         ++ else {
-        cursor.EmitLdloc(122);
-        cursor.EmitLdloc(123);
-        cursor.EmitDelegate(HandleVisibility);
+        //         ++ if(!<visibilityHover>) {
+        cursor.EmitDelegate(() => _ilVisibilityHover);
         cursor.EmitBrtrue(noHover!);
 
         //             <handle guide item slot>
@@ -370,7 +369,7 @@ public sealed class Guide : ModSystem {
         //             ++ <overrideBackground>
         cursor.EmitLdloc(153);
         cursor.EmitDelegate((int i) => {
-            if (!Crafting.Tweeks.Config.focusRecipe && Main.focusRecipe == i) ItemSlot.DrawGoldBGForCraftingMaterial = true;
+            if (Main.focusRecipe == i && Crafting.Tweeks.Config.craftOnList.Parent && !Crafting.Tweeks.Config.craftOnList.Value.focusRecipe) ItemSlot.DrawGoldBGForCraftingMaterial = true;
             if (!Enabled) return;
             OverrideRecipeTexture(GetFavoriteState(Main.availableRecipe[i]), ItemSlot.DrawGoldBGForCraftingMaterial, s_availableRecipes.Contains(Main.availableRecipe[i]));
             ItemSlot.DrawGoldBGForCraftingMaterial = false;
@@ -388,14 +387,15 @@ public sealed class Guide : ModSystem {
         //     }
         // }
     }
-    public static bool HandleVisibility(int x, int y) {
-        if (!Enabled || !Config.craftInMenu) return false;
+    public static void HandleVisibility(int x, int y) {
+        _ilVisibilityHover = false;
+        if (!Enabled || !Config.craftInMenu) return;
         x += (int)((TextureAssets.InventoryBack.Width() - 2) * Main.inventoryScale);
         y += (int)(4 * Main.inventoryScale);
         Vector2 size = InventoryTickBorder.Size() * Main.inventoryScale;
         s_hitBox = new(x - (int)(size.X / 2f), y - (int)(size.Y / 2f), (int)size.X, (int)size.Y);
 
-        if (!(s_hover = s_hitBox.Contains(Main.mouseX, Main.mouseY)) || PlayerInput.IgnoreMouseInterface) return false;
+        if (!(s_hover = s_hitBox.Contains(Main.mouseX, Main.mouseY)) || PlayerInput.IgnoreMouseInterface) return;
 
         Main.player[Main.myPlayer].mouseInterface = true;
         if (Main.mouseLeft && Main.mouseLeftRelease) {
@@ -403,18 +403,18 @@ public sealed class Guide : ModSystem {
             SoundEngine.PlaySound(SoundID.MenuTick);
             Recipe.FindRecipes();
         }
-        return true;
+        _ilVisibilityHover = true;
     }
     public static void DrawVisibility() {
         if (!Enabled || !Config.craftInMenu) return;
         VisibilityFilters filters = LocalFilters;
         Asset<Texture2D> tick = filters.ShowAllRecipes ? TextureAssets.InventoryTickOn : TextureAssets.InventoryTickOff;
         Color color = Color.White * 0.7f;
-        Main.spriteBatch.Draw(tick.Value, s_hitBox.Center(), null, color, 0f, tick.Value.Size() / 2, Main.inventoryScale, 0, 0f);
+        Main.spriteBatch.Draw(tick.Value, s_hitBox.Center(), null, color, 0f, tick.Value.Size() / 2, 1, 0, 0f);
         if (s_hover) {
             string key = filters.ShowAllRecipes ? "Mods.BetterInventory.UI.ShowAll" : "Mods.BetterInventory.UI.ShowAvailable";
             Main.instance.MouseText(Language.GetTextValue(key));
-            Main.spriteBatch.Draw(InventoryTickBorder.Value, s_hitBox.Center(), null, color, 0f, InventoryTickBorder.Value.Size() / 2, Main.inventoryScale, 0, 0f);
+            Main.spriteBatch.Draw(InventoryTickBorder.Value, s_hitBox.Center(), null, color, 0f, InventoryTickBorder.Value.Size() / 2, 1, 0, 0f);
         }
     }
 
@@ -426,11 +426,8 @@ public sealed class Guide : ModSystem {
         Recipe.FindRecipes();
     }
 
-    public static IEnumerable<Item> AddMaterials(out ModPlayer.ItemConsumedCallback itemConsumedCallback) {
-        itemConsumedCallback = (item, amount) => Main.guideItem.stack -= amount;
-        if (!Enabled || SearchItem.Config.searchRecipes) return null!;
-        return new Item[] { Main.guideItem };
-    }
+    public static Item? GetGuideMaterials() =>  Enabled && !SearchItem.Config.searchRecipes ? Main.guideItem : null;
+
     private static void ILFindRecipes(ILContext il) {
         ILCursor cursor = new(il);
 
@@ -758,6 +755,8 @@ public sealed class Guide : ModSystem {
     public const float TileScacingRatio = 0.08f;
 
     public static readonly int[] InventoryContexts = new int[] { ContextID.InventoryItem, ContextID.InventoryAmmo, ContextID.InventoryCoin };
+
+    private static bool _ilVisibilityHover;
 }
 
 public enum PlaceholderType { None, ByHand, Tile, Condition}

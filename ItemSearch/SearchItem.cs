@@ -32,7 +32,7 @@ public sealed class SearchItem : ILoadable {
 
         On_ItemSlot.RightClick_ItemArray_int_int += HookOverrideRightClick;
 
-        On_Player.dropItemCheck += OndropItems;
+        On_Player.dropItemCheck += HookDropItems;
     }
 
     public void Unload() {
@@ -130,7 +130,7 @@ public sealed class SearchItem : ILoadable {
         orig(self, evt, listeningElement);
     }
 
-    private static void OndropItems(On_Player.orig_dropItemCheck orig, Player self) {
+    private static void HookDropItems(On_Player.orig_dropItemCheck orig, Player self) {
         if (!Config.searchRecipes) {
             orig(self);
             Guide.dropItemCheck(self);

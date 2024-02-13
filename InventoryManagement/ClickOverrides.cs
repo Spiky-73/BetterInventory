@@ -17,8 +17,8 @@ public sealed class ClickOverride : ILoadable {
     public static Configs.ClickOverride Config => Configs.InventoryManagement.Instance.clickOverrides.Value;
 
     public void Load(Mod mod) {
-        On_Main.DrawInterface_36_Cursor += DrawCustomCursor;
-        On_Main.TryAllowingToCraftRecipe += TryAllowingToCraftRecipe;
+        On_Main.DrawInterface_36_Cursor += HookDrawCustomCursor;
+        On_Main.TryAllowingToCraftRecipe += HookTryAllowingToCraftRecipe;
 
         IL_Main.CraftItem += ILCraftItem;
         IL_Recipe.Create += ILCreateRecipe;
@@ -122,7 +122,7 @@ public sealed class ClickOverride : ILoadable {
     public static void OverrideCraftHover(int recipeIndex) {
         if (Enabled && Config.crafting && recipeIndex == Main.focusRecipe && ItemSlot.ShiftInUse) Main.cursorOverride = CraftCursorID;
     }
-    private static void DrawCustomCursor(On_Main.orig_DrawInterface_36_Cursor orig) {
+    private static void HookDrawCustomCursor(On_Main.orig_DrawInterface_36_Cursor orig) {
         if (Main.cursorOverride == CraftCursorID) {
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(0, BlendState.AlphaBlend, Main.SamplerStateForCursor, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
@@ -130,13 +130,10 @@ public sealed class ClickOverride : ILoadable {
         } else orig();
     }
 
-    private static bool TryAllowingToCraftRecipe(On_Main.orig_TryAllowingToCraftRecipe orig, Recipe currentRecipe, bool tryFittingItemInInventoryToAllowCrafting, out bool movedAnItemToAllowCrafting) {
-        if (Enabled && Config.crafting) {
-            movedAnItemToAllowCrafting = false;
-            if (Config.invertClicks ? (Main.mouseRight && !Main.mouseRightRelease) : (Main.mouseLeft && !Main.mouseLeftRelease)) return false;
-            if (Main.cursorOverride == CraftCursorID) return Main.LocalPlayer.ItemSpace(currentRecipe.createItem).CanTakeItem;
-        }
-        return orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting, out movedAnItemToAllowCrafting);
+    private static bool HookTryAllowingToCraftRecipe(On_Main.orig_TryAllowingToCraftRecipe orig, Recipe currentRecipe, bool tryFittingItemInInventoryToAllowCrafting, out bool movedAnItemToAllowCrafting) {
+        if (!Enabled || !Config.crafting || Main.cursorOverride != CraftCursorID) return orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting, out movedAnItemToAllowCrafting);
+        movedAnItemToAllowCrafting = false;
+        return Main.LocalPlayer.ItemSpace(currentRecipe.createItem).CanTakeItem;
     }
 
     private static void ILCraftItem(ILContext il) {
