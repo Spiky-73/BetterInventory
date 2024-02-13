@@ -1,4 +1,4 @@
-This mods adds small features designed to improve the player Inventory and all the systems around it.
+This mods adds loads of small features designed to improve the player Inventory and all the systems around it.
 I STRONGLY ADVISE you to read the mod configs to learn about all the features and enable/disable them.
 Feel free to suggest new features I you think of any! 
 

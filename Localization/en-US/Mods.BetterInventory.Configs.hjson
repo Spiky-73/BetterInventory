@@ -26,7 +26,7 @@ Crafting: {
 	}
 
 	recipeScroll: {
-		Label: "[i:3285] Faster Recipe Scroll"
+		Label: "[i:3389] Faster Recipe Scroll"
 		Tooltip: Make the recipe scoll very fast
 	}
 }
@@ -99,7 +99,7 @@ InventoryManagement: {
 
 	quickMove: {
 		Label: "[i:3620] Quick Move"
-		Tooltip: Hover over an item and press a hotbar keybind to move it between different contexts
+		Tooltip: Hover over an item in your inventory and press a hotbar keybind to move it between different contexts
 	}
 
 	fastContainerOpening: {
@@ -133,11 +133,7 @@ InventoryManagement: {
 
 	clickOverrides: {
 		Label: "[i:5075] Click Overrides"
-		Tooltip:
-			'''
-			Shift + Right Click an item to tranfer 1 in your inventory (same as Shift + Left)
-			Makes shops and crafting consistent with inventory movements
-			'''
+		Tooltip: Makes shops and crafting consistent with inventory movements
 	}
 }
 
@@ -185,7 +181,6 @@ ClickOverride: {
 		Label: Crafting
 		Tooltip:
 			'''
-			Makes crafting consistent with inventory movements
 			Left Click to craft a stack of items
 			Right Click to craft the recipe once
 			Hold Shift to tranfer the crafted items in your inventory
@@ -196,7 +191,6 @@ ClickOverride: {
 		Label: Shops
 		Tooltip:
 			'''
-			Makes shops consistent with inventory movements
 			Left Click to buy a stack of items
 			Right Click to buy once
 			Hold Shift to tranfer the baught items in your inventory
@@ -205,7 +199,7 @@ ClickOverride: {
 
 	shiftRight: {
 		Label: Shift Right Click
-		Tooltip: Allows you to Shift or Control Right Click
+		Tooltip: Allows you to Shift or Control Right Click to transfer one item
 	}
 
 	stacking: {
@@ -228,17 +222,17 @@ QuickMove: {
 
 	chainTime: {
 		Label: Chain Interval
-		Tooltip: Frame interval to move to the next context in the chain (60 = 1s)
+		Tooltip: Frame interval until the current chain resets (60 = 1s)
 	}
 
 	showTooltip: {
 		Label: Show Tooltip
-		Tooltip: Displays the chain in the item tooltip
+		Tooltip: Displays the context chain in the item tooltip
 	}
 
 	returnToSlot: {
 		Label: Return to Original Slot
-		Tooltip: Return the item to its original slot at the end of the chain
+		Tooltip: Return the item to its original slot when swapping at the end of the chain
 	}
 
 	hotkeyMode: {

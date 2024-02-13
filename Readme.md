@@ -1,10 +1,10 @@
 ## Better Inventory
 
-This mods adds small features designed to improve the player Inventory and all the systems around it.
+This mods adds loads of small features designed to improve the player Inventory and all the systems around it.
 I STRONGLY ADVISE you to read the mod configs to learn about all the features and enable/disable them.
 Feel free to suggest new features I you think of any! 
 
-Keep in mind, this mod is still in developement. If you find a bug, please report it here or on the Steam Workshop page.
+Keep in mind, this mod is still in developement. If you find a bug, please report it here or on the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetails/?id=3074374647).
 
 Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetails/?id=3074374647) if you wish to download and use this mod.
 
