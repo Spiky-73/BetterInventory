@@ -386,6 +386,7 @@ BetterGuide: {
 			'''
 			Allow you to craft items when talking to the guide
 			Add an icon to toggle between "All Recipes" and "Available Recipes"
+			The toggle stores 2 independent states: one when the guide item or tile are used, and one when one when none are used.
 			'''
 	}
 }

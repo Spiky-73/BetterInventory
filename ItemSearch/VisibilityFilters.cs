@@ -10,7 +10,7 @@ public sealed class VisibilityFilters {
     
     public Flags Visibility { get; set; } = Flags.Default;
 
-    public static Flags CurrentVisibility => Main.guideItem.IsAir ? Flags.ShowAllAir : Flags.ShowAllGuide;
+    public static Flags CurrentVisibility => (Main.guideItem.IsAir && (!Guide.Config.guideTile || Guide.guideTile.IsAir)) ? Flags.ShowAllAir : Flags.ShowAllGuide;
     public bool ShowAllRecipes {
         get => Visibility.HasFlag(CurrentVisibility);
         set => SetFlag(CurrentVisibility, value);

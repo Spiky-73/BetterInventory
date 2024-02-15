@@ -131,9 +131,12 @@ public sealed class ClickOverride : ILoadable {
     }
 
     private static bool HookTryAllowingToCraftRecipe(On_Main.orig_TryAllowingToCraftRecipe orig, Recipe currentRecipe, bool tryFittingItemInInventoryToAllowCrafting, out bool movedAnItemToAllowCrafting) {
-        if (!Enabled || !Config.crafting || Main.cursorOverride != CraftCursorID) return orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting, out movedAnItemToAllowCrafting);
-        movedAnItemToAllowCrafting = false;
-        return Main.LocalPlayer.ItemSpace(currentRecipe.createItem).CanTakeItem;
+        if (Enabled && Config.crafting) {
+            movedAnItemToAllowCrafting = false;
+            if (Config.invertClicks ? (Main.mouseRight && !Main.mouseRightRelease) : (Main.mouseLeft && !Main.mouseLeftRelease)) return false;
+            if (Main.cursorOverride == CraftCursorID) return Main.LocalPlayer.ItemSpace(currentRecipe.createItem).CanTakeItem;
+        }
+        return orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting, out movedAnItemToAllowCrafting);
     }
 
     private static void ILCraftItem(ILContext il) {

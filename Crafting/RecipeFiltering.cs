@@ -40,8 +40,7 @@ public sealed class RecipeFiltering : ILoadable {
         //     ++<drawFilters>
         cursor.EmitLdloc(13); // screen position
         cursor.EmitDelegate((int num54) => {
-            if (!Enabled || Recipes.Length == 0) return;
-            DrawFilters(94, 450 + num54);
+            if (Enabled && Recipes.Length != 0) DrawFilters(94, 450 + num54);
         });
 
         //     ...

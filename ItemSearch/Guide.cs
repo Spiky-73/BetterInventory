@@ -505,7 +505,10 @@ public sealed class Guide : ModSystem {
         cursor.EmitLdarg0();
         cursor.EmitDelegate((int recipeIndex) => {
             if (!Enabled) return false;
-            if (IsUnknown(Main.availableRecipe[recipeIndex])) ForcedToolip = Language.GetText("Mods.BetterInventory.UI.Unknown");
+            if (IsUnknown(Main.availableRecipe[recipeIndex])) {
+                ForcedToolip = Language.GetText("Mods.BetterInventory.UI.Unknown");
+                return false;
+            }
             if (!Config.favoriteRecipes) return false;
             bool click = Main.mouseLeft && Main.mouseLeftRelease;
             if (Main.keyState.IsKeyDown(Main.FavoriteKey)) {
