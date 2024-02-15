@@ -418,12 +418,7 @@ UnlockLevel: {
 }
 
 Version: {
-	Highlights: {
-		Homepage: homepage
-		Workshop: Steam Workshop page
-	}
-
-	DisplayName: Version {$Mods.BetterInventory.Configs.Version.Number}
+	DisplayName: Version {$Mods.BetterInventory.Chat.Version}
 	Headers.Changelog: Changelog
 
 	Info: {
@@ -479,7 +474,10 @@ Version: {
 		Tooltip: ""
 	}
 
-	Number: "0.4"
+	Thanks: {
+		Label: Thanks
+		Tooltip: ""
+	}
 }
 
 Toggle`1.Tooltip: ""

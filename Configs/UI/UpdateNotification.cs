@@ -19,8 +19,8 @@ public class UpdateNotification : IInGameNotification {
         ("Mods.BetterInventory.Configs.Version.DisplayName", $"c/{Colors.RarityCyan.Hex3()}")
     });
     public static TagKeyFormat BugTags => new(null, new(){
-        ("Mods.BetterInventory.Configs.Version.Highlights.Workshop", $"c/{Colors.RarityCyan.Hex3()}"),
-        ("Mods.BetterInventory.Configs.Version.Highlights.Homepage", $"c/{Colors.RarityCyan.Hex3()}")
+        ("Mods.BetterInventory.Chat.Workshop", $"c/{Colors.RarityCyan.Hex3()}"),
+        ("Mods.BetterInventory.Chat.Homepage", $"c/{Colors.RarityCyan.Hex3()}")
     });
     public static TagKeyFormat ImportantTags => new(Colors.RarityAmber, new());
 

@@ -82,19 +82,21 @@ public sealed class BetterPlayer : ModPlayer {
         RecipeFilters ??= new();
         VisibilityFilters ??= new();
 
-        List<(LocalizedText text, TagKeyFormat format)> lines = new();
-        if (Configs.Version.Instance.lastPlayedVersion.Length == 0) {
-            lines.Add((Language.GetText("Mods.BetterInventory.Chat.Download"), UpdateNotification.DownloadTags));
-            lines.Add((Language.GetText("Mods.BetterInventory.Chat.Bug"), UpdateNotification.BugTags));
-        } else if (Mod.Version > new Version(Configs.Version.Instance.lastPlayedVersion)) {
-            lines.Add((Language.GetText("Mods.BetterInventory.Chat.Update"), UpdateNotification.UpdateTags));
-            lines.Add((Language.GetText("Mods.BetterInventory.Chat.Bug"), UpdateNotification.BugTags));
-            (LocalizedText text, TagKeyFormat format) important = (Language.GetText("Mods.BetterInventory.Chat.Important"), UpdateNotification.ImportantTags);
-            if (important.text.Value.Length != 0) lines.Add(important);
-        } else return;
-        InGameNotificationsTracker.AddNotification(new UpdateNotification(lines));
+        bool download;
+        if (Configs.Version.Instance.lastPlayedVersion.Length == 0) download = true;
+        else if (Mod.Version > new Version(Configs.Version.Instance.lastPlayedVersion)) download = false;
+        else return;
+
         Configs.Version.Instance.lastPlayedVersion = Mod.Version.ToString();
         Configs.Version.Instance.SaveConfig();
+
+        List<(LocalizedText text, TagKeyFormat format)> lines = new();
+        if(download) lines.Add((Language.GetText("Mods.BetterInventory.Chat.Download"), UpdateNotification.DownloadTags));
+        else lines.Add((Language.GetText("Mods.BetterInventory.Chat.Update"), UpdateNotification.UpdateTags));
+        lines.Add((Language.GetText("Mods.BetterInventory.Chat.Bug"), UpdateNotification.BugTags));
+        LocalizedText important = Language.GetText("Mods.BetterInventory.Chat.Important");
+        if (!download && important.Value.Length != 0) lines.Add((important, UpdateNotification.ImportantTags));
+        InGameNotificationsTracker.AddNotification(new UpdateNotification(lines));
     }
 
     public override void SetControls() {
