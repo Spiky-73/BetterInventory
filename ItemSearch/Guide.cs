@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using BetterInventory.Crafting;
 using BetterInventory.DataStructures;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -55,6 +54,7 @@ public sealed class Guide : ModSystem {
     }
 
     public override void PostAddRecipes() {
+        SearchItem.HooksBestiaryUI();
         for (int r = 0; r < Recipe.numRecipes; r++) {
             foreach (int tile in Main.recipe[r].requiredTile) CraftingStationsItems[tile] = 0;
         }
@@ -71,13 +71,15 @@ public sealed class Guide : ModSystem {
     }
 
 
-    private void HookGuideCraftText(On_Main.orig_DrawGuideCraftText orig, int adjY, Color craftingTipColor, out int inventoryX, out int inventoryY) {
+    private static void HookGuideCraftText(On_Main.orig_DrawGuideCraftText orig, int adjY, Color craftingTipColor, out int inventoryX, out int inventoryY) {
         if (!Enabled) {
             orig(adjY, craftingTipColor, out inventoryX, out inventoryY);
             return;
         }
         inventoryX = 73;
         inventoryY = 331 + adjY;
+
+        HandleVisibility(inventoryX, inventoryY);
 
         Recipe recipe = Main.recipe[Main.availableRecipe[Main.focusRecipe]];
 
@@ -89,7 +91,7 @@ public sealed class Guide : ModSystem {
         Vector2 position = new(minX, inventoryY - delta.Y);
         int slot = 0;
         void MovePosition() {
-            if (BetterCrafting.Config.tweeks && ++slot % TilesPerLine == 0) {
+            if (Crafting.Tweeks.Config.tweeks && ++slot % TilesPerLine == 0) {
                 position.X = minX;
                 position.Y += delta.Y;
                 if (slot == TilesPerLine) MovePosition();
@@ -170,7 +172,7 @@ public sealed class Guide : ModSystem {
         cursor.EmitDelegate<Func<int, bool>>(i => {
             if (!Enabled) return false;
             Recipe recipe = Main.recipe[i];
-            if (!guideTile.IsAir) {
+            if (Config.guideTile && !guideTile.IsAir) {
                 switch (GetPlaceholderType(guideTile)) {
                 case PlaceholderType.None: // Read Item
                     if (guideTile.createTile != -1) { // Tile
@@ -211,7 +213,7 @@ public sealed class Guide : ModSystem {
         Main.inventoryScale *= TileScale;
         Rectangle hitbox = new((int)x, (int)y, (int)(TextureAssets.InventoryBack.Width() * Main.inventoryScale), (int)(TextureAssets.InventoryBack.Height() * Main.inventoryScale));
         Item[] items = new Item[] { Main.guideItem, guideTile };
-        if (hitbox.Contains(Main.mouseX, Main.mouseY) && !PlayerInput.IgnoreMouseInterface) {
+        if (!_ilVisibilityHover && hitbox.Contains(Main.mouseX, Main.mouseY) && !PlayerInput.IgnoreMouseInterface) {
             Main.player[Main.myPlayer].mouseInterface = true;
             Main.craftingHide = true;
             ItemSlot.OverrideHover(items, 7, 1);
@@ -250,11 +252,8 @@ public sealed class Guide : ModSystem {
         // ----- Visibility Filters -----
         ILLabel? noHover = null;
         cursor.FindNext(out _, i => i.MatchBlt(out noHover));
-        //         ++ if(<visibilityHover>) HandleVisibility();
-        //         ++ else {
-        cursor.EmitLdloc(122);
-        cursor.EmitLdloc(123);
-        cursor.EmitDelegate(HandleVisibility);
+        //         ++ if(!<visibilityHover>) {
+        cursor.EmitDelegate(() => _ilVisibilityHover);
         cursor.EmitBrtrue(noHover!);
 
         //             <handle guide item slot>
@@ -370,7 +369,7 @@ public sealed class Guide : ModSystem {
         //             ++ <overrideBackground>
         cursor.EmitLdloc(153);
         cursor.EmitDelegate((int i) => {
-            if (!BetterCrafting.Config.focusRecipe && Main.focusRecipe == i) ItemSlot.DrawGoldBGForCraftingMaterial = true;
+            if (Main.focusRecipe == i && Crafting.Tweeks.Config.craftOnList.Parent && !Crafting.Tweeks.Config.craftOnList.Value.focusRecipe) ItemSlot.DrawGoldBGForCraftingMaterial = true;
             if (!Enabled) return;
             OverrideRecipeTexture(GetFavoriteState(Main.availableRecipe[i]), ItemSlot.DrawGoldBGForCraftingMaterial, s_availableRecipes.Contains(Main.availableRecipe[i]));
             ItemSlot.DrawGoldBGForCraftingMaterial = false;
@@ -388,14 +387,15 @@ public sealed class Guide : ModSystem {
         //     }
         // }
     }
-    public static bool HandleVisibility(int x, int y) {
-        if (!Enabled || !Config.craftInMenu) return false;
+    public static void HandleVisibility(int x, int y) {
+        _ilVisibilityHover = false;
+        if (!Enabled || !Config.craftInMenu) return;
         x += (int)((TextureAssets.InventoryBack.Width() - 2) * Main.inventoryScale);
         y += (int)(4 * Main.inventoryScale);
         Vector2 size = InventoryTickBorder.Size() * Main.inventoryScale;
         s_hitBox = new(x - (int)(size.X / 2f), y - (int)(size.Y / 2f), (int)size.X, (int)size.Y);
 
-        if (!(s_hover = s_hitBox.Contains(Main.mouseX, Main.mouseY)) || PlayerInput.IgnoreMouseInterface) return false;
+        if (!(s_hover = s_hitBox.Contains(Main.mouseX, Main.mouseY)) || PlayerInput.IgnoreMouseInterface) return;
 
         Main.player[Main.myPlayer].mouseInterface = true;
         if (Main.mouseLeft && Main.mouseLeftRelease) {
@@ -403,18 +403,18 @@ public sealed class Guide : ModSystem {
             SoundEngine.PlaySound(SoundID.MenuTick);
             Recipe.FindRecipes();
         }
-        return true;
+        _ilVisibilityHover = true;
     }
     public static void DrawVisibility() {
         if (!Enabled || !Config.craftInMenu) return;
         VisibilityFilters filters = LocalFilters;
         Asset<Texture2D> tick = filters.ShowAllRecipes ? TextureAssets.InventoryTickOn : TextureAssets.InventoryTickOff;
         Color color = Color.White * 0.7f;
-        Main.spriteBatch.Draw(tick.Value, s_hitBox.Center(), null, color, 0f, tick.Value.Size() / 2, Main.inventoryScale, 0, 0f);
+        Main.spriteBatch.Draw(tick.Value, s_hitBox.Center(), null, color, 0f, tick.Value.Size() / 2, 1, 0, 0f);
         if (s_hover) {
             string key = filters.ShowAllRecipes ? "Mods.BetterInventory.UI.ShowAll" : "Mods.BetterInventory.UI.ShowAvailable";
             Main.instance.MouseText(Language.GetTextValue(key));
-            Main.spriteBatch.Draw(InventoryTickBorder.Value, s_hitBox.Center(), null, color, 0f, InventoryTickBorder.Value.Size() / 2, Main.inventoryScale, 0, 0f);
+            Main.spriteBatch.Draw(InventoryTickBorder.Value, s_hitBox.Center(), null, color, 0f, InventoryTickBorder.Value.Size() / 2, 1, 0, 0f);
         }
     }
 
@@ -426,12 +426,9 @@ public sealed class Guide : ModSystem {
         Recipe.FindRecipes();
     }
 
-    public static IEnumerable<Item> AddMaterials(out ModPlayer.ItemConsumedCallback itemConsumedCallback) {
-        itemConsumedCallback = (item, amount) => Main.guideItem.stack -= amount;
-        if (!Enabled || SearchItem.Config.searchRecipes) return null!;
-        return new Item[] { Main.guideItem };
-    }
-    private void ILFindRecipes(ILContext il) {
+    public static Item? GetGuideMaterials() =>  Enabled && !SearchItem.Config.searchRecipes ? Main.guideItem : null;
+
+    private static void ILFindRecipes(ILContext il) {
         ILCursor cursor = new(il);
 
         // ...
@@ -547,7 +544,7 @@ public sealed class Guide : ModSystem {
         cursor.EmitLdarg0();
         cursor.EmitDelegate((bool prevent, int recipe) => {
             if (prevent || Enabled && !s_availableRecipes.Contains(Main.availableRecipe[recipe])) return true;
-            BetterCrafting.OverrideHover(recipe);
+            InventoryManagement.ClickOverride.OverrideCraftHover(recipe);
             return false;
         });
         //     ...
@@ -560,8 +557,8 @@ public sealed class Guide : ModSystem {
     }
 
 
-    private int HookAllowGuideItem(On_ItemSlot.orig_PickItemMovementAction orig, Item[] inv, int context, int slot, Item checkItem) {
-        if (!Enabled || context != ContextID.GuideItem) return orig(inv, context, slot, checkItem);
+    private static int HookAllowGuideItem(On_ItemSlot.orig_PickItemMovementAction orig, Item[] inv, int context, int slot, Item checkItem) {
+        if (!Enabled || !Config.anyItem || context != ContextID.GuideItem) return orig(inv, context, slot, checkItem);
         if (slot == 0 && GetPlaceholderType(Main.mouseItem) == PlaceholderType.None) return 0;
         if (slot == 1 && IsCraftingTileItem(Main.mouseItem)) return 0;
         return -1;
@@ -606,7 +603,7 @@ public sealed class Guide : ModSystem {
         return orig(inv, context, slot);
     }
 
-    private void HookHideItemStack(On_ItemSlot.orig_Draw_SpriteBatch_refItem_int_Vector2_Color orig, SpriteBatch spriteBatch, ref Item inv, int context, Vector2 position, Color lightColor) {
+    private static void HookHideItemStack(On_ItemSlot.orig_Draw_SpriteBatch_refItem_int_Vector2_Color orig, SpriteBatch spriteBatch, ref Item inv, int context, Vector2 position, Color lightColor) {
         if (s_hideNextItem) {
             Item item = CraftingItem;
             orig(spriteBatch, ref item, context, position, lightColor);
@@ -709,8 +706,20 @@ public sealed class Guide : ModSystem {
         else self.GetDropItem(ref guideTile);
     }
 
+    public static bool AreSame(Item item, Item other) {
+        PlaceholderType a = GetPlaceholderType(item);
+        PlaceholderType b = GetPlaceholderType(other);
+        if (a != b) return false;
+        return a switch {
+            PlaceholderType.ByHand => true,
+            PlaceholderType.Tile => item.createTile == other.createTile,
+            PlaceholderType.Condition => item.BestiaryNotes == other.BestiaryNotes,
+            PlaceholderType.None or _ => item.type == other.type,
+        };
+    }
+
     public static readonly Item CraftingItem = new(ItemID.Lens);
-    public const string ConditionMark = "@BE:";
+    public const string ConditionMark = "@BI:";
 
     public static readonly Dictionary<int, int> CraftingStationsItems = new(); // tile -> item
     public static readonly Dictionary<string, int> ConditionItems = new(); // descrition -> id
@@ -746,6 +755,8 @@ public sealed class Guide : ModSystem {
     public const float TileScacingRatio = 0.08f;
 
     public static readonly int[] InventoryContexts = new int[] { ContextID.InventoryItem, ContextID.InventoryAmmo, ContextID.InventoryCoin };
+
+    private static bool _ilVisibilityHover;
 }
 
 public enum PlaceholderType { None, ByHand, Tile, Condition}

@@ -1,49 +1,88 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using BetterInventory.DataStructures;
 using Terraria;
+using Terraria.ModLoader;
+using Terraria.ModLoader.Core;
 
 namespace BetterInventory;
 
-public static class InventoryLoader {
+public enum SubInventoryType {
+    Classic,
+    NonClassic,
+    Secondary,
+    Default
+}
 
-    public static ReadOnlyCollection<ModInventory> Inventories => _inventories.AsReadOnly();
+public class InventoryLoader : ILoadable {
 
-    internal static void Register(ModInventory inventory){
-        _inventories.Add(inventory);
+    public static IEnumerable<ModSubInventory> SubInventories {
+        get {
+            foreach (var inventory in _special) yield return inventory;
+            foreach (var inventory in _nonClassic) yield return inventory;
+            foreach (var inventory in _classic) yield return inventory;
+        }
     }
 
-    internal static void Unload(){
-        _inventories.Clear();
+    public void Load(Mod mod) {}
+
+    public void Unload() {
+        static void Clear(IList<ModSubInventory> list) {
+            foreach(var inventory in list) Utility.SetInstance(inventory, true);
+            list.Clear();
+        }
+        Clear(_special);
+        Clear(_nonClassic);
+        Clear(_classic);
     }
 
-    public static (InventorySlots? slots, int index) GetInventorySlot(Player player, Item[] inventory, int context, int slot) {
-        foreach (ModInventory modInventory in Inventories) {
-            foreach (InventorySlots slots in modInventory.Slots) {
-                int slotOffset = 0;
-                foreach ((int c, Func<Player, ListIndices<Item>> s) in slots.Slots) {
-                    ListIndices<Item> items = s(player);
-                    int index = items.FromInnerIndex(slot);
-                    if (items.List == inventory && index != -1) return (slots, index);
-                    slotOffset += items.Count;
-                }
+    internal static void Register(ModSubInventory inventory){
+        Utility.SetInstance(inventory);
+        if(!LoaderUtils.HasOverride(inventory.GetType(), Reflection.ModSubInventory.Accepts)) _classic.Add(inventory);
+        else if(inventory.Accepts(new()))_nonClassic.Add(inventory);
+        else _special.Add(inventory);
+    }
+
+    public static Slot? FindItem(Player player, Predicate<Item> predicate) {
+        foreach (ModSubInventory slots in SubInventories) {
+            int slot = slots.Items(player).FindIndex(predicate);
+            if (slot != -1) return new(slots, slot);
+        }
+        return null;
+    }
+
+    public static Slot? GetInventorySlot(Player player, Item[] inventory, int context, int slot) {
+        foreach (ModSubInventory slots in SubInventories) {
+            int slotOffset = 0;
+            foreach (ListIndices<Item> items in slots.Items(player).Lists) {
+                int index = items.FromInnerIndex(slot);
+                if (items.List == inventory && index != -1) return new(slots, index + slotOffset);
+                slotOffset += items.Count;
             }
         }
-        return (null, -1);
+        return null;
     }
 
-    public static void SortSlots(this IList<InventorySlots> slots) {
-        List<InventorySlots> low = new();
-        List<InventorySlots> high = new();
-        foreach(InventorySlots slot in slots) {
-            if (slot.Accepts is null) low.Add(slot);
-            else high.Add(slot);
+    public static IEnumerable<ModSubInventory> GetSubInventories(Item item, SubInventoryType level) {
+        List<ModSubInventory> secondary = new();
+        foreach(var inv in _special) {
+            if (!inv.Accepts(item)) continue;
+            if (inv.IsDefault(item)) yield return inv;
+            else if (level <= SubInventoryType.Secondary) secondary.Add(inv);
         }
-        for (int i = 0; i < high.Count; i++) slots[i] = high[i];
-        for (int i = 0; i < low.Count; i++) slots[i+high.Count] = low[i];
+        foreach (var inv in secondary) yield return inv;
+
+        if (level <= SubInventoryType.NonClassic) {
+            foreach (var inv in _nonClassic) {
+                if (inv.Accepts(item)) yield return inv;
+            }
+            if (level <= SubInventoryType.Classic) {
+                foreach (var inv in _classic) yield return inv;
+            }
+        }
     }
 
-
-    private readonly static List<ModInventory> _inventories = new();
+    private readonly static List<ModSubInventory> _special = new();
+    private readonly static List<ModSubInventory> _nonClassic = new();
+    private readonly static List<ModSubInventory> _classic = new();
 }

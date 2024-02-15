@@ -2,12 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent;
+using Terraria.GameContent.UI;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 using Terraria.ObjectData;
@@ -15,6 +18,15 @@ using Terraria.ObjectData;
 namespace BetterInventory;
 
 public static class Utility {
+
+    public static string FormatTagKeys(this string format, List<(string, string)> Tags) {
+        if (Tags.Count == 0) return format;
+        foreach ((string key, string tag) in Tags) {
+            string word = Language.GetTextValue(key);
+            format = format.Replace(word, $"[{tag}:{word}]");
+        }
+        return format;
+    }
 
     public static void DrawTileFrame(SpriteBatch spriteBatch, int tile, Vector2 position, Vector2 origin, float scale) {
         Main.instance.LoadTiles(tile);
@@ -113,23 +125,25 @@ public static class Utility {
         color.B = (byte)(color.B * mult);
     }
 
-    public static bool Stack(this Item item, Item toStack, out int tranfered, int? maxStack = null, bool canFavorite = true) {
+    public static Item MoveInto(Item item, Item toMove, out int tranfered, int? maxStack = null, bool canFavorite = true) {
         tranfered = 0;
-        if (toStack.IsAir) return false;
+        if (toMove.IsAir) return item;
         if (item.IsAir) {
-            tranfered = maxStack.HasValue ? Math.Min(maxStack.Value, toStack.stack) : toStack.stack;
-            item.SetDefaults(toStack.type);
-            item.Prefix(toStack.prefix);
-            ItemLoader.SplitStack(item, toStack, tranfered);
-        } else if (item.type == toStack.type && item.stack < (maxStack ?? item.maxStack)) {
+            tranfered = maxStack.HasValue ? Math.Min(maxStack.Value, toMove.stack) : toMove.stack;
+            item = toMove.Clone();
+            item.stack = 0;
+            ItemLoader.SplitStack(item, toMove, tranfered);
+        } else if (item.type == toMove.type && item.stack < (maxStack ?? item.maxStack)) {
             int oldStack = item.maxStack;
             if (maxStack.HasValue) item.maxStack = maxStack.Value;
-            ItemLoader.TryStackItems(item, toStack, out tranfered);
+            ItemLoader.TryStackItems(item, toMove, out tranfered);
             item.maxStack = oldStack;
         }
-        item.favorited = canFavorite && toStack.favorited;
-        if (toStack.IsAir) toStack.TurnToAir();
-        return tranfered != 0;
+        if (tranfered != 0) {
+            item.favorited = item.favorited || canFavorite && toMove.favorited;
+            if (toMove.IsAir) toMove.TurnToAir(true);
+        }
+        return item;
     }
 
     public static int FindIndex<T>(this IList<T> list, Predicate<T> predicate) {
@@ -139,6 +153,27 @@ public static class Utility {
 
     public static void SaveConfig(this ModConfig config) => Reflection.ConfigManager.Save.Invoke(config);
 
+    public static void SetInstance<T>(T instance, bool unload = false) where T: notnull => instance.GetType().GetField("Instance", BindingFlags.FlattenHierarchy | BindingFlags.Static | BindingFlags.Public)?.SetValue(null, unload ? null : instance);
+
+    public static long CountCurrency(Player player, int currencyIndex = -1) {
+        if (currencyIndex != -1) {
+            CustomCurrencyManager.TryGetCurrencySystem(currencyIndex, out CustomCurrencySystem customCurrencySystem);
+            return customCurrencySystem.CombineStacks(out _, new long[] {
+                customCurrencySystem.CountCurrency(out _, player.inventory, new int[] { 58, 57, 56, 55, 54 }),
+                customCurrencySystem.CountCurrency(out _, player.bank.item, Array.Empty<int>()),
+                customCurrencySystem.CountCurrency(out _, player.bank2.item, Array.Empty<int>()),
+                customCurrencySystem.CountCurrency(out _, player.bank3.item, Array.Empty<int>()),
+                customCurrencySystem.CountCurrency(out _, player.bank4.item, Array.Empty<int>())
+            });
+        }
+        return Utils.CoinsCombineStacks(out _, new long[] {
+            Utils.CoinsCount(out _, player.inventory, new int[] { 58, 57, 56, 55, 54 }),
+            Utils.CoinsCount(out _, player.bank.item, Array.Empty<int>()),
+            Utils.CoinsCount(out _, player.bank2.item, Array.Empty<int>()),
+            Utils.CoinsCount(out _, player.bank3.item, Array.Empty<int>()),
+            Utils.CoinsCount(out _, player.bank4.item, Array.Empty<int>())
+        });
+    }
 
     public static ReadOnlyDictionary<int, int> OwnedItems => Data.ownedItems;
     

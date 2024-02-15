@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using BetterInventory.Configs.UI;
 using BetterInventory.ItemSearch;
 using MonoMod.Cil;
 using Terraria;
 using Terraria.GameInput;
-using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
@@ -58,16 +59,18 @@ public sealed class BetterPlayer : ModPlayer {
 
     public override void Load() {
         FavoritedBuffKb = KeybindLoader.RegisterKeybind(Mod, "FavoritedQuickBuff", Microsoft.Xna.Framework.Input.Keys.N);
-        foreach(BuilderAccToggle bat in BuilderAccToggles) bat.AddKeybind(Mod);
+        foreach (BuilderAccToggle bat in BuilderAccToggles) bat.AddKeybind(Mod);
         On_ItemSlot.TryOpenContainer += HookTryOpenContainer;
+        On_Player.DropItemFromExtractinator += HookFastExtractinator;
 
         On_Player.OpenChest += HookOpenChest;
-        On_Player.GetItem += HookGetItem;
-        // On_ChestUI.TryPlacingInChest += HookPlaceInChest;
+        IL_Player.GetItem += ILGetItem;
 
         On_ChestUI.LootAll += HookLootAll;
         On_ChestUI.Restock += HookRestock;
         IL_ItemSlot.LeftClick_ItemArray_int_int += ILKeepFavoriteInChest;
+
+        On_ItemSlot.PickupItemIntoMouse += HookNoPickupMouse;
     }
 
     public override void Unload() {
@@ -79,25 +82,25 @@ public sealed class BetterPlayer : ModPlayer {
         RecipeFilters ??= new();
         VisibilityFilters ??= new();
 
-        string version = Configs.Version.Instance.lastPlayedVersion;
-        if (version.Length == 0 && Mod.Version == new Version(0, 2, 1)) version = new Version(0, 2).ToString();
-
-        if (version.Length == 0) {
-            Main.NewText(Language.GetTextValue($"Mods.BetterInventory.Chat.Download", Mod.Version.ToString()), Colors.RarityCyan);
-            Main.NewText(Language.GetTextValue($"Mods.BetterInventory.Chat.Warn"), Colors.RarityCyan);
-        } else if (Mod.Version > new Version(version)) {
-            Main.NewText(Language.GetTextValue($"Mods.BetterInventory.Chat.Update", Mod.Version.ToString()), Colors.RarityCyan);
-            Main.NewText(Language.GetTextValue($"Mods.BetterInventory.Chat.Warn"), Colors.RarityCyan);
-            string important = Language.GetTextValue($"Mods.BetterInventory.Chat.Important");
-            if (important.Length != 0) Main.NewText(Language.GetTextValue($"Mods.BetterInventory.Chat.Important", Mod.Version.ToString()), Colors.RarityAmber);
-        } else return;
+        bool download;
+        if (Configs.Version.Instance.lastPlayedVersion.Length == 0) download = true;
+        else if (Mod.Version > new Version(Configs.Version.Instance.lastPlayedVersion)) download = false;
+        else return;
 
         Configs.Version.Instance.lastPlayedVersion = Mod.Version.ToString();
         Configs.Version.Instance.SaveConfig();
+
+        List<(LocalizedText text, TagKeyFormat format)> lines = new();
+        if(download) lines.Add((Language.GetText("Mods.BetterInventory.Chat.Download"), UpdateNotification.DownloadTags));
+        else lines.Add((Language.GetText("Mods.BetterInventory.Chat.Update"), UpdateNotification.UpdateTags));
+        lines.Add((Language.GetText("Mods.BetterInventory.Chat.Bug"), UpdateNotification.BugTags));
+        LocalizedText important = Language.GetText("Mods.BetterInventory.Chat.Important");
+        if (!download && important.Value.Length != 0) lines.Add((important, UpdateNotification.ImportantTags));
+        InGameNotificationsTracker.AddNotification(new UpdateNotification(lines));
     }
 
     public override void SetControls() {
-        if (Config.fastRightClick && Main.mouseRight && Main.stackSplit == 1) Main.mouseRightRelease = true;
+        if (Config.fastContainerOpening && Main.mouseRight && Main.stackSplit == 1) Main.mouseRightRelease = true;
     }
 
     public override void ProcessTriggers(TriggersSet triggersSet) {
@@ -109,31 +112,47 @@ public sealed class BetterPlayer : ModPlayer {
 
     public override bool HoverSlot(Item[] inventory, int context, int slot) {
         QuickMove.HoverItem(inventory, context, slot);
-        return false;
+        return ClickOverride.OverrideHover(inventory, context, slot);
     }
 
     public override bool PreItemCheck() {
         if (Config.itemRightClick && Player.controlUseTile && Player.releaseUseItem && !Player.controlUseItem && !Player.tileInteractionHappened
                 && !Player.mouseInterface && !Terraria.Graphics.Capture.CaptureManager.Instance.Active && !Main.HoveringOverAnNPC && !Main.SmartInteractShowingGenuine
                 && Main.HoverItem.IsAir && Player.altFunctionUse == 0 && Player.selectedItem < 10) {
-            if(Main.stackSplit == 1) Main.stackSplit = 31;
+            Player.itemAnimation--;
+            if(Main.stackSplit == 1) Player.itemAnimation = 0;
+            if (!Config.itemRightClick.Value.stackableItems) _noMousePickup = true;
             ItemSlot.RightClick(Player.inventory, ItemSlot.Context.InventoryItem, Player.selectedItem);
+            _noMousePickup = false;
+            if (!Main.mouseItem.IsAir) Player.DropSelectedItem();
             return false;
         }
         return true;
     }
+    private static void HookNoPickupMouse(On_ItemSlot.orig_PickupItemIntoMouse orig, Item[] inv, int context, int slot, Player player) {
+        if (!Config.itemRightClick || !_noMousePickup) orig(inv, context, slot, player);
+    }
+
 
     public override IEnumerable<Item> AddMaterialsForCrafting(out ItemConsumedCallback itemConsumedCallback) {
-        return Guide.AddMaterials(out itemConsumedCallback);
+        List<Item> items = new();
+        Item? mat;
+        if((mat = Guide.GetGuideMaterials()) != null) items.Add(mat);
+        if((mat = Crafting.Tweeks.GetMouseMaterial()) != null) items.Add(mat);
+        itemConsumedCallback = (item, amount) => item.stack -= amount;
+        return items;
     }
 
     private static void HookTryOpenContainer(On_ItemSlot.orig_TryOpenContainer orig, Item item, Player player) {
         int split = Main.stackSplit;
         orig(item, player);
-        if (Config.fastRightClick) {
-            Main.stackSplit = split == 31 ? 1 : split;
-            ItemSlot.RefreshStackSplitCooldown();
-        }
+        if (!Config.fastContainerOpening) return;
+        Main.stackSplit = split;
+        ItemSlot.RefreshStackSplitCooldown();
+    }
+    private static void HookFastExtractinator(On_Player.orig_DropItemFromExtractinator orig, Player self, int itemType, int stack) {
+        orig(self, itemType, stack);
+        if (Config.fastContainerOpening) self.itemTime = self.itemTimeMax = self.itemTime/5;
     }
 
     private static void HookOpenChest(On_Player.orig_OpenChest orig, Player self, int x, int y, int newChest) {
@@ -170,22 +189,63 @@ public sealed class BetterPlayer : ModPlayer {
         innerGetItem = false;
         return i;
     }
-    private static Item HookGetItem(On_Player.orig_GetItem orig, Player self, int plr, Item newItem, GetItemSettings settings) {
-        if (innerGetItem) return orig(self, plr, newItem, settings);
+    private static void ILGetItem(ILContext il){
+        ILCursor cursor = new(il);
 
-        if (Config.smartPickup != Configs.InventoryManagement.SmartPickupLevel.Off) {
-            newItem = SmartPickup.SmartGetItem(self, newItem, settings);
-            if (newItem.IsAir) return new();
-        }
+        // ...
+        // if (newItem.uniqueStack && this.HasItem(newItem.type)) return item;
+        cursor.GotoNext(i => i.MatchCallvirt(Reflection.Item.FitsAmmoSlot));
+        cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdloc0());
 
-        self.GetModPlayer<BetterPlayer>().VisibilityFilters.AddOwnedItems(newItem);
-         if (!settings.NoText && Config.autoEquip != Configs.InventoryManagement.AutoEquipLevel.Off) {
-            foreach (ModInventory inventory in InventoryLoader.Inventories) {
-                newItem = inventory.GetItem(self, newItem, settings);
-                if (newItem.IsAir) return new();
+        // ++<smartPickup>
+        cursor.EmitLdarg0();
+        cursor.EmitLdarg2();
+        cursor.EmitLdarg3();
+        cursor.EmitDelegate((Player self, Item newItem, GetItemSettings settings) => {
+            if (innerGetItem || Config.smartPickup == Configs.InventoryManagement.SmartPickupLevel.Off) return newItem;
+            else return SmartPickup.SmartGetItem(self, newItem, settings);
+        });
+        cursor.EmitStarg(2);
+
+        // ++if (newItem.IsAir) return new()
+        cursor.EmitLdarg2();
+        cursor.EmitDelegate((Item item) => item.IsAir);
+        ILLabel skip = cursor.DefineLabel();
+        cursor.EmitBrfalse(skip);
+        cursor.EmitDelegate(() => new Item());
+        cursor.EmitRet();
+        cursor.MarkLabel(skip);
+
+        // if (isACoin) ...
+        // if (item.FitsAmmoSlot()) ...
+        // for(...) ...
+        cursor.GotoNext(i => i.MatchLdloc3());
+        cursor.GotoNext(MoveType.AfterLabel, i => i.MatchLdloc0());
+
+        // ++<autoEquip>
+        cursor.EmitLdarg0();
+        cursor.EmitLdarg2();
+        cursor.EmitLdarg3();
+        cursor.EmitDelegate((Player self, Item newItem, GetItemSettings settings) => {
+            if (innerGetItem || settings.NoText || Config.autoEquip == Configs.InventoryManagement.AutoEquipLevel.Off) return newItem;
+            foreach (ModSubInventory slots in InventoryLoader.GetSubInventories(newItem, Config.autoEquip == Configs.InventoryManagement.AutoEquipLevel.DefaultSlots ? SubInventoryType.Default : SubInventoryType.Secondary).ToArray()) {
+                newItem = slots.GetItem(self, newItem, settings);
+                if (newItem.IsAir) return newItem;
             }
-        }
-        return orig(self, plr, newItem, settings);
+            return newItem;
+        });
+        cursor.EmitStarg(2);
+
+        // ++if (newItem.IsAir) return new()
+        cursor.EmitLdarg2();
+        cursor.EmitDelegate((Item item) => item.IsAir);
+        ILLabel skip2 = cursor.DefineLabel();
+        cursor.EmitBrfalse(skip2);
+        cursor.EmitDelegate(() => new Item());
+        cursor.EmitRet();
+        cursor.MarkLabel(skip2);
+
+        // ...
     }
 
 
@@ -208,6 +268,8 @@ public sealed class BetterPlayer : ModPlayer {
     public VisibilityFilters VisibilityFilters { get; set; } = new();
 
     private static bool innerGetItem;
+
+    private static bool _noMousePickup;
 
     public const string VisibilityTag = "visibility";
     public const string RecipesTag = "recipes";

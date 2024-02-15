@@ -48,6 +48,10 @@ public sealed class Bestiary : ILoadable {
 
 
     private static void HookFixDropRates(On_FewFromOptionsNotScaledWithLuckDropRule.orig_ReportDroprates orig, FewFromOptionsNotScaledWithLuckDropRule self, List<DropRateInfo> drops, DropRateInfoChainFeed ratesInfo) {
+        if (!Enabled) {
+            orig(self, drops, ratesInfo);
+            return;
+        }
         float pesonalDroprate = System.Math.Min(1, self.chanceNumerator / (float)self.chanceDenominator);
         float globalDroprate = pesonalDroprate * ratesInfo.parentDroprateChance;
         float dropRate = 1f / self.dropIds.Length * self.amount * globalDroprate;
@@ -64,7 +68,7 @@ public sealed class Bestiary : ILoadable {
 
         // ++ <fakeUnlock> 
         cursor.EmitDelegate((BestiaryUICollectionInfo info) => {
-            if (Enabled) info.UnlockState = BestiaryEntryUnlockState.CanShowDropsWithDropRates_4;
+            if (Enabled) info.UnlockState = GetDisplayedUnlockLevel(info.UnlockState);
             return info;
         });
         // ...
@@ -125,7 +129,7 @@ public sealed class Bestiary : ILoadable {
 
         // ++ <fakeUnlock> 
         cursor.EmitDelegate((BestiaryUICollectionInfo info) => {
-            if (Enabled && Configs.ItemSearch.Instance.unknownDisplay == Configs.ItemSearch.UnknownDisplay.Known) info.UnlockState = BestiaryEntryUnlockState.CanShowDropsWithDropRates_4;
+            if (Enabled && Configs.ItemSearch.Instance.unknownDisplay == Configs.ItemSearch.UnknownDisplay.Known) info.UnlockState = GetDisplayedUnlockLevel(info.UnlockState);
             return info;
         });
         // ...
@@ -156,9 +160,7 @@ public sealed class Bestiary : ILoadable {
 
         // ++ <fakeUnlock> 
         cursor.EmitDelegate((BestiaryUICollectionInfo info) => {
-            if(!Enabled) return info;
-            if (Configs.ItemSearch.Instance.unknownDisplay == Configs.ItemSearch.UnknownDisplay.Known) info.UnlockState = BestiaryEntryUnlockState.CanShowDropsWithDropRates_4;
-            else if(BestiaryEntryUnlockState.NotKnownAtAll_0 < info.UnlockState && info.UnlockState < BestiaryEntryUnlockState.CanShowDropsWithoutDropRates_3) info.UnlockState = BestiaryEntryUnlockState.CanShowDropsWithoutDropRates_3;
+            if (Enabled && (info.UnlockState > BestiaryEntryUnlockState.NotKnownAtAll_0 || Configs.ItemSearch.Instance.unknownDisplay == Configs.ItemSearch.UnknownDisplay.Known)) info.UnlockState = GetDisplayedUnlockLevel(info.UnlockState);
             return info;
         });
         // ...
@@ -216,6 +218,8 @@ public sealed class Bestiary : ILoadable {
         }
     }
 
+
+    public static BestiaryEntryUnlockState GetDisplayedUnlockLevel(BestiaryEntryUnlockState state) => state < (BestiaryEntryUnlockState)(Config.displayedUnlock+1) ? (BestiaryEntryUnlockState)(Config.displayedUnlock+1) : state;
 
     public static void DarkenElement(UIElement element, float dark, int depth = -1){
         if (element is UIHorizontalSeparator sep) sep.Color.ApplyRGB(dark);

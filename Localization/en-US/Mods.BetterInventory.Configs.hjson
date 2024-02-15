@@ -20,30 +20,37 @@ Crafting: {
 			'''
 	}
 
-	craftOverrides: {
-		Label: "[i:36] Recipe Crafting Overrides"
-		Tooltip:
-			'''
-			Makes crafting consistent with inventory movements
-			Left Click to craft a stack of items
-			Shift Left Click to craft and tranfer a stack of items inside your inventory
-			Right Click to craft the recipe once
-			'''
-	}
-
-	craftingOnRecList: {
+	craftOnList: {
 		Label: "[i:3617] Craft on Recipe List"
 		Tooltip: Allows you to craft items directly from the recipe list
 	}
 
 	recipeScroll: {
-		Label: "[i:3285] Faster Recipe Scroll"
-		Tooltip: ""
+		Label: "[i:3389] Faster Recipe Scroll"
+		Tooltip: Make the recipe scoll very fast
+	}
+}
+
+RecipeFiltering: {
+	Tooltip: ""
+
+	hideUnavailable: {
+		Label: Hide Unavailable Filters
+		Tooltip: Hides filter with no recipes
 	}
 
+	width: {
+		Label: Width
+		Tooltip: The number of filters per line
+	}
+}
+
+CraftOnList: {
+	Tooltip: ""
+
 	focusRecipe: {
-		Label: "[i:1248] Focus Hovered Recipe"
-		Tooltip: Automaticaly selects the hovered recipe on the recipe list
+		Label: Focus Hovered Recipe
+		Tooltip: Automaticaly selects the hovered recipe
 	}
 }
 
@@ -52,7 +59,7 @@ RecipeScroll: {
 
 	listScroll: {
 		Label: Scroll in Recipe List
-		Tooltip: Replace the instant recipe list scroll with a fast scroll
+		Tooltip: Replaces the instant scroll with an extremely fast one when the recipe list is open
 	}
 }
 
@@ -66,7 +73,7 @@ InventoryManagement: {
 
 	smartAmmo: {
 		Label: "[i:40] Smart Ammo Consumption"
-		Tooltip: Consumes ammo from the last stack in the inventory
+		Tooltip: Consumes ammo (arrows, baits, paints, ...) from the last stack in the inventory. Doesn't affect the selected ammo
 	}
 
 	smartPickup: {
@@ -85,23 +92,27 @@ InventoryManagement: {
 		Tooltip:
 			'''
 			Automaticaly equips items such as Armors, Accessories or Equipement
-			{$Mods.BetterInventory.Configs.AutoEquipLevel.MainSlots.Label}: Equipement go to their default slots if available
-			{$Mods.BetterInventory.Configs.AutoEquipLevel.AllSlots.Label}: Inluces Dyes. Armor and Accessories items can go to social slots.
+			{$Mods.BetterInventory.Configs.AutoEquipLevel.DefaultSlots.Label}: Equipement go to their default slots if available
+			{$Mods.BetterInventory.Configs.AutoEquipLevel.AnySlot.Label}: Equipement go to any slot they can go in. Includes Dyes. Armors and Accessories can go to social slots.
 			'''
 	}
 
 	quickMove: {
 		Label: "[i:3620] Quick Move"
-		Tooltip: Hover over an item and press a hotbar keybind to move it between different contexts
+		Tooltip: Hover over an item in your inventory and press a hotbar keybind to move it between different contexts
 	}
 
-	fastRightClick: {
+	fastContainerOpening: {
 		Label: "[i:5002] Fast Container Opening"
-		Tooltip: Hold rick click to rapidly open containers
+		Tooltip:
+			'''
+			Hold rick click to rapidly open containers
+			Faster Extractinator
+			'''
 	}
 
 	itemRightClick: {
-		Label: "[i:5075] Extra Item Right Click"
+		Label: "[i:1503] Extra Item Right Click"
 		Tooltip: Item that can be right clicked in the inventory can be right clicked when held
 	}
 
@@ -119,19 +130,24 @@ InventoryManagement: {
 		Label: "[i:75] Favorite Items in Personal Storages"
 		Tooltip: Allows you to favorite items in your personal storages
 	}
+
+	clickOverrides: {
+		Label: "[i:5075] Click Overrides"
+		Tooltip: Makes shops and crafting consistent with inventory movements
+	}
 }
 
 SmartPickup: {
 	Tooltip: ""
 
-	shiftClicks: {
-		Label: "[i:48] Shift Clicked Items"
-		Tooltip: Applies to items Shift Clicked into
+	mediumCore: {
+		Label: Items Dropped on Death
+		Tooltip: Applies to items dropped on death
 	}
 
-	mediumCore: {
-		Label: "[i:1174] Items Dropped on Death"
-		Tooltip: Applies to items dropped on death
+	markIntensity: {
+		Label: Old Items Opacity
+		Tooltip: The opacity of the ghost displayed on the old item slots
 	}
 }
 
@@ -145,8 +161,60 @@ SmartPickupLevel: {
 AutoEquipLevel: {
 	Tooltip: ""
 	Off.Label: Off
-	MainSlots.Label: Default slots
-	AllSlots.Label: All Slots
+	DefaultSlots.Label: Default slots
+	AnySlot.Label: Any Slots
+}
+
+ItemRightClick: {
+	Tooltip: ""
+
+	stackableItems: {
+		Label: Stackable Items
+		Tooltip: Right Click a stackable item to throw an item of the stack
+	}
+}
+
+ClickOverride: {
+	Tooltip: ""
+
+	crafting: {
+		Label: Crafting
+		Tooltip:
+			'''
+			Left Click to craft a stack of items
+			Right Click to craft the recipe once
+			Hold Shift to tranfer the crafted items in your inventory
+			'''
+	}
+
+	shops: {
+		Label: Shops
+		Tooltip:
+			'''
+			Left Click to buy a stack of items
+			Right Click to buy once
+			Hold Shift to tranfer the baught items in your inventory
+			'''
+	}
+
+	shiftRight: {
+		Label: Shift Right Click
+		Tooltip: Allows you to Shift or Control Right Click to transfer one item
+	}
+
+	stacking: {
+		Label: Trash and Shops Stacking
+		Tooltip:
+			'''
+			Items sold multiple times will stack a single one slot
+			Items trashed multiple in a row times will stack instead of replacing the old one
+			'''
+	}
+
+	invertClicks: {
+		Label: Invert Clicks
+		Tooltip: Invert the behaviour of the left and right clicks when crafting or buying items
+	}
 }
 
 QuickMove: {
@@ -154,23 +222,62 @@ QuickMove: {
 
 	chainTime: {
 		Label: Chain Interval
-		Tooltip: Frame interval to move to the next context in the chain
+		Tooltip: Frame interval until the current chain resets (60 = 1s)
 	}
 
 	showTooltip: {
 		Label: Show Tooltip
-		Tooltip: Displays the chain in the item tooltip
-	}
-
-	highlightSlots: {
-		Label: Highlight Slots
-		Tooltip: Highlight the next slots in the chain
+		Tooltip: Displays the context chain in the item tooltip
 	}
 
 	returnToSlot: {
 		Label: Return to Original Slot
-		Tooltip: Return the item to its original slot at the end of the chain
+		Tooltip: Return the item to its original slot when swapping at the end of the chain
 	}
+
+	hotkeyMode: {
+		Label: Hotkey Mapping
+		Tooltip:
+			'''
+			Changes the mapping of hotkeys depending of the number of target slots
+			{$Mods.BetterInventory.Configs.HotkeyMode.Default.Label}: Hotbar #1 maps to slot 1, Hotbar #10 to slot 10
+			{$Mods.BetterInventory.Configs.HotkeyMode.FromEnd.Label}: Hotbar #10 maps to the last slot, Hotbar #1 to 10 slot from the end
+			{$Mods.BetterInventory.Configs.HotkeyMode.Reversed.Label}: Hotbar #10 maps to slot 1, Hotbar #1 to slot 10
+			'''
+	}
+
+	displayHotkeys: {
+		Label: Display Hotkeys
+		Tooltip:
+			'''
+			Displays hotkeys on the slots where an item can be moved to
+			{$Mods.BetterInventory.Configs.HotkeyDisplayMode.First.Label}: Displays the hotkeys of the next context in the chain
+			{$Mods.BetterInventory.Configs.HotkeyDisplayMode.All.Label}: Displays the hotkey of the all contexts in the chain
+			'''
+	}
+}
+
+HotkeyDisplay: {
+	Tooltip: ""
+
+	highlightIntensity: {
+		Label: Slot Highlight Intensity
+		Tooltip: Highlight the slots where an item can be quick moved to
+	}
+}
+
+HotkeyMode: {
+	Tooltip: ""
+	Default.Label: Default
+	FromEnd.Label: From End
+	Reversed.Label: Reversed
+}
+
+HotkeyDisplayMode: {
+	Tooltip: ""
+	Off.Label: Off
+	First.Label: First
+	All.Label: All
 }
 
 ItemSearch: {
@@ -179,42 +286,45 @@ ItemSearch: {
 	betterGuide: {
 		Label: "[i:267] {$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Name}"
 		Name: Better Guide
-		Tooltip:
-			'''
-			Allows you to searched the recipes of any item
-			Adds recipes crafting the selected item
-			Shows missing materials in non craftable recipes
-			Visualy overrides unknown recipes.
-			'''
+		Tooltip: Improves various aspects of the Guide
 	}
 
 	betterBestiary: {
 		Label: "[i:4767] {$Mods.BetterInventory.Configs.ItemSearch.betterBestiary.Name}"
 		Name: Better Bestiary
-		Tooltip:
-			'''
-			Search includes locked entries
-			Visualy overrides the unlock state of entries (does not affect completion)
-			'''
+		Tooltip: Improves various aspects of the Bestiary
 	}
 
 	searchRecipes: {
-		Label: "[i:3549] Search Recipes"
+		Label: "[i:3549] {$Mods.BetterInventory.Configs.ItemSearch.searchRecipes.Name}"
+		Name: Search Recipes
 		Tooltip:
 			'''
 			Allows you to access the guide anywhere
-			With {$Mods.BetterInventory.Configs.BetterGuide.guideTile.Label} On, searching the guide tile will move it into the guide item and vice-versa
 			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Left Click an item to search its recipe
 			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Middle Click in the inventory to clear the searched item
+			With {$Mods.BetterInventory.Configs.BetterGuide.guideTile.Label} On, searching the guide tile will move it into the guide item and vice-versa
+			Right Click the Guide item to clear it
 			'''
 	}
 
 	searchDrops: {
-		Label: "[i:2903] Search Drops"
+		Label: "[i:2903] {$Mods.BetterInventory.Configs.ItemSearch.searchDrops.Name}"
+		Name: Search Drops
 		Tooltip:
 			'''
 			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Right Click an item to search its drops
 			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Middle Click in the Bestiary to clear the searched item
+			Right Click Bestiary text field to clear it
+			'''
+	}
+
+	searchHistory: {
+		Label: "[i:346] Search History"
+		Tooltip:
+			'''
+			Right Click the Guide item or Bestiary text field to search the previous value instead of clearing it
+			Requires "{$Mods.BetterInventory.Configs.ItemSearch.searchRecipes.Name}" and "{$Mods.BetterInventory.Configs.ItemSearch.searchDrops.Name}" respectively to be On
 			'''
 	}
 
@@ -222,11 +332,11 @@ ItemSearch: {
 		Label: "[i:236] Unknown Recipe or NPCs display"
 		Tooltip:
 			'''
-			Changed how Recipes and NPCs you have not discovered are displayed in the Recipe list and Bestiary
+			Changes how Recipes and NPCs you have not discovered are displayed in the Recipe list and Bestiary
 			Requires "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Name}" and "{$Mods.BetterInventory.Configs.ItemSearch.betterBestiary.Name}" respectively to be On
 			{$Mods.BetterInventory.Configs.UnknownDisplay.Hidden.Label}: Not displayed
 			{$Mods.BetterInventory.Configs.UnknownDisplay.Unknown.Label}: Displayed as '?'
-			{$Mods.BetterInventory.Configs.UnknownDisplay.Known.Label}: Displayed as fully known. Does not affect Bestiary completion
+			{$Mods.BetterInventory.Configs.UnknownDisplay.Known.Label}: Counts as discovered. 
 			'''
 	}
 
@@ -241,8 +351,20 @@ ItemSearch: {
 	}
 }
 
+UnknownDisplay: {
+	Tooltip: ""
+	Hidden.Label: Hidden
+	Unknown.Label: Unknown
+	Known.Label: Known
+}
+
 BetterGuide: {
 	Tooltip: ""
+
+	anyItem: {
+		Label: Search Any Item
+		Tooltip: Allows you to search the recipe of any item
+	}
 
 	favoriteRecipes: {
 		Label: Favorite Recipes
@@ -268,11 +390,94 @@ BetterGuide: {
 	}
 }
 
-UnknownDisplay: {
+BetterBestiary: {
 	Tooltip: ""
-	Hidden.Label: Hidden
-	Unknown.Label: Unknown
-	Known.Label: Known
+
+	showBagContent: {
+		Label: Show Treasure Bag Content
+		Tooltip: Displays items dropped by Treasure Bags in the Bestiary
+	}
+
+	unlockFilter: {
+		Label: Override Unlock Filter
+		Tooltip: Replace the filter "{$BestiaryInfo.IfUnlocked}" with "{$Mods.BetterInventory.UI.FullUnlock}"
+	}
+
+	displayedUnlock: {
+		Label: Minimum Displayed Values
+		Tooltip: Forces the minimal displayed stats for discovered entries
+	}
+}
+
+UnlockLevel: {
+	Tooltip: ""
+	Unchanged.Label: Unchanged
+	Stats.Label: Detailed Stats
+	Drops.Label: Drops
+	DropRates.Label: Drop Rates
+}
+
+Version: {
+	DisplayName: Version {$Mods.BetterInventory.Chat.Version}
+	Headers.Changelog: Changelog
+
+	Info: {
+		Label: Added Click Overrides, Search History and improved various features
+		Tooltip: ""
+	}
+
+	Important: {
+		Label:
+			'''
+			{$Mods.BetterInventory.Chat.Important}
+
+			'''
+		Tooltip: ""
+	}
+
+	Bug: {
+		Label:
+			'''
+			{$Mods.BetterInventory.Chat.Bug}
+
+			'''
+		Tooltip: ""
+	}
+
+	Changelog: {
+		Label:
+			'''
+			- Replaced chat message with notification
+			- Added Chat message to Version Config
+			- Displays Smart pickup ghosts
+			- Allows items to have ghosts in multiple slots
+			- Improved SmartPickup and AutoEquip pickup order
+			- Removes Smart Pickup on Shift Click
+			- Fast Container Opening now applies to the Extractinator
+			- Improved recipe filters display
+			- Fixed recipe scroll SFX
+			- Added Shift Right click override
+			- Added click overrides for shops
+			- Added options to invert Crafting override clicks
+			- Added item stacking for shops and trash
+			- Added More Better Bestiary and Guide settings
+			- Added Search History for Guide and Bestiary
+			- Fixed guideTile applied when disabled
+			- Fixed Guide Item removed when searching the same item
+			- Added Different Quick Move hotkey layouts
+			- Displays the hotkey and highlights the slots where an item can be quick moved to
+			- Fixed Quick Moving accessories keeping the effect of some items
+			- Fixed Quick Move and Smart Pickup losing modded item data
+			- Fixed Quick move changing the favorite state of items
+			- Fixed others bugs
+			'''
+		Tooltip: ""
+	}
+
+	Thanks: {
+		Label: Thanks
+		Tooltip: ""
+	}
 }
 
 Toggle`1.Tooltip: ""
@@ -289,41 +494,6 @@ ChildValue`2: {
 	}
 
 	Tooltip: ""
-}
-
-BetterBestiary: {
-	Tooltip: ""
-
-	showBagContent: {
-		Label: Show Treasure Bag Content
-		Tooltip: Displays info about the items dropped by Treasure bags in the Bestiary
-	}
-
-	unlockFilter: {
-		Label: Override Unlock Filter
-		Tooltip: Replace the filter "{$BestiaryInfo.IfUnlocked}" with "{$Mods.BetterInventory.UI.FullUnlock}"
-	}
-}
-
-Version: {
-	DisplayName: Version 0.3
-
-	Info: {
-		Label: Added a new feature: Smart Pickup
-		Tooltip: ""
-	}
-
-	ChangeLog: {
-		Label:
-			'''
-			- Added Smart Pickup
-			- Small Config label / tooltip changes
-			- Searching guideItem now properly swaps with guideTile if possible
-			- Fixed bugged drops in multiplayer
-			- Fixed displayed requiredTiles when no recipes are available
-			'''
-		Tooltip: ""
-	}
 }
 
 Text.Tooltip: ""

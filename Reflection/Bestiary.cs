@@ -5,6 +5,7 @@ using Terraria.GameContent.Bestiary;
 using Terraria.GameContent.UI.Elements;
 
 using TBestiary = Terraria.GameContent.UI.States.UIBestiaryTest;
+using TSearchBar = Terraria.GameContent.UI.Elements.UISearchBar;
 using TIcon = Terraria.GameContent.UI.Elements.UIBestiaryEntryIcon;
 using TButton = Terraria.GameContent.UI.Elements.UIBestiaryEntryButton;
 using TPage = Terraria.GameContent.UI.Elements.UIBestiaryEntryInfoPage;
@@ -16,7 +17,7 @@ namespace BetterInventory.Reflection;
 
 public static class UIBestiaryTest {
     public static readonly Field<TBestiary, List<BestiaryEntry>> _workingSetEntries = new(nameof(_workingSetEntries));
-    public static readonly Field<TBestiary, UISearchBar> _searchBar = new(nameof(_searchBar));
+    public static readonly Field<TBestiary, TSearchBar> _searchBar = new(nameof(_searchBar));
     public static readonly Field<TBestiary, TButton> _selectedEntryButton = new(nameof(_selectedEntryButton));
     public static readonly Field<TBestiary, UIBestiaryEntryGrid> _entryGrid = new(nameof(_entryGrid));
     public static readonly Method<TBestiary, TButton, object?> SelectEntryButton = new(nameof(SelectEntryButton));
@@ -49,4 +50,7 @@ public static class GroupOptionButton<T> {
 
 public static class ItemDropBestiaryInfoElement {
     public static readonly Field<TItemDropE, DropRateInfo> _droprateInfo = new(nameof(_droprateInfo));
+}
+public static class UISearchBar {
+    public static readonly Field<TSearchBar, string> actualContents = new(nameof(actualContents));
 }

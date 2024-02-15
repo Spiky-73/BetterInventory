@@ -1,7 +1,8 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using BetterInventory.DataStructures;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using MonoMod.Cil;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -15,87 +16,143 @@ public sealed class SmartPickup : ILoadable {
     public static Configs.SmartPickup Config => Configs.InventoryManagement.Instance.smartPickup.Value;
 
     public void Load(Mod mod) {
-        On_ItemSlot.LeftClick_ItemArray_int_int += HookLeftClick;
-        On_ItemSlot.RightClick_ItemArray_int_int += HookRightClick;
+        On_ItemSlot.LeftClick_ItemArray_int_int += HookLeftSaveType;
+        On_ItemSlot.RightClick_ItemArray_int_int += HookRightSaveType;
         On_Player.DropItems += HookMarkItemsOnDeath;
+
+        IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += ILDrawMark;
     }
     public void Unload() { }
 
-    private static void HookRightClick(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
-        int type = inv[slot].type;
-        bool fav = inv[slot].favorited;
+    private static void HookRightSaveType(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
+        (int type, int mouse, bool fav) = (inv[slot].type, Main.mouseItem.type, inv[slot].favorited);
         orig(inv, context, slot);
-        if (SmartPickupEnabled(fav) && type != ItemID.None && inv[slot].IsAir && Main.mouseItem.type == type) Mark(type, inv, context, slot, fav);
+        if(Main.mouseRight) UpdateMark(inv, context, slot, type, mouse, fav);
     }
 
-    private static void HookLeftClick(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
-        (int type, int mouse) = (inv[slot].type, Main.mouseItem.type);
-        bool fav = inv[slot].favorited;
+    private static void HookLeftSaveType(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
+        (int type, int mouse, bool fav) = (inv[slot].type, Main.mouseItem.type, inv[slot].favorited);
         orig(inv, context, slot);
-        if (mouse != ItemID.None && Main.mouseItem.type != mouse && inv[slot].type == mouse) {
-            if(SmartPickupEnabled(fav)) Remark(mouse, type, fav);
-            else Unmark(mouse);
-        } else if (SmartPickupEnabled(fav) && type != ItemID.None && (inv[slot].type != type && Main.mouseItem.type == type || Config.shiftClicks && inv[slot].IsAir)) Mark(type, inv, context, slot, fav);
+        if (Main.mouseLeft && Main.mouseLeftRelease) UpdateMark(inv, context, slot, type, mouse, fav);
+    }
+
+    public static void UpdateMark(Item[] inv, int context, int slot, int oldType, int oldMouse, bool oldFav) {
+        // if (Main.mouseItem.type == oldMouse && (inv[slot].type == oldType || !Config.shiftClicks)) return;
+        if (Main.mouseItem.type == oldMouse) return;
+        if (oldType == ItemID.None) Unmark(inv[slot].type);
+        else if (inv[slot].type == ItemID.None) Mark(oldType, inv, context, slot, oldFav);
+        else Remark(inv[slot].type, oldType, oldFav);
     }
 
     public static Item SmartGetItem(Player player, Item item, GetItemSettings settings) {
-        if (player.whoAmI == Main.myPlayer && IsMarked(item.type)) {
-            var mark = _marks[item.type];
-            item.favorited |= _marksData[item.type];
-            Unmark(item.type);
+        if (player.whoAmI != Main.myPlayer || !IsMarked(item.type)) return item;
 
-            JoinedList<Item> items = mark.items.Items(player);
+        List<Slot> slots = new();
+        while (_marks[item.type].Count > 0) {
+            (Slot mark, bool favorited) = ConsumeMark(item.type);
+            Joined<ListIndices<Item>, Item> items = mark.Inventory.Items(player);
+            if (mark.Index >= items.Count) continue;
+            if (!item.favorited && !favorited && items[mark.Index].favorited) continue;
 
-            if (mark.slot >= items.Count) return item;
-            if (item.favorited || !items[mark.slot].favorited) {
-                (Item moved, items[mark.slot]) = (items[mark.slot], new());
-                item = mark.items.GetItem(player, item, settings, mark.slot);
-                moved = mark.items.Inventory.GetItem(player, moved, settings);
-                if (item.IsAir) return moved;
-                player.GetDropItem(ref moved);
-                return item;
-            }
-            return mark.items.GetItem(player, item, settings, mark.slot);
+            item.favorited |= favorited;
+            (Item moved, items[mark.Index]) = (items[mark.Index], new());
+            Item toMove = item.Clone();
+            toMove.stack = 1;
+            item.stack--;
+            if (!mark.GetItem(player, toMove, settings).IsAir) item.stack++;
+            moved = mark.GetItem(player, moved, settings);
+            if (item.IsAir) return moved;
+            slots.Add(mark);
+            player.GetDropItem(ref moved);
+        }
+        foreach (Slot slot in slots) {
+            item = slot.GetItem(player, item, settings);
+            if (item.IsAir) return item;
         }
         return item;
     }
 
-    public static bool IsMarked(int type) => _marks.ContainsKey(type);
+    private static void ILDrawMark(ILContext il) {
+        ILCursor cursor = new(il);
+
+        // ...
+        // int num9 = context switch { ... };
+        // if ((item.type <= 0 || item.stack <= 0) && ++[!<drawMark> && num9 != -1]) <drawSlotTexture>
+        cursor.GotoNext(MoveType.After, i => i.MatchLdloc(11));
+        cursor.EmitLdarg0();
+        cursor.EmitLdarg1();
+        cursor.EmitLdarg2();
+        cursor.EmitLdarg3();
+        cursor.EmitLdarg(4);
+        cursor.EmitLdloc2();
+        cursor.EmitLdloc(7);
+        cursor.EmitLdloc(3);
+        cursor.EmitDelegate((int num9, SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, float scale, Texture2D texture, Color color) => {
+            if (Level == Configs.InventoryManagement.SmartPickupLevel.Off || Config.markIntensity == 0 || !QuickMove.IsInventorySlot(inv, context, slot, out Slot itemSlot)) return num9;
+            if (!IsMarked(itemSlot)) return num9;
+            float scale2 = ItemSlot.DrawItemIcon(_marksData[itemSlot].fake, context, spriteBatch, position + texture.Size() / 2f * scale, scale, 32f, color * Config.markIntensity * Main.cursorAlpha);
+            return -1;
+        });
+    }
+
+
+    public static bool IsMarked(int type) => _marks.TryGetValue(type, out var marks) && marks.Count > 0;
+    public static bool IsMarked(Slot slot) => _marksData.ContainsKey(slot);
 
     public static void Mark(int type, Item[] inv, int context, int slot, bool favorited) {
-        (InventorySlots? slots, int index) = InventoryLoader.GetInventorySlot(Main.LocalPlayer, inv, context, slot);
-        if (slots is not null) Mark(type, (slots, index), favorited);
+        Slot? mark = InventoryLoader.GetInventorySlot(Main.LocalPlayer, inv, context, slot);
+        if (mark is not null) Mark(type, mark.Value, favorited);
     }
-    public static void Mark(int type, (InventorySlots items, int slot) mark, bool favorited) {
-        Unmark(_marks.FirstOrDefault(kvp => kvp.Value == mark).Key);
-        _marks[type] = mark;
-        _marksData[type] = favorited;
-    }
-    public static void Remark(int oldType, int newType, bool? favorite = null) {
-        if (newType == ItemID.None) Unmark(oldType);
-        else if (IsMarked(oldType)) Mark(newType, _marks[oldType], favorite ?? _marksData[oldType]);
+    public static void Mark(int type, Slot slot, bool favorited) {
+        // if (IsMarked(type)) Unmark(type);
+        if (IsMarked(slot)) Unmark(slot);
+
+        _marks.TryAdd(type, new());
+        _marks[type].Add(slot);
+
+        _marksData[slot] = (new(type), favorited);
     }
     public static void Unmark(int type) {
+        if (!IsMarked(type)) return;
+        List<Slot> marks = _marks[type];
+        foreach (Slot mark in marks) _marksData.Remove(mark);
         _marks.Remove(type);
-        _marksData.Remove(type);
+    }
+    public static void Unmark(Slot slot) {
+        if (!IsMarked(slot)) return;
+        _marks[_marksData[slot].fake.type].Remove(slot);
+        _marksData.Remove(slot);
+    }
+    public static void Remark(int oldType, int newType, bool? favorited = null) {
+        if (newType == oldType || newType == ItemID.None || !IsMarked(oldType)) {
+            Unmark(oldType);
+            return;
+        }
+        List<Slot> marks = _marks[oldType];
+        foreach (Slot mark in marks) _marksData[mark] = (new(newType), favorited ?? _marksData[mark].favorited);
+
+        _marks[newType] = _marks[oldType];
+        _marks.Remove(oldType);
+    }
+    public static (Slot slot, bool favorited) ConsumeMark(int type) {
+        Slot mark = _marks[type][^1];
+        bool favorited = _marksData[mark].favorited;
+        Unmark(mark);
+        return (mark, favorited);
     }
 
-    private void HookMarkItemsOnDeath(On_Player.orig_DropItems orig, Player self) {
+    private static void HookMarkItemsOnDeath(On_Player.orig_DropItems orig, Player self) {
         if(Level == Configs.InventoryManagement.SmartPickupLevel.Off || !Config.mediumCore){
             orig(self);
             return;
         }
-        foreach (ModInventory modInventory in InventoryLoader.Inventories) {
-            foreach (InventorySlots slots in modInventory.Slots) {
-                foreach ((int c, Func<Player, ListIndices<Item>> s) in slots.Slots) {
-                    ListIndices<Item> items = s(self);
-                    for (int i = 0; i < items.Count; i++) {
-                        if(!items[i].IsAir && SmartPickupEnabled(items[i].favorited)) Mark(items[i].type, (slots, i), items[i].favorited);
-                    }
-                }
+
+        foreach (ModSubInventory inventory in InventoryLoader.SubInventories) {
+            IList<Item> items = inventory.Items(self);
+            for (int i = 0; i < items.Count; i++) {
+                if(!items[i].IsAir && SmartPickupEnabled(items[i].favorited)) Mark(items[i].type, new(inventory, i), items[i].favorited);
             }
         }
-        
         orig(self);
     }
 
@@ -105,6 +162,6 @@ public sealed class SmartPickup : ILoadable {
         Configs.InventoryManagement.SmartPickupLevel.Off or _ => false
     };
 
-    private static readonly Dictionary<int, (InventorySlots items, int slot)> _marks = new();
-    private static readonly Dictionary<int, bool> _marksData = new();
+    private static readonly Dictionary<Slot, (Item fake, bool favorited)> _marksData = new();
+    private static readonly Dictionary<int, List<Slot>> _marks = new();
 }

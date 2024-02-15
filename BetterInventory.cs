@@ -1,3 +1,4 @@
+using BetterInventory.Configs.UI;
 using Terraria.ModLoader;
 
 namespace BetterInventory;
@@ -6,10 +7,10 @@ public sealed class BetterInventory : Mod {
 
     public override void Load() {
         Instance = this;
+        MonoModHooks.Modify(Reflection.ConfigElement.DrawSelf, Text.ILColors);
     }
 
     public override void Unload() {
-        InventoryLoader.Unload();
         Instance = null!;
     }
 }

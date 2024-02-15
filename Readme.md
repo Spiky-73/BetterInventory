@@ -1,12 +1,12 @@
 ## Better Inventory
 
-This mods adds small features designed to improve the player Inventory and all the systems around it.
+This mods adds loads of small features designed to improve the player Inventory and all the systems around it.
 I STRONGLY ADVISE you to read the mod configs to learn about all the features and enable/disable them.
-Feel free to suggest new feature in the Steam Workshop page or by creating a new issues on Gihtub. 
+Feel free to suggest new features I you think of any! 
 
-Keep in mind, this mod is still in developement. If you find a bug, please report it on the Steam Workshop page or Gihtub.
+Keep in mind, this mod is still in developement. If you find a bug, please report it here or on the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetails/?id=3074374647).
 
-Visit the [Workshop Page](https://steamcommunity.com/sharedfiles/filedetails/?id=3074374647) if you with to download and use this mod.
+Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetails/?id=3074374647) if you wish to download and use this mod.
 
 
 ## Key Features
@@ -17,11 +17,36 @@ Visit the [Workshop Page](https://steamcommunity.com/sharedfiles/filedetails/?id
  - An improved Guide allowing you to Favorite or Blacklist recipes and filter by crating station
  - An improved Bestiary showing the content of Treasure Bag 
  - An Enhanced Crafting interface with the ability to craft on the recipe list, filter recipes and craft item in stacks 
- - The possibility to search an item's recipes on NPCs dropping it
- - And more...
+ - The possibility to search an item's recipes or NPCs dropping it
+ - And many more...
 
 
 ## Changelog
+
+### v0.4
+- Replaced chat message with notification
+- Added Chat message to Version Config
+- Displays Smart pickup ghosts
+- Allows items to have ghosts in multiple slots
+- Improved SmartPickup and AutoEquip pickup order
+- Removes Smart Pickup on Shift Click
+- Fast Container Opening now applies to the Extractinator
+- Improved recipe filters display
+- Fixed recipe scroll SFX
+- Added Shift Right click override
+- Added click overrides for shops
+- Added options to invert Crafting override clicks
+- Added item stacking for shops and trash
+- Added More Better Bestiary and Guide settings
+- Added Search History for Guide and Bestiary
+- Fixed guideTile applied when disabled
+- Fixed Guide Item removed when searching the same item
+- Added Different Quick Move hotkey layouts
+- Displays the hotkey and highlights the slots where an item can be quick moved to
+- Fixed Quick Moving accessories keeping the effect of some items
+- Fixed Quick Move and Smart Pickup losing modded item data
+- Fixed Quick move changing the favorite state of items
+- Fixed others bugs
 
 ### v0.3
 - Added Smart Pickup
