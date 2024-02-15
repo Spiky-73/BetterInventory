@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework;
 namespace BetterInventory.Reflection;
 
 public static class Main {
+    public static readonly StaticField<int[]> availableRecipe = new(typeof(TMain), nameof(TMain.availableRecipe));
     public static readonly StaticField<int> numAvailableRecipes = new(typeof(TMain), nameof(TMain.numAvailableRecipes));
     public static readonly StaticField<bool> recBigList = new(typeof(TMain), nameof(TMain.recBigList));
     public static readonly StaticField<int> focusRecipe = new(typeof(TMain), nameof(TMain.focusRecipe));
