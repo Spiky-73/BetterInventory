@@ -423,41 +423,22 @@ Version: {
 	Headers.Changelog: Changelog
 
 	Info: {
-		Label: 
-			'''
-			{$Mods.BetterInventory.Chat.Info}
-			'''
+		Label: "{$Mods.BetterInventory.Chat.Info}"
 		Tooltip: ""
 	}
 
 	Important: {
-		Label:
-			'''
-			{$Mods.BetterInventory.Chat.Important}
-
-			'''
+		Label: "{$Mods.BetterInventory.Chat.Important}"
 		Tooltip: ""
 	}
 
 	Bug: {
-		Label:
-			'''
-			{$Mods.BetterInventory.Chat.Bug}
-
-			'''
+		Label: "{$Mods.BetterInventory.Chat.Bug}"
 		Tooltip: ""
 	}
 
 	Changelog: {
-		Label:
-			'''
-			{$Mods.BetterInventory.Chat.Changelog}
-			'''
-		Tooltip: ""
-	}
-
-	Thanks: {
-		Label: Thanks
+		Label: "{$Mods.BetterInventory.Chat.Changelog}"
 		Tooltip: ""
 	}
 }

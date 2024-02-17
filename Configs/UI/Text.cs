@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Xna.Framework;
 using MonoMod.Cil;
 using Newtonsoft.Json;
@@ -8,6 +7,7 @@ using Terraria.GameContent;
 using Terraria.GameContent.UI.States;
 using Terraria.ModLoader.Config;
 using Terraria.ModLoader.Config.UI;
+using Terraria.UI.Chat;
 
 namespace BetterInventory.Configs.UI;
 
@@ -57,7 +57,8 @@ public sealed class TextElement : ConfigElement<Text?> {
 
     public override void Recalculate() {
         base.Recalculate();
-        Height.Pixels = 30 + Label.Count(c => c == '\n') * FontAssets.ItemStack.Value.LineSpacing * 0.8f;
+        Vector2 size = ChatManager.GetStringSize(FontAssets.ItemStack.Value, Label, new Vector2(0.8f), GetDimensions().Width + 1);
+        Height.Pixels = size.Y + 30 - FontAssets.ItemStack.Value.LineSpacing;
         if (Parent != null && Parent is UISortableElement) Parent.Height.Set(Height.Pixels, 0f);
     }
 }

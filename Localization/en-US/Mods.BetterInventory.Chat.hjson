@@ -7,9 +7,9 @@ Version: 0.4.1
 Info: Optimization and bug fixes
 Important: Better Guide and Recipe Filtering were optimised and should cause much less lag with loads of recipes
 Changelog:
-    '''
-    - Optimised Better Guide and Recipe Filtering
-    - Optimised Quick Move display
-    - Fixed Unknown items able to be favorited
-    - Fixed Quick move changing selected slot when it should not
-    '''
+	'''
+	- Optimised Better Guide and Recipe Filtering
+	- Optimised Quick Move display
+	- Fixed Unknown items able to be favorited
+	- Fixed Quick move changing selected slot when it should not
+	'''
