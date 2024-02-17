@@ -164,7 +164,7 @@ public sealed class Guide : ModSystem {
         float y = inventoryY;
         Main.inventoryScale *= TileScale;
         Rectangle hitbox = new((int)x, (int)y, (int)(TextureAssets.InventoryBack.Width() * Main.inventoryScale), (int)(TextureAssets.InventoryBack.Height() * Main.inventoryScale));
-        Item[] items = new Item[] { Main.guideItem, guideTile };
+        Item[] items = GuideItems;
         if (!_ilVisibilityHover && hitbox.Contains(Main.mouseX, Main.mouseY) && !PlayerInput.IgnoreMouseInterface) {
             Main.player[Main.myPlayer].mouseInterface = true;
             Main.craftingHide = true;
@@ -177,7 +177,7 @@ public sealed class Guide : ModSystem {
             ItemSlot.MouseHover(items, 7, 1);
         }
         ItemSlot.Draw(Main.spriteBatch, items, 7, 1, hitbox.TopLeft());
-        (Main.guideItem, guideTile) = (items[0], items[1]);
+        GuideItems = items;
         Main.inventoryScale /= TileScale;
     }
 
@@ -615,9 +615,9 @@ public sealed class Guide : ModSystem {
             (Item mouse, Main.mouseItem, inv[slot]) = (Main.mouseItem, inv[slot], new());
             (int cursor, Main.cursorOverride) = (Main.cursorOverride, 0);
 
-            Item[] items = new Item[] { Main.guideItem, guideTile };
+            Item[] items = GuideItems;
             ItemSlot.LeftClick(items, ContextID.GuideItem, Config.guideTile && IsCraftingTileItem(Main.mouseItem) ? 1 : 0);
-            (Main.guideItem, guideTile) = (items[0], items[1]);
+            GuideItems = items;
 
             if (Enabled) Main.LocalPlayer.GetDropItem(ref Main.mouseItem);
             else inv[slot] = Main.mouseItem;
@@ -766,6 +766,15 @@ public sealed class Guide : ModSystem {
     public static readonly Dictionary<string, int> ConditionItems = new(); // descrition -> id
 
     public static Item guideTile = new();
+    public static Item[] GuideItems {
+        get {
+            (s_guideItems[0], s_guideItems[1]) = (Main.guideItem, guideTile);
+            return s_guideItems;
+        }
+        set => (Main.guideItem, guideTile) = (value[0], value[1]);
+    }
+    private static readonly Item[] s_guideItems = new Item[2];
+
 
     public static readonly Asset<Texture2D>[] DefaultTextures = new Asset<Texture2D>[] { TextureAssets.InventoryBack4, TextureAssets.InventoryBack14 };
     public static readonly Asset<Texture2D>[] FavoriteTextures = new Asset<Texture2D>[] { TextureAssets.InventoryBack10, TextureAssets.InventoryBack17 };

@@ -173,7 +173,7 @@ public sealed class SearchItem : ILoadable {
         (Item mouse, Main.mouseItem) = (Main.mouseItem, item);
         (int cursor, Main.cursorOverride) = (Main.cursorOverride, 0);
         (bool left, Main.mouseLeft, bool rel, Main.mouseLeftRelease) = (Main.mouseLeft, true, Main.mouseLeftRelease, true);
-        Item[] items = new Item[] { Main.guideItem, Guide.guideTile };
+        Item[] items = Guide.GuideItems;
 
         if (item.IsAir) {
             if (slot == -1 || slot == 0) ItemSlot.LeftClick(items, ContextID.GuideItem, 0);
@@ -185,11 +185,11 @@ public sealed class SearchItem : ILoadable {
                     SetGuideItem(new(), slot);
                     slot = 1 - slot;
                 } else if (items[1 - slot].type == item.type) SetGuideItem(new(), 1 - slot);
-                items = new Item[] { Main.guideItem, Guide.guideTile };
+                items = Guide.GuideItems;
             }
             ItemSlot.LeftClick(items, ContextID.GuideItem, slot);
         }
-        (Main.guideItem, Guide.guideTile) = (items[0], items[1]);
+        Guide.GuideItems = items;
 
         Main.mouseItem = mouse;
         Main.cursorOverride = cursor;

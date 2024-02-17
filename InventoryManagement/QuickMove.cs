@@ -43,26 +43,29 @@ public sealed class QuickMove : ILoadable {
         "Hotbar10"
     };
 
-    public static void AddMoveChainLine(Item _, List<TooltipLine> tooltips){
-        if (!_hover || !Config.showTooltip || _displayedChain.Count == 0) return;
-        tooltips.Add(new(
-            BetterInventory.Instance, "QuickMove",
-            Language.GetTextValue("Mods.BetterInventory.UI.QuickMoveTooltip") + ": " + string.Join(" > ", from slots in _displayedChain where slots is not null select slots.DisplayName)
-        ));
+    public static void ProcessTriggers() {
+        (s_hover, s_frameHover) = (s_frameHover, false);
+        if (s_ignoreHotbar >= 0) {
+            if (PlayerInput.Triggers.JustPressed.KeyStatus[MoveKeys[s_ignoreHotbar]]) s_ignoreHotbar = -1;
+            else PlayerInput.Triggers.Current.KeyStatus[MoveKeys[s_ignoreHotbar]] = false;
+        }
+        if (s_moveTime == 0) s_oldSelectedItem = Main.LocalPlayer.selectedItem;
     }
 
-    public static void RecordSelectedSlot() {
-        if (_moveTime == 0) _selectedItem[0] = Main.LocalPlayer.selectedItem;
-
-        (_lastHover, _hover) = (_hover, false);
+    public static void AddMoveChainLine(Item _, List<TooltipLine> tooltips){
+        if (!s_frameHover || !Config.showTooltip || s_displayedChain.Count == 0) return;
+        tooltips.Add(new(
+            BetterInventory.Instance, "QuickMove",
+            Language.GetTextValue("Mods.BetterInventory.UI.QuickMoveTooltip") + ": " + string.Join(" > ", from slots in s_displayedChain where slots is not null select slots.DisplayName)
+        ));
     }
 
     public static void HoverItem(Item[] inventory, int context, int slot) {
         if (!Enabled) return;
-        _hover = true;
-        if (!IsInventorySlot(inventory, context, slot, out Slot itemSlot)) {
-            ClearMoveChain();
-            _moveTime = 0;
+        s_frameHover = true;
+        if (!InventoryLoader.IsInventorySlot(Main.LocalPlayer, inventory, context, slot, out Slot itemSlot)) {
+            ClearDisplayedChain();
+            s_moveTime = 0;
         } else {
             UpdateDisplayedMoveChain(itemSlot.Inventory, inventory[slot]);
             UpdateChain(itemSlot);
@@ -70,58 +73,56 @@ public sealed class QuickMove : ILoadable {
     }
 
     private static void HookAlternateChain(On_Main.orig_DrawInterface_36_Cursor orig) {
-        if (_moveTime > 0 && !_hover) {
-            if (!Main.playerInventory) _moveTime = 0;
+        if (s_moveTime > 0 && !s_frameHover) {
+            if (!Main.playerInventory) s_moveTime = 0;
             else {
-                Main.LocalPlayer.selectedItem = _selectedItem[1];
-                if (PlayerInput.Triggers.JustPressed.KeyStatus[MoveKeys[_moveKey]]) ContinueChain();
+                if (PlayerInput.Triggers.JustPressed.KeyStatus[MoveKeys[s_moveKey]]) ContinueChain();
             }
         }
         orig();
     }
 
     public static void UpdateChain(Slot source) {
-        if (_moveTime > 0) {
-            _moveTime--;
-            if (_moveTime == Config.chainTime - 1) _validSlots[source.Inventory] = source.Index;
-            else if (!_validSlots.TryGetValue(source.Inventory, out int index) || index != source.Index) _moveTime = 0;
-            Main.LocalPlayer.selectedItem = _selectedItem[1];
+        if (s_moveTime > 0) {
+            s_moveTime--;
+            if (s_moveTime == Config.chainTime - 1) s_validSlots[source.Inventory] = source.Index;
+            else if (!s_validSlots.TryGetValue(source.Inventory, out int index) || index != source.Index) s_moveTime = 0;
         }
 
         int targetKey = Array.FindIndex(MoveKeys, key => PlayerInput.Triggers.JustPressed.KeyStatus[key]);
         if (targetKey == -1) return;
 
-        if (_moveTime == 0 || _moveKey != targetKey) SetupChain(source, targetKey);
-        if(_moveChain.Count != 0) ContinueChain();
+        if (s_moveTime == 0 || s_moveKey != targetKey) SetupChain(source, targetKey);
+        if(s_moveChain.Count != 0) ContinueChain();
     }
     private static void SetupChain(Slot source, int targetKey) {
-        _moveSource = source;
-        _moveKey = targetKey;
-        _moveIndex = -1;
-        _moveChain = new(_displayedChain);
-        _validSlots.Clear();
-        _validSlots[source.Inventory] = source.Index;
-        _movedItems.Clear();
+        s_moveSource = source;
+        s_moveKey = targetKey;
+        s_moveIndex = -1;
+        s_moveChain = new(s_displayedChain);
+        s_validSlots.Clear();
+        s_validSlots[source.Inventory] = source.Index;
+        s_movedItems.Clear();
     }
     private static void ContinueChain() {
         Player player = Main.LocalPlayer;
-        UndoMove(player, _movedItems);
-        
-        _moveIndex = (_moveIndex + 1) % (_moveChain.Count + (Config.returnToSlot ? 1 : 0));
-        player.selectedItem = _selectedItem[0];
+        ClearDisplayCache();
+        UndoMove(player, s_movedItems);
+        s_moveIndex = (s_moveIndex + 1) % (s_moveChain.Count + (Config.returnToSlot ? 1 : 0));
+        player.selectedItem = s_oldSelectedItem;
+        s_ignoreHotbar = s_moveKey;
 
-        if (_moveIndex < _moveChain.Count) {
-            int targetSlotCount = _moveChain[_moveIndex].Items(player).Count;
-            int targetSlot = HotkeyToSlot(_moveKey, targetSlotCount);
-            Slot target = new(_moveChain[_moveIndex], targetSlot);
-            _movedItems = Move(player, _moveSource, target);
-            _moveChain[_moveIndex].Focus(player, target.Index);
-            _moveTime = Config.chainTime;
+        if (s_moveIndex < s_moveChain.Count) {
+            int targetSlotCount = s_moveChain[s_moveIndex].Items(player).Count;
+            int targetSlot = HotkeyToSlot(s_moveKey, targetSlotCount);
+            Slot target = new(s_moveChain[s_moveIndex], targetSlot);
+            s_movedItems = Move(player, s_moveSource, target);
+            s_moveChain[s_moveIndex].Focus(player, target.Index);
+            s_moveTime = Config.chainTime;
         } else {
-            _moveSource.Inventory.Focus(player, _moveSource.Index);
-            _moveTime = 0;
+            s_moveSource.Inventory.Focus(player, s_moveSource.Index);
+            s_moveTime = 0;
         }
-        _selectedItem[1] = player.selectedItem;
         SoundEngine.PlaySound(SoundID.Grab);
         Recipe.FindRecipes();
     }
@@ -255,89 +256,92 @@ public sealed class QuickMove : ILoadable {
         cursor.GotoNext(MoveType.After, i => i.MatchLdarg3());
         cursor.EmitDelegate((int slot) => {
             if (!Enabled || Config.displayHotkeys == Configs.QuickMove.HotkeyDisplayMode.Off) return slot;
-            if (_moveTime > 0) return 10;
-            if (_lastHover && _displayedChain.Count != 0) return 10;
+            if (s_moveTime > 0) return 10;
+            if (s_hover && s_displayedChain.Count != 0) return 10;
             return slot;
         });
-    }
-
-    public static bool IsInventorySlot(Item[] inv, int context, int slot, [MaybeNullWhen(false)] out Slot itemSlot) {
-        CacheInv(inv, context, slot);
-        if(!_ilCachedInv.itemSlot.HasValue){
-            itemSlot = default;
-            return false;
-        }
-        itemSlot = _ilCachedInv.itemSlot.Value;
-        return true;
     }
 
     public static bool IsTargetableSlot(Item[] inv, int context, int slot, out int numberInChain, out int key) {
         numberInChain = -1;
         key = -1;
-        if (_moveTime == 0 && (!_lastHover || _displayedChain.Count == 0)) return false;
-        if (!IsInventorySlot(inv, context, slot, out Slot itemSlot)) return false;
+        if (s_moveTime == 0 && (!s_hover || s_displayedChain.Count == 0)) return false;
+        if (!InventoryLoader.IsInventorySlot(Main.LocalPlayer, inv, context, slot, out Slot itemSlot)) return false;
+        if (s_slotMoveInfo.TryGetValue(itemSlot, out var cached)) {
+            numberInChain = cached.number;
+            key = cached.key;
+            return numberInChain > 0 && key != -1;
+        }
 
-        if (Config.returnToSlot && _moveTime > 0 && itemSlot == _moveSource) {
-            int mod = _moveChain.Count + (Config.returnToSlot ? 1 : 0);
-            numberInChain = (_moveChain.Count - _moveIndex + mod) % mod;
-            key = _moveKey;
+        if (Config.returnToSlot && s_moveTime > 0 && itemSlot == s_moveSource) {
+            int mod = s_moveChain.Count + (Config.returnToSlot ? 1 : 0);
+            numberInChain = (s_moveChain.Count - s_moveIndex + mod) % mod;
+            key = s_moveKey;
+            s_slotMoveInfo[itemSlot] = (numberInChain, key);
             return true;
         }
 
-        CacheSlots(itemSlot.Inventory);
-        if (_ilCachedSlots.number < 0) return false;
-        CacheIndex(itemSlot.Index);
-        if (_ilCachedIndex.key == -1 || _ilCachedIndex.index >= 10) return false;
+        (numberInChain, int count, int moveSlot) = GetMoveInfo(itemSlot.Inventory);
+        if (numberInChain < 0) {
+            s_slotMoveInfo[itemSlot] = (numberInChain, key);
+            return false;
+        }
 
-        numberInChain = _ilCachedSlots.number;
-        key = _ilCachedIndex.key;
+        key = SlotToHotkey(itemSlot.Index, count);
+        if (s_moveTime > 0 && key != s_moveKey) {
+            if (moveSlot == itemSlot.Index){
+                key = s_moveKey;
+                s_slotMoveInfo[itemSlot] = (numberInChain, key);
+                return true;
+            }
+            else {
+                s_slotMoveInfo[itemSlot] = (numberInChain, -1);
+                return false;
+            }
+        }
+        if (key == -1 || itemSlot.Index >= 10) {
+            s_slotMoveInfo[itemSlot] = (numberInChain, -1);
+            return false;
+        }
+        s_slotMoveInfo[itemSlot] = (numberInChain, key);
         return true;
     }
-
-    private static void CacheInv(Item[] inv, int context, int slot) {
-        if (inv == _ilCachedInv.inv && context == _ilCachedInv.context && slot == _ilCachedInv.slot) return;
-        _ilCachedInv = (inv, context, slot, InventoryLoader.GetInventorySlot(Main.LocalPlayer, inv, context, slot));
-    }
-    private static void CacheSlots(ModSubInventory slots) {
-        if (slots == _ilCachedSlots.slots) return;
-        _ilCachedSlots = (slots, -1, -1, -1);
-        
+    public static (int number, int count, int moveSlot) GetMoveInfo(ModSubInventory inv) {
+        if (s_invMoveInfo.TryGetValue(inv, out var cached)) return cached;
+       
         List<ModSubInventory> chain; int offset;
-        if (_moveTime > 0) (chain, offset) = (_moveChain, _moveIndex);
-        else if (_lastHover && _displayedChain.Count != 0) (chain, offset) = (_displayedChain, -1);
-        else return;
+        if (s_moveTime > 0) (chain, offset) = (s_moveChain, s_moveIndex);
+        else if (s_hover && s_displayedChain.Count != 0) (chain, offset) = (s_displayedChain, -1);
+        else return s_invMoveInfo[inv] = (-1,-1,-1);
 
-        int number = chain.IndexOf(_ilCachedSlots.slots);
-        if (number < 0) return;
-        _ilCachedSlots.number = number - offset;
-        if (_ilCachedSlots.number < 0) _ilCachedSlots.number += chain.Count + (Config.returnToSlot ? 1 : 0);
-        _ilCachedSlots.count = _ilCachedSlots.slots.Items(Main.LocalPlayer).Count;
-        _ilCachedSlots.moveSlot = HotkeyToSlot(_moveKey, _ilCachedSlots.count);
+        int number = chain.IndexOf(inv);
+        if (number < 0) return s_invMoveInfo[inv] = (-1, -1, -1);
+
+        number -= offset;
+        if (number < 0) number += chain.Count + (Config.returnToSlot ? 1 : 0);
+        int count = inv.Items(Main.LocalPlayer).Count;
+        return s_invMoveInfo[inv] = (number, count, HotkeyToSlot(s_moveKey, count));
     }
-    private static void CacheIndex(int index) {
-        if (_ilCachedIndex.index == index) return;
-        _ilCachedIndex = (index, -1);
-        int key = SlotToHotkey(index, _ilCachedSlots.count);
-        if (_moveTime > 0 && key != _moveKey) {
-            if(_ilCachedSlots.moveSlot == index) _ilCachedIndex.key = _moveKey;
-            return;
-        }
-        _ilCachedIndex.key = key;
-    }
-    private static (Item[] inv, int context, int slot, Slot? itemSlot) _ilCachedInv;
-    private static (ModSubInventory slots, int number, int count, int moveSlot) _ilCachedSlots;
-    private static (int index, int key) _ilCachedIndex;
+
+    private static readonly Dictionary<ModSubInventory, (int number, int count, int moveSlot)> s_invMoveInfo = new();
+    private static readonly Dictionary<Slot, (int number, int key)> s_slotMoveInfo = new();
 
     public static void UpdateDisplayedMoveChain(ModSubInventory slots, Item item) {
-        if (item.IsAir) ClearMoveChain();
-        else if (_displayedItem != item.type) {
-            _displayedChain = GetChain(Main.LocalPlayer, item, slots);
-            _displayedItem = item.type;
+        if (item.IsAir) ClearDisplayedChain();
+        else if (s_displayedItem != item.type) {
+            s_displayedChain = GetChain(Main.LocalPlayer, item, slots);
+            s_displayedItem = item.type;
+            ClearDisplayCache();
         }
     }
-    public static void ClearMoveChain() {
-        _displayedChain.Clear();
-        _displayedItem = ItemID.None;
+    public static void ClearDisplayedChain() {
+        s_displayedChain.Clear();
+        s_displayedItem = ItemID.None;
+        ClearDisplayCache();
+    }
+    public static void ClearDisplayCache() {
+        s_invMoveInfo.Clear();
+        s_slotMoveInfo.Clear();
     }
 
     private static List<ModSubInventory> GetChain(Player player, Item item, ModSubInventory source) {
@@ -346,20 +350,19 @@ public sealed class QuickMove : ILoadable {
         return targetSlots;
     }
 
-    private static int _displayedItem = ItemID.None;
-    private static List<ModSubInventory> _displayedChain = new();
+    private static int s_displayedItem = ItemID.None;
+    private static List<ModSubInventory> s_displayedChain = new();
     
-    private static int _moveTime;
-    private static int _moveIndex = -1;
-    private static List<ModSubInventory> _moveChain = new();
+    private static Slot s_moveSource;
+    private static int s_moveKey;
+    private static List<ModSubInventory> s_moveChain = new();
+    private static int s_moveTime;
+    private static int s_moveIndex = -1;
+    private static readonly Dictionary<ModSubInventory, int> s_validSlots = new();
+    private static List<MovedItem> s_movedItems = new();
 
-    private static Slot _moveSource;
-    private static int _moveKey;
-    private static readonly Dictionary<ModSubInventory, int> _validSlots = new();
-    
-    private static List<MovedItem> _movedItems = new();
+    private static bool s_hover, s_frameHover;
+    private static int s_ignoreHotbar = -1, s_oldSelectedItem;
 
-    private static int[] _selectedItem = new int[2];
-    private static bool _hover, _lastHover;
 }
 public readonly record struct MovedItem(Slot From, ModSubInventory To, int Type, int Prefix, bool Favorited);

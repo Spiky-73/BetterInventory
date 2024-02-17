@@ -24,7 +24,10 @@ public class InventoryLoader : ILoadable {
         }
     }
 
-    public void Load(Mod mod) {}
+    public void Load(Mod mod) {
+        On_Recipe.FindRecipes += HookFindRecipes;
+    }
+
 
     public void Unload() {
         static void Clear(IList<ModSubInventory> list) {
@@ -51,15 +54,28 @@ public class InventoryLoader : ILoadable {
         return null;
     }
 
+    
+    public static bool IsInventorySlot(Player player, Item[] inv, int context, int slot, out Slot itemSlot) {
+        Slot? s = GetInventorySlot(player, inv, context, slot);
+        itemSlot = s ?? default;
+        return s.HasValue;
+    }
     public static Slot? GetInventorySlot(Player player, Item[] inventory, int context, int slot) {
+        VanillaSlot key = new(inventory, context, slot);
+        if (player == Main.LocalPlayer && s_cachedInvs.TryGetValue(key, out var cached)) return cached;
         foreach (ModSubInventory slots in SubInventories) {
             int slotOffset = 0;
             foreach (ListIndices<Item> items in slots.Items(player).Lists) {
                 int index = items.FromInnerIndex(slot);
-                if (items.List == inventory && index != -1) return new(slots, index + slotOffset);
+                if (items.List == inventory && index != -1) {
+                    Slot s = new(slots, index + slotOffset);
+                    if (player == Main.LocalPlayer) s_cachedInvs[key] = s;
+                    return s;
+                }
                 slotOffset += items.Count;
             }
         }
+        if (player == Main.LocalPlayer) s_cachedInvs[key] = null;
         return null;
     }
 
@@ -82,7 +98,16 @@ public class InventoryLoader : ILoadable {
         }
     }
 
+    private static void HookFindRecipes(On_Recipe.orig_FindRecipes orig, bool canDelayCheck) {
+        if(!canDelayCheck) s_cachedInvs.Clear();
+        orig(canDelayCheck);
+    }
+
     private readonly static List<ModSubInventory> _special = new();
     private readonly static List<ModSubInventory> _nonClassic = new();
     private readonly static List<ModSubInventory> _classic = new();
+
+    private static readonly Dictionary<VanillaSlot, Slot?> s_cachedInvs = new();
 }
+
+public readonly record struct VanillaSlot(Item[] Inv, int Context, int Slot);

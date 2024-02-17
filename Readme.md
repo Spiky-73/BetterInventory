@@ -23,6 +23,12 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 
 ## Changelog
 
+### v0.4.1
+- Optimised Better Guide and Recipe Filtering
+- Optimised Quick Move display
+- Fixed Unknown items able to be favorited
+- Fixed Quick move changing selected slot when it should not
+
 ### v0.4
 - Replaced chat message with notification
 - Added Chat message to Version Config
