@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using BetterInventory.Crafting;
+using BetterInventory.InventoryManagement;
 using BetterInventory.DataStructures;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -25,7 +25,7 @@ public sealed class Guide : ModSystem {
     public static bool Enabled => Configs.ItemSearch.Instance.betterGuide;
     public static Configs.BetterGuide Config => Configs.ItemSearch.Instance.betterGuide.Value;
 
-    public static VisibilityFilters LocalFilters => InventoryManagement.BetterPlayer.LocalPlayer.VisibilityFilters;
+    public static VisibilityFilters LocalFilters => BetterPlayer.LocalPlayer.VisibilityFilters;
 
     public override void Load() {
         IL_Main.DrawInventory += IlDrawInventory;
@@ -41,7 +41,6 @@ public sealed class Guide : ModSystem {
 
         On_Player.AdjTiles += HookGuideTileAdj;
         On_ItemSlot.PickItemMovementAction += HookAllowGuideItem;
-        On_ItemSlot.OverrideHover_ItemArray_int_int += HookOverrideHover;
         On_ItemSlot.OverrideLeftClick += HookOverrideLeftClick;
 
         On_ItemSlot.Draw_SpriteBatch_refItem_int_Vector2_Color += HookHideItemStack;
@@ -95,7 +94,7 @@ public sealed class Guide : ModSystem {
         Vector2 position = new(minX, inventoryY - delta.Y);
         int slot = 0;
         void MovePosition() {
-            if (Crafting.Tweeks.Config.tweeks && ++slot % TilesPerLine == 0) {
+            if (Tweeks.Config.tweeks && ++slot % TilesPerLine == 0) {
                 position.X = minX;
                 position.Y += delta.Y;
                 if (slot == TilesPerLine) MovePosition();
@@ -321,7 +320,7 @@ public sealed class Guide : ModSystem {
         //             ++ <overrideBackground>
         cursor.EmitLdloc(153);
         cursor.EmitDelegate((int i) => {
-            if (Main.focusRecipe == i && Crafting.Tweeks.Config.craftOnList.Parent && !Crafting.Tweeks.Config.craftOnList.Value.focusRecipe) ItemSlot.DrawGoldBGForCraftingMaterial = true;
+            if (Main.focusRecipe == i && Tweeks.Config.craftOnList.Parent && !Tweeks.Config.craftOnList.Value.focusRecipe) ItemSlot.DrawGoldBGForCraftingMaterial = true;
             if (!Enabled) return;
             OverrideRecipeTexture(GetFavoriteState(Main.availableRecipe[i]), ItemSlot.DrawGoldBGForCraftingMaterial, s_availableRecipes.Contains(Main.availableRecipe[i]));
             ItemSlot.DrawGoldBGForCraftingMaterial = false;
@@ -426,10 +425,10 @@ public sealed class Guide : ModSystem {
             orig();
             return;
         }
-        if (!Main.mouseItem.IsAir) LocalFilters.AddOwnedItems(Main.mouseItem);
-        foreach (Item item in Main.LocalPlayer.inventory) if (!item.IsAir) LocalFilters.AddOwnedItems(item);
+        if (!Main.mouseItem.IsAir) LocalFilters.AddOwnedItem(Main.mouseItem);
+        foreach (Item item in Main.LocalPlayer.inventory) if (!item.IsAir) LocalFilters.AddOwnedItem(item);
         if(Main.LocalPlayer.InChest(out Item[]? chest)){
-            foreach (Item item in chest) if (!item.IsAir) LocalFilters.AddOwnedItems(item);
+            foreach (Item item in chest) if (!item.IsAir) LocalFilters.AddOwnedItem(item);
         }
 
         s_collectingGuide = true;
@@ -581,7 +580,7 @@ public sealed class Guide : ModSystem {
         cursor.EmitLdarg0();
         cursor.EmitDelegate((bool prevent, int recipe) => {
             if (prevent || Enabled && !s_availableRecipes.Contains(Main.availableRecipe[recipe])) return true;
-            InventoryManagement.ClickOverride.OverrideCraftHover(recipe);
+            ClickOverride.OverrideCraftHover(recipe);
             return false;
         });
         //     ...
@@ -599,39 +598,41 @@ public sealed class Guide : ModSystem {
         Recipe.FindRecipes();
     }
     private static int HookAllowGuideItem(On_ItemSlot.orig_PickItemMovementAction orig, Item[] inv, int context, int slot, Item checkItem) {
-        if (!Enabled || !Config.anyItem || context != ContextID.GuideItem) return orig(inv, context, slot, checkItem);
+        if (context != ContextID.GuideItem || !Enabled || !Config.anyItem) return orig(inv, context, slot, checkItem);
         if (slot == 0 && GetPlaceholderType(Main.mouseItem) == PlaceholderType.None) return 0;
         if (slot == 1 && IsCraftingTileItem(Main.mouseItem)) return 0;
         return -1;
     }
-    private static void HookOverrideHover(On_ItemSlot.orig_OverrideHover_ItemArray_int_int orig, Item[] inv, int context, int slot) {
-        if (SearchItem.OverrideHover(inv, context, slot)) return;
-        if (!inv[slot].favorited && (Enabled ? InventoryContexts.Contains(context) : context == ContextID.InventoryItem) && ItemSlot.ShiftInUse && !ItemSlot.ShiftForcedOn && Main.InGuideCraftMenu && !inv[slot].IsAir && ItemSlot.PickItemMovementAction(inv, ContextID.GuideItem, 0, inv[slot]) == 0) Main.cursorOverride = CursorOverrideID.InventoryToChest;
-        else orig(inv, context, slot);
+    public static bool OverrideHover(Item[] inv, int context, int slot) {
+        if (!Main.InGuideCraftMenu || !ItemSlot.ShiftInUse || inv[slot].favorited || !Enabled || Array.IndexOf(Utility.InventoryContexts, context) == -1 || inv[slot].IsAir|| ItemSlot.PickItemMovementAction(inv, ContextID.GuideItem, 0, inv[slot]) != 0) return false;
+        Main.cursorOverride = CursorOverrideID.InventoryToChest;
+        return true;
     }
     private static bool HookOverrideLeftClick(On_ItemSlot.orig_OverrideLeftClick orig, Item[] inv, int context, int slot) {
-        if (context == ContextID.GuideItem && !Main.mouseItem.IsAir && ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) == 0) Main.recBigList = true;
         if (Main.InGuideCraftMenu && Main.cursorOverride == CursorOverrideID.InventoryToChest) {
             (Item mouse, Main.mouseItem, inv[slot]) = (Main.mouseItem, inv[slot], new());
             (int cursor, Main.cursorOverride) = (Main.cursorOverride, 0);
 
             Item[] items = GuideItems;
-            ItemSlot.LeftClick(items, ContextID.GuideItem, Config.guideTile && IsCraftingTileItem(Main.mouseItem) ? 1 : 0);
+            ItemSlot.LeftClick(items, ContextID.GuideItem, Enabled && Config.guideTile && IsCraftingTileItem(Main.mouseItem) ? 1 : 0);
             GuideItems = items;
 
-            if (Enabled) Main.LocalPlayer.GetDropItem(ref Main.mouseItem);
+            if (Enabled && !SearchItem.Config.searchRecipes) Main.LocalPlayer.GetDropItem(ref Main.mouseItem);
             else inv[slot] = Main.mouseItem;
             Main.mouseItem = mouse;
             Main.cursorOverride = cursor;
             return true;
         }
-        if (context == ContextID.GuideItem && slot == 1) {
-            if (GetPlaceholderType(inv[slot]) != PlaceholderType.None && Main.mouseItem.IsAir) {
+
+        if (context != ContextID.GuideItem) return orig(inv, context, slot);
+        if (!Main.mouseItem.IsAir && ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) == 0) Main.recBigList = true;
+        if (slot == 1) {
+            if (GetPlaceholderType(inv[slot]) != PlaceholderType.None) {
                 inv[slot].TurnToAir();
                 guideTile.TurnToAir();
                 Recipe.FindRecipes();
                 SoundEngine.PlaySound(SoundID.Grab);
-            } else if (inv[slot].IsAir && Main.mouseItem.IsAir) {
+            } else if (inv[slot].IsAir && (Main.mouseItem.IsAir || !IsCraftingTileItem(Main.mouseItem))) {
                 inv[slot] = new(CraftingItem.type) { createTile = -2 };
                 guideTile = inv[slot];
                 Recipe.FindRecipes();
@@ -640,7 +641,6 @@ public sealed class Guide : ModSystem {
             }
             if(ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) != -1) guideTile = Main.mouseItem;
         }
-        if (SearchItem.OverrideLeftClick(inv, context, slot)) return true;
         return orig(inv, context, slot);
     }
 
@@ -809,8 +809,6 @@ public sealed class Guide : ModSystem {
     public const int TilesPerLine = 7;
     public const float TileScale = 0.46f;
     public const float TileScacingRatio = 0.08f;
-
-    public static readonly int[] InventoryContexts = new int[] { ContextID.InventoryItem, ContextID.InventoryAmmo, ContextID.InventoryCoin };
 
     private static bool _ilVisibilityHover;
 }

@@ -14,6 +14,7 @@ using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 using Terraria.ObjectData;
+using ContextID = Terraria.UI.ItemSlot.Context;
 
 namespace BetterInventory;
 
@@ -76,7 +77,7 @@ public static class Utility {
             if (Main.netMode == NetmodeID.MultiplayerClient) NetMessage.SendData(MessageID.SyncItem, -1, -1, null, i, 1f, 0f, 0f, 0, 0, 0);
         }
         item = new();
-        Recipe.FindRecipes(false);
+        Recipe.FindRecipes();
     }
 
     public enum InclusionFlag {
@@ -176,7 +177,9 @@ public static class Utility {
     }
 
     public static ReadOnlyDictionary<int, int> OwnedItems => Data.ownedItems;
-    
+
+    public static readonly int[] InventoryContexts = new int[] { ContextID.InventoryItem, ContextID.InventoryAmmo, ContextID.InventoryCoin };
+
     private class Data : ILoadable {
         public void Load(Mod mod) => ownedItems = new(Reflection.Recipe._ownedItems.GetValue());
         public void Unload() => ownedItems = null!;

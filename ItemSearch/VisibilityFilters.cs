@@ -17,24 +17,24 @@ public sealed class VisibilityFilters {
     }
 
     public bool IsKnownRecipe(Recipe recipe) {
-        if (HasOwnedItems(recipe.createItem) || recipe.requiredItem.Exists(i => HasOwnedItems(i))) return true;
+        if (HasOwnedItem(recipe.createItem) || recipe.requiredItem.Exists(i => HasOwnedItem(i))) return true;
         foreach (int group in recipe.acceptedGroups) {
             foreach (int type in RecipeGroup.recipeGroups[group].ValidItems) {
-                if (HasOwnedItems(type)) return true;
+                if (HasOwnedItem(type)) return true;
             }
         }
         return false;
     }
 
-    public bool HasOwnedItems(Item item) => OwnedItems.TryGetValue(item.ModItem?.Mod.Name ?? "Terraria", out var items) && items.Contains(item.type);
-    public bool HasOwnedItems(int type) {
+    public bool HasOwnedItem(Item item) => OwnedItems.TryGetValue(item.ModItem?.Mod.Name ?? "Terraria", out var items) && items.Contains(item.type);
+    public bool HasOwnedItem(int type) {
         foreach(DataStructures.RangeSet set in OwnedItems.Values) if(set.Contains(type)) return true;
         return false;
     }
-    public void AddOwnedItems(Item item) => AddOwnedItems(item.ModItem?.Mod.Name ?? "Terraria", item.type);
-    public void AddOwnedItems(string mod, int type) {
+    public bool AddOwnedItem(Item item) => AddOwnedItem(item.ModItem?.Mod.Name ?? "Terraria", item.type);
+    public bool AddOwnedItem(string mod, int type) {
         if(!OwnedItems.ContainsKey(mod)) OwnedItems.Add(mod, new());
-        OwnedItems[mod].Add(type);
+        return OwnedItems[mod].Add(type);
     }
 
     public FavoriteState GetFavoriteState(int recipe) => FavoriteRecipes.GetValueOrDefault(recipe);

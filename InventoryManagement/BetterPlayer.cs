@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BetterInventory.Configs.UI;
 using BetterInventory.ItemSearch;
+using BetterInventory.Crafting;
 using MonoMod.Cil;
 using Terraria;
 using Terraria.GameInput;
@@ -110,7 +111,10 @@ public sealed class BetterPlayer : ModPlayer {
 
     public override bool HoverSlot(Item[] inventory, int context, int slot) {
         QuickMove.HoverItem(inventory, context, slot);
-        return ClickOverride.OverrideHover(inventory, context, slot);
+        if (SearchItem.OverrideHover(inventory, context, slot)) return true;
+        if (Guide.OverrideHover(inventory, context, slot)) return true;
+        if (ClickOverride.OverrideHover(inventory, context, slot)) return true;
+        return false;
     }
 
     public override bool PreItemCheck() {
@@ -136,7 +140,7 @@ public sealed class BetterPlayer : ModPlayer {
         List<Item> items = new();
         Item? mat;
         if((mat = Guide.GetGuideMaterials()) != null) items.Add(mat);
-        if((mat = Crafting.Tweeks.GetMouseMaterial()) != null) items.Add(mat);
+        if((mat = Tweeks.GetMouseMaterial()) != null) items.Add(mat);
         itemConsumedCallback = (item, amount) => item.stack -= amount;
         return items;
     }
@@ -254,10 +258,10 @@ public sealed class BetterPlayer : ModPlayer {
     public override void LoadData(TagCompound tag) {
         VisibilityFilters = tag.Get<VisibilityFilters>(VisibilityTag);
         if (tag.TryGet(GuideTileTag, out Item guide)) Guide.guideTile = guide;
-        RecipeFilters = tag.Get<Crafting.RecipeFilters>(RecipesTag);
+        RecipeFilters = tag.Get<RecipeFilters>(RecipesTag);
     }
 
-    public Crafting.RecipeFilters RecipeFilters { get; set; } = null!;
+    public RecipeFilters RecipeFilters { get; set; } = null!;
     public VisibilityFilters VisibilityFilters { get; set; } = new();
 
     private static bool s_innerGetItem;

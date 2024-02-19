@@ -10,7 +10,7 @@ using Terraria.UI;
 
 namespace BetterInventory.InventoryManagement;
 
-public sealed class SmartPickup : ILoadable {
+public sealed class SmartPickup : ILoadable { // TODO clear marks on exit
 
     public static Configs.InventoryManagement.SmartPickupLevel Level => Configs.InventoryManagement.Instance.smartPickup;
     public static bool Enabled(bool favorited) => Level switch {

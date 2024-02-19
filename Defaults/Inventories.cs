@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using BetterInventory.DataStructures;
+using BetterInventory.InventoryManagement;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -8,7 +9,7 @@ using Terraria.ModLoader.Default;
 using Terraria.UI;
 using ContextID = Terraria.UI.ItemSlot.Context;
 
-namespace BetterInventory.InventoryManagement.Inventories;
+namespace BetterInventory.Default.Inventories;
 
 public sealed class Hotbar : ModSubInventory {
     public override int Context => ContextID.InventoryItem;

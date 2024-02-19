@@ -24,8 +24,8 @@ public sealed class ClickOverride : ILoadable {
         IL_Recipe.Create += ILCreateRecipe;
 
         IL_ItemSlot.HandleShopSlot += ILHandleShopSlot;
-        On_ItemSlot.LeftClick_ItemArray_int_int += HookOverrideLeft;
-        On_ItemSlot.RightClick_ItemArray_int_int += HookOverrideRight;
+        On_ItemSlot.LeftClick_ItemArray_int_int += HookShiftLeftCustom;
+        On_ItemSlot.RightClick_ItemArray_int_int += HookShiftRight;
 
         IL_ItemSlot.SellOrTrash += ILStackStrash;
         On_Chest.AddItemToShop += HookStackSold;
@@ -34,31 +34,31 @@ public sealed class ClickOverride : ILoadable {
     public void Unload() { }
 
     public static bool OverrideHover(Item[] inv, int context, int slot) {
-        if(Enabled && Config.shops && context == ItemSlot.Context.ShopItem && ItemSlot.ShiftInUse && !inv[slot].IsAir && Main.LocalPlayer.ItemSpace(inv[slot]).CanTakeItem){
-            Main.cursorOverride = CursorOverrideID.QuickSell;
-            return true;
-        }
-        return false;
+        if (!Enabled || !Config.shops || context != ItemSlot.Context.ShopItem || !ItemSlot.ShiftInUse || inv[slot].IsAir || !Main.LocalPlayer.ItemSpace(inv[slot]).CanTakeItem) return false;
+        Main.cursorOverride = CursorOverrideID.QuickSell;
+        return true;
     }
-    private static void HookOverrideLeft(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
+    private static void HookShiftLeftCustom(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
         if (!Enabled || !Main.mouseLeft || Main.cursorOverride == -1 || context != ItemSlot.Context.ShopItem && context != ItemSlot.Context.CreativeInfinite) orig(inv, context, slot);
         else TwoStepClick(inv, context, slot, (inv, context, slot) => orig(inv, context, slot));
     }
-    private static void HookOverrideRight(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
+    private static void HookShiftRight(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
         if (!Enabled || !Main.mouseRight || !Config.shiftRight || Main.cursorOverride == -1) orig(inv, context, slot);
         else TwoStepClick(inv, context, slot, (inv, context, slot) => orig(inv, context, slot));
     }
     private static void TwoStepClick(Item[] inv, int context, int slot, Action<Item[], int, int> click){
         (Item mouse, Main.mouseItem) = (Main.mouseItem, new());
         click(inv, context, slot);
+        (Main.mouseItem, Item[] inv2) = (mouse, new[]{Main.mouseItem});
+        if (inv2[0].IsAir) return;
         (bool left, bool leftR, Main.mouseLeft, Main.mouseLeftRelease) = (Main.mouseLeft, Main.mouseLeftRelease, true, true);
         int cursor = Main.cursorOverride;
-        if (context == ItemSlot.Context.ShopItem || context == ItemSlot.Context.CreativeInfinite) (context, Main.cursorOverride) = (ItemSlot.Context.ChestItem, CursorOverrideID.ChestToInventory);
-        ItemSlot.LeftClick(ref Main.mouseItem, context);
+        if (Array.IndexOf(Utility.InventoryContexts, context) == -1) (context, Main.cursorOverride) = (ItemSlot.Context.ChestItem, CursorOverrideID.ChestToInventory);
+        ItemSlot.LeftClick(inv2, context, 0);
         (Main.mouseLeft, Main.mouseLeftRelease) = (left, leftR);
         Main.cursorOverride = cursor;
-        if (Main.mouseItem.stack != 0) Utility.MoveInto(inv[slot], Main.mouseItem, out _);
-        Main.mouseItem = mouse;
+        if (!inv2[0].IsAir) inv[slot] = Utility.MoveInto(inv[slot], inv2[0], out _);
+        if(Main.mouseRight) Recipe.FindRecipes(); // TODO remove if possible
     }
 
     private static void ILHandleShopSlot(ILContext il) {

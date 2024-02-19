@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using BetterInventory.InventoryManagement;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
@@ -19,7 +17,7 @@ public sealed class RecipeFiltering : ILoadable {
 
     public static bool Enabled => Configs.Crafting.Instance.recipeFiltering.Parent;
     public static Configs.RecipeFiltering Config => Configs.Crafting.Instance.recipeFiltering.Value;
-    public static RecipeFilters LocalFilters => BetterPlayer.LocalPlayer.RecipeFilters;
+    public static RecipeFilters LocalFilters => InventoryManagement.BetterPlayer.LocalPlayer.RecipeFilters;
 
     public void Load(Mod mod) {
         IL_Main.DrawInventory += ILDrawFilters;

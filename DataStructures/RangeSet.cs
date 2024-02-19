@@ -47,11 +47,12 @@ public sealed class RangeSet : IEnumerable<int> {
 
     public int Count { get; private set; }
 
-    public void Add(int item) => Add(new Range(item, item));
+    public bool Add(int item) => Add(new Range(item, item));
     public void AddRange(IEnumerable<int> enumerable) { foreach (int i in enumerable) Add(i); }
     
-    public void Add(Range range) {
+    public bool Add(Range range) {
         int i = FindInsertIndex(range.Start);
+        if (i != 0 && _ranges[i - 1].Start <= range.Start && range.End <= _ranges[i - 1].End) return false;
         if (i == 0 || range.Start - _ranges[i - 1].End > 1) _ranges.Insert(i, range);
         else if (range.End > _ranges[--i].End) {
             Count -= _ranges[i].Count;
@@ -71,6 +72,7 @@ public sealed class RangeSet : IEnumerable<int> {
             _ranges.RemoveAt(i+1);
         }
         Count += _ranges[i].Count;
+        return true;
     }
 
     public void Remove(int item) {
