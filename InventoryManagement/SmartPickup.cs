@@ -10,7 +10,7 @@ using Terraria.UI;
 
 namespace BetterInventory.InventoryManagement;
 
-public sealed class SmartPickup : ILoadable { // TODO clear marks on exit
+public sealed class SmartPickup : ILoadable {
 
     public static Configs.InventoryManagement.SmartPickupLevel Level => Configs.InventoryManagement.Instance.smartPickup;
     public static bool Enabled(bool favorited) => Level switch {
@@ -147,6 +147,11 @@ public sealed class SmartPickup : ILoadable { // TODO clear marks on exit
         bool favorited = s_marksData[mark].favorited;
         Unmark(mark);
         return (mark, favorited);
+    }
+
+    public static void ClearMarks() {
+        s_marksData.Clear();
+        s_marks.Clear();
     }
 
     private static readonly Dictionary<Slot, (Item fake, bool favorited)> s_marksData = new();

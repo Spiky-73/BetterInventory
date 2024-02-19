@@ -243,7 +243,7 @@ public sealed class SearchItem : ILoadable {
         }
         else if(!inv[slot].IsAir) {
             SetGuideItem(new(), slot);
-            if(Config.searchHistory) _guideHistory[slot].RemoveAt(_guideHistory[slot].Count - 1); // TODO test bug
+            if(Config.searchHistory && _guideHistory[slot].Count > 0) _guideHistory[slot].RemoveAt(_guideHistory[slot].Count - 1);
         }
         inv[0] = Main.guideItem;
         if (inv.Length > 1) inv[1] = Guide.guideTile;

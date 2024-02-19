@@ -26,6 +26,7 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 ### v0.4.1
 - Optimised Better Guide and Recipe Filtering
 - Optimised Quick Move display
+- Clear marks when changing worlds
 - Fixed Unknown items able to be favorited
 - Fixed Quick move changing selected slot when it should not
 

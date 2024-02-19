@@ -22,6 +22,9 @@ namespace BetterInventory.ItemSearch;
 
 
 public sealed class Guide : ModSystem {
+    public override void ClearWorld() {
+        SmartPickup.ClearMarks();
+    }
     public static bool Enabled => Configs.ItemSearch.Instance.betterGuide;
     public static Configs.BetterGuide Config => Configs.ItemSearch.Instance.betterGuide.Value;
 
