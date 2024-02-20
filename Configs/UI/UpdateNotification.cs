@@ -24,6 +24,24 @@ public class UpdateNotification : IInGameNotification {
     });
     public static TagKeyFormat ImportantTags => new(Colors.RarityAmber, new());
 
+    public static void Display() {
+        bool download;
+        if (Version.Instance.lastPlayedVersion.Length == 0) download = true;
+        else if (BetterInventory.Instance.Version > new System.Version(Version.Instance.lastPlayedVersion)) download = false;
+        else return;
+
+        Version.Instance.lastPlayedVersion = BetterInventory.Instance.Version.ToString();
+        Version.Instance.SaveConfig();
+
+        List<(LocalizedText text, TagKeyFormat format)> lines = new();
+        if (download) lines.Add((Language.GetText("Mods.BetterInventory.Chat.Download"), DownloadTags));
+        else lines.Add((Language.GetText("Mods.BetterInventory.Chat.Update"), UpdateTags));
+        lines.Add((Language.GetText("Mods.BetterInventory.Chat.Bug"), BugTags));
+        LocalizedText important = Language.GetText("Mods.BetterInventory.Chat.Important");
+        if (!download && important.Value.Length != 0) lines.Add((important, ImportantTags));
+        InGameNotificationsTracker.AddNotification(new UpdateNotification(lines));
+    }
+
 
     public UpdateNotification(List<(LocalizedText text, TagKeyFormat format)> lines) {
         LifeSpan = MaxLifeSpan;

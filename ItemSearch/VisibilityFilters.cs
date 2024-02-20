@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using BetterInventory.DataStructures;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader.Config;
@@ -28,7 +29,7 @@ public sealed class VisibilityFilters {
 
     public bool HasOwnedItem(Item item) => OwnedItems.TryGetValue(item.ModItem?.Mod.Name ?? "Terraria", out var items) && items.Contains(item.type);
     public bool HasOwnedItem(int type) {
-        foreach(DataStructures.RangeSet set in OwnedItems.Values) if(set.Contains(type)) return true;
+        foreach(RangeSet set in OwnedItems.Values) if(set.Contains(type)) return true;
         return false;
     }
     public bool AddOwnedItem(Item item) => AddOwnedItem(item.ModItem?.Mod.Name ?? "Terraria", item.type);
@@ -37,16 +38,24 @@ public sealed class VisibilityFilters {
         return OwnedItems[mod].Add(type);
     }
 
-    public FavoriteState GetFavoriteState(int recipe) => FavoriteRecipes.GetValueOrDefault(recipe);
-    public void SetFavoriteState(int recipe, FavoriteState state) {
-        if (state == FavoriteState.Default) FavoriteRecipes.Remove(recipe);
-        else FavoriteRecipes[recipe] = state;
+    public FavoriteState GetFavoriteState(int recipe) {
+        if (FavoritedRecipes.Contains(recipe)) return FavoriteState.Favorited;
+        if (BlacklistedRecipes.Contains(recipe)) return FavoriteState.Blacklisted;
+        return FavoriteState.Default;
     }
+    public void FavoriteRecipe(int recipe, bool force = false) {
+        if (!BlacklistedRecipes.Remove(recipe) || force) FavoritedRecipes.Add(recipe);
+    }
+    public void BlacklistRecipe(int recipe, bool force = false) {
+        if (!FavoritedRecipes.Remove(recipe) || force) BlacklistedRecipes.Add(recipe);
+    }
+    public bool ResetFavoriteRecipe(int recipe) => FavoritedRecipes.Remove(recipe) | BlacklistedRecipes.Remove(recipe);
 
-    public readonly Dictionary<int, FavoriteState> FavoriteRecipes = new();
-    public readonly List<(RawRecipe, byte)> MissingRecipes = new();
+    public readonly RangeSet FavoritedRecipes = new();
+    public readonly RangeSet BlacklistedRecipes = new();
+    public readonly List<(RawRecipe, bool)> MissingRecipes = new();
 
-    public readonly Dictionary<string, DataStructures.RangeSet> OwnedItems = new();
+    public readonly Dictionary<string, RangeSet> OwnedItems = new();
     public readonly List<ItemDefinition> UnloadedItems = new();
     
     private void SetFlag(Flags flag, bool set) {
@@ -73,24 +82,28 @@ public sealed class VisibilityFiltersSerialiser : TagSerializer<VisibilityFilter
         if (value.Visibility != VisibilityFilters.Flags.Default) tag[FiltersTag] = (byte)value.Visibility;
 
         List<RawRecipe> recipes = new();
-        List<byte> favorites = new();
-        foreach ((int index, FavoriteState state) in value.FavoriteRecipes) {
-            recipes.Add(new(Main.recipe[index]));
-            favorites.Add((byte)state);
+        List<bool> favorited = new();
+        foreach (int i in value.FavoritedRecipes) {
+            recipes.Add(new(Main.recipe[i]));
+            favorited.Add(true);
         }
-        foreach ((RawRecipe recipe, byte state) in value.MissingRecipes) {
-            recipes.Add(recipe);
-            favorites.Add(state);
+        foreach (int i in value.BlacklistedRecipes) {
+            recipes.Add(new(Main.recipe[i]));
+            favorited.Add(false);
+        }
+        foreach ((RawRecipe r, bool f) in value.MissingRecipes) {
+            favorited.Add(f);
+            recipes.Add(r);
         }
 
         if (recipes.Count != 0) {
             tag[RecipesTag] = recipes;
-            tag[FavoritesTag] = favorites;
+            tag[FavoritedTag] = favorited;
         }
 
         List<ItemDefinition> items = new();
-        foreach((string mod, DataStructures.RangeSet set) in value.OwnedItems) {
-            foreach (DataStructures.Range range in set.GetRanges()) {
+        foreach((string mod, RangeSet set) in value.OwnedItems) {
+            foreach (Range range in set.GetRanges()) {
                 items.Add(new(range.Start));
                 items.Add(new(range.End));
             }
@@ -106,11 +119,12 @@ public sealed class VisibilityFiltersSerialiser : TagSerializer<VisibilityFilter
         if (tag.TryGet(FiltersTag, out byte raw)) value.Visibility = (VisibilityFilters.Flags)raw;
 
         if (tag.TryGet(RecipesTag, out IList<RawRecipe> recipes)) {
-            IList<byte> favorites = tag.Get<IList<byte>>(FavoritesTag);
+            IList<bool> favorited = tag.Get<IList<bool>>(FavoritedTag);
             for (int r = 0; r < recipes.Count; r++) {
                 Recipe? recipe = recipes[r].GetRecipe();
-                if (recipe is null) value.MissingRecipes.Add((recipes[r], favorites[r]));
-                else value.FavoriteRecipes[recipe.RecipeIndex] = (FavoriteState)favorites[r];
+                if (recipe is null) value.MissingRecipes.Add((recipes[r], favorited[r]));
+                else if (favorited[r]) value.FavoritedRecipes.Add(recipe.RecipeIndex);
+                else value.BlacklistedRecipes.Add(recipe.RecipeIndex);
             }
         }
         if (tag.TryGet(ItemsTag, out IList<ItemDefinition> items)) {
@@ -120,7 +134,7 @@ public sealed class VisibilityFiltersSerialiser : TagSerializer<VisibilityFilter
                     value.UnloadedItems.Add(items[i+1]);
                 } else {
                     if (!value.OwnedItems.ContainsKey(items[i].Mod)) value.OwnedItems.Add(items[i].Mod, new());
-                    value.OwnedItems[items[i].Mod].Add(new DataStructures.Range(items[i].Type, items[i+1].Type));
+                    value.OwnedItems[items[i].Mod].Add(new Range(items[i].Type, items[i+1].Type));
                 }
             }
         }
@@ -129,7 +143,7 @@ public sealed class VisibilityFiltersSerialiser : TagSerializer<VisibilityFilter
 
     public const string FiltersTag = "filters";
     public const string RecipesTag = "recipes";
-    public const string FavoritesTag = "favorites";
+    public const string FavoritedTag = "favorited";
     public const string ItemsTag = "items";
 }
 

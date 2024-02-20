@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using BetterInventory.ItemSearch;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
@@ -21,8 +22,6 @@ public sealed class RecipeFiltering : ILoadable {
 
     public void Load(Mod mod) {
         IL_Main.DrawInventory += ILDrawFilters;
-
-        On_Recipe.ClearAvailableRecipes += HookClearFilters;
     }
 
     public void Unload() { }
@@ -59,7 +58,8 @@ public sealed class RecipeFiltering : ILoadable {
 
     public static void DrawFilters(int hammerX, int hammerY){
         static void OnFilterChanges() {
-            Recipe.FindRecipes();
+            if (!Guide.Enabled) Recipe.FindRecipes();
+            else Guide.FindDisplayedRecipes();
             SoundEngine.PlaySound(SoundID.MenuTick);
         }
 
@@ -123,11 +123,10 @@ public sealed class RecipeFiltering : ILoadable {
         }
     }
 
-    private static void HookClearFilters(On_Recipe.orig_ClearAvailableRecipes orig) {
+    public static void ClearFilters() {
         s_recipes = 0;
         s_recipesInFilter.Clear();
         for (int i = 0; i < LocalFilters.Filterer.AvailableFilters.Count; i++) s_recipesInFilter.Add(0);
-        orig();
     }
 
     public static bool FitsFilters(int recipe){

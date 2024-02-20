@@ -75,22 +75,23 @@ public sealed class RangeSet : IEnumerable<int> {
         return true;
     }
 
-    public void Remove(int item) {
-        int i = FindInsertIndex(item);
-        if (i == 0 || i == _ranges.Count && _ranges[i - 1].End < item) return;
-        if (item == _ranges[i - 1].Start) _ranges[i - 1] = new(item + 1, _ranges[i - 1].End);
+    public bool Remove(int item) {
+        if (!Contains(item, out int i)) return false;
+        if (_ranges[i - 1].Count == 1) _ranges.RemoveAt(i - 1);
+        else if (item == _ranges[i - 1].Start) _ranges[i - 1] = new(item + 1, _ranges[i - 1].End);
         else {
             if (item != _ranges[i - 1].End) _ranges.Insert(i, new(item + 1, _ranges[i - 1].End));
             _ranges[i - 1] = new(_ranges[i - 1].Start, item - 1);
         }
         Count--;
+        return true;
     }
 
-    public bool Contains(int item) {
-        int i = FindInsertIndex(item);
-        return i != 0 && item <= _ranges[i-1].End;
+    public bool Contains(int item) => Contains(item, out _);
+    private bool Contains(int item, out int index){
+        index = FindInsertIndex(item);
+        return index != 0 && item <= _ranges[index-1].End;
     }
-
     private int FindInsertIndex(int item) {
         for (int i = 0; i < _ranges.Count; i++) if (item < _ranges[i].Start) return i;
         return _ranges.Count;

@@ -58,7 +58,7 @@ public sealed class ClickOverride : ILoadable {
         (Main.mouseLeft, Main.mouseLeftRelease) = (left, leftR);
         Main.cursorOverride = cursor;
         if (!inv2[0].IsAir) inv[slot] = Utility.MoveInto(inv[slot], inv2[0], out _);
-        if(Main.mouseRight) Recipe.FindRecipes(); // TODO remove if possible
+        if(Main.mouseRight) Recipe.FindRecipes();
     }
 
     private static void ILHandleShopSlot(ILContext il) {

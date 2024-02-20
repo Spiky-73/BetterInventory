@@ -81,21 +81,9 @@ public sealed class BetterPlayer : ModPlayer {
         RecipeFilters ??= new();
         VisibilityFilters ??= new();
 
-        bool download;
-        if (Configs.Version.Instance.lastPlayedVersion.Length == 0) download = true;
-        else if (Mod.Version > new Version(Configs.Version.Instance.lastPlayedVersion)) download = false;
-        else return;
+        if (Guide.Enabled) Guide.FindDisplayedRecipes();
 
-        Configs.Version.Instance.lastPlayedVersion = Mod.Version.ToString();
-        Configs.Version.Instance.SaveConfig();
-
-        List<(LocalizedText text, TagKeyFormat format)> lines = new();
-        if(download) lines.Add((Language.GetText("Mods.BetterInventory.Chat.Download"), UpdateNotification.DownloadTags));
-        else lines.Add((Language.GetText("Mods.BetterInventory.Chat.Update"), UpdateNotification.UpdateTags));
-        lines.Add((Language.GetText("Mods.BetterInventory.Chat.Bug"), UpdateNotification.BugTags));
-        LocalizedText important = Language.GetText("Mods.BetterInventory.Chat.Important");
-        if (!download && important.Value.Length != 0) lines.Add((important, UpdateNotification.ImportantTags));
-        InGameNotificationsTracker.AddNotification(new UpdateNotification(lines));
+        UpdateNotification.Display();
     }
 
     public override void SetControls() {

@@ -24,12 +24,11 @@ public class InventoryLoader : ILoadable {
         }
     }
 
-    public void Load(Mod mod) {
-        On_Recipe.FindRecipes += HookFindRecipes;
-    }
+    public void Load(Mod mod) {}
 
 
     public void Unload() {
+        ClearCache();
         static void Clear(IList<ModSubInventory> list) {
             foreach(var inventory in list) Utility.SetInstance(inventory, true);
             list.Clear();
@@ -81,27 +80,23 @@ public class InventoryLoader : ILoadable {
 
     public static IEnumerable<ModSubInventory> GetSubInventories(Item item, SubInventoryType level) {
         List<ModSubInventory> secondary = new();
-        foreach(var inv in _special) {
+        foreach (var inv in _special) {
             if (!inv.Accepts(item)) continue;
             if (inv.IsDefault(item)) yield return inv;
             else if (level <= SubInventoryType.Secondary) secondary.Add(inv);
         }
         foreach (var inv in secondary) yield return inv;
 
-        if (level <= SubInventoryType.NonClassic) {
-            foreach (var inv in _nonClassic) {
-                if (inv.Accepts(item)) yield return inv;
-            }
-            if (level <= SubInventoryType.Classic) {
-                foreach (var inv in _classic) yield return inv;
-            }
+        if (level > SubInventoryType.NonClassic) yield break;
+        foreach (var inv in _nonClassic) {
+            if (inv.Accepts(item)) yield return inv;
         }
+
+        if (level > SubInventoryType.Classic) yield break;
+        foreach (var inv in _classic) yield return inv;
     }
 
-    private static void HookFindRecipes(On_Recipe.orig_FindRecipes orig, bool canDelayCheck) {
-        if(!canDelayCheck) s_cachedInvs.Clear();
-        orig(canDelayCheck);
-    }
+    public static void ClearCache() => s_cachedInvs.Clear();
 
     private readonly static List<ModSubInventory> _special = new();
     private readonly static List<ModSubInventory> _nonClassic = new();
