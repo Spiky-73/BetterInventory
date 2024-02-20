@@ -180,12 +180,13 @@ public sealed class SearchItem : ILoadable {
             if (slot == -1 || slot == 0) ItemSlot.LeftClick(items, ContextID.GuideItem, 0);
             if (slot == -1 || slot == 1) ItemSlot.LeftClick(items, ContextID.GuideItem, 1);
         } else {
-            if(slot == -1) slot = Guide.Config.guideTile && Guide.IsCraftingTileItem(Main.mouseItem) ? 1 : 0;
-            if (Guide.GetPlaceholderType(item) == PlaceholderType.None) {
-                if (items[slot].type == item.type && Guide.IsCraftingTileItem(Main.mouseItem)) {
-                    SetGuideItem(new(), slot);
+            if(slot == -1) slot = Guide.Config.guideTile && Guide.IsCraftingStation(item) ? 1 : 0;
+            if (Guide.Enabled && Guide.Config.guideTile && Guide.FitsCraftingTile(item) && Guide.GetPlaceholderType(item) == PlaceholderType.None) {
+                bool single = item.tooltipContext != ContextID.GuideItem;
+                if (Guide.AreSame(items[slot], item)) {
+                    if(single) UseGuideHistory(items, slot, true);
                     slot = 1 - slot;
-                } else if (items[1 - slot].type == item.type) SetGuideItem(new(), 1 - slot);
+                } else if (Guide.AreSame(items[1-slot], item) && single) UseGuideHistory(items, 1-slot, true);
                 items = Guide.GuideItems;
             }
             ItemSlot.LeftClick(items, ContextID.GuideItem, slot);
@@ -209,7 +210,7 @@ public sealed class SearchItem : ILoadable {
             return;
         }
 
-        if (Config.searchHistory && !inv[slot].IsAir && !Guide.AreSame(Main.mouseItem, inv[slot])) _guideHistory[slot].Add(inv[slot].Clone());
+        if (Config.searchHistory && !Guide.AreSame(Main.mouseItem, inv[slot])) _guideHistory[slot].Add(inv[slot].Clone());
 
         (Item mouse, int cursor) = (Main.mouseItem, Main.cursorOverride);
         if (Main.cursorOverride > 0) {
@@ -228,26 +229,36 @@ public sealed class SearchItem : ILoadable {
         (Main.mouseItem, Main.cursorOverride) = (mouse, cursor);
     }
 
-    private static void HookRightClickHistory(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
-        if (!Config.searchRecipes || context != ContextID.GuideItem || !Main.mouseRight){
+    private static void HookRightClickHistory(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot)
+    {
+        if (!Config.searchRecipes || context != ContextID.GuideItem || !Main.mouseRight)
+        {
             orig(inv, context, slot);
             return;
         }
         if (!Main.mouseRightRelease) return;
-        if (Config.searchHistory && _guideHistory[slot].Count > 0) {
-            Item item = _guideHistory[slot][^1];
-            _guideHistory[slot].RemoveAt(_guideHistory[slot].Count - 1);
-            int count = _guideHistory[slot].Count;
-            SetGuideItem(item, slot);
-            if(count != _guideHistory[slot].Count) _guideHistory[slot].RemoveAt(_guideHistory[slot].Count - 1);
-        }
-        else if(!inv[slot].IsAir) {
-            SetGuideItem(new(), slot);
-            if(Config.searchHistory && _guideHistory[slot].Count > 0) _guideHistory[slot].RemoveAt(_guideHistory[slot].Count - 1);
-        }
+        UseGuideHistory(inv, slot);
         inv[0] = Main.guideItem;
         if (inv.Length > 1) inv[1] = Guide.guideTile;
     }
+
+    private static void UseGuideHistory(Item[] inv, int slot, bool allowAir = false) {
+        if (Config.searchHistory && _guideHistory[slot].Count > 0) {
+            Item item;
+            do {
+                item = _guideHistory[slot][^1];
+                _guideHistory[slot].RemoveAt(_guideHistory[slot].Count - 1);
+            } while (_guideHistory[slot].Count > 0 && !allowAir && item.IsAir);
+            int count = _guideHistory[slot].Count;
+            SetGuideItem(item, slot);
+            if (_guideHistory[slot].Count > count) _guideHistory[slot].RemoveAt(_guideHistory[slot].Count - 1);
+        }
+        else if (!inv[slot].IsAir) {
+            SetGuideItem(new(), slot);
+            if (Config.searchHistory && _guideHistory[slot].Count > 0) _guideHistory[slot].RemoveAt(_guideHistory[slot].Count - 1);
+        }
+    }
+
 
     public static void HooksBestiaryUI() {
         _npcSearchBar = Reflection.UIBestiaryTest._searchBar.GetValue(Main.BestiaryUI);

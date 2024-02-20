@@ -77,6 +77,7 @@ public enum FavoriteState : byte { Default, Blacklisted, Favorited }
 public sealed class VisibilityFiltersSerialiser : TagSerializer<VisibilityFilters, TagCompound> {
 
     public override TagCompound Serialize(VisibilityFilters value) {
+        // TODO compatibility with prev version
         TagCompound tag = new();
 
         if (value.Visibility != VisibilityFilters.Flags.Default) tag[FiltersTag] = (byte)value.Visibility;
@@ -92,8 +93,8 @@ public sealed class VisibilityFiltersSerialiser : TagSerializer<VisibilityFilter
             favorited.Add(false);
         }
         foreach ((RawRecipe r, bool f) in value.MissingRecipes) {
-            favorited.Add(f);
             recipes.Add(r);
+            favorited.Add(f);
         }
 
         if (recipes.Count != 0) {

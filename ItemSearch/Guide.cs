@@ -523,7 +523,7 @@ public sealed class Guide : ModSystem {
                 if (!Skip(r)) yield return r;
             }
             foreach (int r in LocalFilters.BlacklistedRecipes) yield return r;
-            if (Configs.ItemSearch.Instance.unknownDisplay == Configs.ItemSearch.UnknownDisplay.Known) foreach (int r in s_unknownRecipes) yield return r;
+            if (Configs.ItemSearch.Instance.unknownDisplay == Configs.ItemSearch.UnknownDisplay.Unknown) foreach (int r in s_unknownRecipes) yield return r;
         } else {
             foreach (int r in s_availableRecipes) {
                 if (!Skip(r)) yield return r;
@@ -635,7 +635,7 @@ public sealed class Guide : ModSystem {
     private static int HookAllowGuideItem(On_ItemSlot.orig_PickItemMovementAction orig, Item[] inv, int context, int slot, Item checkItem) {
         if (context != ContextID.GuideItem || !Enabled || !Config.anyItem) return orig(inv, context, slot, checkItem);
         if (slot == 0 && GetPlaceholderType(Main.mouseItem) == PlaceholderType.None) return 0;
-        if (slot == 1 && IsCraftingTileItem(Main.mouseItem)) return 0;
+        if (slot == 1 && FitsCraftingTile(Main.mouseItem)) return 0;
         return -1;
     }
     public static bool OverrideHover(Item[] inv, int context, int slot) {
@@ -649,7 +649,7 @@ public sealed class Guide : ModSystem {
             (int cursor, Main.cursorOverride) = (Main.cursorOverride, 0);
 
             Item[] items = GuideItems;
-            ItemSlot.LeftClick(items, ContextID.GuideItem, Enabled && Config.guideTile && IsCraftingTileItem(Main.mouseItem) ? 1 : 0);
+            ItemSlot.LeftClick(items, ContextID.GuideItem, Enabled && Config.guideTile && IsCraftingStation(Main.mouseItem) ? 1 : 0);
             GuideItems = items;
 
             if (Enabled && !SearchItem.Config.searchRecipes) Main.LocalPlayer.GetDropItem(ref Main.mouseItem);
@@ -667,7 +667,7 @@ public sealed class Guide : ModSystem {
                 guideTile.TurnToAir();
                 Recipe.FindRecipes();
                 SoundEngine.PlaySound(SoundID.Grab);
-            } else if (inv[slot].IsAir && (Main.mouseItem.IsAir || !IsCraftingTileItem(Main.mouseItem))) {
+            } else if (inv[slot].IsAir && (Main.mouseItem.IsAir || !FitsCraftingTile(Main.mouseItem))) {
                 inv[slot] = new(CraftingItem.type) { createTile = -2 };
                 guideTile = inv[slot];
                 Recipe.FindRecipes();
@@ -775,7 +775,8 @@ public sealed class Guide : ModSystem {
         return PlaceholderType.None;
     }
 
-    public static bool IsCraftingTileItem(Item item) => item.IsAir || CraftingStationsItems.ContainsKey(item.createTile) || ConditionItems.ContainsValue(item.type) || GetPlaceholderType(item) != PlaceholderType.None;
+    public static bool FitsCraftingTile(Item item) => item.IsAir || IsCraftingStation(item) || ConditionItems.ContainsValue(item.type);
+    public static bool IsCraftingStation(Item item) => CraftingStationsItems.ContainsKey(item.createTile) || GetPlaceholderType(item) != PlaceholderType.None;
 
     internal static void dropItemCheck(Player self) {
         if (Main.InGuideCraftMenu || guideTile.IsAir) return;
