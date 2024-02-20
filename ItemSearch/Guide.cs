@@ -454,7 +454,7 @@ public sealed class Guide : ModSystem {
             Recipe.ClearAvailableRecipes();
         }
         orig();
-        s_ilRecipes?.Dispose();
+        s_ilRecipes = null;
         s_collectingGuide = false;
 
     }
@@ -496,7 +496,10 @@ public sealed class Guide : ModSystem {
         cursor.GotoLabel(endLoop!);
         cursor.GotoNext(i => i.MatchStloc1());
         cursor.GotoNext(MoveType.After, i => i.MatchLdloc1());
-        cursor.EmitDelegate((int index) => s_ilRecipes!.MoveNext() ? s_ilRecipes.Current : Recipe.numRecipes);
+        cursor.EmitDelegate((int index) => {
+            if (!Enabled) return index;
+            return s_ilRecipes!.MoveNext() ? s_ilRecipes.Current : Recipe.numRecipes;
+        });
         cursor.EmitDup();
         cursor.EmitStloc1();
 
@@ -581,15 +584,13 @@ public sealed class Guide : ModSystem {
             if (Main.keyState.IsKeyDown(Main.FavoriteKey)) {
                 Main.cursorOverride = CursorOverrideID.FavoriteStar;
                 if (click) {
-                    FavoriteState state = GetFavoriteState(Main.availableRecipe[recipeIndex]);
                     LocalFilters.FavoriteRecipe(Main.availableRecipe[recipeIndex]);
                     FindDisplayedRecipes();
                     SoundEngine.PlaySound(SoundID.MenuTick);
                     return true;
                 }
             } else if (ItemSlot.ControlInUse) {
-                FavoriteState state = GetFavoriteState(Main.availableRecipe[recipeIndex]);
-                if (state == FavoriteState.Favorited) return click;
+                if (GetFavoriteState(Main.availableRecipe[recipeIndex]) == FavoriteState.Favorited) return click;
                 Main.cursorOverride = CursorOverrideID.TrashCan;
                 if (click) {
                     LocalFilters.BlacklistRecipe(Main.availableRecipe[recipeIndex]);

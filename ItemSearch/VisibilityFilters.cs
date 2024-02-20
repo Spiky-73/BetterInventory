@@ -44,10 +44,10 @@ public sealed class VisibilityFilters {
         return FavoriteState.Default;
     }
     public void FavoriteRecipe(int recipe, bool force = false) {
-        if (!BlacklistedRecipes.Remove(recipe) || force) FavoritedRecipes.Add(recipe);
+        if (!ResetFavoriteRecipe(recipe) || force) FavoritedRecipes.Add(recipe);
     }
     public void BlacklistRecipe(int recipe, bool force = false) {
-        if (!FavoritedRecipes.Remove(recipe) || force) BlacklistedRecipes.Add(recipe);
+        if (!ResetFavoriteRecipe(recipe) || force) BlacklistedRecipes.Add(recipe);
     }
     public bool ResetFavoriteRecipe(int recipe) => FavoritedRecipes.Remove(recipe) | BlacklistedRecipes.Remove(recipe);
 
