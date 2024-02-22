@@ -74,22 +74,18 @@ public sealed class RecipeFiltering : ILoadable {
                 bool active = filters.IsFilterActive(i);
                 if (Config.hideUnavailable && s_recipesInFilter[i] == 0 && !active) continue;
                 Rectangle hitbox = new(x, y, RecipeFilterBack.Width(), RecipeFilterBack.Height());
-                if (hitbox.Contains(Main.mouseX, Main.mouseY))
-                {
+                if (hitbox.Contains(Main.mouseX, Main.mouseY)) {
                     Main.LocalPlayer.mouseInterface = true;
                     int rare = 0;
                     string name = Language.GetTextValue(filters.AvailableFilters[i].GetDisplayNameKey());
-                    if (s_recipesInFilter[i] != 0 || active)
-                    {
-                        if (Main.mouseLeft && Main.mouseLeftRelease)
-                        {
+                    if (s_recipesInFilter[i] != 0 || active) {
+                        if (Main.mouseLeft && Main.mouseLeftRelease) {
                             bool keepOn = !active || filters.ActiveFilters.Count > 1;
                             filters.ActiveFilters.Clear();
                             if (keepOn) filters.ActiveFilters.Add(filters.AvailableFilters[i]);
                             OnFilterChanges();
                         }
-                        else if (Main.mouseRight && Main.mouseRightRelease)
-                        {
+                        else if (Main.mouseRight && Main.mouseRightRelease) {
                             filters.ToggleFilter(i);
                             OnFilterChanges();
                         }
@@ -101,14 +97,12 @@ public sealed class RecipeFiltering : ILoadable {
                 }
 
                 Color color;
-                if (s_recipesInFilter[i] != 0)
-                {
+                if (s_recipesInFilter[i] != 0) {
                     color = Color.White;
                     if (!active) color *= 0.2f;
                 }
-                else
-                {
-                    color = new(64, 64, 64);
+                else {
+                    color = new Color(96, 96, 96);
                     if (!active) color *= 0.05f;
                 }
 
@@ -132,13 +126,11 @@ public sealed class RecipeFiltering : ILoadable {
     public static bool FitsFilters(int recipe){
         EntryFilterer<Item, CreativeFilterWrapper> filterer = LocalFilters.Filterer;
         bool fits = false;
+        s_recipes++;
         for (int i = 0; i < filterer.AvailableFilters.Count; i++) {
             if (filterer.AvailableFilters[i].FitsFilter(Main.recipe[recipe].createItem)) {
                 s_recipesInFilter[i]++;
-                if (!fits && (filterer.ActiveFilters.Count == 0 || filterer.IsFilterActive(i))) {
-                    fits = true;
-                    s_recipes++;
-                }
+                fits |= filterer.ActiveFilters.Count == 0 || filterer.IsFilterActive(i);
             }
         }
         return fits;

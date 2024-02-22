@@ -379,7 +379,13 @@ public sealed class Guide : ModSystem {
 
     public static Item? GetGuideMaterials() =>  Enabled && !SearchItem.Config.searchRecipes ? Main.guideItem : null;
 
-    public static void FindDisplayedRecipes() => Reflection.Recipe.CollectGuideRecipes.Invoke();
+    public static void FindDisplayedRecipes() {
+        int oldRecipe = Main.availableRecipe[Main.focusRecipe];
+        float focusY = Main.availableRecipeY[Main.focusRecipe];
+        Reflection.Recipe.CollectGuideRecipes.Invoke();
+        Reflection.Recipe.TryRefocusingRecipe.Invoke(oldRecipe);
+        Reflection.Recipe.VisuallyRepositionRecipes.Invoke(focusY);
+    }
 
     private static void HookClearRecipes(On_Recipe.orig_ClearAvailableRecipes orig) {
         if (Enabled && !s_collectingGuide) ClearAvailableRecipes();
