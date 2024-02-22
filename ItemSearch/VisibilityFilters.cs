@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using BetterInventory.DataStructures;
 using Terraria;
@@ -9,8 +10,6 @@ namespace BetterInventory.ItemSearch;
 
 public sealed class VisibilityFilters {
     
-    public Flags Visibility { get; set; } = Flags.Default;
-
     public static Flags CurrentVisibility => (Main.guideItem.IsAir && (!Guide.Config.guideTile || Guide.guideTile.IsAir)) ? Flags.ShowAllAir : Flags.ShowAllGuide;
     public bool ShowAllRecipes {
         get => Visibility.HasFlag(CurrentVisibility);
@@ -51,11 +50,15 @@ public sealed class VisibilityFilters {
     }
     public bool ResetFavoriteRecipe(int recipe) => FavoritedRecipes.Remove(recipe) | BlacklistedRecipes.Remove(recipe);
 
+
+    public Flags Visibility { get; set; } = Flags.Default;
+
     public readonly RangeSet FavoritedRecipes = new();
     public readonly RangeSet BlacklistedRecipes = new();
-    public readonly List<(RawRecipe, bool)> MissingRecipes = new();
 
     public readonly Dictionary<string, RangeSet> OwnedItems = new();
+
+    public readonly List<(RawRecipe, bool)> UnloadedRecipes = new();
     public readonly List<ItemDefinition> UnloadedItems = new();
     
     private void SetFlag(Flags flag, bool set) {
@@ -77,40 +80,28 @@ public enum FavoriteState : byte { Default, Blacklisted, Favorited }
 public sealed class VisibilityFiltersSerialiser : TagSerializer<VisibilityFilters, TagCompound> {
 
     public override TagCompound Serialize(VisibilityFilters value) {
-        // TODO compatibility with prev version
         TagCompound tag = new();
 
         if (value.Visibility != VisibilityFilters.Flags.Default) tag[FiltersTag] = (byte)value.Visibility;
 
-        List<RawRecipe> recipes = new();
-        List<bool> favorited = new();
-        foreach (int i in value.FavoritedRecipes) {
-            recipes.Add(new(Main.recipe[i]));
-            favorited.Add(true);
-        }
-        foreach (int i in value.BlacklistedRecipes) {
-            recipes.Add(new(Main.recipe[i]));
-            favorited.Add(false);
-        }
-        foreach ((RawRecipe r, bool f) in value.MissingRecipes) {
-            recipes.Add(r);
-            favorited.Add(f);
-        }
+        List<RawRecipe> favorited = new();
+        List<RawRecipe> blacklisted = new();
+        foreach (int i in value.FavoritedRecipes) favorited.Add(new(Main.recipe[i]));
+        foreach (int i in value.BlacklistedRecipes) blacklisted.Add(new(Main.recipe[i]));
+        foreach ((RawRecipe r, bool f) in value.UnloadedRecipes) (f ? favorited : blacklisted).Add(r);
+        if (favorited.Count != 0) tag[FavoritedTag] = favorited;
+        if (blacklisted.Count != 0) tag[BlacklistedTag] = blacklisted;
 
-        if (recipes.Count != 0) {
-            tag[RecipesTag] = recipes;
-            tag[FavoritedTag] = favorited;
-        }
-
-        List<ItemDefinition> items = new();
+        List<ItemDefinition> owned = new();
         foreach((string mod, RangeSet set) in value.OwnedItems) {
             foreach (Range range in set.GetRanges()) {
-                items.Add(new(range.Start));
-                items.Add(new(range.End));
+                owned.Add(new(range.Start));
+                owned.Add(new(range.End));
             }
         }
-        items.AddRange(value.UnloadedItems);
-        if(items.Count != 0) tag[ItemsTag] = items;
+        owned.AddRange(value.UnloadedItems);
+        if(owned.Count != 0) tag[OwnedTag] = owned;
+        
         return tag;
     }
 
@@ -119,23 +110,40 @@ public sealed class VisibilityFiltersSerialiser : TagSerializer<VisibilityFilter
 
         if (tag.TryGet(FiltersTag, out byte raw)) value.Visibility = (VisibilityFilters.Flags)raw;
 
-        if (tag.TryGet(RecipesTag, out IList<RawRecipe> recipes)) {
-            IList<bool> favorited = tag.Get<IList<bool>>(FavoritedTag);
-            for (int r = 0; r < recipes.Count; r++) {
-                Recipe? recipe = recipes[r].GetRecipe();
-                if (recipe is null) value.MissingRecipes.Add((recipes[r], favorited[r]));
-                else if (favorited[r]) value.FavoritedRecipes.Add(recipe.RecipeIndex);
+        if (tag.TryGet(FavoritedTag, out IList<RawRecipe> favorited)) {
+            for (int r = 0; r < favorited.Count; r++) {
+                Recipe? recipe = favorited[r].GetRecipe();
+                if (recipe is null) value.UnloadedRecipes.Add((favorited[r], true));
+                else value.FavoritedRecipes.Add(recipe.RecipeIndex);
+            }
+        }
+        if (tag.TryGet(BlacklistedTag, out IList<RawRecipe> blacklisted)) {
+            for (int r = 0; r < blacklisted.Count; r++) {
+                Recipe? recipe = blacklisted[r].GetRecipe();
+                if (recipe is null) value.UnloadedRecipes.Add((blacklisted[r], false));
                 else value.BlacklistedRecipes.Add(recipe.RecipeIndex);
             }
         }
-        if (tag.TryGet(ItemsTag, out IList<ItemDefinition> items)) {
-            for (int i = 0; i < items.Count; i+=2) {
-                if (items[i].IsUnloaded) {
-                    value.UnloadedItems.Add(items[i]);
-                    value.UnloadedItems.Add(items[i+1]);
+
+        if (tag.TryGet(RecipesTag, out IList<RawRecipe> recipes)) {
+            IList<byte> favorites = tag.Get<IList<byte>>(FavoritesTag);
+            for (int r = 0; r < recipes.Count; r++) {
+                bool fav = favorites[r] == (byte)FavoriteState.Favorited;
+                Recipe? recipe = recipes[r].GetRecipe();
+                if (recipe is null) value.UnloadedRecipes.Add((recipes[r], fav));
+                else if (fav) value.FavoritedRecipes.Add(recipe.RecipeIndex);
+                else value.BlacklistedRecipes.Add(recipe.RecipeIndex);
+            }
+        }
+
+        if (tag.TryGet(OwnedTag, out IList<ItemDefinition> owned) || tag.TryGet(ItemsTag, out owned)) {
+            for (int i = 0; i < owned.Count; i+=2) {
+                if (owned[i].IsUnloaded) {
+                    value.UnloadedItems.Add(owned[i]);
+                    value.UnloadedItems.Add(owned[i+1]);
                 } else {
-                    if (!value.OwnedItems.ContainsKey(items[i].Mod)) value.OwnedItems.Add(items[i].Mod, new());
-                    value.OwnedItems[items[i].Mod].Add(new Range(items[i].Type, items[i+1].Type));
+                    if (!value.OwnedItems.ContainsKey(owned[i].Mod)) value.OwnedItems.Add(owned[i].Mod, new());
+                    value.OwnedItems[owned[i].Mod].Add(new Range(owned[i].Type, owned[i+1].Type));
                 }
             }
         }
@@ -143,34 +151,36 @@ public sealed class VisibilityFiltersSerialiser : TagSerializer<VisibilityFilter
     }
 
     public const string FiltersTag = "filters";
-    public const string RecipesTag = "recipes";
     public const string FavoritedTag = "favorited";
+    public const string BlacklistedTag = "blacklisted";
+    public const string OwnedTag = "owned";
+
+    public const string RecipesTag = "recipes";
+    public const string FavoritesTag = "favorites";
     public const string ItemsTag = "items";
 }
 
 
 public sealed class RawRecipe {
-    public RawRecipe(string mod, List<string> items, List<int> stacks, List<string> tiles) {
+    public RawRecipe(string mod, List<ItemDefinition> items, List<string> tiles) {
         this.mod = mod;
         this.items = items;
-        this.stacks = stacks;
         this.tiles = tiles;
     }
 
     public RawRecipe(Recipe recipe) {
         mod = recipe.Mod?.Name ?? "Terraria";
         items = new();
-        stacks = new();
+        tiles = new();
         AddItem(recipe.createItem);
         foreach (Item item in recipe.requiredItem) AddItem(item);
-        tiles = new();
         foreach (int tile in recipe.requiredTile) AddTile(tile);
     }
 
     public Recipe? GetRecipe() {
-        (int type, int stack) = (ItemID.Search.GetId(items[0]), stacks[0]);
-        Dictionary<int, int> requiredItem = new();
-        for (int i = 1; i < items.Count; i++) requiredItem[ItemID.Search.GetId(items[i])] = stacks[i];
+        int type = items[0].Type;
+        HashSet<int> requiredItem = new();
+        for (int i = 1; i < items.Count; i++) requiredItem.Add(items[i].Type);
 
         HashSet<int> requiredTile = new();
         foreach (string tile in tiles) requiredTile.Add(TileID.Search.GetId(tile));
@@ -178,9 +188,9 @@ public sealed class RawRecipe {
         for (int r = 0; r < Recipe.numRecipes; r++) {
             Recipe recipe = Main.recipe[r];
             if ((recipe.Mod?.Name ?? "Terraria") != mod) continue;
-            if (recipe.createItem.type != type || recipe.createItem.stack != stack) continue;
+            if (recipe.createItem.type != type) continue;
             foreach (Item material in recipe.requiredItem) {
-                if (!requiredItem.TryGetValue(material.type, out int s) || material.stack != s) goto next;
+                if (!requiredItem.Contains(material.type)) goto next;
             }
             foreach (int tile in recipe.requiredTile) {
                 if (!requiredTile.Contains(tile)) goto next;
@@ -192,32 +202,28 @@ public sealed class RawRecipe {
     }
 
     public string mod;
-    public List<string> items;
-    public List<int> stacks;
+    public List<ItemDefinition> items;
     public List<string> tiles;
 
-    private void AddItem(Item item) {
-        items.Add(ItemID.Search.GetName(item.type));
-        stacks.Add(item.stack);
-    }
+    private void AddItem(Item item) => items.Add(new(item.type));
     private void AddTile(int tile) => tiles.Add(TileID.Search.GetName(tile));
 
 }
 public sealed class RawRecipeSerialiser : TagSerializer<RawRecipe, TagCompound> {
-    public override TagCompound Serialize(RawRecipe value) => new() {
-        [ModTag] = value.mod,
-        [ItemsTag] = value.items, [StacksTag] = value.stacks,
-        [TilesTag] = value.tiles,
-    };
+    public override TagCompound Serialize(RawRecipe value) => new() { [ModTag] = value.mod, [ItemsTag] = value.items, [TilesTag] = value.tiles };
 
-    public override RawRecipe Deserialize(TagCompound tag) => new(
-        tag.GetString(ModTag),
-        tag.Get<List<string>>(ItemsTag), tag.Get<List<int>>(StacksTag),
-        tag.Get<List<string>>(TilesTag)
-    );
+    public override RawRecipe Deserialize(TagCompound tag){
+        List<ItemDefinition> defs;
+        if (tag.Get<IList>(ItemsTag) is not List<string> old) defs = tag.Get<List<ItemDefinition>>(ItemsTag);
+        else {
+            defs = new();
+            foreach (string s in old) defs.Add(new(s));
+        }
+        return new(tag.GetString(ModTag), defs, tag.Get<List<string>>(TilesTag) );
+    }
+
 
     public const string ModTag = "mod";
     public const string ItemsTag = "items";
-    public const string StacksTag = "stacks";
     public const string TilesTag = "tiles";
 }
