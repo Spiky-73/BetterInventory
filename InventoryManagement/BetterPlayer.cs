@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BetterInventory.Configs.UI;
 using BetterInventory.ItemSearch;
+using BetterInventory.Crafting;
 using MonoMod.Cil;
 using Terraria;
 using Terraria.GameInput;
@@ -63,7 +64,6 @@ public sealed class BetterPlayer : ModPlayer {
         On_ItemSlot.TryOpenContainer += HookTryOpenContainer;
         On_Player.DropItemFromExtractinator += HookFastExtractinator;
 
-        On_Player.OpenChest += HookOpenChest;
         IL_Player.GetItem += ILGetItem;
 
         On_ChestUI.LootAll += HookLootAll;
@@ -72,7 +72,6 @@ public sealed class BetterPlayer : ModPlayer {
 
         On_ItemSlot.PickupItemIntoMouse += HookNoPickupMouse;
     }
-
     public override void Unload() {
         FavoritedBuffKb = null!;
         foreach (BuilderAccToggle bat in BuilderAccToggles) bat.UnloadKeybind();
@@ -82,21 +81,9 @@ public sealed class BetterPlayer : ModPlayer {
         RecipeFilters ??= new();
         VisibilityFilters ??= new();
 
-        bool download;
-        if (Configs.Version.Instance.lastPlayedVersion.Length == 0) download = true;
-        else if (Mod.Version > new Version(Configs.Version.Instance.lastPlayedVersion)) download = false;
-        else return;
+        if (Guide.Enabled) Guide.FindDisplayedRecipes();
 
-        Configs.Version.Instance.lastPlayedVersion = Mod.Version.ToString();
-        Configs.Version.Instance.SaveConfig();
-
-        List<(LocalizedText text, TagKeyFormat format)> lines = new();
-        if(download) lines.Add((Language.GetText("Mods.BetterInventory.Chat.Download"), UpdateNotification.DownloadTags));
-        else lines.Add((Language.GetText("Mods.BetterInventory.Chat.Update"), UpdateNotification.UpdateTags));
-        lines.Add((Language.GetText("Mods.BetterInventory.Chat.Bug"), UpdateNotification.BugTags));
-        LocalizedText important = Language.GetText("Mods.BetterInventory.Chat.Important");
-        if (!download && important.Value.Length != 0) lines.Add((important, UpdateNotification.ImportantTags));
-        InGameNotificationsTracker.AddNotification(new UpdateNotification(lines));
+        UpdateNotification.Display();
     }
 
     public override void SetControls() {
@@ -104,7 +91,7 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public override void ProcessTriggers(TriggersSet triggersSet) {
-        QuickMove.RecordSelectedSlot();
+        QuickMove.ProcessTriggers();
         SearchItem.ProcessSearchTap();
         if (FavoritedBuffKb.JustPressed) FavoritedBuff(Player);
         if(Config.builderKeys) foreach (BuilderAccToggle bat in BuilderAccToggles) bat.Process(Player);
@@ -112,7 +99,10 @@ public sealed class BetterPlayer : ModPlayer {
 
     public override bool HoverSlot(Item[] inventory, int context, int slot) {
         QuickMove.HoverItem(inventory, context, slot);
-        return ClickOverride.OverrideHover(inventory, context, slot);
+        if (SearchItem.OverrideHover(inventory, context, slot)) return true;
+        if (Guide.OverrideHover(inventory, context, slot)) return true;
+        if (ClickOverride.OverrideHover(inventory, context, slot)) return true;
+        return false;
     }
 
     public override bool PreItemCheck() {
@@ -121,16 +111,16 @@ public sealed class BetterPlayer : ModPlayer {
                 && Main.HoverItem.IsAir && Player.altFunctionUse == 0 && Player.selectedItem < 10) {
             Player.itemAnimation--;
             if(Main.stackSplit == 1) Player.itemAnimation = 0;
-            if (!Config.itemRightClick.Value.stackableItems) _noMousePickup = true;
+            if (!Config.itemRightClick.Value.stackableItems) s_noMousePickup = true;
             ItemSlot.RightClick(Player.inventory, ItemSlot.Context.InventoryItem, Player.selectedItem);
-            _noMousePickup = false;
+            s_noMousePickup = false;
             if (!Main.mouseItem.IsAir) Player.DropSelectedItem();
             return false;
         }
         return true;
     }
     private static void HookNoPickupMouse(On_ItemSlot.orig_PickupItemIntoMouse orig, Item[] inv, int context, int slot, Player player) {
-        if (!Config.itemRightClick || !_noMousePickup) orig(inv, context, slot, player);
+        if (!Config.itemRightClick || !s_noMousePickup) orig(inv, context, slot, player);
     }
 
 
@@ -138,7 +128,7 @@ public sealed class BetterPlayer : ModPlayer {
         List<Item> items = new();
         Item? mat;
         if((mat = Guide.GetGuideMaterials()) != null) items.Add(mat);
-        if((mat = Crafting.Tweeks.GetMouseMaterial()) != null) items.Add(mat);
+        if((mat = Tweeks.GetMouseMaterial()) != null) items.Add(mat);
         itemConsumedCallback = (item, amount) => item.stack -= amount;
         return items;
     }
@@ -153,11 +143,6 @@ public sealed class BetterPlayer : ModPlayer {
     private static void HookFastExtractinator(On_Player.orig_DropItemFromExtractinator orig, Player self, int itemType, int stack) {
         orig(self, itemType, stack);
         if (Config.fastContainerOpening) self.itemTime = self.itemTimeMax = self.itemTime/5;
-    }
-
-    private static void HookOpenChest(On_Player.orig_OpenChest orig, Player self, int x, int y, int newChest) {
-        foreach (Item item in self.Chest(newChest)) if (!item.IsAir) self.GetModPlayer<BetterPlayer>().VisibilityFilters.AddOwnedItems(item);
-        orig(self, x, y, newChest);
     }
 
     private static void ILKeepFavoriteInChest(ILContext il) {
@@ -184,9 +169,9 @@ public sealed class BetterPlayer : ModPlayer {
 
 
     public static Item GetItem_Inner(Player self, int plr, Item newItem, GetItemSettings settings) {
-        innerGetItem = true;
+        s_innerGetItem = true;
         Item i = self.GetItem(plr, newItem, settings);
-        innerGetItem = false;
+        s_innerGetItem = false;
         return i;
     }
     private static void ILGetItem(ILContext il){
@@ -202,7 +187,7 @@ public sealed class BetterPlayer : ModPlayer {
         cursor.EmitLdarg2();
         cursor.EmitLdarg3();
         cursor.EmitDelegate((Player self, Item newItem, GetItemSettings settings) => {
-            if (innerGetItem || Config.smartPickup == Configs.InventoryManagement.SmartPickupLevel.Off) return newItem;
+            if (s_innerGetItem || Config.smartPickup == Configs.InventoryManagement.SmartPickupLevel.Off) return newItem;
             else return SmartPickup.SmartGetItem(self, newItem, settings);
         });
         cursor.EmitStarg(2);
@@ -227,7 +212,7 @@ public sealed class BetterPlayer : ModPlayer {
         cursor.EmitLdarg2();
         cursor.EmitLdarg3();
         cursor.EmitDelegate((Player self, Item newItem, GetItemSettings settings) => {
-            if (innerGetItem || settings.NoText || Config.autoEquip == Configs.InventoryManagement.AutoEquipLevel.Off) return newItem;
+            if (s_innerGetItem || settings.NoText || Config.autoEquip == Configs.InventoryManagement.AutoEquipLevel.Off) return newItem;
             foreach (ModSubInventory slots in InventoryLoader.GetSubInventories(newItem, Config.autoEquip == Configs.InventoryManagement.AutoEquipLevel.DefaultSlots ? SubInventoryType.Default : SubInventoryType.Secondary).ToArray()) {
                 newItem = slots.GetItem(self, newItem, settings);
                 if (newItem.IsAir) return newItem;
@@ -261,15 +246,15 @@ public sealed class BetterPlayer : ModPlayer {
     public override void LoadData(TagCompound tag) {
         VisibilityFilters = tag.Get<VisibilityFilters>(VisibilityTag);
         if (tag.TryGet(GuideTileTag, out Item guide)) Guide.guideTile = guide;
-        RecipeFilters = tag.Get<Crafting.RecipeFilters>(RecipesTag);
+        RecipeFilters = tag.Get<RecipeFilters>(RecipesTag);
     }
 
-    public Crafting.RecipeFilters RecipeFilters { get; set; } = null!;
+    public RecipeFilters RecipeFilters { get; set; } = null!;
     public VisibilityFilters VisibilityFilters { get; set; } = new();
 
-    private static bool innerGetItem;
+    private static bool s_innerGetItem;
 
-    private static bool _noMousePickup;
+    private static bool s_noMousePickup;
 
     public const string VisibilityTag = "visibility";
     public const string RecipesTag = "recipes";

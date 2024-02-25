@@ -9,6 +9,6 @@ public class BetterNPC : GlobalNPC {
         if (!Guide.Enabled || npc.type != NPCID.Guide) return;
         Main.InGuideCraftMenu = true;
         Main.recBigList = true;
-        Recipe.FindRecipes();
+        Guide.FindDisplayedRecipes();
     }
 }

@@ -1,5 +1,5 @@
 displayName = Better Inventory
 author = Spiky
-version = 0.4
+version = 0.4.1
 homepage = https://github.com/Spiky-73/BetterInventory/tree/master
 side = Client

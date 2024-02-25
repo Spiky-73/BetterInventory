@@ -386,6 +386,7 @@ BetterGuide: {
 			'''
 			Allow you to craft items when talking to the guide
 			Add an icon to toggle between "All Recipes" and "Available Recipes"
+			The toggle stores 2 independent states: one when the guide item or tile are used, and one when one when none are used.
 			'''
 	}
 }
@@ -422,60 +423,22 @@ Version: {
 	Headers.Changelog: Changelog
 
 	Info: {
-		Label: Added Click Overrides, Search History and improved various features
+		Label: "{$Mods.BetterInventory.Chat.Info}"
 		Tooltip: ""
 	}
 
 	Important: {
-		Label:
-			'''
-			{$Mods.BetterInventory.Chat.Important}
-
-			'''
+		Label: "{$Mods.BetterInventory.Chat.Important}"
 		Tooltip: ""
 	}
 
 	Bug: {
-		Label:
-			'''
-			{$Mods.BetterInventory.Chat.Bug}
-
-			'''
+		Label: "{$Mods.BetterInventory.Chat.Bug}"
 		Tooltip: ""
 	}
 
 	Changelog: {
-		Label:
-			'''
-			- Replaced chat message with notification
-			- Added Chat message to Version Config
-			- Displays Smart pickup ghosts
-			- Allows items to have ghosts in multiple slots
-			- Improved SmartPickup and AutoEquip pickup order
-			- Removes Smart Pickup on Shift Click
-			- Fast Container Opening now applies to the Extractinator
-			- Improved recipe filters display
-			- Fixed recipe scroll SFX
-			- Added Shift Right click override
-			- Added click overrides for shops
-			- Added options to invert Crafting override clicks
-			- Added item stacking for shops and trash
-			- Added More Better Bestiary and Guide settings
-			- Added Search History for Guide and Bestiary
-			- Fixed guideTile applied when disabled
-			- Fixed Guide Item removed when searching the same item
-			- Added Different Quick Move hotkey layouts
-			- Displays the hotkey and highlights the slots where an item can be quick moved to
-			- Fixed Quick Moving accessories keeping the effect of some items
-			- Fixed Quick Move and Smart Pickup losing modded item data
-			- Fixed Quick move changing the favorite state of items
-			- Fixed others bugs
-			'''
-		Tooltip: ""
-	}
-
-	Thanks: {
-		Label: Thanks
+		Label: "{$Mods.BetterInventory.Chat.Changelog}"
 		Tooltip: ""
 	}
 }

@@ -47,11 +47,12 @@ public sealed class RangeSet : IEnumerable<int> {
 
     public int Count { get; private set; }
 
-    public void Add(int item) => Add(new Range(item, item));
+    public bool Add(int item) => Add(new Range(item, item));
     public void AddRange(IEnumerable<int> enumerable) { foreach (int i in enumerable) Add(i); }
     
-    public void Add(Range range) {
+    public bool Add(Range range) {
         int i = FindInsertIndex(range.Start);
+        if (i != 0 && _ranges[i - 1].Start <= range.Start && range.End <= _ranges[i - 1].End) return false;
         if (i == 0 || range.Start - _ranges[i - 1].End > 1) _ranges.Insert(i, range);
         else if (range.End > _ranges[--i].End) {
             Count -= _ranges[i].Count;
@@ -71,24 +72,26 @@ public sealed class RangeSet : IEnumerable<int> {
             _ranges.RemoveAt(i+1);
         }
         Count += _ranges[i].Count;
+        return true;
     }
 
-    public void Remove(int item) {
-        int i = FindInsertIndex(item);
-        if (i == 0 || i == _ranges.Count && _ranges[i - 1].End < item) return;
-        if (item == _ranges[i - 1].Start) _ranges[i - 1] = new(item + 1, _ranges[i - 1].End);
+    public bool Remove(int item) {
+        if (!Contains(item, out int i)) return false;
+        if (_ranges[i - 1].Count == 1) _ranges.RemoveAt(i - 1);
+        else if (item == _ranges[i - 1].Start) _ranges[i - 1] = new(item + 1, _ranges[i - 1].End);
         else {
             if (item != _ranges[i - 1].End) _ranges.Insert(i, new(item + 1, _ranges[i - 1].End));
             _ranges[i - 1] = new(_ranges[i - 1].Start, item - 1);
         }
         Count--;
+        return true;
     }
 
-    public bool Contains(int item) {
-        int i = FindInsertIndex(item);
-        return i != 0 && item <= _ranges[i-1].End;
+    public bool Contains(int item) => Contains(item, out _);
+    private bool Contains(int item, out int index){
+        index = FindInsertIndex(item);
+        return index != 0 && item <= _ranges[index-1].End;
     }
-
     private int FindInsertIndex(int item) {
         for (int i = 0; i < _ranges.Count; i++) if (item < _ranges[i].Start) return i;
         return _ranges.Count;
