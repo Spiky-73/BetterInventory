@@ -24,8 +24,6 @@ public sealed class SmartPickup : ILoadable {
         On_ItemSlot.LeftClick_ItemArray_int_int += HookLeftSaveType;
         On_ItemSlot.RightClick_ItemArray_int_int += HookRightSaveType;
         On_Player.DropItems += HookMarkItemsOnDeath;
-
-        IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += ILDrawMarks;
     }
     public void Unload() { }
 
@@ -61,12 +59,39 @@ public sealed class SmartPickup : ILoadable {
         orig(self);
     }
     
-    private static void ILDrawMarks(ILContext il) {
+    internal static void ILSmartPickup(ILContext il) {
+        ILCursor cursor = new(il);
+
+        // ...
+        // if (newItem.uniqueStack && this.HasItem(newItem.type)) return item;
+        cursor.GotoNext(i => i.MatchCall(Reflection.Player.HasItem));
+        cursor.GotoNext(MoveType.AfterLabel, i => i.MatchLdloc0()); // bool isACoin
+
+        // ++ item = <smartPickup>
+        cursor.EmitLdarg0();
+        cursor.EmitLdarg2();
+        cursor.EmitLdarg3();
+        cursor.EmitDelegate((Player self, Item newItem, GetItemSettings settings) => {
+            if (BetterPlayer.VanillaGetItem || Level == Configs.InventoryManagement.SmartPickupLevel.Off) return newItem;
+            else return SmartGetItem(self, newItem, settings);
+        });
+        cursor.EmitDup();
+        cursor.EmitStarg(2);
+
+        // ++if (newItem.IsAir) return new()
+        cursor.EmitDelegate((Item item) => item.IsAir);
+        ILLabel skip = cursor.DefineLabel();
+        cursor.EmitBrfalse(skip);
+        cursor.EmitDelegate(() => new Item());
+        cursor.EmitRet();
+        cursor.MarkLabel(skip);
+    }
+    internal static void ILDrawMarks(ILContext il) {
         ILCursor cursor = new(il);
 
         // ...
         // int num9 = context switch { ... };
-        // if ((item.type <= 0 || item.stack <= 0) && ++[!<drawMark> && num9 != -1]) <drawSlotTexture>
+        // if ((item.type <= 0 || item.stack <= 0) && ++[!<drawMark>] && num9 != -1) <drawSlotTexture>
         cursor.GotoNext(MoveType.After, i => i.MatchLdloc(11));
         cursor.EmitLdarg0();
         cursor.EmitLdarg1();

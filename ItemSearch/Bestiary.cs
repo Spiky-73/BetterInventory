@@ -22,7 +22,6 @@ public sealed class Bestiary : ILoadable {
 
     public void Load(Mod mod) {
         On_FewFromOptionsNotScaledWithLuckDropRule.ReportDroprates += HookFixDropRates;
-        IL_Filters.BySearch.FitsFilter += ILSearchAddEntries;
         
         On_UIBestiaryInfoItemLine.ctor += HookShowBagContent;
         On_ItemDropBestiaryInfoElement.GetSearchString += HookSearchBagText;
@@ -30,14 +29,10 @@ public sealed class Bestiary : ILoadable {
         On_Filters.ByUnlockState.GetDisplayNameKey += HookCustomUnlockFilterName;
         On_Filters.ByUnlockState.FitsFilter += HookCustomUnlockFilter;
 
-        IL_UIBestiaryEntryIcon.Update += ILIconUpdateFakeUnlock;
-        IL_UIBestiaryEntryIcon.DrawSelf += ILIconDrawFakeUnlock;
         On_UIBestiaryEntryButton.ctor += HookDarkenEntryButton;
 
-        IL_UIBestiaryEntryInfoPage.AddInfoToList += IlEntryPageFakeUnlock;
         On_UIBestiaryEntryInfoPage.AddInfoToList += HookDarkenEntryPage;
 
-        IL_UIBestiaryFilteringOptionsGrid.UpdateAvailability += ILFakeUnlockFilters;
         On_UIBestiaryFilteringOptionsGrid.UpdateButtonSelections += HookDarkenFilters;
 
         On_UIBestiaryTest.FilterEntries += HookBestiaryFilterRemoveHiddenEntries;
@@ -59,7 +54,7 @@ public sealed class Bestiary : ILoadable {
         Chains.ReportDroprates(self.ChainedRules, pesonalDroprate, drops, ratesInfo);
     }
     
-    private static void ILSearchAddEntries(ILContext il) {
+    internal static void ILSearchAddEntries(ILContext il) {
         ILCursor cursor = new(il);
 
         // ...
@@ -121,7 +116,7 @@ public sealed class Bestiary : ILoadable {
     private static bool HookCustomUnlockFilter(On_Filters.ByUnlockState.orig_FitsFilter orig, Filters.ByUnlockState self, BestiaryEntry entry) => Enabled && Config.unlockFilter ? entry.UIInfoProvider.GetEntryUICollectionInfo().UnlockState != BestiaryEntryUnlockState.CanShowDropsWithDropRates_4 : orig(self, entry);
 
 
-    private static void ILIconUpdateFakeUnlock(ILContext il) {
+    internal static void ILIconUpdateFakeUnlock(ILContext il) {
         ILCursor cursor = new(il);
 
         // this._collectionInfo = this._entry.UIInfoProvider.GetEntryUICollectionInfo();
@@ -134,7 +129,7 @@ public sealed class Bestiary : ILoadable {
         });
         // ...
     }
-    private static void ILIconDrawFakeUnlock(ILContext il) {
+    internal static void ILIconDrawFakeUnlock(ILContext il) {
         ILCursor cursor = new(il);
 
         // ...
@@ -152,7 +147,7 @@ public sealed class Bestiary : ILoadable {
         Reflection.UIBestiaryEntryButton._bordersGlow.GetValue(self).Color.ApplyRGB(IconDark);
     }
 
-    private static void IlEntryPageFakeUnlock(ILContext il) {
+    internal static void IlEntryPageFakeUnlock(ILContext il) {
         ILCursor cursor = new(il);
 
         // BestiaryUICollectionInfo uICollectionInfo = this.GetUICollectionInfo(entry, extraInfo);
@@ -175,7 +170,7 @@ public sealed class Bestiary : ILoadable {
         if (s_darkPage) DarkenElement(Reflection.UIBestiaryEntryInfoPage._list.GetValue(self), PageDark);
     }
 
-    private static void ILFakeUnlockFilters(ILContext il) {
+    internal static void ILFakeUnlockFilters(ILContext il) {
         ILCursor cursor = new(il);
 
         // ...

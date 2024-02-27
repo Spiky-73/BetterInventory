@@ -9,10 +9,6 @@ public sealed class SmartConsumptionItem : GlobalItem {
 
     public static Configs.InventoryManagement Config => Configs.InventoryManagement.Instance;
 
-    public override void Load() {
-        IL_Player.ItemCheck_CheckFishingBobber_PickAndConsumeBait += ILSmartBait;
-    }
-
     public override void OnConsumeItem(Item item, Player player) {
         if (!Config.smartConsumption) return;
         if (item.PaintOrCoating) OnConsume(item, player.LastStack(item, true));
@@ -23,7 +19,7 @@ public sealed class SmartConsumptionItem : GlobalItem {
         if (Config.smartAmmo) OnConsume(ammo, player.LastStack(ammo, true));
     }
 
-    private static void ILSmartBait(ILContext il) {
+    internal static void ILSmartBait(ILContext il) {
         ILCursor cursor = new(il);
         cursor.GotoNext(i => i.MatchCall(Reflection.NPC.LadyBugKilled));
         cursor.GotoNext(MoveType.After, i => i.MatchStfld(Reflection.Item.stack));

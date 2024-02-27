@@ -24,11 +24,13 @@ public sealed class Text {
     [JsonIgnore] public TagKeyFormat? Label { get; }
     [JsonIgnore] public TagKeyFormat? Tooltip { get; }
 
-    internal static void ILColors(ILContext il) {
+    internal static void ILTextColors(ILContext il) {
         ILCursor cursor = new(il);
 
-        cursor.GotoNext(i => i.MatchCall(typeof(Terraria.UI.Chat.ChatManager), nameof(Terraria.UI.Chat.ChatManager.DrawColorCodedStringWithShadow)));
-        cursor.GotoPrev(MoveType.After, i => i.MatchLdloc3());
+        if(!cursor.TryGotoNext(i => i.MatchCall(typeof(ChatManager), nameof(ChatManager.DrawColorCodedStringWithShadow)))
+                || !cursor.TryGotoPrev(MoveType.After, i => i.MatchLdloc3())) {
+            return; // TODO log info
+        }
         cursor.EmitLdarg0();
         cursor.EmitDelegate((Color color, ConfigElement self) => {
             if (self is not TextElement textElem) return color;
@@ -37,7 +39,6 @@ public sealed class Text {
             return color == Color.White ? text.Label.Value.Color.Value : text.Label.Value.Color.Value.MultiplyRGB(color);
         });
     }
-
 }
 
 public sealed class TextElement : ConfigElement<Text?> {

@@ -20,24 +20,21 @@ public sealed class RecipeFiltering : ILoadable {
     public static Configs.RecipeFiltering Config => Configs.Crafting.Instance.recipeFiltering.Value;
     public static RecipeFilters LocalFilters => InventoryManagement.BetterPlayer.LocalPlayer.RecipeFilters;
 
-    public void Load(Mod mod) {
-        IL_Main.DrawInventory += ILDrawFilters;
-    }
-
+    public void Load(Mod mod) {}
     public void Unload() { }
 
-    private static void ILDrawFilters(ILContext il) {
+    internal static void ILDrawFilters(ILContext il) {
         ILCursor cursor = new(il);
 
         // ...
         // if(<showRecipes>){
-        cursor.GotoNext(i => i.MatchStsfld(typeof(Terraria.UI.Gamepad.UILinkPointNavigator.Shortcuts), nameof(Terraria.UI.Gamepad.UILinkPointNavigator.Shortcuts.CRAFT_CurrentRecipeBig)));
-        cursor.GotoPrev(MoveType.AfterLabel);
+        cursor.GotoNext(i => i.MatchStloc(124)); // int num63
+        cursor.GotoPrev(MoveType.After, i => i.MatchStsfld(Reflection.UILinkPointNavigator.CRAFT_CurrentRecipeSmall));
 
         //     ++<drawFilters>
-        cursor.EmitLdloc(13); // screen position
-        cursor.EmitDelegate((int num54) => {
-            if (Enabled && s_recipes != 0) DrawFilters(94, 450 + num54);
+        cursor.EmitLdloc(13); // int num54
+        cursor.EmitDelegate((int screenY) => {
+            if (Enabled && s_recipes != 0) DrawFilters(94, 450 + screenY);
         });
 
         //     ...
@@ -46,12 +43,9 @@ public sealed class RecipeFiltering : ILoadable {
         //         int num73 = 94;
         //         int num74 = 450 + num51;
         //         if (++false && Main.InGuideCraftMenu) num74 -= 150;
-        ILLabel? postHammer = null;
-        cursor.GotoNext(i => i.MatchLdsfld(Reflection.Main.InGuideCraftMenu));
-        cursor.GotoNext(i => i.MatchBrfalse(out postHammer));
-        cursor.GotoPrev(i => i.MatchLdsfld(Reflection.Main.InGuideCraftMenu));
-        cursor.EmitBr(postHammer!);
-
+        cursor.GotoNext(i => i.MatchLdsfld(Reflection.TextureAssets.CraftToggle));
+        cursor.GotoPrev(MoveType.After, i => i.MatchLdsfld(Reflection.Main.InGuideCraftMenu));
+        cursor.EmitDelegate((bool inGuide) => !Enabled && inGuide);
         //         ...
         //     }
     }

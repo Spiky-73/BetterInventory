@@ -37,11 +37,8 @@ public sealed class VisibilityFilters {
         return OwnedItems[mod].Add(type);
     }
 
-    public FavoriteState GetFavoriteState(int recipe) {
-        if (FavoritedRecipes.Contains(recipe)) return FavoriteState.Favorited;
-        if (BlacklistedRecipes.Contains(recipe)) return FavoriteState.Blacklisted;
-        return FavoriteState.Default;
-    }
+    public bool IsFavorited(int recipe) => FavoritedRecipes.Contains(recipe);
+    public bool IsBlacklisted(int recipe) => BlacklistedRecipes.Contains(recipe);
     public void FavoriteRecipe(int recipe, bool force = false) {
         if (!ResetFavoriteRecipe(recipe) || force) FavoritedRecipes.Add(recipe);
     }
@@ -73,9 +70,6 @@ public sealed class VisibilityFilters {
         ShowAllGuide =  1 << 1,
     }
 }
-
-
-public enum FavoriteState : byte { Default, Blacklisted, Favorited }
 
 public sealed class VisibilityFiltersSerialiser : TagSerializer<VisibilityFilters, TagCompound> {
 

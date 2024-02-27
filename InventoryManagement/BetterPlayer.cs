@@ -7,7 +7,6 @@ using BetterInventory.Crafting;
 using MonoMod.Cil;
 using Terraria;
 using Terraria.GameInput;
-using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
@@ -64,11 +63,8 @@ public sealed class BetterPlayer : ModPlayer {
         On_ItemSlot.TryOpenContainer += HookTryOpenContainer;
         On_Player.DropItemFromExtractinator += HookFastExtractinator;
 
-        IL_Player.GetItem += ILGetItem;
-
         On_ChestUI.LootAll += HookLootAll;
         On_ChestUI.Restock += HookRestock;
-        IL_ItemSlot.LeftClick_ItemArray_int_int += ILKeepFavoriteInChest;
 
         On_ItemSlot.PickupItemIntoMouse += HookNoPickupMouse;
     }
@@ -145,14 +141,14 @@ public sealed class BetterPlayer : ModPlayer {
         if (Config.fastContainerOpening) self.itemTime = self.itemTimeMax = self.itemTime/5;
     }
 
-    private static void ILKeepFavoriteInChest(ILContext il) {
+    internal static void ILKeepFavoriteInChest(ILContext il) {
         ILCursor cursor = new(il);
         cursor.GotoNext(i => i.MatchStfld(Reflection.Item.favorited));
         cursor.EmitLdarg0();
         cursor.EmitLdarg1();
         cursor.EmitLdarg2();
         cursor.EmitDelegate((bool fav, Item[] inv, int context, int slot) => {
-            if(context == ItemSlot.Context.BankItem) fav = inv[slot].favorited;
+            if(Config.favoriteInBanks && context == ItemSlot.Context.BankItem) fav = inv[slot].favorited;
             return fav;
         });
     }
@@ -169,70 +165,48 @@ public sealed class BetterPlayer : ModPlayer {
 
 
     public static Item GetItem_Inner(Player self, int plr, Item newItem, GetItemSettings settings) {
-        s_innerGetItem = true;
+        VanillaGetItem = true;
         Item i = self.GetItem(plr, newItem, settings);
-        s_innerGetItem = false;
+        VanillaGetItem = false;
         return i;
     }
-    private static void ILGetItem(ILContext il){
+
+    internal static void ILAutoEquip(ILContext il) {
         ILCursor cursor = new(il);
-
-        // ...
-        // if (newItem.uniqueStack && this.HasItem(newItem.type)) return item;
-        cursor.GotoNext(i => i.MatchCallvirt(Reflection.Item.FitsAmmoSlot));
-        cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdloc0());
-
-        // ++<smartPickup>
-        cursor.EmitLdarg0();
-        cursor.EmitLdarg2();
-        cursor.EmitLdarg3();
-        cursor.EmitDelegate((Player self, Item newItem, GetItemSettings settings) => {
-            if (s_innerGetItem || Config.smartPickup == Configs.InventoryManagement.SmartPickupLevel.Off) return newItem;
-            else return SmartPickup.SmartGetItem(self, newItem, settings);
-        });
-        cursor.EmitStarg(2);
-
-        // ++if (newItem.IsAir) return new()
-        cursor.EmitLdarg2();
-        cursor.EmitDelegate((Item item) => item.IsAir);
-        ILLabel skip = cursor.DefineLabel();
-        cursor.EmitBrfalse(skip);
-        cursor.EmitDelegate(() => new Item());
-        cursor.EmitRet();
-        cursor.MarkLabel(skip);
 
         // if (isACoin) ...
         // if (item.FitsAmmoSlot()) ...
         // for(...) ...
-        cursor.GotoNext(i => i.MatchLdloc3());
-        cursor.GotoNext(MoveType.AfterLabel, i => i.MatchLdloc0());
+        cursor.GotoNext(i => i.MatchCall(Reflection.Player.GetItem_FillEmptyInventorySlot));
+        cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdloc0());
 
         // ++<autoEquip>
         cursor.EmitLdarg0();
         cursor.EmitLdarg2();
         cursor.EmitLdarg3();
         cursor.EmitDelegate((Player self, Item newItem, GetItemSettings settings) => {
-            if (s_innerGetItem || settings.NoText || Config.autoEquip == Configs.InventoryManagement.AutoEquipLevel.Off) return newItem;
-            foreach (ModSubInventory slots in InventoryLoader.GetSubInventories(newItem, Config.autoEquip == Configs.InventoryManagement.AutoEquipLevel.DefaultSlots ? SubInventoryType.Default : SubInventoryType.Secondary).ToArray()) {
-                newItem = slots.GetItem(self, newItem, settings);
-                if (newItem.IsAir) return newItem;
-            }
-            return newItem;
+            if (VanillaGetItem || settings.NoText || Config.autoEquip == Configs.InventoryManagement.AutoEquipLevel.Off) return newItem;
+            return AutoEquip(self, newItem, settings);
         });
+        cursor.EmitDup();
         cursor.EmitStarg(2);
 
         // ++if (newItem.IsAir) return new()
-        cursor.EmitLdarg2();
         cursor.EmitDelegate((Item item) => item.IsAir);
-        ILLabel skip2 = cursor.DefineLabel();
-        cursor.EmitBrfalse(skip2);
+        ILLabel skip = cursor.DefineLabel();
+        cursor.EmitBrfalse(skip);
         cursor.EmitDelegate(() => new Item());
         cursor.EmitRet();
-        cursor.MarkLabel(skip2);
-
-        // ...
+        cursor.MarkLabel(skip);
     }
 
+    public static Item AutoEquip(Player self, Item newItem, GetItemSettings settings) {
+        foreach (ModSubInventory slots in InventoryLoader.GetSubInventories(newItem, Config.autoEquip == Configs.InventoryManagement.AutoEquipLevel.DefaultSlots ? SubInventoryType.Default : SubInventoryType.Secondary).ToArray()) {
+            newItem = slots.GetItem(self, newItem, settings);
+            if (newItem.IsAir) return newItem;
+        }
+        return newItem;
+    }
 
     public static void CycleAccState(Player player, int index, int cycle = 2) => player.builderAccStatus[index] = (player.builderAccStatus[index] + 1) % cycle;
     public static void FavoritedBuff(Player player) => Utility.RunWithHiddenItems(player.inventory, i => !i.favorited, player.QuickBuff);
@@ -252,7 +226,7 @@ public sealed class BetterPlayer : ModPlayer {
     public RecipeFilters RecipeFilters { get; set; } = null!;
     public VisibilityFilters VisibilityFilters { get; set; } = new();
 
-    private static bool s_innerGetItem;
+    public static bool VanillaGetItem { get; private set; }
 
     private static bool s_noMousePickup;
 

@@ -22,7 +22,6 @@ public sealed class QuickMove : ILoadable {
 
     public void Load(Mod mod) {
         On_Main.DrawInterface_36_Cursor += HookAlternateChain;
-        IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += ILHighlightSlot;
     }
     public void Unload() {}
 
@@ -194,13 +193,15 @@ public sealed class QuickMove : ILoadable {
     }
 
 
-    private static void ILHighlightSlot(ILContext il) {
+    internal static void ILHighlightSlot(ILContext il) {
         ILCursor cursor = new(il);
 
         // ...
         // if (!flag2) {
         //     spriteBatch.Draw(value, position, null, color2, 0f, default(Vector2), inventoryScale, 0, 0f);
         cursor.GotoNext(MoveType.After, i => i.MatchCallvirt(typeof(SpriteBatch), nameof(SpriteBatch.Draw)));
+
+        // ++ <highlightSlot>
         cursor.EmitLdarg0();
         cursor.EmitLdarg1();
         cursor.EmitLdarg2();
@@ -214,6 +215,10 @@ public sealed class QuickMove : ILoadable {
         });
         // }
 
+    }
+    internal static void ILDisplayHotkey(ILContext il){
+        ILCursor cursor = new(il);
+
         // ...
         // if(...) {
         // } else if (context == 6) {
@@ -226,10 +231,10 @@ public sealed class QuickMove : ILoadable {
         // if (gamepadPointForSlot != -1) {
         //     UILinkPointNavigator.SetPosition(gamepadPointForSlot, position + vector * 0.75f);
         // }
-        // ++ <drawSlotNumbers>
         cursor.GotoNext(i => i.MatchCall(typeof(UILinkPointNavigator), nameof(UILinkPointNavigator.SetPosition)));
         cursor.GotoNext(MoveType.AfterLabel, i => i.MatchRet());
 
+        // ++ <drawSlotNumbers>
         cursor.EmitLdarg0();
         cursor.EmitLdarg1();
         cursor.EmitLdarg2();
@@ -250,9 +255,10 @@ public sealed class QuickMove : ILoadable {
             ChatManager.DrawColorCodedStringWithShadow(spriteBatch, FontAssets.ItemStack.Value, text.ToString(), position + new Vector2(6f, 4) * scale, baseColor, 0f, Vector2.Zero, new Vector2(scale), -1f, scale);
         });
 
-        cursor.GotoPrev(i => i.MatchCallvirt(typeof(SpriteBatch), nameof(SpriteBatch.Draw)));
-
+        cursor.GotoPrev(i => i.MatchCall(typeof(ChatManager), nameof(ChatManager.DrawColorCodedStringWithShadow)));
+        cursor.GotoPrev(i => i.MatchLdarg2());
         cursor.GotoNext(MoveType.After, i => i.MatchLdarg3());
+
         cursor.EmitDelegate((int slot) => {
             if (!Enabled || Config.displayHotkeys == Configs.QuickMove.HotkeyDisplayMode.Off) return slot;
             if (s_moveTime > 0) return 10;

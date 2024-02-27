@@ -1,5 +1,4 @@
 using System;
-using BetterInventory.ItemSearch;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using Terraria;
@@ -14,34 +13,29 @@ public sealed class Tweeks : ILoadable {
     public static Configs.Crafting Config => Configs.Crafting.Instance;
     
     public void Load(Mod mod) {
-        IL_Main.DrawInventory += ILScrolls;
-
         On_Main.TryAllowingToCraftRecipe += HookTryAllowingToCraftRecipe;
     }
 
     public void Unload(){}
 
-    private static void ILScrolls(ILContext il) {
+    internal static void ILFastScroll(ILContext il) {
         ILCursor cursor = new(il);
 
-        // ----- Recipe fast scroll -----
         // ...
         // if(<showRecipes>){
-        cursor.GotoNext(MoveType.After, i => i.MatchCall(typeof(Main), "DrawGuideCraftText"));
-        cursor.GotoNext(i => i.MatchStsfld(typeof(Terraria.UI.Gamepad.UILinkPointNavigator.Shortcuts), nameof(Terraria.UI.Gamepad.UILinkPointNavigator.Shortcuts.CRAFT_CurrentRecipeBig)));
+        //     for (<recipeIndex>) { 
+        cursor.GotoNext(i => i.MatchStloc(124)); // int num63
 
-        //     for (<recipeIndex>) {
-        //         ...
         for (int j = 0; j < 2; j++) { // Up and Down
 
             //     if(<scrool>) {
             //         if(...) SoundEngine.PlaySound(...);
             //         Main.availableRecipeY[num63] += 6.5f;
             cursor.GotoNext(i => i.MatchCall(typeof(SoundEngine), nameof(SoundEngine.PlaySound)));
-            cursor.GotoNext(i => i.MatchLdsfld(typeof(Main), nameof(Main.recFastScroll)));
+            cursor.GotoNext(i => i.MatchLdsfld(Reflection.Main.recFastScroll));
 
             // ++ <custom scroll>
-            cursor.EmitLdloc(124);
+            cursor.EmitLdloc(124); // int num63
             int s = j == 0 ? -1 : 1;
             cursor.EmitDelegate((int r) => {
                 if (!Configs.Crafting.Instance.recipeScroll.Parent) return;
@@ -59,18 +53,24 @@ public sealed class Tweeks : ILoadable {
         }
         //         ...
         //     }
+        //     ...
+        // }
+    }
+    internal static void ILMaterialWrapping(ILContext il) {
+        ILCursor cursor = new(il);
 
-        // ----- Material wrapping -----
+        // if(<showRecipes>){
+        //     ...
         //     if (Main.numAvailableRecipes > 0) {
         //         for (<focusRecipeMaterialIndex>) {
         //             ...
+        cursor.GotoNext(i => i.MatchStsfld(Reflection.UILinkPointNavigator.CRAFT_CurrentIngredientsCount));
+        
         //             int num69 = 80 + num68 * 40;
-        //             int num70 = 380 + num51;
-        cursor.GotoNext(i => i.MatchCall(typeof(Main), "HoverOverCraftingItemButton"));
-        cursor.GotoNext(MoveType.Before, i => i.MatchStloc(131));
+        cursor.GotoNext(MoveType.Before, i => i.MatchStloc(131)); // int num69
 
         //             ++ <wrappingX>
-        cursor.EmitLdloc(130);
+        cursor.EmitLdloc(130); // int num68
         cursor.EmitDelegate((int x, int i) => {
             if (!Config.tweeks) return x;
             if (!Main.recBigList) return x + VanillaCurrection * i;
@@ -79,9 +79,11 @@ public sealed class Tweeks : ILoadable {
             return x + (VanillaMaterialSpcacing + VanillaCurrection) * i;
         });
 
+        //             int num70 = 380 + num51;
+        cursor.GotoNext(MoveType.Before, i => i.MatchStloc(132)); // int num70
+
         //             ++ <wrappingY>
-        cursor.GotoNext(MoveType.Before, i => i.MatchStloc(132));
-        cursor.EmitLdloc(130);
+        cursor.EmitLdloc(130); // int num68
         cursor.EmitDelegate((int y, int i) => {
             if (!Config.tweeks || !Main.recBigList) return y;
             i = i < MaterialsPerLine[0] ? 0 : ((i - MaterialsPerLine[0]) / MaterialsPerLine[1] + 1);
@@ -94,17 +96,23 @@ public sealed class Tweeks : ILoadable {
         //     ...
         // }
 
-        // ----- recBigList Scroll Fix ----- 
+
+    }
+    internal static void ILListScrollFix(ILContext il) {
+        ILCursor cursor = new(il);
         // Main.hidePlayerCraftingMenu = false;
-        cursor.GotoNext(MoveType.After, i => i.MatchStsfld(typeof(Main), nameof(Main.hidePlayerCraftingMenu)));
         // if(<recBigListVisible>) {
         //     ...
-        for (int i = 0; i < 2; i++) {
+        cursor.GotoNext(i => i.MatchStsfld(Reflection.UILinkPointNavigator.CRAFT_IconsPerRow));
 
+        cursor.FindNext(out ILCursor[] cursors,
+            i => i.MatchLdsfld(Reflection.TextureAssets.CraftUpButton) && i.Next.MatchCallvirt(Reflection.Asset<Texture2D>.Value.GetMethod!),
+            i => i.MatchLdsfld(Reflection.TextureAssets.CraftDownButton) && i.Next.MatchCallvirt(Reflection.Asset<Texture2D>.Value.GetMethod!)
+        );
+        foreach(ILCursor c in cursors) {
             // if (<upVisible> / <downVisible>) {
             //     if(<hover>) {
             //         Main.player[Main.myPlayer].mouseInterface = true;
-            cursor.GotoNext(i => i.MatchCallvirt(typeof(SpriteBatch), nameof(SpriteBatch.Draw)));
             cursor.GotoPrev(MoveType.After, i => i.MatchStfld(typeof(Player), nameof(Player.mouseInterface)));
 
             //         ++ <autoScroll>
@@ -115,51 +123,53 @@ public sealed class Tweeks : ILoadable {
                     _recDelay = 1;
                 } else _recDelay--;
             });
-
-            //         ...
             //     }
-            //     Main.spriteBatch.Draw(...);
-            cursor.GotoNext(MoveType.After, i => i.MatchCallvirt(typeof(SpriteBatch), nameof(SpriteBatch.Draw)));
             // }
         }
+        // }
 
-        // ----- Cursor override for recBigList -----
+    }
+    internal static void ILCraftOnList(ILContext il) {
+        ILCursor cursor = new(il);
+
+        // if(<recBigListVisible>) {
         //     ...
         //     while (<showingRecipes>) {
         //         ...
         //         if (<mouseHover>) {
         //             Main.player[Main.myPlayer].mouseInterface = true;
-        cursor.GotoNext(i => i.MatchCall(typeof(Main), nameof(Main.LockCraftingForThisCraftClickDuration)));
-        cursor.GotoPrev(i => i.MatchStfld(typeof(Player), nameof(Player.mouseInterface)));
-        ILLabel? noClick = null;
-        cursor.GotoPrev(i => i.MatchBrtrue(out noClick));
-        cursor.GotoNext(MoveType.After, i => i.MatchStfld(typeof(Player), nameof(Player.mouseInterface)));
+        cursor.GotoNext(i => i.MatchCall(Reflection.Main.LockCraftingForThisCraftClickDuration));
+        cursor.GotoPrev(MoveType.After, i => i.MatchStfld(Reflection.Player.mouseInterface));
 
-        //             ++ if(<enabled>) goto noClick;
-        cursor.EmitLdloc(153);
+        ILLabel? noClick = null;
+        cursor.FindPrev(out _, i => i.MatchBrtrue(out noClick));
+
+        //             if(++[!craftInList] &&<click>) {
+        cursor.EmitLdloc(153); // int num87
         cursor.EmitDelegate((int i) => {
-            if (Config.craftOnList.Parent) {
-                int f = Main.focusRecipe;
-                if (Config.craftOnList.Value.focusRecipe) Main.focusRecipe = i;
-                Reflection.Main.HoverOverCraftingItemButton.Invoke(i);
-                if (f != Main.focusRecipe) Main.recFastScroll = true;
-                Main.craftingHide = false;
-                return true;
-            }
-            Guide.RecipeListHover(i);
-            return false;
+            if (!Config.craftOnList.Parent) return false;
+            int f = Main.focusRecipe;
+            if (Config.craftOnList.Value.focusRecipe) Main.focusRecipe = i;
+            Reflection.Main.HoverOverCraftingItemButton.Invoke(i);
+            if (f != Main.focusRecipe) Main.recFastScroll = true;
+            Main.craftingHide = false;
+            return true;
         });
         cursor.EmitBrtrue(noClick!);
-        //             if(<click>) <scrollList>
+        //                 <scrollList>
+        //                 ...
+        //             }
+        //             Main.craftingHide = true;
+
+        cursor.GotoNext(i => i.MatchCall(Reflection.Main.LockCraftingForThisCraftClickDuration));
+        cursor.GotoNext(MoveType.After, i => i.MatchStfld(Reflection.Main.craftingHide));
+
         //             ...
         //         }
-        //         ++ noClick:
-        //         ...
         //     }
         // }
-        // ...
     }
-
+    
     private static bool HookTryAllowingToCraftRecipe(On_Main.orig_TryAllowingToCraftRecipe orig, Recipe currentRecipe, bool tryFittingItemInInventoryToAllowCrafting, out bool movedAnItemToAllowCrafting)
         => orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting || Config.tweeks, out movedAnItemToAllowCrafting);
 
