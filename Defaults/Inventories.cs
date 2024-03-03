@@ -131,7 +131,7 @@ public abstract class AAccessories<T> : ModSubInventory<T> where T: AAccessories
     public static IList<Slot> GetIncompatibleItems(Player player, Item item, bool vanity, out bool canAllMove) {
         canAllMove = true;
         List<Slot> incompatibles = new();
-        void CheskAccessories(ModSubInventory inv, bool vanity, ref bool canAllMove){
+        void CheckAccessories(ModSubInventory inv, bool vanity, ref bool canAllMove){
             IList<Item> items = inv.Items(player);
             for (int i = 0; i < items.Count; i++) {
                 if (item == items[i]) continue;
@@ -140,8 +140,8 @@ public abstract class AAccessories<T> : ModSubInventory<T> where T: AAccessories
                 if (ItemSlot.isEquipLocked(i)) canAllMove = false;
             }
         }
-        CheskAccessories(Accessories.Instance, vanity, ref canAllMove);
-        CheskAccessories(VanityAccessories.Instance, true, ref canAllMove);
+        CheckAccessories(Accessories.Instance, vanity, ref canAllMove);
+        CheckAccessories(VanityAccessories.Instance, true, ref canAllMove);
         return incompatibles;
     }
 
@@ -189,33 +189,33 @@ public abstract class Loadout2 : ALoadout {
     public sealed override int Index => 2;
 }
 
-public abstract class Equipement : ModSubInventory {
+public abstract class Equipment : ModSubInventory {
     public abstract int Index { get; }
     public sealed override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.miscEquips, Index);
     public sealed override bool IsDefault(Item item) => true;
     public sealed override void Focus(Player player, int slot) => Main.EquipPageSelected = 2;
 }
-public sealed class Pet : Equipement {
+public sealed class Pet : Equipment {
     public sealed override int Index => 0;
     public sealed override int Context => ContextID.EquipPet;
     public sealed override bool Accepts(Item item) => item.buffType > 0 && Main.vanityPet[item.buffType];
 }
-public sealed class LightPet : Equipement {
+public sealed class LightPet : Equipment {
     public sealed override int Index => 1;
     public sealed override int Context => ContextID.EquipLight;
     public sealed override bool Accepts(Item item) => item.buffType > 0 && Main.lightPet[item.buffType];
 }
-public sealed class Minecart : Equipement {
+public sealed class Minecart : Equipment {
     public sealed override int Index => 2;
     public sealed override int Context => ContextID.EquipMinecart;
     public sealed override bool Accepts(Item item) => item.mountType != -1 && MountID.Sets.Cart[item.mountType];
 }
-public sealed class Mount : Equipement {
+public sealed class Mount : Equipment {
     public sealed override int Index => 3;
     public sealed override int Context => ContextID.EquipMount;
     public sealed override bool Accepts(Item item) => item.mountType != -1 && !MountID.Sets.Cart[item.mountType];
 }
-public sealed class Hook : Equipement {
+public sealed class Hook : Equipment {
     public sealed override int Index => 4;
     public sealed override int Context => ContextID.EquipGrapple;
     public sealed override bool Accepts(Item item) => Main.projHook[item.shoot];
@@ -238,7 +238,7 @@ public sealed class AccessoryDyes : Dyes {
         new ListIndices<Item>(ModdedDyes(player), Accessories.UnlockedModdedSlots(player))
     );
 }
-public sealed class EquipementDyes : Dyes {
+public sealed class EquipmentDyes : Dyes {
     public sealed override int Context => ContextID.EquipMiscDye;
     public sealed override void Focus(Player player, int slot) => Main.EquipPageSelected = 2;
     public sealed override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.miscDyes);

@@ -71,7 +71,7 @@ public sealed class VisibilityFilters {
     }
 }
 
-public sealed class VisibilityFiltersSerialiser : TagSerializer<VisibilityFilters, TagCompound> {
+public sealed class VisibilityFiltersSerializer : TagSerializer<VisibilityFilters, TagCompound> {
 
     public override TagCompound Serialize(VisibilityFilters value) {
         TagCompound tag = new();
@@ -203,7 +203,7 @@ public sealed class RawRecipe {
     private void AddTile(int tile) => tiles.Add(new(tile));
 
 }
-public sealed class RawRecipeSerialiser : TagSerializer<RawRecipe, TagCompound> {
+public sealed class RawRecipeSerializer : TagSerializer<RawRecipe, TagCompound> {
     public override TagCompound Serialize(RawRecipe value) => new() { [ModTag] = value.mod, [ItemsTag] = value.items, [TilesTag] = value.tiles };
 
     public override RawRecipe Deserialize(TagCompound tag){

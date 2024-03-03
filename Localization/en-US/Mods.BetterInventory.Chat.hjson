@@ -1,6 +1,6 @@
 Download: Thank you for downloading Better Inventory! Make sure to view and edit the configs before playing
 Update: Better Inventory was updated to v{$Mods.BetterInventory.Chat.Version}! View the {$Mods.BetterInventory.Configs.Version.DisplayName} config to learn more about the update
-Bug: This mod is still in developement. If you found a bug, please report it on the {$Mods.BetterInventory.Chat.Workshop} or the {$Mods.BetterInventory.Chat.Homepage}
+Bug: This mod is still in development. If you found a bug, please report it on the {$Mods.BetterInventory.Chat.Workshop} or the {$Mods.BetterInventory.Chat.Homepage}
 Homepage: homepage
 Workshop: Steam Workshop page
 Version: "0.5"
@@ -9,8 +9,9 @@ Important: ""
 Changelog:
 	'''
 	- Unfavorite favorite recipes on craft
-	- Move some options of Inventory Management into a new config Item Actions
-	- Added a config for max amount of crafted or baught items with left click
+	- Added smart consumption for materials
+	- Move options in the configs
+	- Added a config for max amount of crafted or bought items with left click
 	- Use TileDefinition when possible
 	- Fixed bugs with shops
 	'''

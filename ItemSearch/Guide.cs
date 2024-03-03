@@ -41,7 +41,7 @@ public sealed class Guide : ModSystem {
         On_ItemSlot.OverrideLeftClick += HookOverrideLeftClick;
 
         On_ItemSlot.Draw_SpriteBatch_refItem_int_Vector2_Color += HookHideItemStack;
-        On_ItemSlot.DrawItemIcon += HookCustomItemIcom;
+        On_ItemSlot.DrawItemIcon += HookCustomItemIcon;
         MonoModHooks.Add(typeof(ItemLoader).GetMethod(nameof(ItemLoader.ModifyTooltips)), HookHideTooltip);
 
         s_inventoryBack4 = TextureAssets.InventoryBack4;
@@ -91,8 +91,8 @@ public sealed class Guide : ModSystem {
 
         if (s_textRecipe != (Main.numAvailableRecipes == 0 ? -1 : recipe.RecipeIndex)) UpdateCraftTiles(recipe);
 
-        float minX = inventoryX + TextureAssets.InventoryBack.Width() * Main.inventoryScale * (1 + TileScacingRatio);
-        Vector2 delta = new(TextureAssets.InventoryBack.Width() * (TileScale + TileScacingRatio), -TextureAssets.InventoryBack.Height() * (TileScale + TileScacingRatio));
+        float minX = inventoryX + TextureAssets.InventoryBack.Width() * Main.inventoryScale * (1 + TileSpacingRatio);
+        Vector2 delta = new(TextureAssets.InventoryBack.Width() * (TileScale + TileSpacingRatio), -TextureAssets.InventoryBack.Height() * (TileScale + TileSpacingRatio));
         delta *= Main.inventoryScale;
         Vector2 position = new(minX, inventoryY - delta.Y);
         int slot = 0;
@@ -128,7 +128,7 @@ public sealed class Guide : ModSystem {
             Rectangle hitbox = new((int)position.X, (int)position.Y, (int)(TextureAssets.InventoryBack.Width() * Main.inventoryScale), (int)(TextureAssets.InventoryBack.Height() * Main.inventoryScale));
             if (hitbox.Contains(Main.mouseX, Main.mouseY)) {
                 Main.LocalPlayer.mouseInterface = true;
-                ForcedToolip = condition.Description;
+                ForcedTooltip = condition.Description;
                 ItemSlot.MouseHover(ref item, ContextID.CraftingMaterial);
             }
             Main.inventoryBack = inventoryBack;
@@ -162,7 +162,7 @@ public sealed class Guide : ModSystem {
 
     private static void DrawGuideTile(int inventoryX, int inventoryY) {
         if (!Config.guideTile) return;
-        float x = inventoryX + TextureAssets.InventoryBack.Width() * Main.inventoryScale * (1 + TileScacingRatio);
+        float x = inventoryX + TextureAssets.InventoryBack.Width() * Main.inventoryScale * (1 + TileSpacingRatio);
         float y = inventoryY;
         Main.inventoryScale *= TileScale;
         Rectangle hitbox = new((int)x, (int)y, (int)(TextureAssets.InventoryBack.Width() * Main.inventoryScale), (int)(TextureAssets.InventoryBack.Height() * Main.inventoryScale));
@@ -335,7 +335,7 @@ public sealed class Guide : ModSystem {
         cursor.EmitLdloc(153); // int num87
         cursor.EmitDelegate((int r) => {
             if (!Enabled || !IsUnknown(Main.availableRecipe[r])) return;
-            ForcedToolip = Language.GetText("Mods.BetterInventory.UI.Unknown");
+            ForcedTooltip = Language.GetText("Mods.BetterInventory.UI.Unknown");
         });
         //             ...
         //         }
@@ -611,7 +611,7 @@ public sealed class Guide : ModSystem {
             if (!s_availableRecipes.Contains(Main.availableRecipe[recipeIndex])) Main.LockCraftingForThisCraftClickDuration();
 
             if (IsUnknown(Main.availableRecipe[recipeIndex])) {
-                ForcedToolip = Language.GetText("Mods.BetterInventory.UI.Unknown");
+                ForcedTooltip = Language.GetText("Mods.BetterInventory.UI.Unknown");
                 return false;
             }
             if (!Config.favoriteRecipes) return false;
@@ -745,7 +745,7 @@ public sealed class Guide : ModSystem {
             orig(spriteBatch, ref inv, context, position, lightColor);
         }
     }
-    private static float HookCustomItemIcom(On_ItemSlot.orig_DrawItemIcon orig, Item item, int context, SpriteBatch spriteBatch, Vector2 screenPositionForItemCenter, float scale, float sizeLimit, Color environmentColor) {
+    private static float HookCustomItemIcon(On_ItemSlot.orig_DrawItemIcon orig, Item item, int context, SpriteBatch spriteBatch, Vector2 screenPositionForItemCenter, float scale, float sizeLimit, Color environmentColor) {
         if (s_hideNextItem) {
             return DrawTexture(spriteBatch, UnknownTexture.Value, Color.White, screenPositionForItemCenter, ref scale, sizeLimit, environmentColor);
         }
@@ -773,7 +773,7 @@ public sealed class Guide : ModSystem {
             PlaceholderType.ByHand => Language.GetTextValue("Mods.BetterInventory.UI.ByHand"),
             PlaceholderType.Tile => Lang.GetMapObjectName(MapHelper.TileToLookup(item.createTile, item.placeStyle)),
             PlaceholderType.Condition => Language.GetTextValue(item.BestiaryNotes[ConditionMark.Length..]),
-            _ => ForcedToolip?.Value,
+            _ => ForcedTooltip?.Value,
         };
         if (name is null) return orig.Invoke(item, ref numTooltips, names, ref text, ref modifier, ref badModifier, ref oneDropLogo, out overrideColor, prefixlineIndex);
         List<TooltipLine> tooltips = new() { new(BetterInventory.Instance, names[0], name) };
@@ -859,7 +859,7 @@ public sealed class Guide : ModSystem {
     public const string ConditionMark = "@BI:";
 
     public static readonly Dictionary<int, int> CraftingStationsItems = new(); // tile -> item
-    public static readonly Dictionary<string, int> ConditionItems = new(); // descrition -> id
+    public static readonly Dictionary<string, int> ConditionItems = new(); // description -> id
 
     public static Item guideTile = new();
     public static Item[] GuideItems {
@@ -898,11 +898,11 @@ public sealed class Guide : ModSystem {
     private static readonly List<(Item item, Condition condition)> s_textConditions = new();
 
     private static bool s_hideNextItem;
-    public static LocalizedText? ForcedToolip;
+    public static LocalizedText? ForcedTooltip;
 
     public const int TilesPerLine = 7;
     public const float TileScale = 0.46f;
-    public const float TileScacingRatio = 0.08f;
+    public const float TileSpacingRatio = 0.08f;
 
     private static IEnumerator<int>? s_ilRecipes;
 }

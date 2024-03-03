@@ -4,7 +4,7 @@ This mods adds loads of small features designed to improve the player Inventory 
 I STRONGLY ADVISE you to read the mod configs to learn about all the features and enable/disable them.
 Feel free to suggest new features I you think of any! 
 
-Keep in mind, this mod is still in developement. If you find a bug, please report it here or on the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetails/?id=3074374647).
+Keep in mind, this mod is still in development. If you find a bug, please report it here or on the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetails/?id=3074374647).
 
 Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetails/?id=3074374647) if you wish to download and use this mod.
 
@@ -25,14 +25,15 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 
 ### v0.5
 - Unfavorite favorite recipes on craft
-- Move some options of Inventory Management into a new config Item Actions
-- Added a config for max amount of crafted or baught items with left click
+- Added smart consumption for materials
+- Move options in the configs
+- Added a config for max amount of crafted or bought items with left click
 - Use TileDefinition when possible
 - Fixed bugs with shops
 
 ### v0.4.1
-- Optimised Better Guide and Recipe Filtering
-- Optimised Quick Move display
+- Optimized Better Guide and Recipe Filtering
+- Optimized Quick Move display
 - Clear marks when changing worlds
 - Fixed Unknown items able to be favorited
 - Fixed Quick move changing selected slot when it should not
@@ -70,7 +71,7 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 - Fixed displayed requiredTiles when no recipes are available
 
 ### v0.2.1.1
-- No Auto Equips when tranfering items from inside your inventory (e.g. Accessories -> Inventory)
+- No Auto Equips when transferring items from inside your inventory (e.g. Accessories -> Inventory)
 - Fixed modded accessory slots causing a free when picking up items
 - Fixed modded accessory slots Quick Move
 
@@ -85,7 +86,7 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 - Fixed Quick Move chain not ending when closing the inventory
 - Fixed recipes sometimes not been updated when guideTile changes
 - Fixed guideItem duplication when saving configs
-- Fixed wierd behaviour with Quick Move
+- Fixed weird behavior with Quick Move
 
 ### v0.2
 - Auto Equip items

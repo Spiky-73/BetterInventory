@@ -75,9 +75,9 @@ public sealed class FixedUI : ILoadable {
         cursor.EmitDelegate((int x, int i) => {
             if (!Enabled || !Config.wrapping) return x;
             if (!Main.recBigList) return x + VanillaCorrection * i;
-            x -= i * VanillaMaterialSpcacing;
+            x -= i * VanillaMaterialSpacing;
             if (i >= MaterialsPerLine[0]) i = MaterialsPerLine[0] - MaterialsPerLine[1] + (i - MaterialsPerLine[0]) % MaterialsPerLine[1];
-            return x + (VanillaMaterialSpcacing + VanillaCorrection) * i;
+            return x + (VanillaMaterialSpacing + VanillaCorrection) * i;
         });
 
         //             int num70 = 380 + num51;
@@ -88,7 +88,7 @@ public sealed class FixedUI : ILoadable {
         cursor.EmitDelegate((int y, int i) => {
             if (!Enabled || !Config.wrapping || !Main.recBigList) return y;
             i = i < MaterialsPerLine[0] ? 0 : ((i - MaterialsPerLine[0]) / MaterialsPerLine[1] + 1);
-            return y + (VanillaMaterialSpcacing + VanillaCorrection) * i;
+            return y + (VanillaMaterialSpacing + VanillaCorrection) * i;
         });
 
         //             ...
@@ -137,7 +137,7 @@ public sealed class FixedUI : ILoadable {
     private static int _recDelay = 0;
     public static readonly int[] MaterialsPerLine = new int[] { 6, 4 };
 
-    public const int VanillaMaterialSpcacing = 40;
+    public const int VanillaMaterialSpacing = 40;
     public const int VanillaCorrection = -2;
 
 }

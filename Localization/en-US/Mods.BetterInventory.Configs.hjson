@@ -1,13 +1,9 @@
 Crafting: {
 	DisplayName: Crafting
 
-	tweeks: {
-		Label: "[i:509] General Tweeks"
-		Tooltip:
-			'''
-			Fix recipe list scroll buttons and material wrapping
-			Allows crafting when holding another item
-			'''
+	fixedUI: {
+		Label: "[i:3084] Fixed UI"
+		Tooltip: Fixed inconsistencies with the crafting UI
 	}
 
 	recipeFiltering: {
@@ -25,19 +21,42 @@ Crafting: {
 		Tooltip: Allows you to craft items directly from the recipe list
 	}
 
-	fastScroll: {
-		Label: "[i:3389] Fast Recipe Scroll"
-		Tooltip: Make the recipe scoll very fast
-	}
-
-	fixedUI: {
-		Label: fixed U I
-		Tooltip: ""
-	}
-
 	mouseMaterial: {
-		Label: mouse Material
-		Tooltip: ""
+		Label: "[i:9] Mouse Material"
+		Tooltip: Adds the held item to the available materials
+	}
+}
+
+FixedUI: {
+	Tooltip: ""
+
+	fastScroll: {
+		Label: Fast Recipe Scroll
+		Tooltip: Make the recipe scroll very fast
+	}
+
+	listScroll: {
+		Label: Scroll in Recipe List
+		Tooltip: Replaces the instant scroll with an extremely fast one when the recipe list is open
+	}
+
+	wrapping: {
+		Label: Material Wrapping
+		Tooltip: Prevents materials from overlapping the recipe list
+	}
+
+	moveMouse: {
+		Label: Mouse materials
+		Tooltip: Allows you to craft while holding an item
+	}
+}
+
+RecipeScroll: {
+	Tooltip: ""
+
+	listScroll: {
+		Label: Scroll in Recipe List
+		Tooltip: Replaces the instant scroll with an extremely fast one when the recipe list is open
 	}
 }
 
@@ -60,16 +79,7 @@ CraftOnList: {
 
 	focusRecipe: {
 		Label: Focus Hovered Recipe
-		Tooltip: Automaticaly selects the hovered recipe
-	}
-}
-
-RecipeScroll: {
-	Tooltip: ""
-
-	listScroll: {
-		Label: Scroll in Recipe List
-		Tooltip: Replaces the instant scroll with an extremely fast one when the recipe list is open
+		Tooltip: Automatically selects the hovered recipe
 	}
 }
 
@@ -78,7 +88,7 @@ InventoryManagement: {
 
 	smartConsumption: {
 		Label: "[i:040] Smart item consumption"
-		Tooltip: Consumes items from a differents stack to reduce changes in the selected item
+		Tooltip: Consumes items from a different stack to reduce changes in the selected item
 	}
 
 	smartPickup: {
@@ -96,39 +106,15 @@ InventoryManagement: {
 		Name: Auto Equip Items
 		Tooltip:
 			'''
-			Automaticaly equips items such as Armors, Accessories or Equipement
-			{$Mods.BetterInventory.Configs.AutoEquipLevel.DefaultSlots.Label}: Equipement go to their default slots if available
-			{$Mods.BetterInventory.Configs.AutoEquipLevel.AnySlot.Label}: Equipement go to any slot they can go in. Includes Dyes. Armors and Accessories can go to social slots.
+			Automatically equips items such as Armors, Accessories or Equipment
+			{$Mods.BetterInventory.Configs.AutoEquipLevel.DefaultSlots.Label}: Equipment go to their default slots if available
+			{$Mods.BetterInventory.Configs.AutoEquipLevel.AnySlot.Label}: Equipment go to any slot they can go in. Includes Dyes. Armors and Accessories can go to social slots.
 			'''
 	}
 
 	quickMove: {
 		Label: "[i:3620] Quick Move"
 		Tooltip: Hover over an item in your inventory and press a hotbar keybind to move it between different contexts
-	}
-
-	fastContainerOpening: {
-		Label: "[i:5002] Fast Container Opening"
-		Tooltip:
-			'''
-			Hold rick click to rapidly open containers
-			Faster Extractinator
-			'''
-	}
-
-	itemRightClick: {
-		Label: "[i:1503] Extra Item Right Click"
-		Tooltip: Item that can be right clicked in the inventory can be right clicked when held
-	}
-
-	builderKeys: {
-		Label: "[i:3061] Builder Keybinds"
-		Tooltip: Enables keybinds to toggles the builder toggles
-	}
-
-	FavoriteBuffKeybind: {
-		Label: "[i:2348] Favorite Quick Buff"
-		Tooltip: Similar to Quick Buff, but only consumes favorite items
 	}
 
 	favoriteInBanks: {
@@ -142,23 +128,23 @@ InventoryManagement: {
 	}
 
 	craftStack: {
-		Label: craft Stack
-		Tooltip: ""
-	}
-
-	shiftClick: {
-		Label: shift Click
-		Tooltip: ""
-	}
-
-	stackTrash: {
-		Label: stack Trash
-		Tooltip: ""
+		Label: "[i:5075] Custom Left Click"
+		Tooltip: Left Click to craft or buy a stack of items
 	}
 
 	shiftRight: {
-		Label: shift Right
-		Tooltip: ""
+		Label: "[i:48] Shift Right Click"
+		Tooltip: Allows you to Shift or Control Right Click to transfer one item
+	}
+
+	stackTrash: {
+		Label: "[i:348] Trash and Shops Stacking"
+		Tooltip:
+			'''
+			Items sold multiple times will stack a single one slot
+			Items trashed multiple in a row times will stack instead of replacing the old one
+			Highly recommended with "{$Mods.BetterInventory.Configs.InventoryManagement.shiftRight.Label}"
+			'''
 	}
 }
 
@@ -171,7 +157,7 @@ SmartConsumption: {
 	}
 
 	ammo: {
-		Label: Ammunitions
+		Label: Ammunition
 		Tooltip: Consumes ammo (arrows, baits, paints, ...) from the last stack in the inventory. Doesn't affect the selected ammo
 	}
 
@@ -209,55 +195,17 @@ AutoEquipLevel: {
 	AnySlot.Label: Any Slots
 }
 
-ItemRightClick: {
+StackClick: {
 	Tooltip: ""
-
-	stackableItems: {
-		Label: Stackable Items
-		Tooltip: Right Click a stackable item to throw an item of the stack
-	}
-}
-
-ClickOverride: {
-	Tooltip: ""
-
-	crafting: {
-		Label: Crafting
-		Tooltip:
-			'''
-			Left Click to craft a stack of items
-			Right Click to craft the recipe once
-			Hold Shift to tranfer the crafted items in your inventory
-			'''
-	}
-
-	shops: {
-		Label: Shops
-		Tooltip:
-			'''
-			Left Click to buy a stack of items
-			Right Click to buy once
-			Hold Shift to tranfer the baught items in your inventory
-			'''
-	}
-
-	shiftRight: {
-		Label: Shift Right Click
-		Tooltip: Allows you to Shift or Control Right Click to transfer one item
-	}
-
-	stacking: {
-		Label: Trash and Shops Stacking
-		Tooltip:
-			'''
-			Items sold multiple times will stack a single one slot
-			Items trashed multiple in a row times will stack instead of replacing the old one
-			'''
-	}
 
 	invertClicks: {
 		Label: Invert Clicks
-		Tooltip: Invert the behaviour of the left and right clicks when crafting or buying items
+		Tooltip: Invert the behavior of the left and right clicks when crafting or buying items
+	}
+
+	maxAmount: {
+		Label: Max Items Per Click
+		Tooltip: The maximum amount of items crafted or bought with <left>
 	}
 }
 
@@ -322,6 +270,43 @@ HotkeyDisplayMode: {
 	Off.Label: Off
 	First.Label: First
 	All.Label: All
+}
+
+ItemActions: {
+	DisplayName: Item Actions
+
+	fastContainerOpening: {
+		Label: "[i:5002] Fast Container Opening"
+		Tooltip:
+			'''
+			Hold rick click to rapidly open containers
+			Faster Extractinator
+			'''
+	}
+
+	itemRightClick: {
+		Label: "[i:1503] Extra Item Right Click"
+		Tooltip: Item that can be right clicked in the inventory can be right clicked when held
+	}
+
+	builderKeys: {
+		Label: "[i:3061] Builder Keybinds"
+		Tooltip: Enables keybinds to toggles the builder toggles
+	}
+
+	FavoriteBuffKeybind: {
+		Label: "[i:2348] Favorite Quick Buff"
+		Tooltip: Similar to Quick Buff, but only consumes favorite items
+	}
+}
+
+ItemRightClick: {
+	Tooltip: ""
+
+	stackableItems: {
+		Label: Stackable Items
+		Tooltip: Right Click a stackable item to throw an item of the stack
+	}
 }
 
 ItemSearch: {
@@ -479,6 +464,15 @@ UnlockLevel: {
 	DropRates.Label: Drop Rates
 }
 
+Compatibility: {
+	DisplayName: Mod Compatibility
+
+	compatibilityMode: {
+		Label: compatibility Mode
+		Tooltip: ""
+	}
+}
+
 Version: {
 	DisplayName: Version {$Mods.BetterInventory.Chat.Version}
 	Headers.Changelog: Changelog
@@ -521,67 +515,3 @@ ChildValue`2: {
 }
 
 Text.Tooltip: ""
-
-FixedUI: {
-	Tooltip: ""
-
-	fastScroll: {
-		Label: fast Scroll
-		Tooltip: ""
-	}
-
-	listScroll: {
-		Label: list Scroll
-		Tooltip: ""
-	}
-
-	wrapping: {
-		Label: wrapping
-		Tooltip: ""
-	}
-
-	moveMouse: {
-		Label: move Mouse
-		Tooltip: ""
-	}
-}
-
-StackClick: {
-	Tooltip: ""
-
-	invertClicks: {
-		Label: invert Clicks
-		Tooltip: ""
-	}
-
-	maxAmount: {
-		Label: max Amount
-		Tooltip: ""
-	}
-}
-
-ItemActions: {
-	DisplayName: Item Actions
-
-	fastContainerOpening: {
-		Label: fast Container Opening
-		Tooltip: ""
-	}
-
-	itemRightClick: {
-		Label: item Right Click
-		Tooltip: ""
-	}
-
-	builderKeys: {
-		Label: builder Keys
-		Tooltip: ""
-	}
-
-	FavoriteBuffKeybind: {
-		Label: Favorite Buff Keybind
-		Tooltip: ""
-	}
-}
-
-Compatibitlty.DisplayName: Compatibitlty

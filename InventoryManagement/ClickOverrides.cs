@@ -249,7 +249,7 @@ public sealed class ClickOverrides : ILoadable {
     // }
 
 
-    internal static void ILStackStrash(ILContext il) {
+    internal static void ILStackTrash(ILContext il) {
         ILCursor cursor = new(il);
         // if (<shop>){
         //     ...

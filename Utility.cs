@@ -126,21 +126,21 @@ public static class Utility {
         color.B = (byte)(color.B * mult);
     }
 
-    public static Item MoveInto(Item item, Item toMove, out int tranfered, int? maxStack = null, bool canFavorite = true) {
-        tranfered = 0;
+    public static Item MoveInto(Item item, Item toMove, out int transferred, int? maxStack = null, bool canFavorite = true) {
+        transferred = 0;
         if (toMove.IsAir) return item;
         if (item.IsAir) {
-            tranfered = maxStack.HasValue ? Math.Min(maxStack.Value, toMove.stack) : toMove.stack;
+            transferred = maxStack.HasValue ? Math.Min(maxStack.Value, toMove.stack) : toMove.stack;
             item = toMove.Clone();
             item.stack = 0;
-            ItemLoader.SplitStack(item, toMove, tranfered);
+            ItemLoader.SplitStack(item, toMove, transferred);
         } else if (item.type == toMove.type && item.stack < (maxStack ?? item.maxStack)) {
             int oldStack = item.maxStack;
             if (maxStack.HasValue) item.maxStack = maxStack.Value;
-            ItemLoader.TryStackItems(item, toMove, out tranfered);
+            ItemLoader.TryStackItems(item, toMove, out transferred);
             item.maxStack = oldStack;
         }
-        if (tranfered != 0) {
+        if (transferred != 0) {
             item.favorited = item.favorited || canFavorite && toMove.favorited;
             if (toMove.IsAir) toMove.TurnToAir(true);
         }

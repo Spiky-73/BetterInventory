@@ -1,4 +1,3 @@
-using BetterInventory.Configs.UI;
 using Terraria.ModLoader;
 
 namespace BetterInventory;

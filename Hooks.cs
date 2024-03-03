@@ -92,7 +92,7 @@ public class Hooks : ILoadable {
         ClickOverrides.ILBuyStack(il);
     }
     private void ILSellOrTrash(ILContext il){
-        ClickOverrides.ILStackStrash(il);
+        ClickOverrides.ILStackTrash(il);
     }
     private void ILDrawSlot(ILContext il) {
         SmartPickup.ILDrawMarks(il);
