@@ -77,13 +77,8 @@ InventoryManagement: {
 	DisplayName: Inventory Management
 
 	smartConsumption: {
-		Label: "[i:42] Smart item consumption"
-		Tooltip: Consumes items from the smallest stack in the inventory
-	}
-
-	smartAmmo: {
-		Label: "[i:40] Smart Ammo Consumption"
-		Tooltip: Consumes ammo (arrows, baits, paints, ...) from the last stack in the inventory. Doesn't affect the selected ammo
+		Label: "[i:040] Smart item consumption"
+		Tooltip: Consumes items from a differents stack to reduce changes in the selected item
 	}
 
 	smartPickup: {
@@ -159,6 +154,30 @@ InventoryManagement: {
 	stackTrash: {
 		Label: stack Trash
 		Tooltip: ""
+	}
+
+	shiftRight: {
+		Label: shift Right
+		Tooltip: ""
+	}
+}
+
+SmartConsumption: {
+	Tooltip: ""
+
+	consumables: {
+		Label: Consumables
+		Tooltip: Consumes items from the smallest stack in the inventory
+	}
+
+	ammo: {
+		Label: Ammunitions
+		Tooltip: Consumes ammo (arrows, baits, paints, ...) from the last stack in the inventory. Doesn't affect the selected ammo
+	}
+
+	Materials: {
+		Label: Crafting Materials
+		Tooltip: Consumes materials from the smallest stack in the inventory
 	}
 }
 

@@ -7,16 +7,17 @@ namespace BetterInventory.InventoryManagement;
 
 public sealed class SmartConsumptionItem : GlobalItem {
 
-    public static Configs.InventoryManagement Config => Configs.InventoryManagement.Instance;
+    public static bool Enabled => Configs.InventoryManagement.Instance.smartConsumption;
+    public static Configs.SmartConsumption Config => Configs.InventoryManagement.Instance.smartConsumption.Value;
 
     public override void OnConsumeItem(Item item, Player player) {
-        if (!Config.smartConsumption) return;
+        if (!Enabled || !Config.consumables) return;
         if (item.PaintOrCoating) OnConsume(item, player.LastStack(item, true));
         else OnConsume(item, player.SmallestStack(item, true));
     }
 
     public override void OnConsumedAsAmmo(Item ammo, Item weapon, Player player) {
-        if (Config.smartAmmo) OnConsume(ammo, player.LastStack(ammo, true));
+        if (Enabled && Config.ammo) OnConsume(ammo, player.LastStack(ammo, true));
     }
 
     internal static void ILSmartBait(ILContext il) {
@@ -26,7 +27,7 @@ public sealed class SmartConsumptionItem : GlobalItem {
         cursor.EmitLdarg0();
         cursor.EmitLdloc1();
         cursor.EmitDelegate((Player self, Item item) => {
-            if(Config.smartConsumption) OnConsume(item, self.LastStack(item, true));
+            if (Enabled && Config.ammo) OnConsume(item, self.LastStack(item, true));
         });
     }
 

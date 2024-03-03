@@ -5,8 +5,7 @@ using Terraria.UI;
 namespace BetterInventory.Configs;
 
 public sealed class InventoryManagement : ModConfig {
-    [DefaultValue(true)] public bool smartConsumption; // TODO crafting materials
-    [DefaultValue(true)] public bool smartAmmo;
+    public Toggle<SmartConsumption> smartConsumption = new(true);
     public ChildValue<SmartPickupLevel, SmartPickup> smartPickup = new(SmartPickupLevel.AllItems);
     [DefaultValue(AutoEquipLevel.DefaultSlots)] public AutoEquipLevel autoEquip;
     
@@ -14,7 +13,7 @@ public sealed class InventoryManagement : ModConfig {
     public Toggle<QuickMove> quickMove = new(true);
     public Toggle<StackClick> craftStack = new(true);
 
-    [DefaultValue(true)] public bool shiftClick;
+    [DefaultValue(true)] public bool shiftRight;
     [DefaultValue(true)] public bool stackTrash;
 
     public override void OnChanged() {
@@ -27,6 +26,12 @@ public sealed class InventoryManagement : ModConfig {
     public override ConfigScope Mode => ConfigScope.ClientSide;
     public static InventoryManagement Instance = null!;
 
+}
+
+public sealed class SmartConsumption {
+    [DefaultValue(true)] public bool consumables = true;
+    [DefaultValue(true)] public bool ammo = true;
+    // [DefaultValue(true)] public bool materials = true; // TODO implement
 }
 
 public sealed class SmartPickup {
