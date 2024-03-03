@@ -1,7 +1,6 @@
 using BetterInventory.Configs.UI;
 using BetterInventory.Crafting;
 using BetterInventory.InventoryManagement;
-using BetterInventory.ItemActions;
 using BetterInventory.ItemSearch;
 using MonoMod.Cil;
 using Terraria;
@@ -23,6 +22,7 @@ public class Hooks : ILoadable {
 
         IL_Recipe.FindRecipes += ILFindRecipes;
         IL_Recipe.CollectGuideRecipes += ILOverrideGuideRecipes;
+        IL_Recipe.ConsumeForCraft += ILConsumeForCraft;
 
         IL_ItemSlot.LeftClick_ItemArray_int_int += ILLeftClick;
         IL_ItemSlot.HandleShopSlot += ILHandleShopSlot;
@@ -44,7 +44,7 @@ public class Hooks : ILoadable {
         SmartPickup.ILAutoEquip(il);
     }
     private void ILPickAndConsumeBait(ILContext il){
-        SmartConsumptionItem.ILSmartBait(il);
+        SmartConsumptionItem.ILOnConsumeBait(il);
     }
 
     private void ILDrawInventory(ILContext il) {
@@ -78,6 +78,9 @@ public class Hooks : ILoadable {
     }
     private void ILOverrideGuideRecipes(ILContext il){
         Guide.ILOverrideGuideRecipes(il);
+    }
+    private void ILConsumeForCraft(ILContext il) {
+        SmartConsumptionItem.ILOnConsumedMaterial(il);
     }
 
 

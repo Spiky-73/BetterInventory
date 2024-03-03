@@ -175,8 +175,8 @@ SmartConsumption: {
 		Tooltip: Consumes ammo (arrows, baits, paints, ...) from the last stack in the inventory. Doesn't affect the selected ammo
 	}
 
-	Materials: {
-		Label: Crafting Materials
+	materials: {
+		Label: Materials
 		Tooltip: Consumes materials from the smallest stack in the inventory
 	}
 }
@@ -583,3 +583,5 @@ ItemActions: {
 		Tooltip: ""
 	}
 }
+
+Compatibitlty.DisplayName: Compatibitlty

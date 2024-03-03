@@ -31,7 +31,7 @@ public sealed class InventoryManagement : ModConfig {
 public sealed class SmartConsumption {
     [DefaultValue(true)] public bool consumables = true;
     [DefaultValue(true)] public bool ammo = true;
-    // [DefaultValue(true)] public bool materials = true; // TODO implement
+    [DefaultValue(true)] public bool materials = true;
 }
 
 public sealed class SmartPickup {

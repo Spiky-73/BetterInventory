@@ -26,4 +26,5 @@ public static class Recipe {
 
 public static class RecipeLoader {
     public static readonly StaticMethod<TItem, TRecipe, List<TItem>, TItem, object?> OnCraft = new(typeof(TLoader), nameof(TLoader.OnCraft));
+    public static readonly StaticField<List<TItem>> ConsumedItems = new(typeof(TLoader), nameof(ConsumedItems));
 }
