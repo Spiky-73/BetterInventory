@@ -156,7 +156,7 @@ public sealed class VisibilityFiltersSerialiser : TagSerializer<VisibilityFilter
 
 
 public sealed class RawRecipe {
-    public RawRecipe(string mod, List<ItemDefinition> items, List<string> tiles) {
+    public RawRecipe(string mod, List<ItemDefinition> items, List<TileDefinition> tiles) {
         this.mod = mod;
         this.items = items;
         this.tiles = tiles;
@@ -177,7 +177,7 @@ public sealed class RawRecipe {
         for (int i = 1; i < items.Count; i++) requiredItem.Add(items[i].Type);
 
         HashSet<int> requiredTile = new();
-        foreach (string tile in tiles) requiredTile.Add(TileID.Search.GetId(tile));
+        foreach (TileDefinition tile in tiles) requiredTile.Add(tile.Type);
 
         for (int r = 0; r < Recipe.numRecipes; r++) {
             Recipe recipe = Main.recipe[r];
@@ -197,23 +197,29 @@ public sealed class RawRecipe {
 
     public string mod;
     public List<ItemDefinition> items;
-    public List<string> tiles;
+    public List<TileDefinition> tiles;
 
     private void AddItem(Item item) => items.Add(new(item.type));
-    private void AddTile(int tile) => tiles.Add(TileID.Search.GetName(tile));
+    private void AddTile(int tile) => tiles.Add(new(tile));
 
 }
 public sealed class RawRecipeSerialiser : TagSerializer<RawRecipe, TagCompound> {
     public override TagCompound Serialize(RawRecipe value) => new() { [ModTag] = value.mod, [ItemsTag] = value.items, [TilesTag] = value.tiles };
 
     public override RawRecipe Deserialize(TagCompound tag){
-        List<ItemDefinition> defs;
-        if (tag.Get<IList>(ItemsTag) is not List<string> old) defs = tag.Get<List<ItemDefinition>>(ItemsTag);
+        List<ItemDefinition> items;
+        if (tag.Get<IList>(ItemsTag) is not List<string> i) items = tag.Get<List<ItemDefinition>>(ItemsTag);
         else {
-            defs = new();
-            foreach (string s in old) defs.Add(new(s));
+            items = new();
+            foreach (string s in i) items.Add(new(s));
         }
-        return new(tag.GetString(ModTag), defs, tag.Get<List<string>>(TilesTag) );
+        List<TileDefinition> tiles;
+        if (tag.Get<IList>(TilesTag) is not List<string> t) tiles = tag.Get<List<TileDefinition>>(TilesTag);
+        else {
+            tiles = new();
+            foreach (string s in t) tiles.Add(new(s));
+        }
+        return new(tag.GetString(ModTag), items, tiles);
     }
 
 
