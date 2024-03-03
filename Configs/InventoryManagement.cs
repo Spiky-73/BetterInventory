@@ -38,7 +38,7 @@ public sealed class SmartPickup {
 public sealed class StackClick {
     // [DefaultValue(true)] public bool crafting = true;
     // [DefaultValue(true)] public bool shops = true;
-    [DefaultValue(false)] public bool invertClicks = false; // TODO Redo in a external way (Modify Main.mouseLeft etc)
+    [DefaultValue(false)] public bool invertClicks = false;
     [Range(1, 9999), DefaultValue(9999)] public int maxAmount = 9999;
 }
 
