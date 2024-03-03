@@ -72,7 +72,7 @@ public sealed class SmartPickup : ILoadable {
         cursor.EmitLdarg2();
         cursor.EmitLdarg3();
         cursor.EmitDelegate((Player self, Item newItem, GetItemSettings settings) => {
-            if (BetterPlayer.VanillaGetItem || Level == Configs.InventoryManagement.SmartPickupLevel.Off) return newItem;
+            if (VanillaGetItem || Level == Configs.InventoryManagement.SmartPickupLevel.Off) return newItem;
             else return SmartGetItem(self, newItem, settings);
         });
         cursor.EmitDup();
@@ -109,6 +109,42 @@ public sealed class SmartPickup : ILoadable {
         });
     }
 
+    internal static void ILAutoEquip(ILContext il) {
+        ILCursor cursor = new(il);
+
+        // if (isACoin) ...
+        // if (item.FitsAmmoSlot()) ...
+        // for(...) ...
+        cursor.GotoNext(i => i.MatchCall(Reflection.Player.GetItem_FillEmptyInventorySlot));
+        cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdloc0());
+
+        // ++<autoEquip>
+        cursor.EmitLdarg0();
+        cursor.EmitLdarg2();
+        cursor.EmitLdarg3();
+        cursor.EmitDelegate((Player self, Item newItem, GetItemSettings settings) => {
+            if (VanillaGetItem || settings.NoText || Configs.InventoryManagement.Instance.autoEquip == Configs.InventoryManagement.AutoEquipLevel.Off) return newItem;
+            return AutoEquip(self, newItem, settings);
+        });
+        cursor.EmitDup();
+        cursor.EmitStarg(2);
+
+        // ++if (newItem.IsAir) return new()
+        cursor.EmitDelegate((Item item) => item.IsAir);
+        ILLabel skip = cursor.DefineLabel();
+        cursor.EmitBrfalse(skip);
+        cursor.EmitDelegate(() => new Item());
+        cursor.EmitRet();
+        cursor.MarkLabel(skip);
+    }
+
+    public static Item GetItem_Inner(Player self, int plr, Item newItem, GetItemSettings settings) {
+        VanillaGetItem = true;
+        Item i = self.GetItem(plr, newItem, settings);
+        VanillaGetItem = false;
+        return i;
+    }
+
     public static Item SmartGetItem(Player player, Item item, GetItemSettings settings) {
         if (player.whoAmI != Main.myPlayer || !IsMarked(item.type)) return item;
 
@@ -134,6 +170,13 @@ public sealed class SmartPickup : ILoadable {
             if (item.IsAir) return item;
         }
         return item;
+    }
+    public static Item AutoEquip(Player self, Item newItem, GetItemSettings settings) {
+        foreach (ModSubInventory slots in InventoryLoader.GetSubInventories(newItem, Configs.InventoryManagement.Instance.autoEquip == Configs.InventoryManagement.AutoEquipLevel.DefaultSlots ? SubInventoryType.Default : SubInventoryType.Secondary)) {
+            newItem = slots.GetItem(self, newItem, settings);
+            if (newItem.IsAir) return newItem;
+        }
+        return newItem;
     }
 
     public static bool IsMarked(int type) => s_marks.TryGetValue(type, out var marks) && marks.Count > 0;
@@ -178,6 +221,8 @@ public sealed class SmartPickup : ILoadable {
         s_marksData.Clear();
         s_marks.Clear();
     }
+
+    public static bool VanillaGetItem { get; private set; }
 
     private static readonly Dictionary<Slot, (Item fake, bool favorited)> s_marksData = new();
     private static readonly Dictionary<int, List<Slot>> s_marks = new();

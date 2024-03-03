@@ -25,9 +25,19 @@ Crafting: {
 		Tooltip: Allows you to craft items directly from the recipe list
 	}
 
-	recipeScroll: {
-		Label: "[i:3389] Faster Recipe Scroll"
+	fastScroll: {
+		Label: "[i:3389] Fast Recipe Scroll"
 		Tooltip: Make the recipe scoll very fast
+	}
+
+	fixedUI: {
+		Label: fixed U I
+		Tooltip: ""
+	}
+
+	mouseMaterial: {
+		Label: mouse Material
+		Tooltip: ""
 	}
 }
 
@@ -134,6 +144,21 @@ InventoryManagement: {
 	clickOverrides: {
 		Label: "[i:5075] Click Overrides"
 		Tooltip: Makes shops and crafting consistent with inventory movements
+	}
+
+	craftStack: {
+		Label: craft Stack
+		Tooltip: ""
+	}
+
+	shiftClick: {
+		Label: shift Click
+		Tooltip: ""
+	}
+
+	stackTrash: {
+		Label: stack Trash
+		Tooltip: ""
 	}
 }
 
@@ -336,7 +361,7 @@ ItemSearch: {
 			Requires "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Name}" and "{$Mods.BetterInventory.Configs.ItemSearch.betterBestiary.Name}" respectively to be On
 			{$Mods.BetterInventory.Configs.UnknownDisplay.Hidden.Label}: Not displayed
 			{$Mods.BetterInventory.Configs.UnknownDisplay.Unknown.Label}: Displayed as '?'
-			{$Mods.BetterInventory.Configs.UnknownDisplay.Known.Label}: Counts as discovered. 
+			{$Mods.BetterInventory.Configs.UnknownDisplay.Known.Label}: Displayed as discovered.
 			'''
 	}
 
@@ -389,6 +414,23 @@ BetterGuide: {
 			The toggle stores 2 independent states: one when the guide item or tile are used, and one when one when none are used.
 			'''
 	}
+}
+
+FavoriteRecipes: {
+	Tooltip: ""
+
+	unfavorite: {
+		Label: Unfavorite recipes on Craft
+		Tooltip: Resets the state of recipes when they are crafted
+	}
+}
+
+UnfavoriteOnCraft: {
+	Tooltip: ""
+	None.Label: Off
+	Favorited.Label: Favorited
+	Blacklisted.Label: Blacklisted
+	Both.Label: Favorited and Blacklisted
 }
 
 BetterBestiary: {
@@ -460,3 +502,65 @@ ChildValue`2: {
 }
 
 Text.Tooltip: ""
+
+FixedUI: {
+	Tooltip: ""
+
+	fastScroll: {
+		Label: fast Scroll
+		Tooltip: ""
+	}
+
+	listScroll: {
+		Label: list Scroll
+		Tooltip: ""
+	}
+
+	wrapping: {
+		Label: wrapping
+		Tooltip: ""
+	}
+
+	moveMouse: {
+		Label: move Mouse
+		Tooltip: ""
+	}
+}
+
+StackClick: {
+	Tooltip: ""
+
+	invertClicks: {
+		Label: invert Clicks
+		Tooltip: ""
+	}
+
+	maxAmount: {
+		Label: max Amount
+		Tooltip: ""
+	}
+}
+
+ItemActions: {
+	DisplayName: Item Actions
+
+	fastContainerOpening: {
+		Label: fast Container Opening
+		Tooltip: ""
+	}
+
+	itemRightClick: {
+		Label: item Right Click
+		Tooltip: ""
+	}
+
+	builderKeys: {
+		Label: builder Keys
+		Tooltip: ""
+	}
+
+	FavoriteBuffKeybind: {
+		Label: Favorite Buff Keybind
+		Tooltip: ""
+	}
+}

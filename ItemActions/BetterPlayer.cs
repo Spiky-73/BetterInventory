@@ -10,8 +10,9 @@ using Terraria.GameInput;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
+using BetterInventory.InventoryManagement;
 
-namespace BetterInventory.InventoryManagement;
+namespace BetterInventory.ItemActions;
 
 public sealed record class BuilderAccToggle {
     public BuilderAccToggle(string name, Predicate<Player> available, int number) : this(name, available, player => BetterPlayer.CycleAccState(player, number)) {}
@@ -37,7 +38,8 @@ public sealed record class BuilderAccToggle {
 
 public sealed class BetterPlayer : ModPlayer {
 
-    public static Configs.InventoryManagement Config => Configs.InventoryManagement.Instance;
+    // public static Configs.InventoryManagement Config => Configs.InventoryManagement.Instance;
+    public static Configs.ItemActions Config => Configs.ItemActions.Instance;
 
     public static BetterPlayer LocalPlayer => Main.LocalPlayer.GetModPlayer<BetterPlayer>();
 
@@ -62,9 +64,6 @@ public sealed class BetterPlayer : ModPlayer {
         foreach (BuilderAccToggle bat in BuilderAccToggles) bat.AddKeybind(Mod);
         On_ItemSlot.TryOpenContainer += HookTryOpenContainer;
         On_Player.DropItemFromExtractinator += HookFastExtractinator;
-
-        On_ChestUI.LootAll += HookLootAll;
-        On_ChestUI.Restock += HookRestock;
 
         On_ItemSlot.PickupItemIntoMouse += HookNoPickupMouse;
     }
@@ -97,7 +96,7 @@ public sealed class BetterPlayer : ModPlayer {
         QuickMove.HoverItem(inventory, context, slot);
         if (SearchItem.OverrideHover(inventory, context, slot)) return true;
         if (Guide.OverrideHover(inventory, context, slot)) return true;
-        if (ClickOverride.OverrideHover(inventory, context, slot)) return true;
+        if (ClickOverrides.OverrideHover(inventory, context, slot)) return true;
         return false;
     }
 
@@ -124,7 +123,7 @@ public sealed class BetterPlayer : ModPlayer {
         List<Item> items = new();
         Item? mat;
         if((mat = Guide.GetGuideMaterials()) != null) items.Add(mat);
-        if((mat = Tweeks.GetMouseMaterial()) != null) items.Add(mat);
+        if((mat = Crafting.Crafting.GetMouseMaterial()) != null) items.Add(mat);
         itemConsumedCallback = (item, amount) => item.stack -= amount;
         return items;
     }
@@ -139,73 +138,6 @@ public sealed class BetterPlayer : ModPlayer {
     private static void HookFastExtractinator(On_Player.orig_DropItemFromExtractinator orig, Player self, int itemType, int stack) {
         orig(self, itemType, stack);
         if (Config.fastContainerOpening) self.itemTime = self.itemTimeMax = self.itemTime/5;
-    }
-
-    internal static void ILKeepFavoriteInChest(ILContext il) {
-        ILCursor cursor = new(il);
-        cursor.GotoNext(i => i.MatchStfld(Reflection.Item.favorited));
-        cursor.EmitLdarg0();
-        cursor.EmitLdarg1();
-        cursor.EmitLdarg2();
-        cursor.EmitDelegate((bool fav, Item[] inv, int context, int slot) => {
-            if(Config.favoriteInBanks && context == ItemSlot.Context.BankItem) fav = inv[slot].favorited;
-            return fav;
-        });
-    }
-    private static void HookRestock(On_ChestUI.orig_Restock orig) {
-        ChestUI.GetContainerUsageInfo(out bool sync, out Item[] items);
-        if (!sync && Config.favoriteInBanks) Utility.RunWithHiddenItems(items, i => i.favorited, () => orig());
-        else orig();
-    }
-    private static void HookLootAll(On_ChestUI.orig_LootAll orig) {
-        ChestUI.GetContainerUsageInfo(out bool sync, out Item[] items);
-        if (!sync && Config.favoriteInBanks) Utility.RunWithHiddenItems(items, i => i.favorited, () => orig());
-        else orig();
-    }
-
-
-    public static Item GetItem_Inner(Player self, int plr, Item newItem, GetItemSettings settings) {
-        VanillaGetItem = true;
-        Item i = self.GetItem(plr, newItem, settings);
-        VanillaGetItem = false;
-        return i;
-    }
-
-    internal static void ILAutoEquip(ILContext il) {
-        ILCursor cursor = new(il);
-
-        // if (isACoin) ...
-        // if (item.FitsAmmoSlot()) ...
-        // for(...) ...
-        cursor.GotoNext(i => i.MatchCall(Reflection.Player.GetItem_FillEmptyInventorySlot));
-        cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdloc0());
-
-        // ++<autoEquip>
-        cursor.EmitLdarg0();
-        cursor.EmitLdarg2();
-        cursor.EmitLdarg3();
-        cursor.EmitDelegate((Player self, Item newItem, GetItemSettings settings) => {
-            if (VanillaGetItem || settings.NoText || Config.autoEquip == Configs.InventoryManagement.AutoEquipLevel.Off) return newItem;
-            return AutoEquip(self, newItem, settings);
-        });
-        cursor.EmitDup();
-        cursor.EmitStarg(2);
-
-        // ++if (newItem.IsAir) return new()
-        cursor.EmitDelegate((Item item) => item.IsAir);
-        ILLabel skip = cursor.DefineLabel();
-        cursor.EmitBrfalse(skip);
-        cursor.EmitDelegate(() => new Item());
-        cursor.EmitRet();
-        cursor.MarkLabel(skip);
-    }
-
-    public static Item AutoEquip(Player self, Item newItem, GetItemSettings settings) {
-        foreach (ModSubInventory slots in InventoryLoader.GetSubInventories(newItem, Config.autoEquip == Configs.InventoryManagement.AutoEquipLevel.DefaultSlots ? SubInventoryType.Default : SubInventoryType.Secondary).ToArray()) {
-            newItem = slots.GetItem(self, newItem, settings);
-            if (newItem.IsAir) return newItem;
-        }
-        return newItem;
     }
 
     public static void CycleAccState(Player player, int index, int cycle = 2) => player.builderAccStatus[index] = (player.builderAccStatus[index] + 1) % cycle;
@@ -225,8 +157,6 @@ public sealed class BetterPlayer : ModPlayer {
 
     public RecipeFilters RecipeFilters { get; set; } = null!;
     public VisibilityFilters VisibilityFilters { get; set; } = new();
-
-    public static bool VanillaGetItem { get; private set; }
 
     private static bool s_noMousePickup;
 

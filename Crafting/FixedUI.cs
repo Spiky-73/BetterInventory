@@ -8,9 +8,10 @@ using Terraria.ModLoader;
 
 namespace BetterInventory.Crafting;
 
-public sealed class Tweeks : ILoadable {
+public sealed class FixedUI : ILoadable {
 
-    public static Configs.Crafting Config => Configs.Crafting.Instance;
+    public static bool Enabled => Configs.Crafting.Instance.fixedUI.Parent;
+    public static Configs.FixedUI Config => Configs.Crafting.Instance.fixedUI.Value;
     
     public void Load(Mod mod) {
         On_Main.TryAllowingToCraftRecipe += HookTryAllowingToCraftRecipe;
@@ -34,14 +35,14 @@ public sealed class Tweeks : ILoadable {
             cursor.GotoNext(i => i.MatchCall(typeof(SoundEngine), nameof(SoundEngine.PlaySound)));
             cursor.GotoNext(i => i.MatchLdsfld(Reflection.Main.recFastScroll));
 
-            // ++ <custom scroll>
+            // ++ <fastScroll>
             cursor.EmitLdloc(124); // int num63
             int s = j == 0 ? -1 : 1;
             cursor.EmitDelegate((int r) => {
-                if (!Configs.Crafting.Instance.recipeScroll.Parent) return;
+                if (!Enabled || !Config.fastScroll.Parent) return;
                 Main.availableRecipeY[r] += s * 6.5f;
                 float d = Main.availableRecipeY[r] - (r - Main.focusRecipe) * 65;
-                bool recFast = Main.recFastScroll && Config.recipeScroll.Value.listScroll;
+                bool recFast = Main.recFastScroll && Config.fastScroll.Value.listScroll;
                 if (recFast) d *= 3;
                 float old = Main.availableRecipeY[r];
                 Main.availableRecipeY[r] -= s == 1 ? MathF.Max(s * 6.5f, d / 10) : MathF.Min(s * 6.5f, d / 10);
@@ -72,11 +73,11 @@ public sealed class Tweeks : ILoadable {
         //             ++ <wrappingX>
         cursor.EmitLdloc(130); // int num68
         cursor.EmitDelegate((int x, int i) => {
-            if (!Config.tweeks) return x;
-            if (!Main.recBigList) return x + VanillaCurrection * i;
+            if (!Enabled || !Config.wrapping) return x;
+            if (!Main.recBigList) return x + VanillaCorrection * i;
             x -= i * VanillaMaterialSpcacing;
             if (i >= MaterialsPerLine[0]) i = MaterialsPerLine[0] - MaterialsPerLine[1] + (i - MaterialsPerLine[0]) % MaterialsPerLine[1];
-            return x + (VanillaMaterialSpcacing + VanillaCurrection) * i;
+            return x + (VanillaMaterialSpcacing + VanillaCorrection) * i;
         });
 
         //             int num70 = 380 + num51;
@@ -85,9 +86,9 @@ public sealed class Tweeks : ILoadable {
         //             ++ <wrappingY>
         cursor.EmitLdloc(130); // int num68
         cursor.EmitDelegate((int y, int i) => {
-            if (!Config.tweeks || !Main.recBigList) return y;
+            if (!Enabled || !Config.wrapping || !Main.recBigList) return y;
             i = i < MaterialsPerLine[0] ? 0 : ((i - MaterialsPerLine[0]) / MaterialsPerLine[1] + 1);
-            return y + (VanillaMaterialSpcacing + VanillaCurrection) * i;
+            return y + (VanillaMaterialSpcacing + VanillaCorrection) * i;
         });
 
         //             ...
@@ -115,9 +116,9 @@ public sealed class Tweeks : ILoadable {
             //         Main.player[Main.myPlayer].mouseInterface = true;
             cursor.GotoPrev(MoveType.After, i => i.MatchStfld(typeof(Player), nameof(Player.mouseInterface)));
 
-            //         ++ <autoScroll>
+            //         ++ <listScroll>
             cursor.EmitDelegate(() => {
-                if (!Config.tweeks || !Main.mouseLeft) return;
+                if (!Enabled || !Config.listScroll || !Main.mouseLeft) return;
                 if (Main.mouseLeftRelease || _recDelay == 0) {
                     Main.mouseLeftRelease = true;
                     _recDelay = 1;
@@ -129,56 +130,14 @@ public sealed class Tweeks : ILoadable {
         // }
 
     }
-    internal static void ILCraftOnList(ILContext il) {
-        ILCursor cursor = new(il);
 
-        // if(<recBigListVisible>) {
-        //     ...
-        //     while (<showingRecipes>) {
-        //         ...
-        //         if (<mouseHover>) {
-        //             Main.player[Main.myPlayer].mouseInterface = true;
-        cursor.GotoNext(i => i.MatchCall(Reflection.Main.LockCraftingForThisCraftClickDuration));
-        cursor.GotoPrev(MoveType.After, i => i.MatchStfld(Reflection.Player.mouseInterface));
-
-        ILLabel? noClick = null;
-        cursor.FindPrev(out _, i => i.MatchBrtrue(out noClick));
-
-        //             if(++[!craftInList] &&<click>) {
-        cursor.EmitLdloc(153); // int num87
-        cursor.EmitDelegate((int i) => {
-            if (!Config.craftOnList.Parent) return false;
-            int f = Main.focusRecipe;
-            if (Config.craftOnList.Value.focusRecipe) Main.focusRecipe = i;
-            Reflection.Main.HoverOverCraftingItemButton.Invoke(i);
-            if (f != Main.focusRecipe) Main.recFastScroll = true;
-            Main.craftingHide = false;
-            return true;
-        });
-        cursor.EmitBrtrue(noClick!);
-        //                 <scrollList>
-        //                 ...
-        //             }
-        //             Main.craftingHide = true;
-
-        cursor.GotoNext(i => i.MatchCall(Reflection.Main.LockCraftingForThisCraftClickDuration));
-        cursor.GotoNext(MoveType.After, i => i.MatchStfld(Reflection.Main.craftingHide));
-
-        //             ...
-        //         }
-        //     }
-        // }
-    }
-    
     private static bool HookTryAllowingToCraftRecipe(On_Main.orig_TryAllowingToCraftRecipe orig, Recipe currentRecipe, bool tryFittingItemInInventoryToAllowCrafting, out bool movedAnItemToAllowCrafting)
-        => orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting || Config.tweeks, out movedAnItemToAllowCrafting);
-
-    public static Item? GetMouseMaterial() => Config.tweeks ? Main.mouseItem : null;
+        => orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting || (Enabled && Config.moveMouse), out movedAnItemToAllowCrafting);
 
     private static int _recDelay = 0;
     public static readonly int[] MaterialsPerLine = new int[] { 6, 4 };
 
     public const int VanillaMaterialSpcacing = 40;
-    public const int VanillaCurrection = -2;
+    public const int VanillaCorrection = -2;
 
 }

@@ -4,13 +4,24 @@ using Terraria.ModLoader.Config;
 namespace BetterInventory.Configs;
 
 public sealed class Crafting : ModConfig {
-    [DefaultValue(true)] public bool tweeks;
+    public Toggle<FixedUI> fixedUI = new(true);
     public Toggle<RecipeFiltering> recipeFiltering = new(true);
     public Toggle<CraftOnList> craftOnList = new(true);
-    public Toggle<RecipeScroll> recipeScroll = new(true);
+    [DefaultValue(true)] public bool mouseMaterial;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
     public static Crafting Instance = null!;
+}
+
+public sealed class FixedUI {
+    public Toggle<RecipeScroll> fastScroll = new(true);
+    [DefaultValue(true)] public bool listScroll = true;
+    [DefaultValue(true)] public bool wrapping = true;
+    [DefaultValue(true)] public bool moveMouse = true;
+}
+
+public sealed class RecipeScroll {
+    [DefaultValue(true)] public bool listScroll = true;
 }
 
 public sealed class RecipeFiltering {
@@ -20,8 +31,4 @@ public sealed class RecipeFiltering {
 
 public sealed class CraftOnList {
     [DefaultValue(false)] public bool focusRecipe = false;
-}
-
-public sealed class RecipeScroll {
-    [DefaultValue(true)] public bool listScroll = true;
 }

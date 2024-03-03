@@ -33,7 +33,7 @@ public static class Player {
     public static readonly Field<TPlayer, TItem> trashItem = new(nameof(TPlayer.trashItem));
     public static readonly Field<TPlayer, bool> mouseInterface = new(nameof(TPlayer.mouseInterface));
     public static readonly Method<TPlayer, int, TItem, GetItemSettings, TItem, int, bool> GetItem_FillEmptyInventorySlot = new(nameof(GetItem_FillEmptyInventorySlot));
-    public static readonly Method<TPlayer, TItem, bool> HasItem = new(nameof(TPlayer.HasItem));
+    public static readonly Method<TPlayer, int, bool> HasItem = new(nameof(TPlayer.HasItem));
 }
 
 public static class Item {

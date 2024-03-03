@@ -14,11 +14,11 @@ using Terraria.ModLoader;
 
 namespace BetterInventory.Crafting;
 
-public sealed class RecipeFiltering : ILoadable {
+public sealed class RecipeFiltering {
 
     public static bool Enabled => Configs.Crafting.Instance.recipeFiltering.Parent;
     public static Configs.RecipeFiltering Config => Configs.Crafting.Instance.recipeFiltering.Value;
-    public static RecipeFilters LocalFilters => InventoryManagement.BetterPlayer.LocalPlayer.RecipeFilters;
+    public static RecipeFilters LocalFilters => ItemActions.BetterPlayer.LocalPlayer.RecipeFilters;
 
     public void Load(Mod mod) {}
     public void Unload() { }

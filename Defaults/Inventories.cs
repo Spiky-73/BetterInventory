@@ -20,7 +20,7 @@ public sealed class Hotbar : ModSubInventory {
 public sealed class Inventory : ModSubInventory {
     public override int Context => ContextID.InventoryItem;
     public override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.inventory, DataStructures.Range.FromCount(10, 40));
-    public override Item GetItem(Player player, Item item, GetItemSettings settings) => BetterPlayer.GetItem_Inner(player, player.whoAmI, item, settings);
+    public override Item GetItem(Player player, Item item, GetItemSettings settings) => SmartPickup.GetItem_Inner(player, player.whoAmI, item, settings);
 }
 public sealed class Coin : ModSubInventory {
     public override int Context => ContextID.InventoryCoin;

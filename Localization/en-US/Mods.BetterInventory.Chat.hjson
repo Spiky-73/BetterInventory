@@ -3,14 +3,14 @@ Update: Better Inventory was updated to v{$Mods.BetterInventory.Chat.Version}! V
 Bug: This mod is still in developement. If you found a bug, please report it on the {$Mods.BetterInventory.Chat.Workshop} or the {$Mods.BetterInventory.Chat.Homepage}
 Homepage: homepage
 Workshop: Steam Workshop page
-Version: 0.4.1
-Info: Optimization and bug fixes
-Important: Better Guide and Recipe Filtering were optimised and should cause much less lag with loads of recipes
+Version: 0.5
+Info: Implemented Mod compatibility and reorganized configs
+Important: 
 Changelog:
 	'''
-	- Optimised Better Guide and Recipe Filtering
-	- Optimised Quick Move display
-	- Clear marks when changing worlds
-	- Fixed Unknown items able to be favorited
-	- Fixed Quick move changing selected slot when it should not
+	- Unfavorite favorite recipes on craft
+	- Move some options of Inventory Management into a new config Item Actions
+	- Added a config for max amount of crafted or baught items with left click
+	- Use TileDefinition when possible
+	- Fixed bugs with shops
 	'''

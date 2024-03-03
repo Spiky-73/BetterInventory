@@ -29,7 +29,7 @@ public sealed class Text {
 
         if(!cursor.TryGotoNext(i => i.MatchCall(typeof(ChatManager), nameof(ChatManager.DrawColorCodedStringWithShadow)))
                 || !cursor.TryGotoPrev(MoveType.After, i => i.MatchLdloc3())) {
-            return; // TODO log info
+            return; // TODO log info and other ILs
         }
         cursor.EmitLdarg0();
         cursor.EmitDelegate((Color color, ConfigElement self) => {

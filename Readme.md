@@ -23,6 +23,13 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 
 ## Changelog
 
+### v0.5
+- Unfavorite favorite recipes on craft
+- Move some options of Inventory Management into a new config Item Actions
+- Added a config for max amount of crafted or baught items with left click
+- Use TileDefinition when possible
+- Fixed bugs with shops
+
 ### v0.4.1
 - Optimised Better Guide and Recipe Filtering
 - Optimised Quick Move display

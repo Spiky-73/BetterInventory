@@ -1,6 +1,7 @@
 using BetterInventory.Configs.UI;
 using BetterInventory.Crafting;
 using BetterInventory.InventoryManagement;
+using BetterInventory.ItemActions;
 using BetterInventory.ItemSearch;
 using MonoMod.Cil;
 using Terraria;
@@ -30,17 +31,17 @@ public class Hooks : ILoadable {
 
         MonoModHooks.Modify(Reflection.ConfigElement.DrawSelf, IlDrawSelf);
 
-        IL_Filters.BySearch.FitsFilter += ILSearchAddEntries;
-        IL_UIBestiaryEntryIcon.Update += ILIconUpdateFakeUnlock;
-        IL_UIBestiaryEntryIcon.DrawSelf += ILIconDrawFakeUnlock;
-        IL_UIBestiaryEntryInfoPage.AddInfoToList += IlEntryPageFakeUnlock;
-        IL_UIBestiaryFilteringOptionsGrid.UpdateAvailability += ILFakeUnlockFilters;
+        IL_Filters.BySearch.FitsFilter += ILFilters_BySearch;
+        IL_UIBestiaryEntryIcon.Update += ILEntryIcon_Update;
+        IL_UIBestiaryEntryIcon.DrawSelf += ILEntryIcon_DrawSelf;
+        IL_UIBestiaryEntryInfoPage.AddInfoToList += IlEntryPage_AddInfoToList;
+        IL_UIBestiaryFilteringOptionsGrid.UpdateAvailability += ILFilteringOptionsGrid_UpdateAvailability;
     }
     public void Unload() {}
 
     private void ILGetItem(ILContext il) {
         SmartPickup.ILSmartPickup(il);
-        BetterPlayer.ILAutoEquip(il);
+        SmartPickup.ILAutoEquip(il);
     }
     private void ILPickAndConsumeBait(ILContext il){
         SmartConsumptionItem.ILSmartBait(il);
@@ -48,9 +49,10 @@ public class Hooks : ILoadable {
 
     private void ILDrawInventory(ILContext il) {
         RecipeFiltering.ILDrawFilters(il);
-        Tweeks.ILFastScroll(il);
-        Tweeks.ILListScrollFix(il);
-        Tweeks.ILMaterialWrapping(il);
+        FixedUI.ILFastScroll(il);
+        FixedUI.ILListScrollFix(il);
+        FixedUI.ILMaterialWrapping(il);
+        Crafting.Crafting.ILCraftOnList(il);
         Guide.ILForceGuideDisplay(il);
         Guide.ILDrawVisibility(il);
         Guide.ILCustomDrawCreateItem(il);
@@ -60,13 +62,14 @@ public class Hooks : ILoadable {
     private void ILHoverOverCraftingItemButton(ILContext il) {
         Guide.ILFavoriteRecipe(il);
         Guide.ILCraftInGuideMenu(il);
-        ClickOverride.ILCraftCursorOverride(il);
+        ClickOverrides.ILCraftCursorOverride(il);
     }
     private void ILCraftItem(ILContext il){
-        ClickOverride.ILShiftCraft(il);
-        ClickOverride.ILCraftStack(il);
-        ClickOverride.ILRestoreRecipe(il);
-        ClickOverride.ILFixCraftMouseText(il);
+        ClickOverrides.ILShiftCraft(il);
+        ClickOverrides.ILCraftStack(il);
+        Guide.IlUnfavoriteOnCraft(il);
+        ClickOverrides.ILRestoreRecipe(il);
+        ClickOverrides.ILFixCraftMouseText(il);
     }
 
     private void ILFindRecipes(ILContext il){
@@ -79,13 +82,14 @@ public class Hooks : ILoadable {
 
 
     private void ILLeftClick(ILContext il) {
-        BetterPlayer.ILKeepFavoriteInChest(il);
+        ClickOverrides.ILKeepFavoriteInChest(il);
     }
     private void ILHandleShopSlot(ILContext il){
-        ClickOverride.ILBuyStack(il);
+        ClickOverrides.ILPreventChainBuy(il);
+        ClickOverrides.ILBuyStack(il);
     }
     private void ILSellOrTrash(ILContext il){
-        ClickOverride.ILStackStrash(il);
+        ClickOverrides.ILStackStrash(il);
     }
     private void ILDrawSlot(ILContext il) {
         SmartPickup.ILDrawMarks(il);
@@ -93,11 +97,11 @@ public class Hooks : ILoadable {
         QuickMove.ILDisplayHotkey(il);
     }
 
-    private void ILFakeUnlockFilters(ILContext il) => Bestiary.ILSearchAddEntries(il);
-    private void IlEntryPageFakeUnlock(ILContext il) => Bestiary.ILIconUpdateFakeUnlock(il);
-    private void ILIconDrawFakeUnlock(ILContext il) => Bestiary.ILIconDrawFakeUnlock(il);
-    private void ILIconUpdateFakeUnlock(ILContext il) => Bestiary.IlEntryPageFakeUnlock(il);
-    private void ILSearchAddEntries(ILContext il) => Bestiary.ILFakeUnlockFilters(il);
+    private void ILFilters_BySearch(ILContext il) => Bestiary.ILSearchAddEntries(il);
+    private void ILEntryIcon_Update(ILContext il) => Bestiary.ILIconUpdateFakeUnlock(il);
+    private void ILEntryIcon_DrawSelf(ILContext il) => Bestiary.ILIconDrawFakeUnlock(il);
+    private void IlEntryPage_AddInfoToList(ILContext il) => Bestiary.IlEntryPageFakeUnlock(il);
+    private void ILFilteringOptionsGrid_UpdateAvailability(ILContext il) => Bestiary.ILFakeUnlockFilters(il);
 
     private void IlDrawSelf(ILContext il) => Text.ILTextColors(il);
 }

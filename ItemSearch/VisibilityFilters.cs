@@ -39,13 +39,13 @@ public sealed class VisibilityFilters {
 
     public bool IsFavorited(int recipe) => FavoritedRecipes.Contains(recipe);
     public bool IsBlacklisted(int recipe) => BlacklistedRecipes.Contains(recipe);
-    public void FavoriteRecipe(int recipe, bool force = false) {
-        if (!ResetFavoriteRecipe(recipe) || force) FavoritedRecipes.Add(recipe);
+    public void ToggleFavorited(int recipe, bool force = false) {
+        if (!ResetRecipeState(recipe) || force) FavoritedRecipes.Add(recipe);
     }
-    public void BlacklistRecipe(int recipe, bool force = false) {
-        if (!ResetFavoriteRecipe(recipe) || force) BlacklistedRecipes.Add(recipe);
+    public void ToggleBlacklisted(int recipe, bool force = false) {
+        if (!ResetRecipeState(recipe) || force) BlacklistedRecipes.Add(recipe);
     }
-    public bool ResetFavoriteRecipe(int recipe) => FavoritedRecipes.Remove(recipe) | BlacklistedRecipes.Remove(recipe);
+    public bool ResetRecipeState(int recipe) => FavoritedRecipes.Remove(recipe) | BlacklistedRecipes.Remove(recipe);
 
 
     public Flags Visibility { get; set; } = Flags.Default;

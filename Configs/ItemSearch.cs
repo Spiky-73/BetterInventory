@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel;
 using BetterInventory.ItemSearch;
 using Newtonsoft.Json;
@@ -14,8 +15,7 @@ public sealed class ItemSearch : ModConfig {
     [DefaultValue(true)] public bool searchHistory;
     [DefaultValue(UnknownDisplay.Unknown)] public UnknownDisplay unknownDisplay;
 
-    [JsonIgnore, ShowDespiteJsonIgnore]
-    public string SearchItemKeybind {
+    [JsonIgnore, ShowDespiteJsonIgnore] public string SearchItemKeybind {
         get {
             var keys = SearchItem.Keybind?.GetAssignedKeys() ?? new();
             return keys.Count == 0 ? Lang.inter[23].Value : keys[0];
@@ -31,9 +31,15 @@ public sealed class ItemSearch : ModConfig {
 
 public class BetterGuide {
     [DefaultValue(true)] public bool anyItem = true;
-    [DefaultValue(true)] public bool favoriteRecipes = true;
+    public Toggle<FavoriteRecipes> favoriteRecipes = new(true);
     [DefaultValue(true)] public bool craftInMenu = true;
     [DefaultValue(true)] public bool guideTile = true;
+}
+
+public class FavoriteRecipes {
+    [DefaultValue(UnfavoriteOnCraft.Favorited)] public UnfavoriteOnCraft unfavorite = UnfavoriteOnCraft.Favorited;
+
+    [Flags] public enum UnfavoriteOnCraft { None = 0b00, Favorited = 0b01, Blacklisted = 0b10, Both = Favorited | Blacklisted }
 }
 
 public class BetterBestiary {

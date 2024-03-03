@@ -1,30 +1,21 @@
 using System.ComponentModel;
-using BetterInventory.InventoryManagement;
-using Terraria;
 using Terraria.ModLoader.Config;
 using Terraria.UI;
 
 namespace BetterInventory.Configs;
 
 public sealed class InventoryManagement : ModConfig {
-    [DefaultValue(true)] public bool smartConsumption;
+    [DefaultValue(true)] public bool smartConsumption; // TODO crafting materials
     [DefaultValue(true)] public bool smartAmmo;
     public ChildValue<SmartPickupLevel, SmartPickup> smartPickup = new(SmartPickupLevel.AllItems);
     [DefaultValue(AutoEquipLevel.DefaultSlots)] public AutoEquipLevel autoEquip;
     
     [DefaultValue(true)] public bool favoriteInBanks;
-    [DefaultValue(true)] public bool fastContainerOpening;
-    public Toggle<ItemRightClick> itemRightClick = new(true);
-    public Toggle<ClickOverride> clickOverrides = new(true);
-
     public Toggle<QuickMove> quickMove = new(true);
-    [DefaultValue(true)] public bool builderKeys; // TODO check new api
-    public string FavoriteBuffKeybind {
-        get {
-            var keys = BetterPlayer.FavoritedBuffKb?.GetAssignedKeys() ?? new();
-            return keys.Count == 0 ? Lang.inter[23].Value : keys[0];
-        }
-    }
+    public Toggle<StackClick> craftStack = new(true);
+
+    [DefaultValue(true)] public bool shiftClick;
+    [DefaultValue(true)] public bool stackTrash;
 
     public override void OnChanged() {
         Reflection.ItemSlot.canFavoriteAt.GetValue()[ItemSlot.Context.BankItem] = favoriteInBanks;
@@ -44,18 +35,12 @@ public sealed class SmartPickup {
     [DefaultValue(0.33f)] public float markIntensity = 0.33f;
 }
 
-public sealed class ItemRightClick {
-    [DefaultValue(false)] public bool stackableItems = false;
+public sealed class StackClick {
+    // [DefaultValue(true)] public bool crafting = true;
+    // [DefaultValue(true)] public bool shops = true;
+    [DefaultValue(false)] public bool invertClicks = false; // TODO Redo in a external way (Modify Main.mouseLeft etc)
+    [Range(1, 9999), DefaultValue(9999)] public int maxAmount = 9999;
 }
-
-public sealed class ClickOverride {
-    [DefaultValue(true)] public bool crafting = true;
-    [DefaultValue(true)] public bool shops = true;
-    [DefaultValue(true)] public bool shiftRight = true;
-    [DefaultValue(true)] public bool stacking = true;
-    [DefaultValue(false)] public bool invertClicks = false;
-}
-
 
 public sealed class QuickMove {
     [Range(0, 3600), DefaultValue(60*3)] public int chainTime = 60*3;

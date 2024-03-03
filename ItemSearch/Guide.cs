@@ -17,6 +17,7 @@ using Terraria.Map;
 using Terraria.ModLoader;
 using Terraria.UI;
 using ContextID = Terraria.UI.ItemSlot.Context;
+using BetterInventory.ItemActions;
 
 namespace BetterInventory.ItemSearch;
 
@@ -96,7 +97,7 @@ public sealed class Guide : ModSystem {
         Vector2 position = new(minX, inventoryY - delta.Y);
         int slot = 0;
         void MovePosition() {
-            if (Tweeks.Config.tweeks && ++slot % TilesPerLine == 0) {
+            if (FixedUI.Enabled && FixedUI.Config.wrapping && ++slot % TilesPerLine == 0) {
                 position.X = minX;
                 position.Y += delta.Y;
                 if (slot == TilesPerLine) MovePosition();
@@ -347,7 +348,6 @@ public sealed class Guide : ModSystem {
         //             ++ <overrideBackground>
         cursor.EmitLdloc(153);
         cursor.EmitDelegate((int i) => {
-            if (Main.focusRecipe == i && Tweeks.Config.craftOnList.Parent && !Tweeks.Config.craftOnList.Value.focusRecipe) ItemSlot.DrawGoldBGForCraftingMaterial = true;
             if (!Enabled) return;
             OverrideRecipeTexture(GetFavoriteState(Main.availableRecipe[i]), ItemSlot.DrawGoldBGForCraftingMaterial, s_availableRecipes.Contains(Main.availableRecipe[i]));
             ItemSlot.DrawGoldBGForCraftingMaterial = false;
@@ -398,7 +398,7 @@ public sealed class Guide : ModSystem {
     }
 
 
-    public static Item? GetGuideMaterials() =>  Enabled && !SearchItem.Config.searchRecipes ? Main.guideItem : null;
+    public static Item? GetGuideMaterials() =>  Enabled && !SearchItem.Config.searchRecipes ? Main.guideItem : null; // ? add toggle
 
     public static void FindDisplayedRecipes() {
         int oldRecipe = Main.availableRecipe[Main.focusRecipe];
@@ -514,7 +514,7 @@ public sealed class Guide : ModSystem {
         //         if(<recipeOk> ++[&& !custom]) {
         cursor.EmitLdloc1();
         cursor.EmitDelegate((int r) => {
-            if (!Enabled) return false;
+            if (!(Enabled || RecipeFiltering.Enabled)) return false;
             Reflection.Recipe.AddToAvailableRecipes.Invoke(r);
             return true;
         });
@@ -543,23 +543,24 @@ public sealed class Guide : ModSystem {
                 s_unknownRecipes.Add(r);
                 return true;
             }
+            if (!Config.favoriteRecipes) return false;
             if (LocalFilters.FavoritedRecipes.Contains(r)) return true;
             if (LocalFilters.BlacklistedRecipes.Contains(r)) return true;
             return false;
         }
 
-        foreach (int r in LocalFilters.FavoritedRecipes) yield return r;
-        if(LocalFilters.ShowAllRecipes) {
+        if (Config.favoriteRecipes) foreach (int r in LocalFilters.FavoritedRecipes) yield return r;
+        if (LocalFilters.ShowAllRecipes) {
             for (int r = 0; r < Recipe.numRecipes; r++) {
                 if (!Skip(r)) yield return r;
             }
-            foreach (int r in LocalFilters.BlacklistedRecipes) yield return r;
+            if (Config.favoriteRecipes) foreach (int r in LocalFilters.BlacklistedRecipes) yield return r;
             if (Configs.ItemSearch.Instance.unknownDisplay == Configs.ItemSearch.UnknownDisplay.Unknown) foreach (int r in s_unknownRecipes) yield return r;
         } else {
             foreach (int r in s_availableRecipes) {
                 if (!Skip(r)) yield return r;
             }
-            if(!Config.craftInMenu) foreach (int r in LocalFilters.BlacklistedRecipes) yield return r;
+            if(Config.favoriteRecipes && !Config.craftInMenu) foreach (int r in LocalFilters.BlacklistedRecipes) yield return r;
         }
     }
 
@@ -607,7 +608,7 @@ public sealed class Guide : ModSystem {
         cursor.EmitDelegate((int recipeIndex) => {
             if (!Enabled) return false;
 
-            if (!s_availableRecipes.Contains(Main.availableRecipe[recipeIndex])) Reflection.Main._preventCraftingBecauseClickWasUsedToChangeFocusedRecipe.SetValue(true);
+            if (!s_availableRecipes.Contains(Main.availableRecipe[recipeIndex])) Main.LockCraftingForThisCraftClickDuration();
 
             if (IsUnknown(Main.availableRecipe[recipeIndex])) {
                 ForcedToolip = Language.GetText("Mods.BetterInventory.UI.Unknown");
@@ -618,7 +619,7 @@ public sealed class Guide : ModSystem {
             if (Main.keyState.IsKeyDown(Main.FavoriteKey)) {
                 Main.cursorOverride = CursorOverrideID.FavoriteStar;
                 if (click) {
-                    LocalFilters.FavoriteRecipe(Main.availableRecipe[recipeIndex]);
+                    LocalFilters.ToggleFavorited(Main.availableRecipe[recipeIndex]);
                     FindDisplayedRecipes();
                     SoundEngine.PlaySound(SoundID.MenuTick);
                     return true;
@@ -626,7 +627,7 @@ public sealed class Guide : ModSystem {
             } else if (ItemSlot.ControlInUse && GetFavoriteState(Main.availableRecipe[recipeIndex]) != FavoriteState.Favorited) {
                 Main.cursorOverride = CursorOverrideID.TrashCan;
                 if (click) {
-                    LocalFilters.BlacklistRecipe(Main.availableRecipe[recipeIndex]);
+                    LocalFilters.ToggleBlacklisted(Main.availableRecipe[recipeIndex]);
                     FindDisplayedRecipes();
                     SoundEngine.PlaySound(SoundID.MenuTick);
                     return true;
@@ -647,6 +648,28 @@ public sealed class Guide : ModSystem {
         
         // Main.craftingHide = true;
     }
+
+    internal static void IlUnfavoriteOnCraft(ILContext il) {
+        ILCursor cursor = new(il);
+
+        // Item crafted = r.createItem.Clone();
+        // r.Create();
+        // RecipeLoader.OnCraft(crafted, r, Main.mouseItem);
+        cursor.GotoNext(MoveType.After, i => i.MatchCall(typeof(RecipeLoader), nameof(RecipeLoader.OnCraft)));
+
+        // ++ <unFavorite>
+        cursor.EmitLdarg0();
+        cursor.EmitDelegate((Recipe r) => {
+            if (!Config.favoriteRecipes) return;
+            if (!(GetFavoriteState(r.RecipeIndex) switch {
+                FavoriteState.Favorited => Config.favoriteRecipes.Value.unfavorite.HasFlag(Configs.FavoriteRecipes.UnfavoriteOnCraft.Favorited),
+                FavoriteState.Blacklisted => Config.favoriteRecipes.Value.unfavorite.HasFlag(Configs.FavoriteRecipes.UnfavoriteOnCraft.Blacklisted),
+                FavoriteState.Default or _ => false,
+            })) return;
+            LocalFilters.ResetRecipeState(r.RecipeIndex);
+            FindDisplayedRecipes();
+        });
+    }
     internal static void ILCraftInGuideMenu(ILContext context) {
         ILCursor cursor = new(context);
 
@@ -658,23 +681,6 @@ public sealed class Guide : ModSystem {
         //     <craft>
         // }
     }
-    // internal static void ILPreventCraft(ILContext context) {
-    //     ILCursor cursor = new(context);
-
-    //     // if (Main.focusRecipe == recipeIndex && ++[Main.guideItem.IsAir || <allowCraft>]) {
-    //     //     <flags*4>
-    //     cursor.GotoNext(MoveType.After, i => i.MatchLdsfld(Reflection.Main._preventCraftingBecauseClickWasUsedToChangeFocusedRecipe));
-
-    //     cursor.GotoNext(MoveType.After, i => i.MatchLdsfld(Reflection.Main._preventCraftingBecauseClickWasUsedToChangeFocusedRecipe));
-    //     cursor.EmitLdarg0();
-    //     cursor.EmitDelegate((bool prevent, int recipe) => {
-    //         if (prevent || Enabled && !s_availableRecipes.Contains(Main.availableRecipe[recipe])) return true;
-    //         ClickOverride.OverrideCraftHover(recipe);
-    //         return false;
-    //     });
-    //     //     ...
-    //     // }
-    // }
     
     private static void HookGuideTileAdj(On_Player.orig_AdjTiles orig, Player self) {
         orig(self);
