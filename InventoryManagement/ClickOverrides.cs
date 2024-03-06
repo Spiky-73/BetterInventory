@@ -13,8 +13,6 @@ namespace BetterInventory.InventoryManagement;
 
 public sealed class ClickOverrides : ILoadable {
 
-    public static Configs.InventoryManagement Config => Configs.InventoryManagement.Instance;
-
     public void Load(Mod mod) {
         On_Main.DrawInterface_36_Cursor += HookDrawCustomCursor;
         On_Main.TryAllowingToCraftRecipe += HookTryAllowingToCraftRecipe;
@@ -34,11 +32,11 @@ public sealed class ClickOverrides : ILoadable {
 
 
     private static void HookShiftLeftCustom(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
-        if (!Config.shiftRight || !Main.mouseLeft || Main.cursorOverride == -1 || context != ItemSlot.Context.ShopItem && context != ItemSlot.Context.CreativeInfinite) orig(inv, context, slot);
+        if (!Configs.InventoryManagement.ShiftRight || !Main.mouseLeft || Main.cursorOverride == -1 || context != ItemSlot.Context.ShopItem && context != ItemSlot.Context.CreativeInfinite) orig(inv, context, slot);
         else TwoStepClick(inv, context, slot, (inv, context, slot) => orig(inv, context, slot));
     }
     private static void HookShiftRight(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
-        if (!Main.mouseRight || !Config.shiftRight || Main.cursorOverride == -1) orig(inv, context, slot);
+        if (!Main.mouseRight || !Configs.InventoryManagement.ShiftRight || Main.cursorOverride == -1) orig(inv, context, slot);
         else TwoStepClick(inv, context, slot, (inv, context, slot) => orig(inv, context, slot));
     }
     private static void TwoStepClick(Item[] inv, int context, int slot, Action<Item[], int, int> click){
@@ -58,7 +56,7 @@ public sealed class ClickOverrides : ILoadable {
 
 
     public static bool OverrideHover(Item[] inv, int context, int slot) {
-        if (!Config.shiftRight || context != ItemSlot.Context.ShopItem || !ItemSlot.ShiftInUse || inv[slot].IsAir || !Main.LocalPlayer.ItemSpace(inv[slot]).CanTakeItem) return false;
+        if (!Configs.InventoryManagement.ShiftRight || context != ItemSlot.Context.ShopItem || !ItemSlot.ShiftInUse || inv[slot].IsAir || !Main.LocalPlayer.ItemSpace(inv[slot]).CanTakeItem) return false;
         Main.cursorOverride = CursorOverrideID.QuickSell;
         return true;
     }
@@ -68,7 +66,7 @@ public sealed class ClickOverrides : ILoadable {
         cursor.EmitLdarg2();
         cursor.EmitLdarg3();
         cursor.EmitDelegate((bool rightClickIsValid, bool leftClickIsValid) => {
-            if (Config.craftStack && (Config.craftStack.Value.invertClicks ? (rightClickIsValid && !Main.mouseRightRelease) : (leftClickIsValid && !Main.mouseLeftRelease))) return true;
+            if (Configs.CraftStack.Enabled && (Configs.CraftStack.Value.invertClicks ? (rightClickIsValid && !Main.mouseRightRelease) : (leftClickIsValid && !Main.mouseLeftRelease))) return true;
             return false;
         });
         ILLabel skip = cursor.DefineLabel();
@@ -85,14 +83,14 @@ public sealed class ClickOverrides : ILoadable {
         cursor.EmitLdarg3();
         cursor.EmitLdloc(4); // long calcForBuying
         cursor.EmitDelegate((Item[] inv, int slot, bool rightClickIsValid, bool leftClickIsValid, long price) => {
-            if (!Config.craftStack || !(Config.craftStack.Value.invertClicks ? rightClickIsValid  : leftClickIsValid)) {
+            if (!Configs.CraftStack.Enabled || !(Configs.CraftStack.Value.invertClicks ? rightClickIsValid  : leftClickIsValid)) {
                 s_ilShopMultiplier = 1;
                 return price;
             }
             int amount = GetMaxBuyAmount(inv[slot], price);
             int available = inv[slot].buyOnce ? inv[slot].stack : inv[slot].maxStack;
-            int maxPickup = Config.shiftRight && Main.cursorOverride == CursorOverrideID.QuickSell ? GetMaxPickupAmount(inv[slot]) : (inv[slot].maxStack - Main.mouseItem.stack);
-            s_ilShopMultiplier = Math.Min(Math.Min(Math.Min(amount, available), maxPickup), Config.craftStack.Value.maxAmount);
+            int maxPickup = Configs.InventoryManagement.ShiftRight && Main.cursorOverride == CursorOverrideID.QuickSell ? GetMaxPickupAmount(inv[slot]) : (inv[slot].maxStack - Main.mouseItem.stack);
+            s_ilShopMultiplier = Math.Min(Math.Min(Math.Min(amount, available), maxPickup), Configs.CraftStack.Value.maxAmount);
             if (!inv[slot].buyOnce) inv[slot].stack = s_ilShopMultiplier;
             return price * s_ilShopMultiplier;
         });
@@ -126,14 +124,14 @@ public sealed class ClickOverrides : ILoadable {
         cursor.EmitLdloc(3); // bool flag3
         cursor.EmitLdloc(5); // bool flag5
         cursor.EmitDelegate((bool canCraft, bool crafting) => {
-            if (!Config.shiftRight || !ItemSlot.ShiftInUse) return;
+            if (!Configs.InventoryManagement.ShiftRight || !ItemSlot.ShiftInUse) return;
             if (canCraft && !crafting && Main.stackSplit <= 1) Main.cursorOverride = CraftCursorID;
         });
         //     ...
         // }
     }
     private static void HookDrawCustomCursor(On_Main.orig_DrawInterface_36_Cursor orig) {
-        if (Config.shiftRight && Main.cursorOverride == CraftCursorID) {
+        if (Configs.InventoryManagement.ShiftRight && Main.cursorOverride == CraftCursorID) {
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(0, BlendState.AlphaBlend, Main.SamplerStateForCursor, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
             Main.spriteBatch.Draw(CursorCraft.Value, new Vector2(Main.mouseX, Main.mouseY), null, Color.White, 0, default, Main.cursorScale, 0, 0f);
@@ -142,8 +140,8 @@ public sealed class ClickOverrides : ILoadable {
 
     private static bool HookTryAllowingToCraftRecipe(On_Main.orig_TryAllowingToCraftRecipe orig, Recipe currentRecipe, bool tryFittingItemInInventoryToAllowCrafting, out bool movedAnItemToAllowCrafting) {
         movedAnItemToAllowCrafting = false;
-        if (Config.craftStack && (Config.craftStack.Value.invertClicks ? (Main.mouseRight && !Main.mouseRightRelease) : (Main.mouseLeft && !Main.mouseLeftRelease))) return false;
-        if (Config.shiftRight && Main.cursorOverride == CraftCursorID) return Main.LocalPlayer.ItemSpace(currentRecipe.createItem).CanTakeItem;
+        if (Configs.CraftStack.Enabled && (Configs.CraftStack.Value.invertClicks ? (Main.mouseRight && !Main.mouseRightRelease) : (Main.mouseLeft && !Main.mouseLeftRelease))) return false;
+        if (Configs.InventoryManagement.ShiftRight && Main.cursorOverride == CraftCursorID) return Main.LocalPlayer.ItemSpace(currentRecipe.createItem).CanTakeItem;
         return orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting, out movedAnItemToAllowCrafting);
     }
     internal static void ILShiftCraft(ILContext il) {
@@ -156,7 +154,7 @@ public sealed class ClickOverrides : ILoadable {
         ILLabel skipVanillaCheck = cursor.DefineLabel();
         ILLabel vanillaCheck = cursor.DefineLabel();
         cursor.EmitLdarg0();
-        cursor.EmitDelegate((Recipe r) => Config.shiftRight && Main.cursorOverride == CraftCursorID);
+        cursor.EmitDelegate((Recipe r) => Configs.InventoryManagement.ShiftRight && Main.cursorOverride == CraftCursorID);
         cursor.EmitBrfalse(vanillaCheck);
         cursor.EmitLdarg0();
         cursor.EmitDelegate((Recipe r) => Main.LocalPlayer.ItemSpace(r.createItem).CanTakeItem);
@@ -180,10 +178,10 @@ public sealed class ClickOverrides : ILoadable {
         cursor.GotoPrev(MoveType.After, i => i.MatchLdarg0());
         cursor.EmitDelegate((Recipe r) => {
             s_ilCraftMultiplier = 1;
-            if (!Config.craftStack || !(Config.craftStack.Value.invertClicks ? Main.mouseRight : Main.mouseLeft)) return r;
+            if (!Configs.CraftStack.Enabled || !(Configs.CraftStack.Value.invertClicks ? Main.mouseRight : Main.mouseLeft)) return r;
             int amount = GetMaxCraftAmount(r);
-            int maxPickup = Config.shiftRight && Main.cursorOverride == CraftCursorID ? GetMaxPickupAmount(r.createItem) : (r.createItem.maxStack - Main.mouseItem.stack);
-            s_ilCraftMultiplier = Math.Min(Math.Min(amount, maxPickup / r.createItem.stack), Config.craftStack.Value.maxAmount / r.createItem.stack);
+            int maxPickup = Configs.InventoryManagement.ShiftRight && Main.cursorOverride == CraftCursorID ? GetMaxPickupAmount(r.createItem) : (r.createItem.maxStack - Main.mouseItem.stack);
+            s_ilCraftMultiplier = Math.Min(Math.Min(amount, maxPickup / r.createItem.stack), Configs.CraftStack.Value.maxAmount / r.createItem.stack);
             r.createItem.stack *= s_ilCraftMultiplier;
             foreach (Item i in r.requiredItem) i.stack *= s_ilCraftMultiplier;
             return r;
@@ -212,7 +210,7 @@ public sealed class ClickOverrides : ILoadable {
                 r.createItem.stack /= s_ilCraftMultiplier;
                 foreach (Item i in r.requiredItem) i.stack /= s_ilCraftMultiplier;
             }
-            if (Config.shiftRight && Main.cursorOverride == CraftCursorID) {
+            if (Configs.InventoryManagement.ShiftRight && Main.cursorOverride == CraftCursorID) {
                 Main.LocalPlayer.GetItem(Main.myPlayer, crafted, GetItemSettings.InventoryUIToInventorySettingsShowAsNew);
                 return true;
             }
@@ -261,7 +259,7 @@ public sealed class ClickOverrides : ILoadable {
 
         //     ++<stackTrash>
         cursor.EmitDelegate((Item trash) => {
-            if(Config.stackTrash && trash.type == Main.LocalPlayer.trashItem.type) {
+            if(Configs.InventoryManagement.StackTrash && trash.type == Main.LocalPlayer.trashItem.type) {
                 if (ItemLoader.TryStackItems(Main.LocalPlayer.trashItem, trash, out int transfered)) return Main.LocalPlayer.trashItem;
             }
             return trash;
@@ -274,7 +272,7 @@ public sealed class ClickOverrides : ILoadable {
     }
     private static int HookStackSold(On_Chest.orig_AddItemToShop orig, Chest self, Item newItem) {
         int baught = Main.shopSellbackHelper.GetAmount(newItem);
-        if (!Config.stackTrash || baught >= newItem.stack) return orig(self, newItem);
+        if (!Configs.InventoryManagement.StackTrash || baught >= newItem.stack) return orig(self, newItem);
         newItem.stack -= Main.shopSellbackHelper.Remove(newItem);
         for (int i = 0; i < self.item.Length; i++) {
             if (self.item[i].IsAir || self.item[i].type != newItem.type || !self.item[i].buyOnce) continue;
@@ -293,18 +291,18 @@ public sealed class ClickOverrides : ILoadable {
         cursor.EmitLdarg1();
         cursor.EmitLdarg2();
         cursor.EmitDelegate((bool fav, Item[] inv, int context, int slot) => {
-            if(Config.favoriteInBanks && context == ItemSlot.Context.BankItem) fav = inv[slot].favorited;
+            if(Configs.InventoryManagement.FavoriteInBanks && context == ItemSlot.Context.BankItem) fav = inv[slot].favorited;
             return fav;
         });
     }
     private static void HookRestock(On_ChestUI.orig_Restock orig) {
         ChestUI.GetContainerUsageInfo(out bool sync, out Item[] items);
-        if (!sync && Config.favoriteInBanks) Utility.RunWithHiddenItems(items, i => i.favorited, () => orig());
+        if (!sync && Configs.InventoryManagement.FavoriteInBanks) Utility.RunWithHiddenItems(items, i => i.favorited, () => orig());
         else orig();
     }
     private static void HookLootAll(On_ChestUI.orig_LootAll orig) {
         ChestUI.GetContainerUsageInfo(out bool sync, out Item[] items);
-        if (!sync && Config.favoriteInBanks) Utility.RunWithHiddenItems(items, i => i.favorited, () => orig());
+        if (!sync && Configs.InventoryManagement.FavoriteInBanks) Utility.RunWithHiddenItems(items, i => i.favorited, () => orig());
         else orig();
     }
 

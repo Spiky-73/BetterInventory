@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using BetterInventory.Configs.UI;
 using BetterInventory.ItemActions;
 using Newtonsoft.Json;
 using Terraria;
@@ -18,6 +19,9 @@ public sealed class ItemActions : ModConfig {
         }
     }
 
+    public static bool FastContainerOpening => Instance.fastContainerOpening;
+    public static bool BuilderKeys => Instance.builderKeys;    
+
     public override ConfigScope Mode => ConfigScope.ClientSide;
     public static ItemActions Instance = null!;
 
@@ -25,4 +29,7 @@ public sealed class ItemActions : ModConfig {
 
 public sealed class ItemRightClick {
     [DefaultValue(false)] public bool stackableItems = false;
+
+    public static bool Enabled => ItemActions.Instance.itemRightClick;
+    public static ItemRightClick Value => ItemActions.Instance.itemRightClick.Value;
 }

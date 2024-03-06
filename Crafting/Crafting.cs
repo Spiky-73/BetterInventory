@@ -6,8 +6,6 @@ using Terraria.UI;
 namespace BetterInventory.Crafting;
 
 public sealed class Crafting : ILoadable {
-
-    public static Configs.Crafting Config => Configs.Crafting.Instance;
     
     public void Load(Mod mod) {}
     public void Unload(){}
@@ -30,9 +28,9 @@ public sealed class Crafting : ILoadable {
         //             if(++[!craftInList] &&<click>) {
         cursor.EmitLdloc(153); // int num87
         cursor.EmitDelegate((int i) => {
-            if (!Config.craftOnList.Parent) return false;
+            if (!Configs.CraftOnList.Enabled) return false;
             int f = Main.focusRecipe;
-            if (Config.craftOnList.Value.focusRecipe) Main.focusRecipe = i;
+            if (Configs.CraftOnList.Value.focusRecipe) Main.focusRecipe = i;
             Reflection.Main.HoverOverCraftingItemButton.Invoke(i);
             if (f != Main.focusRecipe) Main.recFastScroll = true;
             Main.craftingHide = false;
@@ -48,11 +46,12 @@ public sealed class Crafting : ILoadable {
         cursor.GotoLabel(skipVanillaHover!, MoveType.AfterLabel);
         cursor.EmitLdloc(153);
         cursor.EmitDelegate((int i) => {
-            if (Main.numAvailableRecipes > 0 && Main.focusRecipe == i && Config.craftOnList.Parent && !Config.craftOnList.Value.focusRecipe) ItemSlot.DrawGoldBGForCraftingMaterial = true;
+            if (!Configs.CraftOnList.Enabled) return;
+            if (Main.numAvailableRecipes > 0 && Main.focusRecipe == i && !Configs.CraftOnList.Value.focusRecipe) ItemSlot.DrawGoldBGForCraftingMaterial = true;
         });
         //     }
         // }
     }
 
-    public static Item? GetMouseMaterial() => Config.mouseMaterial ? Main.mouseItem : null;
+    public static Item? GetMouseMaterial() => Configs.Crafting.MouseMaterial ? Main.mouseItem : null;
 }

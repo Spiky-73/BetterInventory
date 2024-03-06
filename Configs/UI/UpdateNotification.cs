@@ -16,11 +16,11 @@ public class UpdateNotification : IInGameNotification {
 
     public static TagKeyFormat DownloadTags => new(null, new());
     public static TagKeyFormat UpdateTags => new(null, new(){
-        ("Mods.BetterInventory.Configs.Version.DisplayName", $"c/{Colors.RarityCyan.Hex3()}")
+        ($"{Localization.Keys.Configs}.Configs.Version.DisplayName", $"c/{Colors.RarityCyan.Hex3()}")
     });
     public static TagKeyFormat BugTags => new(null, new(){
-        ("Mods.BetterInventory.Chat.Workshop", $"c/{Colors.RarityCyan.Hex3()}"),
-        ("Mods.BetterInventory.Chat.Homepage", $"c/{Colors.RarityCyan.Hex3()}")
+        ($"{Localization.Keys.Chat}.Workshop", $"c/{Colors.RarityCyan.Hex3()}"),
+        ($"{Localization.Keys.Chat}.Homepage", $"c/{Colors.RarityCyan.Hex3()}")
     });
     public static TagKeyFormat ImportantTags => new(Colors.RarityAmber, new());
 
@@ -34,10 +34,10 @@ public class UpdateNotification : IInGameNotification {
         Version.Instance.SaveConfig();
 
         List<(LocalizedText text, TagKeyFormat format)> lines = new();
-        if (download) lines.Add((Language.GetText("Mods.BetterInventory.Chat.Download"), DownloadTags));
-        else lines.Add((Language.GetText("Mods.BetterInventory.Chat.Update"), UpdateTags));
-        lines.Add((Language.GetText("Mods.BetterInventory.Chat.Bug"), BugTags));
-        LocalizedText important = Language.GetText("Mods.BetterInventory.Chat.Important");
+        if (download) lines.Add((Language.GetText($"{Localization.Keys.Chat}.Download"), DownloadTags));
+        else lines.Add((Language.GetText($"{Localization.Keys.Chat}.Update"), UpdateTags));
+        lines.Add((Language.GetText($"{Localization.Keys.Chat}.Bug"), BugTags));
+        LocalizedText important = Language.GetText($"{Localization.Keys.Chat}.Important");
         if (!download && important.Value.Length != 0) lines.Add((important, ImportantTags));
         InGameNotificationsTracker.AddNotification(new UpdateNotification(lines));
     }

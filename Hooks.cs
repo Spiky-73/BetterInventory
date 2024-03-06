@@ -53,7 +53,7 @@ public class Hooks : ILoadable {
         FixedUI.ILListScrollFix(il);
         FixedUI.ILMaterialWrapping(il);
         Crafting.Crafting.ILCraftOnList(il);
-        Guide.ILForceGuideDisplay(il);
+        SearchItem.ILForceGuideDisplay(il);
         Guide.ILDrawVisibility(il);
         Guide.ILCustomDrawCreateItem(il);
         Guide.ILCustomDrawMaterials(il);

@@ -16,8 +16,6 @@ namespace BetterInventory.Crafting;
 
 public sealed class RecipeFiltering {
 
-    public static bool Enabled => Configs.Crafting.Instance.recipeFiltering.Parent;
-    public static Configs.RecipeFiltering Config => Configs.Crafting.Instance.recipeFiltering.Value;
     public static RecipeFilters LocalFilters => ItemActions.BetterPlayer.LocalPlayer.RecipeFilters;
 
     public void Load(Mod mod) {}
@@ -34,7 +32,7 @@ public sealed class RecipeFiltering {
         //     ++<drawFilters>
         cursor.EmitLdloc(13); // int num54
         cursor.EmitDelegate((int screenY) => {
-            if (Enabled && s_recipes != 0) DrawFilters(94, 450 + screenY);
+            if (Configs.RecipeFiltering.Enabled && s_recipes != 0) DrawFilters(94, 450 + screenY);
         });
 
         //     ...
@@ -45,15 +43,15 @@ public sealed class RecipeFiltering {
         //         if (++false && Main.InGuideCraftMenu) num74 -= 150;
         cursor.GotoNext(i => i.MatchLdsfld(Reflection.TextureAssets.CraftToggle));
         cursor.GotoPrev(MoveType.After, i => i.MatchLdsfld(Reflection.Main.InGuideCraftMenu));
-        cursor.EmitDelegate((bool inGuide) => !Enabled && inGuide);
+        cursor.EmitDelegate((bool inGuide) => !Configs.RecipeFiltering.Enabled && inGuide);
         //         ...
         //     }
     }
 
     public static void DrawFilters(int hammerX, int hammerY){
         static void OnFilterChanges() {
-            if (!Guide.Enabled) Recipe.FindRecipes();
-            else Guide.FindDisplayedRecipes();
+            if (!Configs.BetterGuide.AvailablesRecipes) Recipe.FindRecipes();
+            else Guide.FindGuideRecipes();
             SoundEngine.PlaySound(SoundID.MenuTick);
         }
 
@@ -64,9 +62,9 @@ public sealed class RecipeFiltering {
         int y = hammerY + TextureAssets.CraftToggle[0].Height() - TextureAssets.InfoIcon[0].Width()/2;
         while (i < LocalFilters.Filterer.AvailableFilters.Count) {
             int x = hammerX - TextureAssets.InfoIcon[0].Width() - 1;
-            for(int d = 0; i < filters.AvailableFilters.Count && d < Config.width; i++){
+            for(int d = 0; i < filters.AvailableFilters.Count && d < Configs.RecipeFiltering.Value.width; i++){
                 bool active = filters.IsFilterActive(i);
-                if (Config.hideUnavailable && s_recipesInFilter[i] == 0 && !active) continue;
+                if (Configs.RecipeFiltering.Value.hideUnavailable && s_recipesInFilter[i] == 0 && !active) continue;
                 Rectangle hitbox = new(x, y, RecipeFilterBack.Width(), RecipeFilterBack.Height());
                 if (hitbox.Contains(Main.mouseX, Main.mouseY)) {
                     Main.LocalPlayer.mouseInterface = true;
@@ -83,7 +81,7 @@ public sealed class RecipeFiltering {
                             filters.ToggleFilter(i);
                             OnFilterChanges();
                         }
-                        name = Language.GetTextValue("Mods.BetterInventory.UI.Filter", name, s_recipesInFilter[i]);
+                        name = Language.GetTextValue($"{Localization.Keys.UI}.Filter", name, s_recipesInFilter[i]);
                         Main.spriteBatch.Draw(TextureAssets.InfoIcon[13].Value, hitbox.Center(), null, Main.OurFavoriteColor, 0, TextureAssets.InfoIcon[13].Size() / 2, 1, SpriteEffects.None, 0);
                     }
                     if (s_recipesInFilter[i] == 0) rare = -1;

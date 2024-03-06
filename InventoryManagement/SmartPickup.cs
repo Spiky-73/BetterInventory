@@ -12,14 +12,6 @@ namespace BetterInventory.InventoryManagement;
 
 public sealed class SmartPickup : ILoadable {
 
-    public static Configs.InventoryManagement.SmartPickupLevel Level => Configs.InventoryManagement.Instance.smartPickup;
-    public static bool Enabled(bool favorited) => Level switch {
-        Configs.InventoryManagement.SmartPickupLevel.AllItems => true,
-        Configs.InventoryManagement.SmartPickupLevel.FavoriteOnly => favorited,
-        Configs.InventoryManagement.SmartPickupLevel.Off or _ => false
-    };
-    public static Configs.SmartPickup Config => Configs.InventoryManagement.Instance.smartPickup.Value;
-
     public void Load(Mod mod) {
         On_ItemSlot.LeftClick_ItemArray_int_int += HookLeftSaveType;
         On_ItemSlot.RightClick_ItemArray_int_int += HookRightSaveType;
@@ -30,12 +22,12 @@ public sealed class SmartPickup : ILoadable {
     private static void HookRightSaveType(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
         (int type, int mouse, bool fav) = (inv[slot].type, Main.mouseItem.type, inv[slot].favorited);
         orig(inv, context, slot);
-        if(Main.mouseRight) UpdateMark(inv, context, slot, type, mouse, fav);
+        if(Configs.SmartPickup.Enabled(fav) && Main.mouseRight) UpdateMark(inv, context, slot, type, mouse, fav);
     }
     private static void HookLeftSaveType(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
         (int type, int mouse, bool fav) = (inv[slot].type, Main.mouseItem.type, inv[slot].favorited);
         orig(inv, context, slot);
-        if (Main.mouseLeft && Main.mouseLeftRelease) UpdateMark(inv, context, slot, type, mouse, fav);
+        if (Configs.SmartPickup.Enabled(fav) && Main.mouseLeft && Main.mouseLeftRelease) UpdateMark(inv, context, slot, type, mouse, fav);
     }
     public static void UpdateMark(Item[] inv, int context, int slot, int oldType, int oldMouse, bool oldFav) {
         // if (Main.mouseItem.type == oldMouse && (inv[slot].type == oldType || !Config.shiftClicks)) return;
@@ -45,7 +37,7 @@ public sealed class SmartPickup : ILoadable {
         else Remark(inv[slot].type, oldType, oldFav);
     }
     private static void HookMarkItemsOnDeath(On_Player.orig_DropItems orig, Player self) {
-        if(Level == Configs.InventoryManagement.SmartPickupLevel.Off || !Config.mediumCore){
+        if(!Configs.SmartPickup.MediumCore){
             orig(self);
             return;
         }
@@ -53,7 +45,7 @@ public sealed class SmartPickup : ILoadable {
         foreach (ModSubInventory inventory in InventoryLoader.SubInventories) {
             IList<Item> items = inventory.Items(self);
             for (int i = 0; i < items.Count; i++) {
-                if(!items[i].IsAir && Enabled(items[i].favorited)) Mark(items[i].type, new(inventory, i), items[i].favorited);
+                if(!items[i].IsAir && Configs.SmartPickup.Enabled(items[i].favorited)) Mark(items[i].type, new(inventory, i), items[i].favorited);
             }
         }
         orig(self);
@@ -64,15 +56,18 @@ public sealed class SmartPickup : ILoadable {
 
         // ...
         // if (newItem.uniqueStack && this.HasItem(newItem.type)) return item;
-        cursor.GotoNext(i => i.MatchCall(Reflection.Player.HasItem));
-        cursor.GotoNext(MoveType.AfterLabel, i => i.MatchLdloc0()); // bool isACoin
+        if(!cursor.TryGotoNext(i => i.MatchCall(Reflection.Player.HasItem))
+                || !cursor.TryGotoNext(MoveType.AfterLabel, i => i.MatchLdloc0())) {// bool isACoin
+            Utility.Logger.Error($"{nameof(ILSmartPickup)} failled to load");
+            return;
+        }
 
         // ++ item = <smartPickup>
         cursor.EmitLdarg0();
         cursor.EmitLdarg2();
         cursor.EmitLdarg3();
         cursor.EmitDelegate((Player self, Item newItem, GetItemSettings settings) => {
-            if (VanillaGetItem || Level == Configs.InventoryManagement.SmartPickupLevel.Off) return newItem;
+            if (VanillaGetItem || !Configs.SmartPickup.Enabled()) return newItem;
             else return SmartGetItem(self, newItem, settings);
         });
         cursor.EmitDup();
@@ -102,9 +97,9 @@ public sealed class SmartPickup : ILoadable {
         cursor.EmitLdloc(7);
         cursor.EmitLdloc(3);
         cursor.EmitDelegate((int num9, SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, float scale, Texture2D texture, Color color) => {
-            if (Level == Configs.InventoryManagement.SmartPickupLevel.Off || Config.markIntensity == 0 || !InventoryLoader.IsInventorySlot(Main.LocalPlayer, inv, context, slot, out Slot itemSlot)) return num9;
+            if (!Configs.SmartPickup.Marks || !InventoryLoader.IsInventorySlot(Main.LocalPlayer, inv, context, slot, out Slot itemSlot)) return num9;
             if (!IsMarked(itemSlot)) return num9;
-            float scale2 = ItemSlot.DrawItemIcon(s_marksData[itemSlot].fake, context, spriteBatch, position + texture.Size() / 2f * scale, scale, 32f, color * Config.markIntensity * Main.cursorAlpha);
+            float scale2 = ItemSlot.DrawItemIcon(s_marksData[itemSlot].fake, context, spriteBatch, position + texture.Size() / 2f * scale, scale, 32f, color * Configs.SmartPickup.Value.markIntensity * Main.cursorAlpha);
             return -1;
         });
     }
@@ -123,7 +118,7 @@ public sealed class SmartPickup : ILoadable {
         cursor.EmitLdarg2();
         cursor.EmitLdarg3();
         cursor.EmitDelegate((Player self, Item newItem, GetItemSettings settings) => {
-            if (VanillaGetItem || settings.NoText || Configs.InventoryManagement.Instance.autoEquip == Configs.InventoryManagement.AutoEquipLevel.Off) return newItem;
+            if (VanillaGetItem || settings.NoText || !Configs.InventoryManagement.AutoEquip) return newItem;
             return AutoEquip(self, newItem, settings);
         });
         cursor.EmitDup();
@@ -172,7 +167,7 @@ public sealed class SmartPickup : ILoadable {
         return item;
     }
     public static Item AutoEquip(Player self, Item newItem, GetItemSettings settings) {
-        foreach (ModSubInventory slots in InventoryLoader.GetSubInventories(newItem, Configs.InventoryManagement.Instance.autoEquip == Configs.InventoryManagement.AutoEquipLevel.DefaultSlots ? SubInventoryType.Default : SubInventoryType.Secondary)) {
+        foreach (ModSubInventory slots in InventoryLoader.GetSubInventories(newItem, Configs.InventoryManagement.Instance.autoEquip == Configs.AutoEquipLevel.DefaultSlots ? SubInventoryType.Default : SubInventoryType.Secondary)) {
             newItem = slots.GetItem(self, newItem, settings);
             if (newItem.IsAir) return newItem;
         }

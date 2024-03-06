@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using MonoMod.Cil;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent.Bestiary;
@@ -11,13 +12,9 @@ using Terraria.UI;
 
 using ContextID = Terraria.UI.ItemSlot.Context;
 
-
 namespace BetterInventory.ItemSearch;
 
 public sealed class SearchItem : ILoadable {
-
-    public static Configs.ItemSearch Config => Configs.ItemSearch.Instance;
-    public static bool Enabled => Config.searchRecipes || Config.searchDrops;
 
     public void Load(Mod mod) {
         Keybind = KeybindLoader.RegisterKeybind(mod, "SearchItem", Microsoft.Xna.Framework.Input.Keys.N);
@@ -44,13 +41,13 @@ public sealed class SearchItem : ILoadable {
     }
 
     private static void HookRedirectCursor(On_Main.orig_DrawCursor orig, Vector2 bonus, bool smart) {
-        if(Enabled && s_redir) Reflection.Main.DrawInterface_36_Cursor.Invoke();
+        if(Configs.ItemSearch.SearchItems && s_redir) Reflection.Main.DrawInterface_36_Cursor.Invoke();
         else orig(bonus, smart);
     }
-    private static Vector2 HookRedirectThickCursor(On_Main.orig_DrawThickCursor orig, bool smart) => Enabled && s_redir ? Vector2.Zero : orig(smart);
+    private static Vector2 HookRedirectThickCursor(On_Main.orig_DrawThickCursor orig, bool smart) => Configs.ItemSearch.SearchItems && s_redir ? Vector2.Zero : orig(smart);
     private static void HookDrawInterfaceCursor(On_Main.orig_DrawInterface_36_Cursor orig) {
         s_redir = false;
-        if (Enabled && Keybind.Current && !Main.HoverItem.IsAir && Guide.ForcedTooltip?.Key != "Mods.BetterInventory.UI.Unknown") {
+        if (Configs.ItemSearch.SearchItems && Keybind.Current && !Main.HoverItem.IsAir && Guide.ForcedTooltip?.Key != $"{Localization.Keys.UI}.Unknown") {
             s_allowClick = true;
             Main.cursorOverride = CursorOverrideID.Magnifiers;
         }
@@ -58,7 +55,7 @@ public sealed class SearchItem : ILoadable {
         s_redir = true;
     }
     private static void HookClickOverrideInterface(On_Main.orig_DrawInterface orig, Main self, GameTime time) {
-        bool interceptClicks = Enabled && Keybind.Current;
+        bool interceptClicks = Configs.ItemSearch.SearchItems && Keybind.Current;
         bool left, right;
         if (interceptClicks) (left, Main.mouseLeft, right, Main.mouseRight) = (Main.mouseLeft, false, Main.mouseRight, false);
         else (left, right) = (false, false);
@@ -75,11 +72,11 @@ public sealed class SearchItem : ILoadable {
                 s_allowClick = true;
             }
             if (s_allowClick) {
-                if (Config.searchRecipes && (forcedLeft || left && Main.mouseLeftRelease)) {
+                if (Configs.ItemSearch.SearchRecipes && (forcedLeft || left && Main.mouseLeftRelease)) {
                     Guide.ToggleRecipeList(true);
                     SetGuideItem(forcedLeft ? new() : Main.HoverItem);
                     s_searchItemTimer = 15;
-                } else if (Config.searchDrops && (forcedRight || right && Main.mouseRightRelease)) {
+                } else if (Configs.ItemSearch.SearchDrops && (forcedRight || right && Main.mouseRightRelease)) {
                     Bestiary.ToggleBestiary(true);
                     SetBestiaryText((forcedRight ? new() : Main.HoverItem).Name, Main.InGameUI.CurrentState != Main.BestiaryUI);
                     s_searchItemTimer = 15;
@@ -89,6 +86,44 @@ public sealed class SearchItem : ILoadable {
             Main.cursorOverride = -1;
         }
         Guide.ForcedTooltip = null;
+    }
+
+    internal static void ILForceGuideDisplay(ILContext il) {
+        ILCursor cursor = new(il);
+
+        // if(Main.InReforgeMenu){
+        //     ...
+        // } else if(Main.InGuideCraftMenu) {
+        //     if(<closeGuideUI>) ...
+        //     else {
+        ILLabel? endGuide = null;
+        cursor.GotoNext(i => i.MatchCall(typeof(Main), "DrawGuideCraftText"));
+        cursor.GotoPrev(MoveType.After, i => i.MatchBr(out endGuide));
+
+        //         ++ guide:
+        ILLabel guide = cursor.DefineLabel();
+        cursor.MarkLabel(guide);
+
+        cursor.GotoLabel(endGuide!, MoveType.Before);
+
+        //         ++ if(<alternateGuideDraw>) goto recipe;
+        ILLabel recipe = cursor.DefineLabel();
+        cursor.EmitDelegate(() => Configs.ItemSearch.SearchRecipes && !Main.InGuideCraftMenu);
+        cursor.EmitBrtrue(recipe);
+        //     }
+        // }
+
+        // ...
+        // if(<showRecipes>){
+        cursor.GotoNext(i => i.MatchStloc(124)); // int num63
+        cursor.GotoPrev(MoveType.After, i => i.MatchStsfld(Reflection.UILinkPointNavigator.CRAFT_CurrentRecipeSmall));
+
+        //     ++ if(<alternateGuideDraw>) goto guide;
+        cursor.EmitDelegate(() => Configs.ItemSearch.SearchRecipes && !Main.InGuideCraftMenu);
+        cursor.EmitBrtrue(guide);
+
+        //     ++ recipe:
+        cursor.MarkLabel(recipe);
     }
 
     public static void ProcessSearchTap() {
@@ -127,12 +162,12 @@ public sealed class SearchItem : ILoadable {
         s_bestiaryDelayed = null;
     }
     private static void HookCancelSearch(On_UIBestiaryTest.orig_searchCancelButton_OnClick orig, UIBestiaryTest self, UIMouseEvent evt, UIElement listeningElement) {
-        if (Config.searchDrops && Config.searchHistory && _npcSearchBar.HasContents) _npcHistory.Add(Reflection.UISearchBar.actualContents.GetValue(_npcSearchBar));
+        if (Configs.ItemSearch.SearchDrops && Configs.ItemSearch.SearchHistory && _npcSearchBar.HasContents) _npcHistory.Add(Reflection.UISearchBar.actualContents.GetValue(_npcSearchBar));
         orig(self, evt, listeningElement);
     }
 
     private static void HookDropItems(On_Player.orig_dropItemCheck orig, Player self) {
-        if (!Config.searchRecipes) {
+        if (!Configs.ItemSearch.SearchRecipes) {
             orig(self);
             Guide.dropItemCheck(self);
             return;
@@ -180,8 +215,8 @@ public sealed class SearchItem : ILoadable {
             if (slot == -1 || slot == 0) ItemSlot.LeftClick(items, ContextID.GuideItem, 0);
             if (slot == -1 || slot == 1) ItemSlot.LeftClick(items, ContextID.GuideItem, 1);
         } else {
-            if(slot == -1) slot = Guide.Config.guideTile && Guide.IsCraftingStation(item) ? 1 : 0;
-            if (Guide.Enabled && Guide.Config.guideTile && Guide.FitsCraftingTile(item) && Guide.GetPlaceholderType(item) == PlaceholderType.None) {
+            if(slot == -1) slot = Configs.BetterGuide.Tile && Guide.IsCraftingStation(item) ? 1 : 0;
+            if (Configs.BetterGuide.Tile && Guide.FitsCraftingTile(item) && Guide.GetPlaceholderType(item) == PlaceholderType.None) {
                 bool single = item.tooltipContext != ContextID.GuideItem;
                 if (Guide.AreSame(items[slot], item)) {
                     if(single) UseGuideHistory(items, slot, true);
@@ -200,17 +235,17 @@ public sealed class SearchItem : ILoadable {
     }
 
     public static bool OverrideHover(Item[] inv, int context, int slot) {
-        if (!Config.searchRecipes || context != ContextID.GuideItem) return false;
+        if (!Configs.ItemSearch.SearchRecipes || context != ContextID.GuideItem) return false;
         if (!inv[slot].IsAir && (Main.mouseItem.IsAir || ItemSlot.ShiftInUse || ItemSlot.ControlInUse)) Main.cursorOverride = CursorOverrideID.TrashCan;
         return true;
     }
     private static void HookLeftClick(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
-        if (!Config.searchRecipes || context != ContextID.GuideItem || !(Main.mouseLeft && Main.mouseLeftRelease)) {
+        if (!Configs.ItemSearch.SearchRecipes || context != ContextID.GuideItem || !(Main.mouseLeft && Main.mouseLeftRelease)) {
             orig(inv, context, slot);
             return;
         }
 
-        if (Config.searchHistory && !Guide.AreSame(Main.mouseItem, inv[slot])) _guideHistory[slot].Add(inv[slot].Clone());
+        if (Configs.ItemSearch.SearchHistory && !Guide.AreSame(Main.mouseItem, inv[slot])) _guideHistory[slot].Add(inv[slot].Clone());
 
         (Item mouse, int cursor) = (Main.mouseItem, Main.cursorOverride);
         if (Main.cursorOverride > 0) {
@@ -231,7 +266,7 @@ public sealed class SearchItem : ILoadable {
 
     private static void HookRightClickHistory(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot)
     {
-        if (!Config.searchRecipes || context != ContextID.GuideItem || !Main.mouseRight)
+        if (!Configs.ItemSearch.SearchRecipes || context != ContextID.GuideItem || !Main.mouseRight)
         {
             orig(inv, context, slot);
             return;
@@ -243,7 +278,7 @@ public sealed class SearchItem : ILoadable {
     }
 
     private static void UseGuideHistory(Item[] inv, int slot, bool allowAir = false) {
-        if (Config.searchHistory && _guideHistory[slot].Count > 0) {
+        if (Configs.ItemSearch.SearchHistory && _guideHistory[slot].Count > 0) {
             Item item;
             do {
                 item = _guideHistory[slot][^1];
@@ -255,7 +290,7 @@ public sealed class SearchItem : ILoadable {
         }
         else if (!inv[slot].IsAir) {
             SetGuideItem(new(), slot);
-            if (Config.searchHistory && _guideHistory[slot].Count > 0) _guideHistory[slot].RemoveAt(_guideHistory[slot].Count - 1);
+            if (Configs.ItemSearch.SearchHistory && _guideHistory[slot].Count > 0) _guideHistory[slot].RemoveAt(_guideHistory[slot].Count - 1);
         }
     }
 
@@ -263,8 +298,8 @@ public sealed class SearchItem : ILoadable {
     public static void HooksBestiaryUI() {
         _npcSearchBar = Reflection.UIBestiaryTest._searchBar.GetValue(Main.BestiaryUI);
         _npcSearchBar.Parent.OnRightClick += (_, _) => {
-            if (!Config.searchDrops) return;
-            if (Config.searchHistory && _npcHistory.Count != 0) {
+            if (!Configs.ItemSearch.SearchDrops) return;
+            if (Configs.ItemSearch.SearchHistory && _npcHistory.Count != 0) {
                 string text = _npcHistory[^1];
                 _npcHistory.RemoveAt(_npcHistory.Count - 1);
                 int count = _npcHistory.Count;
@@ -273,7 +308,7 @@ public sealed class SearchItem : ILoadable {
             } else if (_npcSearchBar.HasContents) SetBestiaryText(null!);
         };
         _npcSearchBar.OnStartTakingInput += () => {
-            if (!Config.searchDrops || !Config.searchHistory) return;
+            if (!Configs.ItemSearch.SearchDrops || !Configs.ItemSearch.SearchHistory) return;
             string? text = Reflection.UISearchBar.actualContents.GetValue(_npcSearchBar);
             if (text is null || text.Length == 0 || (_npcHistory.Count > 0 && _npcHistory[^1] == text)) return;
             _npcHistory.Add(text);
@@ -281,11 +316,11 @@ public sealed class SearchItem : ILoadable {
     }
 
     public static void UpdateGuide() {
-        if (Config.searchDrops && (Main.guideItem.stack > 1 || Main.guideItem.prefix != 0)) {
+        if (Configs.ItemSearch.SearchDrops && (Main.guideItem.stack > 1 || Main.guideItem.prefix != 0)) {
             (Item item, Main.guideItem) = (Main.guideItem, new(Main.guideItem.type));
             Main.LocalPlayer.GetDropItem(ref item);
         }
-        if (Config.searchDrops && (Guide.guideTile.stack > 1 || Guide.guideTile.prefix != 0)) {
+        if (Configs.ItemSearch.SearchDrops && (Guide.guideTile.stack > 1 || Guide.guideTile.prefix != 0)) {
             (Item item, Guide.guideTile) = (Guide.guideTile, new(Guide.guideTile.type));
             Main.LocalPlayer.GetDropItem(ref item);
         }

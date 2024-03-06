@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using BetterInventory.Configs.UI;
 using BetterInventory.ItemSearch;
 using BetterInventory.Crafting;
-using MonoMod.Cil;
 using Terraria;
 using Terraria.GameInput;
 using Terraria.ModLoader;
@@ -37,9 +35,6 @@ public sealed record class BuilderAccToggle {
 }
 
 public sealed class BetterPlayer : ModPlayer {
-
-    // public static Configs.InventoryManagement Config => Configs.InventoryManagement.Instance;
-    public static Configs.ItemActions Config => Configs.ItemActions.Instance;
 
     public static BetterPlayer LocalPlayer => Main.LocalPlayer.GetModPlayer<BetterPlayer>();
 
@@ -75,21 +70,20 @@ public sealed class BetterPlayer : ModPlayer {
     public override void OnEnterWorld() {
         RecipeFilters ??= new();
         VisibilityFilters ??= new();
-
-        if (Guide.Enabled) Guide.FindDisplayedRecipes();
+        if (Configs.BetterGuide.AvailablesRecipes) Guide.FindGuideRecipes();
 
         UpdateNotification.Display();
     }
 
     public override void SetControls() {
-        if (Config.fastContainerOpening && Main.mouseRight && Main.stackSplit == 1) Main.mouseRightRelease = true;
+        if (Configs.ItemActions.FastContainerOpening && Main.mouseRight && Main.stackSplit == 1) Main.mouseRightRelease = true;
     }
 
     public override void ProcessTriggers(TriggersSet triggersSet) {
         QuickMove.ProcessTriggers();
         SearchItem.ProcessSearchTap();
         if (FavoritedBuffKb.JustPressed) FavoritedBuff(Player);
-        if(Config.builderKeys) foreach (BuilderAccToggle bat in BuilderAccToggles) bat.Process(Player);
+        if(Configs.ItemActions.BuilderKeys) foreach (BuilderAccToggle bat in BuilderAccToggles) bat.Process(Player);
     }
 
     public override bool HoverSlot(Item[] inventory, int context, int slot) {
@@ -101,12 +95,12 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public override bool PreItemCheck() {
-        if (Config.itemRightClick && Player.controlUseTile && Player.releaseUseItem && !Player.controlUseItem && !Player.tileInteractionHappened
+        if (Configs.ItemRightClick.Enabled && Player.controlUseTile && Player.releaseUseItem && !Player.controlUseItem && !Player.tileInteractionHappened
                 && !Player.mouseInterface && !Terraria.Graphics.Capture.CaptureManager.Instance.Active && !Main.HoveringOverAnNPC && !Main.SmartInteractShowingGenuine
                 && Main.HoverItem.IsAir && Player.altFunctionUse == 0 && Player.selectedItem < 10) {
             Player.itemAnimation--;
             if(Main.stackSplit == 1) Player.itemAnimation = 0;
-            if (!Config.itemRightClick.Value.stackableItems) s_noMousePickup = true;
+            if (!Configs.ItemRightClick.Value.stackableItems) s_noMousePickup = true;
             ItemSlot.RightClick(Player.inventory, ItemSlot.Context.InventoryItem, Player.selectedItem);
             s_noMousePickup = false;
             if (!Main.mouseItem.IsAir) Player.DropSelectedItem();
@@ -115,7 +109,7 @@ public sealed class BetterPlayer : ModPlayer {
         return true;
     }
     private static void HookNoPickupMouse(On_ItemSlot.orig_PickupItemIntoMouse orig, Item[] inv, int context, int slot, Player player) {
-        if (!Config.itemRightClick || !s_noMousePickup) orig(inv, context, slot, player);
+        if (!Configs.ItemRightClick.Enabled || !s_noMousePickup) orig(inv, context, slot, player);
     }
 
 
@@ -131,13 +125,13 @@ public sealed class BetterPlayer : ModPlayer {
     private static void HookTryOpenContainer(On_ItemSlot.orig_TryOpenContainer orig, Item item, Player player) {
         int split = Main.stackSplit;
         orig(item, player);
-        if (!Config.fastContainerOpening) return;
+        if (!Configs.ItemActions.FastContainerOpening) return;
         Main.stackSplit = split;
         ItemSlot.RefreshStackSplitCooldown();
     }
     private static void HookFastExtractinator(On_Player.orig_DropItemFromExtractinator orig, Player self, int itemType, int stack) {
         orig(self, itemType, stack);
-        if (Config.fastContainerOpening) self.itemTime = self.itemTimeMax = self.itemTime/5;
+        if (Configs.ItemActions.FastContainerOpening) self.itemTime = self.itemTimeMax = self.itemTime/5;
     }
 
     public static void CycleAccState(Player player, int index, int cycle = 2) => player.builderAccStatus[index] = (player.builderAccStatus[index] + 1) % cycle;
@@ -153,6 +147,7 @@ public sealed class BetterPlayer : ModPlayer {
         VisibilityFilters = tag.Get<VisibilityFilters>(VisibilityTag);
         if (tag.TryGet(GuideTileTag, out Item guide)) Guide.guideTile = guide;
         RecipeFilters = tag.Get<RecipeFilters>(RecipesTag);
+        // RecipeFiltering.ClearFilters();
     }
 
     public RecipeFilters RecipeFilters { get; set; } = null!;

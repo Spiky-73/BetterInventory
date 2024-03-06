@@ -8,17 +8,15 @@ namespace BetterInventory.InventoryManagement;
 
 public sealed class SmartConsumptionItem : GlobalItem {
 
-    public static bool Enabled => Configs.InventoryManagement.Instance.smartConsumption;
-    public static Configs.SmartConsumption Config => Configs.InventoryManagement.Instance.smartConsumption.Value;
-
     public override void OnConsumeItem(Item item, Player player) {
-        if (!Enabled || !Config.consumables) return;
-        if (item.PaintOrCoating) SmartConsume(item, () => player.LastStack(item, true));
-        else SmartConsume(item, () => player.SmallestStack(item, true));
+        if (item.PaintOrCoating) {
+            if(Configs.SmartConsumption.Paints) SmartConsume(item, () => player.LastStack(item, true));
+        }
+        else if (Configs.SmartConsumption.Consumables) SmartConsume(item, () => player.SmallestStack(item, true));
     }
 
     public override void OnConsumedAsAmmo(Item ammo, Item weapon, Player player) {
-        if (Enabled && Config.ammo) SmartConsume(ammo, () => player.LastStack(ammo, true));
+        if (Configs.SmartConsumption.Ammo) SmartConsume(ammo, () => player.LastStack(ammo, true));
     }
 
     internal static void ILOnConsumedMaterial(ILContext il) {
@@ -28,7 +26,7 @@ public sealed class SmartConsumptionItem : GlobalItem {
         cursor.EmitLdarg1();
         cursor.EmitLdloc0();
         cursor.EmitDelegate((Item item, Item consumed) => {
-            if (Enabled && Config.materials) SmartConsume(item, () => Main.LocalPlayer.SmallestStack(item, false), consumed.stack);
+            if (Configs.SmartConsumption.Materials) SmartConsume(item, () => Main.LocalPlayer.SmallestStack(item, false), consumed.stack);
         });
     }
 
@@ -39,7 +37,7 @@ public sealed class SmartConsumptionItem : GlobalItem {
         cursor.EmitLdarg0();
         cursor.EmitLdloc1();
         cursor.EmitDelegate((Player self, Item item) => {
-            if (Enabled && Config.ammo) SmartConsume(item, () => self.LastStack(item, true));
+            if (Configs.SmartConsumption.Baits) SmartConsume(item, () => self.LastStack(item, true));
         });
     }
 

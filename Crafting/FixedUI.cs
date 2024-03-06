@@ -10,13 +10,9 @@ namespace BetterInventory.Crafting;
 
 public sealed class FixedUI : ILoadable {
 
-    public static bool Enabled => Configs.Crafting.Instance.fixedUI.Parent;
-    public static Configs.FixedUI Config => Configs.Crafting.Instance.fixedUI.Value;
-    
     public void Load(Mod mod) {
         On_Main.TryAllowingToCraftRecipe += HookTryAllowingToCraftRecipe;
     }
-
     public void Unload(){}
 
     internal static void ILFastScroll(ILContext il) {
@@ -39,10 +35,10 @@ public sealed class FixedUI : ILoadable {
             cursor.EmitLdloc(124); // int num63
             int s = j == 0 ? -1 : 1;
             cursor.EmitDelegate((int r) => {
-                if (!Enabled || !Config.fastScroll.Parent) return;
+                if (!Configs.FixedUI.FastScroll) return;
                 Main.availableRecipeY[r] += s * 6.5f;
                 float d = Main.availableRecipeY[r] - (r - Main.focusRecipe) * 65;
-                bool recFast = Main.recFastScroll && Config.fastScroll.Value.listScroll;
+                bool recFast = Main.recFastScroll && Configs.FastScroll.Value.listScroll;
                 if (recFast) d *= 3;
                 float old = Main.availableRecipeY[r];
                 Main.availableRecipeY[r] -= s == 1 ? MathF.Max(s * 6.5f, d / 10) : MathF.Min(s * 6.5f, d / 10);
@@ -73,7 +69,7 @@ public sealed class FixedUI : ILoadable {
         //             ++ <wrappingX>
         cursor.EmitLdloc(130); // int num68
         cursor.EmitDelegate((int x, int i) => {
-            if (!Enabled || !Config.wrapping) return x;
+            if (!Configs.FixedUI.Wrapping) return x;
             if (!Main.recBigList) return x + VanillaCorrection * i;
             x -= i * VanillaMaterialSpacing;
             if (i >= MaterialsPerLine[0]) i = MaterialsPerLine[0] - MaterialsPerLine[1] + (i - MaterialsPerLine[0]) % MaterialsPerLine[1];
@@ -86,7 +82,7 @@ public sealed class FixedUI : ILoadable {
         //             ++ <wrappingY>
         cursor.EmitLdloc(130); // int num68
         cursor.EmitDelegate((int y, int i) => {
-            if (!Enabled || !Config.wrapping || !Main.recBigList) return y;
+            if (!Configs.FixedUI.Wrapping || !Main.recBigList) return y;
             i = i < MaterialsPerLine[0] ? 0 : ((i - MaterialsPerLine[0]) / MaterialsPerLine[1] + 1);
             return y + (VanillaMaterialSpacing + VanillaCorrection) * i;
         });
@@ -114,11 +110,11 @@ public sealed class FixedUI : ILoadable {
             // if (<upVisible> / <downVisible>) {
             //     if(<hover>) {
             //         Main.player[Main.myPlayer].mouseInterface = true;
-            cursor.GotoPrev(MoveType.After, i => i.MatchStfld(typeof(Player), nameof(Player.mouseInterface)));
+            c.GotoPrev(MoveType.After, i => i.MatchStfld(typeof(Player), nameof(Player.mouseInterface)));
 
             //         ++ <listScroll>
-            cursor.EmitDelegate(() => {
-                if (!Enabled || !Config.listScroll || !Main.mouseLeft) return;
+            c.EmitDelegate(() => {
+                if (!!Configs.FixedUI.ListScroll || !Main.mouseLeft) return;
                 if (Main.mouseLeftRelease || _recDelay == 0) {
                     Main.mouseLeftRelease = true;
                     _recDelay = 1;
@@ -132,7 +128,7 @@ public sealed class FixedUI : ILoadable {
     }
 
     private static bool HookTryAllowingToCraftRecipe(On_Main.orig_TryAllowingToCraftRecipe orig, Recipe currentRecipe, bool tryFittingItemInInventoryToAllowCrafting, out bool movedAnItemToAllowCrafting)
-        => orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting || (Enabled && Config.moveMouse), out movedAnItemToAllowCrafting);
+        => orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting || Configs.FixedUI.MoveMouse, out movedAnItemToAllowCrafting);
 
     private static int _recDelay = 0;
     public static readonly int[] MaterialsPerLine = new int[] { 6, 4 };

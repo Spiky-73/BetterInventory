@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using BetterInventory.DataStructures;
 using Terraria;
-using Terraria.ID;
 using Terraria.ModLoader.Config;
 using Terraria.ModLoader.IO;
 
@@ -10,7 +9,7 @@ namespace BetterInventory.ItemSearch;
 
 public sealed class VisibilityFilters {
     
-    public static Flags CurrentVisibility => (Main.guideItem.IsAir && (!Guide.Config.guideTile || Guide.guideTile.IsAir)) ? Flags.ShowAllAir : Flags.ShowAllGuide;
+    public static Flags CurrentVisibility => (Main.guideItem.IsAir && (!Configs.BetterGuide.Tile || Guide.guideTile.IsAir)) ? Flags.ShowAllAir : Flags.ShowAllGuide;
     public bool ShowAllRecipes {
         get => Visibility.HasFlag(CurrentVisibility);
         set => SetFlag(CurrentVisibility, value);

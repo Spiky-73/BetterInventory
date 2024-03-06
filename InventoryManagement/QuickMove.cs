@@ -24,9 +24,6 @@ public sealed class QuickMove : ILoadable {
     }
     public void Unload() {}
 
-    public static bool Enabled => Configs.InventoryManagement.Instance.quickMove;
-    public static Configs.QuickMove Config => Configs.InventoryManagement.Instance.quickMove.Value;
-
     public static readonly string[] MoveKeys = new[] {
         "Hotbar1",
         "Hotbar2",
@@ -50,15 +47,15 @@ public sealed class QuickMove : ILoadable {
     }
 
     public static void AddMoveChainLine(Item _, List<TooltipLine> tooltips){
-        if (!s_frameHover || !Config.showTooltip || s_displayedChain.Count == 0) return;
+        if (!s_frameHover || !Configs.QuickMove.Value.showTooltip || s_displayedChain.Count == 0) return;
         tooltips.Add(new(
             BetterInventory.Instance, "QuickMove",
-            Language.GetTextValue("Mods.BetterInventory.UI.QuickMoveTooltip") + ": " + string.Join(" > ", from slots in s_displayedChain where slots is not null select slots.DisplayName)
+            Language.GetTextValue($"{Localization.Keys.UI}.QuickMoveTooltip") + ": " + string.Join(" > ", from slots in s_displayedChain where slots is not null select slots.DisplayName)
         ));
     }
 
     public static void HoverItem(Item[] inventory, int context, int slot) {
-        if (!Enabled) return;
+        if (!Configs.QuickMove.Enabled) return;
         s_frameHover = true;
         if (!InventoryLoader.IsInventorySlot(Main.LocalPlayer, inventory, context, slot, out Slot itemSlot)) {
             ClearDisplayedChain();
@@ -70,7 +67,7 @@ public sealed class QuickMove : ILoadable {
     }
 
     private static void HookAlternateChain(On_Main.orig_DrawInterface_36_Cursor orig) {
-        if (s_moveTime > 0 && !s_frameHover) {
+        if (Configs.QuickMove.Enabled && s_moveTime > 0 && !s_frameHover) {
             if (!Main.playerInventory) s_moveTime = 0;
             else {
                 if (PlayerInput.Triggers.JustPressed.KeyStatus[MoveKeys[s_moveKey]]) ContinueChain();
@@ -82,7 +79,7 @@ public sealed class QuickMove : ILoadable {
     public static void UpdateChain(Slot source) {
         if (s_moveTime > 0) {
             s_moveTime--;
-            if (s_moveTime == Config.chainTime - 1) s_validSlots[source.Inventory] = source.Index;
+            if (s_moveTime == Configs.QuickMove.Value.chainTime - 1) s_validSlots[source.Inventory] = source.Index;
             else if (!s_validSlots.TryGetValue(source.Inventory, out int index) || index != source.Index) s_moveTime = 0;
         }
 
@@ -105,7 +102,7 @@ public sealed class QuickMove : ILoadable {
         Player player = Main.LocalPlayer;
         ClearDisplayCache();
         UndoMove(player, s_movedItems);
-        s_moveIndex = (s_moveIndex + 1) % (s_moveChain.Count + (Config.returnToSlot ? 1 : 0));
+        s_moveIndex = (s_moveIndex + 1) % (s_moveChain.Count + (Configs.QuickMove.Value.returnToSlot ? 1 : 0));
         player.selectedItem = s_oldSelectedItem;
         s_ignoreHotbar = s_moveKey;
 
@@ -115,7 +112,7 @@ public sealed class QuickMove : ILoadable {
             Slot target = new(s_moveChain[s_moveIndex], targetSlot);
             s_movedItems = Move(player, s_moveSource, target);
             s_moveChain[s_moveIndex].Focus(player, target.Index);
-            s_moveTime = Config.chainTime;
+            s_moveTime = Configs.QuickMove.Value.chainTime;
         } else {
             s_moveSource.Inventory.Focus(player, s_moveSource.Index);
             s_moveTime = 0;
@@ -125,16 +122,16 @@ public sealed class QuickMove : ILoadable {
     }
 
     public static int HotkeyToSlot(int hotkey, int slotCount) => Math.Clamp(
-        Config.hotkeyMode switch {
-            Configs.QuickMove.HotkeyMode.FromEnd => slotCount > 10 ? hotkey : (hotkey - (MoveKeys.Length - slotCount)),
-            Configs.QuickMove.HotkeyMode.Reversed => MoveKeys.Length - hotkey - 1,
-            Configs.QuickMove.HotkeyMode.Default or _ => hotkey
+        Configs.QuickMove.Value.hotkeyMode switch {
+            Configs.HotkeyMode.FromEnd => slotCount > 10 ? hotkey : (hotkey - (MoveKeys.Length - slotCount)),
+            Configs.HotkeyMode.Reversed => MoveKeys.Length - hotkey - 1,
+            Configs.HotkeyMode.Default or _ => hotkey
         }, 0, slotCount - 1
     );
-    public static int SlotToHotkey(int slot, int slotCount) => Config.hotkeyMode switch {
-        Configs.QuickMove.HotkeyMode.FromEnd => slotCount > 10 ? slot : (slot + (MoveKeys.Length - slotCount)),
-        Configs.QuickMove.HotkeyMode.Reversed => MoveKeys.Length - slot - 1,
-        Configs.QuickMove.HotkeyMode.Default or _ => slot
+    public static int SlotToHotkey(int slot, int slotCount) => Configs.QuickMove.Value.hotkeyMode switch {
+        Configs.HotkeyMode.FromEnd => slotCount > 10 ? slot : (slot + (MoveKeys.Length - slotCount)),
+        Configs.HotkeyMode.Reversed => MoveKeys.Length - slot - 1,
+        Configs.HotkeyMode.Default or _ => slot
     };
 
     private static List<MovedItem> Move(Player player, Slot source, Slot target) {
@@ -208,9 +205,9 @@ public sealed class QuickMove : ILoadable {
         cursor.EmitLdarg(4);
         cursor.EmitLdloc2();
         cursor.EmitDelegate((SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, float scale) => {
-            if (!Enabled || Config.displayHotkeys == Configs.QuickMove.HotkeyDisplayMode.Off || Config.displayHotkeys.Value.highlightIntensity == 0) return;
-            if (!IsTargetableSlot(inv, context, slot, out int number, out int key) || (Config.displayHotkeys == Configs.QuickMove.HotkeyDisplayMode.First ? number != 1 : number == 0)) return;
-            spriteBatch.Draw(TextureAssets.InventoryBack18.Value, position, null, Main.OurFavoriteColor * (Config.displayHotkeys.Value.highlightIntensity / number) * Main.cursorAlpha, 0f, default, scale, 0, 0f);
+            if (!Configs.QuickMove.Hightlight) return;
+            if (!IsTargetableSlot(inv, context, slot, out int number, out int key) || (Configs.QuickMove.Value.displayHotkeys == Configs.HotkeyDisplayMode.First ? number != 1 : number == 0)) return;
+            spriteBatch.Draw(TextureAssets.InventoryBack18.Value, position, null, Main.OurFavoriteColor * (Configs.QuickMove.Value.displayHotkeys.Value.highlightIntensity / number) * Main.cursorAlpha, 0f, default, scale, 0, 0f);
         });
         // }
 
@@ -241,8 +238,8 @@ public sealed class QuickMove : ILoadable {
         cursor.EmitLdarg(4);
         cursor.EmitLdloc2();
         cursor.EmitDelegate((SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, float scale) => {
-            if (!Enabled || Config.displayHotkeys == Configs.QuickMove.HotkeyDisplayMode.Off) return;
-            if (!IsTargetableSlot(inv, context, slot, out int number, out int key) || (Config.displayHotkeys == Configs.QuickMove.HotkeyDisplayMode.First ? number != 1 : number == 0)) return;
+            if (!Configs.QuickMove.DisplayHotkeys) return;
+            if (!IsTargetableSlot(inv, context, slot, out int number, out int key) || (Configs.QuickMove.Value.displayHotkeys == Configs.HotkeyDisplayMode.First ? number != 1 : number == 0)) return;
             key = (key + 1) % 10;
             StringBuilder text = new();
             text.Append(key);
@@ -259,7 +256,7 @@ public sealed class QuickMove : ILoadable {
         cursor.GotoNext(MoveType.After, i => i.MatchLdarg3());
 
         cursor.EmitDelegate((int slot) => {
-            if (!Enabled || Config.displayHotkeys == Configs.QuickMove.HotkeyDisplayMode.Off) return slot;
+            if (!Configs.QuickMove.DisplayHotkeys) return slot;
             if (s_moveTime > 0) return 10;
             if (s_hover && s_displayedChain.Count != 0) return 10;
             return slot;
@@ -277,8 +274,8 @@ public sealed class QuickMove : ILoadable {
             return numberInChain > 0 && key != -1;
         }
 
-        if (Config.returnToSlot && s_moveTime > 0 && itemSlot == s_moveSource) {
-            int mod = s_moveChain.Count + (Config.returnToSlot ? 1 : 0);
+        if (Configs.QuickMove.Value.returnToSlot && s_moveTime > 0 && itemSlot == s_moveSource) {
+            int mod = s_moveChain.Count + (Configs.QuickMove.Value.returnToSlot ? 1 : 0);
             numberInChain = (s_moveChain.Count - s_moveIndex + mod) % mod;
             key = s_moveKey;
             s_slotMoveInfo[itemSlot] = (numberInChain, key);
@@ -322,7 +319,7 @@ public sealed class QuickMove : ILoadable {
         if (number < 0) return s_invMoveInfo[inv] = (-1, -1, -1);
 
         number -= offset;
-        if (number < 0) number += chain.Count + (Config.returnToSlot ? 1 : 0);
+        if (number < 0) number += chain.Count + (Configs.QuickMove.Value.returnToSlot ? 1 : 0);
         int count = inv.Items(Main.LocalPlayer).Count;
         return s_invMoveInfo[inv] = (number, count, HotkeyToSlot(s_moveKey, count));
     }

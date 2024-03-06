@@ -25,6 +25,8 @@ Crafting: {
 		Label: "[i:9] Mouse Material"
 		Tooltip: Adds the held item to the available materials
 	}
+
+	Tooltip: ""
 }
 
 FixedUI: {
@@ -51,7 +53,7 @@ FixedUI: {
 	}
 }
 
-RecipeScroll: {
+FastScroll: {
 	Tooltip: ""
 
 	listScroll: {
@@ -165,6 +167,16 @@ SmartConsumption: {
 		Label: Materials
 		Tooltip: Consumes materials from the smallest stack in the inventory
 	}
+
+	baits: {
+		Label: baits
+		Tooltip: ""
+	}
+
+	paints: {
+		Label: paints
+		Tooltip: ""
+	}
 }
 
 SmartPickup: {
@@ -195,7 +207,7 @@ AutoEquipLevel: {
 	AnySlot.Label: Any Slots
 }
 
-StackClick: {
+CraftStack: {
 	Tooltip: ""
 
 	invertClicks: {
@@ -418,6 +430,21 @@ BetterGuide: {
 			The toggle stores 2 independent states: one when the guide item or tile are used, and one when one when none are used.
 			'''
 	}
+
+	craftText: {
+		Label: craft Text
+		Tooltip: ""
+	}
+
+	tile: {
+		Label: tile
+		Tooltip: ""
+	}
+
+	progression: {
+		Label: progression
+		Tooltip: ""
+	}
 }
 
 FavoriteRecipes: {
@@ -427,6 +454,11 @@ FavoriteRecipes: {
 		Label: Unfavorite recipes on Craft
 		Tooltip: Resets the state of recipes when they are crafted
 	}
+
+	unfavoriteOnCraft: {
+		Label: unfavorite On Craft
+		Tooltip: ""
+	}
 }
 
 UnfavoriteOnCraft: {
@@ -435,6 +467,7 @@ UnfavoriteOnCraft: {
 	Favorited.Label: Favorited
 	Blacklisted.Label: Blacklisted
 	Both.Label: Favorited and Blacklisted
+	Off.Label: Off
 }
 
 BetterBestiary: {
@@ -454,21 +487,48 @@ BetterBestiary: {
 		Label: Minimum Displayed Values
 		Tooltip: Forces the minimal displayed stats for discovered entries
 	}
+
+	progression: {
+		Label: progression
+		Tooltip: ""
+	}
 }
 
 UnlockLevel: {
 	Tooltip: ""
-	Unchanged.Label: Unchanged
+	Unchanged.Label: Unchanged (Off)
 	Stats.Label: Detailed Stats
 	Drops.Label: Drops
 	DropRates.Label: Drop Rates
+	Off.Label: Off
+	Name.Label: Name
 }
 
 Compatibility: {
 	DisplayName: Mod Compatibility
 
 	compatibilityMode: {
-		Label: compatibility Mode
+		Label: "[i:509] Compatibility Mode"
+		Tooltip: ""
+	}
+
+	Crafting: {
+		Label: Crafting
+		Tooltip: ""
+	}
+
+	crafting: {
+		Label: crafting
+		Tooltip: ""
+	}
+
+	inventoryManagement: {
+		Label: inventory Management
+		Tooltip: ""
+	}
+
+	itemSearch: {
+		Label: item Search
 		Tooltip: ""
 	}
 }
@@ -515,3 +575,130 @@ ChildValue`2: {
 }
 
 Text.Tooltip: ""
+
+CraftingCompatibility: {
+	Tooltip: ""
+
+	fastScroll: {
+		Label: fast Scroll
+		Tooltip: ""
+	}
+
+	listScroll: {
+		Label: list Scroll
+		Tooltip: ""
+	}
+
+	wrapping: {
+		Label: wrapping
+		Tooltip: ""
+	}
+
+	recipeFiltering: {
+		Label: recipe Filtering
+		Tooltip: ""
+	}
+
+	craftOnList: {
+		Label: craft On List
+		Tooltip: ""
+	}
+}
+
+InventoryManagementCompatibility: {
+	Tooltip: ""
+
+	autoEquip: {
+		Label: auto Equip
+		Tooltip: ""
+	}
+
+	favoriteInBanks: {
+		Label: favorite In Banks
+		Tooltip: ""
+	}
+
+	shiftRight: {
+		Label: shift Right
+		Tooltip: ""
+	}
+
+	stackTrash: {
+		Label: stack Trash
+		Tooltip: ""
+	}
+
+	baits: {
+		Label: baits
+		Tooltip: ""
+	}
+
+	materials: {
+		Label: materials
+		Tooltip: ""
+	}
+
+	smartPickup: {
+		Label: smart Pickup
+		Tooltip: ""
+	}
+
+	marks: {
+		Label: marks
+		Tooltip: ""
+	}
+
+	QuickMoveDisplay: {
+		Label: Quick Move Display
+		Tooltip: ""
+	}
+
+	QuickMoveHightlight: {
+		Label: Quick Move Hightlight
+		Tooltip: ""
+	}
+
+	craftStack: {
+		Label: craft Stack
+		Tooltip: ""
+	}
+}
+
+ItemSearchCompatibility: {
+	Tooltip: ""
+
+	guideFavorite: {
+		Label: guide Favorite
+		Tooltip: ""
+	}
+
+	guideUnfavoriteOnCraft: {
+		Label: guide Unfavorite On Craft
+		Tooltip: ""
+	}
+
+	guideCraftInMenu: {
+		Label: guide Craft In Menu
+		Tooltip: ""
+	}
+
+	guideTile: {
+		Label: guide Tile
+		Tooltip: ""
+	}
+
+	guideProgression: {
+		Label: guide Progression
+		Tooltip: ""
+	}
+
+	bestiaryProgression: {
+		Label: bestiary Progression
+		Tooltip: ""
+	}
+
+	bestiaryDisplayedUnlock: {
+		Label: bestiary Displayed Unlock
+		Tooltip: ""
+	}
+}

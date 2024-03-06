@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using log4net;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -177,6 +178,9 @@ public static class Utility {
     }
 
     public static ReadOnlyDictionary<int, int> OwnedItems => Data.ownedItems;
+
+    public static ILog Logger => BetterInventory.Instance.Logger;
+
 
     public static readonly int[] InventoryContexts = new int[] { ContextID.InventoryItem, ContextID.InventoryAmmo, ContextID.InventoryCoin };
 
