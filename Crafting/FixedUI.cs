@@ -92,8 +92,6 @@ public sealed class FixedUI : ILoadable {
         //     }
         //     ...
         // }
-
-
     }
     internal static void ILListScrollFix(ILContext il) {
         ILCursor cursor = new(il);

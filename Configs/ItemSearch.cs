@@ -24,8 +24,8 @@ public sealed class ItemSearch : ModConfig {
         }
     }
 
-    public static bool SearchRecipes => Instance.searchRecipes;
-    public static bool SearchDrops => Instance.searchDrops;
+    public static bool SearchRecipes => Instance.searchRecipes && !Hooks.UnloadedItemSearch.searchRecipes;
+    public static bool SearchDrops => Instance.searchDrops && !Hooks.UnloadedItemSearch.searchDrops;
     public static bool SearchItems => SearchRecipes || SearchDrops;
     public static bool SearchHistory => Instance.searchHistory;
     public static ItemSearch Instance = null!;
@@ -47,12 +47,12 @@ public class BetterGuide {
     [DefaultValue(true)] public bool progression = true;
 
     public static bool Enabled => ItemSearch.Instance.betterGuide;
-    public static bool AnyItem => Enabled && Value.anyItem;
+    public static bool AnyItem => Enabled && Value.anyItem && !Hooks.UnloadedItemSearch.guideAnyItem;
     public static bool CraftText => Enabled && Value.craftText;
-    public static bool FavoriteRecipes => Enabled && Value.favoriteRecipes && !Compatibility.ItemSearch.guideFavorite;
-    public static bool CraftInMenu => Enabled && Value.craftInMenu && !Compatibility.ItemSearch.guideCraftInMenu;
+    public static bool FavoriteRecipes => Enabled && Value.favoriteRecipes && !Hooks.UnloadedItemSearch.guideFavorite;
+    public static bool CraftInMenu => Enabled && Value.craftInMenu && !Hooks.UnloadedItemSearch.guideCraftInMenu;
     public static bool Tile => Enabled && Value.tile;
-    public static bool Progression => Enabled && Value.progression && !Compatibility.ItemSearch.guideProgression;
+    public static bool Progression => Enabled && Value.progression && !Hooks.UnloadedItemSearch.guideProgression;
     public static bool AvailablesRecipes => FavoriteRecipes || CraftInMenu || Progression;
     
     public static BetterGuide Value => ItemSearch.Instance.betterGuide.Value;
@@ -61,7 +61,7 @@ public class BetterGuide {
 public class FavoriteRecipes {
     [DefaultValue(Configs.UnfavoriteOnCraft.Favorited)] public UnfavoriteOnCraft unfavoriteOnCraft = Configs.UnfavoriteOnCraft.Favorited;
 
-    public static bool UnfavoriteOnCraft => BetterGuide.FavoriteRecipes && Value.unfavoriteOnCraft != Configs.UnfavoriteOnCraft.Off && !Compatibility.ItemSearch.guideUnfavoriteOnCraft;
+    public static bool UnfavoriteOnCraft => BetterGuide.FavoriteRecipes && Value.unfavoriteOnCraft != Configs.UnfavoriteOnCraft.Off && !Hooks.UnloadedItemSearch.guideUnfavoriteOnCraft;
 
     public static FavoriteRecipes Value => BetterGuide.Value.favoriteRecipes.Value;
 }
@@ -75,10 +75,11 @@ public class BetterBestiary {
     [DefaultValue(true)] public bool progression = true;
 
     public static bool Enabled => ItemSearch.Instance.betterBestiary;
-    public static bool DisplayedUnlock => Enabled && Value.displayedUnlock != UnlockLevel.Off && !Compatibility.ItemSearch.bestiaryDisplayedUnlock;
+    public static bool DisplayedUnlock => Enabled && Value.displayedUnlock != UnlockLevel.Off && !Hooks.UnloadedItemSearch.bestiaryDisplayedUnlock;
     public static bool ShowBagContent => Enabled && Value.showBagContent;
     public static bool UnlockFilter => Enabled && Value.unlockFilter;
-    public static bool Progression => Enabled && Value.progression && !Compatibility.ItemSearch.bestiaryProgression;
+    public static bool Progression => Enabled && Value.progression && !Hooks.UnloadedItemSearch.bestiaryProgression;
+    public static bool Unlock => Progression || DisplayedUnlock;
     public static BetterBestiary Value => ItemSearch.Instance.betterBestiary.Value;
 }
 

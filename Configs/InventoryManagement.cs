@@ -17,10 +17,11 @@ public sealed class InventoryManagement : ModConfig {
     [DefaultValue(true)] public bool shiftRight;
     [DefaultValue(true)] public bool stackTrash;
 
-    public static bool AutoEquip => !Compatibility.InventoryManagement.autoEquip && Instance.autoEquip != AutoEquipLevel.Off;
-    public static bool FavoriteInBanks => !Compatibility.InventoryManagement.favoriteInBanks && Instance.favoriteInBanks;
-    public static bool ShiftRight => !Compatibility.InventoryManagement.shiftRight && Instance.shiftRight;
-    public static bool StackTrash => !Compatibility.InventoryManagement.stackTrash && Instance.stackTrash;
+    public static bool AutoEquip => !Hooks.UnloadedInventoryManagement.autoEquip && Instance.autoEquip != AutoEquipLevel.Off;
+    public static bool FavoriteInBanks => !Hooks.UnloadedInventoryManagement.favoriteInBanks && Instance.favoriteInBanks;
+    public static bool ShiftRight => !Hooks.UnloadedInventoryManagement.shiftRight && Instance.shiftRight;
+    public static bool ClickOverrides => ShiftRight || CraftStack.Enabled;
+    public static bool StackTrash => !Hooks.UnloadedInventoryManagement.stackTrash && Instance.stackTrash;
 
     public override void OnChanged() {
         Reflection.ItemSlot.canFavoriteAt.GetValue()[ItemSlot.Context.BankItem] = favoriteInBanks;
@@ -43,9 +44,9 @@ public sealed class SmartConsumption {
 
     public static bool Consumables => InventoryManagement.Instance.smartConsumption && InventoryManagement.Instance.smartConsumption.Value.consumables;
     public static bool Ammo => InventoryManagement.Instance.smartConsumption && InventoryManagement.Instance.smartConsumption.Value.ammo;
-    public static bool Baits => InventoryManagement.Instance.smartConsumption && InventoryManagement.Instance.smartConsumption.Value.baits && !Compatibility.InventoryManagement.baits;
+    public static bool Baits => InventoryManagement.Instance.smartConsumption && InventoryManagement.Instance.smartConsumption.Value.baits && !Hooks.UnloadedInventoryManagement.baits;
     public static bool Paints => InventoryManagement.Instance.smartConsumption && InventoryManagement.Instance.smartConsumption.Value.paints;
-    public static bool Materials => InventoryManagement.Instance.smartConsumption && InventoryManagement.Instance.smartConsumption.Value.materials && !Compatibility.InventoryManagement.materials;
+    public static bool Materials => InventoryManagement.Instance.smartConsumption && InventoryManagement.Instance.smartConsumption.Value.materials && !Hooks.UnloadedInventoryManagement.materials;
 }
 
 public sealed class SmartPickup {
@@ -53,9 +54,9 @@ public sealed class SmartPickup {
     [DefaultValue(true)] public bool mediumCore = true;
     [DefaultValue(0.33f)] public float markIntensity = 0.33f;
 
-    public static bool Enabled(bool favorited = true) => !Compatibility.InventoryManagement.smartPickup && InventoryManagement.Instance.smartPickup.Parent >= (favorited ? SmartPickupLevel.FavoriteOnly : SmartPickupLevel.AllItems);
+    public static bool Enabled(bool favorited = true) => !Hooks.UnloadedInventoryManagement.smartPickup && InventoryManagement.Instance.smartPickup.Parent >= (favorited ? SmartPickupLevel.FavoriteOnly : SmartPickupLevel.AllItems);
     public static bool MediumCore => Enabled() && Value.mediumCore;
-    public static bool Marks => Enabled() && Value.markIntensity != 0 && !Compatibility.InventoryManagement.marks;
+    public static bool Marks => Enabled() && Value.markIntensity != 0 && !Hooks.UnloadedInventoryManagement.marks;
     public static SmartPickup Value => InventoryManagement.Instance.smartPickup.Value;
 }
 
@@ -68,8 +69,8 @@ public sealed class QuickMove {
     public ChildValue<HotkeyDisplayMode, HotkeyDisplay> displayHotkeys = new(HotkeyDisplayMode.All);
 
     public static bool Enabled => InventoryManagement.Instance.quickMove;
-    public static bool DisplayHotkeys => Value.displayHotkeys != HotkeyDisplayMode.Off && !Compatibility.InventoryManagement.QuickMoveDisplay;
-    public static bool Hightlight => DisplayHotkeys && Value.displayHotkeys.Value.highlightIntensity != 0 && !Compatibility.InventoryManagement.QuickMoveHightlight;
+    public static bool DisplayHotkeys => Value.displayHotkeys != HotkeyDisplayMode.Off && !Hooks.UnloadedInventoryManagement.quickMoveDisplay;
+    public static bool Hightlight => DisplayHotkeys && Value.displayHotkeys.Value.highlightIntensity != 0 && !Hooks.UnloadedInventoryManagement.quickMoveHightlight;
     public static QuickMove Value => InventoryManagement.Instance.quickMove.Value;
 }
 
@@ -86,6 +87,6 @@ public sealed class CraftStack {
     [DefaultValue(false)] public bool invertClicks = false;
     [Range(1, 9999), DefaultValue(9999)] public int maxAmount = 9999;
 
-    public static bool Enabled => !Compatibility.InventoryManagement.craftStack && InventoryManagement.Instance.craftStack;
+    public static bool Enabled => !Hooks.UnloadedInventoryManagement.craftStack && InventoryManagement.Instance.craftStack;
     public static CraftStack Value => InventoryManagement.Instance.craftStack.Value;
 }

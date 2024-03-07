@@ -218,7 +218,6 @@ public sealed class Guide : ModSystem {
     internal static void ILCustomDrawCreateItem(ILContext il) {
         ILCursor cursor = new(il);
 
-        // ----- Recipes createItem background and ??? -----
         //     for (<recipeIndex>) {
         //         ...
         //         if(<visible>) {
@@ -251,13 +250,11 @@ public sealed class Guide : ModSystem {
     internal static void ILCustomDrawMaterials(ILContext il) {
         ILCursor cursor = new(il);
 
-        // ----- recipes materials ??? -----
         //     if (++<known> && Main.numAvailableRecipes > 0) {
         cursor.GotoNext(i => i.MatchStsfld(Reflection.UILinkPointNavigator.CRAFT_CurrentIngredientsCount));
         cursor.GotoPrev(MoveType.After, i => i.MatchLdsfld(Reflection.Main.numAvailableRecipes));
         cursor.EmitDelegate((int num) => num == 0 || Configs.BetterGuide.Progression && IsUnknown(Main.availableRecipe[Main.focusRecipe]) ? 0 : num);
 
-        // ----- Recipe requiredItems background -----
         //         for (<focusRecipeMaterialIndex>) {
         //             ...
         //             Item tempItem = ...;
@@ -434,7 +431,7 @@ public sealed class Guide : ModSystem {
         // });
 
         cursor.GotoPrev(MoveType.After, i => i.MatchRet());
-        cursor.MarkLabel(skipGuide);
+        cursor.MarkLabel(skipGuide); // TODO test if thrown early
     }
     internal static void ILUpdateOwnedItems(ILContext il) {
         ILCursor cursor = new(il);
@@ -469,8 +466,8 @@ public sealed class Guide : ModSystem {
         s_collectingGuide = false;
 
     }
-    internal static void ILOverrideGuideRecipes(ILContext il) {
-        ILCursor cursor = new(il);
+
+    private static ILLabel GotoRecipeDisabled(ILCursor cursor) {
         ILLabel? endLoop = null;
 
         // for (<recipeIndex>) {
@@ -479,7 +476,13 @@ public sealed class Guide : ModSystem {
         cursor.GotoNext(i => i.MatchCallvirt(Reflection.Recipe.Disabled.GetMethod!));
         cursor.GotoNext(i => i.MatchBrtrue(out endLoop));
         cursor.GotoNext(MoveType.AfterLabel);
+        return endLoop!;
+    }
+    internal static void ILMoreGuideRecipes(ILContext il) {
+        ILCursor cursor = new(il);
 
+        ILLabel endLoop = GotoRecipeDisabled(cursor);
+        
         //     ++ if(<extraRecipe>) {
         //     ++     <addRecipe>
         //     ++     continue;
@@ -492,15 +495,20 @@ public sealed class Guide : ModSystem {
             }
             return false;
         });
-        cursor.EmitBrtrue(endLoop!);
+        cursor.EmitBrtrue(endLoop);
+    }
+    internal static void ILForceAddToAvailable(ILContext il) {
+        ILCursor cursor = new(il);
 
+        ILLabel endLoop = GotoRecipeDisabled(cursor);
+        
         //     for(<material>) {
         cursor.GotoNext(MoveType.AfterLabel, i => i.MatchLdsfld(Reflection.Main.availableRecipe));
 
         //         if(<recipeOk> ++[&& !custom]) {
         cursor.EmitLdloc1();
         cursor.EmitDelegate((int r) => {
-            if (!(Configs.BetterGuide.Enabled || Configs.RecipeFiltering.Enabled)) return false;
+        if (!(Configs.BetterGuide.AvailablesRecipes || Configs.BetterGuide.Tile || Configs.RecipeFiltering.Enabled)) return false;
             Reflection.Recipe.AddToAvailableRecipes.Invoke(r);
             return true;
         });
@@ -510,6 +518,13 @@ public sealed class Guide : ModSystem {
         //             Main.numAvailableRecipes++;
         //             break;
         //         }
+        //     }
+        // }
+    }
+    internal static void ILGuideRecipeOrder(ILContext il) {
+        ILCursor cursor = new(il);
+
+        ILLabel endLoop = GotoRecipeDisabled(cursor);
         cursor.GotoLabel(endLoop!);
         cursor.GotoNext(i => i.MatchStloc1());
         cursor.GotoNext(MoveType.After, i => i.MatchLdloc1());
@@ -619,7 +634,7 @@ public sealed class Guide : ModSystem {
         // ++ skip:
         cursor.GotoNext(i => i.MatchStsfld(Reflection.Main.craftingHide));
         cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdcI4(1));
-        cursor.MarkLabel(skip);
+        cursor.MarkLabel(skip); // TODO test if thrown on prev goto (before the line)
         
         // Main.craftingHide = true;
     }

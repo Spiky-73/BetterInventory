@@ -27,11 +27,8 @@ public sealed class Text {
     internal static void ILTextColors(ILContext il) {
         ILCursor cursor = new(il);
 
-        if(!cursor.TryGotoNext(i => i.MatchCall(typeof(ChatManager), nameof(ChatManager.DrawColorCodedStringWithShadow)))
-                || !cursor.TryGotoPrev(MoveType.After, i => i.MatchLdloc3())) {
-            Utility.Logger.Error($"{nameof(ILTextColors)} failled to load");
-            return;
-        }
+        cursor.GotoNext(i => i.MatchCall(typeof(ChatManager), nameof(ChatManager.DrawColorCodedStringWithShadow)));
+        cursor.GotoPrev(MoveType.After, i => i.MatchLdloc3());
         cursor.EmitLdarg0();
         cursor.EmitDelegate((Color color, ConfigElement self) => {
             if (self is not TextElement textElem) return color;

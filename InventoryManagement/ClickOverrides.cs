@@ -113,7 +113,7 @@ public sealed class ClickOverrides : ILoadable {
     }
 
 
-    internal static void ILCraftCursorOverride(ILContext context) {
+    internal static void ILShiftRightCursorOverride(ILContext context) {
         ILCursor cursor = new(context);
 
         // if (Main.focusRecipe == recipeIndex && ++[Main.guideItem.IsAir || <allowCraft>]) {
@@ -206,7 +206,7 @@ public sealed class ClickOverrides : ILoadable {
         cursor.EmitLdarg0();
         cursor.EmitLdloc0();
         cursor.EmitDelegate((Recipe r, Item crafted) => {
-            if (s_ilCraftMultiplier != 1) {
+            if (Configs.CraftStack.Enabled && s_ilCraftMultiplier != 1) {
                 r.createItem.stack /= s_ilCraftMultiplier;
                 foreach (Item i in r.requiredItem) i.stack /= s_ilCraftMultiplier;
             }
@@ -226,7 +226,7 @@ public sealed class ClickOverrides : ILoadable {
 
         cursor.GotoNext(i => i.MatchCall(typeof(PopupText), nameof(PopupText.NewText)));
         cursor.GotoPrev(MoveType.After, i => i.MatchLdfld(Reflection.Item.stack));
-        cursor.EmitDelegate((int stack) => stack * s_ilCraftMultiplier);
+        cursor.EmitDelegate((int stack) => Configs.CraftStack.Enabled ? (stack * s_ilCraftMultiplier) : stack);
         // PopupText.NewText(...);
         // ...
     }
@@ -284,7 +284,7 @@ public sealed class ClickOverrides : ILoadable {
     }
 
 
-    internal static void ILKeepFavoriteInChest(ILContext il) {
+    internal static void ILKeepFavoriteInBanks(ILContext il) {
         ILCursor cursor = new(il);
         cursor.GotoNext(i => i.MatchStfld(Reflection.Item.favorited));
         cursor.EmitLdarg0();

@@ -19,7 +19,7 @@ public sealed class Crafting : ILoadable {
         //         ...
         //         if (<mouseHover>) {
         //             Main.player[Main.myPlayer].mouseInterface = true;
-        cursor.GotoNext(i => i.MatchCall(Reflection.Main.LockCraftingForThisCraftClickDuration));
+        cursor.GotoNext(i => i.MatchCall(Reflection.Main.LockCraftingForThisCraftClickDuration)); // BUG Better Game UI
         cursor.GotoPrev(MoveType.After, i => i.MatchStfld(Reflection.Player.mouseInterface));
 
         ILLabel? skipVanillaHover = null;
