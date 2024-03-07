@@ -1,6 +1,7 @@
-Download: Thank you for downloading Better Inventory! Make sure to view and edit the configs before playing
-Update: Better Inventory was updated to v{$Mods.BetterInventory.Chat.Version}! View the {$Mods.BetterInventory.Configs.Version.DisplayName} config to learn more about the update
+Download: Thank you for downloading {$Mods.BetterInventory.Chat.ModName}! Make sure to view and edit the configs before playing
+Update: "{$Mods.BetterInventory.Chat.ModName} was updated to v{$Mods.BetterInventory.Chat.Version}! View the {$Mods.BetterInventory.Configs.Version.DisplayName} config to learn more about the update"
 Bug: This mod is still in development. If you found a bug, please report it on the {$Mods.BetterInventory.Chat.Workshop} or the {$Mods.BetterInventory.Chat.Homepage}
+ModName: Better Inventory
 Homepage: homepage
 Workshop: Steam Workshop page
 Version: "0.5"

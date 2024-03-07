@@ -89,7 +89,7 @@ InventoryManagement: {
 	DisplayName: Inventory Management
 
 	smartConsumption: {
-		Label: "[i:040] Smart item consumption"
+		Label: "[i:40] Smart item consumption"
 		Tooltip: Consumes items from a different stack to reduce changes in the selected item
 	}
 
@@ -98,19 +98,18 @@ InventoryManagement: {
 		Tooltip:
 			'''
 			Items go their previous slot in your inventory when picked up
-			{$Mods.BetterInventory.Configs.SmartPickupLevel.FavoriteOnly.Label}: Applies to Favorited items only
-			{$Mods.BetterInventory.Configs.SmartPickupLevel.AllItems.Label}: Applies to all items
+			{$Mods.BetterInventory.Configs.SmartPickupLevel.FavoriteOnly.Label}: Favorited items only
+			{$Mods.BetterInventory.Configs.SmartPickupLevel.AllItems.Label}: All items
 			'''
 	}
 
 	autoEquip: {
-		Label: "[i:83] {$Mods.BetterInventory.Configs.InventoryManagement.autoEquip.Name}"
-		Name: Auto Equip Items
+		Label: "[i:83] Auto Equip Items"
 		Tooltip:
 			'''
 			Automatically equips items such as Armors, Accessories or Equipment
 			{$Mods.BetterInventory.Configs.AutoEquipLevel.DefaultSlots.Label}: Equipment go to their default slots if available
-			{$Mods.BetterInventory.Configs.AutoEquipLevel.AnySlot.Label}: Equipment go to any slot they can go in. Includes Dyes. Armors and Accessories can go to social slots.
+			{$Mods.BetterInventory.Configs.AutoEquipLevel.AnySlot.Label}: Equipment go to any slot they can go in (includes Dyes). Armors and Accessories can go to social slots.
 			'''
 	}
 
@@ -135,7 +134,8 @@ InventoryManagement: {
 	}
 
 	shiftRight: {
-		Label: "[i:48] Shift Right Click"
+		Name: Shift Right Click
+		Label: "[i:48] {$Mods.BetterInventory.Configs.InventoryManagement.shiftRight.Name}"
 		Tooltip: Allows you to Shift or Control Right Click to transfer one item
 	}
 
@@ -145,7 +145,7 @@ InventoryManagement: {
 			'''
 			Items sold multiple times will stack a single one slot
 			Items trashed multiple in a row times will stack instead of replacing the old one
-			Highly recommended with "{$Mods.BetterInventory.Configs.InventoryManagement.shiftRight.Label}"
+			Highly recommended with "{$Mods.BetterInventory.Configs.InventoryManagement.shiftRight.Name}"
 			'''
 	}
 }
@@ -160,7 +160,7 @@ SmartConsumption: {
 
 	ammo: {
 		Label: Ammunition
-		Tooltip: Consumes ammo (arrows, baits, paints, ...) from the last stack in the inventory. Doesn't affect the selected ammo
+		Tooltip: Consumes ammo from the last selected stack in the inventory. Doesn't affect the selected ammo
 	}
 
 	materials: {
@@ -169,13 +169,13 @@ SmartConsumption: {
 	}
 
 	baits: {
-		Label: baits
-		Tooltip: ""
+		Label: Baits
+		Tooltip: Consumes baits from the last selected stack in the inventory. Doesn't affect the selected ammo
 	}
 
 	paints: {
-		Label: paints
-		Tooltip: ""
+		Label: Paints
+		Tooltip: Consumes paints from the last selected stack in the inventory. Doesn't affect the selected ammo
 	}
 }
 
@@ -255,13 +255,13 @@ QuickMove: {
 		Tooltip:
 			'''
 			Displays hotkeys on the slots where an item can be moved to
-			{$Mods.BetterInventory.Configs.HotkeyDisplayMode.First.Label}: Displays the hotkeys of the next context in the chain
-			{$Mods.BetterInventory.Configs.HotkeyDisplayMode.All.Label}: Displays the hotkey of the all contexts in the chain
+			{$Mods.BetterInventory.Configs.HotkeyDisplayMode.First.Label}: Next context in the chain
+			{$Mods.BetterInventory.Configs.HotkeyDisplayMode.All.Label}: All contexts in the chain
 			'''
 	}
 }
 
-HotkeyDisplay: {
+DisplayedHotkeys: {
 	Tooltip: ""
 
 	highlightIntensity: {
@@ -325,33 +325,33 @@ ItemSearch: {
 	DisplayName: Item Search
 
 	betterGuide: {
-		Label: "[i:267] {$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Name}"
 		Name: Better Guide
+		Label: "[i:267] {$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Name}"
 		Tooltip: Improves various aspects of the Guide
 	}
 
 	betterBestiary: {
-		Label: "[i:4767] {$Mods.BetterInventory.Configs.ItemSearch.betterBestiary.Name}"
 		Name: Better Bestiary
+		Label: "[i:4767] {$Mods.BetterInventory.Configs.ItemSearch.betterBestiary.Name}"
 		Tooltip: Improves various aspects of the Bestiary
 	}
 
 	searchRecipes: {
-		Label: "[i:3549] {$Mods.BetterInventory.Configs.ItemSearch.searchRecipes.Name}"
 		Name: Search Recipes
+		Label: "[i:3549] {$Mods.BetterInventory.Configs.ItemSearch.searchRecipes.Name}"
 		Tooltip:
 			'''
 			Allows you to access the guide anywhere
 			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Left Click an item to search its recipe
 			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Middle Click in the inventory to clear the searched item
-			With {$Mods.BetterInventory.Configs.BetterGuide.guideTile.Label} On, searching the guide tile will move it into the guide item and vice-versa
+			With "{$Mods.BetterInventory.Configs.BetterGuide.tile.Label}" On, searching the guide tile will move it into the guide item and vice-versa
 			Right Click the Guide item to clear it
 			'''
 	}
 
 	searchDrops: {
-		Label: "[i:2903] {$Mods.BetterInventory.Configs.ItemSearch.searchDrops.Name}"
 		Name: Search Drops
+		Label: "[i:2903] {$Mods.BetterInventory.Configs.ItemSearch.searchDrops.Name}"
 		Tooltip:
 			'''
 			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Right Click an item to search its drops
@@ -370,11 +370,12 @@ ItemSearch: {
 	}
 
 	unknownDisplay: {
-		Label: "[i:236] Unknown Recipe or NPCs display"
+		Name: Unknown Entity Display
+		Label: "[i:236] {$Mods.BetterInventory.Configs.ItemSearch.unknownDisplay.Name}"
 		Tooltip:
 			'''
 			Changes how Recipes and NPCs you have not discovered are displayed in the Recipe list and Bestiary
-			Requires "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Name}" and "{$Mods.BetterInventory.Configs.ItemSearch.betterBestiary.Name}" respectively to be On
+			Requires "{$Mods.BetterInventory.Configs.BetterGuide.progression.Label}" in "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Name}" and "{$Mods.BetterInventory.Configs.ItemSearch.betterBestiary.Name}" respectively to be On
 			{$Mods.BetterInventory.Configs.UnknownDisplay.Hidden.Label}: Not displayed
 			{$Mods.BetterInventory.Configs.UnknownDisplay.Unknown.Label}: Displayed as '?'
 			{$Mods.BetterInventory.Configs.UnknownDisplay.Known.Label}: Displayed as discovered.
@@ -382,8 +383,8 @@ ItemSearch: {
 	}
 
 	SearchItemKeybind: {
-		Label: "[i:487] {$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}"
 		Name: Search Item
+		Label: "[i:487] {$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}"
 		Tooltip:
 			'''
 			Tap this key to close the current menu or open the Recipe list
@@ -395,7 +396,7 @@ ItemSearch: {
 UnknownDisplay: {
 	Tooltip: ""
 	Hidden.Label: Hidden
-	Unknown.Label: Unknown
+	Unknown.Label: "{$Mods.BetterInventory.UI.Unknown}"
 	Known.Label: Known
 }
 
@@ -412,11 +413,11 @@ BetterGuide: {
 		Tooltip: Allows you to favorite or blacklist recipes
 	}
 
-	guideTile: {
+	tile: {
 		Label: Guide Tile
 		Tooltip:
 			'''
-			Adds a second slot next to the guide item to filter by crafting station or conditions
+			Adds a second slot next to the guide item to filter by crafting station or condition
 			Click it when empty to filter by created By Hand
 			'''
 	}
@@ -432,32 +433,22 @@ BetterGuide: {
 	}
 
 	craftText: {
-		Label: craft Text
-		Tooltip: ""
-	}
-
-	tile: {
-		Label: tile
-		Tooltip: ""
+		Label: Craft Tiles and Conditions
+		Tooltip: Improves the way crafting station and conditions are displayed
 	}
 
 	progression: {
-		Label: progression
-		Tooltip: ""
+		Label: Recipe Progression
+		Tooltip: Hides Unknown recipes accoring to "{$Mods.BetterInventory.Configs.ItemSearch.unknownDisplay.Name}"
 	}
 }
 
 FavoriteRecipes: {
 	Tooltip: ""
 
-	unfavorite: {
-		Label: Unfavorite recipes on Craft
-		Tooltip: Resets the state of recipes when they are crafted
-	}
-
 	unfavoriteOnCraft: {
-		Label: unfavorite On Craft
-		Tooltip: ""
+		Label: Unfavorite Recipes on Craft
+		Tooltip: Resets the state of recipes when they are crafted
 	}
 }
 
@@ -484,13 +475,21 @@ BetterBestiary: {
 	}
 
 	displayedUnlock: {
-		Label: Minimum Displayed Values
-		Tooltip: Forces the minimal displayed stats for discovered entries
+		Label: Minimum Displayed Info
+		Tooltip:
+			'''
+			Forces the minimal displayed information for discovered entries
+			{$Mods.BetterInventory.UI.NoBestiaryEffect}
+			'''
 	}
 
 	progression: {
-		Label: progression
-		Tooltip: ""
+		Label: NPC Progression
+		Tooltip:
+			'''
+			Hides Unknown NPC accoring to "{$Mods.BetterInventory.Configs.ItemSearch.unknownDisplay.Name}"
+			{$Mods.BetterInventory.UI.NoBestiaryEffect}
+			'''
 	}
 }
 
@@ -508,27 +507,182 @@ Compatibility: {
 	DisplayName: Mod Compatibility
 
 	compatibilityMode: {
-		Label: "[i:509] Compatibility Mode"
+		Name: Compatibility Mode
+		Label: "[i:509] {$Mods.BetterInventory.Configs.Compatibility.compatibilityMode.Name}"
+		Tooltip:
+			'''
+			Disabled features will not be loaded and will have no effect even when Enabled
+			Enable this if {$Mods.BetterInventory.Chat.ModName} fails to load or causes crashes when loading other mods
+
+			If you are is this situation:
+			1) Enable "{$Mods.BetterInventory.Configs.Compatibility.compatibilityMode.Name}" and initialize "{$Mods.BetterInventory.Configs.Compatibility.disableAll.Name}"
+			2) Reload
+			3) Re-enable a feature and Reload. If the loading fails, disable it
+			4) Repeat step 3 with every features you want to enable
+
+			Also, please report the mods you had and the features you had to disable on the {$Mods.BetterInventory.Chat.Workshop} or the {$Mods.BetterInventory.Chat.Homepage}
+			'''
+	}
+
+	DisableAll: {
+		Name: Disable All
+		Label: "[i:348] {$Mods.BetterInventory.Configs.Compatibility.disableAll.Name}"
+		Tooltip:
+			'''
+			Disables every feature that could cause a crash when loaded
+			[c/ff0000:This action cannot be undone, you will have to re-enable the features manually. Use carefully]
+			'''
+	}
+
+	UnloadedCrafting: {
+		Label: "[i:398] Unloaded {$Mods.BetterInventory.Configs.Crafting.DisplayName} Features"
+		Tooltip: The following features were not loaded and will have no effect even when Enabled
+	}
+
+	UnloadedInventoryManagement: {
+		Label: "[i:5075] Unloaded {$Mods.BetterInventory.Configs.InventoryManagement.DisplayName} Features"
+		Tooltip: "{$Mods.BetterInventory.Configs.Compatibility.unloadedCrafting.Tooltip}"
+	}
+
+	UnloadedItemSearch: {
+		Label: "[i:487] Unloaded {$Mods.BetterInventory.Configs.ItemSearch.DisplayName} Features"
+		Tooltip: "{$Mods.BetterInventory.Configs.Compatibility.unloadedCrafting.Tooltip}"
+	}
+}
+
+UnloadedCrafting: {
+	Tooltip: ""
+
+	fastScroll: {
+		Label: "{$Mods.BetterInventory.Configs.Crafting.fixedUI.Label} @ {$Mods.BetterInventory.Configs.FixedUI.fastScroll.Label}"
 		Tooltip: ""
 	}
 
-	Crafting: {
-		Label: Crafting
+	listScroll: {
+		Label: "{$Mods.BetterInventory.Configs.Crafting.fixedUI.Label} @ {$Mods.BetterInventory.Configs.FixedUI.listScroll.Label}"
 		Tooltip: ""
 	}
 
-	crafting: {
-		Label: crafting
+	wrapping: {
+		Label: "{$Mods.BetterInventory.Configs.Crafting.fixedUI.Label} @ {$Mods.BetterInventory.Configs.FixedUI.wrapping.Label}"
 		Tooltip: ""
 	}
 
-	inventoryManagement: {
-		Label: inventory Management
+	recipeFiltering: {
+		Label: "{$Mods.BetterInventory.Configs.Crafting.recipeFiltering.Label}"
 		Tooltip: ""
 	}
 
-	itemSearch: {
-		Label: item Search
+	craftOnList: {
+		Label: "{$Mods.BetterInventory.Configs.Crafting.craftOnList.Label}"
+		Tooltip: ""
+	}
+}
+
+UnloadedInventoryManagement: {
+	Tooltip: ""
+
+	autoEquip: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.autoEquip.Label}"
+		Tooltip: ""
+	}
+
+	favoriteInBanks: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.favoriteInBanks.Label}"
+		Tooltip: ""
+	}
+
+	shiftRight: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.shiftRight.Label}"
+		Tooltip: ""
+	}
+
+	stackTrash: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.stackTrash.Label}"
+		Tooltip: ""
+	}
+
+	baits: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartConsumption.Label} @ {$Mods.BetterInventory.Configs.SmartConsumption.baits.Label}"
+		Tooltip: ""
+	}
+
+	materials: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartConsumption.Label} @ {$Mods.BetterInventory.Configs.SmartConsumption.materials.Label}"
+		Tooltip: ""
+	}
+
+	smartPickup: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label}"
+		Tooltip: ""
+	}
+
+	marks: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ {$Mods.BetterInventory.Configs.SmartPickup.markIntensity.Label}"
+		Tooltip: ""
+	}
+
+	quickMoveHotkeys: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.quickMove.Label} @ {$Mods.BetterInventory.Configs.QuickMove.displayHotkeys.Label}"
+		Tooltip: ""
+	}
+
+	quickMoveHightlight: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.quickMove.Label} @ {$Mods.BetterInventory.Configs.QuickMove.displayHotkeys.Label} @ {$Mods.BetterInventory.Configs.DisplayedHotkeys.highlightIntensity.Label}"
+		Tooltip: ""
+	}
+
+	craftStack: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.craftStack.Label}"
+		Tooltip: ""
+	}
+}
+
+UnloadedItemSearch: {
+	Tooltip: ""
+
+	searchRecipes: {
+		Label: "{$Mods.BetterInventory.Configs.ItemSearch.searchRecipes.Label}"
+		Tooltip: ""
+	}
+
+	searchDrops: {
+		Label: "{$Mods.BetterInventory.Configs.ItemSearch.searchDrops.Label}"
+		Tooltip: ""
+	}
+
+	guideAnyItem: {
+		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.anyItem.Label}"
+		Tooltip: ""
+	}
+
+	guideFavorite: {
+		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.favoriteRecipes.Label}"
+		Tooltip: ""
+	}
+
+	guideUnfavoriteOnCraft: {
+		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.favoriteRecipes.Label} @ {$Mods.BetterInventory.Configs.FavoriteRecipes.unfavoriteOnCraft.Label}"
+		Tooltip: ""
+	}
+
+	guideCraftInMenu: {
+		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.craftInMenu.Label}"
+		Tooltip: ""
+	}
+
+	guideProgression: {
+		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.progression.Label}"
+		Tooltip: ""
+	}
+
+	bestiaryProgression: {
+		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterBestiary.Label} @ {$Mods.BetterInventory.Configs.BetterBestiary.progression.Label}"
+		Tooltip: ""
+	}
+
+	bestiaryDisplayedUnlock: {
+		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterBestiary.Label} @ {$Mods.BetterInventory.Configs.BetterBestiary.displayedUnlock.Label}"
 		Tooltip: ""
 	}
 }
@@ -575,130 +729,3 @@ ChildValue`2: {
 }
 
 Text.Tooltip: ""
-
-CraftingCompatibility: {
-	Tooltip: ""
-
-	fastScroll: {
-		Label: fast Scroll
-		Tooltip: ""
-	}
-
-	listScroll: {
-		Label: list Scroll
-		Tooltip: ""
-	}
-
-	wrapping: {
-		Label: wrapping
-		Tooltip: ""
-	}
-
-	recipeFiltering: {
-		Label: recipe Filtering
-		Tooltip: ""
-	}
-
-	craftOnList: {
-		Label: craft On List
-		Tooltip: ""
-	}
-}
-
-InventoryManagementCompatibility: {
-	Tooltip: ""
-
-	autoEquip: {
-		Label: auto Equip
-		Tooltip: ""
-	}
-
-	favoriteInBanks: {
-		Label: favorite In Banks
-		Tooltip: ""
-	}
-
-	shiftRight: {
-		Label: shift Right
-		Tooltip: ""
-	}
-
-	stackTrash: {
-		Label: stack Trash
-		Tooltip: ""
-	}
-
-	baits: {
-		Label: baits
-		Tooltip: ""
-	}
-
-	materials: {
-		Label: materials
-		Tooltip: ""
-	}
-
-	smartPickup: {
-		Label: smart Pickup
-		Tooltip: ""
-	}
-
-	marks: {
-		Label: marks
-		Tooltip: ""
-	}
-
-	QuickMoveDisplay: {
-		Label: Quick Move Display
-		Tooltip: ""
-	}
-
-	QuickMoveHightlight: {
-		Label: Quick Move Hightlight
-		Tooltip: ""
-	}
-
-	craftStack: {
-		Label: craft Stack
-		Tooltip: ""
-	}
-}
-
-ItemSearchCompatibility: {
-	Tooltip: ""
-
-	guideFavorite: {
-		Label: guide Favorite
-		Tooltip: ""
-	}
-
-	guideUnfavoriteOnCraft: {
-		Label: guide Unfavorite On Craft
-		Tooltip: ""
-	}
-
-	guideCraftInMenu: {
-		Label: guide Craft In Menu
-		Tooltip: ""
-	}
-
-	guideTile: {
-		Label: guide Tile
-		Tooltip: ""
-	}
-
-	guideProgression: {
-		Label: guide Progression
-		Tooltip: ""
-	}
-
-	bestiaryProgression: {
-		Label: bestiary Progression
-		Tooltip: ""
-	}
-
-	bestiaryDisplayedUnlock: {
-		Label: bestiary Displayed Unlock
-		Tooltip: ""
-	}
-}
