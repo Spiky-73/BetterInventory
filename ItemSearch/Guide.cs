@@ -371,7 +371,7 @@ public sealed class Guide : ModSystem {
     }
 
 
-    public static Item? GetGuideMaterials() => Configs.BetterGuide.Enabled && !Configs.ItemSearch.SearchRecipes ? Main.guideItem : null; // ? add toggle
+    public static Item? GetGuideMaterials() => Configs.BetterGuide.AvailablesRecipes && !Configs.ItemSearch.SearchRecipes ? Main.guideItem : null;
 
     public static void FindGuideRecipes() {
         s_collectingGuide = true;
@@ -617,7 +617,7 @@ public sealed class Guide : ModSystem {
         // if (Main.focusRecipe == recipeIndex && Main.guideItem.IsAir) ...
         // else ...
         // ++ skip:
-        cursor.GotoNext(i => i.MatchStsfld(Reflection.Main.craftingHide)); // TODO find existing label
+        cursor.GotoNext(i => i.MatchStsfld(Reflection.Main.craftingHide));
         cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdcI4(1));
         cursor.MarkLabel(skip);
         

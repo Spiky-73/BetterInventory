@@ -33,9 +33,7 @@ public sealed class Bestiary : ILoadable {
         On_UIBestiaryFilteringOptionsGrid.UpdateButtonSelections += HookDarkenFilters;
 
         On_UIBestiaryTest.FilterEntries += HookBestiaryFilterRemoveHiddenEntries;
-
     }
-
     public void Unload() => _bossBagSearch.Clear();
 
 
@@ -107,7 +105,6 @@ public sealed class Bestiary : ILoadable {
         if (!ItemID.Sets.BossBag[dropRateInfo.itemId]) return s;
         return $"{s}|{GetBossBagSearch(dropRateInfo)}";
     }
-
 
     private static string HookCustomUnlockFilterName(On_Filters.ByUnlockState.orig_GetDisplayNameKey orig, Filters.ByUnlockState self) => Configs.BetterBestiary.UnlockFilter ? $"{Localization.Keys.UI}.FullUnlock" : orig(self);
     private static bool HookCustomUnlockFilter(On_Filters.ByUnlockState.orig_FitsFilter orig, Filters.ByUnlockState self, BestiaryEntry entry) => Configs.BetterBestiary.UnlockFilter ? entry.UIInfoProvider.GetEntryUICollectionInfo().UnlockState != BestiaryEntryUnlockState.CanShowDropsWithDropRates_4 : orig(self, entry);
