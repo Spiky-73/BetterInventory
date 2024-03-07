@@ -110,6 +110,7 @@ public sealed class SearchItem : ILoadable {
         ILLabel recipe = cursor.DefineLabel();
         cursor.EmitDelegate(() => Configs.ItemSearch.SearchRecipes && !Main.InGuideCraftMenu);
         cursor.EmitBrtrue(recipe);
+        cursor.MarkLabel(recipe); // Here in case of exception
         //     }
         // }
 

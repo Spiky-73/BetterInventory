@@ -414,6 +414,7 @@ public sealed class Guide : ModSystem {
         ILLabel skipGuide = cursor.DefineLabel();
         cursor.EmitDelegate(() => Configs.BetterGuide.AvailablesRecipes);
         cursor.EmitBrtrue(skipGuide);
+        cursor.MarkLabel(skipGuide); // Here in case of exception
 
 
         // if(<guideItem>) {
@@ -431,7 +432,7 @@ public sealed class Guide : ModSystem {
         // });
 
         cursor.GotoPrev(MoveType.After, i => i.MatchRet());
-        cursor.MarkLabel(skipGuide); // TODO test if thrown early
+        cursor.MarkLabel(skipGuide);
     }
     internal static void ILUpdateOwnedItems(ILContext il) {
         ILCursor cursor = new(il);
@@ -628,14 +629,15 @@ public sealed class Guide : ModSystem {
         });
         ILLabel skip = cursor.DefineLabel();
         cursor.EmitBrtrue(skip);
+        cursor.MarkLabel(skip); // Here in case of exception
 
         // if (Main.focusRecipe == recipeIndex && Main.guideItem.IsAir) ...
         // else ...
         // ++ skip:
+        // throw new Exception();
         cursor.GotoNext(i => i.MatchStsfld(Reflection.Main.craftingHide));
         cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdcI4(1));
-        cursor.MarkLabel(skip); // TODO test if thrown on prev goto (before the line)
-        
+        cursor.MarkLabel(skip);
         // Main.craftingHide = true;
     }
 

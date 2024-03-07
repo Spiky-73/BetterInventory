@@ -161,6 +161,7 @@ public sealed class ClickOverrides : ILoadable {
         cursor.EmitBrtrue(skipVanillaCheck);
         cursor.EmitRet();
         cursor.MarkLabel(vanillaCheck);
+        cursor.MarkLabel(skipVanillaCheck); // Here in case of exception
 
         // if (Main.mouseItem.stack > 0 && !ItemLoader.CanStack(Main.mouseItem, r.createItem)) return;
         cursor.GotoNext(i => i.MatchStloc0());
