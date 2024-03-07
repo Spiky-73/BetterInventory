@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using BetterInventory.Configs.UI;
 using Newtonsoft.Json;
 using Terraria.ModLoader.Config;
 
@@ -25,9 +26,9 @@ public sealed class Compatibility : ModConfig {
         }
     }
 
-    [JsonIgnore, ShowDespiteJsonIgnore] public UnloadedCrafting UnloadedCrafting {get; set;} = new();
-    [JsonIgnore, ShowDespiteJsonIgnore] public UnloadedInventoryManagement UnloadedInventoryManagement {get; set;} = new();
-    [JsonIgnore, ShowDespiteJsonIgnore] public UnloadedItemSearch UnloadedItemSearch {get; set;} = new();
+    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(ObjectAsTextElement))] public UnloadedCrafting UnloadedCrafting {get; set;} = new();
+    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(ObjectAsTextElement))] public UnloadedInventoryManagement UnloadedInventoryManagement {get; set;} = new();
+    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(ObjectAsTextElement))] public UnloadedItemSearch UnloadedItemSearch {get; set;} = new();
 
     public static bool CompatibilityMode => Instance.compatibilityMode;
     public static Compatibility Instance = null!;

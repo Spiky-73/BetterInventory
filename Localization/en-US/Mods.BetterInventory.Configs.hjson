@@ -526,7 +526,7 @@ Compatibility: {
 
 	DisableAll: {
 		Name: Disable All
-		Label: "[i:348] {$Mods.BetterInventory.Configs.Compatibility.disableAll.Name}"
+		Label: "[i:348] {$Mods.BetterInventory.Configs.Compatibility.DisableAll.Name}"
 		Tooltip:
 			'''
 			Disables every feature that could cause a crash when loaded
@@ -541,12 +541,12 @@ Compatibility: {
 
 	UnloadedInventoryManagement: {
 		Label: "[i:5075] Unloaded {$Mods.BetterInventory.Configs.InventoryManagement.DisplayName} Features"
-		Tooltip: "{$Mods.BetterInventory.Configs.Compatibility.unloadedCrafting.Tooltip}"
+		Tooltip: "{$Mods.BetterInventory.Configs.Compatibility.UnloadedCrafting.Tooltip}"
 	}
 
 	UnloadedItemSearch: {
 		Label: "[i:487] Unloaded {$Mods.BetterInventory.Configs.ItemSearch.DisplayName} Features"
-		Tooltip: "{$Mods.BetterInventory.Configs.Compatibility.unloadedCrafting.Tooltip}"
+		Tooltip: "{$Mods.BetterInventory.Configs.Compatibility.UnloadedCrafting.Tooltip}"
 	}
 }
 
@@ -555,27 +555,27 @@ UnloadedCrafting: {
 
 	fastScroll: {
 		Label: "{$Mods.BetterInventory.Configs.Crafting.fixedUI.Label} @ {$Mods.BetterInventory.Configs.FixedUI.fastScroll.Label}"
-		Tooltip: ""
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
 	listScroll: {
 		Label: "{$Mods.BetterInventory.Configs.Crafting.fixedUI.Label} @ {$Mods.BetterInventory.Configs.FixedUI.listScroll.Label}"
-		Tooltip: ""
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
 	wrapping: {
 		Label: "{$Mods.BetterInventory.Configs.Crafting.fixedUI.Label} @ {$Mods.BetterInventory.Configs.FixedUI.wrapping.Label}"
-		Tooltip: ""
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
 	recipeFiltering: {
 		Label: "{$Mods.BetterInventory.Configs.Crafting.recipeFiltering.Label}"
-		Tooltip: ""
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
 	craftOnList: {
 		Label: "{$Mods.BetterInventory.Configs.Crafting.craftOnList.Label}"
-		Tooltip: ""
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 }
 
@@ -584,57 +584,57 @@ UnloadedInventoryManagement: {
 
 	autoEquip: {
 		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.autoEquip.Label}"
-		Tooltip: ""
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
 	favoriteInBanks: {
 		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.favoriteInBanks.Label}"
-		Tooltip: ""
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
 	shiftRight: {
 		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.shiftRight.Label}"
-		Tooltip: ""
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
 	stackTrash: {
 		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.stackTrash.Label}"
-		Tooltip: ""
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
 	baits: {
 		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartConsumption.Label} @ {$Mods.BetterInventory.Configs.SmartConsumption.baits.Label}"
-		Tooltip: ""
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
 	materials: {
 		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartConsumption.Label} @ {$Mods.BetterInventory.Configs.SmartConsumption.materials.Label}"
-		Tooltip: ""
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
 	smartPickup: {
 		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label}"
-		Tooltip: ""
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
 	marks: {
 		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ {$Mods.BetterInventory.Configs.SmartPickup.markIntensity.Label}"
-		Tooltip: ""
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
 	quickMoveHotkeys: {
 		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.quickMove.Label} @ {$Mods.BetterInventory.Configs.QuickMove.displayHotkeys.Label}"
-		Tooltip: ""
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
 	quickMoveHightlight: {
 		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.quickMove.Label} @ {$Mods.BetterInventory.Configs.QuickMove.displayHotkeys.Label} @ {$Mods.BetterInventory.Configs.DisplayedHotkeys.highlightIntensity.Label}"
-		Tooltip: ""
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
 	craftStack: {
 		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.craftStack.Label}"
-		Tooltip: ""
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 }
 
@@ -643,47 +643,47 @@ UnloadedItemSearch: {
 
 	searchRecipes: {
 		Label: "{$Mods.BetterInventory.Configs.ItemSearch.searchRecipes.Label}"
-		Tooltip: ""
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
 	searchDrops: {
 		Label: "{$Mods.BetterInventory.Configs.ItemSearch.searchDrops.Label}"
-		Tooltip: ""
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
 	guideAnyItem: {
 		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.anyItem.Label}"
-		Tooltip: ""
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
 	guideFavorite: {
 		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.favoriteRecipes.Label}"
-		Tooltip: ""
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
 	guideUnfavoriteOnCraft: {
 		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.favoriteRecipes.Label} @ {$Mods.BetterInventory.Configs.FavoriteRecipes.unfavoriteOnCraft.Label}"
-		Tooltip: ""
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
 	guideCraftInMenu: {
 		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.craftInMenu.Label}"
-		Tooltip: ""
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
 	guideProgression: {
 		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.progression.Label}"
-		Tooltip: ""
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
 	bestiaryProgression: {
 		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterBestiary.Label} @ {$Mods.BetterInventory.Configs.BetterBestiary.progression.Label}"
-		Tooltip: ""
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
 	bestiaryDisplayedUnlock: {
 		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterBestiary.Label} @ {$Mods.BetterInventory.Configs.BetterBestiary.displayedUnlock.Label}"
-		Tooltip: ""
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 }
 

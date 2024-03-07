@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.GameContent.UI.States;
+using Terraria.Localization;
 using Terraria.ModLoader.Config;
 using Terraria.ModLoader.Config.UI;
 using Terraria.UI.Chat;
@@ -16,13 +17,16 @@ public readonly record struct TagKeyFormat(Color? Color, List<(string, string)> 
 [CustomModConfigItem(typeof(TextElement))]
 public sealed class Text {
     public Text() {}
-    public Text(TagKeyFormat? label = null, TagKeyFormat? tooltip = null) {
-        Label = label;
-        Tooltip = tooltip;
+    public Text(TagKeyFormat? labelFormat = null, TagKeyFormat? tooltipFormat = null) : this(null, null, labelFormat, tooltipFormat) {}
+    public Text(string? label = null, string? tooltip = null, TagKeyFormat? labelFormat = null, TagKeyFormat? tooltipFormat = null) {
+        Label = label; Tooltip = tooltip;
+        LabelFormat = labelFormat; TooltipFormat = tooltipFormat;
     }
 
-    [JsonIgnore] public TagKeyFormat? Label { get; }
-    [JsonIgnore] public TagKeyFormat? Tooltip { get; }
+    [JsonIgnore] public string? Label { get; }
+    [JsonIgnore] public string? Tooltip { get; }
+    [JsonIgnore] public TagKeyFormat? LabelFormat { get; }
+    [JsonIgnore] public TagKeyFormat? TooltipFormat { get; }
 
     internal static void ILTextColors(ILContext il) {
         ILCursor cursor = new(il);
@@ -33,8 +37,8 @@ public sealed class Text {
         cursor.EmitDelegate((Color color, ConfigElement self) => {
             if (self is not TextElement textElem) return color;
             Text? text = textElem.Value;
-            if (text is null || !text.Label.HasValue || !text.Label.Value.Color.HasValue) return color;
-            return color == Color.White ? text.Label.Value.Color.Value : text.Label.Value.Color.Value.MultiplyRGB(color);
+            if (text is null || !text.LabelFormat.HasValue || !text.LabelFormat.Value.Color.HasValue) return color;
+            return color == Color.White ? text.LabelFormat.Value.Color.Value : text.LabelFormat.Value.Color.Value.MultiplyRGB(color);
         });
     }
 }
@@ -47,11 +51,13 @@ public sealed class TextElement : ConfigElement<Text?> {
         base.OnBind();
         Text? value = Value;
         if (value is null) return;
-        if (value.Label.HasValue) Label = Label.FormatTagKeys(value.Label.Value.Tags);
-        if (value.Tooltip.HasValue) {
-            string tooltip = TooltipFunction().FormatTagKeys(value.Tooltip.Value.Tags);
-            TooltipFunction = () => tooltip;
-        }
+        if (value.Label is not null) Label = Language.GetTextValue(value.Label);
+        if (value.LabelFormat.HasValue) Label = Label.FormatTagKeys(value.LabelFormat.Value.Tags);
+
+        string tooltip = TooltipFunction();
+        if (value.Tooltip is not null) tooltip = Language.GetTextValue(value.Tooltip);
+        if (value.TooltipFormat.HasValue) tooltip.FormatTagKeys(value.TooltipFormat.Value.Tags);
+        TooltipFunction = () => tooltip;
     }
 
     public override void Recalculate() {
