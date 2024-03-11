@@ -7,6 +7,9 @@ namespace BetterInventory.Configs;
 
 public sealed class Compatibility : ModConfig {
 
+    [DefaultValue(0), JsonProperty] internal int failledILs = 0;
+
+
     [ReloadRequired, DefaultValue(false)] public bool compatibilityMode;
 
     // public override bool NeedsReload(ModConfig pendingConfig) {
@@ -22,7 +25,35 @@ public sealed class Compatibility : ModConfig {
     [JsonIgnore, ShowDespiteJsonIgnore, NullAllowed] public object? DisableAll {
         get => null;
         set {
-            // TODO disable all
+            FixedUI.Value.fastScroll.Parent = false;
+            FixedUI.Value.listScroll = false;
+            FixedUI.Value.wrapping = false;
+            Crafting.Instance.recipeFiltering.Parent = false;
+            Crafting.Instance.craftOnList.Parent = false;
+            Crafting.Instance.SaveConfig();
+
+            InventoryManagement.Instance.autoEquip = AutoEquipLevel.Off;
+            InventoryManagement.Instance.favoriteInBanks = false;
+            InventoryManagement.Instance.shiftRight = false;
+            InventoryManagement.Instance.stackTrash = false;
+            InventoryManagement.Instance.craftStack.Parent = false;
+            InventoryManagement.Instance.smartPickup.Parent = SmartPickupLevel.Off;
+            SmartConsumption.Value.materials = false;
+            SmartConsumption.Value.baits = false;
+            SmartPickup.Value.markIntensity = 0;
+            QuickMove.Value.displayHotkeys.Parent = HotkeyDisplayMode.Off;
+            QuickMove.Value.displayHotkeys.Value.highlightIntensity = 0;
+            InventoryManagement.Instance.SaveConfig();
+
+            ItemSearch.Instance.searchRecipes = false;
+            ItemSearch.Instance.searchDrops = false;
+            BetterGuide.Value.anyItem = false;
+            FavoriteRecipes.Value.unfavoriteOnCraft = UnfavoriteOnCraft.Off;
+            BetterGuide.Value.craftInMenu = false;
+            BetterGuide.Value.progression = false;
+            BetterBestiary.Value.progression = false;
+            BetterBestiary.Value.displayedUnlock = UnlockLevel.Off;
+            ItemSearch.Instance.SaveConfig();
         }
     }
 

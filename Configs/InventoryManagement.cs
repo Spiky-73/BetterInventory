@@ -42,11 +42,13 @@ public sealed class SmartConsumption {
     [DefaultValue(true)] public bool paints = true;
     [DefaultValue(true)] public bool materials = true;
 
-    public static bool Consumables => InventoryManagement.Instance.smartConsumption && InventoryManagement.Instance.smartConsumption.Value.consumables;
-    public static bool Ammo => InventoryManagement.Instance.smartConsumption && InventoryManagement.Instance.smartConsumption.Value.ammo;
-    public static bool Baits => InventoryManagement.Instance.smartConsumption && InventoryManagement.Instance.smartConsumption.Value.baits && !UnloadedInventoryManagement.Value.baits;
-    public static bool Paints => InventoryManagement.Instance.smartConsumption && InventoryManagement.Instance.smartConsumption.Value.paints;
-    public static bool Materials => InventoryManagement.Instance.smartConsumption && InventoryManagement.Instance.smartConsumption.Value.materials && !UnloadedInventoryManagement.Value.materials;
+    public static bool Enabled => InventoryManagement.Instance.smartConsumption;
+    public static bool Consumables => Enabled && Value.consumables;
+    public static bool Ammo => Enabled && Value.ammo;
+    public static bool Baits => Enabled && Value.baits && !UnloadedInventoryManagement.Value.baits;
+    public static bool Paints => Enabled && Value.paints;
+    public static bool Materials => Enabled && Value.materials && !UnloadedInventoryManagement.Value.materials;
+    public static SmartConsumption Value => InventoryManagement.Instance.smartConsumption.Value;
 }
 
 public sealed class SmartPickup {

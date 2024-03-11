@@ -22,10 +22,12 @@ public sealed class FixedUI {
     [DefaultValue(true)] public bool wrapping = true;
     [DefaultValue(true)] public bool moveMouse = true;
 
-    public static bool FastScroll => Crafting.Instance.fixedUI && Crafting.Instance.fixedUI.Value.fastScroll && !UnloadedCrafting.Value.fastScroll;
-    public static bool ListScroll => Crafting.Instance.fixedUI && Crafting.Instance.fixedUI.Value.listScroll && !UnloadedCrafting.Value.listScroll;
-    public static bool Wrapping => Crafting.Instance.fixedUI && Crafting.Instance.fixedUI.Value.wrapping && !UnloadedCrafting.Value.wrapping;
-    public static bool MoveMouse => Crafting.Instance.fixedUI && Crafting.Instance.fixedUI.Value.moveMouse;
+    public static bool Enabled => Crafting.Instance.fixedUI;
+    public static bool FastScroll => Enabled && Value.fastScroll && !UnloadedCrafting.Value.fastScroll;
+    public static bool ListScroll => Enabled && Value.listScroll && !UnloadedCrafting.Value.listScroll;
+    public static bool Wrapping => Enabled && Value.wrapping && !UnloadedCrafting.Value.wrapping;
+    public static bool MoveMouse => Enabled && Value.moveMouse;
+    public static FixedUI Value => Crafting.Instance.fixedUI.Value;
 }
 
 public sealed class FastScroll {

@@ -135,9 +135,12 @@ public class Hooks : ILoadable {
             ilEdit(context); 
         } catch (Exception) {
             MonoModHooks.DumpIL(Mod, context);
+            FailledILs++;
             Mod.Logger.Warn($"{name} failled to load. Related features will be disabled until reload");
             return false;
         }
         return true;
     }
+
+    public static int FailledILs { get; private set; }
 }

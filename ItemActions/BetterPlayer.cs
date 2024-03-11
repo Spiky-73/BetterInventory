@@ -72,7 +72,8 @@ public sealed class BetterPlayer : ModPlayer {
         VisibilityFilters ??= new();
         if (Configs.BetterGuide.AvailablesRecipes) Guide.FindGuideRecipes();
 
-        UpdateNotification.Display();
+        Notification.DisplayUpdate();
+        Notification.DisplayCompatibility();
     }
 
     public override void SetControls() {
