@@ -99,10 +99,10 @@ public sealed class ClickOverrides : ILoadable {
         cursor.GotoNext(MoveType.Before, i => i.MatchStfld(typeof(Item), nameof(Item.stack)));
         cursor.EmitDelegate((int one) => s_ilShopMultiplier == 1 ? one : s_ilShopMultiplier);
 
-        cursor.GotoNext(MoveType.Before, i => i.MatchCall(typeof(ItemLoader), nameof(ItemLoader.StackItems)));
+        cursor.GotoNext(MoveType.Before, i => i.SaferMatchCall(typeof(ItemLoader), nameof(ItemLoader.StackItems)));
         cursor.EmitDelegate((int? one) => s_ilShopMultiplier == 1 ? one : s_ilShopMultiplier );
 
-        cursor.GotoNext(MoveType.After, i => i.MatchCall(typeof(ItemSlot), nameof(ItemSlot.RefreshStackSplitCooldown)));
+        cursor.GotoNext(MoveType.After, i => i.SaferMatchCall(typeof(ItemSlot), nameof(ItemSlot.RefreshStackSplitCooldown)));
         cursor.EmitLdarg0();
         cursor.EmitLdarg1();
         cursor.EmitDelegate((Item[] inv, int slot) => {
@@ -197,7 +197,7 @@ public sealed class ClickOverrides : ILoadable {
         // Item crafted = r.createItem.Clone();
         // r.Create();
         // RecipeLoader.OnCraft(crafted, r, Main.mouseItem);
-        cursor.GotoNext(MoveType.After, i => i.MatchCall(typeof(RecipeLoader), nameof(RecipeLoader.OnCraft)));
+        cursor.GotoNext(MoveType.After, i => i.SaferMatchCall(typeof(RecipeLoader), nameof(RecipeLoader.OnCraft)));
 
         // ++ <restoreRecipe>
         // ++ if(<gotoInventory>) {
@@ -225,7 +225,7 @@ public sealed class ClickOverrides : ILoadable {
     internal static void ILFixCraftMouseText(ILContext il) {
         ILCursor cursor = new(il);
 
-        cursor.GotoNext(i => i.MatchCall(typeof(PopupText), nameof(PopupText.NewText)));
+        cursor.GotoNext(i => i.SaferMatchCall(typeof(PopupText), nameof(PopupText.NewText)));
         cursor.GotoPrev(MoveType.After, i => i.MatchLdfld(Reflection.Item.stack));
         cursor.EmitDelegate((int stack) => Configs.CraftStack.Enabled ? (stack * s_ilCraftMultiplier) : stack);
         // PopupText.NewText(...);
@@ -237,7 +237,7 @@ public sealed class ClickOverrides : ILoadable {
     //     // foreach (<requiredItem>) {
     //     //     ...
     //     //     RecipeLoader.ConsumeItem(this, item2.type, ref num);
-    //     cursor.GotoNext(MoveType.After, i => i.MatchCall(typeof(RecipeLoader), nameof(RecipeLoader.ConsumeItem)));
+    //     cursor.GotoNext(MoveType.After, i => i.SaferMatchCall(typeof(RecipeLoader), nameof(RecipeLoader.ConsumeItem)));
 
     //     //     ++ <bulkCraftCost>
     //     cursor.EmitLdloca(4);

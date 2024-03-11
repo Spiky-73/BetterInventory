@@ -31,7 +31,7 @@ public sealed class Text {
     internal static void ILTextColors(ILContext il) {
         ILCursor cursor = new(il);
 
-        cursor.GotoNext(i => i.MatchCall(typeof(ChatManager), nameof(ChatManager.DrawColorCodedStringWithShadow)));
+        cursor.GotoNext(i => i.SaferMatchCall(typeof(ChatManager), nameof(ChatManager.DrawColorCodedStringWithShadow)));
         cursor.GotoPrev(MoveType.After, i => i.MatchLdloc3());
         cursor.EmitLdarg0();
         cursor.EmitDelegate((Color color, ConfigElement self) => {

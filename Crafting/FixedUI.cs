@@ -28,7 +28,7 @@ public sealed class FixedUI : ILoadable {
             //     if(<scrool>) {
             //         if(...) SoundEngine.PlaySound(...);
             //         Main.availableRecipeY[num63] += 6.5f;
-            cursor.GotoNext(i => i.MatchCall(typeof(SoundEngine), nameof(SoundEngine.PlaySound)));
+            cursor.GotoNext(i => i.SaferMatchCall(typeof(SoundEngine), nameof(SoundEngine.PlaySound)));
             cursor.GotoNext(i => i.MatchLdsfld(Reflection.Main.recFastScroll));
 
             // ++ <fastScroll>

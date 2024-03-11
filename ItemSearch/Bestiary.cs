@@ -146,7 +146,7 @@ public sealed class Bestiary : ILoadable {
         ILCursor cursor = new(il);
 
         // BestiaryUICollectionInfo uICollectionInfo = this.GetUICollectionInfo(entry, extraInfo);
-        cursor.GotoNext(MoveType.After, i => i.MatchCall(typeof(UIBestiaryEntryInfoPage), "GetUICollectionInfo"));
+        cursor.GotoNext(MoveType.After, i => i.SaferMatchCall(typeof(UIBestiaryEntryInfoPage), "GetUICollectionInfo"));
 
         // ++ <fakeUnlock>
         cursor.EmitDelegate((BestiaryUICollectionInfo info) => {
@@ -173,7 +173,7 @@ public sealed class Bestiary : ILoadable {
         // for (<filter>) {
         //     ...
         //     bool b = this.GetIsFilterAvailableForEntries(bestiaryEntryFilter, entries);
-        cursor.GotoNext(MoveType.After, i => i.MatchCall(typeof(UIBestiaryFilteringOptionsGrid), "GetIsFilterAvailableForEntries"));
+        cursor.GotoNext(MoveType.After, i => i.SaferMatchCall(typeof(UIBestiaryFilteringOptionsGrid), "GetIsFilterAvailableForEntries"));
 
         //     ++ <fakeUnlock> 
         cursor.EmitLdloc(13);

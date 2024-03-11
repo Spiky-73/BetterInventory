@@ -97,7 +97,7 @@ public sealed class SearchItem : ILoadable {
         //     if(<closeGuideUI>) ...
         //     else {
         ILLabel? endGuide = null;
-        cursor.GotoNext(i => i.MatchCall(typeof(Main), "DrawGuideCraftText"));
+        cursor.GotoNext(i => i.SaferMatchCall(typeof(Main), "DrawGuideCraftText"));
         cursor.GotoPrev(MoveType.After, i => i.MatchBr(out endGuide));
 
         //         ++ guide:

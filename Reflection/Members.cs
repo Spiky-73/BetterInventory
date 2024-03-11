@@ -104,6 +104,7 @@ public abstract class StaticMember<TMemberInfo> where TMemberInfo : MemberInfo {
         MemberInfo = info;
     }
 
+    public Type DeclaringType => MemberInfo.DeclaringType!;
     public string Name => MemberInfo.Name;
     public TMemberInfo MemberInfo { get; }
 

@@ -198,7 +198,7 @@ public sealed class Guide : ModSystem {
         ILCursor cursor = new(il);
 
         //         Main.DrawGuideCraftText(...);
-        cursor.GotoNext(MoveType.After, i => i.MatchCall(typeof(Main), "DrawGuideCraftText"));
+        cursor.GotoNext(MoveType.After, i => i.SaferMatchCall(typeof(Main), "DrawGuideCraftText"));
         ILLabel? noHover = null;
         cursor.FindNext(out _, i => i.MatchBlt(out noHover));
         //         ++ if(!<visibilityHover>) {
@@ -208,7 +208,7 @@ public sealed class Guide : ModSystem {
         //             <handle guide item slot>
         //         ++ }
         //         ItemSlot.Draw(Main.spriteBatch, ref Main.guideItem, ...);
-        cursor.GotoNext(MoveType.After, i => i.MatchCall(typeof(ItemSlot), nameof(ItemSlot.Draw)));
+        cursor.GotoNext(MoveType.After, i => i.SaferMatchCall(typeof(ItemSlot), nameof(ItemSlot.Draw)));
 
         //         ++ <drawVisibility>
         cursor.EmitDelegate(() => {
@@ -225,8 +225,8 @@ public sealed class Guide : ModSystem {
         //             if (Main.numAvailableRecipes > 0) {
         //                 ...
         //                 Main.inventoryBack = ...;
-        cursor.GotoNext(i => i.MatchCall(typeof(Main), "HoverOverCraftingItemButton"));
-        cursor.GotoNext(MoveType.Before, i => i.MatchCall(typeof(ItemSlot), nameof(ItemSlot.Draw)));
+        cursor.GotoNext(i => i.SaferMatchCall(typeof(Main), "HoverOverCraftingItemButton"));
+        cursor.GotoNext(MoveType.Before, i => i.SaferMatchCall(typeof(ItemSlot), nameof(ItemSlot.Draw)));
 
         //                 ++ <overrideBackground>
         cursor.EmitLdloc(124); // int num63
@@ -258,8 +258,8 @@ public sealed class Guide : ModSystem {
         //         for (<focusRecipeMaterialIndex>) {
         //             ...
         //             Item tempItem = ...;
-        cursor.GotoNext(i => i.MatchCall(Reflection.Main.SetRecipeMaterialDisplayName));
-        cursor.GotoNext(MoveType.Before, i => i.MatchCall(typeof(ItemSlot), nameof(ItemSlot.Draw)));
+        cursor.GotoNext(i => i.SaferMatchCall(Reflection.Main.SetRecipeMaterialDisplayName));
+        cursor.GotoNext(MoveType.Before, i => i.SaferMatchCall(typeof(ItemSlot), nameof(ItemSlot.Draw)));
 
         //             ++ <overrideBackground>
         cursor.EmitLdloc(130); // int num68
@@ -300,7 +300,7 @@ public sealed class Guide : ModSystem {
         //         if (<mouseHover>) {
         //             if (<click>) ...
         //             Main.craftingHide = true;
-        cursor.GotoNext(i => i.MatchCall(Reflection.Main.LockCraftingForThisCraftClickDuration));
+        cursor.GotoNext(i => i.SaferMatchCall(Reflection.Main.LockCraftingForThisCraftClickDuration));
         cursor.GotoNext(MoveType.After, i => i.MatchStsfld(Reflection.Main.craftingHide));
 
         //             ++ <GuideHover>
@@ -314,7 +314,7 @@ public sealed class Guide : ModSystem {
         //         if (Main.numAvailableRecipes > 0) {
         //             ...
         //             Main.inventoryBack = ...;
-        cursor.GotoNext(MoveType.Before, i => i.MatchCall(typeof(ItemSlot), nameof(ItemSlot.Draw)));
+        cursor.GotoNext(MoveType.Before, i => i.SaferMatchCall(typeof(ItemSlot), nameof(ItemSlot.Draw)));
 
         //             ++ <overrideBackground>
         cursor.EmitLdloc(153);
@@ -408,7 +408,7 @@ public sealed class Guide : ModSystem {
         ILCursor cursor = new(il);
 
         // Recipe.ClearAvailableRecipes()
-        cursor.GotoNext(MoveType.After, i => i.MatchCall(Reflection.Recipe.ClearAvailableRecipes));
+        cursor.GotoNext(MoveType.After, i => i.SaferMatchCall(Reflection.Recipe.ClearAvailableRecipes));
 
         // ++ if (Enabled) goto skipGuide
         ILLabel skipGuide = cursor.DefineLabel();
@@ -423,7 +423,7 @@ public sealed class Guide : ModSystem {
         // ++ skipGuide:
         // Player localPlayer = Main.LocalPlayer;
         // Recipe.CollectItemsToCraftWithFrom(localPlayer);
-        cursor.GotoNext(MoveType.After, i => i.MatchCall(Reflection.Recipe.CollectItemsToCraftWithFrom));
+        cursor.GotoNext(MoveType.After, i => i.SaferMatchCall(Reflection.Recipe.CollectItemsToCraftWithFrom));
 
         // // ++<setup>
         // cursor.EmitDelegate(() => {
@@ -438,7 +438,7 @@ public sealed class Guide : ModSystem {
         ILCursor cursor = new(il);
 
         // <availableRecipes>
-        cursor.GotoNext(MoveType.Before, i => i.MatchCall(Reflection.Recipe.TryRefocusingRecipe));
+        cursor.GotoNext(MoveType.Before, i => i.SaferMatchCall(Reflection.Recipe.TryRefocusingRecipe));
 
         // ++<updateDisplay>
         cursor.EmitDelegate(() => {
@@ -647,7 +647,7 @@ public sealed class Guide : ModSystem {
         // Item crafted = r.createItem.Clone();
         // r.Create();
         // RecipeLoader.OnCraft(crafted, r, Main.mouseItem);
-        cursor.GotoNext(MoveType.After, i => i.MatchCall(typeof(RecipeLoader), nameof(RecipeLoader.OnCraft)));
+        cursor.GotoNext(MoveType.After, i => i.SaferMatchCall(typeof(RecipeLoader), nameof(RecipeLoader.OnCraft)));
 
         // ++ <unFavorite>
         cursor.EmitLdarg0();

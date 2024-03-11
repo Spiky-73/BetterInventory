@@ -227,7 +227,7 @@ public sealed class QuickMove : ILoadable {
         // if (gamepadPointForSlot != -1) {
         //     UILinkPointNavigator.SetPosition(gamepadPointForSlot, position + vector * 0.75f);
         // }
-        cursor.GotoNext(i => i.MatchCall(typeof(UILinkPointNavigator), nameof(UILinkPointNavigator.SetPosition)));
+        cursor.GotoNext(i => i.SaferMatchCall(typeof(UILinkPointNavigator), nameof(UILinkPointNavigator.SetPosition)));
         cursor.GotoNext(MoveType.AfterLabel, i => i.MatchRet());
 
         // ++ <drawSlotNumbers>
@@ -251,7 +251,7 @@ public sealed class QuickMove : ILoadable {
             ChatManager.DrawColorCodedStringWithShadow(spriteBatch, FontAssets.ItemStack.Value, text.ToString(), position + new Vector2(6f, 4) * scale, baseColor, 0f, Vector2.Zero, new Vector2(scale), -1f, scale);
         });
 
-        cursor.GotoPrev(i => i.MatchCall(typeof(ChatManager), nameof(ChatManager.DrawColorCodedStringWithShadow)));
+        cursor.GotoPrev(i => i.SaferMatchCall(typeof(ChatManager), nameof(ChatManager.DrawColorCodedStringWithShadow)));
         cursor.GotoPrev(i => i.MatchLdarg2());
         cursor.GotoNext(MoveType.After, i => i.MatchLdarg3());
 

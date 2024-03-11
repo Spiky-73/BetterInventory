@@ -56,7 +56,7 @@ public sealed class SmartPickup : ILoadable {
 
         // ...
         // if (newItem.uniqueStack && this.HasItem(newItem.type)) return item;
-        if(!cursor.TryGotoNext(i => i.MatchCall(Reflection.Player.HasItem))
+        if(!cursor.TryGotoNext(i => i.SaferMatchCall(Reflection.Player.HasItem))
                 || !cursor.TryGotoNext(MoveType.AfterLabel, i => i.MatchLdloc0())) {// bool isACoin
             Utility.Logger.Error($"{nameof(ILSmartPickup)} failled to load");
             return;
@@ -110,7 +110,7 @@ public sealed class SmartPickup : ILoadable {
         // if (isACoin) ...
         // if (item.FitsAmmoSlot()) ...
         // for(...) ...
-        cursor.GotoNext(i => i.MatchCall(Reflection.Player.GetItem_FillEmptyInventorySlot));
+        cursor.GotoNext(i => i.SaferMatchCall(Reflection.Player.GetItem_FillEmptyInventorySlot));
         cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdloc0());
 
         // ++<autoEquip>

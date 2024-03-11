@@ -32,7 +32,7 @@ public sealed class SmartConsumptionItem : GlobalItem {
 
     internal static void ILOnConsumeBait(ILContext il) {
         ILCursor cursor = new(il);
-        cursor.GotoNext(i => i.MatchCall(Reflection.NPC.LadyBugKilled));
+        cursor.GotoNext(i => i.SaferMatchCall(Reflection.NPC.LadyBugKilled));
         cursor.GotoNext(MoveType.After, i => i.MatchStfld(Reflection.Item.stack));
         cursor.EmitLdarg0();
         cursor.EmitLdloc1();

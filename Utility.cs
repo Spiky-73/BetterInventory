@@ -6,6 +6,8 @@ using System.Reflection;
 using log4net;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent;
@@ -175,6 +177,23 @@ public static class Utility {
             Utils.CoinsCount(out _, player.bank3.item, Array.Empty<int>()),
             Utils.CoinsCount(out _, player.bank4.item, Array.Empty<int>())
         });
+    }
+
+    public static bool SaferMatchCall(this Instruction inst, MethodInfo method) {
+        try {
+            return inst.MatchCall(method);
+        }
+        catch (InvalidCastException) {
+            return false;
+        }
+    }
+    public static bool SaferMatchCall(this Instruction inst, Type type, string name) {
+        try {
+            return inst.MatchCall(type, name);
+        }
+        catch (InvalidCastException) {
+            return false;
+        }
     }
 
     public static ReadOnlyDictionary<int, int> OwnedItems => Data.ownedItems;
