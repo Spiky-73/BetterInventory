@@ -126,7 +126,7 @@ public sealed class FixedUI : ILoadable {
     }
 
     private static bool HookTryAllowingToCraftRecipe(On_Main.orig_TryAllowingToCraftRecipe orig, Recipe currentRecipe, bool tryFittingItemInInventoryToAllowCrafting, out bool movedAnItemToAllowCrafting)
-        => orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting || Configs.FixedUI.MoveMouse, out movedAnItemToAllowCrafting);
+        => orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting || Configs.FixedUI.CraftWhenHolding, out movedAnItemToAllowCrafting);
 
     private static int _recDelay = 0;
     public static readonly int[] MaterialsPerLine = new int[] { 6, 4 };

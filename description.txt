@@ -1,19 +1,19 @@
 This mods adds loads of small features designed to improve the player Inventory and all the systems around it.
 I STRONGLY ADVISE you to read the mod configs to learn about all the features and enable/disable them.
-Feel free to suggest new features I you think of any! 
+Feel free to suggest new features If you think of any! 
 
 Keep in mind, this mod is still in development. If you find a bug, please report it on the Steam Workshop page or the homepage.
 
 Visit the homepage for more info.
 
----------- Key Features ---------- 
-
- - More item actions in the inventory
- - A way to quickly move item between various inventory slots
- - Smarter item consumption and pickup
- - Various keybinds to toggle Builder Accessories or Quick Buff favorites items
- - An improved Guide allowing you to Favorite or Blacklist recipes and filter by crating station
- - An improved Bestiary showing the content of Treasure Bag 
- - An Enhanced Crafting interface with the ability to craft on the recipe list, filter recipes and craft item in stacks 
- - The possibility to search an item's recipes or NPCs dropping it
+---------- Key Features ----------
+ - Smart item consumption and pickup
+ - Quickly move items between special slots in the inventory
+ - Favorite, Blacklist and Filter recipes
+ - Quickly search recipes using a material or NPCs dropping an item with a simple keybind
+ - See the content of Treasure Bags and force the minimal displayed information in the Bestiary
+ - Craft and Buy items in stacks
+ - Quick buff favorite potions only
+ - Various item actions in the inventory
+ - Toggle builder accessories with a keybind
  - And many more...

@@ -28,7 +28,7 @@ public sealed class Compatibility : ModConfig {
             FixedUI.Value.fastScroll.Parent = false;
             FixedUI.Value.listScroll = false;
             FixedUI.Value.wrapping = false;
-            Crafting.Instance.recipeFiltering.Parent = false;
+            Crafting.Instance.recipeFilters.Parent = false;
             Crafting.Instance.craftOnList.Parent = false;
             Crafting.Instance.SaveConfig();
 
@@ -47,7 +47,7 @@ public sealed class Compatibility : ModConfig {
 
             ItemSearch.Instance.searchRecipes = false;
             ItemSearch.Instance.searchDrops = false;
-            BetterGuide.Value.anyItem = false;
+            BetterGuide.Value.moreRecipes = false;
             FavoriteRecipes.Value.unfavoriteOnCraft = UnfavoriteOnCraft.Off;
             BetterGuide.Value.craftInMenu = false;
             BetterGuide.Value.progression = false;
@@ -71,7 +71,7 @@ public sealed class UnloadedCrafting {
     public bool fastScroll = false;
     public bool listScroll = false;
     public bool wrapping = false;
-    public bool recipeFiltering = false;
+    public bool recipeFilters = false;
     public bool craftOnList = false;
 
     public static UnloadedCrafting Value => Compatibility.Instance.UnloadedCrafting;
@@ -98,7 +98,7 @@ public sealed class UnloadedInventoryManagement {
 public sealed class UnloadedItemSearch {
     public bool searchRecipes = false;
     public bool searchDrops = false;
-    public bool guideAnyItem = false;
+    public bool guideMoreRecipes = false;
     public bool guideFavorite = false;
     public bool guideUnfavoriteOnCraft = false;
     public bool guideCraftInMenu = false;

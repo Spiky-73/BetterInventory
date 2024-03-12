@@ -3,14 +3,14 @@ Crafting: {
 
 	fixedUI: {
 		Label: "[i:3084] Fixed UI"
-		Tooltip: Fixed inconsistencies with the crafting UI
+		Tooltip: Fixes inconsistencies with the crafting UI
 	}
 
-	recipeFiltering: {
-		Label: "[i: 38] Recipe Filtering"
+	recipeFilters: {
+		Label: "[i: 38] Recipe Filters"
 		Tooltip:
 			'''
-			Adds recipes filters
+			Filter recipes by their created item
 			Left Click to select a single filter
 			Right Click to select multiple filters
 			'''
@@ -18,11 +18,11 @@ Crafting: {
 
 	craftOnList: {
 		Label: "[i:3617] Craft on Recipe List"
-		Tooltip: Allows you to craft items directly from the recipe list
+		Tooltip: Craft items directly from the recipe list
 	}
 
 	mouseMaterial: {
-		Label: "[i:9] Mouse Material"
+		Label: "[i:9] Held Material"
 		Tooltip: Adds the held item to the available materials
 	}
 
@@ -39,7 +39,7 @@ FixedUI: {
 
 	listScroll: {
 		Label: Scroll in Recipe List
-		Tooltip: Replaces the instant scroll with an extremely fast one when the recipe list is open
+		Tooltip: Replaces the instant scroll when the recipe list is open with an extremely fast one
 	}
 
 	wrapping: {
@@ -47,9 +47,9 @@ FixedUI: {
 		Tooltip: Prevents materials from overlapping the recipe list
 	}
 
-	moveMouse: {
-		Label: Mouse materials
-		Tooltip: Allows you to craft while holding an item
+	craftWhenHolding: {
+		Label: Craft When Holding an Item
+		Tooltip: Allows you to craft when holding an item
 	}
 }
 
@@ -62,7 +62,7 @@ FastScroll: {
 	}
 }
 
-RecipeFiltering: {
+RecipeFilters: {
 	Tooltip: ""
 
 	hideUnavailable: {
@@ -98,8 +98,8 @@ InventoryManagement: {
 		Tooltip:
 			'''
 			Items go their previous slot in your inventory when picked up
-			{$Mods.BetterInventory.Configs.SmartPickupLevel.FavoriteOnly.Label}: Favorited items only
-			{$Mods.BetterInventory.Configs.SmartPickupLevel.AllItems.Label}: All items
+			{$Mods.BetterInventory.Configs.SmartPickupLevel.FavoriteOnly.Label}: Applies to Favorited items only
+			{$Mods.BetterInventory.Configs.SmartPickupLevel.AllItems.Label}: Applies to All items
 			'''
 	}
 
@@ -115,35 +115,35 @@ InventoryManagement: {
 
 	quickMove: {
 		Label: "[i:3620] Quick Move"
-		Tooltip: Hover over an item in your inventory and press a hotbar keybind to move it between different contexts
+		Tooltip:
+			'''
+			Quickly move items between special slots in the inventory
+			Hover over an item in your inventory or equipement and press a hotbar keybind to move it to this slot
+			Press the same key to move to the next special slots in the cycle
+			'''
 	}
 
 	favoriteInBanks: {
 		Label: "[i:75] Favorite Items in Personal Storages"
-		Tooltip: Allows you to favorite items in your personal storages
-	}
-
-	clickOverrides: {
-		Label: "[i:5075] Click Overrides"
-		Tooltip: Makes shops and crafting consistent with inventory movements
+		Tooltip: Favorite items in the Piggy Bank, Safe, ...
 	}
 
 	craftStack: {
-		Label: "[i:5075] Custom Left Click"
-		Tooltip: Left Click to craft or buy a stack of items
+		Label: "[i:5075] Craft Stack"
+		Tooltip: Left Click to craft or buy items in stacks
 	}
 
 	shiftRight: {
 		Name: Shift Right Click
 		Label: "[i:48] {$Mods.BetterInventory.Configs.InventoryManagement.shiftRight.Name}"
-		Tooltip: Allows you to Shift or Control Right Click to transfer one item
+		Tooltip: Shift or Control Right Click to transfer one item
 	}
 
 	stackTrash: {
-		Label: "[i:348] Trash and Shops Stacking"
+		Label: "[i:348] Stack Trashed and Sold Items"
 		Tooltip:
 			'''
-			Items sold multiple times will stack a single one slot
+			Items sold or multiple times will stack in a single slot
 			Items trashed multiple in a row times will stack instead of replacing the old one
 			Highly recommended with "{$Mods.BetterInventory.Configs.InventoryManagement.shiftRight.Name}"
 			'''
@@ -170,12 +170,12 @@ SmartConsumption: {
 
 	baits: {
 		Label: Baits
-		Tooltip: Consumes baits from the last selected stack in the inventory. Doesn't affect the selected ammo
+		Tooltip: Consumes baits from the last selected stack in the inventory. Doesn't affect the selected bait
 	}
 
 	paints: {
 		Label: Paints
-		Tooltip: Consumes paints from the last selected stack in the inventory. Doesn't affect the selected ammo
+		Tooltip: Consumes paints from the last selected stack in the inventory. Doesn't affect the selected paint
 	}
 }
 
@@ -231,12 +231,12 @@ QuickMove: {
 
 	showTooltip: {
 		Label: Show Tooltip
-		Tooltip: Displays the context chain in the item tooltip
+		Tooltip: Displays the special slots chain in the item tooltip
 	}
 
 	returnToSlot: {
 		Label: Return to Original Slot
-		Tooltip: Return the item to its original slot when swapping at the end of the chain
+		Tooltip: Return the item to its original slot when moving at the end of the chain
 	}
 
 	hotkeyMode: {
@@ -255,8 +255,8 @@ QuickMove: {
 		Tooltip:
 			'''
 			Displays hotkeys on the slots where an item can be moved to
-			{$Mods.BetterInventory.Configs.HotkeyDisplayMode.First.Label}: Next context in the chain
-			{$Mods.BetterInventory.Configs.HotkeyDisplayMode.All.Label}: All contexts in the chain
+			{$Mods.BetterInventory.Configs.HotkeyDisplayMode.First.Label}: Next slots in the chain
+			{$Mods.BetterInventory.Configs.HotkeyDisplayMode.All.Label}: All slots in the chain
 			'''
 	}
 }
@@ -289,11 +289,12 @@ ItemActions: {
 
 	fastContainerOpening: {
 		Label: "[i:5002] Fast Container Opening"
-		Tooltip:
-			'''
-			Hold rick click to rapidly open containers
-			Faster Extractinator
-			'''
+		Tooltip: Hold rick click to rapidly open containers
+	}
+
+	fastExtractinator: {
+		Label: "[i:997] Fast Extractinator"
+		Tooltip: Much Faster Extractination
 	}
 
 	itemRightClick: {
@@ -301,18 +302,18 @@ ItemActions: {
 		Tooltip: Item that can be right clicked in the inventory can be right clicked when held
 	}
 
-	builderKeys: {
-		Label: "[i:3061] Builder Keybinds"
-		Tooltip:
-			'''
-			Enables keybinds to toggles the builder toggles
-			Keybindings will appear at the bottom of the Keybindings' page
-			'''
+	favoriteBuff: {
+		Label: "[i:2348] Favorite Quick Buff"
+		Tooltip: Quick buff favorite potions only keybind
 	}
 
-	FavoriteBuffKeybind: {
-		Label: "[i:2348] Favorite Quick Buff"
-		Tooltip: Similar to Quick Buff, but only consumes favorite items
+	builderAccs: {
+		Label: "[i:3061] Builder Accessories"
+		Tooltip:
+			'''
+			Toggle builder accessories with a keybind
+			Keybindings will appear at the bottom of the Keybindings' page
+			'''
 	}
 }
 
@@ -345,8 +346,8 @@ ItemSearch: {
 		Label: "[i:3549] {$Mods.BetterInventory.Configs.ItemSearch.searchRecipes.Name}"
 		Tooltip:
 			'''
-			Allows you to access the guide anywhere
-			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Left Click an item to search its recipe
+			Access the guide anywhere
+			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Left Click a material to search the recipes using it
 			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Middle Click in the inventory to clear the searched item
 			With "{$Mods.BetterInventory.Configs.BetterGuide.tile.Label}" On, searching the guide tile will move it into the guide item and vice-versa
 			Right Click the Guide item to clear it
@@ -358,7 +359,7 @@ ItemSearch: {
 		Label: "[i:2903] {$Mods.BetterInventory.Configs.ItemSearch.searchDrops.Name}"
 		Tooltip:
 			'''
-			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Right Click an item to search its drops
+			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Right Click an item to search the NPCs dropping it
 			Hold the "{$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}" key and Middle Click in the Bestiary to clear the searched item
 			Right Click Bestiary text field to clear it
 			'''
@@ -378,7 +379,7 @@ ItemSearch: {
 		Label: "[i:236] {$Mods.BetterInventory.Configs.ItemSearch.unknownDisplay.Name}"
 		Tooltip:
 			'''
-			Changes how Recipes and NPCs you have not discovered are displayed in the Recipe list and Bestiary
+			Change how undiscovered recipes or NPCs are displayed
 			Requires "{$Mods.BetterInventory.Configs.BetterGuide.progression.Label}" in "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Name}" and "{$Mods.BetterInventory.Configs.ItemSearch.betterBestiary.Name}" respectively to be On
 			{$Mods.BetterInventory.Configs.UnknownDisplay.Hidden.Label}: Not displayed
 			{$Mods.BetterInventory.Configs.UnknownDisplay.Unknown.Label}: Displayed as '?'
@@ -391,9 +392,16 @@ ItemSearch: {
 		Label: "[i:487] {$Mods.BetterInventory.Configs.ItemSearch.SearchItemKeybind.Name}"
 		Tooltip:
 			'''
-			Tap this key to close the current menu or open the Recipe list
+			Quickly open the recipe list or the Bestiary
+			Tap this key to open the Recipe list
 			Double tap this key to open the Bestiary
+			See also "{$Mods.BetterInventory.Configs.ItemSearch.searchRecipes.Name}" and "{$Mods.BetterInventory.Configs.ItemSearch.searchDrops.Name}"
 			'''
+	}
+
+	info: {
+		Label: info
+		Tooltip: ""
 	}
 }
 
@@ -407,14 +415,18 @@ UnknownDisplay: {
 BetterGuide: {
 	Tooltip: ""
 
-	anyItem: {
-		Label: Search Any Item
-		Tooltip: Allows you to search the recipe of any item
+	moreRecipes: {
+		Label: More recipes
+		Tooltip:
+			'''
+			Adds recipes crafting the item to the guide results
+			Search the recipe of any item
+			'''
 	}
 
 	favoriteRecipes: {
 		Label: Favorite Recipes
-		Tooltip: Allows you to favorite or blacklist recipes
+		Tooltip: Favorite or blacklist recipes
 	}
 
 	tile: {
@@ -430,15 +442,15 @@ BetterGuide: {
 		Label: Craft in Guide Menu
 		Tooltip:
 			'''
-			Allow you to craft items when talking to the guide
-			Add an icon to toggle between "All Recipes" and "Available Recipes"
+			Craft items when talking to the guide
+			Toggle between "All Recipes" and "Available Recipes"
 			The toggle stores 2 independent states: one when the guide item or tile are used, and one when one when none are used.
 			'''
 	}
 
 	craftText: {
 		Label: Craft Tiles and Conditions
-		Tooltip: Improves the way crafting station and conditions are displayed
+		Tooltip: Overhauls the way crafting station and conditions of recipes are displayed
 	}
 
 	progression: {
@@ -581,6 +593,11 @@ UnloadedCrafting: {
 		Label: "{$Mods.BetterInventory.Configs.Crafting.craftOnList.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
+
+	recipeFilters: {
+		Label: recipe Filters
+		Tooltip: ""
+	}
 }
 
 UnloadedInventoryManagement: {
@@ -655,8 +672,8 @@ UnloadedItemSearch: {
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
-	guideAnyItem: {
-		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.anyItem.Label}"
+	guideMoreRecipes: {
+		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.moreRecipes.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 

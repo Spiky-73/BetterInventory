@@ -60,8 +60,8 @@ public sealed class BetterPlayer : ModPlayer {
     public override void ProcessTriggers(TriggersSet triggersSet) {
         QuickMove.ProcessTriggers();
         SearchItem.ProcessSearchTap();
-        if (FavoritedBuffKb.JustPressed) FavoritedBuff(Player);
-        if (Configs.ItemActions.BuilderKeys) {
+        if (Configs.ItemActions.FavoriteBuff && FavoritedBuffKb.JustPressed) FavoritedBuff(Player);
+        if (Configs.ItemActions.BuilderAccs) {
             foreach ((BuilderToggle? builder, ModKeybind kb) in BuilderTogglesKb) {
                 if (!kb.JustPressed) continue;
                 if (builder is null) {
@@ -120,7 +120,7 @@ public sealed class BetterPlayer : ModPlayer {
     }
     private static void HookFastExtractinator(On_Player.orig_DropItemFromExtractinator orig, Player self, int itemType, int stack) {
         orig(self, itemType, stack);
-        if (Configs.ItemActions.FastContainerOpening) self.itemTime = self.itemTimeMax = self.itemTime/5;
+        if (Configs.ItemActions.FastExtractinator) self.itemTime = self.itemTimeMax = self.itemTime/5; // TODO stackSplit
     }
 
     public static void CycleBuilderState(Player player, BuilderToggle toggle, int? state = null) => player.builderAccStatus[toggle.Type] = (state ?? (player.builderAccStatus[toggle.Type] + 1)) % toggle.NumberOfStates;

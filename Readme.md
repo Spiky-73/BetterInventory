@@ -9,30 +9,57 @@ Keep in mind, this mod is still in development. If you find a bug, please report
 Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetails/?id=3074374647) if you wish to download and use this mod.
 
 
-## Key Features
- - More item actions in the inventory
- - A way to quickly move item between various inventory slots
- - Smarter item consumption and pickup
- - Various keybinds to toggle Builder Accessories or Quick Buff favorites items
- - An improved Guide allowing you to Favorite or Blacklist recipes and filter by crating station
- - An improved Bestiary showing the content of Treasure Bag 
- - An Enhanced Crafting interface with the ability to craft on the recipe list, filter recipes and craft item in stacks 
- - The possibility to search an item's recipes or NPCs dropping it
- - And many more...
+## Features
 
+### Inventory Management
+- `Smart Item consumption`: Consume items from a different stack to reduce changes in the selected item
+- `Smart Item Pickup`: Items go their previous slot in your inventory when picked up
+- `Auto Equip Items`:  Automatically equip items such as Armors, Accessories or Equipment
+- `Quick Move`: Quickly move items between special slots in the inventory
+- `Favorite Items in Personal Storages`: Favorite items in the Piggy Bank, Safe, ...
+- `Craft Stack`: Left Click to craft or buy items in stacks
+- `Shift Right Click`: Shift or Control Right Click to transfer one item
+- `Stack Trashed and Sold Items` Items sold or trashed multiple times will stack
+
+### Item Actions
+- `Fast Container Opening`: Hold rick click to rapidly open containers
+- `Fast Extractinator`: Much Faster Extractination
+- `Extra Item Right Click`: Item that can be right clicked in the inventory can be right clicked when held
+- `Builder Accessories`: Toggle builder accessories with a keybind
+- `Favorite Quick Buff`: Quick buff favorite potions only
+
+### Crafting
+- `Fixed UI`: Fixes inconsistencies with the crafting UI, such as the scrolling and material display
+- `Recipe Filters`: Filter recipes by their created item
+- `Craft on Recipe List`: Craft items directly from the recipe list
+- `Held Material`: Adds the held item to the available materials
+
+### Item Search
+- `More recipes`: Adds recipes crafting the item to the guide results
+- `Favorite Recipes`: Allows you to favorite or blacklist recipes
+- `Guide Tile`: Adds a second slot next to the guide item to filter by crafting station or condition
+- `Craft in Guide Menu`: Allow you to craft items when talking to the guide and toggle between "All Recipes" and "Available Recipes"
+- `Craft Tiles and Conditions`: Overhauls the way crafting station and conditions of recipes are displayed
+- `Show Treasure Bag Content`: Displays items dropped by Treasure Bags in the Bestiary
+- `Override Unlock Filter`: Replace the Bestiary filter "Is Unlocked" with "Not Full Unlocked"
+- `Minimum Displayed Info`: Force the minimal displayed information for discovered Bestiary entries
+- `Search Item` Quickly open the recipe list or the Bestiary, search recipes using a material or NPCs dropping an item with a simple keybind
+- `Search History`: Search the previously searched entry
+- `Unknown Entity Display`: Change how undiscovered recipes or NPCs are displayed
 
 ## Changelog
 
 ### v0.5
 - Added the Mod Compatibility Config
-- Added an option to sensitive sensible parts of the mod from loading at all
+- Added an option to sensitive parts of the mod from loading at all
 - Added a Compatibility layer to disable part of the mods when they fail loading
-- Auto Builder Toggle keybinds generation
-- Unfavorite favorite recipes on craft
+- Added Unfavorite favorite recipes on craft
 - Added smart consumption for materials
 - Added a option for max amount of crafted or bought items with left click
+- Auto generation of Builder Accessories keybinds
 - Reorganized some options in the configs
-- Use TileDefinition when possible
+- Added full feature list in README.md
+- Replaced string with TileDefinition when possible
 - Fixed crash on load with Better Game UI
 - Fixed bugs with shops
 

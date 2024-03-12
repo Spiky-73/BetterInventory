@@ -490,7 +490,7 @@ public sealed class Guide : ModSystem {
         //     ++ }
         cursor.EmitLdloc2();
         cursor.EmitDelegate<Func<Recipe, bool>>(recipe => {
-            if (Configs.BetterGuide.AnyItem && Main.guideItem.type == ItemID.None || recipe.HasResult(Main.guideItem.type)) {
+            if (Configs.BetterGuide.MoreRecipes && Main.guideItem.type == ItemID.None || recipe.HasResult(Main.guideItem.type)) {
                 Reflection.Recipe.AddToAvailableRecipes.Invoke(recipe.RecipeIndex);
                 return true;
             }
@@ -509,7 +509,7 @@ public sealed class Guide : ModSystem {
         //         if(<recipeOk> ++[&& !custom]) {
         cursor.EmitLdloc1();
         cursor.EmitDelegate((int r) => {
-        if (!(Configs.BetterGuide.AvailablesRecipes || Configs.BetterGuide.Tile || Configs.RecipeFiltering.Enabled)) return false;
+        if (!(Configs.BetterGuide.AvailablesRecipes || Configs.BetterGuide.Tile || Configs.RecipeFilters.Enabled)) return false;
             Reflection.Recipe.AddToAvailableRecipes.Invoke(r);
             return true;
         });
@@ -571,7 +571,7 @@ public sealed class Guide : ModSystem {
             s_availableRecipes.Add(recipeIndex);
             return;
         }
-        if ((Configs.BetterGuide.Tile && !CheckGuideFilters(recipeIndex)) || (Configs.RecipeFiltering.Enabled && !RecipeFiltering.FitsFilters(recipeIndex))) return;
+        if ((Configs.BetterGuide.Tile && !CheckGuideFilters(recipeIndex)) || (Configs.RecipeFilters.Enabled && !RecipeFiltering.FitsFilters(recipeIndex))) return;
         orig(recipeIndex);
     }
 
@@ -676,18 +676,18 @@ public sealed class Guide : ModSystem {
     
     private static void HookGuideTileAdj(On_Player.orig_AdjTiles orig, Player self) {
         orig(self);
-        if (!Configs.BetterGuide.Tile || Configs.ItemSearch.SearchRecipes || guideTile.createTile < TileID.Dirt) return;
+        if (!Configs.BetterGuide.AvailablesRecipes || !Configs.BetterGuide.Tile || Configs.ItemSearch.SearchRecipes || guideTile.createTile < TileID.Dirt) return;
         self.adjTile[guideTile.createTile] = true;
         Recipe.FindRecipes();
     }
     private static int HookAllowGuideItem(On_ItemSlot.orig_PickItemMovementAction orig, Item[] inv, int context, int slot, Item checkItem) {
         if (context != ContextID.GuideItem) return orig(inv, context, slot, checkItem);
-        if (Configs.BetterGuide.AnyItem && slot == 0 && GetPlaceholderType(Main.mouseItem) == PlaceholderType.None) return 0;
+        if (Configs.BetterGuide.MoreRecipes && slot == 0 && GetPlaceholderType(Main.mouseItem) == PlaceholderType.None) return 0;
         if (Configs.BetterGuide.Tile && slot == 1 && FitsCraftingTile(Main.mouseItem)) return 0;
         return -1;
     }
     public static bool OverrideHover(Item[] inv, int context, int slot) {
-        if (!Main.InGuideCraftMenu || !ItemSlot.ShiftInUse || inv[slot].favorited || !Configs.BetterGuide.AnyItem || Array.IndexOf(Utility.InventoryContexts, context) == -1 || inv[slot].IsAir|| ItemSlot.PickItemMovementAction(inv, ContextID.GuideItem, 0, inv[slot]) != 0) return false;
+        if (!Main.InGuideCraftMenu || !ItemSlot.ShiftInUse || inv[slot].favorited || !Configs.BetterGuide.MoreRecipes || Array.IndexOf(Utility.InventoryContexts, context) == -1 || inv[slot].IsAir|| ItemSlot.PickItemMovementAction(inv, ContextID.GuideItem, 0, inv[slot]) != 0) return false;
         Main.cursorOverride = CursorOverrideID.InventoryToChest;
         return true;
     }

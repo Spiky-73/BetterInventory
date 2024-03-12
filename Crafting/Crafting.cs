@@ -1,14 +1,10 @@
 using MonoMod.Cil;
 using Terraria;
-using Terraria.ModLoader;
 using Terraria.UI;
 
 namespace BetterInventory.Crafting;
 
-public sealed class Crafting : ILoadable {
-    
-    public void Load(Mod mod) {}
-    public void Unload(){}
+public static class Crafting {
 
     internal static void ILCraftOnList(ILContext il) {
         ILCursor cursor = new(il);

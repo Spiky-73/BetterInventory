@@ -14,12 +14,9 @@ using Terraria.ModLoader;
 
 namespace BetterInventory.Crafting;
 
-public sealed class RecipeFiltering {
+public static class RecipeFiltering {
 
     public static RecipeFilters LocalFilters => ItemActions.BetterPlayer.LocalPlayer.RecipeFilters;
-
-    public void Load(Mod mod) {}
-    public void Unload() { }
 
     internal static void ILDrawFilters(ILContext il) {
         ILCursor cursor = new(il);
@@ -32,7 +29,7 @@ public sealed class RecipeFiltering {
         //     ++<drawFilters>
         cursor.EmitLdloc(13); // int num54
         cursor.EmitDelegate((int screenY) => {
-            if (Configs.RecipeFiltering.Enabled && s_recipes != 0) DrawFilters(94, 450 + screenY);
+            if (Configs.RecipeFilters.Enabled && s_recipes != 0) DrawFilters(94, 450 + screenY);
         });
 
         //     ...
@@ -43,7 +40,7 @@ public sealed class RecipeFiltering {
         //         if (++false && Main.InGuideCraftMenu) num74 -= 150;
         cursor.GotoNext(i => i.MatchLdsfld(Reflection.TextureAssets.CraftToggle));
         cursor.GotoPrev(MoveType.After, i => i.MatchLdsfld(Reflection.Main.InGuideCraftMenu));
-        cursor.EmitDelegate((bool inGuide) => !Configs.RecipeFiltering.Enabled && inGuide);
+        cursor.EmitDelegate((bool inGuide) => !Configs.RecipeFilters.Enabled && inGuide);
         //         ...
         //     }
     }
@@ -62,9 +59,9 @@ public sealed class RecipeFiltering {
         int y = hammerY + TextureAssets.CraftToggle[0].Height() - TextureAssets.InfoIcon[0].Width()/2;
         while (i < LocalFilters.Filterer.AvailableFilters.Count) {
             int x = hammerX - TextureAssets.InfoIcon[0].Width() - 1;
-            for(int d = 0; i < filters.AvailableFilters.Count && d < Configs.RecipeFiltering.Value.width; i++){
+            for(int d = 0; i < filters.AvailableFilters.Count && d < Configs.RecipeFilters.Value.width; i++){
                 bool active = filters.IsFilterActive(i);
-                if (Configs.RecipeFiltering.Value.hideUnavailable && s_recipesInFilter[i] == 0 && !active) continue;
+                if (Configs.RecipeFilters.Value.hideUnavailable && s_recipesInFilter[i] == 0 && !active) continue;
                 Rectangle hitbox = new(x, y, RecipeFilterBack.Width(), RecipeFilterBack.Height());
                 if (hitbox.Contains(Main.mouseX, Main.mouseY)) {
                     Main.LocalPlayer.mouseInterface = true;

@@ -2,7 +2,6 @@ using System;
 using System.ComponentModel;
 using BetterInventory.Configs.UI;
 using BetterInventory.ItemSearch;
-using Iced.Intel;
 using Newtonsoft.Json;
 using Terraria;
 using Terraria.ModLoader.Config;
@@ -39,7 +38,7 @@ public sealed class ItemSearch : ModConfig {
 public enum UnknownDisplay { Hidden, Unknown, Known }
 
 public class BetterGuide {
-    [DefaultValue(true)] public bool anyItem = true;
+    [DefaultValue(true)] public bool moreRecipes = true;
     [DefaultValue(true)] public bool craftText = true;
     public Toggle<FavoriteRecipes> favoriteRecipes = new(true);
     [DefaultValue(true)] public bool craftInMenu = true;
@@ -47,7 +46,7 @@ public class BetterGuide {
     [DefaultValue(true)] public bool progression = true;
 
     public static bool Enabled => ItemSearch.Instance.betterGuide;
-    public static bool AnyItem => Enabled && Value.anyItem && !UnloadedItemSearch.Value.guideAnyItem;
+    public static bool MoreRecipes => Enabled && Value.moreRecipes && !UnloadedItemSearch.Value.guideMoreRecipes;
     public static bool CraftText => Enabled && Value.craftText;
     public static bool FavoriteRecipes => Enabled && Value.favoriteRecipes && !UnloadedItemSearch.Value.guideFavorite;
     public static bool CraftInMenu => Enabled && Value.craftInMenu && !UnloadedItemSearch.Value.guideCraftInMenu;

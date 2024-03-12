@@ -6,7 +6,7 @@ namespace BetterInventory.Configs;
 
 public sealed class Crafting : ModConfig {
     public Toggle<FixedUI> fixedUI = new(true);
-    public Toggle<RecipeFiltering> recipeFiltering = new(true);
+    public Toggle<RecipeFilters> recipeFilters = new(true);
     public Toggle<CraftOnList> craftOnList = new(true);
     [DefaultValue(true)] public bool mouseMaterial;
 
@@ -20,13 +20,13 @@ public sealed class FixedUI {
     public Toggle<FastScroll> fastScroll = new(true);
     [DefaultValue(true)] public bool listScroll = true;
     [DefaultValue(true)] public bool wrapping = true;
-    [DefaultValue(true)] public bool moveMouse = true;
+    [DefaultValue(true)] public bool craftWhenHolding = true;
 
     public static bool Enabled => Crafting.Instance.fixedUI;
     public static bool FastScroll => Enabled && Value.fastScroll && !UnloadedCrafting.Value.fastScroll;
     public static bool ListScroll => Enabled && Value.listScroll && !UnloadedCrafting.Value.listScroll;
     public static bool Wrapping => Enabled && Value.wrapping && !UnloadedCrafting.Value.wrapping;
-    public static bool MoveMouse => Enabled && Value.moveMouse;
+    public static bool CraftWhenHolding => Enabled && Value.craftWhenHolding;
     public static FixedUI Value => Crafting.Instance.fixedUI.Value;
 }
 
@@ -36,12 +36,12 @@ public sealed class FastScroll {
     public static FastScroll Value => Crafting.Instance.fixedUI.Value.fastScroll.Value;
 }
 
-public sealed class RecipeFiltering {
+public sealed class RecipeFilters {
     [DefaultValue(true)] public bool hideUnavailable = true;
     [Range(0, 6), DefaultValue(4)] public int width = 4;
 
-    public static bool Enabled => Crafting.Instance.recipeFiltering && !UnloadedCrafting.Value.recipeFiltering;
-    public static RecipeFiltering Value => Crafting.Instance.recipeFiltering.Value;
+    public static bool Enabled => Crafting.Instance.recipeFilters && !UnloadedCrafting.Value.recipeFilters;
+    public static RecipeFilters Value => Crafting.Instance.recipeFilters.Value;
 }
 
 public sealed class CraftOnList {

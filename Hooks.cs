@@ -54,7 +54,7 @@ public class Hooks : ILoadable {
     }
 
     private void ILDrawInventory(ILContext il) {
-        if (!ApplyIL(il, RecipeFiltering.ILDrawFilters, Configs.RecipeFiltering.Enabled)) Configs.UnloadedCrafting.Value.recipeFiltering = true;
+        if (!ApplyIL(il, RecipeFiltering.ILDrawFilters, Configs.RecipeFilters.Enabled)) Configs.UnloadedCrafting.Value.recipeFilters = true;
         if (!ApplyIL(il, FixedUI.ILFastScroll, Configs.FixedUI.FastScroll)) Configs.UnloadedCrafting.Value.fastScroll = true;
         if (!ApplyIL(il, FixedUI.ILListScrollFix, Configs.FixedUI.ListScroll)) Configs.UnloadedCrafting.Value.listScroll = true;
         if (!ApplyIL(il, FixedUI.ILMaterialWrapping, Configs.FixedUI.Wrapping)) Configs.UnloadedCrafting.Value.wrapping = true;
@@ -83,8 +83,8 @@ public class Hooks : ILoadable {
         if (!ApplyIL(il, Guide.ILUpdateOwnedItems, Configs.BetterGuide.AvailablesRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailablesRecipes = true;
     }
     private void ILOverrideGuideRecipes(ILContext il){
-        if (!ApplyIL(il, Guide.ILMoreGuideRecipes, Configs.BetterGuide.AnyItem)) Configs.UnloadedItemSearch.Value.guideAnyItem = true;
-        if (!ApplyIL(il, Guide.ILForceAddToAvailable, Configs.BetterGuide.AvailablesRecipes || Configs.BetterGuide.Tile || Configs.RecipeFiltering.Enabled)) Configs.UnloadedItemSearch.Value.GuideAvailablesRecipes = Configs.UnloadedItemSearch.Value.guideAnyItem = Configs.UnloadedCrafting.Value.recipeFiltering = true;
+        if (!ApplyIL(il, Guide.ILMoreGuideRecipes, Configs.BetterGuide.MoreRecipes)) Configs.UnloadedItemSearch.Value.guideMoreRecipes = true;
+        if (!ApplyIL(il, Guide.ILForceAddToAvailable, Configs.BetterGuide.AvailablesRecipes || Configs.BetterGuide.Tile || Configs.RecipeFilters.Enabled)) Configs.UnloadedItemSearch.Value.GuideAvailablesRecipes = Configs.UnloadedItemSearch.Value.guideMoreRecipes = Configs.UnloadedCrafting.Value.recipeFilters = true;
         if (!ApplyIL(il, Guide.ILGuideRecipeOrder, Configs.BetterGuide.AvailablesRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailablesRecipes = true;
     }
     private void ILConsumeForCraft(ILContext il) {
