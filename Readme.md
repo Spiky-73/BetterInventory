@@ -25,8 +25,8 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 - `Fast Container Opening`: Hold rick click to rapidly open containers
 - `Fast Extractinator`: Much Faster Extractination
 - `Extra Item Right Click`: Item that can be right clicked in the inventory can be right clicked when held
-- `Builder Accessories`: Toggle builder accessories with a keybind
 - `Favorited Quick Buff`: Quick buff using favorited potions only
+- `Builder Accessories`: Toggle builder accessories with a keybind
 
 ### Crafting
 - `Fixed UI`: Fixes inconsistencies with the crafting UI, such as the scrolling and material display
@@ -35,14 +35,14 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 - `Held Material`: Adds the held item to the available materials
 
 ### Item Search
-- `More recipes`: Adds recipes crafting the item to the guide results
 - `Favorite Recipes`: Allows you to favorite or blacklist recipes
-- `Guide Tile`: Adds a second slot next to the guide item to filter by crafting station or condition
 - `Craft in Guide Menu`: Allow you to craft items when talking to the guide and toggle between "All Recipes" and "Available Recipes"
+- `Guide Tile`: Adds a second slot next to the guide item to filter by crafting station or condition
+- `More recipes`: Adds recipes crafting the item to the guide results
 - `Craft Tiles and Conditions`: Overhauls the way crafting station and conditions of recipes are displayed
 - `Show Treasure Bag Content`: Displays items dropped by Treasure Bags in the Bestiary
-- `Override Unlock Filter`: Replace the Bestiary filter "If Unlocked" with "Not Full Unlocked"
 - `Minimum Displayed Info`: Force the minimal displayed information for discovered Bestiary entries
+- `Override Unlock Filter`: Replace the Bestiary filter "If Unlocked" with "Not Full Unlocked"
 - `Search Item` Quickly open the recipe list or the Bestiary, search recipes using a material or NPCs dropping an item with a simple keybind
 - `Search History`: Search the previously searched entry
 - `Unknown Entity Display`: Change how undiscovered recipes or NPCs are displayed

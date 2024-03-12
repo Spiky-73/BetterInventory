@@ -42,11 +42,11 @@ public sealed class Bestiary : ILoadable {
             orig(self, drops, ratesInfo);
             return;
         }
-        float pesonalDroprate = System.Math.Min(1, self.chanceNumerator / (float)self.chanceDenominator);
-        float globalDroprate = pesonalDroprate * ratesInfo.parentDroprateChance;
+        float personalDroprate = System.Math.Min(1, self.chanceNumerator / (float)self.chanceDenominator);
+        float globalDroprate = personalDroprate * ratesInfo.parentDroprateChance;
         float dropRate = 1f / self.dropIds.Length * self.amount * globalDroprate;
         for (int i = 0; i < self.dropIds.Length; i++) drops.Add(new DropRateInfo(self.dropIds[i], 1, 1, dropRate, ratesInfo.conditions));
-        Chains.ReportDroprates(self.ChainedRules, pesonalDroprate, drops, ratesInfo);
+        Chains.ReportDroprates(self.ChainedRules, personalDroprate, drops, ratesInfo);
     }
     
     internal static void ILSearchAddEntries(ILContext il) {
@@ -233,16 +233,16 @@ public sealed class Bestiary : ILoadable {
         }
     }
 
-    public static string GetBossBagSearch(DropRateInfo bossbag){
-        if(_bossBagSearch.TryGetValue(bossbag.itemId, out string? s)) return s;
+    public static string GetBossBagSearch(DropRateInfo bossBag){
+        if(_bossBagSearch.TryGetValue(bossBag.itemId, out string? s)) return s;
         List<DropRateInfo> drops = new();
         DropRateInfoChainFeed ratesInfo = new(1f);
         List<string> names = new();
-        foreach (IItemDropRule itemDropRule in Main.ItemDropsDB.GetRulesForItemID(bossbag.itemId)) itemDropRule.ReportDroprates(drops, ratesInfo);
+        foreach (IItemDropRule itemDropRule in Main.ItemDropsDB.GetRulesForItemID(bossBag.itemId)) itemDropRule.ReportDroprates(drops, ratesInfo);
         foreach (DropRateInfo drop in drops) {
             if (!drop.itemId.InRange(ItemID.CopperCoin, ItemID.PlatinumCoin)) names.Add(Lang.GetItemNameValue(drop.itemId));
         }
-        return _bossBagSearch[bossbag.itemId] = string.Join('|', names);
+        return _bossBagSearch[bossBag.itemId] = string.Join('|', names);
     }
 
     public static void ToggleBestiary(bool? enabled = null) {

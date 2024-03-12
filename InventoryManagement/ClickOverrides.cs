@@ -17,8 +17,6 @@ public sealed class ClickOverrides : ILoadable {
         On_Main.DrawInterface_36_Cursor += HookDrawCustomCursor;
         On_Main.TryAllowingToCraftRecipe += HookTryAllowingToCraftRecipe;
 
-        // IL_Recipe.Create += ILCreateRecipe;
-
         On_ChestUI.LootAll += HookLootAll;
         On_ChestUI.Restock += HookRestock;
 
@@ -231,22 +229,6 @@ public sealed class ClickOverrides : ILoadable {
         // PopupText.NewText(...);
         // ...
     }
-    // private static void ILCreateRecipe(ILContext il) {
-    //     ILCursor cursor = new(il);
-
-    //     // foreach (<requiredItem>) {
-    //     //     ...
-    //     //     RecipeLoader.ConsumeItem(this, item2.type, ref num);
-    //     cursor.GotoNext(MoveType.After, i => i.SaferMatchCall(typeof(RecipeLoader), nameof(RecipeLoader.ConsumeItem)));
-
-    //     //     ++ <bulkCraftCost>
-    //     cursor.EmitLdloca(4);
-    //     cursor.EmitDelegate((ref int consumed) => { consumed *= s_ilCraftMultiplier; });
-    //     //     <consumeItems>
-    //     // }
-    //     // ...
-    // }
-
 
     internal static void ILStackTrash(ILContext il) {
         ILCursor cursor = new(il);
@@ -272,12 +254,12 @@ public sealed class ClickOverrides : ILoadable {
         // ...
     }
     private static int HookStackSold(On_Chest.orig_AddItemToShop orig, Chest self, Item newItem) {
-        int baught = Main.shopSellbackHelper.GetAmount(newItem);
-        if (!Configs.InventoryManagement.StackTrash || baught >= newItem.stack) return orig(self, newItem);
+        int bought = Main.shopSellbackHelper.GetAmount(newItem);
+        if (!Configs.InventoryManagement.StackTrash || bought >= newItem.stack) return orig(self, newItem);
         newItem.stack -= Main.shopSellbackHelper.Remove(newItem);
         for (int i = 0; i < self.item.Length; i++) {
             if (self.item[i].IsAir || self.item[i].type != newItem.type || !self.item[i].buyOnce) continue;
-            if (!ItemLoader.TryStackItems(self.item[i], newItem, out int transfered)) continue;
+            if (!ItemLoader.TryStackItems(self.item[i], newItem, out int transferred)) continue;
             if (newItem.IsAir) return i;
         }
 

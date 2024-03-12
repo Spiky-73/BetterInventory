@@ -49,15 +49,15 @@ public class Notification : IInGameNotification {
     }
 
     public static void DisplayCompatibility() {
-        bool failled;
-        if (Hooks.FailledILs > Compatibility.Instance.failledILs) failled = true;
-        else if (Hooks.FailledILs < Compatibility.Instance.failledILs) failled = false;
+        bool failed;
+        if (Hooks.FailedILs > Compatibility.Instance.failedILs) failed = true;
+        else if (Hooks.FailedILs < Compatibility.Instance.failedILs) failed = false;
         else return;
-        Compatibility.Instance.failledILs = Hooks.FailledILs;
+        Compatibility.Instance.failedILs = Hooks.FailedILs;
         Compatibility.Instance.SaveConfig();
 
         List<(LocalizedText text, TagKeyFormat format)> lines = new() {
-            failled ? (Language.GetText($"{Localization.Keys.Chat}.UnloadedMore"), UnloadedMore) : (Language.GetText($"{Localization.Keys.Chat}.UnloadedLess"), UnloadedLess)
+            failed ? (Language.GetText($"{Localization.Keys.Chat}.UnloadedMore"), UnloadedMore) : (Language.GetText($"{Localization.Keys.Chat}.UnloadedLess"), UnloadedLess)
         };
         InGameNotificationsTracker.AddNotification(new Notification(lines));
     }

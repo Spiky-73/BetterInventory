@@ -231,7 +231,7 @@ public sealed class Guide : ModSystem {
         //                 ++ <overrideBackground>
         cursor.EmitLdloc(124); // int num63
         cursor.EmitDelegate((int i) => {
-            if (!Configs.BetterGuide.AvailablesRecipes) return;
+            if (!Configs.BetterGuide.AvailableRecipes) return;
             OverrideRecipeTexture(GetFavoriteState(Main.availableRecipe[i]), ItemSlot.DrawGoldBGForCraftingMaterial, IsAvailable(Main.availableRecipe[i]));
             ItemSlot.DrawGoldBGForCraftingMaterial = false;
             if (Configs.BetterGuide.Progression && IsUnknown(Main.availableRecipe[i])) s_hideNextItem = true;
@@ -264,7 +264,7 @@ public sealed class Guide : ModSystem {
         //             ++ <overrideBackground>
         cursor.EmitLdloc(130); // int num68
         cursor.EmitDelegate((int matI) => {
-            if (!Configs.BetterGuide.AvailablesRecipes) return;
+            if (!Configs.BetterGuide.AvailableRecipes) return;
             bool canCraft = IsAvailable(Main.availableRecipe[Main.focusRecipe]);
             if (!canCraft) {
                 Item material = Main.recipe[Main.availableRecipe[Main.focusRecipe]].requiredItem[matI];
@@ -319,7 +319,7 @@ public sealed class Guide : ModSystem {
         //             ++ <overrideBackground>
         cursor.EmitLdloc(153);
         cursor.EmitDelegate((int i) => {
-            if (!Configs.BetterGuide.AvailablesRecipes) return;
+            if (!Configs.BetterGuide.AvailableRecipes) return;
             OverrideRecipeTexture(GetFavoriteState(Main.availableRecipe[i]), ItemSlot.DrawGoldBGForCraftingMaterial, s_availableRecipes.Contains(Main.availableRecipe[i]));
             ItemSlot.DrawGoldBGForCraftingMaterial = false;
             if (Configs.BetterGuide.Progression && IsUnknown(Main.availableRecipe[i])) s_hideNextItem = true;
@@ -368,7 +368,7 @@ public sealed class Guide : ModSystem {
     }
 
 
-    public static Item? GetGuideMaterials() => Configs.BetterGuide.AvailablesRecipes && !Configs.SearchItems.Recipes ? Main.guideItem : null;
+    public static Item? GetGuideMaterials() => Configs.BetterGuide.AvailableRecipes && !Configs.SearchItems.Recipes ? Main.guideItem : null;
 
     public static void FindGuideRecipes() {
         s_collectingGuide = true;
@@ -381,7 +381,7 @@ public sealed class Guide : ModSystem {
     }
 
     private static void HookClearRecipes(On_Recipe.orig_ClearAvailableRecipes orig) {
-        if (Configs.BetterGuide.AvailablesRecipes && !s_collectingGuide) {
+        if (Configs.BetterGuide.AvailableRecipes && !s_collectingGuide) {
             ClearAvailableRecipes();
             return;
         }
@@ -395,7 +395,7 @@ public sealed class Guide : ModSystem {
             orig(canDelayCheck);
             return;
         }
-        if (!Configs.BetterGuide.AvailablesRecipes) {
+        if (!Configs.BetterGuide.AvailableRecipes) {
             if (Configs.BetterGuide.Tile && !guideTile.IsAir) FindGuideRecipes();
             else orig(canDelayCheck);
             return;
@@ -412,7 +412,7 @@ public sealed class Guide : ModSystem {
 
         // ++ if (Enabled) goto skipGuide
         ILLabel skipGuide = cursor.DefineLabel();
-        cursor.EmitDelegate(() => Configs.BetterGuide.AvailablesRecipes);
+        cursor.EmitDelegate(() => Configs.BetterGuide.AvailableRecipes);
         cursor.EmitBrtrue(skipGuide);
         cursor.MarkLabel(skipGuide); // Here in case of exception
 
@@ -442,7 +442,7 @@ public sealed class Guide : ModSystem {
 
         // ++<updateDisplay>
         cursor.EmitDelegate(() => {
-            if (!Configs.BetterGuide.AvailablesRecipes) return;
+            if (!Configs.BetterGuide.AvailableRecipes) return;
             bool added = false;
             if (!Main.mouseItem.IsAir) added |= LocalFilters.AddOwnedItem(Main.mouseItem);
             foreach (Item item in Main.LocalPlayer.inventory) if (!item.IsAir) added |= LocalFilters.AddOwnedItem(item);
@@ -456,7 +456,7 @@ public sealed class Guide : ModSystem {
         // Recipe.VisuallyRepositionRecipes(focusY);
     }
     private static void HookCollectGuideRecipes(On_Recipe.orig_CollectGuideRecipes orig) {
-        if (Configs.BetterGuide.AvailablesRecipes) {
+        if (Configs.BetterGuide.AvailableRecipes) {
             s_collectingGuide = true;
             s_ilRecipes = GetDisplayedRecipes().GetEnumerator();
             s_dispGuide = Main.guideItem.Clone();
@@ -509,7 +509,7 @@ public sealed class Guide : ModSystem {
         //         if(<recipeOk> ++[&& !custom]) {
         cursor.EmitLdloc1();
         cursor.EmitDelegate((int r) => {
-        if (!(Configs.BetterGuide.AvailablesRecipes || Configs.BetterGuide.Tile || Configs.RecipeFilters.Enabled)) return false;
+        if (!(Configs.BetterGuide.AvailableRecipes || Configs.BetterGuide.Tile || Configs.RecipeFilters.Enabled)) return false;
             Reflection.Recipe.AddToAvailableRecipes.Invoke(r);
             return true;
         });
@@ -530,7 +530,7 @@ public sealed class Guide : ModSystem {
         cursor.GotoNext(i => i.MatchStloc1());
         cursor.GotoNext(MoveType.After, i => i.MatchLdloc1());
         cursor.EmitDelegate((int index) => {
-            if (!Configs.BetterGuide.AvailablesRecipes) return index;
+            if (!Configs.BetterGuide.AvailableRecipes) return index;
             return s_ilRecipes!.MoveNext() ? s_ilRecipes.Current : Recipe.numRecipes;
         });
         cursor.EmitDup();
@@ -567,7 +567,7 @@ public sealed class Guide : ModSystem {
     }
 
     private static void HookAddToAvailableRecipes(On_Recipe.orig_AddToAvailableRecipes orig, int recipeIndex) {
-        if (Configs.BetterGuide.AvailablesRecipes && !s_collectingGuide){
+        if (Configs.BetterGuide.AvailableRecipes && !s_collectingGuide){
             s_availableRecipes.Add(recipeIndex);
             return;
         }
@@ -596,7 +596,7 @@ public sealed class Guide : ModSystem {
         // ++ if(<favorite>) goto skip;
         cursor.EmitLdarg0();
         cursor.EmitDelegate((int recipeIndex) => {
-            if (!Configs.BetterGuide.AvailablesRecipes) return false;
+            if (!Configs.BetterGuide.AvailableRecipes) return false;
 
             if (!IsAvailable(Main.availableRecipe[recipeIndex])) Main.LockCraftingForThisCraftClickDuration();
 
@@ -676,7 +676,7 @@ public sealed class Guide : ModSystem {
     
     private static void HookGuideTileAdj(On_Player.orig_AdjTiles orig, Player self) {
         orig(self);
-        if (!Configs.BetterGuide.AvailablesRecipes || !Configs.BetterGuide.Tile || Configs.SearchItems.Recipes || guideTile.createTile < TileID.Dirt) return;
+        if (!Configs.BetterGuide.AvailableRecipes || !Configs.BetterGuide.Tile || Configs.SearchItems.Recipes || guideTile.createTile < TileID.Dirt) return;
         self.adjTile[guideTile.createTile] = true;
         Recipe.FindRecipes();
     }

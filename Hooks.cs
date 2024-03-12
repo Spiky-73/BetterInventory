@@ -61,12 +61,12 @@ public class Hooks : ILoadable {
         if (!ApplyIL(il, Crafting.Crafting.ILCraftOnList, Configs.CraftOnList.Enabled)) Configs.UnloadedCrafting.Value.craftOnList = true;
         if (!ApplyIL(il, SearchItem.ILForceGuideDisplay, Configs.SearchItems.Recipes)) Configs.UnloadedItemSearch.Value.searchRecipes = true;
         if (!ApplyIL(il, Guide.ILDrawVisibility, Configs.BetterGuide.CraftInMenu)) Configs.UnloadedItemSearch.Value.guideCraftInMenu = true;
-        if (!ApplyIL(il, Guide.ILCustomDrawCreateItem, Configs.BetterGuide.AvailablesRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailablesRecipes = true;
-        if (!ApplyIL(il, Guide.ILCustomDrawMaterials, Configs.BetterGuide.AvailablesRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailablesRecipes = true;
-        if (!ApplyIL(il, Guide.ILCustomDrawRecipeList, Configs.BetterGuide.AvailablesRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailablesRecipes = true;
+        if (!ApplyIL(il, Guide.ILCustomDrawCreateItem, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = true;
+        if (!ApplyIL(il, Guide.ILCustomDrawMaterials, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = true;
+        if (!ApplyIL(il, Guide.ILCustomDrawRecipeList, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = true;
     }
     private void ILHoverOverCraftingItemButton(ILContext il) {
-        if (!ApplyIL(il, Guide.ILFavoriteRecipe, Configs.BetterGuide.AvailablesRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailablesRecipes = true;
+        if (!ApplyIL(il, Guide.ILFavoriteRecipe, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = true;
         if (!ApplyIL(il, Guide.ILCraftInGuideMenu, Configs.BetterGuide.CraftInMenu)) Configs.UnloadedItemSearch.Value.guideCraftInMenu = true;
         if (!ApplyIL(il, ClickOverrides.ILShiftRightCursorOverride, Configs.InventoryManagement.ShiftRight)) Configs.UnloadedInventoryManagement.Value.shiftRight = true;
     }
@@ -79,13 +79,13 @@ public class Hooks : ILoadable {
     }
 
     private void ILFindRecipes(ILContext il){
-        if (!ApplyIL(il, Guide.ILSkipGuideRecipes, Configs.BetterGuide.AvailablesRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailablesRecipes = true;
-        if (!ApplyIL(il, Guide.ILUpdateOwnedItems, Configs.BetterGuide.AvailablesRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailablesRecipes = true;
+        if (!ApplyIL(il, Guide.ILSkipGuideRecipes, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = true;
+        if (!ApplyIL(il, Guide.ILUpdateOwnedItems, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = true;
     }
     private void ILOverrideGuideRecipes(ILContext il){
         if (!ApplyIL(il, Guide.ILMoreGuideRecipes, Configs.BetterGuide.MoreRecipes)) Configs.UnloadedItemSearch.Value.guideMoreRecipes = true;
-        if (!ApplyIL(il, Guide.ILForceAddToAvailable, Configs.BetterGuide.AvailablesRecipes || Configs.BetterGuide.Tile || Configs.RecipeFilters.Enabled)) Configs.UnloadedItemSearch.Value.GuideAvailablesRecipes = Configs.UnloadedItemSearch.Value.guideMoreRecipes = Configs.UnloadedCrafting.Value.recipeFilters = true;
-        if (!ApplyIL(il, Guide.ILGuideRecipeOrder, Configs.BetterGuide.AvailablesRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailablesRecipes = true;
+        if (!ApplyIL(il, Guide.ILForceAddToAvailable, Configs.BetterGuide.AvailableRecipes || Configs.BetterGuide.Tile || Configs.RecipeFilters.Enabled)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = Configs.UnloadedItemSearch.Value.guideMoreRecipes = Configs.UnloadedCrafting.Value.recipeFilters = true;
+        if (!ApplyIL(il, Guide.ILGuideRecipeOrder, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = true;
     }
     private void ILConsumeForCraft(ILContext il) {
         if (!ApplyIL(il, SmartConsumptionItem.ILOnConsumedMaterial, Configs.SmartConsumption.Materials)) Configs.UnloadedInventoryManagement.Value.materials = true;
@@ -104,7 +104,7 @@ public class Hooks : ILoadable {
     }
     private void ILDrawSlot(ILContext il) {
         if (!ApplyIL(il, SmartPickup.ILDrawMarks, Configs.SmartPickup.Marks)) Configs.UnloadedInventoryManagement.Value.marks = true;
-        if (!ApplyIL(il, QuickMove.ILHighlightSlot, Configs.QuickMove.Hightlight)) Configs.UnloadedInventoryManagement.Value.quickMoveHightlight = true;
+        if (!ApplyIL(il, QuickMove.ILHighlightSlot, Configs.QuickMove.Highlight)) Configs.UnloadedInventoryManagement.Value.quickMoveHighlight = true;
         if (!ApplyIL(il, QuickMove.ILDisplayHotkey, Configs.QuickMove.DisplayHotkeys)) Configs.UnloadedInventoryManagement.Value.quickMoveHotkeys = true;
     }
 
@@ -135,12 +135,12 @@ public class Hooks : ILoadable {
             ilEdit(context); 
         } catch (Exception) {
             MonoModHooks.DumpIL(Mod, context);
-            FailledILs++;
+            FailedILs++;
             Mod.Logger.Warn($"{name} failled to load. Related features will be disabled until reload");
             return false;
         }
         return true;
     }
 
-    public static int FailledILs { get; private set; }
+    public static int FailedILs { get; private set; }
 }

@@ -47,7 +47,7 @@ public static class RecipeFiltering {
 
     public static void DrawFilters(int hammerX, int hammerY){
         static void OnFilterChanges() {
-            if (!Configs.BetterGuide.AvailablesRecipes) Recipe.FindRecipes();
+            if (!Configs.BetterGuide.AvailableRecipes) Recipe.FindRecipes();
             else Guide.FindGuideRecipes();
             SoundEngine.PlaySound(SoundID.MenuTick);
         }

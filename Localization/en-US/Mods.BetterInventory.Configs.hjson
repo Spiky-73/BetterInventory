@@ -118,7 +118,7 @@ InventoryManagement: {
 		Tooltip:
 			'''
 			Quickly move items between special slots in the inventory
-			Hover over an item in your inventory or equipement and press a hotbar key to move it to this slot
+			Hover over an item in your inventory or equipment and press a hotbar key to move it to this slot
 			Press the same key to move to the next special slots in the cycle
 			'''
 	}
@@ -357,7 +357,7 @@ ItemSearch: {
 			'''
 			Hold the "{$Mods.BetterInventory.Keybinds.SearchItem.DisplayName}" key and a Click to search an item
 			Hold the "{$Mods.BetterInventory.Keybinds.SearchItem.DisplayName}" key and a Middle Click clear searched items
-			Right Click a searched fieldl to clear it
+			Right Click a searched field to clear it
 			Binding the same key for "{$Mods.BetterInventory.Keybinds.QuickList.DisplayName}" and "{$Mods.BetterInventory.Keybinds.SearchItem.DisplayName}" is recommended
 			'''
 	}
@@ -426,7 +426,7 @@ BetterGuide: {
 
 	progression: {
 		Label: Recipe Progression
-		Tooltip: Hides Unknown recipes accoring to "{$Mods.BetterInventory.Configs.ItemSearch.unknownDisplay.Name}"
+		Tooltip: Hides Unknown recipes according to "{$Mods.BetterInventory.Configs.ItemSearch.unknownDisplay.Name}"
 	}
 }
 
@@ -474,7 +474,7 @@ BetterBestiary: {
 		Label: NPC Progression
 		Tooltip:
 			'''
-			Hides Unknown NPC accoring to "{$Mods.BetterInventory.Configs.ItemSearch.unknownDisplay.Name}"
+			Hides Unknown NPC according to "{$Mods.BetterInventory.Configs.ItemSearch.unknownDisplay.Name}"
 			{$Mods.BetterInventory.UI.NoBestiaryEffect}
 			'''
 	}
@@ -494,7 +494,7 @@ QuickList: {
 	Tooltip: ""
 
 	tap: {
-		Label: Tap Lenght
+		Label: Tap Length
 		Tooltip: The maximum time for a press to count as a tap ({$Mods.BetterInventory.UI.FramesToSec})
 	}
 
@@ -668,7 +668,7 @@ UnloadedInventoryManagement: {
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
-	quickMoveHightlight: {
+	quickMoveHighlight: {
 		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.quickMove.Label} @ {$Mods.BetterInventory.Configs.QuickMove.displayHotkeys.Label} @ {$Mods.BetterInventory.Configs.DisplayedHotkeys.highlightIntensity.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}

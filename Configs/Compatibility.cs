@@ -7,7 +7,7 @@ namespace BetterInventory.Configs;
 
 public sealed class Compatibility : ModConfig {
 
-    [DefaultValue(0), JsonProperty] internal int failledILs = 0;
+    [DefaultValue(0), JsonProperty] internal int failedILs = 0;
 
 
     [ReloadRequired, DefaultValue(false)] public bool compatibilityMode;
@@ -86,7 +86,7 @@ public sealed class UnloadedInventoryManagement {
     public bool smartPickup = false;
     public bool marks = false;
     public bool quickMoveHotkeys = false;
-    public bool quickMoveHightlight = false;
+    public bool quickMoveHighlight = false;
     public bool craftStack = false;
 
     [JsonIgnore] public bool ClickOverrides { set { craftStack = value; shiftRight = value;} }
@@ -105,7 +105,7 @@ public sealed class UnloadedItemSearch {
     public bool bestiaryDisplayedUnlock = false;
 
     [JsonIgnore] public bool BestiaryUnlock { set { bestiaryProgression = value; bestiaryDisplayedUnlock = value; } }
-    [JsonIgnore] public bool GuideAvailablesRecipes { set { guideFavorite = value; guideCraftInMenu = value; guideProgression = value; } }
+    [JsonIgnore] public bool GuideAvailableRecipes { set { guideFavorite = value; guideCraftInMenu = value; guideProgression = value; } }
     
     public static UnloadedItemSearch Value => Compatibility.Instance.UnloadedItemSearch;
 }

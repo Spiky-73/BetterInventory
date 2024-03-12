@@ -72,7 +72,7 @@ public sealed class QuickMove {
 
     public static bool Enabled => InventoryManagement.Instance.quickMove;
     public static bool DisplayHotkeys => Value.displayHotkeys != HotkeyDisplayMode.Off && !UnloadedInventoryManagement.Value.quickMoveHotkeys;
-    public static bool Hightlight => DisplayHotkeys && Value.displayHotkeys.Value.highlightIntensity != 0 && !UnloadedInventoryManagement.Value.quickMoveHightlight;
+    public static bool Highlight => DisplayHotkeys && Value.displayHotkeys.Value.highlightIntensity != 0 && !UnloadedInventoryManagement.Value.quickMoveHighlight;
     public static QuickMove Value => InventoryManagement.Instance.quickMove.Value;
 }
 

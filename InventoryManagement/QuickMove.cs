@@ -205,7 +205,7 @@ public sealed class QuickMove : ILoadable {
         cursor.EmitLdarg(4);
         cursor.EmitLdloc2();
         cursor.EmitDelegate((SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, float scale) => {
-            if (!Configs.QuickMove.Hightlight) return;
+            if (!Configs.QuickMove.Highlight) return;
             if (!IsTargetableSlot(inv, context, slot, out int number, out int key) || (Configs.QuickMove.Value.displayHotkeys == Configs.HotkeyDisplayMode.First ? number != 1 : number == 0)) return;
             spriteBatch.Draw(TextureAssets.InventoryBack18.Value, position, null, Main.OurFavoriteColor * (Configs.QuickMove.Value.displayHotkeys.Value.highlightIntensity / number) * Main.cursorAlpha, 0f, default, scale, 0, 0f);
         });

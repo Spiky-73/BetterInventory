@@ -6,6 +6,5 @@ Unknown: ???
 ByHand: By Hand
 QuickMoveTooltip: Quick move chain
 NoBestiaryEffect: Does not affect Bestiary completion
-DisplayOnly: Go the the "Keybings" page to change this value
 FeatureUnloaded: This feature was not loaded and will have no effect even when Enabled
 FramesToSec: 60 = 1s

@@ -22,11 +22,11 @@ public sealed class ItemSearch : ModConfig {
 public enum UnknownDisplay { Hidden, Unknown, Known }
 
 public class BetterGuide {
-    [DefaultValue(true)] public bool moreRecipes = true;
-    [DefaultValue(true)] public bool craftText = true;
     public Toggle<FavoriteRecipes> favoriteRecipes = new(true);
     [DefaultValue(true)] public bool craftInMenu = true;
+    [DefaultValue(true)] public bool moreRecipes = true;
     [DefaultValue(true)] public bool tile = true;
+    [DefaultValue(true)] public bool craftText = true;
     [DefaultValue(true)] public bool progression = true;
 
     public static bool Enabled => ItemSearch.Instance.betterGuide;
@@ -36,7 +36,7 @@ public class BetterGuide {
     public static bool CraftInMenu => Enabled && Value.craftInMenu && !UnloadedItemSearch.Value.guideCraftInMenu;
     public static bool Tile => Enabled && Value.tile;
     public static bool Progression => Enabled && Value.progression && !UnloadedItemSearch.Value.guideProgression;
-    public static bool AvailablesRecipes => FavoriteRecipes || CraftInMenu || Progression;
+    public static bool AvailableRecipes => FavoriteRecipes || CraftInMenu || Progression;
     
     public static BetterGuide Value => ItemSearch.Instance.betterGuide.Value;
 }
