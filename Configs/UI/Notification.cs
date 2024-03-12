@@ -28,7 +28,9 @@ public class Notification : IInGameNotification {
         ($"{Localization.Keys.Chat}.Workshop", $"c/{Colors.RarityCyan.Hex3()}"),
         ($"{Localization.Keys.Chat}.Homepage", $"c/{Colors.RarityCyan.Hex3()}")
     });
-    public static TagKeyFormat ImportantTags => new(Colors.RarityAmber, new());
+    public static TagKeyFormat ImportantTags => new(Colors.RarityAmber, new() {
+        ($"{Localization.Keys.Configs}.Compatibility.DisplayName", $"c/{Colors.RarityCyan.Hex3()}")
+    });
 
     public static void DisplayUpdate() {
         bool download;

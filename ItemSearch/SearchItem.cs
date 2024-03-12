@@ -17,8 +17,7 @@ namespace BetterInventory.ItemSearch;
 public sealed class SearchItem : ILoadable {
 
     public void Load(Mod mod) {
-        ListKb = KeybindLoader.RegisterKeybind(mod, "QuickList", Microsoft.Xna.Framework.Input.Keys.N);
-        SearchKb = KeybindLoader.RegisterKeybind(mod, "SearchItem", Microsoft.Xna.Framework.Input.Keys.N);
+        QuickSearchKb = KeybindLoader.RegisterKeybind(mod, "QuickSearch", Microsoft.Xna.Framework.Input.Keys.N);
 
         On_Main.DrawCursor += HookRedirectCursor;
         On_Main.DrawThickCursor += HookRedirectThickCursor;
@@ -48,7 +47,7 @@ public sealed class SearchItem : ILoadable {
     private static Vector2 HookRedirectThickCursor(On_Main.orig_DrawThickCursor orig, bool smart) => Configs.SearchItems.Enabled && s_redirect ? Vector2.Zero : orig(smart);
     private static void HookDrawInterfaceCursor(On_Main.orig_DrawInterface_36_Cursor orig) {
         s_redirect = false;
-        if (Configs.SearchItems.Enabled && SearchKb.Current && !Main.HoverItem.IsAir && Guide.ForcedTooltip?.Key != $"{Localization.Keys.UI}.Unknown") {
+        if (Configs.SearchItems.Enabled && QuickSearchKb.Current && !Main.HoverItem.IsAir && Guide.ForcedTooltip?.Key != $"{Localization.Keys.UI}.Unknown") {
             s_allowClick = true;
             Main.cursorOverride = CursorOverrideID.Magnifiers;
         }
@@ -56,7 +55,7 @@ public sealed class SearchItem : ILoadable {
         s_redirect = true;
     }
     private static void HookClickOverrideInterface(On_Main.orig_DrawInterface orig, Main self, GameTime time) {
-        bool interceptClicks = Configs.SearchItems.Enabled && SearchKb.Current;
+        bool interceptClicks = Configs.SearchItems.Enabled && QuickSearchKb.Current;
         bool left, right;
         if (interceptClicks) (left, Main.mouseLeft, right, Main.mouseRight) = (Main.mouseLeft, false, Main.mouseRight, false);
         else (left, right) = (false, false);
@@ -125,7 +124,7 @@ public sealed class SearchItem : ILoadable {
 
     public static void ProcessSearchTap() {
         s_searchItemTimer++;
-        if (ListKb.JustReleased) {
+        if (QuickSearchKb.JustReleased) {
             if (s_searchItemTimer <= Configs.QuickList.Value.tap) {
                 if (Main.InGameUI.CurrentState == Main.BestiaryUI) {
                     Bestiary.ToggleBestiary();
@@ -146,7 +145,7 @@ public sealed class SearchItem : ILoadable {
             s_searchItemTimer = 0;
         }
 
-        if (ListKb.JustPressed) {
+        if (QuickSearchKb.JustPressed) {
             if (s_searchItemTimer > Configs.QuickList.Value.delay) s_searchItemTaps = 0;
             s_searchItemTimer = 0;
         }
@@ -326,8 +325,7 @@ public sealed class SearchItem : ILoadable {
 
     private static string? s_bestiaryDelayed;
 
-    public static ModKeybind ListKb { get; private set; } = null!;
-    public static ModKeybind SearchKb { get; private set; } = null!;
+    public static ModKeybind QuickSearchKb { get; private set; } = null!;
     private static bool s_allowClick = false;
     private static int s_searchItemTimer = 0, s_searchItemTaps = 0;
 

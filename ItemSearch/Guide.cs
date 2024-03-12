@@ -234,7 +234,7 @@ public sealed class Guide : ModSystem {
             if (!Configs.BetterGuide.AvailableRecipes) return;
             OverrideRecipeTexture(GetFavoriteState(Main.availableRecipe[i]), ItemSlot.DrawGoldBGForCraftingMaterial, IsAvailable(Main.availableRecipe[i]));
             ItemSlot.DrawGoldBGForCraftingMaterial = false;
-            if (Configs.BetterGuide.Progression && IsUnknown(Main.availableRecipe[i])) s_hideNextItem = true;
+            if (Configs.BetterGuide.UnknownDisplay && IsUnknown(Main.availableRecipe[i])) s_hideNextItem = true;
         });
 
         //                 ItemSlot.Draw(...);
@@ -253,7 +253,7 @@ public sealed class Guide : ModSystem {
         //     if (++<known> && Main.numAvailableRecipes > 0) {
         cursor.GotoNext(i => i.MatchStsfld(Reflection.UILinkPointNavigator.CRAFT_CurrentIngredientsCount));
         cursor.GotoPrev(MoveType.After, i => i.MatchLdsfld(Reflection.Main.numAvailableRecipes));
-        cursor.EmitDelegate((int num) => num == 0 || Configs.BetterGuide.Progression && IsUnknown(Main.availableRecipe[Main.focusRecipe]) ? 0 : num);
+        cursor.EmitDelegate((int num) => num == 0 || Configs.BetterGuide.UnknownDisplay && IsUnknown(Main.availableRecipe[Main.focusRecipe]) ? 0 : num);
 
         //         for (<focusRecipeMaterialIndex>) {
         //             ...
@@ -306,7 +306,7 @@ public sealed class Guide : ModSystem {
         //             ++ <GuideHover>
         cursor.EmitLdloc(153); // int num87
         cursor.EmitDelegate((int r) => {
-            if (Configs.BetterGuide.Progression && IsUnknown(Main.availableRecipe[r])) ForcedTooltip = Language.GetText($"{Localization.Keys.UI}.Unknown");
+            if (Configs.BetterGuide.UnknownDisplay && IsUnknown(Main.availableRecipe[r])) ForcedTooltip = Language.GetText($"{Localization.Keys.UI}.Unknown");
         });
         //             ...
         //         }
@@ -322,7 +322,7 @@ public sealed class Guide : ModSystem {
             if (!Configs.BetterGuide.AvailableRecipes) return;
             OverrideRecipeTexture(GetFavoriteState(Main.availableRecipe[i]), ItemSlot.DrawGoldBGForCraftingMaterial, s_availableRecipes.Contains(Main.availableRecipe[i]));
             ItemSlot.DrawGoldBGForCraftingMaterial = false;
-            if (Configs.BetterGuide.Progression && IsUnknown(Main.availableRecipe[i])) s_hideNextItem = true;
+            if (Configs.BetterGuide.UnknownDisplay && IsUnknown(Main.availableRecipe[i])) s_hideNextItem = true;
 
         });
 
@@ -541,7 +541,7 @@ public sealed class Guide : ModSystem {
     }
     private static IEnumerable<int> GetDisplayedRecipes() {
         static bool Skip(int r) {
-            if (Configs.ItemSearch.Instance.unknownDisplay != Configs.UnknownDisplay.Known && !LocalFilters.IsKnownRecipe(Main.recipe[r])) {
+            if (Configs.BetterGuide.UnknownDisplay && Configs.BetterGuide.Value.unknownDisplay != Configs.UnknownDisplay.Known && !LocalFilters.IsKnownRecipe(Main.recipe[r])) {
                 s_unknownRecipes.Add(r);
                 return true;
             }
@@ -557,7 +557,7 @@ public sealed class Guide : ModSystem {
                 if (!Skip(r)) yield return r;
             }
             if (Configs.BetterGuide.FavoriteRecipes) foreach (int r in LocalFilters.BlacklistedRecipes) yield return r;
-            if (Configs.ItemSearch.Instance.unknownDisplay == Configs.UnknownDisplay.Unknown) foreach (int r in s_unknownRecipes) yield return r;
+            if (Configs.BetterGuide.UnknownDisplay && Configs.BetterGuide.Value.unknownDisplay == Configs.UnknownDisplay.Unknown) foreach (int r in s_unknownRecipes) yield return r;
         } else {
             foreach (int r in s_availableRecipes) {
                 if (!Skip(r)) yield return r;
@@ -600,7 +600,7 @@ public sealed class Guide : ModSystem {
 
             if (!IsAvailable(Main.availableRecipe[recipeIndex])) Main.LockCraftingForThisCraftClickDuration();
 
-            if (Configs.BetterGuide.Progression && IsUnknown(Main.availableRecipe[recipeIndex])) {
+            if (Configs.BetterGuide.UnknownDisplay && IsUnknown(Main.availableRecipe[recipeIndex])) {
                 ForcedTooltip = Language.GetText($"{Localization.Keys.UI}.Unknown");
                 return false;
             }

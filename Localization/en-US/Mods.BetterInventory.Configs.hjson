@@ -342,37 +342,17 @@ ItemSearch: {
 	}
 
 	quickList: {
-		Label: "[i:3611] {$Mods.BetterInventory.Keybinds.QuickList.DisplayName}"
+		Label: "[i:3611] Quick List"
 		Tooltip:
 			'''
-			Tap the {$Mods.BetterInventory.Keybinds.QuickList.DisplayName} key to open the Recipe list
+			Tap the {$Mods.BetterInventory.Keybinds.QuickSearch.DisplayName} key to open the Recipe list
 			Double tap to open the Bestiary
-			Binding the same key for "{$Mods.BetterInventory.Keybinds.QuickList.DisplayName}" and "{$Mods.BetterInventory.Keybinds.SearchItem.DisplayName}" is recommended
 			'''
 	}
 
 	searchItems: {
-		Label: "[i:487] {$Mods.BetterInventory.Keybinds.SearchItem.DisplayName}"
-		Tooltip:
-			'''
-			Hold the "{$Mods.BetterInventory.Keybinds.SearchItem.DisplayName}" key and a Click to search an item
-			Hold the "{$Mods.BetterInventory.Keybinds.SearchItem.DisplayName}" key and a Middle Click clear searched items
-			Right Click a searched field to clear it
-			Binding the same key for "{$Mods.BetterInventory.Keybinds.QuickList.DisplayName}" and "{$Mods.BetterInventory.Keybinds.SearchItem.DisplayName}" is recommended
-			'''
-	}
-
-	unknownDisplay: {
-		Name: Unknown Entity Display
-		Label: "[i:236] {$Mods.BetterInventory.Configs.ItemSearch.unknownDisplay.Name}"
-		Tooltip:
-			'''
-			Change how undiscovered recipes or NPCs are displayed
-			Requires "Progression" in "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Name}" and "{$Mods.BetterInventory.Configs.ItemSearch.betterBestiary.Name}" respectively to be On
-			{$Mods.BetterInventory.Configs.UnknownDisplay.Hidden.Label}: Not displayed
-			{$Mods.BetterInventory.Configs.UnknownDisplay.Unknown.Label}: Displayed as '?'
-			{$Mods.BetterInventory.Configs.UnknownDisplay.Known.Label}: Displayed as discovered.
-			'''
+		Label: "[i:487] Search Item"
+		Tooltip: Search recipes or NPC drops with the "{$Mods.BetterInventory.Keybinds.QuickSearch.DisplayName}" keybind
 	}
 }
 
@@ -381,6 +361,7 @@ UnknownDisplay: {
 	Hidden.Label: Hidden
 	Unknown.Label: "{$Mods.BetterInventory.UI.Unknown}"
 	Known.Label: Known
+	Off.Label: Off
 }
 
 BetterGuide: {
@@ -424,9 +405,15 @@ BetterGuide: {
 		Tooltip: Overhauls the way crafting station and conditions of recipes are displayed
 	}
 
-	progression: {
-		Label: Recipe Progression
-		Tooltip: Hides Unknown recipes according to "{$Mods.BetterInventory.Configs.ItemSearch.unknownDisplay.Name}"
+	unknownDisplay: {
+		Label: Undiscovered Recipes Display
+		Tooltip:
+			'''
+			Change how undiscovered recipes are displayed
+			{$Mods.BetterInventory.Configs.UnknownDisplay.Hidden.Label}: Not displayed
+			{$Mods.BetterInventory.Configs.UnknownDisplay.Unknown.Label}: Displayed as '?'
+			{$Mods.BetterInventory.Configs.UnknownDisplay.Known.Label}: Displayed as discovered.
+			'''
 	}
 }
 
@@ -465,16 +452,19 @@ BetterBestiary: {
 		Label: Minimum Displayed Info
 		Tooltip:
 			'''
-			Forces the minimal displayed information for discovered entries
+			Forces the minimal displayed information for unlocked entries
 			{$Mods.BetterInventory.UI.NoBestiaryEffect}
 			'''
 	}
 
-	progression: {
-		Label: NPC Progression
+	unknownDisplay: {
+		Label: Locked NPC Display
 		Tooltip:
 			'''
-			Hides Unknown NPC according to "{$Mods.BetterInventory.Configs.ItemSearch.unknownDisplay.Name}"
+			Change how locked NPCs are displayed
+			{$Mods.BetterInventory.Configs.UnknownDisplay.Hidden.Label}: Not displayed
+			{$Mods.BetterInventory.Configs.UnknownDisplay.Unknown.Label}: Displayed as '?'
+			{$Mods.BetterInventory.Configs.UnknownDisplay.Known.Label}: Displayed as unlocked.
 			{$Mods.BetterInventory.UI.NoBestiaryEffect}
 			'''
 	}
@@ -511,10 +501,9 @@ SearchItems: {
 		Label: Recipes
 		Tooltip:
 			'''
-			Access the guide anywhere
-			Hold the "{$Mods.BetterInventory.Keybinds.SearchItem.DisplayName}" key and Left Click a material to search the recipes using it
-			Hold the "{$Mods.BetterInventory.Keybinds.SearchItem.DisplayName}" key and Middle Click in the inventory to clear the searched item
+			Hold the "{$Mods.BetterInventory.Keybinds.QuickSearch.DisplayName}" key and Left Click a material to search the recipes using it
 			With "{$Mods.BetterInventory.Configs.BetterGuide.tile.Label}" On, searching the guide tile will move it into the guide item and vice-versa
+			Hold the "{$Mods.BetterInventory.Keybinds.QuickSearch.DisplayName}" key and Middle Click in the inventory to clear the searched item
 			Right Click the Guide item to clear it
 			'''
 	}
@@ -523,8 +512,8 @@ SearchItems: {
 		Label: Drops
 		Tooltip:
 			'''
-			Hold the "{$Mods.BetterInventory.Keybinds.SearchItem.DisplayName}" key and Right Click an item to search the NPCs dropping it
-			Hold the "{$Mods.BetterInventory.Keybinds.SearchItem.DisplayName}" key and Middle Click in the Bestiary to clear the searched item
+			Hold the "{$Mods.BetterInventory.Keybinds.QuickSearch.DisplayName}" key and Right Click an item to search the NPCs dropping it
+			Hold the "{$Mods.BetterInventory.Keybinds.QuickSearch.DisplayName}" key and Middle Click in the Bestiary to clear the searched item
 			Right Click Bestiary text field to clear it
 			'''
 	}
@@ -551,7 +540,7 @@ Compatibility: {
 			Enable this if {$Mods.BetterInventory.Chat.ModName} fails to load or causes crashes when loading other mods
 
 			If you are is this situation:
-			1) Enable "{$Mods.BetterInventory.Configs.Compatibility.compatibilityMode.Name}" and initialize "{$Mods.BetterInventory.Configs.Compatibility.disableAll.Name}"
+			1) Enable "{$Mods.BetterInventory.Configs.Compatibility.compatibilityMode.Name}" and initialize "{$Mods.BetterInventory.Configs.Compatibility.DisableAll.Name}"
 			2) Reload
 			3) Re-enable a feature and Reload. If the loading fails, disable it
 			4) Repeat step 3 with every features you want to enable
@@ -572,17 +561,17 @@ Compatibility: {
 
 	UnloadedCrafting: {
 		Label: "[i:398] Unloaded {$Mods.BetterInventory.Configs.Crafting.DisplayName} Features"
-		Tooltip: The following features were not loaded and will have no effect even when Enabled
+		Tooltip: ""
 	}
 
 	UnloadedInventoryManagement: {
 		Label: "[i:5075] Unloaded {$Mods.BetterInventory.Configs.InventoryManagement.DisplayName} Features"
-		Tooltip: "{$Mods.BetterInventory.Configs.Compatibility.UnloadedCrafting.Tooltip}"
+		Tooltip: ""
 	}
 
 	UnloadedItemSearch: {
 		Label: "[i:487] Unloaded {$Mods.BetterInventory.Configs.ItemSearch.DisplayName} Features"
-		Tooltip: "{$Mods.BetterInventory.Configs.Compatibility.UnloadedCrafting.Tooltip}"
+		Tooltip: ""
 	}
 }
 
@@ -712,13 +701,13 @@ UnloadedItemSearch: {
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
-	guideProgression: {
-		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.progression.Label}"
+	guideUnknown: {
+		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.unknownDisplay.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
-	bestiaryProgression: {
-		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterBestiary.Label} @ {$Mods.BetterInventory.Configs.BetterBestiary.progression.Label}"
+	bestiaryUnknown: {
+		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterBestiary.Label} @ {$Mods.BetterInventory.Configs.BetterBestiary.unknownDisplay.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 

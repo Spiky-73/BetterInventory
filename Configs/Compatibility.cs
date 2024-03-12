@@ -47,9 +47,9 @@ public sealed class Compatibility : ModConfig {
 
             BetterGuide.Value.moreRecipes = false;
             BetterGuide.Value.craftInMenu = false;
-            BetterGuide.Value.progression = false;
+            BetterGuide.Value.unknownDisplay = UnknownDisplay.Off;
             FavoriteRecipes.Value.unfavoriteOnCraft = UnfavoriteOnCraft.Off;
-            BetterBestiary.Value.progression = false;
+            BetterBestiary.Value.unknownDisplay = UnknownDisplay.Off;
             BetterBestiary.Value.displayedUnlock = UnlockLevel.Off;
             SearchItems.Value.recipes = false;
             ItemSearch.Instance.SaveConfig();
@@ -100,12 +100,12 @@ public sealed class UnloadedItemSearch {
     public bool guideFavorite = false;
     public bool guideUnfavoriteOnCraft = false;
     public bool guideCraftInMenu = false;
-    public bool guideProgression = false;
-    public bool bestiaryProgression = false;
+    public bool guideUnknown = false;
+    public bool bestiaryUnknown = false;
     public bool bestiaryDisplayedUnlock = false;
 
-    [JsonIgnore] public bool BestiaryUnlock { set { bestiaryProgression = value; bestiaryDisplayedUnlock = value; } }
-    [JsonIgnore] public bool GuideAvailableRecipes { set { guideFavorite = value; guideCraftInMenu = value; guideProgression = value; } }
+    [JsonIgnore] public bool BestiaryUnlock { set { bestiaryUnknown = value; bestiaryDisplayedUnlock = value; } }
+    [JsonIgnore] public bool GuideAvailableRecipes { set { guideFavorite = value; guideCraftInMenu = value; guideUnknown = value; } }
     
     public static UnloadedItemSearch Value => Compatibility.Instance.UnloadedItemSearch;
 }

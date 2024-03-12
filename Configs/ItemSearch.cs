@@ -10,7 +10,6 @@ public sealed class ItemSearch : ModConfig {
     public Toggle<BetterBestiary> betterBestiary = new(true);
     public Toggle<QuickList> quickList = new(true);
     public Toggle<SearchItems> searchItems = new(true);
-    [DefaultValue(UnknownDisplay.Unknown)] public UnknownDisplay unknownDisplay;
 
     public static ItemSearch Instance = null!;
     
@@ -19,7 +18,7 @@ public sealed class ItemSearch : ModConfig {
     public override void OnChanged() => global::BetterInventory.ItemSearch.SearchItem.UpdateGuide();
 }
 
-public enum UnknownDisplay { Hidden, Unknown, Known }
+public enum UnknownDisplay { Off, Hidden, Unknown, Known }
 
 public class BetterGuide {
     public Toggle<FavoriteRecipes> favoriteRecipes = new(true);
@@ -27,7 +26,7 @@ public class BetterGuide {
     [DefaultValue(true)] public bool moreRecipes = true;
     [DefaultValue(true)] public bool tile = true;
     [DefaultValue(true)] public bool craftText = true;
-    [DefaultValue(true)] public bool progression = true;
+    [DefaultValue(Configs.UnknownDisplay.Unknown)] public UnknownDisplay unknownDisplay = Configs.UnknownDisplay.Unknown;
 
     public static bool Enabled => ItemSearch.Instance.betterGuide;
     public static bool MoreRecipes => Enabled && Value.moreRecipes && !UnloadedItemSearch.Value.guideMoreRecipes;
@@ -35,8 +34,8 @@ public class BetterGuide {
     public static bool FavoriteRecipes => Enabled && Value.favoriteRecipes && !UnloadedItemSearch.Value.guideFavorite;
     public static bool CraftInMenu => Enabled && Value.craftInMenu && !UnloadedItemSearch.Value.guideCraftInMenu;
     public static bool Tile => Enabled && Value.tile;
-    public static bool Progression => Enabled && Value.progression && !UnloadedItemSearch.Value.guideProgression;
-    public static bool AvailableRecipes => FavoriteRecipes || CraftInMenu || Progression;
+    public static bool UnknownDisplay => Enabled && Value.unknownDisplay > Configs.UnknownDisplay.Off && !UnloadedItemSearch.Value.guideUnknown;
+    public static bool AvailableRecipes => FavoriteRecipes || CraftInMenu || UnknownDisplay;
     
     public static BetterGuide Value => ItemSearch.Instance.betterGuide.Value;
 }
@@ -55,14 +54,14 @@ public class BetterBestiary {
     [DefaultValue(UnlockLevel.Drops)] public UnlockLevel displayedUnlock = UnlockLevel.Drops;
     [DefaultValue(true)] public bool showBagContent = true;
     [DefaultValue(true)] public bool unlockFilter = true;
-    [DefaultValue(true)] public bool progression = true;
+    [DefaultValue(Configs.UnknownDisplay.Unknown)] public UnknownDisplay unknownDisplay = Configs.UnknownDisplay.Unknown;
 
     public static bool Enabled => ItemSearch.Instance.betterBestiary;
     public static bool DisplayedUnlock => Enabled && Value.displayedUnlock != UnlockLevel.Off && !UnloadedItemSearch.Value.bestiaryDisplayedUnlock;
     public static bool ShowBagContent => Enabled && Value.showBagContent;
     public static bool UnlockFilter => Enabled && Value.unlockFilter;
-    public static bool Progression => Enabled && Value.progression && !UnloadedItemSearch.Value.bestiaryProgression;
-    public static bool Unlock => Progression || DisplayedUnlock;
+    public static bool UnknownDisplay => Enabled && Value.unknownDisplay > Configs.UnknownDisplay.Off && !UnloadedItemSearch.Value.bestiaryUnknown;
+    public static bool Unlock => UnknownDisplay || DisplayedUnlock;
     public static BetterBestiary Value => ItemSearch.Instance.betterBestiary.Value;
 }
 
@@ -74,10 +73,12 @@ public class QuickList {
     public static QuickList Value => ItemSearch.Instance.quickList.Value;
 }
 
+// TODO keybinds instead of hard codded
+// TODO composite vs single mode
 public class SearchItems {
     [DefaultValue(true)] public bool recipes = true;
     [DefaultValue(true)] public bool drops = true;
-    [DefaultValue(true)] public bool history = true;
+    [DefaultValue(true)] public bool history = true; // TODO remove to need for the other settings to be on
 
     public static bool Enabled => ItemSearch.Instance.searchItems;
     public static bool Recipes => Value.recipes && !UnloadedItemSearch.Value.searchRecipes;

@@ -11,7 +11,7 @@ Version: "0.5"
 Info: Added Mod compatibility options, remade Builder Toggles and added a few options
 Important:
 	'''
-	The config "{$Mods.BetterInventory.Configs.Compatibility.DisplayName}" was added, have a look at it if you encounter issues when loading mods
+	The config {$Mods.BetterInventory.Configs.Compatibility.DisplayName} was added, have a look at it if you encounter issues when loading mods
 	Better Game UI should now load without issue with this mod
 	'''
 Changelog:

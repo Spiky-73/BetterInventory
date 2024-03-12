@@ -115,13 +115,13 @@ public class Hooks : ILoadable {
         if (!ApplyIL(il, Bestiary.ILIconUpdateFakeUnlock, Configs.BetterBestiary.Unlock)) Configs.UnloadedItemSearch.Value.BestiaryUnlock = true;
     }
     private void ILEntryIcon_DrawSelf(ILContext il) {
-        if (!ApplyIL(il, Bestiary.ILIconDrawFakeUnlock, Configs.BetterBestiary.Progression)) Configs.UnloadedItemSearch.Value.bestiaryProgression = true;
+        if (!ApplyIL(il, Bestiary.ILIconDrawFakeUnlock, Configs.BetterBestiary.UnknownDisplay)) Configs.UnloadedItemSearch.Value.bestiaryUnknown = true;
     }
     private void IlEntryPage_AddInfoToList(ILContext il) {
         if (!ApplyIL(il, Bestiary.IlEntryPageFakeUnlock, Configs.BetterBestiary.Unlock)) Configs.UnloadedItemSearch.Value.BestiaryUnlock = true;
     }
     private void ILFilteringOptionsGrid_UpdateAvailability(ILContext il) {
-        if (!ApplyIL(il, Bestiary.ILFakeUnlockFilters, Configs.BetterBestiary.Progression)) Configs.UnloadedItemSearch.Value.bestiaryProgression = true;
+        if (!ApplyIL(il, Bestiary.ILFakeUnlockFilters, Configs.BetterBestiary.UnknownDisplay)) Configs.UnloadedItemSearch.Value.bestiaryUnknown = true;
     }
 
     private void IlDrawSelf(ILContext il) => ApplyIL(il, Text.ILTextColors, true);

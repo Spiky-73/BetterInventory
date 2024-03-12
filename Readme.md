@@ -41,11 +41,11 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 - `More recipes`: Adds recipes crafting the item to the guide results
 - `Craft Tiles and Conditions`: Overhauls the way crafting station and conditions of recipes are displayed
 - `Show Treasure Bag Content`: Displays items dropped by Treasure Bags in the Bestiary
-- `Minimum Displayed Info`: Force the minimal displayed information for discovered Bestiary entries
+- `Minimum Displayed Info`: Force the minimal displayed information for Bestiary entries
 - `Override Unlock Filter`: Replace the Bestiary filter "If Unlocked" with "Not Full Unlocked"
 - `Search Item` Quickly open the recipe list or the Bestiary, search recipes using a material or NPCs dropping an item with a simple keybind
 - `Search History`: Search the previously searched entry
-- `Unknown Entity Display`: Change how undiscovered recipes or NPCs are displayed
+- `Unknown Entity Display`: Change how unknown items, recipes or NPCs are displayed
 
 ## Changelog
 
