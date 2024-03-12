@@ -13,7 +13,7 @@ Visit the homepage for more info.
  - Quickly search recipes using a material or NPCs dropping an item with a simple keybind
  - See the content of Treasure Bags and force the minimal displayed information in the Bestiary
  - Craft and Buy items in stacks
- - Quick buff favorite potions only
+ - Quick buff using favorited potions only
  - Various item actions in the inventory
  - Toggle builder accessories with a keybind
  - And many more...

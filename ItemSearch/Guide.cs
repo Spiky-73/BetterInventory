@@ -368,7 +368,7 @@ public sealed class Guide : ModSystem {
     }
 
 
-    public static Item? GetGuideMaterials() => Configs.BetterGuide.AvailablesRecipes && !Configs.ItemSearch.SearchRecipes ? Main.guideItem : null;
+    public static Item? GetGuideMaterials() => Configs.BetterGuide.AvailablesRecipes && !Configs.SearchItems.Recipes ? Main.guideItem : null;
 
     public static void FindGuideRecipes() {
         s_collectingGuide = true;
@@ -676,7 +676,7 @@ public sealed class Guide : ModSystem {
     
     private static void HookGuideTileAdj(On_Player.orig_AdjTiles orig, Player self) {
         orig(self);
-        if (!Configs.BetterGuide.AvailablesRecipes || !Configs.BetterGuide.Tile || Configs.ItemSearch.SearchRecipes || guideTile.createTile < TileID.Dirt) return;
+        if (!Configs.BetterGuide.AvailablesRecipes || !Configs.BetterGuide.Tile || Configs.SearchItems.Recipes || guideTile.createTile < TileID.Dirt) return;
         self.adjTile[guideTile.createTile] = true;
         Recipe.FindRecipes();
     }
@@ -692,7 +692,7 @@ public sealed class Guide : ModSystem {
         return true;
     }
     private static bool HookOverrideLeftClick(On_ItemSlot.orig_OverrideLeftClick orig, Item[] inv, int context, int slot) {
-        if (Main.InGuideCraftMenu && Main.cursorOverride == CursorOverrideID.InventoryToChest && (Configs.BetterGuide.Enabled || Configs.ItemSearch.SearchRecipes)) {
+        if (Main.InGuideCraftMenu && Main.cursorOverride == CursorOverrideID.InventoryToChest && (Configs.BetterGuide.Enabled || Configs.SearchItems.Recipes)) {
             (Item mouse, Main.mouseItem, inv[slot]) = (Main.mouseItem, inv[slot], new());
             (int cursor, Main.cursorOverride) = (Main.cursorOverride, 0);
 
@@ -700,7 +700,7 @@ public sealed class Guide : ModSystem {
             ItemSlot.LeftClick(items, ContextID.GuideItem, Configs.BetterGuide.Tile && IsCraftingStation(Main.mouseItem) ? 1 : 0);
             GuideItems = items;
 
-            if (Configs.BetterGuide.Enabled && !Configs.ItemSearch.SearchRecipes) Main.LocalPlayer.GetDropItem(ref Main.mouseItem);
+            if (Configs.BetterGuide.Enabled && !Configs.SearchItems.Recipes) Main.LocalPlayer.GetDropItem(ref Main.mouseItem);
             else inv[slot] = Main.mouseItem;
             Main.mouseItem = mouse;
             Main.cursorOverride = cursor;

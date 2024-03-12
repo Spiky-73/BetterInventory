@@ -1,9 +1,6 @@
 using System;
 using System.ComponentModel;
 using BetterInventory.Configs.UI;
-using BetterInventory.ItemSearch;
-using Newtonsoft.Json;
-using Terraria;
 using Terraria.ModLoader.Config;
 
 namespace BetterInventory.Configs;
@@ -11,28 +8,15 @@ namespace BetterInventory.Configs;
 public sealed class ItemSearch : ModConfig {  
     public Toggle<BetterGuide> betterGuide = new(true);
     public Toggle<BetterBestiary> betterBestiary = new(true);
-    [DefaultValue(true)] public bool searchRecipes;
-    [DefaultValue(true)] public bool searchDrops;
-    [DefaultValue(true)] public bool searchHistory;
+    public Toggle<QuickList> quickList = new(true);
+    public Toggle<SearchItems> searchItems = new(true);
     [DefaultValue(UnknownDisplay.Unknown)] public UnknownDisplay unknownDisplay;
 
-    [JsonIgnore, ShowDespiteJsonIgnore] public string SearchItemKeybind {
-        get {
-            var keys = SearchItem.Keybind?.GetAssignedKeys() ?? new();
-            return keys.Count == 0 ? Lang.inter[23].Value : keys[0];
-        }
-    }
-
-    public static bool SearchRecipes => Instance.searchRecipes && !UnloadedItemSearch.Value.searchRecipes;
-    public static bool SearchDrops => Instance.searchDrops && !UnloadedItemSearch.Value.searchDrops;
-    public static bool SearchItems => SearchRecipes || SearchDrops;
-    public static bool SearchHistory => Instance.searchHistory;
     public static ItemSearch Instance = null!;
     
     public override ConfigScope Mode => ConfigScope.ClientSide;
 
-    public override void OnChanged() => SearchItem.UpdateGuide();
-
+    public override void OnChanged() => global::BetterInventory.ItemSearch.SearchItem.UpdateGuide();
 }
 
 public enum UnknownDisplay { Hidden, Unknown, Known }
@@ -80,6 +64,26 @@ public class BetterBestiary {
     public static bool Progression => Enabled && Value.progression && !UnloadedItemSearch.Value.bestiaryProgression;
     public static bool Unlock => Progression || DisplayedUnlock;
     public static BetterBestiary Value => ItemSearch.Instance.betterBestiary.Value;
+}
+
+public class QuickList {
+    [DefaultValue(10)] public int tap = 10;
+    [DefaultValue(10)] public int delay = 10;
+
+    public static bool Enabled => ItemSearch.Instance.quickList;
+    public static QuickList Value => ItemSearch.Instance.quickList.Value;
+}
+
+public class SearchItems {
+    [DefaultValue(true)] public bool recipes = true;
+    [DefaultValue(true)] public bool drops = true;
+    [DefaultValue(true)] public bool history = true;
+
+    public static bool Enabled => ItemSearch.Instance.searchItems;
+    public static bool Recipes => Value.recipes && !UnloadedItemSearch.Value.searchRecipes;
+    public static bool Drops => Value.drops;
+    public static bool History => Value.history;
+    public static SearchItems Value => ItemSearch.Instance.searchItems.Value;
 }
 
 public enum UnlockLevel { Off, Name, Stats, Drops, DropRates }

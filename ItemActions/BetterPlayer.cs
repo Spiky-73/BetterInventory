@@ -22,7 +22,7 @@ public sealed class BetterPlayer : ModPlayer {
     public static readonly List<BuilderToggle> WireDisplayToggles = new();
 
     public override void Load() {
-        FavoritedBuffKb = KeybindLoader.RegisterKeybind(Mod, "FavoritedQuickBuff", Microsoft.Xna.Framework.Input.Keys.N);
+        FavoritedBuffKb = KeybindLoader.RegisterKeybind(Mod, "FavoritedQuickBuff", Microsoft.Xna.Framework.Input.Keys.B);
         On_ItemSlot.TryOpenContainer += HookTryOpenContainer;
         On_Player.DropItemFromExtractinator += HookFastExtractinator;
 
@@ -58,21 +58,10 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public override void ProcessTriggers(TriggersSet triggersSet) {
-        QuickMove.ProcessTriggers();
-        SearchItem.ProcessSearchTap();
-        if (Configs.ItemActions.FavoriteBuff && FavoritedBuffKb.JustPressed) FavoritedBuff(Player);
-        if (Configs.ItemActions.BuilderAccs) {
-            foreach ((BuilderToggle? builder, ModKeybind kb) in BuilderTogglesKb) {
-                if (!kb.JustPressed) continue;
-                if (builder is null) {
-                    CycleBuilderState(Player, WireDisplayToggles[0]);
-                    for (int i = 1; i < WireDisplayToggles.Count; i++) CycleBuilderState(Player, WireDisplayToggles[i], WireDisplayToggles[i].CurrentState);
-                } else {
-                    CycleBuilderState(Player, builder);
-                }
-                SoundEngine.PlaySound(SoundID.MenuTick);
-            }
-        }
+        if(Configs.QuickMove.Enabled) QuickMove.ProcessTriggers();
+        if(Configs.QuickList.Enabled) SearchItem.ProcessSearchTap();
+        if (Configs.ItemActions.FavoritedBuff && FavoritedBuffKb.JustPressed) FavoritedBuff(Player);
+        if (Configs.ItemActions.BuilderAccs) BuilderKeys();
     }
 
     public override bool HoverSlot(Item[] inventory, int context, int slot) {
@@ -125,7 +114,18 @@ public sealed class BetterPlayer : ModPlayer {
 
     public static void CycleBuilderState(Player player, BuilderToggle toggle, int? state = null) => player.builderAccStatus[toggle.Type] = (state ?? (player.builderAccStatus[toggle.Type] + 1)) % toggle.NumberOfStates;
     public static void FavoritedBuff(Player player) => Utility.RunWithHiddenItems(player.inventory, i => !i.favorited, player.QuickBuff);
-
+    private void BuilderKeys() {
+        foreach ((BuilderToggle? builder, ModKeybind kb) in BuilderTogglesKb) {
+            if (!kb.JustPressed) continue;
+            if (builder is null) {
+                CycleBuilderState(Player, WireDisplayToggles[0]);
+                for (int i = 1; i < WireDisplayToggles.Count; i++) CycleBuilderState(Player, WireDisplayToggles[i], WireDisplayToggles[i].CurrentState);
+            } else {
+                CycleBuilderState(Player, builder);
+            }
+            SoundEngine.PlaySound(SoundID.MenuTick);
+        }
+    }
     public override void SaveData(TagCompound tag) {
         tag[VisibilityTag] = VisibilityFilters;
         tag[RecipesTag] = RecipeFilters;

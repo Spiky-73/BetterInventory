@@ -32,27 +32,26 @@ public sealed class Compatibility : ModConfig {
             Crafting.Instance.craftOnList.Parent = false;
             Crafting.Instance.SaveConfig();
 
+            SmartConsumption.Value.materials = false;
+            SmartConsumption.Value.baits = false;
+            SmartPickup.Value.markIntensity = 0;
+            QuickMove.Value.displayHotkeys.Parent = HotkeyDisplayMode.Off;
+            QuickMove.Value.displayHotkeys.Value.highlightIntensity = 0;
             InventoryManagement.Instance.autoEquip = AutoEquipLevel.Off;
             InventoryManagement.Instance.favoriteInBanks = false;
             InventoryManagement.Instance.shiftRight = false;
             InventoryManagement.Instance.stackTrash = false;
             InventoryManagement.Instance.craftStack.Parent = false;
             InventoryManagement.Instance.smartPickup.Parent = SmartPickupLevel.Off;
-            SmartConsumption.Value.materials = false;
-            SmartConsumption.Value.baits = false;
-            SmartPickup.Value.markIntensity = 0;
-            QuickMove.Value.displayHotkeys.Parent = HotkeyDisplayMode.Off;
-            QuickMove.Value.displayHotkeys.Value.highlightIntensity = 0;
             InventoryManagement.Instance.SaveConfig();
 
-            ItemSearch.Instance.searchRecipes = false;
-            ItemSearch.Instance.searchDrops = false;
             BetterGuide.Value.moreRecipes = false;
-            FavoriteRecipes.Value.unfavoriteOnCraft = UnfavoriteOnCraft.Off;
             BetterGuide.Value.craftInMenu = false;
             BetterGuide.Value.progression = false;
+            FavoriteRecipes.Value.unfavoriteOnCraft = UnfavoriteOnCraft.Off;
             BetterBestiary.Value.progression = false;
             BetterBestiary.Value.displayedUnlock = UnlockLevel.Off;
+            SearchItems.Value.recipes = false;
             ItemSearch.Instance.SaveConfig();
         }
     }
@@ -97,7 +96,6 @@ public sealed class UnloadedInventoryManagement {
 
 public sealed class UnloadedItemSearch {
     public bool searchRecipes = false;
-    public bool searchDrops = false;
     public bool guideMoreRecipes = false;
     public bool guideFavorite = false;
     public bool guideUnfavoriteOnCraft = false;

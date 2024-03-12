@@ -59,7 +59,7 @@ public class Hooks : ILoadable {
         if (!ApplyIL(il, FixedUI.ILListScrollFix, Configs.FixedUI.ListScroll)) Configs.UnloadedCrafting.Value.listScroll = true;
         if (!ApplyIL(il, FixedUI.ILMaterialWrapping, Configs.FixedUI.Wrapping)) Configs.UnloadedCrafting.Value.wrapping = true;
         if (!ApplyIL(il, Crafting.Crafting.ILCraftOnList, Configs.CraftOnList.Enabled)) Configs.UnloadedCrafting.Value.craftOnList = true;
-        if (!ApplyIL(il, SearchItem.ILForceGuideDisplay, Configs.ItemSearch.SearchRecipes)) Configs.UnloadedItemSearch.Value.searchRecipes = true;
+        if (!ApplyIL(il, SearchItem.ILForceGuideDisplay, Configs.SearchItems.Recipes)) Configs.UnloadedItemSearch.Value.searchRecipes = true;
         if (!ApplyIL(il, Guide.ILDrawVisibility, Configs.BetterGuide.CraftInMenu)) Configs.UnloadedItemSearch.Value.guideCraftInMenu = true;
         if (!ApplyIL(il, Guide.ILCustomDrawCreateItem, Configs.BetterGuide.AvailablesRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailablesRecipes = true;
         if (!ApplyIL(il, Guide.ILCustomDrawMaterials, Configs.BetterGuide.AvailablesRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailablesRecipes = true;
