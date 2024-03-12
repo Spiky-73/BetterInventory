@@ -24,14 +24,15 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 ## Changelog
 
 ### v0.5
-- Unfavorite favorite recipes on craft
-- Added smart consumption for materials
-- Reorganized some options in the configs
-- Added a config for max amount of crafted or bought items with left click
-- Use TileDefinition when possible
 - Added the Mod Compatibility Config
 - Added an option to prevent sensible parts of the mod from loading at all
 - Added a Compatibility layer to disable part of the mods when they fail loading
+- Auto Builder Toggle keybinds generation
+- Unfavorite favorite recipes on craft
+- Added smart consumption for materials
+- Added a config for max amount of crafted or bought items with left click
+- Reorganized some options in the configs
+- Use TileDefinition when possible
 - Fixed bugs with shops
 
 ### v0.4.1

@@ -303,7 +303,11 @@ ItemActions: {
 
 	builderKeys: {
 		Label: "[i:3061] Builder Keybinds"
-		Tooltip: Enables keybinds to toggles the builder toggles
+		Tooltip:
+			'''
+			Enables keybinds to toggles the builder toggles
+			You may loose the keybinding of unloaded toggles
+			'''
 	}
 
 	FavoriteBuffKeybind: {
