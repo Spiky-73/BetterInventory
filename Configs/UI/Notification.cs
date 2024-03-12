@@ -67,11 +67,12 @@ public class Notification : IInGameNotification {
         MaxLifeSpan = LifeSpan = lifeSpan;
         
         _lines = new();
-        _textSize = new(0, FontAssets.MouseText.Value.LineSpacing * lines.Count);
+        _textSize = new();
         foreach((LocalizedText text, TagKeyFormat format) in lines) {
             string line = text.Value;
             Vector2 size = FontAssets.MouseText.Value.MeasureString(line);
             if (size.X > _textSize.X) _textSize.X = size.X;
+            _textSize.Y += size.Y;
             _lines.Add(new(line.FormatTagKeys(format.Tags), size, format.Color));
         }
     }

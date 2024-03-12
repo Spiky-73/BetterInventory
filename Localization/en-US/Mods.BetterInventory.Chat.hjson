@@ -8,18 +8,23 @@ ModName: Better Inventory
 Homepage: homepage
 Workshop: Steam Workshop page
 Version: "0.5"
-Info: Implemented Mod compatibility and reorganized configs
-Important: ""
+Info: Added Mod compatibilility options, remade Builder Toggles and added a few options
+Important:
+	'''
+	The config "{$Mods.BetterInventory.Configs.Compatibility.DisplayName}" was added, have a look at if if you encounter issus when loading mods
+	Better Game UI should now load without issue with this mod
+	'''
 Changelog:
 	'''
 	- Added the Mod Compatibility Config
-	- Added an option to prevent sensible parts of the mod from loading at all
+	- Added an option to prevent sensitive parts of the mod from loading at all
 	- Added a Compatibility layer to disable part of the mods when they fail loading
 	- Auto Builder Toggle keybinds generation
 	- Unfavorite favorite recipes on craft
 	- Added smart consumption for materials
-	- Added a config for max amount of crafted or bought items with left click
+	- Added a option for max amount of crafted or bought items with left click
 	- Reorganized some options in the configs
 	- Use TileDefinition when possible
+	- Fixed crash on load with Better Game UI
 	- Fixed bugs with shops
 	'''
