@@ -87,7 +87,7 @@ public sealed class CraftStack {
     // [DefaultValue(true)] public bool crafting = true;
     // [DefaultValue(true)] public bool shops = true;
     [DefaultValue(false)] public bool invertClicks = false;
-    [Range(1, 9999), DefaultValue(9999)] public int maxAmount = 9999;
+    [Range(1, 9999), DefaultValue(999)] public int maxAmount = 999;
 
     public static bool Enabled => !UnloadedInventoryManagement.Value.craftStack && InventoryManagement.Instance.craftStack;
     public static CraftStack Value => InventoryManagement.Instance.craftStack.Value;

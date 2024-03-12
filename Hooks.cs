@@ -73,6 +73,7 @@ public class Hooks : ILoadable {
     private void ILCraftItem(ILContext il){
         if (!ApplyIL(il, ClickOverrides.ILShiftCraft, Configs.InventoryManagement.ShiftRight)) Configs.UnloadedInventoryManagement.Value.shiftRight = true;
         if (!ApplyIL(il, ClickOverrides.ILCraftStack, Configs.InventoryManagement.ClickOverrides)) Configs.UnloadedInventoryManagement.Value.ClickOverrides = true;
+        if (!ApplyIL(il, ClickOverrides.ILRestoreRecipe, Configs.InventoryManagement.ClickOverrides || Configs.InventoryManagement.ShiftRight)) Configs.UnloadedInventoryManagement.Value.ClickOverrides = Configs.UnloadedInventoryManagement.Value.shiftRight = true;
         if (!ApplyIL(il, Guide.IlUnfavoriteOnCraft, Configs.FavoriteRecipes.UnfavoriteOnCraft)) Configs.UnloadedItemSearch.Value.guideUnfavoriteOnCraft = true;
         if (!ApplyIL(il, ClickOverrides.ILFixCraftMouseText, Configs.InventoryManagement.ClickOverrides)) Configs.UnloadedInventoryManagement.Value.ClickOverrides = true;
         if (!ApplyIL(il, ClickOverrides.ILFixCraftMouseText, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;

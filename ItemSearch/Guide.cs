@@ -438,7 +438,8 @@ public sealed class Guide : ModSystem {
         ILCursor cursor = new(il);
 
         // <availableRecipes>
-        cursor.GotoNext(MoveType.Before, i => i.SaferMatchCall(Reflection.Recipe.TryRefocusingRecipe));
+        cursor.GotoNext(i => i.SaferMatchCall(Reflection.Recipe.CollectItemsToCraftWithFrom));
+        cursor.GotoNext(MoveType.AfterLabel, i => i.SaferMatchCall(Reflection.Recipe.TryRefocusingRecipe));
 
         // ++<updateDisplay>
         cursor.EmitDelegate(() => {
