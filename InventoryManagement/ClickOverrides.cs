@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using ReLogic.Content;
 using Terraria;
+using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI;
@@ -288,7 +289,17 @@ public sealed class ClickOverrides : ILoadable {
         if (!sync && Configs.InventoryManagement.FavoriteInBanks) Utility.RunWithHiddenItems(items, i => i.favorited, () => orig());
         else orig();
     }
+    internal static void ILFavoritedBankBackground(ILContext il) {
+        ILCursor cursor = new(il);
 
+        // if (item.type > 0 && item.stack > 0 && item.favorited && context != 13 && context != 21 && context != 22 && context != 14) {
+        //     value = TextureAssets.InventoryBack10.Value;
+        //     ++ <favorited>
+        cursor.GotoNext(MoveType.After, i => i.MatchCallvirt(Reflection.Asset<Texture2D>.Value.GetMethod!) && i.Previous.MatchLdsfld(Reflection.TextureAssets.InventoryBack10));
+        cursor.EmitLdarg1().EmitLdarg2().EmitLdarg3();
+        cursor.EmitDelegate((Texture2D texture, Item[] inv, int context, int slot) => Configs.InventoryManagement.FavoriteInBanks && context == ItemSlot.Context.BankItem && inv[slot].favorited ? TextureAssets.InventoryBack19.Value : texture);
+        // }
+    }
 
     public static int GetMaxBuyAmount(Item item, long price) {
         if (price == 0) return item.maxStack;

@@ -106,6 +106,7 @@ public class Hooks : ILoadable {
         if (!ApplyIL(il, SmartPickup.ILDrawMarks, Configs.SmartPickup.Marks)) Configs.UnloadedInventoryManagement.Value.marks = true;
         if (!ApplyIL(il, QuickMove.ILHighlightSlot, Configs.QuickMove.Highlight)) Configs.UnloadedInventoryManagement.Value.quickMoveHighlight = true;
         if (!ApplyIL(il, QuickMove.ILDisplayHotkey, Configs.QuickMove.DisplayHotkeys)) Configs.UnloadedInventoryManagement.Value.quickMoveHotkeys = true;
+        if (!ApplyIL(il, ClickOverrides.ILFavoritedBankBackground, Configs.InventoryManagement.FavoriteInBanks)) Configs.UnloadedInventoryManagement.Value.favoriteInBanks = true;
     }
 
     private void ILFilters_BySearch(ILContext il) {
@@ -136,7 +137,7 @@ public class Hooks : ILoadable {
         } catch (Exception) {
             MonoModHooks.DumpIL(Mod, context);
             FailedILs++;
-            Mod.Logger.Warn($"{name} failled to load. Related features will be disabled until reload");
+            Mod.Logger.Warn($"{name} failed to load. Related features will be disabled until reload");
             return false;
         }
         return true;

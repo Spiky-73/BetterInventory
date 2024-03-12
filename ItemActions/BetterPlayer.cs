@@ -127,15 +127,17 @@ public sealed class BetterPlayer : ModPlayer {
         }
     }
     public override void SaveData(TagCompound tag) {
+        if (!Guide.guideTile.IsAir) tag[GuideTileTag] = Guide.guideTile;
         tag[VisibilityTag] = VisibilityFilters;
         tag[RecipesTag] = RecipeFilters;
-        if (!Guide.guideTile.IsAir) tag[GuideTileTag] = Guide.guideTile;
+        tag[FavoritedInBanksTag] = new FavoritedInBanks(Player);
     }
 
     public override void LoadData(TagCompound tag) {
-        VisibilityFilters = tag.Get<VisibilityFilters>(VisibilityTag);
         if (tag.TryGet(GuideTileTag, out Item guide)) Guide.guideTile = guide;
-        RecipeFilters = tag.Get<RecipeFilters>(RecipesTag);
+        if (tag.TryGet(VisibilityTag, out VisibilityFilters visibility)) VisibilityFilters = visibility;
+        if (tag.TryGet(RecipesTag, out RecipeFilters recipe)) RecipeFilters = recipe;
+        if (Configs.InventoryManagement.FavoriteInBanks && tag.TryGet(FavoritedInBanksTag, out FavoritedInBanks favorited)) favorited.Apply(Player);
     }
 
     public RecipeFilters RecipeFilters { get; set; } = null!;
@@ -146,4 +148,5 @@ public sealed class BetterPlayer : ModPlayer {
     public const string VisibilityTag = "visibility";
     public const string RecipesTag = "recipes";
     public const string GuideTileTag = "guideTile";
+    public const string FavoritedInBanksTag = "favorited";
 }

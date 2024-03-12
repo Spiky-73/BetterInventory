@@ -24,7 +24,7 @@ public sealed class InventoryManagement : ModConfig {
     public static bool StackTrash => !UnloadedInventoryManagement.Value.stackTrash && Instance.stackTrash;
 
     public override void OnChanged() {
-        Reflection.ItemSlot.canFavoriteAt.GetValue()[ItemSlot.Context.BankItem] = favoriteInBanks;
+        Reflection.ItemSlot.canFavoriteAt.GetValue()[ItemSlot.Context.BankItem] = FavoriteInBanks;
     }
 
     public override ConfigScope Mode => ConfigScope.ClientSide;

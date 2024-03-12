@@ -60,6 +60,7 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 - Reorganized some options in the configs
 - Added full feature list in README.md
 - Replaced string with TileDefinition when possible
+- Fixed favorite items in banks not been saved
 - Fixed crash on load with Better Game UI
 - Fixed bugs with shops
 
