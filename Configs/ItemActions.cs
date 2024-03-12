@@ -11,7 +11,7 @@ public sealed class ItemActions : ModConfig {
     [DefaultValue(true)] public bool fastContainerOpening;
     public Toggle<ItemRightClick> itemRightClick = new(true);
 
-    [DefaultValue(true)] public bool builderKeys; // TODO check new api
+    [DefaultValue(true)] public bool builderKeys;
     [JsonIgnore, ShowDespiteJsonIgnore] public string FavoriteBuffKeybind {
         get {
             var keys = BetterPlayer.FavoritedBuffKb?.GetAssignedKeys() ?? new();

@@ -8,6 +8,8 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
 using BetterInventory.InventoryManagement;
+using Terraria.Audio;
+using Terraria.ID;
 
 namespace BetterInventory.ItemActions;
 
@@ -61,12 +63,14 @@ public sealed class BetterPlayer : ModPlayer {
         if (FavoritedBuffKb.JustPressed) FavoritedBuff(Player);
         if (Configs.ItemActions.BuilderKeys) {
             foreach ((BuilderToggle? builder, ModKeybind kb) in BuilderTogglesKb) {
+                if (!kb.JustPressed) continue;
                 if (builder is null) {
                     CycleBuilderState(Player, WireDisplayToggles[0]);
                     for (int i = 1; i < WireDisplayToggles.Count; i++) CycleBuilderState(Player, WireDisplayToggles[i], WireDisplayToggles[i].CurrentState);
                 } else {
                     CycleBuilderState(Player, builder);
                 }
+                SoundEngine.PlaySound(SoundID.MenuTick);
             }
         }
     }

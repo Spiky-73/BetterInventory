@@ -306,7 +306,7 @@ ItemActions: {
 		Tooltip:
 			'''
 			Enables keybinds to toggles the builder toggles
-			You may loose the keybinding of unloaded toggles
+			Keybindings will appear at the bottom of the Keybindings' page
 			'''
 	}
 
