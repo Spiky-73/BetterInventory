@@ -20,7 +20,6 @@ public sealed class InventoryManagement : ModConfig {
     public static bool AutoEquip => !UnloadedInventoryManagement.Value.autoEquip && Instance.autoEquip != AutoEquipLevel.Off;
     public static bool FavoriteInBanks => !UnloadedInventoryManagement.Value.favoriteInBanks && Instance.favoriteInBanks;
     public static bool ShiftRight => !UnloadedInventoryManagement.Value.shiftRight && Instance.shiftRight;
-    public static bool ClickOverrides => ShiftRight || CraftStack.Enabled;
     public static bool StackTrash => !UnloadedInventoryManagement.Value.stackTrash && Instance.stackTrash;
 
     public override void OnChanged() {
@@ -86,6 +85,7 @@ public sealed class DisplayedHotkeys {
 public sealed class CraftStack {
     // [DefaultValue(true)] public bool crafting = true;
     // [DefaultValue(true)] public bool shops = true;
+    // [DefaultValue(false)] public bool hold = false; // TODO implement
     [DefaultValue(false)] public bool invertClicks = false;
     [Range(1, 9999), DefaultValue(999)] public int maxAmount = 999;
 

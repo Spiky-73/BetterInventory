@@ -88,8 +88,6 @@ public sealed class UnloadedInventoryManagement {
     public bool quickMoveHotkeys = false;
     public bool quickMoveHighlight = false;
     public bool craftStack = false;
-
-    [JsonIgnore] public bool ClickOverrides { set { craftStack = value; shiftRight = value;} }
     
     public static UnloadedInventoryManagement Value => Compatibility.Instance.UnloadedInventoryManagement;
 }

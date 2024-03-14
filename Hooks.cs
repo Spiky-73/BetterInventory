@@ -19,6 +19,7 @@ public class Hooks : ILoadable {
         Mod = mod;
         IL_Player.GetItem += ILGetItem;
         IL_Player.ItemCheck_CheckFishingBobber_PickAndConsumeBait += ILPickAndConsumeBait;
+        IL_Player.PayCurrency += ILPayCurrency;
         
         IL_Main.DrawInventory += ILDrawInventory;
         IL_Main.CraftItem += ILCraftItem;
@@ -27,6 +28,7 @@ public class Hooks : ILoadable {
         IL_Recipe.FindRecipes += ILFindRecipes;
         IL_Recipe.CollectGuideRecipes += ILOverrideGuideRecipes;
         IL_Recipe.ConsumeForCraft += ILConsumeForCraft;
+        IL_Recipe.Create += ILCreate;
 
         IL_ItemSlot.LeftClick_ItemArray_int_int += ILLeftClick;
         IL_ItemSlot.HandleShopSlot += ILHandleShopSlot;
@@ -52,6 +54,9 @@ public class Hooks : ILoadable {
     private void ILPickAndConsumeBait(ILContext il){
         if (!ApplyIL(il, SmartConsumptionItem.ILOnConsumeBait, Configs.SmartConsumption.Baits)) Configs.UnloadedInventoryManagement.Value.baits = true;
     }
+    private void ILPayCurrency(ILContext il){
+        if (!ApplyIL(il, ClickOverrides.ILPayStack, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
+    }
 
     private void ILDrawInventory(ILContext il) {
         if (!ApplyIL(il, RecipeFiltering.ILDrawFilters, Configs.RecipeFilters.Enabled)) Configs.UnloadedCrafting.Value.recipeFilters = true;
@@ -72,11 +77,10 @@ public class Hooks : ILoadable {
     }
     private void ILCraftItem(ILContext il){
         if (!ApplyIL(il, ClickOverrides.ILShiftCraft, Configs.InventoryManagement.ShiftRight)) Configs.UnloadedInventoryManagement.Value.shiftRight = true;
-        if (!ApplyIL(il, ClickOverrides.ILCraftStack, Configs.InventoryManagement.ClickOverrides)) Configs.UnloadedInventoryManagement.Value.ClickOverrides = true;
-        if (!ApplyIL(il, ClickOverrides.ILRestoreRecipe, Configs.InventoryManagement.ClickOverrides || Configs.InventoryManagement.ShiftRight)) Configs.UnloadedInventoryManagement.Value.ClickOverrides = Configs.UnloadedInventoryManagement.Value.shiftRight = true;
+        if (!ApplyIL(il, ClickOverrides.ILCraftMultiplier, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
+        if (!ApplyIL(il, ClickOverrides.ILCraftStackAndPickup, Configs.CraftStack.Enabled || Configs.InventoryManagement.ShiftRight)) Configs.UnloadedInventoryManagement.Value.craftStack = Configs.UnloadedInventoryManagement.Value.shiftRight = true;
+        if (!ApplyIL(il, ClickOverrides.ILCraftFixMouseText, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
         if (!ApplyIL(il, Guide.IlUnfavoriteOnCraft, Configs.FavoriteRecipes.UnfavoriteOnCraft)) Configs.UnloadedItemSearch.Value.guideUnfavoriteOnCraft = true;
-        if (!ApplyIL(il, ClickOverrides.ILFixCraftMouseText, Configs.InventoryManagement.ClickOverrides)) Configs.UnloadedInventoryManagement.Value.ClickOverrides = true;
-        if (!ApplyIL(il, ClickOverrides.ILFixCraftMouseText, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
     }
 
     private void ILFindRecipes(ILContext il){
@@ -91,14 +95,18 @@ public class Hooks : ILoadable {
     private void ILConsumeForCraft(ILContext il) {
         if (!ApplyIL(il, SmartConsumptionItem.ILOnConsumedMaterial, Configs.SmartConsumption.Materials)) Configs.UnloadedInventoryManagement.Value.materials = true;
     }
-
+    private void ILCreate(ILContext il) {
+        if (!ApplyIL(il, ClickOverrides.ILRecipeConsumeStack, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
+    }
 
     private void ILLeftClick(ILContext il) {
         if (!ApplyIL(il, ClickOverrides.ILKeepFavoriteInBanks, Configs.InventoryManagement.FavoriteInBanks)) Configs.UnloadedInventoryManagement.Value.favoriteInBanks = true;
     }
     private void ILHandleShopSlot(ILContext il){
         if (!ApplyIL(il, ClickOverrides.ILPreventChainBuy, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
-        if (!ApplyIL(il, ClickOverrides.ILBuyStack, Configs.InventoryManagement.ClickOverrides)) Configs.UnloadedInventoryManagement.Value.ClickOverrides = true;
+        if (!ApplyIL(il, ClickOverrides.ILBuyMultiplier, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
+        if (!ApplyIL(il, ClickOverrides.ILBuyStack, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
+        if (!ApplyIL(il, ClickOverrides.ILRestoreShopItem, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
     }
     private void ILSellOrTrash(ILContext il){
         if (!ApplyIL(il, ClickOverrides.ILStackTrash, Configs.InventoryManagement.StackTrash)) Configs.UnloadedInventoryManagement.Value.stackTrash = true;
