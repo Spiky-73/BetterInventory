@@ -57,6 +57,7 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 - Added smart consumption for materials
 - Added a option for max amount of crafted or bought items with left click
 - Auto generation of Builder Accessories keybinds
+- Improved recipe filters display (again)
 - Reorganized some options in the configs
 - Added full feature list in README.md
 - Replaced string with TileDefinition when possible

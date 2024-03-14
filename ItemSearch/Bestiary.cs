@@ -118,7 +118,7 @@ public sealed class Bestiary : ILoadable {
 
         // ++ <fakeUnlock> 
         cursor.EmitDelegate((BestiaryUICollectionInfo info) => {
-            if (Configs.BetterBestiary.UnknownDisplay && Configs.BetterBestiary.Value.unknownDisplay <= Configs.UnknownDisplay.Known && info.UnlockState == BestiaryEntryUnlockState.NotKnownAtAll_0) info.UnlockState = BestiaryEntryUnlockState.CanShowPortraitOnly_1;
+            if (Configs.BetterBestiary.UnknownDisplay && Configs.BetterBestiary.Value.unknownDisplay == Configs.UnknownDisplay.Known && info.UnlockState == BestiaryEntryUnlockState.NotKnownAtAll_0) info.UnlockState = BestiaryEntryUnlockState.CanShowPortraitOnly_1;
             if (Configs.BetterBestiary.DisplayedUnlock && info.UnlockState > BestiaryEntryUnlockState.NotKnownAtAll_0) info.UnlockState = GetDisplayedUnlockLevel(info.UnlockState);
             return info;
         });

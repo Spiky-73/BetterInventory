@@ -11,6 +11,7 @@ using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using Terraria.ModLoader.UI;
 
 namespace BetterInventory.Crafting;
 
@@ -85,19 +86,16 @@ public static class RecipeFiltering {
                     Main.instance.MouseText(name, rare);
                 }
 
-                Color color;
-                if (s_recipesInFilter[i] != 0) {
-                    color = Color.White;
-                    if (!active) color *= 0.2f;
-                }
-                else {
-                    color = new Color(96, 96, 96);
-                    if (!active) color *= 0.05f;
+                Color color = Color.White;
+                Color colorBack = s_recipesInFilter[i] != 0 ? UICommon.DefaultUIBlue : new(64, 64, 64);
+                if (!active) {
+                    color = color.MultiplyRGBA(new(80, 80, 80, 70));
+                    colorBack = colorBack.MultiplyRGBA(new(80, 80, 80, 70));
                 }
 
-                Main.spriteBatch.Draw(RecipeFilterBack.Value, hitbox.Center(), null, color, 0, RecipeFilterBack.Size() / 2, 1, SpriteEffects.None, 0);
+                Main.spriteBatch.Draw(RecipeFilterBack.Value, hitbox.Center(), null, colorBack, 0, RecipeFilterBack.Size() / 2, 1, SpriteEffects.None, 0);
                 Rectangle frame = filters.AvailableFilters[i].GetSourceFrame();
-                Main.spriteBatch.Draw(RecipeFilters.Value, hitbox.Center(), frame, color, 0, frame.Size() / 2, 1, SpriteEffects.None, 0);
+                Main.spriteBatch.Draw((s_recipesInFilter[i] != 0 ? RecipeFilters : RecipeFilter2).Value, hitbox.Center(), frame, color, 0, frame.Size() / 2, 1, SpriteEffects.None, 0);
 
                 x += delta;
                 d++;
@@ -130,4 +128,5 @@ public static class RecipeFiltering {
 
     public static Asset<Texture2D> RecipeFilterBack => ModContent.Request<Texture2D>($"BetterInventory/Assets/Recipe_Filter_Back");
     public static Asset<Texture2D> RecipeFilters => ModContent.Request<Texture2D>($"BetterInventory/Assets/Recipe_Filters");
+    public static Asset<Texture2D> RecipeFilter2 => ModContent.Request<Texture2D>($"BetterInventory/Assets/Recipe_Filters2");
 }

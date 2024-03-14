@@ -810,7 +810,6 @@ public sealed class Guide : ModSystem {
             } else {
                 Main.CreativeMenu.CloseMenu();
                 Main.LocalPlayer.tileEntityAnchor.Clear();
-                if (!Main.InGuideCraftMenu) Main.LocalPlayer.SetTalkNPC(-1);
             }
             Main.recBigList = Main.numAvailableRecipes > 0;
         }
