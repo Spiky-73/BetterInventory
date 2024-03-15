@@ -219,6 +219,11 @@ CraftStack: {
 		Label: Max Items Per Click
 		Tooltip: The maximum amount of items crafted or bought with <left>
 	}
+
+	single: {
+		Label: Single Click
+		Tooltip: Holding Left Click will only craft / buy a stack once
+	}
 }
 
 QuickMove: {

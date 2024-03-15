@@ -83,9 +83,7 @@ public sealed class DisplayedHotkeys {
 }
 
 public sealed class CraftStack {
-    // [DefaultValue(true)] public bool crafting = true;
-    // [DefaultValue(true)] public bool shops = true;
-    // [DefaultValue(false)] public bool hold = false; // TODO implement
+    [DefaultValue(false)] public bool single = false;
     [DefaultValue(false)] public bool invertClicks = false;
     [Range(1, 9999), DefaultValue(999)] public int maxAmount = 999;
 

@@ -65,7 +65,7 @@ public sealed class ClickOverrides : ILoadable {
         cursor.EmitLdarg2();
         cursor.EmitLdarg3();
         cursor.EmitDelegate((bool rightClickIsValid, bool leftClickIsValid) => {
-            if (Configs.CraftStack.Enabled && (Configs.CraftStack.Value.invertClicks ? (rightClickIsValid && !Main.mouseRightRelease) : (leftClickIsValid && !Main.mouseLeftRelease))) return true;
+            if (Configs.CraftStack.Enabled && (Configs.CraftStack.Value.invertClicks ? (rightClickIsValid && Configs.CraftStack.Value.single && !Main.mouseRightRelease) : (leftClickIsValid && Configs.CraftStack.Value.single && !Main.mouseLeftRelease))) return true;
             return false;
         });
         ILLabel skip = cursor.DefineLabel();
@@ -159,7 +159,7 @@ public sealed class ClickOverrides : ILoadable {
 
     private static bool HookTryAllowingToCraftRecipe(On_Main.orig_TryAllowingToCraftRecipe orig, Recipe currentRecipe, bool tryFittingItemInInventoryToAllowCrafting, out bool movedAnItemToAllowCrafting) {
         movedAnItemToAllowCrafting = false;
-        if (Configs.CraftStack.Enabled && (Configs.CraftStack.Value.invertClicks ? (Main.mouseRight && !Main.mouseRightRelease) : (Main.mouseLeft && !Main.mouseLeftRelease))) return false;
+        if (Configs.CraftStack.Enabled && (Configs.CraftStack.Value.invertClicks ? (Main.mouseRight && Configs.CraftStack.Value.single && !Main.mouseRightRelease) : (Main.mouseLeft && Configs.CraftStack.Value.single && !Main.mouseLeftRelease))) return false;
         if (Configs.InventoryManagement.ShiftRight && Main.cursorOverride == CraftCursorID) return Main.LocalPlayer.ItemSpace(currentRecipe.createItem).CanTakeItem;
         return orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting, out movedAnItemToAllowCrafting);
     }
@@ -197,8 +197,8 @@ public sealed class ClickOverrides : ILoadable {
         cursor.GotoNext(i => i.MatchStloc0());
         cursor.GotoPrev(MoveType.After, i => i.MatchLdarg0());
         cursor.EmitDelegate((Recipe r) => {
-            if (!Configs.CraftStack.Enabled || !(Configs.CraftStack.Value.invertClicks ? Main.mouseRight : Main.mouseLeft)) return r;
             s_ilCraftMultiplier = 1;
+            if (!Configs.CraftStack.Enabled || !(Configs.CraftStack.Value.invertClicks ? Main.mouseRight : Main.mouseLeft)) return r;
             int amount = GetMaxCraftAmount(r);
             int maxPickup = Configs.InventoryManagement.ShiftRight && Main.cursorOverride == CraftCursorID ? GetMaxPickupAmount(r.createItem) : (r.createItem.maxStack - Main.mouseItem.stack);
             s_ilCraftMultiplier = Math.Min(Math.Min(amount, maxPickup / r.createItem.stack), Configs.CraftStack.Value.maxAmount / r.createItem.stack);
