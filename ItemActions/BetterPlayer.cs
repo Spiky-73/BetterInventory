@@ -101,15 +101,21 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     private static void HookTryOpenContainer(On_ItemSlot.orig_TryOpenContainer orig, Item item, Player player) {
+        if (!Configs.ItemActions.FastContainerOpening) {
+            orig(item,player);
+            return;
+        }
         int split = Main.stackSplit;
-        orig(item, player);
-        if (!Configs.ItemActions.FastContainerOpening) return;
+        for (int i = 0; i < Main.superFastStack + 1; i++) orig(item,player);
         Main.stackSplit = split;
         ItemSlot.RefreshStackSplitCooldown();
     }
     private static void HookFastExtractinator(On_Player.orig_DropItemFromExtractinator orig, Player self, int itemType, int stack) {
         orig(self, itemType, stack);
-        if (Configs.ItemActions.FastExtractinator) self.itemTime = self.itemTimeMax = self.itemTime/5; // TODO stackSplit
+        if (!Configs.ItemActions.FastExtractinator || self.ItemTimeIsZero) return;
+        ItemSlot.RefreshStackSplitCooldown();
+        self.itemTime = self.itemTimeMax = Main.stackSplit - 1;
+        Main.preventStackSplitReset = true;
     }
 
     public static void CycleBuilderState(Player player, BuilderToggle toggle, int? state = null) => player.builderAccStatus[toggle.Type] = (state ?? (player.builderAccStatus[toggle.Type] + 1)) % toggle.NumberOfStates;
