@@ -162,8 +162,6 @@ public sealed class QuickMove : ILoadable {
             target.Inventory.OnSlotChange(player, target.Index);
         }
 
-        if(!freeItems[0].IsAir) freeItems[0] = source.GetItem(player, freeItems[0], GetItemSettings.GetItemInDropItemCheck);
-
         for (int i = 0; i < freeItems.Count; i++) {
             Item free = freeItems[i];
             if (free.IsAir) continue;

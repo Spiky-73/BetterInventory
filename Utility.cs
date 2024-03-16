@@ -69,10 +69,10 @@ public static class Utility {
         return currentMin;
     }
 
-    public static void GetDropItem(this Player player, ref Item item) {
+    public static void GetDropItem(this Player player, ref Item item, GetItemSettings? settings = null) {
         if (item.IsAir) return;
-        Main.mouseItem.position = player.Center;
-        Item rem = player.GetItem(player.whoAmI, item, GetItemSettings.GetItemInDropItemCheck);
+        item.position = player.Center;
+        Item rem = player.GetItem(player.whoAmI, item, settings ?? GetItemSettings.GetItemInDropItemCheck);
         if (rem.stack > 0) {
             int i = Item.NewItem(new EntitySource_OverfullInventory(player, null), (int)player.position.X, (int)player.position.Y, player.width, player.height, rem.type, rem.stack, false, rem.prefix, true, false);
             Main.item[i] = rem.Clone();

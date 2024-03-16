@@ -156,9 +156,9 @@ public sealed class SmartPickup : ILoadable {
             toMove.stack = 1;
             if (mark.GetItem(player, toMove, settings).IsAir) item.stack--;
             moved = mark.GetItem(player, moved, settings);
-            if (item.IsAir) return moved;
-            slots.Add(mark);
             player.GetDropItem(ref moved);
+            if (item.IsAir) return item;
+            slots.Add(mark);
         }
         foreach (Slot slot in slots) {
             item = slot.GetItem(player, item, settings);

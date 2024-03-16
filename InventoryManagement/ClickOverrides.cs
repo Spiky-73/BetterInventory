@@ -45,7 +45,7 @@ public sealed class ClickOverrides : ILoadable {
         if (inv2[0].IsAir) return;
         (bool left, bool leftR, Main.mouseLeft, Main.mouseLeftRelease) = (Main.mouseLeft, Main.mouseLeftRelease, true, true);
         int cursor = Main.cursorOverride;
-        if (Array.IndexOf(Utility.InventoryContexts, context) == -1) (context, Main.cursorOverride) = (ItemSlot.Context.ChestItem, CursorOverrideID.ChestToInventory);
+        if (Array.IndexOf(TransportCursors, Main.cursorOverride) == -1) (context, Main.cursorOverride) = (ItemSlot.Context.ChestItem, CursorOverrideID.ChestToInventory);
         ItemSlot.LeftClick(inv2, context, 0);
         (Main.mouseLeft, Main.mouseLeftRelease) = (left, leftR);
         Main.cursorOverride = cursor;
@@ -55,9 +55,16 @@ public sealed class ClickOverrides : ILoadable {
 
 
     public static bool OverrideHover(Item[] inv, int context, int slot) {
-        if (!Configs.InventoryManagement.ShiftRight || context != ItemSlot.Context.ShopItem || !ItemSlot.ShiftInUse || inv[slot].IsAir || !Main.LocalPlayer.ItemSpace(inv[slot]).CanTakeItem) return false;
-        Main.cursorOverride = CursorOverrideID.QuickSell;
-        return true;
+        if (!Configs.InventoryManagement.ShiftRight || inv[slot].IsAir) return false;
+        if((context == ItemSlot.Context.ChestItem || context == ItemSlot.Context.BankItem) && ItemSlot.ControlInUse){
+            Main.cursorOverride = CursorOverrideID.TrashCan;
+            return true;
+        }
+        if (context == ItemSlot.Context.ShopItem && ItemSlot.ShiftInUse && Main.LocalPlayer.ItemSpace(inv[slot]).CanTakeItem) {
+            Main.cursorOverride = CursorOverrideID.QuickSell;
+            return true;
+        }
+        return false;
     }
     internal static void ILPreventChainBuy(ILContext il) {
         ILCursor cursor = new(il);
@@ -144,7 +151,7 @@ public sealed class ClickOverrides : ILoadable {
         cursor.EmitLdloc(5); // bool flag5
         cursor.EmitDelegate((bool canCraft, bool crafting) => {
             if (!Configs.InventoryManagement.ShiftRight || !ItemSlot.ShiftInUse) return;
-            if (canCraft && !crafting && Main.stackSplit <= 1) Main.cursorOverride = CraftCursorID;
+            if (canCraft && Main.LocalPlayer.ItemSpace(Main.recipe[Main.availableRecipe[Main.focusRecipe]].createItem).CanTakeItem && !crafting && Main.stackSplit <= 1) Main.cursorOverride = CraftCursorID;
         });
         //     ...
         // }
@@ -241,7 +248,7 @@ public sealed class ClickOverrides : ILoadable {
         cursor.EmitDelegate((Recipe r, Item crafted) => {
             if (Configs.CraftStack.Enabled && s_ilCraftMultiplier != 1) crafted.stack *= s_ilCraftMultiplier;
             if (Configs.InventoryManagement.ShiftRight && Main.cursorOverride == CraftCursorID) {
-                Main.LocalPlayer.GetItem(Main.myPlayer, crafted, GetItemSettings.InventoryUIToInventorySettingsShowAsNew);
+                Main.LocalPlayer.GetDropItem(ref crafted, GetItemSettings.InventoryUIToInventorySettingsShowAsNew);
                 return true;
             }
             return false;
@@ -249,7 +256,7 @@ public sealed class ClickOverrides : ILoadable {
         ILLabel normalCraftItemCode = cursor.DefineLabel();
         cursor.EmitBrfalse(normalCraftItemCode);
         cursor.EmitRet();
-        cursor.MarkLabel(normalCraftItemCode); // TODO test can turn mouseItem to air or lose crafted item
+        cursor.MarkLabel(normalCraftItemCode);
     }
     internal static void ILCraftFixMouseText(ILContext il) {
         ILCursor cursor = new(il);
@@ -372,4 +379,7 @@ public sealed class ClickOverrides : ILoadable {
 
     public const int CraftCursorID = 22;
     public static Asset<Texture2D> CursorCraft => ModContent.Request<Texture2D>($"BetterInventory/Assets/Cursor_Craft");
+
+    public static readonly int[] TransportCursors = new int[] { CursorOverrideID.TrashCan, CursorOverrideID.InventoryToChest, CursorOverrideID.ChestToInventory };
+
 }
