@@ -78,13 +78,14 @@ public class QuickList {
 public class SearchItems {
     [DefaultValue(true)] public bool recipes = true;
     [DefaultValue(true)] public bool drops = true;
-    [DefaultValue(true)] public bool history = true; // TODO remove to need for the other settings to be on
+    [DefaultValue(true)] public RightClickAction rightClick = RightClickAction.SearchPrevious;
 
     public static bool Enabled => ItemSearch.Instance.searchItems;
     public static bool Recipes => Value.recipes && !UnloadedItemSearch.Value.searchRecipes;
     public static bool Drops => Value.drops;
-    public static bool History => Value.history;
+    public static bool RightClick => Value.rightClick != RightClickAction.Off;
     public static SearchItems Value => ItemSearch.Instance.searchItems.Value;
 }
 
+public enum RightClickAction { Off, Clear, SearchPrevious }
 public enum UnlockLevel { Off, Name, Stats, Drops, DropRates }

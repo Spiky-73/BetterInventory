@@ -31,11 +31,11 @@ public sealed class ClickOverrides : ILoadable {
 
 
     private static void HookShiftLeftCustom(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
-        if (!Configs.InventoryManagement.ShiftRight || !Main.mouseLeft || Main.cursorOverride == -1 || context != ItemSlot.Context.ShopItem && context != ItemSlot.Context.CreativeInfinite) orig(inv, context, slot);
+        if (!Configs.InventoryManagement.ShiftRight || !Main.mouseLeft || Main.cursorOverride <= CursorOverrideID.DefaultCursor || context != ItemSlot.Context.ShopItem && context != ItemSlot.Context.CreativeInfinite) orig(inv, context, slot);
         else TwoStepClick(inv, context, slot, (inv, context, slot) => orig(inv, context, slot));
     }
     private static void HookShiftRight(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
-        if (!Main.mouseRight || !Configs.InventoryManagement.ShiftRight || Main.cursorOverride == -1) orig(inv, context, slot);
+        if (!Main.mouseRight || !Configs.InventoryManagement.ShiftRight || Main.cursorOverride <= CursorOverrideID.DefaultCursor) orig(inv, context, slot);
         else TwoStepClick(inv, context, slot, (inv, context, slot) => orig(inv, context, slot));
     }
     private static void TwoStepClick(Item[] inv, int context, int slot, Action<Item[], int, int> click){
