@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
@@ -166,8 +167,9 @@ public sealed class Bestiary : ILoadable {
         if (s_darkPage) DarkenElement(Reflection.UIBestiaryEntryInfoPage._list.GetValue(self), PageDark);
     }
 
-    internal static void ILFakeUnlockFilters(ILContext il) { // TODO hide filters
+    internal static void ILFakeUnlockFilters(ILContext il) {
         ILCursor cursor = new(il);
+        cursor.EmitDelegate(() => { s_ilSkipped = 0; });
 
         // ...
         // for (<filter>) {
@@ -175,16 +177,52 @@ public sealed class Bestiary : ILoadable {
         //     bool b = this.GetIsFilterAvailableForEntries(bestiaryEntryFilter, entries);
         cursor.GotoNext(MoveType.After, i => i.SaferMatchCall(typeof(UIBestiaryFilteringOptionsGrid), "GetIsFilterAvailableForEntries"));
 
+        ILLabel? cont = null; 
+        cursor.FindNext(out _, i => i.MatchBr(out cont));
+
         //     ++ <fakeUnlock> 
         cursor.EmitLdloc(13);
         cursor.EmitLdloc(14);
         cursor.EmitDelegate((bool on, IBestiaryEntryFilter filter, List<BestiaryEntry> entries) => {
-            if(filter.ForcedDisplay.HasValue) return on;
-            if (Configs.BetterBestiary.UnknownDisplay && Configs.BetterBestiary.Value.unknownDisplay == Configs.UnknownDisplay.Known) {
-                for (int i = 0; i < entries.Count; i++) if (filter.FitsFilter(entries[i])) return true;
+            s_ilOn = on;
+            if(!Configs.BetterBestiary.UnknownDisplay || on || filter.ForcedDisplay.HasValue) return false;
+            if (Configs.BetterBestiary.Value.unknownDisplay == Configs.UnknownDisplay.Known) {
+                s_ilOn = true;
+                return false;
             }
-            return on;
+            if (Configs.BetterBestiary.Value.unknownDisplay == Configs.UnknownDisplay.Hidden) {
+                s_ilSkipped++;
+                return true;
+            }
+            return false;
         });
+        cursor.EmitBrtrue(cont!);
+        cursor.EmitDelegate(() => s_ilOn);
+    }
+    internal static void ILFixPosition(ILContext il) {
+        ILCursor cursor = new(il);
+
+        cursor.GotoNext(i => i.MatchStloc(11)).GotoPrev(MoveType.After, i => i.MatchLdloc(10));
+        cursor.EmitDelegate((int i) => i-s_ilSkipped);
+        cursor.GotoNext(i => i.MatchStloc(12)).GotoPrev(MoveType.After, i => i.MatchLdloc(10));
+        cursor.EmitDelegate((int i) => i-s_ilSkipped);
+
+        cursor.GotoNext(MoveType.Before, i => i.MatchRet());
+        cursor.EmitLdarg0();
+        cursor.EmitDelegate((UIBestiaryFilteringOptionsGrid self) => {
+            UIPanel p = (UIPanel)Reflection.UIBestiaryFilteringOptionsGrid._container.GetValue(self);
+            EntryFilterer<BestiaryEntry, IBestiaryEntryFilter> filterer = Reflection.UIBestiaryFilteringOptionsGrid._filterer.GetValue(self);
+            int widthWithSpacing = 32 + 2;
+            int perRow = 12;
+            int howManyRows = (int)Math.Ceiling((filterer.AvailableFilters.Count - s_ilSkipped) / (float)perRow);
+            if (p.Children.Count() < perRow) {
+                p.Width = new(p.Children.Count() * widthWithSpacing + 10, 0f);
+                p.Height = new(1 * widthWithSpacing + 10, 0f);
+            } else {
+                p.Width = new(perRow * widthWithSpacing + 10, 0f);
+                p.Height = new(howManyRows * widthWithSpacing + 10, 0f);
+            }
+        }); 
 
     }
     private static void HookDarkenFilters(On_UIBestiaryFilteringOptionsGrid.orig_UpdateButtonSelections orig, UIBestiaryFilteringOptionsGrid self) {
@@ -192,8 +230,8 @@ public sealed class Bestiary : ILoadable {
         if (!Configs.BetterBestiary.UnknownDisplay) return;
         EntryFilterer<BestiaryEntry, IBestiaryEntryFilter> filterer = Reflection.UIBestiaryFilteringOptionsGrid._filterer.GetValue(self);
         List<GroupOptionButton<int>> filters = Reflection.UIBestiaryFilteringOptionsGrid._filterButtons.GetValue(self);
-        for (int i = 0; i < filterer.AvailableFilters.Count; i++){
-            if (!Reflection.UIBestiaryFilteringOptionsGrid.GetIsFilterAvailableForEntries.Invoke(self, filterer.AvailableFilters[i], Reflection.UIBestiaryFilteringOptionsGrid._filterAvailabilityTests.GetValue(self)[i])) DarkenElement(filters[i], IconDark);
+        foreach(GroupOptionButton<int> filter in filters) {
+            if (!Reflection.UIBestiaryFilteringOptionsGrid.GetIsFilterAvailableForEntries.Invoke(self, filterer.AvailableFilters[filter.OptionValue], Reflection.UIBestiaryFilteringOptionsGrid._filterAvailabilityTests.GetValue(self)[filter.OptionValue])) DarkenElement(filter, IconDark);
         }
     }
 
@@ -265,6 +303,8 @@ public sealed class Bestiary : ILoadable {
     public const float IconDark = 0.5f;
 
     private static bool s_darkPage = false;
+    private static int s_ilSkipped = 0;
+    private static bool s_ilOn = false;
 
     private static readonly Dictionary<int, string> _bossBagSearch = new();
 }

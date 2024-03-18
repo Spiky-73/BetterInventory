@@ -132,6 +132,7 @@ public class Hooks : ILoadable {
     }
     private void ILFilteringOptionsGrid_UpdateAvailability(ILContext il) {
         if (!ApplyIL(il, Bestiary.ILFakeUnlockFilters, Configs.BetterBestiary.UnknownDisplay)) Configs.UnloadedItemSearch.Value.bestiaryUnknown = true;
+        if (!ApplyIL(il, Bestiary.ILFixPosition, Configs.BetterBestiary.UnknownDisplay)) Configs.UnloadedItemSearch.Value.bestiaryUnknown = true;
     }
 
     private void IlDrawSelf(ILContext il) => ApplyIL(il, Text.ILTextColors, true);

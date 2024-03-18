@@ -12,6 +12,7 @@ using TPage = Terraria.GameContent.UI.Elements.UIBestiaryEntryInfoPage;
 using TFilterGrid = Terraria.GameContent.UI.Elements.UIBestiaryFilteringOptionsGrid;
 using TItemDropE = Terraria.GameContent.Bestiary.ItemDropBestiaryInfoElement;
 using Terraria.GameContent.ItemDropRules;
+using Terraria.UI;
 
 namespace BetterInventory.Reflection;
 
@@ -38,6 +39,7 @@ public static class UIBestiaryEntryInfoPage {
 }
 
 public static class UIBestiaryFilteringOptionsGrid {
+    public static readonly Field<TFilterGrid, UIElement> _container = new(nameof(_container));
     public static readonly Field<TFilterGrid, EntryFilterer<BestiaryEntry, IBestiaryEntryFilter>> _filterer = new(nameof(_filterer));
     public static readonly Field<TFilterGrid, List<Terraria.GameContent.UI.Elements.GroupOptionButton<int>>> _filterButtons = new(nameof(_filterButtons));
     public static readonly Field<TFilterGrid, List<List<BestiaryEntry>>> _filterAvailabilityTests = new(nameof(_filterAvailabilityTests));
