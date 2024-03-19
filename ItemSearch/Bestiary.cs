@@ -230,8 +230,9 @@ public sealed class Bestiary : ILoadable {
         if (!Configs.BetterBestiary.UnknownDisplay) return;
         EntryFilterer<BestiaryEntry, IBestiaryEntryFilter> filterer = Reflection.UIBestiaryFilteringOptionsGrid._filterer.GetValue(self);
         List<GroupOptionButton<int>> filters = Reflection.UIBestiaryFilteringOptionsGrid._filterButtons.GetValue(self);
-        foreach(GroupOptionButton<int> filter in filters) {
-            if (!Reflection.UIBestiaryFilteringOptionsGrid.GetIsFilterAvailableForEntries.Invoke(self, filterer.AvailableFilters[filter.OptionValue], Reflection.UIBestiaryFilteringOptionsGrid._filterAvailabilityTests.GetValue(self)[filter.OptionValue])) DarkenElement(filter, IconDark);
+        List<List<BestiaryEntry>> test = Reflection.UIBestiaryFilteringOptionsGrid._filterAvailabilityTests.GetValue(self);
+        foreach (GroupOptionButton<int> filter in filters) {
+            if (filter.OptionValue < 0 || !Reflection.UIBestiaryFilteringOptionsGrid.GetIsFilterAvailableForEntries.Invoke(self, filterer.AvailableFilters[filter.OptionValue], test[filter.OptionValue])) DarkenElement(filter, IconDark);
         }
     }
 
