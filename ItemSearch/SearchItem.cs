@@ -249,9 +249,10 @@ public sealed class SearchItem : ILoadable {
         }
 
         (Item mouse, int cursor) = (Main.mouseItem, Main.cursorOverride);
+        inv[slot].TurnToAir();
         if (Main.cursorOverride > CursorOverrideID.DefaultCursor) {
-            Main.mouseItem = new();
-            Main.cursorOverride = CursorOverrideID.DefaultCursor;
+            SoundEngine.PlaySound(SoundID.Grab);
+            return;
         } else {
             Main.mouseItem = Main.mouseItem.Clone();
             if(!Main.mouseItem.IsAir) {
@@ -278,21 +279,24 @@ public sealed class SearchItem : ILoadable {
 
     private static void SetPreviousGuideItem(Item[] inv, int slot, bool allowAir = false) {
         void MoveItem(Item item) {
-            if(!Configs.SearchItems.Recipes) {
+            if (!Configs.SearchItems.Recipes) {
                 int i = Main.LocalPlayer.FindItem(item.type);
                 (Item mouse, Main.mouseItem) = (Main.mouseItem, new());
                 (int cursor, Main.cursorOverride) = (Main.cursorOverride, 0);
                 (bool left, Main.mouseLeft, bool rel, Main.mouseLeftRelease) = (Main.mouseLeft, true, Main.mouseLeftRelease, true);
                 Item[] items = Guide.GuideItems;
                 if (i != -1) ItemSlot.LeftClick(Main.LocalPlayer.inventory, ContextID.InventoryItem, i);
-                ItemSlot.LeftClick(items, ContextID.GuideItem, slot); 
+                ItemSlot.LeftClick(items, ContextID.GuideItem, slot);
                 if (i != -1) ItemSlot.LeftClick(Main.LocalPlayer.inventory, ContextID.InventoryItem, i);
                 Main.LocalPlayer.GetDropItem(ref Main.mouseItem);
                 Guide.GuideItems = items;
                 Main.mouseItem = mouse;
                 Main.cursorOverride = cursor;
                 (Main.mouseLeft, Main.mouseLeftRelease) = (left, rel);
-            } else SetGuideItem(item, slot);
+            } else {
+                SetGuideItem(item, slot);
+                SoundEngine.PlaySound(SoundID.Grab);
+            }
         }
         
         if (Configs.SearchItems.Value.rightClick == Configs.RightClickAction.SearchPrevious && _guideHistory[slot].Count > 0) {
@@ -300,7 +304,7 @@ public sealed class SearchItem : ILoadable {
             do {
                 item = _guideHistory[slot][^1];
                 _guideHistory[slot].RemoveAt(_guideHistory[slot].Count - 1);
-            } while (_guideHistory[slot].Count > 0 && !allowAir && item.IsAir);
+            } while (_guideHistory[slot].Count > 0 && (!allowAir && item.IsAir || Guide.AreSame(item, inv[slot])));
             int count = _guideHistory[slot].Count;
             MoveItem(item);
             if (_guideHistory[slot].Count > count) _guideHistory[slot].RemoveAt(_guideHistory[slot].Count - 1);
