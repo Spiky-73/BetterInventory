@@ -137,7 +137,7 @@ public class Hooks : ILoadable {
 
     private void IlDrawSelf(ILContext il) => ApplyIL(il, Text.ILTextColors, true);
 
-    public static bool ApplyIL(ILContext context, Action<ILContext> ilEdit, bool enabled, [CallerArgumentExpression(nameof(ilEdit))] string name = "") {
+    public static bool ApplyIL(ILContext context, Action<ILContext> ilEdit, bool enabled, [CallerArgumentExpression("ilEdit")] string name = "") {
         if (Configs.Compatibility.CompatibilityMode && !enabled) {
             Mod.Logger.Info($"{name} was not loaded. Related features will be disabled until reload");
             return false;
