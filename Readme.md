@@ -59,7 +59,7 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 - Auto generation of Builder Accessories keybinds
 - Improved recipe filters display (again)
 - Reorganized some options in the configs
-- Added full feature list in README.md
+- Added full feature list on the homepage
 - Replaced string with TileDefinition when possible
 - Fixed favorite items in banks not been saved
 - Fixed crash on load with Better Game UI

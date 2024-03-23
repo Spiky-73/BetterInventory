@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reflection;
 using log4net;
 using Microsoft.Xna.Framework;
@@ -82,6 +83,9 @@ public static class Utility {
         item = new();
         Recipe.FindRecipes();
     }
+
+    public static T Min<T>(params T[] values) where T : IComparable<T> => values.Min()!;
+    public static T Max<T>(params T[] values) where T : IComparable<T> => values.Max()!;
 
     public enum InclusionFlag {
         Min = 0x01,

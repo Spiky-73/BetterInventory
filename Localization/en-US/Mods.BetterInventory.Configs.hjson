@@ -505,7 +505,6 @@ SearchItems: {
 	recipes: {
 		Label: Recipes
 		Tooltip:
-			// Use the "{$Mods.BetterInventory.Keybinds.Guide.DisplayName}" key to search the recipes using a material
 			'''
 			Hold the "{$Mods.BetterInventory.Keybinds.QuickSearch.DisplayName}" key and Left Click a material to search the recipes using it
 			With "{$Mods.BetterInventory.Configs.BetterGuide.tile.Label}" On, searching the guide tile will move it into the guide item and vice-versa
@@ -515,7 +514,6 @@ SearchItems: {
 	drops: {
 		Label: Drops
 		Tooltip: Hold the "{$Mods.BetterInventory.Keybinds.QuickSearch.DisplayName}" key and Right Click an item to search the NPCs dropping it
-		// Tooltip: Use the "{$Mods.BetterInventory.Keybinds.NPC.DisplayName}" key to search the NPCs dropping an item
 	}
 
 	rightClick: {

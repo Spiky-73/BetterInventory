@@ -96,7 +96,7 @@ public sealed class ClickOverrides : ILoadable {
             int amount = GetMaxBuyAmount(inv[slot], price);
             int available = inv[slot].buyOnce ? inv[slot].stack : inv[slot].maxStack;
             int maxPickup = Configs.InventoryManagement.ShiftRight && Main.cursorOverride == CursorOverrideID.QuickSell ? GetMaxPickupAmount(inv[slot]) : (inv[slot].maxStack - Main.mouseItem.stack);
-            s_ilShopMultiplier = Math.Min(Math.Min(Math.Min(amount, available), maxPickup), Configs.CraftStack.Value.maxAmount);
+            s_ilShopMultiplier = Math.Max(Utility.Min(amount, available, maxPickup, Configs.CraftStack.Value.maxAmount), 1);
             return price;
         });
         cursor.EmitStloc(4);
@@ -208,7 +208,7 @@ public sealed class ClickOverrides : ILoadable {
             if (!Configs.CraftStack.Enabled || !(Configs.CraftStack.Value.invertClicks ? Main.mouseRight : Main.mouseLeft)) return r;
             int amount = GetMaxCraftAmount(r);
             int maxPickup = Configs.InventoryManagement.ShiftRight && Main.cursorOverride == CraftCursorID ? GetMaxPickupAmount(r.createItem) : (r.createItem.maxStack - Main.mouseItem.stack);
-            s_ilCraftMultiplier = Math.Min(Math.Min(amount, maxPickup / r.createItem.stack), Configs.CraftStack.Value.maxAmount / r.createItem.stack);
+            s_ilCraftMultiplier = Math.Max(Utility.Min(amount, maxPickup / r.createItem.stack, Configs.CraftStack.Value.maxAmount / r.createItem.stack), 1);
             return r;
         });
         // Item crafted = r.createItem.Clone();

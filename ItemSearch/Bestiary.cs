@@ -43,7 +43,7 @@ public sealed class Bestiary : ILoadable {
             orig(self, drops, ratesInfo);
             return;
         }
-        float personalDroprate = System.Math.Min(1, self.chanceNumerator / (float)self.chanceDenominator);
+        float personalDroprate = Math.Min(1, self.chanceNumerator / (float)self.chanceDenominator);
         float globalDroprate = personalDroprate * ratesInfo.parentDroprateChance;
         float dropRate = 1f / self.dropIds.Length * self.amount * globalDroprate;
         for (int i = 0; i < self.dropIds.Length; i++) drops.Add(new DropRateInfo(self.dropIds[i], 1, 1, dropRate, ratesInfo.conditions));
