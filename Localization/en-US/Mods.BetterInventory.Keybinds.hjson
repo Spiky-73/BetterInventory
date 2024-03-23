@@ -1,11 +1,10 @@
 FavoritedQuickBuff.DisplayName: Favorited Quick buff
-PrioritizeOre.DisplayName: Prioritize ore
+QuickSearch.DisplayName: Quick Search
+BlockSwap.DisplayName: Block Swap
+TorchBiome.DisplayName: Torch Biome
+HideAllWires.DisplayName: Hide All Wires
+WireDisplay.DisplayName: Wire Display
 RulerLine.DisplayName: Ruler Line
 RulerGrid.DisplayName: Ruler Grid
+AutoActuate.DisplayName: Auto Actuate
 AutoPaint.DisplayName: Auto Paint
-AutoActuator.DisplayName: Auto Actuator
-WireDisplay.DisplayName: Wire display
-ForcedWires.DisplayName: Forced Wires
-BlockSwap.DisplayName: Block Swap
-BiomeTorches.DisplayName: Biome Torches
-SearchItem.DisplayName: Search Item

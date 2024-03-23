@@ -2,9 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reflection;
+using log4net;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent;
@@ -66,10 +70,10 @@ public static class Utility {
         return currentMin;
     }
 
-    public static void GetDropItem(this Player player, ref Item item) {
+    public static void GetDropItem(this Player player, ref Item item, GetItemSettings? settings = null) {
         if (item.IsAir) return;
-        Main.mouseItem.position = player.Center;
-        Item rem = player.GetItem(player.whoAmI, item, GetItemSettings.GetItemInDropItemCheck);
+        item.position = player.Center;
+        Item rem = player.GetItem(player.whoAmI, item, settings ?? GetItemSettings.GetItemInDropItemCheck);
         if (rem.stack > 0) {
             int i = Item.NewItem(new EntitySource_OverfullInventory(player, null), (int)player.position.X, (int)player.position.Y, player.width, player.height, rem.type, rem.stack, false, rem.prefix, true, false);
             Main.item[i] = rem.Clone();
@@ -79,6 +83,9 @@ public static class Utility {
         item = new();
         Recipe.FindRecipes();
     }
+
+    public static T Min<T>(params T[] values) where T : IComparable<T> => values.Min()!;
+    public static T Max<T>(params T[] values) where T : IComparable<T> => values.Max()!;
 
     public enum InclusionFlag {
         Min = 0x01,
@@ -126,21 +133,21 @@ public static class Utility {
         color.B = (byte)(color.B * mult);
     }
 
-    public static Item MoveInto(Item item, Item toMove, out int tranfered, int? maxStack = null, bool canFavorite = true) {
-        tranfered = 0;
+    public static Item MoveInto(Item item, Item toMove, out int transferred, int? maxStack = null, bool canFavorite = true) {
+        transferred = 0;
         if (toMove.IsAir) return item;
         if (item.IsAir) {
-            tranfered = maxStack.HasValue ? Math.Min(maxStack.Value, toMove.stack) : toMove.stack;
+            transferred = maxStack.HasValue ? Math.Min(maxStack.Value, toMove.stack) : toMove.stack;
             item = toMove.Clone();
             item.stack = 0;
-            ItemLoader.SplitStack(item, toMove, tranfered);
+            ItemLoader.SplitStack(item, toMove, transferred);
         } else if (item.type == toMove.type && item.stack < (maxStack ?? item.maxStack)) {
             int oldStack = item.maxStack;
             if (maxStack.HasValue) item.maxStack = maxStack.Value;
-            ItemLoader.TryStackItems(item, toMove, out tranfered);
+            ItemLoader.TryStackItems(item, toMove, out transferred);
             item.maxStack = oldStack;
         }
-        if (tranfered != 0) {
+        if (transferred != 0) {
             item.favorited = item.favorited || canFavorite && toMove.favorited;
             if (toMove.IsAir) toMove.TurnToAir(true);
         }
@@ -176,7 +183,27 @@ public static class Utility {
         });
     }
 
+    public static bool SaferMatchCall(this Instruction inst, MethodInfo method) {
+        try {
+            return inst.MatchCall(method);
+        }
+        catch (InvalidCastException) {
+            return false;
+        }
+    }
+    public static bool SaferMatchCall(this Instruction inst, Type type, string name) {
+        try {
+            return inst.MatchCall(type, name);
+        }
+        catch (InvalidCastException) {
+            return false;
+        }
+    }
+
     public static ReadOnlyDictionary<int, int> OwnedItems => Data.ownedItems;
+
+    public static ILog Logger => BetterInventory.Instance.Logger;
+
 
     public static readonly int[] InventoryContexts = new int[] { ContextID.InventoryItem, ContextID.InventoryAmmo, ContextID.InventoryCoin };
 

@@ -11,33 +11,26 @@ using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using Terraria.ModLoader.UI;
 
 namespace BetterInventory.Crafting;
 
-public sealed class RecipeFiltering : ILoadable {
+public static class RecipeFiltering {
 
-    public static bool Enabled => Configs.Crafting.Instance.recipeFiltering.Parent;
-    public static Configs.RecipeFiltering Config => Configs.Crafting.Instance.recipeFiltering.Value;
-    public static RecipeFilters LocalFilters => InventoryManagement.BetterPlayer.LocalPlayer.RecipeFilters;
+    public static RecipeFilters LocalFilters => ItemActions.BetterPlayer.LocalPlayer.RecipeFilters;
 
-    public void Load(Mod mod) {
-        IL_Main.DrawInventory += ILDrawFilters;
-    }
-
-    public void Unload() { }
-
-    private static void ILDrawFilters(ILContext il) {
+    internal static void ILDrawFilters(ILContext il) {
         ILCursor cursor = new(il);
 
         // ...
         // if(<showRecipes>){
-        cursor.GotoNext(i => i.MatchStsfld(typeof(Terraria.UI.Gamepad.UILinkPointNavigator.Shortcuts), nameof(Terraria.UI.Gamepad.UILinkPointNavigator.Shortcuts.CRAFT_CurrentRecipeBig)));
-        cursor.GotoPrev(MoveType.AfterLabel);
+        cursor.GotoNext(i => i.MatchStloc(124)); // int num63
+        cursor.GotoPrev(MoveType.After, i => i.MatchStsfld(Reflection.UILinkPointNavigator.CRAFT_CurrentRecipeSmall));
 
         //     ++<drawFilters>
-        cursor.EmitLdloc(13); // screen position
-        cursor.EmitDelegate((int num54) => {
-            if (Enabled && s_recipes != 0) DrawFilters(94, 450 + num54);
+        cursor.EmitLdloc(13); // int num54
+        cursor.EmitDelegate((int screenY) => {
+            if (Configs.RecipeFilters.Enabled && s_recipes != 0) DrawFilters(94, 450 + screenY);
         });
 
         //     ...
@@ -46,20 +39,17 @@ public sealed class RecipeFiltering : ILoadable {
         //         int num73 = 94;
         //         int num74 = 450 + num51;
         //         if (++false && Main.InGuideCraftMenu) num74 -= 150;
-        ILLabel? postHammer = null;
-        cursor.GotoNext(i => i.MatchLdsfld(Reflection.Main.InGuideCraftMenu));
-        cursor.GotoNext(i => i.MatchBrfalse(out postHammer));
-        cursor.GotoPrev(i => i.MatchLdsfld(Reflection.Main.InGuideCraftMenu));
-        cursor.EmitBr(postHammer!);
-
+        cursor.GotoNext(i => i.MatchLdsfld(Reflection.TextureAssets.CraftToggle));
+        cursor.GotoPrev(MoveType.After, i => i.MatchLdsfld(Reflection.Main.InGuideCraftMenu));
+        cursor.EmitDelegate((bool inGuide) => !Configs.RecipeFilters.Enabled && inGuide);
         //         ...
         //     }
     }
 
     public static void DrawFilters(int hammerX, int hammerY){
         static void OnFilterChanges() {
-            if (!Guide.Enabled) Recipe.FindRecipes();
-            else Guide.FindDisplayedRecipes();
+            if (!Configs.BetterGuide.AvailableRecipes) Recipe.FindRecipes();
+            else Guide.FindGuideRecipes();
             SoundEngine.PlaySound(SoundID.MenuTick);
         }
 
@@ -70,9 +60,9 @@ public sealed class RecipeFiltering : ILoadable {
         int y = hammerY + TextureAssets.CraftToggle[0].Height() - TextureAssets.InfoIcon[0].Width()/2;
         while (i < LocalFilters.Filterer.AvailableFilters.Count) {
             int x = hammerX - TextureAssets.InfoIcon[0].Width() - 1;
-            for(int d = 0; i < filters.AvailableFilters.Count && d < Config.width; i++){
+            for(int d = 0; i < filters.AvailableFilters.Count && d < Configs.RecipeFilters.Value.width; i++){
                 bool active = filters.IsFilterActive(i);
-                if (Config.hideUnavailable && s_recipesInFilter[i] == 0 && !active) continue;
+                if (Configs.RecipeFilters.Value.hideUnavailable && s_recipesInFilter[i] == 0 && !active) continue;
                 Rectangle hitbox = new(x, y, RecipeFilterBack.Width(), RecipeFilterBack.Height());
                 if (hitbox.Contains(Main.mouseX, Main.mouseY)) {
                     Main.LocalPlayer.mouseInterface = true;
@@ -89,26 +79,23 @@ public sealed class RecipeFiltering : ILoadable {
                             filters.ToggleFilter(i);
                             OnFilterChanges();
                         }
-                        name = Language.GetTextValue("Mods.BetterInventory.UI.Filter", name, s_recipesInFilter[i]);
+                        name = Language.GetTextValue($"{Localization.Keys.UI}.Filter", name, s_recipesInFilter[i]);
                         Main.spriteBatch.Draw(TextureAssets.InfoIcon[13].Value, hitbox.Center(), null, Main.OurFavoriteColor, 0, TextureAssets.InfoIcon[13].Size() / 2, 1, SpriteEffects.None, 0);
                     }
                     if (s_recipesInFilter[i] == 0) rare = -1;
                     Main.instance.MouseText(name, rare);
                 }
 
-                Color color;
-                if (s_recipesInFilter[i] != 0) {
-                    color = Color.White;
-                    if (!active) color *= 0.2f;
-                }
-                else {
-                    color = new Color(96, 96, 96);
-                    if (!active) color *= 0.05f;
+                Color color = Color.White;
+                Color colorBack = s_recipesInFilter[i] != 0 ? UICommon.DefaultUIBlue : new(64, 64, 64);
+                if (!active) {
+                    color = color.MultiplyRGBA(new(80, 80, 80, 70));
+                    colorBack = colorBack.MultiplyRGBA(new(80, 80, 80, 70));
                 }
 
-                Main.spriteBatch.Draw(RecipeFilterBack.Value, hitbox.Center(), null, color, 0, RecipeFilterBack.Size() / 2, 1, SpriteEffects.None, 0);
+                Main.spriteBatch.Draw(RecipeFilterBack.Value, hitbox.Center(), null, colorBack, 0, RecipeFilterBack.Size() / 2, 1, SpriteEffects.None, 0);
                 Rectangle frame = filters.AvailableFilters[i].GetSourceFrame();
-                Main.spriteBatch.Draw(RecipeFilters.Value, hitbox.Center(), frame, color, 0, frame.Size() / 2, 1, SpriteEffects.None, 0);
+                Main.spriteBatch.Draw((s_recipesInFilter[i] != 0 ? RecipeFilters : RecipeFilter2).Value, hitbox.Center(), frame, color, 0, frame.Size() / 2, 1, SpriteEffects.None, 0);
 
                 x += delta;
                 d++;
@@ -141,4 +128,5 @@ public sealed class RecipeFiltering : ILoadable {
 
     public static Asset<Texture2D> RecipeFilterBack => ModContent.Request<Texture2D>($"BetterInventory/Assets/Recipe_Filter_Back");
     public static Asset<Texture2D> RecipeFilters => ModContent.Request<Texture2D>($"BetterInventory/Assets/Recipe_Filters");
+    public static Asset<Texture2D> RecipeFilter2 => ModContent.Request<Texture2D>($"BetterInventory/Assets/Recipe_Filters2");
 }

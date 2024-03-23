@@ -17,11 +17,11 @@ Accessories.DisplayName: Accessory
 VanityAccessories.DisplayName: Social
 Loadout1.DisplayName: Loadout1
 Loadout2.DisplayName: Loadout2
-Pet.DisplayName: Equipement
-LightPet.DisplayName: Equipement
-Minecart.DisplayName: Equipement
-Mount.DisplayName: Equipement
-Hook.DisplayName: Equipement
+Pet.DisplayName: Equipment
+LightPet.DisplayName: Equipment
+Minecart.DisplayName: Equipment
+Mount.DisplayName: Equipment
+Hook.DisplayName: Equipment
 ArmorDyes.DisplayName: Armor Dye
 AccessoryDyes.DisplayName: Accessory Dye
-EquipementDyes.DisplayName: Equipement Dye
+EquipmentDyes.DisplayName: Equipment Dye

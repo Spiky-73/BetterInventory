@@ -8,7 +8,37 @@ using Terraria.UI;
 
 namespace BetterInventory.Configs.UI;
 
-public sealed class ChildValueElement : ConfigElement<IChildValue>{
+public interface IChildValue {
+    object Parent { get; set; }
+    [Expand(false, false)]
+    public object Value { get; set; }
+}
+
+[CustomModConfigItem(typeof(ChildValueElement))]
+public class ChildValue<TParent, TValue> : IChildValue where TParent: struct where TValue: class, new() {
+    public ChildValue() : this(default) { } 
+    public ChildValue(TParent parent = default, TValue? value = default) {
+        Parent = parent;
+        Value = value ?? new();
+    }
+
+    public TParent Parent { get; set; }
+
+    [Expand(false, false)]
+    public TValue Value { get; set; }
+    [Expand(false, false)]
+    object IChildValue.Parent { get => Parent; set => Parent = (TParent)value!; }
+    object IChildValue.Value { get => Value; set => Value = (TValue)value!; }
+
+    public static implicit operator TParent(ChildValue<TParent, TValue> self) => self.Parent;
+}
+
+public sealed class Toggle<T> : ChildValue<bool, T> where T: class, new() {
+    public Toggle() : this(default) {}
+    public Toggle(bool enabled = default, T? value = null) : base(enabled, value) {}
+}
+
+public sealed class ChildValueElement : ConfigElement<IChildValue> {
     public override void OnBind() {
         base.OnBind();
 
@@ -48,7 +78,7 @@ public sealed class ChildValueElement : ConfigElement<IChildValue>{
 
     public override void Recalculate() {
         base.Recalculate();
-        Height =_child.Height;
+        Height = _child.Height;
         if (Parent != null && Parent is UISortableElement) Parent.Height.Set(Height.Pixels, 0f);
     }
 

@@ -12,19 +12,27 @@ using Terraria.UI;
 
 namespace BetterInventory.Configs.UI;
 
-public class UpdateNotification : IInGameNotification {
+public class Notification : IInGameNotification {
 
     public static TagKeyFormat DownloadTags => new(null, new());
     public static TagKeyFormat UpdateTags => new(null, new(){
-        ("Mods.BetterInventory.Configs.Version.DisplayName", $"c/{Colors.RarityCyan.Hex3()}")
+        ($"{Localization.Keys.Configs}.Version.DisplayName", $"c/{Colors.RarityCyan.Hex3()}"),
     });
-    public static TagKeyFormat BugTags => new(null, new(){
-        ("Mods.BetterInventory.Chat.Workshop", $"c/{Colors.RarityCyan.Hex3()}"),
-        ("Mods.BetterInventory.Chat.Homepage", $"c/{Colors.RarityCyan.Hex3()}")
+    public static TagKeyFormat UnloadedMore => new(Colors.RarityAmber, new(){
+        ($"{Localization.Keys.Configs}.Compatibility.DisplayName", $"c/{Colors.RarityCyan.Hex3()}")
     });
-    public static TagKeyFormat ImportantTags => new(Colors.RarityAmber, new());
+    public static TagKeyFormat UnloadedLess => new(Colors.RarityGreen, new(){
+        ($"{Localization.Keys.Configs}.Compatibility.DisplayName", $"c/{Colors.RarityCyan.Hex3()}")
+    });
+    public static TagKeyFormat BugsTags => new(null, new(){
+        ($"{Localization.Keys.Chat}.Workshop", $"c/{Colors.RarityCyan.Hex3()}"),
+        ($"{Localization.Keys.Chat}.Homepage", $"c/{Colors.RarityCyan.Hex3()}")
+    });
+    public static TagKeyFormat ImportantTags => new(Colors.RarityAmber, new() {
+        ($"{Localization.Keys.Configs}.Compatibility.DisplayName", $"c/{Colors.RarityCyan.Hex3()}")
+    });
 
-    public static void Display() {
+    public static void DisplayUpdate() {
         bool download;
         if (Version.Instance.lastPlayedVersion.Length == 0) download = true;
         else if (BetterInventory.Instance.Version > new System.Version(Version.Instance.lastPlayedVersion)) download = false;
@@ -34,24 +42,39 @@ public class UpdateNotification : IInGameNotification {
         Version.Instance.SaveConfig();
 
         List<(LocalizedText text, TagKeyFormat format)> lines = new();
-        if (download) lines.Add((Language.GetText("Mods.BetterInventory.Chat.Download"), DownloadTags));
-        else lines.Add((Language.GetText("Mods.BetterInventory.Chat.Update"), UpdateTags));
-        lines.Add((Language.GetText("Mods.BetterInventory.Chat.Bug"), BugTags));
-        LocalizedText important = Language.GetText("Mods.BetterInventory.Chat.Important");
+        if (download) lines.Add((Language.GetText($"{Localization.Keys.Chat}.Download"), DownloadTags));
+        else lines.Add((Language.GetText($"{Localization.Keys.Chat}.Update"), UpdateTags));
+        lines.Add((Language.GetText($"{Localization.Keys.Chat}.Bug"), BugsTags));
+        LocalizedText important = Language.GetText($"{Localization.Keys.Chat}.Important");
         if (!download && important.Value.Length != 0) lines.Add((important, ImportantTags));
-        InGameNotificationsTracker.AddNotification(new UpdateNotification(lines));
+        InGameNotificationsTracker.AddNotification(new Notification(lines, 15*60));
+    }
+
+    public static void DisplayCompatibility() {
+        bool failed;
+        if (Hooks.FailedILs > Compatibility.Instance.failedILs) failed = true;
+        else if (Hooks.FailedILs < Compatibility.Instance.failedILs) failed = false;
+        else return;
+        Compatibility.Instance.failedILs = Hooks.FailedILs;
+        Compatibility.Instance.SaveConfig();
+
+        List<(LocalizedText text, TagKeyFormat format)> lines = new() {
+            failed ? (Language.GetText($"{Localization.Keys.Chat}.UnloadedMore"), UnloadedMore) : (Language.GetText($"{Localization.Keys.Chat}.UnloadedLess"), UnloadedLess)
+        };
+        InGameNotificationsTracker.AddNotification(new Notification(lines));
     }
 
 
-    public UpdateNotification(List<(LocalizedText text, TagKeyFormat format)> lines) {
-        LifeSpan = MaxLifeSpan;
+    public Notification(List<(LocalizedText text, TagKeyFormat format)> lines, int lifeSpan = 5 * 60) {
+        MaxLifeSpan = LifeSpan = lifeSpan;
         
         _lines = new();
-        _textSize = new(0, FontAssets.MouseText.Value.LineSpacing * lines.Count);
+        _textSize = new();
         foreach((LocalizedText text, TagKeyFormat format) in lines) {
             string line = text.Value;
             Vector2 size = FontAssets.MouseText.Value.MeasureString(line);
             if (size.X > _textSize.X) _textSize.X = size.X;
+            _textSize.Y += size.Y;
             _lines.Add(new(line.FormatTagKeys(format.Tags), size, format.Color));
         }
     }
@@ -97,20 +120,24 @@ public class UpdateNotification : IInGameNotification {
 
     public bool ShouldBeRemoved => LifeSpan <= 0;
 
+    public int MaxLifeSpan { get; }
     public int LifeSpan { get; private set; }
 
-    public float Scale => LifeSpan switch {
-        < 60 / 2 => MathHelper.Lerp(0f, 1f, LifeSpan / (60 / 2f)),
-        > MaxLifeSpan - 60 / 4 => MathHelper.Lerp(1f, 0f, (LifeSpan - (MaxLifeSpan - 60 / 4)) / (60 / 4f)),
-        _ => 1f,
-    };
+    public float Scale {
+        get {
+            if (LifeSpan < 60 / 2) return MathHelper.Lerp(0f, 1f, LifeSpan / (60 / 2f));
+            if (LifeSpan > MaxLifeSpan - 60 / 4) return MathHelper.Lerp(1f, 0f, (LifeSpan - (MaxLifeSpan - 60 / 4)) / (60 / 4f));
+            return 1;
+        }
+    }
+
+
     public float Opacity => Scale <= 0.2f ? 0f : (Scale - 0.2f) / 0.8f;
 
 
     private readonly List<LineInfo> _lines;
     private Vector2 _textSize;
 
-    public const int MaxLifeSpan = 15 * 60;
     public static Asset<Texture2D> ModIcon => ModContent.Request<Texture2D>($"BetterInventory/icon");
     public static readonly Vector2 Padding = new(7, 5);
 

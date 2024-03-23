@@ -61,20 +61,20 @@ public class InventoryLoader : ILoadable {
     }
     public static Slot? GetInventorySlot(Player player, Item[] inventory, int context, int slot) {
         VanillaSlot key = new(inventory, context, slot);
-        if (player == Main.LocalPlayer && s_cachedInvs.TryGetValue(key, out var cached)) return cached;
+        if (player == Main.LocalPlayer && s_slotToInv.TryGetValue(key, out var cached)) return cached;
         foreach (ModSubInventory slots in SubInventories) {
             int slotOffset = 0;
             foreach (ListIndices<Item> items in slots.Items(player).Lists) {
                 int index = items.FromInnerIndex(slot);
                 if (items.List == inventory && index != -1) {
                     Slot s = new(slots, index + slotOffset);
-                    if (player == Main.LocalPlayer) s_cachedInvs[key] = s;
+                    if (player == Main.LocalPlayer) s_slotToInv[key] = s;
                     return s;
                 }
                 slotOffset += items.Count;
             }
         }
-        if (player == Main.LocalPlayer) s_cachedInvs[key] = null;
+        if (player == Main.LocalPlayer) s_slotToInv[key] = null;
         return null;
     }
 
@@ -96,13 +96,13 @@ public class InventoryLoader : ILoadable {
         foreach (var inv in _classic) yield return inv;
     }
 
-    public static void ClearCache() => s_cachedInvs.Clear();
+    public static void ClearCache() => s_slotToInv.Clear();
 
     private readonly static List<ModSubInventory> _special = new();
     private readonly static List<ModSubInventory> _nonClassic = new();
     private readonly static List<ModSubInventory> _classic = new();
 
-    private static readonly Dictionary<VanillaSlot, Slot?> s_cachedInvs = new();
+    private static readonly Dictionary<VanillaSlot, Slot?> s_slotToInv = new();
 }
 
 public readonly record struct VanillaSlot(Item[] Inv, int Context, int Slot);

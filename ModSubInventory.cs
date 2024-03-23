@@ -49,11 +49,11 @@ public abstract class ModSubInventory : ModType, ILocalizedModType {
 
     private void TryStackItem(Player player, Item item, int slot, GetItemSettings settings, IList<Item> items) {
         if (!FitsSlot(player, item, slot, out var itemsToMove) || itemsToMove.Count != 0) return;
-        items[slot] = Utility.MoveInto(items[slot], item, out int tranfered, MaxStack);
-        if (tranfered == 0) return;
+        items[slot] = Utility.MoveInto(items[slot], item, out int transferred, MaxStack);
+        if (transferred == 0) return;
         SoundEngine.PlaySound(SoundID.Grab);
         items[slot].position = player.position;
-        if (!settings.NoText) PopupText.NewText(PopupTextContext.ItemPickupToVoidContainer, items[slot], tranfered, false, settings.LongText);
+        if (!settings.NoText) PopupText.NewText(PopupTextContext.ItemPickupToVoidContainer, items[slot], transferred, false, settings.LongText);
         OnSlotChange(player, slot);
         return;
     }

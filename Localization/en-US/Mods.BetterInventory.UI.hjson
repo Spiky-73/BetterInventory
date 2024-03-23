@@ -5,3 +5,6 @@ Filter: "{0} ({1})"
 Unknown: ???
 ByHand: By Hand
 QuickMoveTooltip: Quick move chain
+NoBestiaryEffect: Does not affect Bestiary completion
+FeatureUnloaded: This feature was not loaded and will have no effect even when Enabled
+FramesToSec: 60 = 1s

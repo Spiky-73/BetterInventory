@@ -1,10 +1,14 @@
 using System.Collections.Generic;
+using TItem = Terraria.Item;
 using TRecipe = Terraria.Recipe;
+using TLoader = Terraria.ModLoader.RecipeLoader;
 
 namespace BetterInventory.Reflection;
 
 public static class Recipe {
     public static readonly Property<TRecipe, bool> Disabled = new(nameof(TRecipe.Disabled));
+    public static readonly Field<TRecipe, TItem> createItem = new(nameof(TRecipe.createItem));
+    public static readonly Method<TRecipe, object?> Create = new(nameof(TRecipe.Create));
     public static readonly Field<TRecipe, bool> needWater = new(nameof(needWater));
     public static readonly Field<TRecipe, bool> needHoney = new(nameof(needHoney));
     public static readonly Field<TRecipe, bool> needLava = new(nameof(needLava));
@@ -18,4 +22,9 @@ public static class Recipe {
     public static readonly StaticMethod<int, object?> AddToAvailableRecipes = new(typeof(TRecipe), nameof(AddToAvailableRecipes));
     public static readonly StaticMethod<object?> ClearAvailableRecipes = new(typeof(TRecipe), nameof(TRecipe.ClearAvailableRecipes));
     public static readonly StaticMethod<Terraria.Player, object?> CollectItemsToCraftWithFrom = new(typeof(TRecipe), nameof(CollectItemsToCraftWithFrom));
+}
+
+public static class RecipeLoader {
+    public static readonly StaticMethod<TItem, TRecipe, List<TItem>, TItem, object?> OnCraft = new(typeof(TLoader), nameof(TLoader.OnCraft));
+    public static readonly StaticField<List<TItem>> ConsumedItems = new(typeof(TLoader), nameof(ConsumedItems));
 }

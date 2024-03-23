@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using BetterInventory.DataStructures;
 using Terraria;
-using Terraria.ID;
 using Terraria.ModLoader.Config;
 using Terraria.ModLoader.IO;
 
@@ -10,7 +9,7 @@ namespace BetterInventory.ItemSearch;
 
 public sealed class VisibilityFilters {
     
-    public static Flags CurrentVisibility => (Main.guideItem.IsAir && (!Guide.Config.guideTile || Guide.guideTile.IsAir)) ? Flags.ShowAllAir : Flags.ShowAllGuide;
+    public static Flags CurrentVisibility => (Main.guideItem.IsAir && (!Configs.BetterGuide.Tile || Guide.guideTile.IsAir)) ? Flags.ShowAllAir : Flags.ShowAllGuide;
     public bool ShowAllRecipes {
         get => Visibility.HasFlag(CurrentVisibility);
         set => SetFlag(CurrentVisibility, value);
@@ -37,18 +36,15 @@ public sealed class VisibilityFilters {
         return OwnedItems[mod].Add(type);
     }
 
-    public FavoriteState GetFavoriteState(int recipe) {
-        if (FavoritedRecipes.Contains(recipe)) return FavoriteState.Favorited;
-        if (BlacklistedRecipes.Contains(recipe)) return FavoriteState.Blacklisted;
-        return FavoriteState.Default;
+    public bool IsFavorited(int recipe) => FavoritedRecipes.Contains(recipe);
+    public bool IsBlacklisted(int recipe) => BlacklistedRecipes.Contains(recipe);
+    public void ToggleFavorited(int recipe, bool force = false) {
+        if (!ResetRecipeState(recipe) || force) FavoritedRecipes.Add(recipe);
     }
-    public void FavoriteRecipe(int recipe, bool force = false) {
-        if (!ResetFavoriteRecipe(recipe) || force) FavoritedRecipes.Add(recipe);
+    public void ToggleBlacklisted(int recipe, bool force = false) {
+        if (!ResetRecipeState(recipe) || force) BlacklistedRecipes.Add(recipe);
     }
-    public void BlacklistRecipe(int recipe, bool force = false) {
-        if (!ResetFavoriteRecipe(recipe) || force) BlacklistedRecipes.Add(recipe);
-    }
-    public bool ResetFavoriteRecipe(int recipe) => FavoritedRecipes.Remove(recipe) | BlacklistedRecipes.Remove(recipe);
+    public bool ResetRecipeState(int recipe) => FavoritedRecipes.Remove(recipe) | BlacklistedRecipes.Remove(recipe);
 
 
     public Flags Visibility { get; set; } = Flags.Default;
@@ -74,10 +70,7 @@ public sealed class VisibilityFilters {
     }
 }
 
-
-public enum FavoriteState : byte { Default, Blacklisted, Favorited }
-
-public sealed class VisibilityFiltersSerialiser : TagSerializer<VisibilityFilters, TagCompound> {
+public sealed class VisibilityFiltersSerializer : TagSerializer<VisibilityFilters, TagCompound> {
 
     public override TagCompound Serialize(VisibilityFilters value) {
         TagCompound tag = new();
@@ -162,7 +155,7 @@ public sealed class VisibilityFiltersSerialiser : TagSerializer<VisibilityFilter
 
 
 public sealed class RawRecipe {
-    public RawRecipe(string mod, List<ItemDefinition> items, List<string> tiles) {
+    public RawRecipe(string mod, List<ItemDefinition> items, List<TileDefinition> tiles) {
         this.mod = mod;
         this.items = items;
         this.tiles = tiles;
@@ -183,7 +176,7 @@ public sealed class RawRecipe {
         for (int i = 1; i < items.Count; i++) requiredItem.Add(items[i].Type);
 
         HashSet<int> requiredTile = new();
-        foreach (string tile in tiles) requiredTile.Add(TileID.Search.GetId(tile));
+        foreach (TileDefinition tile in tiles) requiredTile.Add(tile.Type);
 
         for (int r = 0; r < Recipe.numRecipes; r++) {
             Recipe recipe = Main.recipe[r];
@@ -203,23 +196,29 @@ public sealed class RawRecipe {
 
     public string mod;
     public List<ItemDefinition> items;
-    public List<string> tiles;
+    public List<TileDefinition> tiles;
 
     private void AddItem(Item item) => items.Add(new(item.type));
-    private void AddTile(int tile) => tiles.Add(TileID.Search.GetName(tile));
+    private void AddTile(int tile) => tiles.Add(new(tile));
 
 }
-public sealed class RawRecipeSerialiser : TagSerializer<RawRecipe, TagCompound> {
+public sealed class RawRecipeSerializer : TagSerializer<RawRecipe, TagCompound> {
     public override TagCompound Serialize(RawRecipe value) => new() { [ModTag] = value.mod, [ItemsTag] = value.items, [TilesTag] = value.tiles };
 
     public override RawRecipe Deserialize(TagCompound tag){
-        List<ItemDefinition> defs;
-        if (tag.Get<IList>(ItemsTag) is not List<string> old) defs = tag.Get<List<ItemDefinition>>(ItemsTag);
+        List<ItemDefinition> items;
+        if (tag.Get<IList>(ItemsTag) is not List<string> i) items = tag.Get<List<ItemDefinition>>(ItemsTag);
         else {
-            defs = new();
-            foreach (string s in old) defs.Add(new(s));
+            items = new();
+            foreach (string s in i) items.Add(new(s));
         }
-        return new(tag.GetString(ModTag), defs, tag.Get<List<string>>(TilesTag) );
+        List<TileDefinition> tiles;
+        if (tag.Get<IList>(TilesTag) is not List<string> t) tiles = tag.Get<List<TileDefinition>>(TilesTag);
+        else {
+            tiles = new();
+            foreach (string s in t) tiles.Add(new(s));
+        }
+        return new(tag.GetString(ModTag), items, tiles);
     }
 
 

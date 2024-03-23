@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.DataStructures;
@@ -36,7 +35,7 @@ public sealed class RecipeFilters {
 }
 
 
-public sealed class RecipeFiltersSerialiser : TagSerializer<RecipeFilters, int> {
+public sealed class RecipeFiltersSerializer : TagSerializer<RecipeFilters, int> {
 
     public override int Serialize(RecipeFilters value) {
         int raw = 0;
