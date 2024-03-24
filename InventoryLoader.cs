@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using BetterInventory.DataStructures;
+using SpikysLib;
+using SpikysLib.DataStructures;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Core;
@@ -30,7 +31,7 @@ public class InventoryLoader : ILoadable {
     public void Unload() {
         ClearCache();
         static void Clear(IList<ModSubInventory> list) {
-            foreach(var inventory in list) Utility.SetInstance(inventory, true);
+            foreach(var inventory in list) ConfigHelper.SetInstance(inventory, true);
             list.Clear();
         }
         Clear(_special);
@@ -39,7 +40,7 @@ public class InventoryLoader : ILoadable {
     }
 
     internal static void Register(ModSubInventory inventory){
-        Utility.SetInstance(inventory);
+        ConfigHelper.SetInstance(inventory);
         if(!LoaderUtils.HasOverride(inventory.GetType(), Reflection.ModSubInventory.Accepts)) _classic.Add(inventory);
         else if(inventory.Accepts(new()))_nonClassic.Add(inventory);
         else _special.Add(inventory);

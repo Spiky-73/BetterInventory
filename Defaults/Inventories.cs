@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using BetterInventory.DataStructures;
+using SpikysLib.DataStructures;
 using BetterInventory.InventoryManagement;
 using Terraria;
 using Terraria.ID;
@@ -15,23 +15,23 @@ public sealed class Hotbar : ModSubInventory {
     public override int Context => ContextID.InventoryItem;
     public override bool Accepts(Item item) => true;
     public override void Focus(Player player, int slot) => player.selectedItem = slot;
-    public override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.inventory, DataStructures.Range.FromCount(0, 10));
+    public override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.inventory, SpikysLib.DataStructures.Range.FromCount(0, 10));
 }
 public sealed class Inventory : ModSubInventory {
     public override int Context => ContextID.InventoryItem;
-    public override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.inventory, DataStructures.Range.FromCount(10, 40));
+    public override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.inventory, SpikysLib.DataStructures.Range.FromCount(10, 40));
     public override Item GetItem(Player player, Item item, GetItemSettings settings) => SmartPickup.GetItem_Inner(player, player.whoAmI, item, settings);
 }
 public sealed class Coin : ModSubInventory {
     public override int Context => ContextID.InventoryCoin;
     public sealed override bool Accepts(Item item) => item.IsACoin;
-    public override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.inventory, DataStructures.Range.FromCount(50, 4));
+    public override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.inventory, SpikysLib.DataStructures.Range.FromCount(50, 4));
 }
 public sealed class Ammo : ModSubInventory {
     public override int Context => ContextID.InventoryAmmo;
     public override bool IsDefault(Item item) => true;
     public sealed override bool Accepts(Item item) => !item.IsAir && item.FitsAmmoSlot();
-    public override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.inventory, DataStructures.Range.FromCount(54, 4));
+    public override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.inventory, SpikysLib.DataStructures.Range.FromCount(54, 4));
 }
 
 public abstract class Container : ModSubInventory {
@@ -230,7 +230,7 @@ public abstract class Dyes : ModSubInventory {
     public static Item[] ModdedDyes(Player player) => Reflection.ModAccessorySlotPlayer.exDyesAccessory.GetValue(player.GetModPlayer<ModAccessorySlotPlayer>());
 }
 public sealed class ArmorDyes : Dyes {
-    public sealed override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.dye, DataStructures.Range.FromCount(0, Armor.Count));
+    public sealed override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.dye, SpikysLib.DataStructures.Range.FromCount(0, Armor.Count));
 }
 public sealed class AccessoryDyes : Dyes {
     public sealed override Joined<ListIndices<Item>, Item> Items(Player player) => new(

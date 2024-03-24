@@ -1,5 +1,5 @@
 using System.ComponentModel;
-using BetterInventory.Configs.UI;
+using SpikysLib.Configs.UI;
 using Terraria.ModLoader.Config;
 
 namespace BetterInventory.Configs;

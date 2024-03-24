@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using BetterInventory.DataStructures;
+using SpikysLib.DataStructures;
 using Terraria;
 using Terraria.ModLoader.Config;
 using Terraria.ModLoader.IO;

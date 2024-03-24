@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using BetterInventory.Configs.UI;
 using BetterInventory.ItemSearch;
 using BetterInventory.Crafting;
 using Terraria;
@@ -10,6 +9,10 @@ using Terraria.UI;
 using BetterInventory.InventoryManagement;
 using Terraria.Audio;
 using Terraria.ID;
+using SpikysLib;
+using SpikysLib.UI;
+using Terraria.Localization;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace BetterInventory.ItemActions;
 
@@ -49,8 +52,38 @@ public sealed class BetterPlayer : ModPlayer {
         VisibilityFilters ??= new();
         if (Configs.BetterGuide.AvailableRecipes) Guide.FindGuideRecipes();
 
-        Notification.DisplayUpdate();
-        Notification.DisplayCompatibility();
+        DisplayUpdate();
+        DisplayCompatibility();
+    }
+
+    public void DisplayUpdate() {
+        bool download;
+        if (Configs.Version.Instance.lastPlayedVersion.Length == 0) download = true;
+        else if (Mod.Version > new System.Version(Configs.Version.Instance.lastPlayedVersion)) download = false;
+        else return;
+
+        Configs.Version.Instance.lastPlayedVersion = Mod.Version.ToString();
+        Configs.Version.Instance.SaveConfig();
+
+        List<ITextLine> lines = new();
+        if (download) lines.Add(new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.Download")));
+        else lines.Add(new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.Update")));
+        lines.Add(new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.Bug")));
+        LocalizedLine important = new(Language.GetText($"{Localization.Keys.Chat}.Important"), Colors.RarityAmber);
+        if (!download && important.Value.Length != 0) lines.Add(important);
+        InGameNotificationsTracker.AddNotification(new InGameNotification(ModContent.Request<Texture2D>($"BetterInventory/icon"), lines.ToArray()) { timeLeft = 15 * 60 });
+    }
+
+    public void DisplayCompatibility() {
+        bool failed;
+        if (Hooks.FailedILs > Configs.Compatibility.Instance.failedILs) failed = true;
+        else if (Hooks.FailedILs < Configs.Compatibility.Instance.failedILs) failed = false;
+        else return;
+        Configs.Compatibility.Instance.failedILs = Hooks.FailedILs;
+        Configs.Compatibility.Instance.SaveConfig();
+
+        List<ITextLine> lines = new() { failed ? new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.UnloadedMore"), Colors.RarityAmber) : new(Language.GetText($"{Localization.Keys.Chat}.UnloadedLess"), Colors.RarityGreen) };
+        InGameNotificationsTracker.AddNotification(new InGameNotification(ModContent.Request<Texture2D>($"BetterInventory/icon"), lines.ToArray()));
     }
 
     public override void SetControls() {
@@ -119,7 +152,7 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public static void CycleBuilderState(Player player, BuilderToggle toggle, int? state = null) => player.builderAccStatus[toggle.Type] = (state ?? (player.builderAccStatus[toggle.Type] + 1)) % toggle.NumberOfStates;
-    public static void FavoritedBuff(Player player) => Utility.RunWithHiddenItems(player.inventory, i => !i.favorited, player.QuickBuff);
+    public static void FavoritedBuff(Player player) => ItemHelper.RunWithHiddenItems(player.inventory, player.QuickBuff, i => !i.favorited);
     private void BuilderKeys() {
         foreach ((BuilderToggle? builder, ModKeybind kb) in BuilderTogglesKb) {
             if (!kb.JustPressed) continue;

@@ -1,6 +1,7 @@
 using System.ComponentModel;
-using BetterInventory.Configs.UI;
 using Newtonsoft.Json;
+using SpikysLib;
+using SpikysLib.Configs.UI;
 using Terraria.ModLoader.Config;
 
 namespace BetterInventory.Configs;
@@ -11,16 +12,6 @@ public sealed class Compatibility : ModConfig {
 
 
     [ReloadRequired, DefaultValue(false)] public bool compatibilityMode;
-
-    // public override bool NeedsReload(ModConfig pendingConfig) {
-    //     if(!Compatibility.CompatibilityMode) return base.NeedsReload(pendingConfig);
-    //     foreach (PropertyFieldWrapper fieldsAndProperty in ConfigManager.GetFieldsAndProperties(this)) {
-    //         if (!ConfigManager.ObjectEquals(fieldsAndProperty.GetValue(this), fieldsAndProperty.GetValue(pendingConfig))) {
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // }
 
     [JsonIgnore, ShowDespiteJsonIgnore, NullAllowed] public object? DisableAll {
         get => null;
@@ -56,9 +47,9 @@ public sealed class Compatibility : ModConfig {
         }
     }
 
-    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(ObjectAsTextElement))] public UnloadedCrafting UnloadedCrafting {get; set;} = new();
-    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(ObjectAsTextElement))] public UnloadedInventoryManagement UnloadedInventoryManagement {get; set;} = new();
-    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(ObjectAsTextElement))] public UnloadedItemSearch UnloadedItemSearch {get; set;} = new();
+    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedCrafting UnloadedCrafting {get; set;} = new();
+    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedInventoryManagement UnloadedInventoryManagement {get; set;} = new();
+    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedItemSearch UnloadedItemSearch {get; set;} = new();
 
     public static bool CompatibilityMode => Instance.compatibilityMode;
     public static Compatibility Instance = null!;

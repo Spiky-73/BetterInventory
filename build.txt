@@ -3,3 +3,4 @@ author = Spiky
 version = 0.5
 homepage = https://github.com/Spiky-73/BetterInventory/tree/master
 side = Client
+modReferences = SpikysLib

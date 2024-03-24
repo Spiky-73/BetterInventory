@@ -12,6 +12,7 @@ using Terraria.GameContent.UI.States;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI;
+using SpikysLib;
 
 namespace BetterInventory.ItemSearch;
 

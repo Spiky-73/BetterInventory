@@ -1,13 +1,13 @@
 using System.ComponentModel;
 using Terraria.ModLoader.Config;
 using Terraria.UI;
-using BetterInventory.Configs.UI;
+using SpikysLib.Configs.UI;
 
 namespace BetterInventory.Configs;
 
 public sealed class InventoryManagement : ModConfig {
     public Toggle<SmartConsumption> smartConsumption = new(true);
-    public ChildValue<SmartPickupLevel, SmartPickup> smartPickup = new(SmartPickupLevel.AllItems);
+    public NestedValue<SmartPickupLevel, SmartPickup> smartPickup = new(SmartPickupLevel.AllItems);
     [DefaultValue(AutoEquipLevel.DefaultSlots)] public AutoEquipLevel autoEquip;
     
     [DefaultValue(true)] public bool favoriteInBanks;
@@ -67,7 +67,7 @@ public sealed class QuickMove {
     [DefaultValue(true)] public bool returnToSlot = true;
     [DefaultValue(false)] public bool showTooltip = false;
     [DefaultValue(HotkeyMode.Default)] public HotkeyMode hotkeyMode = HotkeyMode.Default;
-    public ChildValue<HotkeyDisplayMode, DisplayedHotkeys> displayHotkeys = new(HotkeyDisplayMode.All);
+    public NestedValue<HotkeyDisplayMode, DisplayedHotkeys> displayHotkeys = new(HotkeyDisplayMode.All);
 
     public static bool Enabled => InventoryManagement.Instance.quickMove;
     public static bool DisplayHotkeys => Value.displayHotkeys != HotkeyDisplayMode.Off && !UnloadedInventoryManagement.Value.quickMoveHotkeys;
