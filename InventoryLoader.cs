@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using SpikysLib;
 using SpikysLib.DataStructures;
+using SpikysLib.Extensions;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Core;
@@ -31,7 +31,7 @@ public class InventoryLoader : ILoadable {
     public void Unload() {
         ClearCache();
         static void Clear(IList<ModSubInventory> list) {
-            foreach(var inventory in list) ConfigHelper.SetInstance(inventory, true);
+            foreach(var inventory in list) ModConfigExtensions.SetInstance(inventory, true);
             list.Clear();
         }
         Clear(_special);
@@ -40,7 +40,7 @@ public class InventoryLoader : ILoadable {
     }
 
     internal static void Register(ModSubInventory inventory){
-        ConfigHelper.SetInstance(inventory);
+        ModConfigExtensions.SetInstance(inventory);
         if(!LoaderUtils.HasOverride(inventory.GetType(), Reflection.ModSubInventory.Accepts)) _classic.Add(inventory);
         else if(inventory.Accepts(new()))_nonClassic.Add(inventory);
         else _special.Add(inventory);
@@ -60,22 +60,16 @@ public class InventoryLoader : ILoadable {
         itemSlot = s ?? default;
         return s.HasValue;
     }
-    public static Slot? GetInventorySlot(Player player, Item[] inventory, int context, int slot) {
-        VanillaSlot key = new(inventory, context, slot);
-        if (player == Main.LocalPlayer && s_slotToInv.TryGetValue(key, out var cached)) return cached;
+    public static Slot? GetInventorySlot(Player player, Item[] inventory, int context, int slot) => player == Main.LocalPlayer ? s_slotToInv.GetOrAdd(new(inventory, context, slot)) : ComputeInventorySlot(player, inventory, context, slot);
+    private static Slot? ComputeInventorySlot(Player player, Item[] inventory, int context, int slot) {
         foreach (ModSubInventory slots in SubInventories) {
             int slotOffset = 0;
             foreach (ListIndices<Item> items in slots.Items(player).Lists) {
                 int index = items.FromInnerIndex(slot);
-                if (items.List == inventory && index != -1) {
-                    Slot s = new(slots, index + slotOffset);
-                    if (player == Main.LocalPlayer) s_slotToInv[key] = s;
-                    return s;
-                }
+                if (items.List == inventory && index != -1) return new(slots, index + slotOffset);
                 slotOffset += items.Count;
             }
         }
-        if (player == Main.LocalPlayer) s_slotToInv[key] = null;
         return null;
     }
 
@@ -99,11 +93,13 @@ public class InventoryLoader : ILoadable {
 
     public static void ClearCache() => s_slotToInv.Clear();
 
-    private readonly static List<ModSubInventory> _special = new();
-    private readonly static List<ModSubInventory> _nonClassic = new();
-    private readonly static List<ModSubInventory> _classic = new();
+    private static readonly List<ModSubInventory> _special = new();
+    private static readonly List<ModSubInventory> _nonClassic = new();
+    private static readonly List<ModSubInventory> _classic = new();
 
-    private static readonly Dictionary<VanillaSlot, Slot?> s_slotToInv = new();
+    private static readonly Cache<VanillaSlot, Slot?> s_slotToInv = new(slot => ComputeInventorySlot(Main.LocalPlayer, slot.Inv, slot.Context, slot.Slot)) {
+        EstimateValueSize = slot => sizeof(int) + IntPtr.Size
+    };
 }
 
 public readonly record struct VanillaSlot(Item[] Inv, int Context, int Slot);

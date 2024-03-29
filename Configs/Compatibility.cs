@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using Newtonsoft.Json;
-using SpikysLib;
 using SpikysLib.Configs.UI;
+using SpikysLib.Extensions;
 using Terraria.ModLoader.Config;
 
 namespace BetterInventory.Configs;
@@ -21,7 +21,7 @@ public sealed class Compatibility : ModConfig {
             FixedUI.Value.wrapping = false;
             Crafting.Instance.recipeFilters.Parent = false;
             Crafting.Instance.craftOnList.Parent = false;
-            Crafting.Instance.SaveConfig();
+            Crafting.Instance.Save();
 
             SmartConsumption.Value.materials = false;
             SmartConsumption.Value.baits = false;
@@ -34,7 +34,7 @@ public sealed class Compatibility : ModConfig {
             InventoryManagement.Instance.stackTrash = false;
             InventoryManagement.Instance.craftStack.Parent = false;
             InventoryManagement.Instance.smartPickup.Parent = SmartPickupLevel.Off;
-            InventoryManagement.Instance.SaveConfig();
+            InventoryManagement.Instance.Save();
 
             BetterGuide.Value.moreRecipes = false;
             BetterGuide.Value.craftInMenu = false;
@@ -43,7 +43,7 @@ public sealed class Compatibility : ModConfig {
             BetterBestiary.Value.unknownDisplay = UnknownDisplay.Off;
             BetterBestiary.Value.displayedUnlock = UnlockLevel.Off;
             SearchItems.Value.recipes = false;
-            ItemSearch.Instance.SaveConfig();
+            ItemSearch.Instance.Save();
         }
     }
 

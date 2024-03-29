@@ -1,5 +1,5 @@
 using MonoMod.Cil;
-using SpikysLib;
+using SpikysLib.Extensions;
 using Terraria;
 using Terraria.UI;
 

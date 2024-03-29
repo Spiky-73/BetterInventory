@@ -87,7 +87,7 @@ public sealed class VisibilityFiltersSerializer : TagSerializer<VisibilityFilter
 
         List<ItemDefinition> owned = new();
         foreach((string mod, RangeSet set) in value.OwnedItems) {
-            foreach (Range range in set.GetRanges()) {
+            foreach (Range range in set.Ranges) {
                 owned.Add(new(range.Start));
                 owned.Add(new(range.End));
             }

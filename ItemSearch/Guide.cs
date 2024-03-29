@@ -18,6 +18,7 @@ using Terraria.ModLoader;
 using Terraria.UI;
 using ContextID = Terraria.UI.ItemSlot.Context;
 using BetterInventory.ItemActions;
+using SpikysLib.Extensions;
 using SpikysLib;
 
 namespace BetterInventory.ItemSearch;
@@ -269,7 +270,7 @@ public sealed class Guide : ModSystem {
             bool canCraft = IsAvailable(Main.availableRecipe[Main.focusRecipe]);
             if (!canCraft) {
                 Item material = Main.recipe[Main.availableRecipe[Main.focusRecipe]].requiredItem[matI];
-                canCraft = PlayerHelper.OwnedItems.GetValueOrDefault(material.type, 0) >= material.stack;
+                canCraft = PlayerExtensions.OwnedItems.GetValueOrDefault(material.type, 0) >= material.stack;
             }
             // FavoriteState state = GetFavoriteState(Main.availableRecipe[Main.focusRecipe]);
             // if (state == FavoriteState.Favorited) state = FavoriteState.Default;
@@ -689,7 +690,7 @@ public sealed class Guide : ModSystem {
         return -1;
     }
     public static bool OverrideHover(Item[] inv, int context, int slot) {
-        if (!Main.InGuideCraftMenu || !ItemSlot.ShiftInUse || inv[slot].favorited || !Configs.BetterGuide.MoreRecipes || Array.IndexOf(PlayerHelper.InventoryContexts, context) == -1 || inv[slot].IsAir|| ItemSlot.PickItemMovementAction(inv, ContextID.GuideItem, 0, inv[slot]) != 0) return false;
+        if (!Main.InGuideCraftMenu || !ItemSlot.ShiftInUse || inv[slot].favorited || !Configs.BetterGuide.MoreRecipes || Array.IndexOf(PlayerExtensions.InventoryContexts, context) == -1 || inv[slot].IsAir|| ItemSlot.PickItemMovementAction(inv, ContextID.GuideItem, 0, inv[slot]) != 0) return false;
         Main.cursorOverride = CursorOverrideID.InventoryToChest;
         return true;
     }
@@ -747,7 +748,7 @@ public sealed class Guide : ModSystem {
             Main.instance.LoadItem(ItemID.BoneGlove);
             return DrawTexture(spriteBatch, TextureAssets.Item[ItemID.BoneGlove].Value, Color.White, screenPositionForItemCenter, ref scale, sizeLimit, environmentColor);
         case PlaceholderType.Tile:
-            GraphicsHelper.DrawTileFrame(spriteBatch, item.createTile, screenPositionForItemCenter, new Vector2(0.5f, 0.5f), scale);
+            Graphics.DrawTileFrame(spriteBatch, item.createTile, screenPositionForItemCenter, new Vector2(0.5f, 0.5f), scale);
             return scale;
         }
         return orig(item, context, spriteBatch, screenPositionForItemCenter, scale, sizeLimit, environmentColor);

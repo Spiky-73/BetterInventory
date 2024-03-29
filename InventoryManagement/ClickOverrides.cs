@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using ReLogic.Content;
 using SpikysLib;
+using SpikysLib.Extensions;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ID;
@@ -50,7 +51,7 @@ public sealed class ClickOverrides : ILoadable {
         ItemSlot.LeftClick(inv2, context, 0);
         (Main.mouseLeft, Main.mouseLeftRelease) = (left, leftR);
         Main.cursorOverride = cursor;
-        if (!inv2[0].IsAir) inv[slot] = ItemHelper.MoveInto(inv[slot], inv2[0], out _);
+        if (!inv2[0].IsAir) inv[slot] = ItemExtensions.MoveInto(inv[slot], inv2[0], out _);
         if(Main.mouseRight) Recipe.FindRecipes();
     }
 
@@ -319,12 +320,12 @@ public sealed class ClickOverrides : ILoadable {
     }
     private static void HookRestock(On_ChestUI.orig_Restock orig) {
         ChestUI.GetContainerUsageInfo(out bool sync, out Item[] items);
-        if (!sync && Configs.InventoryManagement.FavoriteInBanks) ItemHelper.RunWithHiddenItems(items, () => orig(), i => i.favorited);
+        if (!sync && Configs.InventoryManagement.FavoriteInBanks) ItemExtensions.RunWithHiddenItems(items, () => orig(), i => i.favorited);
         else orig();
     }
     private static void HookLootAll(On_ChestUI.orig_LootAll orig) {
         ChestUI.GetContainerUsageInfo(out bool sync, out Item[] items);
-        if (!sync && Configs.InventoryManagement.FavoriteInBanks) ItemHelper.RunWithHiddenItems(items, () => orig(), i => i.favorited);
+        if (!sync && Configs.InventoryManagement.FavoriteInBanks) ItemExtensions.RunWithHiddenItems(items, () => orig(), i => i.favorited);
         else orig();
     }
     internal static void ILFavoritedBankBackground(ILContext il) {
@@ -352,7 +353,7 @@ public sealed class ClickOverrides : ILoadable {
 
         int amount = 0;
         foreach (Item material in recipe.requiredItem) {
-            int a = PlayerHelper.OwnedItems[groupItems.GetValueOrDefault(material.type, material.type)] / material.stack;
+            int a = PlayerExtensions.OwnedItems[groupItems.GetValueOrDefault(material.type, material.type)] / material.stack;
             if (amount == 0 || a < amount) amount = a;
         }
         return amount;

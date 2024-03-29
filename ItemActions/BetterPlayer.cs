@@ -9,7 +9,7 @@ using Terraria.UI;
 using BetterInventory.InventoryManagement;
 using Terraria.Audio;
 using Terraria.ID;
-using SpikysLib;
+using SpikysLib.Extensions;
 using SpikysLib.UI;
 using Terraria.Localization;
 using Microsoft.Xna.Framework.Graphics;
@@ -63,7 +63,7 @@ public sealed class BetterPlayer : ModPlayer {
         else return;
 
         Configs.Version.Instance.lastPlayedVersion = Mod.Version.ToString();
-        Configs.Version.Instance.SaveConfig();
+        Configs.Version.Instance.Save();
 
         List<ITextLine> lines = new();
         if (download) lines.Add(new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.Download")));
@@ -80,7 +80,7 @@ public sealed class BetterPlayer : ModPlayer {
         else if (Hooks.FailedILs < Configs.Compatibility.Instance.failedILs) failed = false;
         else return;
         Configs.Compatibility.Instance.failedILs = Hooks.FailedILs;
-        Configs.Compatibility.Instance.SaveConfig();
+        Configs.Compatibility.Instance.Save();
 
         List<ITextLine> lines = new() { failed ? new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.UnloadedMore"), Colors.RarityAmber) : new(Language.GetText($"{Localization.Keys.Chat}.UnloadedLess"), Colors.RarityGreen) };
         InGameNotificationsTracker.AddNotification(new InGameNotification(ModContent.Request<Texture2D>($"BetterInventory/icon"), lines.ToArray()));
@@ -152,7 +152,7 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public static void CycleBuilderState(Player player, BuilderToggle toggle, int? state = null) => player.builderAccStatus[toggle.Type] = (state ?? (player.builderAccStatus[toggle.Type] + 1)) % toggle.NumberOfStates;
-    public static void FavoritedBuff(Player player) => ItemHelper.RunWithHiddenItems(player.inventory, player.QuickBuff, i => !i.favorited);
+    public static void FavoritedBuff(Player player) => ItemExtensions.RunWithHiddenItems(player.inventory, player.QuickBuff, i => !i.favorited);
     private void BuilderKeys() {
         foreach ((BuilderToggle? builder, ModKeybind kb) in BuilderTogglesKb) {
             if (!kb.JustPressed) continue;

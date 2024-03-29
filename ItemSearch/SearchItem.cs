@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using MonoMod.Cil;
-using SpikysLib;
+using SpikysLib.Extensions;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent.Bestiary;

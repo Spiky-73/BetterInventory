@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
-using SpikysLib;
+using SpikysLib.Extensions;
 using SpikysLib.DataStructures;
 using Terraria;
 using Terraria.ID;
