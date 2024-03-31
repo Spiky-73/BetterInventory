@@ -49,6 +49,9 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 
 ## Changelog
 
+### v0.5.1
+- Added Spiky's Lib mod dependency
+
 ### v0.5
 - Added the Mod Compatibility Config
 - Added an option to sensitive parts of the mod from loading at all

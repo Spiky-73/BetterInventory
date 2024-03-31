@@ -10,4 +10,7 @@ Workshop: Steam Workshop page
 Version: "0.5"
 Info: ""
 Important: ""
-Changelog: ""
+Changelog: 
+    '''
+    - Added Spiky's Lib mod dependency
+    '''
