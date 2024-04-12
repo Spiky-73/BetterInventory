@@ -1,5 +1,5 @@
 using System.ComponentModel;
-using SpikysLib.Configs.UI;
+using SpikysLib.Configs;
 using Newtonsoft.Json;
 using Terraria.ModLoader.Config;
 using SpikysLib.UI;

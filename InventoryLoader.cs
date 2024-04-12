@@ -41,7 +41,7 @@ public class InventoryLoader : ILoadable {
 
     internal static void Register(ModSubInventory inventory){
         ModConfigExtensions.SetInstance(inventory);
-        if(!LoaderUtils.HasOverride(inventory.GetType(), Reflection.ModSubInventory.Accepts)) _classic.Add(inventory);
+        if(!LoaderUtils.HasOverride(inventory, i => i.Accepts)) _classic.Add(inventory);
         else if(inventory.Accepts(new()))_nonClassic.Add(inventory);
         else _special.Add(inventory);
     }
