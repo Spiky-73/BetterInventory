@@ -725,7 +725,11 @@ UnloadedItemSearch: {
 
 Version: {
 	DisplayName: Version {$Mods.BetterInventory.Chat.Version}
-	Headers.Changelog: Changelog
+
+	Headers: {
+		Info: Update Info
+		Changelog: Changelog
+	}
 
 	Info: {
 		Label: "{$Mods.BetterInventory.Chat.Info}"

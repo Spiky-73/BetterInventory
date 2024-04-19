@@ -10,7 +10,7 @@ namespace BetterInventory;
 
 public enum SubInventoryType {
     Classic,
-    NonClassic,
+    Special,
     Secondary,
     Default
 }
@@ -19,8 +19,8 @@ public class InventoryLoader : ILoadable {
 
     public static IEnumerable<ModSubInventory> SubInventories {
         get {
+            foreach (var inventory in _dedicated) yield return inventory;
             foreach (var inventory in _special) yield return inventory;
-            foreach (var inventory in _nonClassic) yield return inventory;
             foreach (var inventory in _classic) yield return inventory;
         }
     }
@@ -34,16 +34,24 @@ public class InventoryLoader : ILoadable {
             foreach(var inventory in list) ModConfigExtensions.SetInstance(inventory, true);
             list.Clear();
         }
+        Clear(_dedicated);
         Clear(_special);
-        Clear(_nonClassic);
         Clear(_classic);
     }
 
     internal static void Register(ModSubInventory inventory){
         ModConfigExtensions.SetInstance(inventory);
-        if(!LoaderUtils.HasOverride(inventory, i => i.Accepts)) _classic.Add(inventory);
-        else if(inventory.Accepts(new()))_nonClassic.Add(inventory);
-        else _special.Add(inventory);
+        List<ModSubInventory> list;
+        if(!LoaderUtils.HasOverride(inventory, i => i.Accepts)) list = _classic;
+        else if(inventory.Accepts(new()))list = _special;
+        else list = _dedicated;
+
+        for (int i = 0; i < list.Count; i++) {
+            if (inventory.ComparePositionTo(list[i]) >= 0 && list[i].ComparePositionTo(inventory) <= 0) continue;
+            list.Insert(i, inventory);
+            return;
+        }
+        list.Add(inventory);
     }
 
     public static Slot? FindItem(Player player, Predicate<Item> predicate) {
@@ -75,15 +83,15 @@ public class InventoryLoader : ILoadable {
 
     public static IEnumerable<ModSubInventory> GetSubInventories(Item item, SubInventoryType level) {
         List<ModSubInventory> secondary = new();
-        foreach (var inv in _special) {
+        foreach (var inv in _dedicated) {
             if (!inv.Accepts(item)) continue;
             if (inv.IsDefault(item)) yield return inv;
             else if (level <= SubInventoryType.Secondary) secondary.Add(inv);
         }
         foreach (var inv in secondary) yield return inv;
 
-        if (level > SubInventoryType.NonClassic) yield break;
-        foreach (var inv in _nonClassic) {
+        if (level > SubInventoryType.Special) yield break;
+        foreach (var inv in _special) {
             if (inv.Accepts(item)) yield return inv;
         }
 
@@ -93,8 +101,8 @@ public class InventoryLoader : ILoadable {
 
     public static void ClearCache() => s_slotToInv.Clear();
 
+    private static readonly List<ModSubInventory> _dedicated = new();
     private static readonly List<ModSubInventory> _special = new();
-    private static readonly List<ModSubInventory> _nonClassic = new();
     private static readonly List<ModSubInventory> _classic = new();
 
     private static readonly Cache<VanillaSlot, Slot?> s_slotToInv = new(slot => ComputeInventorySlot(Main.LocalPlayer, slot.Inv, slot.Context, slot.Slot)) {

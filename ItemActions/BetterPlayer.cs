@@ -62,9 +62,6 @@ public sealed class BetterPlayer : ModPlayer {
         else if (Mod.Version > new System.Version(Configs.Version.Instance.lastPlayedVersion)) download = false;
         else return;
 
-        Configs.Version.Instance.lastPlayedVersion = Mod.Version.ToString();
-        Configs.Version.Instance.Save();
-
         List<ITextLine> lines = new();
         if (download) lines.Add(new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.Download")));
         else lines.Add(new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.Update")));
@@ -72,6 +69,9 @@ public sealed class BetterPlayer : ModPlayer {
         LocalizedLine important = new(Language.GetText($"{Localization.Keys.Chat}.Important"), Colors.RarityAmber);
         if (!download && important.Value.Length != 0) lines.Add(important);
         InGameNotificationsTracker.AddNotification(new InGameNotification(ModContent.Request<Texture2D>($"BetterInventory/icon"), lines.ToArray()) { timeLeft = 15 * 60 });
+
+        Configs.Version.Instance.lastPlayedVersion = Mod.Version.ToString();
+        Configs.Version.Instance.Save();
     }
 
     public void DisplayCompatibility() {

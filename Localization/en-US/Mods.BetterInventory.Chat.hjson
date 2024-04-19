@@ -1,4 +1,4 @@
-Download: Thank you for downloading {$Mods.BetterInventory.Chat.ModName}! Make sure to view and edit the configs before playing
+Download: Thank you for downloading {$Mods.BetterInventory.Chat.ModName}! Make sure to view and adjust the configs before playing
 Update: "{$Mods.BetterInventory.Chat.ModName} was updated to v{$Mods.BetterInventory.Chat.Version}! View the [c/05c8ff:{$Mods.BetterInventory.Configs.Version.DisplayName}] config to learn more about the update"
 Bug: This mod is still in development. If you found a bug, please report it on the [c/05c8ff:{$Mods.BetterInventory.Chat.Workshop}] or the [c/05c8ff:{$Mods.BetterInventory.Chat.Homepage}]
 UnloadedMore: Some features failed to load and will have no effect in game. {$Mods.BetterInventory.Chat.Compatibility}
@@ -7,7 +7,11 @@ Compatibility: View the [c/05c8ff:{$Mods.BetterInventory.Configs.Compatibility.D
 ModName: Better Inventory
 Homepage: homepage
 Workshop: Steam Workshop page
-Version: "0.5"
-Info: ""
+Version: 0.5.1
+Info: Small changes under the hood
 Important: ""
-Changelog: - Added Spiky's Lib mod dependency
+Changelog:
+	'''
+	- Added SubInventories ordering
+	- Added Spiky's Lib mod dependency
+	'''

@@ -10,9 +10,9 @@ VoidBag.DisplayName: Void Bag
 HeadArmor.DisplayName: Armor
 BodyArmor.DisplayName: Armor
 LegArmor.DisplayName: Armor
-HeadVanityArmor.DisplayName: Vanity
-BodyVanityArmor.DisplayName: Vanity
-LegVanityArmor.DisplayName: Vanity
+HeadVanity.DisplayName: Vanity
+BodyVanity.DisplayName: Vanity
+LegVanity.DisplayName: Vanity
 Accessories.DisplayName: Accessory
 VanityAccessories.DisplayName: Social
 Loadout1.DisplayName: Loadout1

@@ -59,6 +59,8 @@ public abstract class ModSubInventory : ModType, ILocalizedModType {
         return;
     }
 
+    public virtual int ComparePositionTo(ModSubInventory other) => 0;
+
     protected sealed override void Register() {
         ModTypeLookup<ModSubInventory>.Register(this);
         InventoryLoader.Register(this);

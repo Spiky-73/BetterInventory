@@ -16,6 +16,7 @@ public sealed class Hotbar : ModSubInventory {
     public override bool Accepts(Item item) => true;
     public override void Focus(Player player, int slot) => player.selectedItem = slot;
     public override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.inventory, SpikysLib.DataStructures.Range.FromCount(0, 10));
+    public override int ComparePositionTo(ModSubInventory other) => 1;
 }
 public sealed class Inventory : ModSubInventory {
     public override int Context => ContextID.InventoryItem;
@@ -98,15 +99,15 @@ public sealed class LegArmor : Armor {
     public sealed override bool IsArmor(Item item) => item.legSlot != -1;
     public sealed  override int Index => 2;
 }
-public sealed class HeadVanityArmor : AVanityArmor {
+public sealed class HeadVanity : AVanityArmor {
     public sealed override bool IsArmor(Item item) => item.headSlot != -1;
     public sealed  override int Index => 0;
 }
-public sealed class BodyVanityArmor : AVanityArmor {
+public sealed class BodyVanity : AVanityArmor {
     public sealed override bool IsArmor(Item item) => item.bodySlot != -1;
     public sealed  override int Index => 1;
 }
-public sealed class LegVanityArmor : AVanityArmor {
+public sealed class LegVanity : AVanityArmor {
     public sealed override bool IsArmor(Item item) => item.legSlot != -1;
     public sealed  override int Index => 2;
 }
@@ -187,6 +188,7 @@ public abstract class Loadout1 : ALoadout {
 }
 public abstract class Loadout2 : ALoadout {
     public sealed override int Index => 2;
+    public override int ComparePositionTo(ModSubInventory other) => other is Loadout1 ? 1 : 0;
 }
 
 public abstract class Equipment : ModSubInventory {
@@ -220,6 +222,7 @@ public sealed class Hook : Equipment {
     public sealed override int Context => ContextID.EquipGrapple;
     public sealed override bool Accepts(Item item) => Main.projHook[item.shoot];
 }
+
 public abstract class Dyes : ModSubInventory {
     public override int Context => ContextID.EquipDye;
     public override void Focus(Player player, int slot) => Main.EquipPageSelected = 0;
@@ -237,9 +240,11 @@ public sealed class AccessoryDyes : Dyes {
         new ListIndices<Item>(player.dye, Accessories.UnlockedVanillaSlots(player)),
         new ListIndices<Item>(ModdedDyes(player), Accessories.UnlockedModdedSlots(player))
     );
+    public override int ComparePositionTo(ModSubInventory other) => other is ArmorDyes ? 1 : 0;
 }
 public sealed class EquipmentDyes : Dyes {
     public sealed override int Context => ContextID.EquipMiscDye;
     public sealed override void Focus(Player player, int slot) => Main.EquipPageSelected = 2;
     public sealed override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.miscDyes);
+    public override int ComparePositionTo(ModSubInventory other) => other is AccessoryDyes ? 1 : 0;
 }
