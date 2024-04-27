@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
+using SpikysLib.Extensions;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
@@ -155,8 +156,8 @@ public sealed class QuickMove : ILoadable {
         foreach (Slot slot in itemsToMove) FreeTargetItem(slot);
 
         bool canFavorite = canFavoriteAt[Math.Abs(target.Inventory.Context)];
-        items[target.Index] = Utility.MoveInto(items[target.Index], item, out int moved, target.Inventory.MaxStack, canFavorite);
-        items[target.Index] = Utility.MoveInto(items[target.Index], freeItems[0], out _, target.Inventory.MaxStack, canFavorite);
+        items[target.Index] = ItemExtensions.MoveInto(items[target.Index], item, out int moved, target.Inventory.MaxStack, canFavorite);
+        items[target.Index] = ItemExtensions.MoveInto(items[target.Index], freeItems[0], out _, target.Inventory.MaxStack, canFavorite);
         if (moved != 0) {
             source.Inventory.OnSlotChange(player, source.Index);
             target.Inventory.OnSlotChange(player, target.Index);
@@ -344,7 +345,7 @@ public sealed class QuickMove : ILoadable {
     }
 
     private static List<ModSubInventory> GetChain(Player player, Item item, ModSubInventory source) {
-        List<ModSubInventory> targetSlots = new(InventoryLoader.GetSubInventories(item, SubInventoryType.NonClassic));
+        List<ModSubInventory> targetSlots = new(InventoryLoader.GetSubInventories(item, SubInventoryType.Special));
         if (targetSlots.Remove(source) && source.Items(player).Count > 1) targetSlots.Insert(0, source);
         return targetSlots;
     }

@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using BetterInventory.DataStructures;
+using SpikysLib.DataStructures;
 using Terraria;
 using Terraria.ModLoader.Config;
 using Terraria.ModLoader.IO;
@@ -87,7 +87,7 @@ public sealed class VisibilityFiltersSerializer : TagSerializer<VisibilityFilter
 
         List<ItemDefinition> owned = new();
         foreach((string mod, RangeSet set) in value.OwnedItems) {
-            foreach (Range range in set.GetRanges()) {
+            foreach (Range range in set.Ranges) {
                 owned.Add(new(range.Start));
                 owned.Add(new(range.End));
             }

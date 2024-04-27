@@ -4,6 +4,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using ReLogic.Content;
+using SpikysLib;
+using SpikysLib.Extensions;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ID;
@@ -49,7 +51,7 @@ public sealed class ClickOverrides : ILoadable {
         ItemSlot.LeftClick(inv2, context, 0);
         (Main.mouseLeft, Main.mouseLeftRelease) = (left, leftR);
         Main.cursorOverride = cursor;
-        if (!inv2[0].IsAir) inv[slot] = Utility.MoveInto(inv[slot], inv2[0], out _);
+        if (!inv2[0].IsAir) inv[slot] = ItemExtensions.MoveInto(inv[slot], inv2[0], out _);
         if(Main.mouseRight) Recipe.FindRecipes();
     }
 
@@ -96,7 +98,7 @@ public sealed class ClickOverrides : ILoadable {
             int amount = GetMaxBuyAmount(inv[slot], price);
             int available = inv[slot].buyOnce ? inv[slot].stack : inv[slot].maxStack;
             int maxPickup = Configs.InventoryManagement.ShiftRight && Main.cursorOverride == CursorOverrideID.QuickSell ? GetMaxPickupAmount(inv[slot]) : (inv[slot].maxStack - Main.mouseItem.stack);
-            s_ilShopMultiplier = Math.Max(Utility.Min(amount, available, maxPickup, Configs.CraftStack.Value.maxAmount), 1);
+            s_ilShopMultiplier = Math.Max(MathX.Min(amount, available, maxPickup, Configs.CraftStack.Value.maxAmount), 1);
             return price;
         });
         cursor.EmitStloc(4);
@@ -208,7 +210,7 @@ public sealed class ClickOverrides : ILoadable {
             if (!Configs.CraftStack.Enabled || !(Configs.CraftStack.Value.invertClicks ? Main.mouseRight : Main.mouseLeft)) return r;
             int amount = GetMaxCraftAmount(r);
             int maxPickup = Configs.InventoryManagement.ShiftRight && Main.cursorOverride == CraftCursorID ? GetMaxPickupAmount(r.createItem) : (r.createItem.maxStack - Main.mouseItem.stack);
-            s_ilCraftMultiplier = Math.Max(Utility.Min(amount, maxPickup / r.createItem.stack, Configs.CraftStack.Value.maxAmount / r.createItem.stack), 1);
+            s_ilCraftMultiplier = Math.Max(MathX.Min(amount, maxPickup / r.createItem.stack, Configs.CraftStack.Value.maxAmount / r.createItem.stack), 1);
             return r;
         });
         // Item crafted = r.createItem.Clone();
@@ -318,12 +320,12 @@ public sealed class ClickOverrides : ILoadable {
     }
     private static void HookRestock(On_ChestUI.orig_Restock orig) {
         ChestUI.GetContainerUsageInfo(out bool sync, out Item[] items);
-        if (!sync && Configs.InventoryManagement.FavoriteInBanks) Utility.RunWithHiddenItems(items, i => i.favorited, () => orig());
+        if (!sync && Configs.InventoryManagement.FavoriteInBanks) ItemExtensions.RunWithHiddenItems(items, () => orig(), i => i.favorited);
         else orig();
     }
     private static void HookLootAll(On_ChestUI.orig_LootAll orig) {
         ChestUI.GetContainerUsageInfo(out bool sync, out Item[] items);
-        if (!sync && Configs.InventoryManagement.FavoriteInBanks) Utility.RunWithHiddenItems(items, i => i.favorited, () => orig());
+        if (!sync && Configs.InventoryManagement.FavoriteInBanks) ItemExtensions.RunWithHiddenItems(items, () => orig(), i => i.favorited);
         else orig();
     }
     internal static void ILFavoritedBankBackground(ILContext il) {
@@ -340,7 +342,7 @@ public sealed class ClickOverrides : ILoadable {
 
     public static int GetMaxBuyAmount(Item item, long price) {
         if (price == 0) return item.maxStack;
-        else return (int)Math.Clamp(Utility.CountCurrency(Main.LocalPlayer, item.shopSpecialCurrency) / price, 1, item.maxStack - Main.mouseItem.stack);
+        else return (int)Math.Clamp(Main.LocalPlayer.CountCurrency(item.shopSpecialCurrency) / price, 1, item.maxStack - Main.mouseItem.stack);
     }
     public static int GetMaxCraftAmount(Recipe recipe) {
         Dictionary<int, int> groupItems = new();
@@ -351,7 +353,7 @@ public sealed class ClickOverrides : ILoadable {
 
         int amount = 0;
         foreach (Item material in recipe.requiredItem) {
-            int a = Utility.OwnedItems[groupItems.GetValueOrDefault(material.type, material.type)] / material.stack;
+            int a = PlayerExtensions.OwnedItems[groupItems.GetValueOrDefault(material.type, material.type)] / material.stack;
             if (amount == 0 || a < amount) amount = a;
         }
         return amount;

@@ -3,8 +3,10 @@ using TMain = Terraria.Main;
 using TPlayer = Terraria.Player;
 using TItem = Terraria.Item;
 using TNPC = Terraria.NPC;
-using Microsoft.Xna.Framework;
+using TRecipe = Terraria.Recipe;
+using SpikysLib.Reflection;
 using Terraria;
+using Microsoft.Xna.Framework;
 
 namespace BetterInventory.Reflection;
 
@@ -19,21 +21,19 @@ public static class Main {
     public static readonly StaticField<TItem> guideItem = new(typeof(TMain), nameof(TMain.guideItem));
     public static readonly StaticField<bool> _preventCraftingBecauseClickWasUsedToChangeFocusedRecipe = new(typeof(TMain), nameof(_preventCraftingBecauseClickWasUsedToChangeFocusedRecipe));
     public static readonly StaticMethod<object?> DrawInterface_36_Cursor = new(typeof(TMain), nameof(DrawInterface_36_Cursor));
-    public static readonly StaticMethod<int, object?> HoverOverCraftingItemButton = new(typeof(TMain), nameof(HoverOverCraftingItemButton));
+    public static readonly StaticMethod<object?> HoverOverCraftingItemButton = new(typeof(TMain), nameof(HoverOverCraftingItemButton), typeof(int));
     public static readonly StaticMethod<object?> LockCraftingForThisCraftClickDuration = new(typeof(TMain), nameof(TMain.LockCraftingForThisCraftClickDuration));
-    public static readonly StaticMethod<int, object?> SetRecipeMaterialDisplayName = new(typeof(TMain), nameof(SetRecipeMaterialDisplayName));
+    public static readonly StaticMethod<object?> SetRecipeMaterialDisplayName = new(typeof(TMain), nameof(SetRecipeMaterialDisplayName), typeof(int));
     
     public static readonly FieldInfo _mouseTextCache = typeof(TMain).GetField(nameof(_mouseTextCache), BindingFlags.Instance | BindingFlags.NonPublic)!;
     public static readonly FieldInfo _mouseTextCache_isValid = typeof(TMain).GetNestedType("MouseTextCache", BindingFlags.NonPublic)!.GetField("isValid", BindingFlags.Instance | BindingFlags.Public)!;
-
-    public static readonly Assembly tModLoader = Assembly.Load("tModLoader");
 }
 
 public static class Player {
     public static readonly Field<TPlayer, TItem> trashItem = new(nameof(TPlayer.trashItem));
     public static readonly Field<TPlayer, bool> mouseInterface = new(nameof(TPlayer.mouseInterface));
-    public static readonly Method<TPlayer, int, TItem, GetItemSettings, TItem, int, bool> GetItem_FillEmptyInventorySlot = new(nameof(GetItem_FillEmptyInventorySlot));
-    public static readonly Method<TPlayer, int, bool> HasItem = new(nameof(TPlayer.HasItem));
+    public static readonly Method<TPlayer, bool> GetItem_FillEmptyInventorySlot = new(nameof(GetItem_FillEmptyInventorySlot), typeof(int), typeof(TItem), typeof(GetItemSettings), typeof(TItem), typeof(int));
+    public static readonly Method<TPlayer, bool> HasItem = new(nameof(TPlayer.HasItem), typeof(int));
 }
 
 public static class Item {
@@ -44,5 +44,23 @@ public static class Item {
 }
 
 public static class NPC {
-    public static readonly StaticMethod<Vector2, bool, object?> LadyBugKilled = new(typeof(TNPC), nameof(TNPC.LadyBugKilled));
+    public static readonly StaticMethod<object?> LadyBugKilled = new(typeof(TNPC), nameof(TNPC.LadyBugKilled), typeof(Vector2), typeof(bool));
+}
+
+public static class Recipe {
+    public static readonly Property<TRecipe, bool> Disabled = new(nameof(TRecipe.Disabled));
+    public static readonly Field<TRecipe, TItem> createItem = new(nameof(TRecipe.createItem));
+    public static readonly Method<TRecipe, object?> Create = new(nameof(TRecipe.Create));
+    public static readonly Field<TRecipe, bool> needWater = new(nameof(needWater));
+    public static readonly Field<TRecipe, bool> needHoney = new(nameof(needHoney));
+    public static readonly Field<TRecipe, bool> needLava = new(nameof(needLava));
+    public static readonly Field<TRecipe, bool> needSnowBiome = new(nameof(needSnowBiome));
+    public static readonly Field<TRecipe, bool> needGraveyardBiome = new(nameof(needGraveyardBiome));
+
+    public static readonly StaticMethod<object?> CollectGuideRecipes = new(typeof(TRecipe), nameof(CollectGuideRecipes));
+    public static readonly StaticMethod<object?> TryRefocusingRecipe = new(typeof(TRecipe), nameof(TryRefocusingRecipe), typeof(int));
+    public static readonly StaticMethod<object?> VisuallyRepositionRecipes = new(typeof(TRecipe), nameof(VisuallyRepositionRecipes), typeof(float));
+    public static readonly StaticMethod<object?> AddToAvailableRecipes = new(typeof(TRecipe), nameof(AddToAvailableRecipes), typeof(int));
+    public static readonly StaticMethod<object?> ClearAvailableRecipes = new(typeof(TRecipe), nameof(TRecipe.ClearAvailableRecipes));
+    public static readonly StaticMethod<object?> CollectItemsToCraftWithFrom = new(typeof(TRecipe), nameof(CollectItemsToCraftWithFrom), typeof(TPlayer));
 }

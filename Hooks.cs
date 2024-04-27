@@ -1,6 +1,5 @@
 using System;
 using System.Runtime.CompilerServices;
-using BetterInventory.Configs.UI;
 using BetterInventory.Crafting;
 using BetterInventory.InventoryManagement;
 using BetterInventory.ItemSearch;
@@ -34,8 +33,6 @@ public class Hooks : ILoadable {
         IL_ItemSlot.HandleShopSlot += ILHandleShopSlot;
         IL_ItemSlot.SellOrTrash += ILSellOrTrash;
         IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += ILDrawSlot;
-
-        MonoModHooks.Modify(Reflection.ConfigElement.DrawSelf, IlDrawSelf);
 
         IL_Filters.BySearch.FitsFilter += ILFilters_BySearch;
         IL_UIBestiaryEntryIcon.Update += ILEntryIcon_Update;
@@ -135,8 +132,6 @@ public class Hooks : ILoadable {
         if (!ApplyIL(il, Bestiary.ILFixPosition, Configs.BetterBestiary.UnknownDisplay)) Configs.UnloadedItemSearch.Value.bestiaryUnknown = true;
     }
 
-    private void IlDrawSelf(ILContext il) => ApplyIL(il, Text.ILTextColors, true);
-
     public static bool ApplyIL(ILContext context, Action<ILContext> ilEdit, bool enabled, [CallerArgumentExpression("ilEdit")] string name = "") {
         if (Configs.Compatibility.CompatibilityMode && !enabled) {
             Mod.Logger.Info($"{name} was not loaded. Related features will be disabled until reload");
@@ -144,10 +139,11 @@ public class Hooks : ILoadable {
         }
         try { 
             ilEdit(context); 
-        } catch (Exception) {
+        } catch (Exception e) {
             MonoModHooks.DumpIL(Mod, context);
             FailedILs++;
-            Mod.Logger.Warn($"{name} failed to load. Related features will be disabled until reload");
+            Mod.Logger.Warn($"{name} failed to load. Related features will be disabled until reload", e);
+
             return false;
         }
         return true;

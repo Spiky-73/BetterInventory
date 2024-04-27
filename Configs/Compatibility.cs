@@ -1,6 +1,7 @@
 using System.ComponentModel;
-using BetterInventory.Configs.UI;
 using Newtonsoft.Json;
+using SpikysLib.Configs.UI;
+using SpikysLib.Extensions;
 using Terraria.ModLoader.Config;
 
 namespace BetterInventory.Configs;
@@ -12,16 +13,6 @@ public sealed class Compatibility : ModConfig {
 
     [ReloadRequired, DefaultValue(false)] public bool compatibilityMode;
 
-    // public override bool NeedsReload(ModConfig pendingConfig) {
-    //     if(!Compatibility.CompatibilityMode) return base.NeedsReload(pendingConfig);
-    //     foreach (PropertyFieldWrapper fieldsAndProperty in ConfigManager.GetFieldsAndProperties(this)) {
-    //         if (!ConfigManager.ObjectEquals(fieldsAndProperty.GetValue(this), fieldsAndProperty.GetValue(pendingConfig))) {
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // }
-
     [JsonIgnore, ShowDespiteJsonIgnore, NullAllowed] public object? DisableAll {
         get => null;
         set {
@@ -30,7 +21,7 @@ public sealed class Compatibility : ModConfig {
             FixedUI.Value.wrapping = false;
             Crafting.Instance.recipeFilters.Parent = false;
             Crafting.Instance.craftOnList.Parent = false;
-            Crafting.Instance.SaveConfig();
+            Crafting.Instance.Save();
 
             SmartConsumption.Value.materials = false;
             SmartConsumption.Value.baits = false;
@@ -43,7 +34,7 @@ public sealed class Compatibility : ModConfig {
             InventoryManagement.Instance.stackTrash = false;
             InventoryManagement.Instance.craftStack.Parent = false;
             InventoryManagement.Instance.smartPickup.Parent = SmartPickupLevel.Off;
-            InventoryManagement.Instance.SaveConfig();
+            InventoryManagement.Instance.Save();
 
             BetterGuide.Value.moreRecipes = false;
             BetterGuide.Value.craftInMenu = false;
@@ -52,13 +43,13 @@ public sealed class Compatibility : ModConfig {
             BetterBestiary.Value.unknownDisplay = UnknownDisplay.Off;
             BetterBestiary.Value.displayedUnlock = UnlockLevel.Off;
             SearchItems.Value.recipes = false;
-            ItemSearch.Instance.SaveConfig();
+            ItemSearch.Instance.Save();
         }
     }
 
-    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(ObjectAsTextElement))] public UnloadedCrafting UnloadedCrafting {get; set;} = new();
-    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(ObjectAsTextElement))] public UnloadedInventoryManagement UnloadedInventoryManagement {get; set;} = new();
-    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(ObjectAsTextElement))] public UnloadedItemSearch UnloadedItemSearch {get; set;} = new();
+    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedCrafting UnloadedCrafting {get; set;} = new();
+    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedInventoryManagement UnloadedInventoryManagement {get; set;} = new();
+    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedItemSearch UnloadedItemSearch {get; set;} = new();
 
     public static bool CompatibilityMode => Instance.compatibilityMode;
     public static Compatibility Instance = null!;

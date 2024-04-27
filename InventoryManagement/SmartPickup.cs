@@ -1,8 +1,9 @@
 using System.Collections.Generic;
-using BetterInventory.DataStructures;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
+using SpikysLib.Extensions;
+using SpikysLib.DataStructures;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -58,7 +59,7 @@ public sealed class SmartPickup : ILoadable {
         // if (newItem.uniqueStack && this.HasItem(newItem.type)) return item;
         if(!cursor.TryGotoNext(i => i.SaferMatchCall(Reflection.Player.HasItem))
                 || !cursor.TryGotoNext(MoveType.AfterLabel, i => i.MatchLdloc0())) {// bool isACoin
-            Utility.Logger.Error($"{nameof(ILSmartPickup)} failled to load");
+            BetterInventory.Instance.Logger.Error($"{nameof(ILSmartPickup)} failled to load");
             return;
         }
 
