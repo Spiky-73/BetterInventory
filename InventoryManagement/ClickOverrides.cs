@@ -309,7 +309,7 @@ public sealed class ClickOverrides : ILoadable {
 
     internal static void ILKeepFavoriteInBanks(ILContext il) {
         ILCursor cursor = new(il);
-        cursor.GotoNext(i => i.MatchStfld(Reflection.Item.favorited));
+        cursor.GotoNext(MoveType.Before, i => i.MatchStfld(Reflection.Item.favorited));
         cursor.EmitLdarg0();
         cursor.EmitLdarg1();
         cursor.EmitLdarg2();

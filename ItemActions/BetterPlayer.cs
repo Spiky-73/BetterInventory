@@ -74,7 +74,7 @@ public sealed class BetterPlayer : ModPlayer {
         Configs.Version.Instance.Save();
     }
 
-    public void DisplayCompatibility() {
+    public static void DisplayCompatibility() {
         bool failed;
         if (Hooks.FailedILs > Configs.Compatibility.Instance.failedILs) failed = true;
         else if (Hooks.FailedILs < Configs.Compatibility.Instance.failedILs) failed = false;
@@ -106,7 +106,7 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public override bool PreItemCheck() {
-        if (Configs.ItemRightClick.Enabled && Player.controlUseTile && Player.releaseUseItem && !Player.controlUseItem && !Player.tileInteractionHappened
+        if (Main.myPlayer == Player.whoAmI && Configs.ItemRightClick.Enabled && Player.controlUseTile && Player.releaseUseItem && !Player.controlUseItem && !Player.tileInteractionHappened
                 && !Player.mouseInterface && !Terraria.Graphics.Capture.CaptureManager.Instance.Active && !Main.HoveringOverAnNPC && !Main.SmartInteractShowingGenuine
                 && Main.HoverItem.IsAir && Player.altFunctionUse == 0 && Player.selectedItem < 10) {
             Player.itemAnimation--;

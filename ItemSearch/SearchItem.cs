@@ -48,7 +48,7 @@ public sealed class SearchItem : ILoadable {
     private static Vector2 HookRedirectThickCursor(On_Main.orig_DrawThickCursor orig, bool smart) => Configs.SearchItems.Enabled && s_redirect ? Vector2.Zero : orig(smart);
     private static void HookDrawInterfaceCursor(On_Main.orig_DrawInterface_36_Cursor orig) {
         s_redirect = false;
-        if (Configs.SearchItems.Enabled && QuickSearchKb.Current && !Main.HoverItem.IsAir && Guide.ForcedTooltip?.Key != $"{Localization.Keys.UI}.Unknown") {
+        if (Configs.SearchItems.Enabled && QuickSearchKb.Current && !Main.HoverItem.IsAir && Guide.forcedTooltip?.Key != $"{Localization.Keys.UI}.Unknown") {
             s_allowClick = true;
             Main.cursorOverride = CursorOverrideID.Magnifiers;
         }
@@ -81,7 +81,7 @@ public sealed class SearchItem : ILoadable {
             s_allowClick = false;
             Main.cursorOverride = -1;
         }
-        Guide.ForcedTooltip = null;
+        Guide.forcedTooltip = null;
     }
 
     internal static void ILForceGuideDisplay(ILContext il) {

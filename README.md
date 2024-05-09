@@ -49,6 +49,9 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 
 ## Changelog
 
+### v0.5.1.1
+- Fixed Extra Item Right Click bug in Multiplayer
+
 ### v0.5.1
 - Added SubInventories ordering
 - Added Spiky's Lib mod dependency
