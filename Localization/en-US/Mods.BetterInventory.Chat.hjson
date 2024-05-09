@@ -7,11 +7,7 @@ Compatibility: View the [c/05c8ff:{$Mods.BetterInventory.Configs.Compatibility.D
 ModName: Better Inventory
 Homepage: homepage
 Workshop: Steam Workshop page
-Version: 0.5.1
-Info: Small changes under the hood
-Important: ""
-Changelog:
-	'''
-	- Added SubInventories ordering
-	- Added Spiky's Lib mod dependency
-	'''
+Version: 0.5.1.1
+Info: Bug Fix
+Important: Fixed held item vanishing in Multiplayer
+Changelog: - Fixed Extra Item Right Click bug in Multiplayer

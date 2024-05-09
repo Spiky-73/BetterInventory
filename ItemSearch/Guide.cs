@@ -143,7 +143,7 @@ public sealed class Guide : ModSystem {
             Rectangle hitbox = new((int)position.X, (int)position.Y, (int)(TextureAssets.InventoryBack.Width() * Main.inventoryScale), (int)(TextureAssets.InventoryBack.Height() * Main.inventoryScale));
             if (hitbox.Contains(Main.mouseX, Main.mouseY)) {
                 Main.LocalPlayer.mouseInterface = true;
-                ForcedTooltip = condition.Description;
+                forcedTooltip = condition.Description;
                 ItemSlot.MouseHover(ref item, ContextID.CraftingMaterial);
             }
             Main.inventoryBack = inventoryBack;
@@ -308,7 +308,7 @@ public sealed class Guide : ModSystem {
         //             ++ <GuideHover>
         cursor.EmitLdloc(153); // int num87
         cursor.EmitDelegate((int r) => {
-            if (Configs.BetterGuide.UnknownDisplay && IsUnknown(Main.availableRecipe[r])) ForcedTooltip = Language.GetText($"{Localization.Keys.UI}.Unknown");
+            if (Configs.BetterGuide.UnknownDisplay && IsUnknown(Main.availableRecipe[r])) forcedTooltip = Language.GetText($"{Localization.Keys.UI}.Unknown");
         });
         //             ...
         //         }
@@ -604,7 +604,7 @@ public sealed class Guide : ModSystem {
             if (!IsAvailable(Main.availableRecipe[recipeIndex])) Main.LockCraftingForThisCraftClickDuration();
 
             if (Configs.BetterGuide.UnknownDisplay && IsUnknown(Main.availableRecipe[recipeIndex])) {
-                ForcedTooltip = Language.GetText($"{Localization.Keys.UI}.Unknown");
+                forcedTooltip = Language.GetText($"{Localization.Keys.UI}.Unknown");
                 return false;
             }
             if (Configs.BetterGuide.FavoriteRecipes) {
@@ -767,7 +767,7 @@ public sealed class Guide : ModSystem {
             PlaceholderType.ByHand => Language.GetTextValue($"{Localization.Keys.UI}.ByHand"),
             PlaceholderType.Tile => Lang.GetMapObjectName(MapHelper.TileToLookup(item.createTile, item.placeStyle)),
             PlaceholderType.Condition => Language.GetTextValue(item.BestiaryNotes[ConditionMark.Length..]),
-            _ => ForcedTooltip?.Value,
+            _ => forcedTooltip?.Value,
         };
         if (name is null) return orig.Invoke(item, ref numTooltips, names, ref text, ref modifier, ref badModifier, ref oneDropLogo, out overrideColor, prefixlineIndex);
         List<TooltipLine> tooltips = new() { new(BetterInventory.Instance, names[0], name) };
@@ -865,11 +865,11 @@ public sealed class Guide : ModSystem {
     private static readonly Item[] s_guideItems = new Item[2];
 
 
-    public static readonly Asset<Texture2D>[] DefaultTextures = new Asset<Texture2D>[] { TextureAssets.InventoryBack4, TextureAssets.InventoryBack14 };
-    public static readonly Asset<Texture2D>[] FavoriteTextures = new Asset<Texture2D>[] { TextureAssets.InventoryBack10, TextureAssets.InventoryBack17 };
-    public static readonly Asset<Texture2D>[] BlacklistedTextures = new Asset<Texture2D>[] { TextureAssets.InventoryBack5, TextureAssets.InventoryBack11 };
-    public static readonly Asset<Texture2D>[] TileTextures = new Asset<Texture2D>[] { TextureAssets.InventoryBack3, TextureAssets.InventoryBack6 };
-    public static readonly Asset<Texture2D>[] ConditionTextures = new Asset<Texture2D>[] { TextureAssets.InventoryBack12, TextureAssets.InventoryBack8 };
+    public static readonly Asset<Texture2D>[] DefaultTextures = [ TextureAssets.InventoryBack4, TextureAssets.InventoryBack14 ];
+    public static readonly Asset<Texture2D>[] FavoriteTextures = [ TextureAssets.InventoryBack10, TextureAssets.InventoryBack17 ];
+    public static readonly Asset<Texture2D>[] BlacklistedTextures = [ TextureAssets.InventoryBack5, TextureAssets.InventoryBack11 ];
+    public static readonly Asset<Texture2D>[] TileTextures = [ TextureAssets.InventoryBack3, TextureAssets.InventoryBack6 ];
+    public static readonly Asset<Texture2D>[] ConditionTextures = [ TextureAssets.InventoryBack12, TextureAssets.InventoryBack8 ];
 
     public static Asset<Texture2D> InventoryTickBorder => ModContent.Request<Texture2D>($"BetterInventory/Assets/Inventory_Tick_Border");
     public static Asset<Texture2D> UnknownTexture => ModContent.Request<Texture2D>($"BetterInventory/Assets/Unknown_Item");
@@ -877,8 +877,8 @@ public sealed class Guide : ModSystem {
     private static Asset<Texture2D> s_inventoryBack4 = null!;
 
     private static bool s_collectingGuide;
-    private static readonly RangeSet s_unknownRecipes = new();
-    private static readonly RangeSet s_availableRecipes = new();
+    private static readonly RangeSet s_unknownRecipes = [];
+    private static readonly RangeSet s_availableRecipes = [];
 
     private static Item s_dispGuide = new(), s_dispTile = new();
 
@@ -887,11 +887,11 @@ public sealed class Guide : ModSystem {
     private static Rectangle s_hitBox;
 
     private static int s_textRecipe = -1;
-    private static readonly List<Item> s_textTiles = new();
-    private static readonly List<(Item item, Condition condition)> s_textConditions = new();
+    private static readonly List<Item> s_textTiles = [];
+    private static readonly List<(Item item, Condition condition)> s_textConditions = [];
 
     private static bool s_hideNextItem;
-    public static LocalizedText? ForcedTooltip;
+    public static LocalizedText? forcedTooltip;
 
     public const int TilesPerLine = 7;
     public const float TileScale = 0.46f;

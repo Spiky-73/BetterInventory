@@ -15,7 +15,7 @@ public enum SubInventoryType {
     Default
 }
 
-public class InventoryLoader : ILoadable {
+public sealed class InventoryLoader : ILoadable {
 
     public static IEnumerable<ModSubInventory> SubInventories {
         get {
