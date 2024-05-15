@@ -7,7 +7,12 @@ Compatibility: View the [c/05c8ff:{$Mods.BetterInventory.Configs.Compatibility.D
 ModName: Better Inventory
 Homepage: homepage
 Workshop: Steam Workshop page
-Version: 0.5.1.1
-Info: Bug Fix
-Important: Fixed held item vanishing in Multiplayer
-Changelog: - Fixed Extra Item Right Click bug in Multiplayer
+Version: 0.5.1.2
+Info: Bug Fixes
+Important: ""
+Changelog:
+	'''
+	- Fixed Mouse item not been consumed when crafting
+	- Fixed Recipe groups materials not been displayed as owned
+	- Fixed the Accept condition on Armor SubInventories
+	'''

@@ -129,7 +129,10 @@ public sealed class BetterPlayer : ModPlayer {
         Item? mat;
         if((mat = Guide.GetGuideMaterials()) != null) items.Add(mat);
         if((mat = Crafting.Crafting.GetMouseMaterial()) != null) items.Add(mat);
-        itemConsumedCallback = (item, amount) => item.stack -= amount;
+        itemConsumedCallback = (item, index) => {
+            if (item == Main.mouseItem) item.stack -= Reflection.RecipeLoader.ConsumedItems.GetValue()[^1].stack; // FIXME seems hacky
+            return;
+        };
         return items;
     }
 
