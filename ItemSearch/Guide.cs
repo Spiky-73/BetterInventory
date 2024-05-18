@@ -267,13 +267,19 @@ public sealed class Guide : ModSystem {
         cursor.EmitLdloc(130); // int num68
         cursor.EmitDelegate((int matI) => {
             if (!Configs.BetterGuide.AvailableRecipes) return;
-            bool canCraft = IsAvailable(Main.availableRecipe[Main.focusRecipe]);
+            Recipe recipe = Main.recipe[Main.availableRecipe[Main.focusRecipe]];
+            bool canCraft = IsAvailable(recipe.RecipeIndex);
             if (!canCraft) {
-                Item material = Main.recipe[Main.availableRecipe[Main.focusRecipe]].requiredItem[matI];
+                Item material = recipe.requiredItem[matI];
                 canCraft = PlayerExtensions.OwnedItems.GetValueOrDefault(material.type, 0) >= material.stack;
+                if(!canCraft) {
+                    int g = recipe.acceptedGroups.FindIndex(g => RecipeGroup.recipeGroups[g].IconicItemId == material.type);
+                    if (g != -1) {
+                        RecipeGroup group = RecipeGroup.recipeGroups[recipe.acceptedGroups[g]];
+                        canCraft = PlayerExtensions.OwnedItems.GetValueOrDefault(group.GetGroupFakeItemId(), 0) >= material.stack;
+                    }
+                }
             }
-            // FavoriteState state = GetFavoriteState(Main.availableRecipe[Main.focusRecipe]);
-            // if (state == FavoriteState.Favorited) state = FavoriteState.Default;
             OverrideRecipeTexture(FavoriteState.Default, false, canCraft);
         });
 

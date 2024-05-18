@@ -10,7 +10,7 @@ public abstract class AArmor : ModSubInventory {
     public abstract bool IsArmor(Item item);
 
     public override int Context => ContextID.EquipArmor;
-    public override bool Accepts(Item item) => IsArmor(item) && item.defense != 0;
+    public override bool Accepts(Item item) => IsArmor(item) && !item.vanity;
     public override bool IsDefault(Item item) => true;
     public override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.armor, Index);
 

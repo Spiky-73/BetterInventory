@@ -49,6 +49,11 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 
 ## Changelog
 
+### v0.5.1.2
+- Fixed Mouse item not been consumed when crafting
+- Fixed Recipe groups materials not been displayed as owned
+- Fixed the Accept condition on Armor SubInventories
+
 ### v0.5.1.1
 - Fixed Extra Item Right Click bug in Multiplayer
 
