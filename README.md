@@ -1,4 +1,5 @@
-## Better Inventory
+# Better Inventory
+![Better Inventory](icon_workshop.png)
 
 This mods adds loads of small features designed to improve the player Inventory and all the systems around it.
 I STRONGLY ADVISE you to read the mod configs to learn about all the features and enable/disable them.
