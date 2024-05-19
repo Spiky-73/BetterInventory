@@ -50,6 +50,10 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 
 ## Changelog
 
+### v0.5.1.3
+- Fixed SmartConsumption not consuming mouse item
+- Fixed recipes not update with SmartPickup
+
 ### v0.5.1.2
 - Fixed Mouse item not been consumed when crafting
 - Fixed Recipe groups materials not been displayed as owned

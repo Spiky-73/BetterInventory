@@ -177,6 +177,11 @@ SmartConsumption: {
 		Label: Paints
 		Tooltip: Consumes paints from the last selected stack in the inventory. Doesn't affect the selected paint
 	}
+
+	mouse: {
+		Label: Pick Mouse Item
+		Tooltip: Includes the mouse item when searching for the item to consume
+	}
 }
 
 SmartPickup: {

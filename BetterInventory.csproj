@@ -5,7 +5,7 @@
     <nullable>enable</nullable>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="../../ModAssemblies/SpikysLib_v1.0.dll" />
+    <Reference Include="../../ModAssemblies/SpikysLib_v1.0.1.dll" />
     <!-- <ProjectReference Include="../SpikysLib/SpikysLib.csproj" /> -->
   </ItemGroup>
 </Project>

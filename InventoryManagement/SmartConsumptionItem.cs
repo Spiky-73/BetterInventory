@@ -11,13 +11,14 @@ public sealed class SmartConsumptionItem : GlobalItem {
 
     public override void OnConsumeItem(Item item, Player player) {
         if (item.PaintOrCoating) {
-            if(Configs.SmartConsumption.Paints) SmartConsume(item, () => player.LastStack(item, true));
+            if (Configs.SmartConsumption.Paints) SmartConsume(item, () => player.LastStack(item, Configs.SmartConsumption.Mouse));
+        } else {
+            if (Configs.SmartConsumption.Consumables) SmartConsume(item, () => player.SmallestStack(item, Configs.SmartConsumption.Mouse));
         }
-        else if (Configs.SmartConsumption.Consumables) SmartConsume(item, () => player.SmallestStack(item, true));
     }
 
     public override void OnConsumedAsAmmo(Item ammo, Item weapon, Player player) {
-        if (Configs.SmartConsumption.Ammo) SmartConsume(ammo, () => player.LastStack(ammo, true));
+        if (Configs.SmartConsumption.Ammo) SmartConsume(ammo, () => player.LastStack(ammo, Configs.SmartConsumption.Mouse));
     }
 
     internal static void ILOnConsumedMaterial(ILContext il) {
@@ -27,7 +28,7 @@ public sealed class SmartConsumptionItem : GlobalItem {
         cursor.EmitLdarg1();
         cursor.EmitLdloc0();
         cursor.EmitDelegate((Item item, Item consumed) => {
-            if (Configs.SmartConsumption.Materials) SmartConsume(item, () => Main.LocalPlayer.SmallestStack(item, false), consumed.stack);
+            if (Configs.SmartConsumption.Materials) SmartConsume(item, () => Main.LocalPlayer.SmallestStack(item, AllowedItems.Self | Configs.SmartConsumption.Mouse), consumed.stack);
         });
     }
 
@@ -38,7 +39,7 @@ public sealed class SmartConsumptionItem : GlobalItem {
         cursor.EmitLdarg0();
         cursor.EmitLdloc1();
         cursor.EmitDelegate((Player self, Item item) => {
-            if (Configs.SmartConsumption.Baits) SmartConsume(item, () => self.LastStack(item, true));
+            if (Configs.SmartConsumption.Baits) SmartConsume(item, () => self.LastStack(item, Configs.SmartConsumption.Mouse));
         });
     }
 

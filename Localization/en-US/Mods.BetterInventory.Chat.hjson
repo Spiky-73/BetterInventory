@@ -7,12 +7,11 @@ Compatibility: View the [c/05c8ff:{$Mods.BetterInventory.Configs.Compatibility.D
 ModName: Better Inventory
 Homepage: homepage
 Workshop: Steam Workshop page
-Version: 0.5.1.2
-Info: Bug Fixes
+Version: 0.5.1.3
+Info: More Bug Fixes
 Important: ""
 Changelog:
 	'''
-	- Fixed Mouse item not been consumed when crafting
-	- Fixed Recipe groups materials not been displayed as owned
-	- Fixed the Accept condition on Armor SubInventories
+	- Fixed Smart consumption not consuming mouse items
+	- Fixed recipes not update with SmartPickup
 	'''

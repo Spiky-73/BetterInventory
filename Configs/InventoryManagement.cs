@@ -40,6 +40,7 @@ public sealed class SmartConsumption {
     [DefaultValue(true)] public bool baits = true;
     [DefaultValue(true)] public bool paints = true;
     [DefaultValue(true)] public bool materials = true;
+    [DefaultValue(false)] public bool mouse = false;
 
     public static bool Enabled => InventoryManagement.Instance.smartConsumption;
     public static bool Consumables => Enabled && Value.consumables;
@@ -47,6 +48,7 @@ public sealed class SmartConsumption {
     public static bool Baits => Enabled && Value.baits && !UnloadedInventoryManagement.Value.baits;
     public static bool Paints => Enabled && Value.paints;
     public static bool Materials => Enabled && Value.materials && !UnloadedInventoryManagement.Value.materials;
+    public static AllowedItems Mouse => Value.mouse ? AllowedItems.Mouse : AllowedItems.None;
     public static SmartConsumption Value => InventoryManagement.Instance.smartConsumption.Value;
 }
 
