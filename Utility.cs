@@ -24,6 +24,8 @@ public static class Utility {
                     && (!notArg || player.inventory[i] != item))
                 currentMin = player.inventory[i];
         }
+        if (currentMin == player.inventory[58])
+            Main.mouseItem = currentMin;
         return currentMin;
     }
 }
