@@ -11,7 +11,7 @@ public static class Utility {
 
         for (int i = 49; i >= 0; i--) if (Check(player.inventory[i])) return player.inventory[i];
         for (int i = 57; i >= 50; i--) if (Check(player.inventory[i])) return player.inventory[i];
-        if (Main.myPlayer == player.whoAmI && allowedItems.HasFlag(AllowedItems.Mouse) && Check(Main.mouseItem)) return Main.mouseItem;
+        if (allowedItems.HasFlag(AllowedItems.Mouse) && Check(player.inventory[58])) return player.inventory[58];
         return null;
     }
 
@@ -23,7 +23,7 @@ public static class Utility {
 
         for (int i = 49; i >= 0; i--) Check(player.inventory[i]);
         for (int i = 57; i >= 50; i--) Check(player.inventory[i]);
-        if (Main.myPlayer == player.whoAmI && allowedItems.HasFlag(AllowedItems.Mouse)) Check(Main.mouseItem);
+        if (allowedItems.HasFlag(AllowedItems.Mouse)) Check(player.inventory[58]);
         return min;
     }
 }
