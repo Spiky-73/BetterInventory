@@ -1,4 +1,5 @@
-## Better Inventory
+# Better Inventory
+![Better Inventory](icon_workshop.png)
 
 This mods adds loads of small features designed to improve the player Inventory and all the systems around it.
 I STRONGLY ADVISE you to read the mod configs to learn about all the features and enable/disable them.
@@ -48,6 +49,10 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 - `Unknown Entity Display`: Change how unknown items, recipes or NPCs are displayed
 
 ## Changelog
+
+### v0.5.1.3
+- Fixed SmartConsumption not consuming mouse item
+- Fixed recipes not update with SmartPickup
 
 ### v0.5.1.2
 - Fixed Mouse item not been consumed when crafting

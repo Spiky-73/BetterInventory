@@ -39,12 +39,14 @@ public abstract class ModSubInventory : ModType, ILocalizedModType {
         if (!Accepts(item)) return item;
         IList<Item> items = Items(player);
         for (int i = 0; i < items.Count && !item.IsAir; i++) TryStackItem(player, item, i, settings, items);
+        Recipe.FindRecipes();
         return item;
     }
     
     public Item GetItem(Player player, Item item, int slot, GetItemSettings settings) {
         if (!Accepts(item)) return item;
         TryStackItem(player, item, slot, settings, Items(player));
+        Recipe.FindRecipes();
         return item;
     }
 
