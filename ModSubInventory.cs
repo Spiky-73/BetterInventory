@@ -20,6 +20,8 @@ public abstract class ModSubInventory<TInventory> : ModSubInventory where TInven
 }
 
 public abstract class ModSubInventory : ModType, ILocalizedModType {
+    public SubInventoryType Type { get; internal set; }
+
     public abstract int Context { get; }
     public virtual int? MaxStack => null;
 
@@ -42,7 +44,7 @@ public abstract class ModSubInventory : ModType, ILocalizedModType {
         Recipe.FindRecipes();
         return item;
     }
-    
+
     public Item GetItem(Player player, Item item, int slot, GetItemSettings settings) {
         if (!Accepts(item)) return item;
         TryStackItem(player, item, slot, settings, Items(player));

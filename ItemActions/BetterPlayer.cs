@@ -91,7 +91,7 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public override void ProcessTriggers(TriggersSet triggersSet) {
-        if(Configs.QuickMove.Enabled) QuickMove.ProcessTriggers();
+        QuickMove.ProcessTriggers();
         if(Configs.QuickList.Enabled) SearchItem.ProcessSearchTap();
         if (Configs.ItemActions.FavoritedBuff && FavoritedBuffKb.JustPressed) FavoritedBuff(Player);
         if (Configs.ItemActions.BuilderAccs) BuilderKeys();

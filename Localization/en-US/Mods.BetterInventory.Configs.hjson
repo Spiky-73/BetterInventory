@@ -282,7 +282,7 @@ DisplayedHotkeys: {
 
 HotkeyMode: {
 	Tooltip: ""
-	Default.Label: Default
+	Hotbar.Label: Hotbar
 	FromEnd.Label: From End
 	Reversed.Label: Reversed
 }

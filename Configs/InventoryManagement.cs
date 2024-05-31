@@ -68,7 +68,7 @@ public sealed class QuickMove {
     [Range(0, 3600), DefaultValue(60*3)] public int chainTime = 60*3;
     [DefaultValue(true)] public bool returnToSlot = true;
     [DefaultValue(false)] public bool showTooltip = false;
-    [DefaultValue(HotkeyMode.Default)] public HotkeyMode hotkeyMode = HotkeyMode.Default;
+    [DefaultValue(HotkeyMode.Hotbar)] public HotkeyMode hotkeyMode = HotkeyMode.Hotbar;
     public NestedValue<HotkeyDisplayMode, DisplayedHotkeys> displayHotkeys = new(HotkeyDisplayMode.All);
 
     public static bool Enabled => InventoryManagement.Instance.quickMove;
@@ -78,7 +78,7 @@ public sealed class QuickMove {
 }
 
 public enum HotkeyDisplayMode { Off, First, All }
-public enum HotkeyMode { Default, FromEnd, Reversed }
+public enum HotkeyMode { Hotbar, FromEnd, Reversed }
 
 public sealed class DisplayedHotkeys {
     [DefaultValue(0.2f)] public float highlightIntensity = 0.2f;

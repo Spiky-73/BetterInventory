@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using SpikysLib.DataStructures;
 using SpikysLib.Extensions;
 using Terraria;
@@ -11,7 +12,7 @@ namespace BetterInventory;
 public enum SubInventoryType {
     Classic,
     Special,
-    Secondary,
+    Secondary, // TODO change to RightClickTarget and ???
     Default
 }
 
@@ -24,14 +25,16 @@ public sealed class InventoryLoader : ILoadable {
             foreach (var inventory in _classic) yield return inventory;
         }
     }
+    public static ReadOnlyCollection<ModSubInventory> Dedicated => _dedicated.AsReadOnly();
+    public static ReadOnlyCollection<ModSubInventory> Special => _special.AsReadOnly();
+    public static ReadOnlyCollection<ModSubInventory> Classic => _classic.AsReadOnly();
 
-    public void Load(Mod mod) {}
-
+    public void Load(Mod mod) { }
 
     public void Unload() {
         ClearCache();
         static void Clear(IList<ModSubInventory> list) {
-            foreach(var inventory in list) ModConfigExtensions.SetInstance(inventory, true);
+            foreach (var inventory in list) ModConfigExtensions.SetInstance(inventory, true);
             list.Clear();
         }
         Clear(_dedicated);
@@ -39,12 +42,16 @@ public sealed class InventoryLoader : ILoadable {
         Clear(_classic);
     }
 
-    internal static void Register(ModSubInventory inventory){
+    internal static void Register(ModSubInventory inventory) {
         ModConfigExtensions.SetInstance(inventory);
-        List<ModSubInventory> list;
-        if(!LoaderUtils.HasOverride(inventory, i => i.Accepts)) list = _classic;
-        else if(inventory.Accepts(new()))list = _special;
-        else list = _dedicated;
+        if (!LoaderUtils.HasOverride(inventory, i => i.Accepts)) inventory.Type = SubInventoryType.Classic;
+        else if (inventory.Accepts(new())) inventory.Type = SubInventoryType.Special;
+        else inventory.Type = SubInventoryType.Default;
+        List<ModSubInventory> list = inventory.Type switch {
+            SubInventoryType.Classic => _classic,
+            SubInventoryType.Special => _special,
+            SubInventoryType.Default or _ => _dedicated,
+        };
 
         for (int i = 0; i < list.Count; i++) {
             if (inventory.ComparePositionTo(list[i]) >= 0 && list[i].ComparePositionTo(inventory) <= 0) continue;
@@ -62,7 +69,6 @@ public sealed class InventoryLoader : ILoadable {
         return null;
     }
 
-    
     public static bool IsInventorySlot(Player player, Item[] inv, int context, int slot, out Slot itemSlot) {
         Slot? s = GetInventorySlot(player, inv, context, slot);
         itemSlot = s ?? default;
@@ -101,9 +107,9 @@ public sealed class InventoryLoader : ILoadable {
 
     public static void ClearCache() => s_slotToInv.Clear();
 
-    private static readonly List<ModSubInventory> _dedicated = new();
-    private static readonly List<ModSubInventory> _special = new();
-    private static readonly List<ModSubInventory> _classic = new();
+    private static readonly List<ModSubInventory> _dedicated = [];
+    private static readonly List<ModSubInventory> _special = [];
+    private static readonly List<ModSubInventory> _classic = [];
 
     private static readonly Cache<VanillaSlot, Slot?> s_slotToInv = new(slot => ComputeInventorySlot(Main.LocalPlayer, slot.Inv, slot.Context, slot.Slot)) {
         EstimateValueSize = slot => sizeof(int) + IntPtr.Size

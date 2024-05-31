@@ -39,6 +39,7 @@ public sealed class QuickMove : ILoadable {
     };
 
     public static void ProcessTriggers() {
+        if (!Configs.QuickMove.Enabled) return;
         (s_hover, s_frameHover) = (s_frameHover, false);
         if (s_ignoreHotbar >= 0) {
             if (PlayerInput.Triggers.JustPressed.KeyStatus[MoveKeys[s_ignoreHotbar]]) s_ignoreHotbar = -1;
@@ -48,6 +49,7 @@ public sealed class QuickMove : ILoadable {
     }
 
     public static void AddMoveChainLine(Item _, List<TooltipLine> tooltips){
+        if (!Configs.QuickMove.Enabled) return;
         if (!s_frameHover || !Configs.QuickMove.Value.showTooltip || s_displayedChain.Count == 0) return;
         tooltips.Add(new(
             BetterInventory.Instance, "QuickMove",
@@ -126,13 +128,13 @@ public sealed class QuickMove : ILoadable {
         Configs.QuickMove.Value.hotkeyMode switch {
             Configs.HotkeyMode.FromEnd => slotCount > 10 ? hotkey : (hotkey - (MoveKeys.Length - slotCount)),
             Configs.HotkeyMode.Reversed => MoveKeys.Length - hotkey - 1,
-            Configs.HotkeyMode.Default or _ => hotkey
+            Configs.HotkeyMode.Hotbar or _ => hotkey
         }, 0, slotCount - 1
     );
     public static int SlotToHotkey(int slot, int slotCount) => Configs.QuickMove.Value.hotkeyMode switch {
         Configs.HotkeyMode.FromEnd => slotCount > 10 ? slot : (slot + (MoveKeys.Length - slotCount)),
         Configs.HotkeyMode.Reversed => MoveKeys.Length - slot - 1,
-        Configs.HotkeyMode.Default or _ => slot
+        Configs.HotkeyMode.Hotbar or _ => slot
     };
 
     private static List<MovedItem> Move(Player player, Slot source, Slot target) {
