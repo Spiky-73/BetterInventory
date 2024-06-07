@@ -7,7 +7,7 @@ namespace BetterInventory.Configs;
 
 public sealed class InventoryManagement : ModConfig {
     public Toggle<SmartConsumption> smartConsumption = new(true);
-    public NestedValue<SmartPickupLevel, SmartPickup> smartPickup = new(SmartPickupLevel.AllItems);
+    public Toggle<SmartPickup> smartPickup = new(true);
     [DefaultValue(AutoEquipLevel.DefaultSlots)] public AutoEquipLevel autoEquip;
     
     [DefaultValue(true)] public bool favoriteInBanks;
@@ -30,9 +30,7 @@ public sealed class InventoryManagement : ModConfig {
     public static InventoryManagement Instance = null!;
 
 }
-
 public enum AutoEquipLevel { Off, DefaultSlots, AnySlot }
-public enum SmartPickupLevel { Off, FavoriteOnly, AllItems }
 
 public sealed class SmartConsumption {
     [DefaultValue(true)] public bool consumables = true;
@@ -53,15 +51,18 @@ public sealed class SmartConsumption {
 }
 
 public sealed class SmartPickup {
-    // [DefaultValue(false)] public bool shiftClicks = false;
+    [DefaultValue(MousePickupLevel.AllItems)] public MousePickupLevel mouse = MousePickupLevel.AllItems;
     [DefaultValue(true)] public bool mediumCore = true;
+    [DefaultValue(false)] public bool overrideMarks = false;
     [DefaultValue(0.33f)] public float markIntensity = 0.33f;
 
-    public static bool Enabled(bool favorited = true) => !UnloadedInventoryManagement.Value.smartPickup && InventoryManagement.Instance.smartPickup.Parent >= (favorited ? SmartPickupLevel.FavoriteOnly : SmartPickupLevel.AllItems);
-    public static bool MediumCore => Enabled() && Value.mediumCore;
-    public static bool Marks => Enabled() && Value.markIntensity != 0 && !UnloadedInventoryManagement.Value.marks;
+    public static bool Enabled => !UnloadedInventoryManagement.Value.smartPickup && InventoryManagement.Instance.smartPickup.Parent;
+    public static bool Mouse => Enabled && Value.mouse > MousePickupLevel.Off;
+    public static bool MediumCore => Enabled && Value.mediumCore;
+    public static bool Marks => Enabled && Value.markIntensity != 0 && !UnloadedInventoryManagement.Value.marks;
     public static SmartPickup Value => InventoryManagement.Instance.smartPickup.Value;
 }
+public enum MousePickupLevel { Off, FavoritedOnly, AllItems }
 
 
 public sealed class QuickMove {

@@ -95,12 +95,7 @@ InventoryManagement: {
 
 	smartPickup: {
 		Label: "[i:4131] Smart Item Pickup"
-		Tooltip:
-			'''
-			Items go their previous slot in your inventory when picked up
-			{$Mods.BetterInventory.Configs.SmartPickupLevel.FavoriteOnly.Label}: Applies to Favorited items only
-			{$Mods.BetterInventory.Configs.SmartPickupLevel.AllItems.Label}: Applies to All items
-			'''
+		Tooltip: Items go their previous slot in your inventory when picked up
 	}
 
 	autoEquip: {
@@ -187,6 +182,11 @@ SmartConsumption: {
 SmartPickup: {
 	Tooltip: ""
 
+	mouse: {
+		Label: Mouse Items
+		Tooltip: Applies to items moved to the mouse
+	}
+
 	mediumCore: {
 		Label: Items Dropped on Death
 		Tooltip: Applies to items dropped on death
@@ -196,12 +196,21 @@ SmartPickup: {
 		Label: Old Items Opacity
 		Tooltip: The opacity of the ghost displayed on the old item slots
 	}
+
+	overrideMarks: {
+		Label: Override Marks
+		Tooltip:
+			'''
+			Allows marks to be overriden by other marks
+			This happens for instance when the items you pick up cover marks and are moved with the mouse
+			'''
+	}
 }
 
-SmartPickupLevel: {
+MousePickupLevel: {
 	Tooltip: ""
 	Off.Label: Off
-	FavoriteOnly.Label: Favorite Items Only
+	FavoritedOnly.Label: Favorited Items Only
 	AllItems.Label: All Items
 }
 

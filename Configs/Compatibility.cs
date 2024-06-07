@@ -33,7 +33,7 @@ public sealed class Compatibility : ModConfig {
             InventoryManagement.Instance.shiftRight = false;
             InventoryManagement.Instance.stackTrash = false;
             InventoryManagement.Instance.craftStack.Parent = false;
-            InventoryManagement.Instance.smartPickup.Parent = SmartPickupLevel.Off;
+            InventoryManagement.Instance.smartPickup.Parent = false;
             InventoryManagement.Instance.Save();
 
             BetterGuide.Value.moreRecipes = false;
