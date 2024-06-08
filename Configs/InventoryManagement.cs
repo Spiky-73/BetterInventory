@@ -2,6 +2,7 @@ using System.ComponentModel;
 using Terraria.ModLoader.Config;
 using Terraria.UI;
 using SpikysLib.Configs;
+using Microsoft.Xna.Framework;
 
 namespace BetterInventory.Configs;
 
@@ -54,16 +55,35 @@ public sealed class SmartPickup {
     [DefaultValue(MousePickupLevel.AllItems)] public MousePickupLevel mouse = MousePickupLevel.AllItems;
     [DefaultValue(true)] public bool mediumCore = true;
     [DefaultValue(false)] public bool overrideMarks = false;
-    [DefaultValue(0.33f)] public float markIntensity = 0.33f;
+    public Toggle<MarksDisplay> displayMarks = new(true); // TODO port settings
 
     public static bool Enabled => !UnloadedInventoryManagement.Value.smartPickup && InventoryManagement.Instance.smartPickup.Parent;
     public static bool Mouse => Enabled && Value.mouse > MousePickupLevel.Off;
     public static bool MediumCore => Enabled && Value.mediumCore;
-    public static bool Marks => Enabled && Value.markIntensity != 0 && !UnloadedInventoryManagement.Value.marks;
     public static SmartPickup Value => InventoryManagement.Instance.smartPickup.Value;
 }
 public enum MousePickupLevel { Off, FavoritedOnly, AllItems }
 
+public sealed class MarksDisplay {
+    public Toggle<FakeItemDisplay> fakeItem = new(true);
+    public Toggle<IconDisplay> icon = new(true);
+    
+    public static bool Enabled => SmartPickup.Value.displayMarks;
+    public static bool FakeItem => Enabled && Value.icon && !UnloadedInventoryManagement.Value.fakeItem;
+    public static bool Icon => Enabled && Value.icon && !UnloadedInventoryManagement.Value.marksIcon;
+    public static MarksDisplay Value => SmartPickup.Value.displayMarks.Value;
+}
+public interface IMarkDisplay { Vector2 position { get; } float scale { get; } float intensity { get; } }
+public sealed class FakeItemDisplay : IMarkDisplay {
+    [DefaultValue(typeof(Vector2), "0.5, 0.5")] public Vector2 position { get; set; } = new(0.5f, 0.5f);
+    [DefaultValue(1f)] public float scale { get; set; } = 1f;
+    [DefaultValue(0.33f)] public float intensity { get; set; } = 0.33f;
+}
+public sealed class IconDisplay : IMarkDisplay {
+    [DefaultValue(typeof(Vector2), "0.8, 0.8")] public Vector2 position { get; set; } = new(0.8f, 0.8f);
+    [DefaultValue(1f)] public float scale { get; set; } = 0.4f;
+    [DefaultValue(1f)] public float intensity { get; set; } = 1f;
+}
 
 public sealed class QuickMove {
     [Range(0, 3600), DefaultValue(60*3)] public int chainTime = 60*3;

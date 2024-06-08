@@ -25,7 +25,8 @@ public sealed class Compatibility : ModConfig {
 
             SmartConsumption.Value.materials = false;
             SmartConsumption.Value.baits = false;
-            SmartPickup.Value.markIntensity = 0;
+            MarksDisplay.Value.fakeItem.Parent = false;
+            MarksDisplay.Value.icon.Parent = false;
             QuickMove.Value.displayHotkeys.Parent = HotkeyDisplayMode.Off;
             QuickMove.Value.displayHotkeys.Value.highlightIntensity = 0;
             InventoryManagement.Instance.autoEquip = AutoEquipLevel.Off;
@@ -75,7 +76,8 @@ public sealed class UnloadedInventoryManagement {
     public bool materials = false;
     public bool baits = false;
     public bool smartPickup = false;
-    public bool marks = false;
+    public bool fakeItem = false;
+    public bool marksIcon = false;
     public bool quickMoveHotkeys = false;
     public bool quickMoveHighlight = false;
     public bool craftStack = false;

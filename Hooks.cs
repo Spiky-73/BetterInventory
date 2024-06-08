@@ -109,7 +109,8 @@ public class Hooks : ILoadable {
         if (!ApplyIL(il, ClickOverrides.ILStackTrash, Configs.InventoryManagement.StackTrash)) Configs.UnloadedInventoryManagement.Value.stackTrash = true;
     }
     private void ILDrawSlot(ILContext il) {
-        if (!ApplyIL(il, SmartPickup.ILDrawMarks, Configs.SmartPickup.Marks)) Configs.UnloadedInventoryManagement.Value.marks = true;
+        if (!ApplyIL(il, SmartPickup.ILDrawFakeItem, Configs.MarksDisplay.FakeItem)) Configs.UnloadedInventoryManagement.Value.fakeItem = true;
+        if (!ApplyIL(il, SmartPickup.ILDrawIcon, Configs.MarksDisplay.Icon)) Configs.UnloadedInventoryManagement.Value.marksIcon = true;
         if (!ApplyIL(il, QuickMove.ILHighlightSlot, Configs.QuickMove.Highlight)) Configs.UnloadedInventoryManagement.Value.quickMoveHighlight = true;
         if (!ApplyIL(il, QuickMove.ILDisplayHotkey, Configs.QuickMove.DisplayHotkeys)) Configs.UnloadedInventoryManagement.Value.quickMoveHotkeys = true;
         if (!ApplyIL(il, ClickOverrides.ILFavoritedBankBackground, Configs.InventoryManagement.FavoriteInBanks)) Configs.UnloadedInventoryManagement.Value.favoriteInBanks = true;

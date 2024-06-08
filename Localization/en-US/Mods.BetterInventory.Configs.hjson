@@ -192,11 +192,6 @@ SmartPickup: {
 		Tooltip: Applies to items dropped on death
 	}
 
-	markIntensity: {
-		Label: Old Items Opacity
-		Tooltip: The opacity of the ghost displayed on the old item slots
-	}
-
 	overrideMarks: {
 		Label: Override Marks
 		Tooltip:
@@ -205,6 +200,11 @@ SmartPickup: {
 			This happens for instance when the items you pick up cover marks and are moved with the mouse
 			'''
 	}
+
+	displayMarks: {
+		Label: Display Marks
+		Tooltip: Displays the item marked to a slot inside it
+	}
 }
 
 MousePickupLevel: {
@@ -212,6 +212,62 @@ MousePickupLevel: {
 	Off.Label: Off
 	FavoritedOnly.Label: Favorited Items Only
 	AllItems.Label: All Items
+}
+
+MarksDisplay: {
+	Tooltip: ""
+
+	fakeItem: {
+		Label: Fake Item
+		Tooltip: Displays a fake item when the slot is empty
+	}
+
+	icon: {
+		Label: Icon
+		Tooltip:
+			'''
+			Displays an icon of the item
+			The icon will not be displayed if a fake item is displayed
+			'''
+	}
+}
+
+FakeItemDisplay: {
+	Tooltip: ""
+
+	position: {
+		Label: Position
+		Tooltip: The position of the item
+	}
+
+	scale: {
+		Label: Scale
+		Tooltip: The scale of the item
+	}
+
+	intensity: {
+		Label: Opacity
+		Tooltip: The opacity of the item
+	}
+}
+
+IconDisplay: {
+	Tooltip: ""
+
+	position: {
+		Label: "{$Mods.BetterInventory.Configs.FakeItemDisplay.position.Label}"
+		Tooltip: "{$Mods.BetterInventory.Configs.FakeItemDisplay.position.Tooltip}"
+	}
+
+	scale: {
+		Label: "{$Mods.BetterInventory.Configs.FakeItemDisplay.scale.Label}"
+		Tooltip: "{$Mods.BetterInventory.Configs.FakeItemDisplay.scale.Tooltip}"
+	}
+
+	intensity: {
+		Label: "{$Mods.BetterInventory.Configs.FakeItemDisplay.intensity.Label}"
+		Tooltip: "{$Mods.BetterInventory.Configs.FakeItemDisplay.intensity.Tooltip}"
+	}
 }
 
 AutoEquipLevel: {
@@ -685,6 +741,21 @@ UnloadedInventoryManagement: {
 	craftStack: {
 		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.craftStack.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	marksFakeItem: {
+		Label: "{$Mods.BetterInventory.Configs.MarksDisplay.fakeItem.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	marksIcon: {
+		Label: "{$Mods.BetterInventory.Configs.MarksDisplay.icon.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	fakeItem: {
+		Label: fake Item
+		Tooltip: ""
 	}
 }
 

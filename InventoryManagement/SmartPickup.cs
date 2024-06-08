@@ -10,6 +10,7 @@ using Terraria.ModLoader;
 using Terraria.UI;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using Terraria.UI.Gamepad;
 
 namespace BetterInventory.InventoryManagement;
 
@@ -88,7 +89,7 @@ public sealed class SmartPickup : ILoadable {
         cursor.EmitRet();
         cursor.MarkLabel(skip);
     }
-    internal static void ILDrawMarks(ILContext il) {
+    internal static void ILDrawFakeItem(ILContext il) {
         ILCursor cursor = new(il);
 
         // ...
@@ -104,12 +105,47 @@ public sealed class SmartPickup : ILoadable {
         cursor.EmitLdloc(7);
         cursor.EmitLdloc(3);
         cursor.EmitDelegate((int num9, SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, float scale, Texture2D texture, Color color) => {
-            if (!Configs.SmartPickup.Marks || !InventoryLoader.IsInventorySlot(Main.LocalPlayer, inv, context, slot, out Slot itemSlot)) return num9;
-            if (!TryGetMark(itemSlot, out Item? mark)) return num9;
-            // TODO position + scale
-            float scale2 = ItemSlot.DrawItemIcon(mark, context, spriteBatch, position + texture.Size() / 2f * scale, scale, 32f, color * Configs.SmartPickup.Value.markIntensity * Main.cursorAlpha);
+            if (!Configs.MarksDisplay.FakeItem || !TryDrawMark(spriteBatch, inv, context, slot, position, scale, texture, color, Configs.MarksDisplay.Value.fakeItem.Value)) return num9;
+            s_ilBackgroundMark = true;
             return -1;
         });
+    }
+    internal static void ILDrawIcon(ILContext il) {
+        ILCursor cursor = new(il);
+
+        // ...
+        // if(...) {
+        // } else if (context == 6) {
+        //     ...
+        //     spriteBatch.Draw(value10, position4, null, new Color(100, 100, 100, 100), 0f, default(Vector2), inventoryScale, 0, 0f);
+        // }
+        // if (context == 0 && ++[!<hideKeys> && slot < 10]) {
+        //     ...
+        // }
+        cursor.GotoNext(i => i.SaferMatchCall(typeof(UILinkPointNavigator), nameof(UILinkPointNavigator.SetPosition)));
+        cursor.GotoPrev(i => i.MatchCallvirt(typeof(SpriteBatch), nameof(SpriteBatch.Draw)));
+        cursor.GotoNext(MoveType.AfterLabel, i => i.MatchLdarg2());
+
+        // ++ <drawMark>
+        cursor.EmitLdarg0();
+        cursor.EmitLdarg1();
+        cursor.EmitLdarg2();
+        cursor.EmitLdarg3();
+        cursor.EmitLdarg(4);
+        cursor.EmitLdloc2();
+        cursor.EmitLdloc(7);
+        cursor.EmitLdloc(3);
+        cursor.EmitDelegate((SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, float scale, Texture2D texture, Color color) => {
+            if (!Main.gameMenu && !s_ilBackgroundMark && Configs.MarksDisplay.Icon) TryDrawMark(spriteBatch, inv, context, slot, position, scale, texture, color, Configs.MarksDisplay.Value.icon.Value);
+            s_ilBackgroundMark = false;
+        });
+    }
+    private static bool s_ilBackgroundMark;
+    
+    private static bool TryDrawMark(SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, float scale, Texture2D texture, Color color, Configs.IMarkDisplay ui) {
+        if (!InventoryLoader.IsInventorySlot(Main.LocalPlayer, inv, context, slot, out Slot itemSlot) || !TryGetMark(itemSlot, out Item? mark)) return false;
+        ItemSlot.DrawItemIcon(mark, context, spriteBatch, position + texture.Size() * ui.position * scale, scale * ui.scale, 32f, color * Main.cursorAlpha * ui.intensity);
+        return true;
     }
 
     internal static void ILAutoEquip(ILContext il) {
