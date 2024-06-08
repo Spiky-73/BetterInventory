@@ -11,22 +11,22 @@ namespace BetterInventory;
 
 public enum SubInventoryType {
     Classic,
-    Special,
-    Secondary, // TODO change to RightClickTarget and ???
-    Default
+    WithCondition,
+    Equipement,
+    RightClickTarget,
 }
 
 public sealed class InventoryLoader : ILoadable {
 
     public static IEnumerable<ModSubInventory> SubInventories {
         get {
-            foreach (var inventory in _dedicated) yield return inventory;
-            foreach (var inventory in _special) yield return inventory;
+            foreach (var inventory in _equipement) yield return inventory;
+            foreach (var inventory in _condition) yield return inventory;
             foreach (var inventory in _classic) yield return inventory;
         }
     }
-    public static ReadOnlyCollection<ModSubInventory> Dedicated => _dedicated.AsReadOnly();
-    public static ReadOnlyCollection<ModSubInventory> Special => _special.AsReadOnly();
+    public static ReadOnlyCollection<ModSubInventory> Dedicated => _equipement.AsReadOnly();
+    public static ReadOnlyCollection<ModSubInventory> Special => _condition.AsReadOnly();
     public static ReadOnlyCollection<ModSubInventory> Classic => _classic.AsReadOnly();
 
     public void Load(Mod mod) { }
@@ -37,20 +37,20 @@ public sealed class InventoryLoader : ILoadable {
             foreach (var inventory in list) ModConfigExtensions.SetInstance(inventory, true);
             list.Clear();
         }
-        Clear(_dedicated);
-        Clear(_special);
+        Clear(_equipement);
+        Clear(_condition);
         Clear(_classic);
     }
 
     internal static void Register(ModSubInventory inventory) {
         ModConfigExtensions.SetInstance(inventory);
-        if (!LoaderUtils.HasOverride(inventory, i => i.Accepts)) inventory.Type = SubInventoryType.Classic;
-        else if (inventory.Accepts(new())) inventory.Type = SubInventoryType.Special;
-        else inventory.Type = SubInventoryType.Default;
+        if (LoaderUtils.HasOverride(inventory, i => i.IsRightClickTarget)) inventory.Type = SubInventoryType.Equipement;
+        else if (LoaderUtils.HasOverride(inventory, i => i.Accepts)) inventory.Type = SubInventoryType.WithCondition;
+        else inventory.Type = SubInventoryType.Classic;
         List<ModSubInventory> list = inventory.Type switch {
-            SubInventoryType.Classic => _classic,
-            SubInventoryType.Special => _special,
-            SubInventoryType.Default or _ => _dedicated,
+            SubInventoryType.Equipement => _equipement,
+            SubInventoryType.WithCondition => _condition,
+            SubInventoryType.Classic or _ => _classic,
         };
 
         for (int i = 0; i < list.Count; i++) {
@@ -88,16 +88,16 @@ public sealed class InventoryLoader : ILoadable {
     }
 
     public static IEnumerable<ModSubInventory> GetSubInventories(Item item, SubInventoryType level) {
-        List<ModSubInventory> secondary = new();
-        foreach (var inv in _dedicated) {
+        List<ModSubInventory> equipement = new();
+        foreach (var inv in _equipement) {
             if (!inv.Accepts(item)) continue;
-            if (inv.IsDefault(item)) yield return inv;
-            else if (level <= SubInventoryType.Secondary) secondary.Add(inv);
+            if (inv.IsRightClickTarget(item)) yield return inv;
+            else if (level <= SubInventoryType.Equipement) equipement.Add(inv);
         }
-        foreach (var inv in secondary) yield return inv;
+        foreach (var inv in equipement) yield return inv;
 
-        if (level > SubInventoryType.Special) yield break;
-        foreach (var inv in _special) {
+        if (level > SubInventoryType.WithCondition) yield break;
+        foreach (var inv in _condition) {
             if (inv.Accepts(item)) yield return inv;
         }
 
@@ -107,8 +107,8 @@ public sealed class InventoryLoader : ILoadable {
 
     public static void ClearCache() => s_slotToInv.Clear();
 
-    private static readonly List<ModSubInventory> _dedicated = [];
-    private static readonly List<ModSubInventory> _special = [];
+    private static readonly List<ModSubInventory> _equipement = [];
+    private static readonly List<ModSubInventory> _condition = [];
     private static readonly List<ModSubInventory> _classic = [];
 
     private static readonly Cache<VanillaSlot, Slot?> s_slotToInv = new(slot => ComputeInventorySlot(Main.LocalPlayer, slot.Inv, slot.Context, slot.Slot)) {

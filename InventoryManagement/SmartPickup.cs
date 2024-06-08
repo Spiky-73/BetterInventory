@@ -210,7 +210,7 @@ public sealed class SmartPickup : ILoadable {
         return item;
     }
     public static Item AutoEquip(Player self, Item newItem, GetItemSettings settings) {
-        foreach (ModSubInventory slots in InventoryLoader.GetSubInventories(newItem, Configs.InventoryManagement.Instance.autoEquip == Configs.AutoEquipLevel.DefaultSlots ? SubInventoryType.Default : SubInventoryType.Secondary)) {
+        foreach (ModSubInventory slots in InventoryLoader.GetSubInventories(newItem, Configs.InventoryManagement.Instance.autoEquip == Configs.AutoEquipLevel.DefaultSlots ? SubInventoryType.RightClickTarget : SubInventoryType.Equipement)) {
             newItem = slots.GetItem(self, newItem, settings);
             if (newItem.IsAir) return newItem;
         }
