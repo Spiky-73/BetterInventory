@@ -106,6 +106,7 @@ public sealed class SmartPickup : ILoadable {
         cursor.EmitDelegate((int num9, SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, float scale, Texture2D texture, Color color) => {
             if (!Configs.SmartPickup.Marks || !InventoryLoader.IsInventorySlot(Main.LocalPlayer, inv, context, slot, out Slot itemSlot)) return num9;
             if (!TryGetMark(itemSlot, out Item? mark)) return num9;
+            // TODO position + scale
             float scale2 = ItemSlot.DrawItemIcon(mark, context, spriteBatch, position + texture.Size() / 2f * scale, scale, 32f, color * Configs.SmartPickup.Value.markIntensity * Main.cursorAlpha);
             return -1;
         });

@@ -7,7 +7,7 @@ namespace BetterInventory.Configs;
 
 public sealed class InventoryManagement : ModConfig {
     public Toggle<SmartConsumption> smartConsumption = new(true);
-    public Toggle<SmartPickup> smartPickup = new(true);
+    public Toggle<SmartPickup> smartPickup = new(true); // TODO port settings
     [DefaultValue(AutoEquipLevel.DefaultSlots)] public AutoEquipLevel autoEquip;
     
     [DefaultValue(true)] public bool favoriteInBanks;

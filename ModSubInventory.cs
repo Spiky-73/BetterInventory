@@ -13,6 +13,8 @@ namespace BetterInventory;
 public readonly record struct Slot(ModSubInventory Inventory, int Index) {
     public Item Item(Player player) => Inventory.Items(player)[Index];
     public Item GetItem(Player player, Item item, GetItemSettings settings) => Inventory.GetItem(player, item, Index, settings);
+    public void Focus(Player player) => Inventory.Focus(player, Index);
+    public void OnSlotChange(Player player) => Inventory.OnSlotChange(player, Index);
 }
 
 public abstract class ModSubInventory<TInventory> : ModSubInventory where TInventory : ModSubInventory<TInventory> {
