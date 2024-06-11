@@ -11,7 +11,7 @@ namespace BetterInventory.Default.Inventories;
 
 public sealed class Hotbar : ModSubInventory {
     public override int Context => ContextID.InventoryItem;
-    public override bool Accepts(Item item) => true;
+    public override bool IsPrimaryFor(Item item) => false; // ? item.favorited;
     public override void Focus(Player player, int slot) => player.selectedItem = slot;
     public override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.inventory, SpikysLib.DataStructures.Range.FromCount(0, 10));
     public override int ComparePositionTo(ModSubInventory other) => 1;
@@ -28,7 +28,7 @@ public sealed class Coin : ModSubInventory {
 }
 public sealed class Ammo : ModSubInventory {
     public override int Context => ContextID.InventoryAmmo;
-    public override bool IsDefault(Item item) => true;
+    public override bool IsPrimaryFor(Item item) => true;
     public sealed override bool Accepts(Item item) => !item.IsAir && item.FitsAmmoSlot();
     public override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.inventory, SpikysLib.DataStructures.Range.FromCount(54, 4));
 }

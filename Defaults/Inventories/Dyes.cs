@@ -11,6 +11,7 @@ public abstract class Dyes : ModSubInventory {
 
     public sealed override int? MaxStack => 1;
     public sealed override bool Accepts(Item item) => item.dye != 0;
+    public sealed override bool IsPrimaryFor(Item item) => false;
 
     public static Item[] ModdedDyes(Player player) => Reflection.ModAccessorySlotPlayer.exDyesAccessory.GetValue(player.GetModPlayer<ModAccessorySlotPlayer>());
 }

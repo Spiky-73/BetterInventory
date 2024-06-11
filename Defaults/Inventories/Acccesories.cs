@@ -58,7 +58,7 @@ public abstract class AAccessories<T> : ModSubInventory<T> where T : AAccessorie
 }
 public sealed class Accessories : AAccessories<Accessories> {
     public override bool Accepts(Item item) => item.accessory && !item.vanity;
-    public override bool IsDefault(Item item) => true;
+    public override bool IsPrimaryFor(Item item) => true;
     public override int Context => ContextID.EquipAccessory;
     public override Joined<ListIndices<Item>, Item> Items(Player player) => new(
         new ListIndices<Item>(player.armor, UnlockedVanillaSlots(player)),
@@ -67,7 +67,7 @@ public sealed class Accessories : AAccessories<Accessories> {
 }
 public sealed class VanityAccessories : AAccessories<VanityAccessories> {
     public override bool Accepts(Item item) => item.accessory;
-    public override bool IsDefault(Item item) => item.vanity && item.FitsAccessoryVanitySlot;
+    public override bool IsPrimaryFor(Item item) => item.vanity && item.FitsAccessoryVanitySlot;
     public override int Context => ContextID.EquipAccessoryVanity;
     public override Joined<ListIndices<Item>, Item> Items(Player player) => new(
         new ListIndices<Item>(player.armor, UnlockedVanillaSlots(player, AArmor.Count + AccessorySlotLoader.MaxVanillaSlotCount)),

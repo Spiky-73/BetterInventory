@@ -9,24 +9,15 @@ using Terraria.ModLoader.Core;
 
 namespace BetterInventory;
 
-public enum SubInventoryType {
-    Classic,
-    WithCondition,
-    Equipement,
-    RightClickTarget,
-}
-
 public sealed class InventoryLoader : ILoadable {
 
     public static IEnumerable<ModSubInventory> SubInventories {
         get {
-            foreach (var inventory in _equipement) yield return inventory;
-            foreach (var inventory in _condition) yield return inventory;
+            foreach (var inventory in _special) yield return inventory;
             foreach (var inventory in _classic) yield return inventory;
         }
     }
-    public static ReadOnlyCollection<ModSubInventory> Dedicated => _equipement.AsReadOnly();
-    public static ReadOnlyCollection<ModSubInventory> Special => _condition.AsReadOnly();
+    public static ReadOnlyCollection<ModSubInventory> Special => _special.AsReadOnly();
     public static ReadOnlyCollection<ModSubInventory> Classic => _classic.AsReadOnly();
 
     public void Load(Mod mod) { }
@@ -37,28 +28,18 @@ public sealed class InventoryLoader : ILoadable {
             foreach (var inventory in list) ModConfigExtensions.SetInstance(inventory, true);
             list.Clear();
         }
-        Clear(_equipement);
-        Clear(_condition);
         Clear(_classic);
+        Clear(_special);
     }
 
     internal static void Register(ModSubInventory inventory) {
         ModConfigExtensions.SetInstance(inventory);
-        if (LoaderUtils.HasOverride(inventory, i => i.IsRightClickTarget)) inventory.Type = SubInventoryType.Equipement;
-        else if (LoaderUtils.HasOverride(inventory, i => i.Accepts)) inventory.Type = SubInventoryType.WithCondition;
-        else inventory.Type = SubInventoryType.Classic;
-        List<ModSubInventory> list = inventory.Type switch {
-            SubInventoryType.Equipement => _equipement,
-            SubInventoryType.WithCondition => _condition,
-            SubInventoryType.Classic or _ => _classic,
-        };
+        inventory.CanBePrimary = LoaderUtils.HasOverride(inventory, i => i.IsPrimaryFor);
+        List<ModSubInventory> list = inventory.CanBePrimary ? _special : _classic;
 
-        for (int i = 0; i < list.Count; i++) {
-            if (inventory.ComparePositionTo(list[i]) >= 0 && list[i].ComparePositionTo(inventory) <= 0) continue;
-            list.Insert(i, inventory);
-            return;
-        }
-        list.Add(inventory);
+        int before = list.FindIndex(i => inventory.ComparePositionTo(i) < 0 || i.ComparePositionTo(inventory) > 0);
+        if (before != -1) list.Insert(before, inventory);
+        else list.Add(inventory);
     }
 
     public static Slot? FindItem(Player player, Predicate<Item> predicate) {
@@ -87,29 +68,10 @@ public sealed class InventoryLoader : ILoadable {
         return null;
     }
 
-    public static IEnumerable<ModSubInventory> GetSubInventories(Item item, SubInventoryType level) {
-        List<ModSubInventory> equipement = new();
-        foreach (var inv in _equipement) {
-            if (!inv.Accepts(item)) continue;
-            if (inv.IsRightClickTarget(item)) yield return inv;
-            else if (level <= SubInventoryType.Equipement) equipement.Add(inv);
-        }
-        foreach (var inv in equipement) yield return inv;
-
-        if (level > SubInventoryType.WithCondition) yield break;
-        foreach (var inv in _condition) {
-            if (inv.Accepts(item)) yield return inv;
-        }
-
-        if (level > SubInventoryType.Classic) yield break;
-        foreach (var inv in _classic) yield return inv;
-    }
-
     public static void ClearCache() => s_slotToInv.Clear();
 
-    private static readonly List<ModSubInventory> _equipement = [];
-    private static readonly List<ModSubInventory> _condition = [];
     private static readonly List<ModSubInventory> _classic = [];
+    private static readonly List<ModSubInventory> _special = [];
 
     private static readonly Cache<VanillaSlot, Slot?> s_slotToInv = new(slot => ComputeInventorySlot(Main.LocalPlayer, slot.Inv, slot.Context, slot.Slot)) {
         EstimateValueSize = slot => sizeof(int) + IntPtr.Size

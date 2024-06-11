@@ -9,7 +9,7 @@ namespace BetterInventory.Configs;
 public sealed class InventoryManagement : ModConfig {
     public Toggle<SmartConsumption> smartConsumption = new(true);
     public Toggle<SmartPickup> smartPickup = new(true); // TODO port settings
-    [DefaultValue(AutoEquipLevel.DefaultSlots)] public AutoEquipLevel autoEquip;
+    [DefaultValue(AutoEquipLevel.PrimarySlots)] public AutoEquipLevel autoEquip;
     
     [DefaultValue(true)] public bool favoriteInBanks;
     public Toggle<QuickMove> quickMove = new(true);
@@ -31,7 +31,7 @@ public sealed class InventoryManagement : ModConfig {
     public static InventoryManagement Instance = null!;
 
 }
-public enum AutoEquipLevel { Off, DefaultSlots, AnySlot }
+public enum AutoEquipLevel { Off, PrimarySlots, AnySlot }
 
 public sealed class SmartConsumption {
     [DefaultValue(true)] public bool consumables = true;
@@ -52,14 +52,14 @@ public sealed class SmartConsumption {
 }
 
 public sealed class SmartPickup {
-    [DefaultValue(MousePickupLevel.AllItems)] public MousePickupLevel mouse = MousePickupLevel.AllItems;
-    [DefaultValue(true)] public bool mediumCore = true;
+    [DefaultValue(MousePickupLevel.AllItems)] public MousePickupLevel mouse = MousePickupLevel.AllItems; // TODO port settings
+    [DefaultValue(MousePickupLevel.AllItems)] public MousePickupLevel mediumCore = MousePickupLevel.AllItems;
     [DefaultValue(false)] public bool overrideMarks = false;
     public Toggle<MarksDisplay> displayMarks = new(true); // TODO port settings
 
     public static bool Enabled => !UnloadedInventoryManagement.Value.smartPickup && InventoryManagement.Instance.smartPickup.Parent;
     public static bool Mouse => Enabled && Value.mouse > MousePickupLevel.Off;
-    public static bool MediumCore => Enabled && Value.mediumCore;
+    public static bool MediumCore => Enabled && Value.mediumCore > MousePickupLevel.Off;
     public static SmartPickup Value => InventoryManagement.Instance.smartPickup.Value;
 }
 public enum MousePickupLevel { Off, FavoritedOnly, AllItems }

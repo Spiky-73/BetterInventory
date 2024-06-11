@@ -11,6 +11,8 @@ using Terraria.UI;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using Terraria.UI.Gamepad;
+using System.Linq;
+using BetterInventory.Default.Inventories;
 
 namespace BetterInventory.InventoryManagement;
 
@@ -26,7 +28,7 @@ public sealed class SmartPickup : ILoadable {
     private static void HookLeftSaveType(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) => UpdateMark((inv, context, slot) => orig(inv, context, slot), inv, context, slot, Main.mouseLeft && Main.mouseLeftRelease);
     private static void HookRightSaveType(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) => UpdateMark((inv, context, slot) => orig(inv, context, slot), inv, context, slot, Main.mouseRight);
     private static void UpdateMark(Action<Item[], int, int> orig, Item[] inv, int context, int slot, bool update) {
-        if (!update || !Configs.SmartPickup.Mouse) {
+        if (!update || !Configs.SmartPickup.Mouse || !InventoryLoader.IsInventorySlot(Main.LocalPlayer, inv, context, slot, out Slot mark)) {
             orig(inv, context, slot);
             return;
         }
@@ -34,15 +36,13 @@ public sealed class SmartPickup : ILoadable {
         orig(inv, context, slot);
         if (Main.mouseItem.type == oldMouse) return;
 
-        bool removed = oldType != ItemID.None && (Configs.SmartPickup.Value.mouse > Configs.MousePickupLevel.FavoritedOnly || oldFav);
-        bool placed = inv[slot].type != ItemID.None && (Configs.SmartPickup.Value.mouse > Configs.MousePickupLevel.FavoritedOnly || inv[slot].favorited);
+        bool removed = oldType != ItemID.None && (Configs.SmartPickup.Value.mouse == Configs.MousePickupLevel.AllItems || mark.Inventory.CanBePrimary || oldFav);
+        bool placed = inv[slot].type != ItemID.None && (Configs.SmartPickup.Value.mouse == Configs.MousePickupLevel.AllItems || mark.Inventory.CanBePrimary || inv[slot].favorited);
 
         if (placed && removed) Remark(inv[slot].type, oldType, oldFav);
-        else if (removed && InventoryLoader.IsInventorySlot(Main.LocalPlayer, inv, context, slot, out Slot mark)) Mark(oldType, mark, oldFav);
-        else if (placed) {
-            Unmark(inv[slot].type);
-            if (InventoryLoader.IsInventorySlot(Main.LocalPlayer, inv, context, slot, out Slot mark2)) Unmark(mark2);
-        }
+        else if (removed) Mark(oldType, mark, oldFav);
+        else if (placed) Unmark(inv[slot].type);
+        if (placed) Unmark(mark);
     }
     private static void HookMarkItemsOnDeath(On_Player.orig_DropItems orig, Player self) {
         if (!Configs.SmartPickup.MediumCore) {
@@ -53,7 +53,7 @@ public sealed class SmartPickup : ILoadable {
         foreach (ModSubInventory inventory in InventoryLoader.SubInventories) {
             IList<Item> items = inventory.Items(self);
             for (int i = 0; i < items.Count; i++) {
-                if (!items[i].IsAir && (Configs.SmartPickup.Value.mouse > Configs.MousePickupLevel.FavoritedOnly || items[i].favorited)) Mark(items[i].type, new(inventory, i), items[i].favorited);
+                if (!items[i].IsAir && (Configs.SmartPickup.Value.mouse == Configs.MousePickupLevel.AllItems || inventory.CanBePrimary || items[i].favorited)) Mark(items[i].type, new(inventory, i), items[i].favorited);
             }
         }
         orig(self);
@@ -210,8 +210,9 @@ public sealed class SmartPickup : ILoadable {
         return item;
     }
     public static Item AutoEquip(Player self, Item newItem, GetItemSettings settings) {
-        foreach (ModSubInventory slots in InventoryLoader.GetSubInventories(newItem, Configs.InventoryManagement.Instance.autoEquip == Configs.AutoEquipLevel.DefaultSlots ? SubInventoryType.RightClickTarget : SubInventoryType.Equipement)) {
-            newItem = slots.GetItem(self, newItem, settings);
+        foreach (ModSubInventory inv in InventoryLoader.Special.Where(i => i is not Hotbar &&  i.Accepts(newItem))) {
+            if (Configs.InventoryManagement.Instance.autoEquip == Configs.AutoEquipLevel.PrimarySlots && !inv.IsPrimaryFor(newItem)) continue;
+            newItem = inv.GetItem(self, newItem, settings);
             if (newItem.IsAir) return newItem;
         }
         return newItem;

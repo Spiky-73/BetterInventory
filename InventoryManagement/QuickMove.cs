@@ -297,7 +297,7 @@ public sealed class QuickMove : ILoadable {
     }
 
     private static List<ModSubInventory> GetDisplayedChain(Player player, Item item, ModSubInventory source) {
-        List<ModSubInventory> targetSlots = new(InventoryLoader.GetSubInventories(item, SubInventoryType.WithCondition));
+        List<ModSubInventory> targetSlots = InventoryLoader.Special.Where(i => i.Accepts(item)).ToList();
         if (targetSlots.Remove(source) && source.Items(player).Count > 1) targetSlots.Insert(0, source);
         return targetSlots;
     }

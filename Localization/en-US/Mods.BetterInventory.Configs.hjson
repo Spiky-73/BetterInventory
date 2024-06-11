@@ -103,7 +103,7 @@ InventoryManagement: {
 		Tooltip:
 			'''
 			Automatically equips items such as Armors, Accessories or Equipment
-			{$Mods.BetterInventory.Configs.AutoEquipLevel.DefaultSlots.Label}: Equipment go to their default slots if available
+			{$Mods.BetterInventory.Configs.AutoEquipLevel.PrimarySlots.Label}: Equipment go to their default slots if available
 			{$Mods.BetterInventory.Configs.AutoEquipLevel.AnySlot.Label}: Equipment go to any slot they can go in (includes Dyes). Armors and Accessories can go to social slots.
 			'''
 	}
@@ -273,7 +273,7 @@ IconDisplay: {
 AutoEquipLevel: {
 	Tooltip: ""
 	Off.Label: Off
-	DefaultSlots.Label: Default slots
+	PrimarySlots.Label: Primary Slots
 	AnySlot.Label: Any Slots
 }
 
