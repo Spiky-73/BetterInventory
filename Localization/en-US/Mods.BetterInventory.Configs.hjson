@@ -100,12 +100,8 @@ InventoryManagement: {
 
 	autoEquip: {
 		Label: "[i:83] Auto Equip Items"
-		Tooltip:
-			'''
-			Automatically equips items such as Armors, Accessories or Equipment
-			{$Mods.BetterInventory.Configs.AutoEquipLevel.PrimarySlots.Label}: Equipment go to their default slots if available
-			{$Mods.BetterInventory.Configs.AutoEquipLevel.AnySlot.Label}: Equipment go to any slot they can go in (includes Dyes). Armors and Accessories can go to social slots.
-			'''
+		Tooltip: Automatically equips items such as Armors, Accessories or Equipment
+
 	}
 
 	quickMove: {
@@ -270,11 +266,13 @@ IconDisplay: {
 	}
 }
 
-AutoEquipLevel: {
+AutoEquip: {
 	Tooltip: ""
-	Off.Label: Off
-	PrimarySlots.Label: Primary Slots
-	AnySlot.Label: Any Slots
+
+	anyItem: {
+		Label: Any Item
+		Tooltip: Equipment go to any slot they can go in (includes Dyes). Armors and Accessories can go to social slots.
+	}
 }
 
 CraftStack: {

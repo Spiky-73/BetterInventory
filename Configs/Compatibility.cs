@@ -29,7 +29,7 @@ public sealed class Compatibility : ModConfig {
             MarksDisplay.Value.icon.Parent = false;
             QuickMove.Value.displayHotkeys.Parent = HotkeyDisplayMode.Off;
             QuickMove.Value.displayHotkeys.Value.highlightIntensity = 0;
-            InventoryManagement.Instance.autoEquip = AutoEquipLevel.Off;
+            InventoryManagement.Instance.autoEquip.Parent = false;
             InventoryManagement.Instance.favoriteInBanks = false;
             InventoryManagement.Instance.shiftRight = false;
             InventoryManagement.Instance.stackTrash = false;

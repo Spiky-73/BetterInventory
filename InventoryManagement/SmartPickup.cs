@@ -162,7 +162,7 @@ public sealed class SmartPickup : ILoadable {
         cursor.EmitLdarg2();
         cursor.EmitLdarg3();
         cursor.EmitDelegate((Player self, Item newItem, GetItemSettings settings) => {
-            if (VanillaGetItem || settings.NoText || !Configs.InventoryManagement.AutoEquip) return newItem;
+            if (VanillaGetItem || settings.NoText || !Configs.AutoEquip.Enabled) return newItem;
             return AutoEquip(self, newItem, settings);
         });
         cursor.EmitDup();
@@ -211,7 +211,7 @@ public sealed class SmartPickup : ILoadable {
     }
     public static Item AutoEquip(Player self, Item newItem, GetItemSettings settings) {
         foreach (ModSubInventory inv in InventoryLoader.Special.Where(i => i is not Hotbar &&  i.Accepts(newItem))) {
-            if (Configs.InventoryManagement.Instance.autoEquip == Configs.AutoEquipLevel.PrimarySlots && !inv.IsPrimaryFor(newItem)) continue;
+            if (!Configs.AutoEquip.Value.anyItem && !inv.IsPrimaryFor(newItem)) continue;
             newItem = inv.GetItem(self, newItem, settings);
             if (newItem.IsAir) return newItem;
         }

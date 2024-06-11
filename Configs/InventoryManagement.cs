@@ -9,7 +9,7 @@ namespace BetterInventory.Configs;
 public sealed class InventoryManagement : ModConfig {
     public Toggle<SmartConsumption> smartConsumption = new(true);
     public Toggle<SmartPickup> smartPickup = new(true); // TODO port settings
-    [DefaultValue(AutoEquipLevel.PrimarySlots)] public AutoEquipLevel autoEquip;
+    public Toggle<AutoEquip> autoEquip = new(true); // TODO port settings
     
     [DefaultValue(true)] public bool favoriteInBanks;
     public Toggle<QuickMove> quickMove = new(true);
@@ -18,7 +18,6 @@ public sealed class InventoryManagement : ModConfig {
     [DefaultValue(true)] public bool shiftRight;
     [DefaultValue(true)] public bool stackTrash;
 
-    public static bool AutoEquip => !UnloadedInventoryManagement.Value.autoEquip && Instance.autoEquip != AutoEquipLevel.Off;
     public static bool FavoriteInBanks => !UnloadedInventoryManagement.Value.favoriteInBanks && Instance.favoriteInBanks;
     public static bool ShiftRight => !UnloadedInventoryManagement.Value.shiftRight && Instance.shiftRight;
     public static bool StackTrash => !UnloadedInventoryManagement.Value.stackTrash && Instance.stackTrash;
@@ -31,7 +30,6 @@ public sealed class InventoryManagement : ModConfig {
     public static InventoryManagement Instance = null!;
 
 }
-public enum AutoEquipLevel { Off, PrimarySlots, AnySlot }
 
 public sealed class SmartConsumption {
     [DefaultValue(true)] public bool consumables = true;
@@ -73,6 +71,7 @@ public sealed class MarksDisplay {
     public static bool Icon => Enabled && Value.icon && !UnloadedInventoryManagement.Value.marksIcon;
     public static MarksDisplay Value => SmartPickup.Value.displayMarks.Value;
 }
+
 public interface IMarkDisplay { Vector2 position { get; } float scale { get; } float intensity { get; } }
 public sealed class FakeItemDisplay : IMarkDisplay {
     [DefaultValue(typeof(Vector2), "0.5, 0.5")] public Vector2 position { get; set; } = new(0.5f, 0.5f);
@@ -83,6 +82,13 @@ public sealed class IconDisplay : IMarkDisplay {
     [DefaultValue(typeof(Vector2), "0.8, 0.8")] public Vector2 position { get; set; } = new(0.8f, 0.8f);
     [DefaultValue(1f)] public float scale { get; set; } = 0.4f;
     [DefaultValue(1f)] public float intensity { get; set; } = 1f;
+}
+
+public sealed class AutoEquip {
+    [DefaultValue(false)] public bool anyItem = false;
+
+    public static bool Enabled => !UnloadedInventoryManagement.Value.autoEquip && InventoryManagement.Instance.autoEquip;
+    public static AutoEquip Value => InventoryManagement.Instance.autoEquip.Value;
 }
 
 public sealed class QuickMove {

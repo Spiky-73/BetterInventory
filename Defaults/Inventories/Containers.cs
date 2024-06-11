@@ -11,7 +11,7 @@ namespace BetterInventory.Default.Inventories;
 
 public sealed class Hotbar : ModSubInventory {
     public override int Context => ContextID.InventoryItem;
-    public override bool IsPrimaryFor(Item item) => false; // ? item.favorited;
+    public override bool IsPrimaryFor(Item item) => item.favorited;
     public override void Focus(Player player, int slot) => player.selectedItem = slot;
     public override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.inventory, SpikysLib.DataStructures.Range.FromCount(0, 10));
     public override int ComparePositionTo(ModSubInventory other) => 1;
