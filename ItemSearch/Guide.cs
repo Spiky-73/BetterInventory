@@ -71,7 +71,7 @@ public sealed class Guide : ModSystem {
         SmartPickup.ClearMarks();
     }
     public override void PostAddRecipes() {
-        SearchItem.HooksBestiaryUI();
+        Default.SearchProviders.Bestiary.HooksBestiaryUI();
         for (int r = 0; r < Recipe.numRecipes; r++) {
             foreach (int tile in Main.recipe[r].requiredTile) CraftingStationsItems[tile] = 0;
         }
@@ -376,7 +376,7 @@ public sealed class Guide : ModSystem {
     }
 
 
-    public static Item? GetGuideMaterials() => Configs.BetterGuide.AvailableRecipes && !Configs.SearchItems.Recipes ? Main.guideItem : null;
+    public static Item? GetGuideMaterials() => Configs.BetterGuide.AvailableRecipes && !Configs.QuickSearch.Recipes ? Main.guideItem : null;
 
     public static void FindGuideRecipes() {
         s_collectingGuide = true;
@@ -685,7 +685,7 @@ public sealed class Guide : ModSystem {
     
     private static void HookGuideTileAdj(On_Player.orig_AdjTiles orig, Player self) {
         orig(self);
-        if (!Configs.BetterGuide.AvailableRecipes || !Configs.BetterGuide.Tile || Configs.SearchItems.Recipes || guideTile.createTile < TileID.Dirt) return;
+        if (!Configs.BetterGuide.AvailableRecipes || !Configs.BetterGuide.Tile || Configs.QuickSearch.Recipes || guideTile.createTile < TileID.Dirt) return;
         self.adjTile[guideTile.createTile] = true;
         Recipe.FindRecipes();
     }
@@ -701,7 +701,7 @@ public sealed class Guide : ModSystem {
         return true;
     }
     private static bool HookOverrideLeftClick(On_ItemSlot.orig_OverrideLeftClick orig, Item[] inv, int context, int slot) {
-        if (Main.InGuideCraftMenu && Main.cursorOverride == CursorOverrideID.InventoryToChest && (Configs.BetterGuide.Enabled || Configs.SearchItems.Recipes)) {
+        if (Main.InGuideCraftMenu && Main.cursorOverride == CursorOverrideID.InventoryToChest && (Configs.BetterGuide.Enabled || Configs.QuickSearch.Recipes)) {
             (Item mouse, Main.mouseItem, inv[slot]) = (Main.mouseItem, inv[slot], new());
             (int cursor, Main.cursorOverride) = (Main.cursorOverride, 0);
 
@@ -709,7 +709,7 @@ public sealed class Guide : ModSystem {
             ItemSlot.LeftClick(items, ContextID.GuideItem, Configs.BetterGuide.Tile && IsCraftingStation(Main.mouseItem) ? 1 : 0);
             GuideItems = items;
 
-            if (Configs.BetterGuide.Enabled && !Configs.SearchItems.Recipes) Main.LocalPlayer.GetDropItem(ref Main.mouseItem);
+            if (Configs.BetterGuide.Enabled && !Configs.QuickSearch.Recipes) Main.LocalPlayer.GetDropItem(ref Main.mouseItem);
             else inv[slot] = Main.mouseItem;
             Main.mouseItem = mouse;
             Main.cursorOverride = cursor;
@@ -804,23 +804,6 @@ public sealed class Guide : ModSystem {
     public static void OverrideRecipeTexture(Asset<Texture2D>[] textures, bool selected, bool available) {
         TextureAssets.InventoryBack4 = textures[selected ? 1 : 0];
         if (!available) Main.inventoryBack.ApplyRGB(0.5f);
-    }
-
-    public static void ToggleRecipeList(bool? enabled = null) {
-        if (Main.playerInventory && Main.recBigList && !Main.CreativeMenu.Enabled) {
-            if (enabled == true) return;
-            Main.recBigList = false;
-        } else {
-            if (enabled == false) return;
-            if (!Main.playerInventory) {
-                Main.LocalPlayer.ToggleInv();
-                if (!Main.playerInventory) Main.LocalPlayer.ToggleInv();
-            } else {
-                Main.CreativeMenu.CloseMenu();
-                Main.LocalPlayer.tileEntityAnchor.Clear();
-            }
-            Main.recBigList = Main.numAvailableRecipes > 0;
-        }
     }
 
     public static PlaceholderType GetPlaceholderType(Item item) {

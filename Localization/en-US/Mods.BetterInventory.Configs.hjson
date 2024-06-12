@@ -101,7 +101,6 @@ InventoryManagement: {
 	autoEquip: {
 		Label: "[i:83] Auto Equip Items"
 		Tooltip: Automatically equips items such as Armors, Accessories or Equipment
-
 	}
 
 	quickMove: {
@@ -414,18 +413,9 @@ ItemSearch: {
 		Tooltip: Improves various aspects of the Bestiary
 	}
 
-	quickList: {
-		Label: "[i:3611] Quick List"
-		Tooltip:
-			'''
-			Tap the {$Mods.BetterInventory.Keybinds.QuickSearch.DisplayName} key to open the Recipe list
-			Double tap to open the Bestiary
-			'''
-	}
-
-	searchItems: {
-		Label: "[i:487] Search Item"
-		Tooltip: Search recipes or NPC drops with the "{$Mods.BetterInventory.Keybinds.QuickSearch.DisplayName}" keybind
+	quickSearch: {
+		Label: "[i:487] Quick Search"
+		Tooltip: Quickly search recipes or NPC drops and navigate between those menus
 	}
 }
 
@@ -545,30 +535,25 @@ BetterBestiary: {
 
 UnlockLevel: {
 	Tooltip: ""
-	Unchanged.Label: Unchanged (Off)
+	Off.Label: Off
+	Name.Label: Name
 	Stats.Label: Detailed Stats
 	Drops.Label: Drops
 	DropRates.Label: Drop Rates
-	Off.Label: Off
-	Name.Label: Name
 }
 
-QuickList: {
+QuickSearch: {
 	Tooltip: ""
 
-	tap: {
-		Label: Tap Length
-		Tooltip: The maximum time for a press to count as a tap ({$Mods.BetterInventory.UI.FramesToSec})
+	individualKeybinds: {
+		Label: Individual Keybinds
+		Tooltip: ""
 	}
 
-	delay: {
-		Label: Multi Tap Delay
-		Tooltip: The maximum interval for successive taps ({$Mods.BetterInventory.UI.FramesToSec})
+	sharedKeybind: {
+		Label: Shared Keybind
+		Tooltip: ""
 	}
-}
-
-SearchItems: {
-	Tooltip: ""
 
 	recipes: {
 		Label: Recipes
@@ -588,10 +573,41 @@ SearchItems: {
 		Label: Right Click Action
 		Tooltip:
 			'''
-			Right Click  the bestiary text field or tha guide item to perform an action
-			{$Mods.BetterInventory.Configs.RightClickAction.Clear.Label}: Clear the field.
+			Right Click the bestiary text field or the guide item to perform an action
+			{$Mods.BetterInventory.Configs.RightClickAction.Clear.Label}: Clear the field
 			{$Mods.BetterInventory.Configs.RightClickAction.SearchPrevious.Label}: Search previous entry
 			'''
+	}
+}
+
+SearchAction: {
+	Tooltip: ""
+	Off.Label: Off
+	Search.Label: Search
+	Toggle.Label: Toggle
+	Both.Label: Search and Toggle
+}
+
+IndividualKeybinds: {
+	Tooltip: ""
+
+	composite: {
+		Label: Compose With {$Mods.BetterInventory.Keybinds.QuickSearch.DisplayName}
+		Tooltip: ""
+	}
+}
+
+SharedKeybind: {
+	Tooltip: ""
+
+	tap: {
+		Label: Tap Length
+		Tooltip: The maximum time for a press to count as a tap ({$Mods.BetterInventory.UI.FramesToSec})
+	}
+
+	delay: {
+		Label: Multi Tap Delay
+		Tooltip: The maximum interval for successive taps ({$Mods.BetterInventory.UI.FramesToSec})
 	}
 }
 

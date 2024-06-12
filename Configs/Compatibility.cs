@@ -43,7 +43,7 @@ public sealed class Compatibility : ModConfig {
             FavoriteRecipes.Value.unfavoriteOnCraft = UnfavoriteOnCraft.Off;
             BetterBestiary.Value.unknownDisplay = UnknownDisplay.Off;
             BetterBestiary.Value.displayedUnlock = UnlockLevel.Off;
-            SearchItems.Value.recipes = false;
+            QuickSearch.Value.recipes = false;
             ItemSearch.Instance.Save();
         }
     }

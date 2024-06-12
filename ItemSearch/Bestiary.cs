@@ -286,22 +286,6 @@ public sealed class Bestiary : ILoadable {
         return _bossBagSearch[bossBag.itemId] = string.Join('|', names);
     }
 
-    public static void ToggleBestiary(bool? enabled = null) {
-        if (Main.InGameUI.CurrentState == Main.BestiaryUI) {
-            if (enabled == true) return;
-            IngameFancyUI.Close();
-        } else {
-            if (enabled == false) return;
-            Main.LocalPlayer.SetTalkNPC(-1, false);
-            Main.npcChatCornerItem = 0;
-            Main.npcChatText = "";
-            Main.mouseLeftRelease = false;
-            IngameFancyUI.OpenUIState(Main.BestiaryUI);
-            Main.BestiaryUI.OnOpenPage();
-        }
-    }
-
-
     public const float PageDark = 0.7f;
     public const float IconDark = 0.5f;
 

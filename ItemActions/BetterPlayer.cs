@@ -92,14 +92,14 @@ public sealed class BetterPlayer : ModPlayer {
 
     public override void ProcessTriggers(TriggersSet triggersSet) {
         QuickMove.ProcessTriggers();
-        if(Configs.QuickList.Enabled) SearchItem.ProcessSearchTap();
+        QuickSearch.ProcessTriggers();
         if (Configs.ItemActions.FavoritedBuff && FavoritedBuffKb.JustPressed) FavoritedBuff(Player);
         if (Configs.ItemActions.BuilderAccs) BuilderKeys();
     }
 
     public override bool HoverSlot(Item[] inventory, int context, int slot) {
         QuickMove.HoverItem(inventory, context, slot);
-        if (SearchItem.OverrideHover(inventory, context, slot)) return true;
+        if (Default.SearchProviders.RecipeList.OverrideHover(inventory, context, slot)) return true;
         if (Guide.OverrideHover(inventory, context, slot)) return true;
         if (ClickOverrides.OverrideHover(inventory, context, slot)) return true;
         return false;
