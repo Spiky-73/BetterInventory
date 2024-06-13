@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using BetterInventory.Default.SearchProviders;
 using Newtonsoft.Json;
 using SpikysLib.Configs.UI;
 using SpikysLib.Extensions;
@@ -43,7 +44,7 @@ public sealed class Compatibility : ModConfig {
             FavoriteRecipes.Value.unfavoriteOnCraft = UnfavoriteOnCraft.Off;
             BetterBestiary.Value.unknownDisplay = UnknownDisplay.Off;
             BetterBestiary.Value.displayedUnlock = UnlockLevel.Off;
-            QuickSearch.Value.recipes = false;
+            QuickSearch.Value.providers[new(RecipeList.Instance)] = false;
             ItemSearch.Instance.Save();
         }
     }

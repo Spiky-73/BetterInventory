@@ -555,20 +555,6 @@ QuickSearch: {
 		Tooltip: ""
 	}
 
-	recipes: {
-		Label: Recipes
-		Tooltip:
-			'''
-			Hold the "{$Mods.BetterInventory.Keybinds.QuickSearch.DisplayName}" key and Left Click a material to search the recipes using it
-			With "{$Mods.BetterInventory.Configs.BetterGuide.tile.Label}" On, searching the guide tile will move it into the guide item and vice-versa
-			'''
-	}
-
-	drops: {
-		Label: Drops
-		Tooltip: Hold the "{$Mods.BetterInventory.Keybinds.QuickSearch.DisplayName}" key and Right Click an item to search the NPCs dropping it
-	}
-
 	rightClick: {
 		Label: Right Click Action
 		Tooltip:
@@ -577,6 +563,11 @@ QuickSearch: {
 			{$Mods.BetterInventory.Configs.RightClickAction.Clear.Label}: Clear the field
 			{$Mods.BetterInventory.Configs.RightClickAction.SearchPrevious.Label}: Search previous entry
 			'''
+	}
+
+	providers: {
+		Label: Search Providers
+		Tooltip: ""
 	}
 }
 
@@ -868,3 +859,4 @@ ChildValue`2: {
 }
 
 Text.Tooltip: ""
+SearchProviderDefinition.Tooltip: ""

@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using BetterInventory.ItemSearch;
 using SpikysLib.Configs;
+using SpikysLib.Configs.UI;
 using Terraria.ModLoader.Config;
 
 namespace BetterInventory.Configs;
@@ -66,14 +69,20 @@ public enum UnlockLevel { Off, Name, Stats, Drops, DropRates }
 public sealed class QuickSearch {
     public NestedValue<SearchAction, IndividualKeybinds> individualKeybinds = new(SearchAction.Both);
     public NestedValue<SearchAction, SharedKeybind> sharedKeybind = new(SearchAction.Toggle);
-    [DefaultValue(true)] public bool recipes = true; // TODO dictionnary
-    [DefaultValue(true)] public bool drops = true;
-    [DefaultValue(RightClickAction.SearchPrevious)] public RightClickAction rightClick = RightClickAction.SearchPrevious;
+    [CustomModConfigItem(typeof(DictionaryValuesElement))] public Dictionary<SearchProviderDefinition, bool> providers {
+        get => _providers;
+        set {
+            foreach (SearchProvider provider in global::BetterInventory.ItemSearch.QuickSearch.Providers) value.TryAdd(new(provider), true);
+            _providers = value;
+        }
+
+    }
+    [DefaultValue(RightClickAction.SearchPrevious)] public RightClickAction rightClick { get; set; } = RightClickAction.SearchPrevious;
     // [DefaultValue(false)] public bool air = false;
 
+    private Dictionary<SearchProviderDefinition, bool> _providers = [];
+
     public static bool Enabled => ItemSearch.Instance.quickSearch;
-    public static bool Recipes => Enabled && Value.recipes && !UnloadedItemSearch.Value.searchRecipes;
-    public static bool Drops => Enabled && Value.drops;
     public static bool IndividualKeybinds => Enabled && Value.individualKeybinds > SearchAction.Off;
     public static bool SharedKeybind => Enabled && Value.sharedKeybind > SearchAction.Off;
     public static bool RightClick => Enabled && Value.rightClick != RightClickAction.Off;

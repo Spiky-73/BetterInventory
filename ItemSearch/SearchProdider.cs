@@ -10,6 +10,8 @@ public abstract class SearchProvider : ModType, ILocalizedModType {
         QuickSearch.Register(this);
     }
 
+    public virtual bool Enabled => Configs.QuickSearch.Enabled && Configs.QuickSearch.Value.providers[new(this)];
+
     public ModKeybind Keybind { get; protected set; } = null!;
     public abstract bool Visible { get; }
     public abstract void Toggle(bool? enabled = null);

@@ -20,6 +20,7 @@ using ContextID = Terraria.UI.ItemSlot.Context;
 using BetterInventory.ItemActions;
 using SpikysLib.Extensions;
 using SpikysLib;
+using BetterInventory.Default.SearchProviders;
 
 namespace BetterInventory.ItemSearch;
 
@@ -376,7 +377,7 @@ public sealed class Guide : ModSystem {
     }
 
 
-    public static Item? GetGuideMaterials() => Configs.BetterGuide.AvailableRecipes && !Configs.QuickSearch.Recipes ? Main.guideItem : null;
+    public static Item? GetGuideMaterials() => Configs.BetterGuide.AvailableRecipes && !RecipeList.Instance.Enabled ? Main.guideItem : null;
 
     public static void FindGuideRecipes() {
         s_collectingGuide = true;
@@ -685,7 +686,7 @@ public sealed class Guide : ModSystem {
     
     private static void HookGuideTileAdj(On_Player.orig_AdjTiles orig, Player self) {
         orig(self);
-        if (!Configs.BetterGuide.AvailableRecipes || !Configs.BetterGuide.Tile || Configs.QuickSearch.Recipes || guideTile.createTile < TileID.Dirt) return;
+        if (!Configs.BetterGuide.AvailableRecipes || !Configs.BetterGuide.Tile || RecipeList.Instance.Enabled || guideTile.createTile < TileID.Dirt) return;
         self.adjTile[guideTile.createTile] = true;
         Recipe.FindRecipes();
     }
@@ -701,7 +702,7 @@ public sealed class Guide : ModSystem {
         return true;
     }
     private static bool HookOverrideLeftClick(On_ItemSlot.orig_OverrideLeftClick orig, Item[] inv, int context, int slot) {
-        if (Main.InGuideCraftMenu && Main.cursorOverride == CursorOverrideID.InventoryToChest && (Configs.BetterGuide.Enabled || Configs.QuickSearch.Recipes)) {
+        if (Main.InGuideCraftMenu && Main.cursorOverride == CursorOverrideID.InventoryToChest && (Configs.BetterGuide.Enabled || RecipeList.Instance.Enabled)) {
             (Item mouse, Main.mouseItem, inv[slot]) = (Main.mouseItem, inv[slot], new());
             (int cursor, Main.cursorOverride) = (Main.cursorOverride, 0);
 
@@ -709,7 +710,7 @@ public sealed class Guide : ModSystem {
             ItemSlot.LeftClick(items, ContextID.GuideItem, Configs.BetterGuide.Tile && IsCraftingStation(Main.mouseItem) ? 1 : 0);
             GuideItems = items;
 
-            if (Configs.BetterGuide.Enabled && !Configs.QuickSearch.Recipes) Main.LocalPlayer.GetDropItem(ref Main.mouseItem);
+            if (Configs.BetterGuide.Enabled && !RecipeList.Instance.Enabled) Main.LocalPlayer.GetDropItem(ref Main.mouseItem);
             else inv[slot] = Main.mouseItem;
             Main.mouseItem = mouse;
             Main.cursorOverride = cursor;

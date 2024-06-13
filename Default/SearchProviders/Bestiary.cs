@@ -13,6 +13,8 @@ namespace BetterInventory.Default.SearchProviders;
 
 public sealed class Bestiary : SearchProvider {
 
+    public static Bestiary Instance = null!;    
+
     public override void Load() {
         Keybind = KeybindLoader.RegisterKeybind(Mod, Name, "Mouse2");
 
@@ -28,7 +30,7 @@ public sealed class Bestiary : SearchProvider {
     public static void HooksBestiaryUI() {
         _npcSearchBar = Reflection.UIBestiaryTest._searchBar.GetValue(Main.BestiaryUI);
         _npcSearchBar.Parent.OnRightClick += (_, _) => {
-            if (!Configs.QuickSearch.RightClick) return;
+            if (!Instance.Enabled || !Configs.QuickSearch.RightClick) return;
             int count = 0;
             if (Configs.QuickSearch.Value.rightClick == Configs.RightClickAction.SearchPrevious && _npcHistory.Count != 0) {
                 string text = _npcHistory[^1];
@@ -39,7 +41,7 @@ public sealed class Bestiary : SearchProvider {
             if (_npcHistory.Count > count) _npcHistory.RemoveAt(_npcHistory.Count - 1);
         };
         _npcSearchBar.OnStartTakingInput += () => {
-            if (!Configs.QuickSearch.RightClick || Configs.QuickSearch.Value.rightClick != Configs.RightClickAction.SearchPrevious) return;
+            if (!Instance.Enabled || Configs.QuickSearch.Value.rightClick != Configs.RightClickAction.SearchPrevious) return;
             string? text = Reflection.UISearchBar.actualContents.GetValue(_npcSearchBar);
             if (text is null || text.Length == 0 || (_npcHistory.Count > 0 && _npcHistory[^1] == text)) return;
             _npcHistory.Add(text);
@@ -53,7 +55,7 @@ public sealed class Bestiary : SearchProvider {
         s_bestiaryDelayed = null;
     }
     private static void HookCancelSearch(On_UIBestiaryTest.orig_searchCancelButton_OnClick orig, UIBestiaryTest self, UIMouseEvent evt, UIElement listeningElement) {
-        if (Configs.QuickSearch.RightClick && Configs.QuickSearch.Value.rightClick == Configs.RightClickAction.SearchPrevious && _npcSearchBar.HasContents) _npcHistory.Add(Reflection.UISearchBar.actualContents.GetValue(_npcSearchBar));
+        if (Instance.Enabled && Configs.QuickSearch.Value.rightClick == Configs.RightClickAction.SearchPrevious && _npcSearchBar.HasContents) _npcHistory.Add(Reflection.UISearchBar.actualContents.GetValue(_npcSearchBar));
         orig(self, evt, listeningElement);
     }
 

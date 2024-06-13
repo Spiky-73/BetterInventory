@@ -65,12 +65,14 @@ public sealed class QuickSearch : ILoadable {
 
         Main.LocalPlayer.mouseInterface = true;
         foreach(SearchProvider provider in Providers) {
-            if(true && provider.Keybind.JustPressed) { // TODO SearchProvider.Enabled
+            if(provider.Enabled && provider.Keybind.JustPressed) {
                 if (Configs.QuickSearch.Value.individualKeybinds.Parent.HasFlag(Configs.SearchAction.Search) && !Main.HoverItem.IsAir) {
                     provider.Toggle(true);
                     if (Guide.forcedTooltip?.Key != $"{Localization.Keys.UI}.Unknown") provider.Search(Main.HoverItem);
+                    SoundEngine.PlaySound(SoundID.Grab);
                 } else if (Configs.QuickSearch.Value.individualKeybinds.Parent.HasFlag(Configs.SearchAction.Toggle)) {
                     provider.Toggle();
+                    SoundEngine.PlaySound(SoundID.MenuTick);
                 }
             }
         }
@@ -91,12 +93,14 @@ public sealed class QuickSearch : ILoadable {
                     if (!first) Providers[(s_taps+Providers.Count-1) % Providers.Count].Toggle(false);
                     Providers[s_taps].Toggle(true);
                     if (Guide.forcedTooltip?.Key != $"{Localization.Keys.UI}.Unknown") Providers[s_taps].Search(s_sharedItem);
+                    SoundEngine.PlaySound(SoundID.Grab);
                 } else if (Configs.QuickSearch.Value.sharedKeybind.Parent.HasFlag(Configs.SearchAction.Toggle)) {
                     if (first) Providers[s_taps].Toggle();
                     else {
                         Providers[(s_taps + Providers.Count - 1) % Providers.Count].Toggle(false);
                         Providers[s_taps].Toggle(true);
                     }
+                    SoundEngine.PlaySound(SoundID.MenuTick);
                 } else {
                     s_taps = -2;
                 }
@@ -114,6 +118,8 @@ public sealed class QuickSearch : ILoadable {
         if (before != -1) s_providers.Insert(before, provider);
         else s_providers.Add(provider);
     }
+
+    public static SearchProvider? GetProvider(string mod, string name) => s_providers.Find(p => p.Mod.Name == mod && p.Name == name);
 
     public static ModKeybind QuickSearchKb { get; private set; } = null!;
     public static ReadOnlyCollection<SearchProvider> Providers => s_providers.AsReadOnly();
