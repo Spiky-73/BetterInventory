@@ -284,12 +284,35 @@ CraftStack: {
 
 	maxAmount: {
 		Label: Max Items Per Click
-		Tooltip: The maximum amount of items crafted or bought with <left>
+		Tooltip:
+			'''
+			The maximum amount of items crafted or bought with Left Click
+			Setting this to "{$Mods.BetterInventory.Configs.MaxCraftAmount.spic.Label}" requires the mod "Spy's Infinite Consumables"
+			'''
 	}
 
 	single: {
 		Label: Single Click
 		Tooltip: Holding Left Click will only craft / buy a stack once
+	}
+
+	tooltip: {
+		Label: Tooltip
+		Tooltip: Adds a tooltip line when the action is available
+	}
+}
+
+MaxCraftAmount: {
+	Tooltip: ""
+
+	amount: {
+		Label: Amount
+		Tooltip: ""
+	}
+
+	spic: {
+		Label: Spy's Infinite Consumables Requirement
+		Tooltip: ""
 	}
 }
 
@@ -301,9 +324,9 @@ QuickMove: {
 		Tooltip: Frame interval until the current chain resets ({$Mods.BetterInventory.UI.FramesToSec})
 	}
 
-	showTooltip: {
-		Label: Show Tooltip
-		Tooltip: Displays the special slots chain in the item tooltip
+	tooltip: {
+		Label: Tooltip
+		Tooltip: Adds a tooltip line to displays the Quick Move chain
 	}
 
 	returnToSlot: {

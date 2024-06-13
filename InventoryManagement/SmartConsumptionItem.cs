@@ -45,6 +45,7 @@ public sealed class SmartConsumptionItem : GlobalItem {
 
     public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
         QuickMove.AddMoveChainLine(item, tooltips);
+        ClickOverrides.AddCraftStackLine(item, tooltips);
     }
 
     public static void SmartConsume(Player player, Item item, Func<Item?> stackPicker, int consumed = 1) {

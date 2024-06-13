@@ -51,7 +51,7 @@ public sealed class QuickMove : ILoadable {
 
     public static void AddMoveChainLine(Item _, List<TooltipLine> tooltips){
         if (!Configs.QuickMove.Enabled) return;
-        if (!s_frameHover || !Configs.QuickMove.Value.showTooltip || s_displayedChain.Count == 0) return;
+        if (!s_frameHover || !Configs.QuickMove.Value.tooltip || s_displayedChain.Count == 0) return;
         tooltips.Add(new(
             BetterInventory.Instance, "QuickMove",
             Language.GetTextValue($"{Localization.Keys.UI}.QuickMoveTooltip") + ": " + string.Join(" > ", from slots in s_displayedChain where slots is not null select slots.DisplayName)

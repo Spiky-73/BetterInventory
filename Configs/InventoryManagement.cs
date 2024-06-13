@@ -94,7 +94,7 @@ public sealed class AutoEquip {
 public sealed class QuickMove {
     [Range(0, 3600), DefaultValue(60*3)] public int chainTime = 60*3;
     [DefaultValue(true)] public bool returnToSlot = true;
-    [DefaultValue(false)] public bool showTooltip = false;
+    [DefaultValue(false)] public bool tooltip = false;
     [DefaultValue(HotkeyMode.Hotbar)] public HotkeyMode hotkeyMode = HotkeyMode.Hotbar;
     public NestedValue<HotkeyDisplayMode, DisplayedHotkeys> displayHotkeys = new(HotkeyDisplayMode.All);
 
@@ -114,8 +114,32 @@ public sealed class DisplayedHotkeys {
 public sealed class CraftStack {
     [DefaultValue(false)] public bool single = false;
     [DefaultValue(false)] public bool invertClicks = false;
-    [Range(1, 9999), DefaultValue(999)] public int maxAmount = 999;
+    public MaxCraftAmount maxAmount = new(999);
+    [DefaultValue(false)] public bool tooltip = false;
 
     public static bool Enabled => !UnloadedInventoryManagement.Value.craftStack && InventoryManagement.Instance.craftStack;
+    public static bool Tooltip => Enabled && Value.tooltip;
     public static CraftStack Value => InventoryManagement.Instance.craftStack.Value;
+}
+
+public sealed class MaxCraftAmount : MultiChoice<int> {
+    public MaxCraftAmount() : base() { }
+    public MaxCraftAmount(int value) : base(value) { }
+
+    [Choice, Range(1, 9999), DefaultValue(999)] public int amount = 999;
+    [Choice] public Text? spic { get; set; }
+
+    public override int Value {
+        get => Choice == nameof(spic) ? 0 : amount;
+        set {
+            if (value == 0) Choice = nameof(spic);
+            else {
+                Choice = nameof(amount);
+                amount = value;
+            }
+        }
+    }
+
+    public static implicit operator MaxCraftAmount(int count) => new(count);
+    public static MaxCraftAmount FromString(string s) => new(int.Parse(s));
 }

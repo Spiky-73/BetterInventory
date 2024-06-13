@@ -5,10 +5,12 @@ using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using ReLogic.Content;
 using SpikysLib;
+using SpikysLib.CrossMod;
 using SpikysLib.Extensions;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
 
@@ -30,6 +32,17 @@ public sealed class ClickOverrides : ILoadable {
 
     }
     public void Unload() { }
+
+    public static void AddCraftStackLine(Item item, List<TooltipLine> tooltips) {
+        if (!Configs.CraftStack.Tooltip || !(item.tooltipContext == ItemSlot.Context.ShopItem || (item.tooltipContext == ItemSlot.Context.CraftingMaterial && !item.IsNotSameTypePrefixAndStack(Main.recipe[Main.availableRecipe[Main.focusRecipe]].createItem)))) return;
+        tooltips.Add(new(
+            BetterInventory.Instance, "CraftStack",
+            Language.GetTextValue($"{Localization.Keys.UI}.CraftStackTooltip",
+                Lang.SupportGlyphs(Configs.CraftStack.Value.invertClicks ? "<right>" : "<left>"),
+                Language.GetTextValue($"{Localization.Keys.UI}.{(item.tooltipContext == ItemSlot.Context.ShopItem ? "Buy" : "Craft")}"),
+                GetMaxStackAmount(item)
+        )));
+    }
 
 
     private static void HookShiftLeftCustom(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
@@ -95,10 +108,11 @@ public sealed class ClickOverrides : ILoadable {
                 s_ilShopMultiplier = 1;
                 return price;
             }
-            int amount = GetMaxBuyAmount(inv[slot], price);
+            int buy = GetMaxBuyAmount(inv[slot], price);
             int available = inv[slot].buyOnce ? inv[slot].stack : inv[slot].maxStack;
-            int maxPickup = Configs.InventoryManagement.ShiftRight && Main.cursorOverride == CursorOverrideID.QuickSell ? GetMaxPickupAmount(inv[slot]) : (inv[slot].maxStack - Main.mouseItem.stack);
-            s_ilShopMultiplier = Math.Max(MathX.Min(amount, available, maxPickup, Configs.CraftStack.Value.maxAmount), 1);
+            int pickup = GetMaxPickupAmount(inv[slot]);
+            int stack = Configs.CraftStack.Value.maxAmount == 0 && SpysInfiniteConsumables.Enabled ? (int)SpysInfiniteConsumables.GetMixedRequirement(Main.LocalPlayer, inv[slot]) : Configs.CraftStack.Value.maxAmount;
+            s_ilShopMultiplier = Math.Max(MathX.Min(buy, available, pickup, stack), 1);
             return price;
         });
         cursor.EmitStloc(4);
@@ -208,9 +222,10 @@ public sealed class ClickOverrides : ILoadable {
         cursor.EmitDelegate((Recipe r) => {
             s_ilCraftMultiplier = 1;
             if (!Configs.CraftStack.Enabled || !(Configs.CraftStack.Value.invertClicks ? Main.mouseRight : Main.mouseLeft)) return r;
-            int amount = GetMaxCraftAmount(r);
-            int maxPickup = Configs.InventoryManagement.ShiftRight && Main.cursorOverride == CraftCursorID ? GetMaxPickupAmount(r.createItem) : (r.createItem.maxStack - Main.mouseItem.stack);
-            s_ilCraftMultiplier = Math.Max(MathX.Min(amount, maxPickup / r.createItem.stack, Configs.CraftStack.Value.maxAmount / r.createItem.stack), 1);
+            int craft = GetMaxCraftAmount(r);
+            int pickup = GetMaxPickupAmount(r.createItem);
+            int stack = GetMaxStackAmount(r.createItem);
+            s_ilCraftMultiplier = Math.Max(MathX.Min(craft, pickup / r.createItem.stack, Configs.CraftStack.Value.maxAmount / r.createItem.stack), 1);
             return r;
         });
         // Item crafted = r.createItem.Clone();
@@ -340,6 +355,11 @@ public sealed class ClickOverrides : ILoadable {
         // }
     }
 
+    public static int GetMaxStackAmount(Item item) {
+        if (Configs.CraftStack.Value.maxAmount != 0 || !SpysInfiniteConsumables.Enabled) return Configs.CraftStack.Value.maxAmount.amount;
+        return (int)SpysInfiniteConsumables.GetMixedRequirement(Main.LocalPlayer, item);
+    }
+
     public static int GetMaxBuyAmount(Item item, long price) {
         if (price == 0) return item.maxStack;
         else return (int)Math.Clamp(Main.LocalPlayer.CountCurrency(item.shopSpecialCurrency) / price, 1, item.maxStack - Main.mouseItem.stack);
@@ -358,12 +378,12 @@ public sealed class ClickOverrides : ILoadable {
         }
         return amount;
     }
-    public static int GetMaxPickupAmount(Item item, int max = -1) {
-        if (max == -1) max = item.maxStack;
+    public static int GetMaxPickupAmount(Item item) {
+        if (!Configs.InventoryManagement.ShiftRight || Main.cursorOverride != CraftCursorID) return item.maxStack - Main.mouseItem.stack;
         int free = GetFreeSpace(Main.LocalPlayer.inventory, item, 58);
         if (Main.LocalPlayer.InChest(out Item[]? chest)) free += GetFreeSpace(chest, item);
         if (Main.LocalPlayer.useVoidBag() && Main.LocalPlayer.chest != -5) free += GetFreeSpace(Main.LocalPlayer.bank4.item, item);
-        return Math.Min(max, free);
+        return free;
     }
     public static int GetFreeSpace(Item[] inv, Item item, params int[] ignored) {
         int free = 0;
@@ -382,6 +402,6 @@ public sealed class ClickOverrides : ILoadable {
     public const int CraftCursorID = 22;
     public static Asset<Texture2D> CursorCraft => ModContent.Request<Texture2D>($"BetterInventory/Assets/Cursor_Craft");
 
-    public static readonly int[] TransportCursors = new int[] { CursorOverrideID.TrashCan, CursorOverrideID.InventoryToChest, CursorOverrideID.ChestToInventory };
+    public static readonly int[] TransportCursors = [CursorOverrideID.TrashCan, CursorOverrideID.InventoryToChest, CursorOverrideID.ChestToInventory];
 
 }
