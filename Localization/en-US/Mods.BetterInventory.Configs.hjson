@@ -138,6 +138,11 @@ InventoryManagement: {
 			Highly recommended with "{$Mods.BetterInventory.Configs.InventoryManagement.shiftRight.Name}"
 			'''
 	}
+
+	hotbarLast: {
+		Label: Pickup To Hotbar Last
+		Tooltip: Picked up items will fill the hotbar slots last
+	}
 }
 
 SmartConsumption: {
@@ -783,6 +788,11 @@ UnloadedInventoryManagement: {
 
 	fakeItem: {
 		Label: fake Item
+		Tooltip: ""
+	}
+
+	hotbarLast: {
+		Label: hotbar Last
 		Tooltip: ""
 	}
 }

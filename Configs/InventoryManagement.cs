@@ -12,6 +12,7 @@ public sealed class InventoryManagement : ModConfig {
     public Toggle<AutoEquip> autoEquip = new(true); // TODO port settings
     
     [DefaultValue(true)] public bool favoriteInBanks;
+    [DefaultValue(true)] public bool hotbarLast;
     public Toggle<QuickMove> quickMove = new(true);
     public Toggle<CraftStack> craftStack = new(true);
 
@@ -19,6 +20,7 @@ public sealed class InventoryManagement : ModConfig {
     [DefaultValue(true)] public bool stackTrash;
 
     public static bool FavoriteInBanks => !UnloadedInventoryManagement.Value.favoriteInBanks && Instance.favoriteInBanks;
+    public static bool HotbarLast => !UnloadedInventoryManagement.Value.hotbarLast && Instance.hotbarLast;
     public static bool ShiftRight => !UnloadedInventoryManagement.Value.shiftRight && Instance.shiftRight;
     public static bool StackTrash => !UnloadedInventoryManagement.Value.stackTrash && Instance.stackTrash;
 

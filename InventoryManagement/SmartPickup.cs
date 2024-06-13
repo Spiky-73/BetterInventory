@@ -176,6 +176,17 @@ public sealed class SmartPickup : ILoadable {
         cursor.EmitRet();
         cursor.MarkLabel(skip);
     }
+    internal static void ILHotbarLast(ILContext il) {
+        ILCursor cursor = new(il);
+
+        // if (!isACoin ++[&& !<hotbarLast>] && newItem.useStyle != 0) <hotbar>
+        cursor.GotoNext(MoveType.After, i => i.MatchLdfld(Reflection.Item.useStyle));
+
+        cursor.EmitDelegate((int style) => {
+            if (Configs.InventoryManagement.HotbarLast) return ItemUseStyleID.None;
+            return style;
+        });
+    }
 
     public static Item GetItem_Inner(Player self, int plr, Item newItem, GetItemSettings settings) {
         VanillaGetItem = true;
