@@ -211,7 +211,7 @@ public sealed class SmartPickup : ILoadable {
     }
     public static Item AutoEquip(Player self, Item newItem, GetItemSettings settings) {
         foreach (ModSubInventory inv in InventoryLoader.Special.Where(i => i is not Hotbar &&  i.Accepts(newItem))) {
-            if (!Configs.AutoEquip.Value.anyItem && !inv.IsPrimaryFor(newItem)) continue;
+            if (!Configs.AutoEquip.Value.nonPrimary && !inv.IsPrimaryFor(newItem)) continue;
             newItem = inv.GetItem(self, newItem, settings);
             if (newItem.IsAir) return newItem;
         }

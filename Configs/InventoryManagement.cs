@@ -85,7 +85,7 @@ public sealed class IconDisplay : IMarkDisplay {
 }
 
 public sealed class AutoEquip {
-    [DefaultValue(false)] public bool anyItem = false;
+    [DefaultValue(false)] public bool nonPrimary = false;
 
     public static bool Enabled => !UnloadedInventoryManagement.Value.autoEquip && InventoryManagement.Instance.autoEquip;
     public static AutoEquip Value => InventoryManagement.Instance.autoEquip.Value;

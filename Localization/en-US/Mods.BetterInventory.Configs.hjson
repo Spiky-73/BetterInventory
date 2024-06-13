@@ -268,8 +268,8 @@ IconDisplay: {
 AutoEquip: {
 	Tooltip: ""
 
-	anyItem: {
-		Label: Any Item
+	nonPrimary: {
+		Label: Non Primary slots
 		Tooltip: Equipment go to any slot they can go in (includes Dyes). Armors and Accessories can go to social slots.
 	}
 }
