@@ -29,13 +29,14 @@ public sealed class Bestiary : SearchProvider {
         _npcSearchBar = Reflection.UIBestiaryTest._searchBar.GetValue(Main.BestiaryUI);
         _npcSearchBar.Parent.OnRightClick += (_, _) => {
             if (!Configs.QuickSearch.RightClick) return;
-            if (Configs.QuickSearch.Value.rightClick == Configs.RightClickAction.SearchPrevious && _npcHistory.Count != 0) { // BUG nevers ending cycle undo
+            int count = 0;
+            if (Configs.QuickSearch.Value.rightClick == Configs.RightClickAction.SearchPrevious && _npcHistory.Count != 0) {
                 string text = _npcHistory[^1];
                 _npcHistory.RemoveAt(_npcHistory.Count - 1);
-                int count = _npcHistory.Count;
+                count = _npcHistory.Count;
                 Search(text);
-                if (count != _npcHistory.Count) _npcHistory.RemoveAt(_npcHistory.Count - 1);
             } else if (_npcSearchBar.HasContents) Search(null!);
+            if (_npcHistory.Count > count) _npcHistory.RemoveAt(_npcHistory.Count - 1);
         };
         _npcSearchBar.OnStartTakingInput += () => {
             if (!Configs.QuickSearch.RightClick || Configs.QuickSearch.Value.rightClick != Configs.RightClickAction.SearchPrevious) return;
