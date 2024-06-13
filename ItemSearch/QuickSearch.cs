@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using SpikysLib.Extensions;
 using Terraria;
@@ -87,24 +88,29 @@ public sealed class QuickSearch : ILoadable {
                 bool first = s_taps == -1;
                 if (first) {
                     s_sharedItem = Main.HoverItem.Clone();
-                    s_taps = Math.Max(Providers.FindIndex(p => p.Visible), 0);
+                    s_enabledProviders = Providers.Where(p => p.Enabled).ToList();
+                    s_taps = Math.Max(s_enabledProviders.FindIndex(p => p.Visible), 0);
                 }
+                if (s_enabledProviders.Count == 0) return;
+
+                int last = s_taps;
+                if (!first) s_taps = (s_taps + 1) % s_enabledProviders.Count;
+
                 if (Configs.QuickSearch.Value.sharedKeybind.Parent.HasFlag(Configs.SearchAction.Search) && !s_sharedItem.IsAir) {
-                    if (!first) Providers[(s_taps+Providers.Count-1) % Providers.Count].Toggle(false);
-                    Providers[s_taps].Toggle(true);
-                    if (Guide.forcedTooltip?.Key != $"{Localization.Keys.UI}.Unknown") Providers[s_taps].Search(s_sharedItem);
+                    if (!first) s_enabledProviders[last].Toggle(false);
+                    s_enabledProviders[s_taps].Toggle(true);
+                    if (Guide.forcedTooltip?.Key != $"{Localization.Keys.UI}.Unknown") s_enabledProviders[s_taps].Search(s_sharedItem);
                     SoundEngine.PlaySound(SoundID.Grab);
                 } else if (Configs.QuickSearch.Value.sharedKeybind.Parent.HasFlag(Configs.SearchAction.Toggle)) {
-                    if (first) Providers[s_taps].Toggle();
+                    if (first) s_enabledProviders[s_taps].Toggle();
                     else {
-                        Providers[(s_taps + Providers.Count - 1) % Providers.Count].Toggle(false);
-                        Providers[s_taps].Toggle(true);
+                        s_enabledProviders[last].Toggle(false);
+                        s_enabledProviders[s_taps].Toggle(true);
                     }
                     SoundEngine.PlaySound(SoundID.MenuTick);
                 } else {
-                    s_taps = -2;
+                    s_taps = -1;
                 }
-                s_taps = (s_taps + 1) % Providers.Count;
             } else s_taps = -1;
             s_timer = 0;
         }
@@ -131,4 +137,5 @@ public sealed class QuickSearch : ILoadable {
 
     private static int s_timer = 0, s_taps = 0;
     private static Item s_sharedItem = new();
+    private static List<SearchProvider> s_enabledProviders = new();
 }

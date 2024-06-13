@@ -4,6 +4,7 @@ using System.ComponentModel;
 using BetterInventory.ItemSearch;
 using SpikysLib.Configs;
 using SpikysLib.Configs.UI;
+using Terraria;
 using Terraria.ModLoader.Config;
 
 namespace BetterInventory.Configs;
@@ -17,7 +18,9 @@ public sealed class ItemSearch : ModConfig {
     
     public override ConfigScope Mode => ConfigScope.ClientSide;
 
-    public override void OnChanged() => Default.SearchProviders.RecipeList.UpdateGuide();
+    public override void OnChanged() {
+        if (!Main.gameMenu) Default.SearchProviders.RecipeList.UpdateGuide();
+    }
 }
 
 public enum UnknownDisplay { Off, Hidden, Unknown, Known }

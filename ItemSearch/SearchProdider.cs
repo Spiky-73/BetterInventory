@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -10,7 +11,7 @@ public abstract class SearchProvider : ModType, ILocalizedModType {
         QuickSearch.Register(this);
     }
 
-    public virtual bool Enabled => Configs.QuickSearch.Enabled && Configs.QuickSearch.Value.providers[new(this)];
+    public virtual bool Enabled => Configs.QuickSearch.Enabled && Configs.QuickSearch.Value.providers.GetValueOrDefault(new(this), true);
 
     public ModKeybind Keybind { get; protected set; } = null!;
     public abstract bool Visible { get; }
