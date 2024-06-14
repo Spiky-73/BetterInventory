@@ -8,11 +8,13 @@ namespace BetterInventory.Configs;
 
 public sealed class InventoryManagement : ModConfig {
     public Toggle<SmartConsumption> smartConsumption = new(true);
+    
     public Toggle<SmartPickup> smartPickup = new(true); // TODO port settings
     public Toggle<AutoEquip> autoEquip = new(true); // TODO port settings
-    
-    [DefaultValue(true)] public bool favoriteInBanks;
+    public Toggle<AutoUpgrade> autoUpgrade = new(true);
     [DefaultValue(true)] public bool hotbarLast;
+        
+    [DefaultValue(true)] public bool favoriteInBanks;
     public Toggle<QuickMove> quickMove = new(true);
     public Toggle<CraftStack> craftStack = new(true);
 
@@ -91,6 +93,12 @@ public sealed class AutoEquip {
 
     public static bool Enabled => !UnloadedInventoryManagement.Value.autoEquip && InventoryManagement.Instance.autoEquip;
     public static AutoEquip Value => InventoryManagement.Instance.autoEquip.Value;
+}
+public sealed class AutoUpgrade {
+    [DefaultValue(false)] public bool favoritedOnly = false;
+
+    public static bool Enabled => !UnloadedInventoryManagement.Value.autoUpgrade && InventoryManagement.Instance.autoUpgrade;
+    public static AutoUpgrade Value => InventoryManagement.Instance.autoUpgrade.Value;
 }
 
 public sealed class QuickMove {

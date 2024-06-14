@@ -72,22 +72,17 @@ public sealed class SmartPickup : ILoadable {
 
         // ++ item = <smartPickup>
         cursor.EmitLdarg0();
-        cursor.EmitLdarg2();
+        cursor.EmitLdloc1();
         cursor.EmitLdarg3();
-        cursor.EmitDelegate((Player self, Item newItem, GetItemSettings settings) => {
-            if (VanillaGetItem || !Configs.SmartPickup.Enabled) return newItem;
-            else return SmartGetItem(self, newItem, settings);
+        cursor.EmitDelegate((Player self, Item item, GetItemSettings settings) => {
+            if (VanillaGetItem || !Configs.SmartPickup.Enabled) return item;
+            else return SmartGetItem(self, item, settings);
         });
         cursor.EmitDup();
-        cursor.EmitStarg(2);
+        cursor.EmitStloc1();
 
         // ++if (newItem.IsAir) return new()
-        cursor.EmitDelegate((Item item) => item.IsAir);
-        ILLabel skip = cursor.DefineLabel();
-        cursor.EmitBrfalse(skip);
-        cursor.EmitDelegate(() => new Item());
-        cursor.EmitRet();
-        cursor.MarkLabel(skip);
+        EmitRetAir(cursor);
     }
     internal static void ILDrawFakeItem(ILContext il) {
         ILCursor cursor = new(il);
@@ -148,7 +143,7 @@ public sealed class SmartPickup : ILoadable {
         return true;
     }
 
-    internal static void ILAutoEquip(ILContext il) {
+    internal static void ILAutoEquipUprade(ILContext il) {
         ILCursor cursor = new(il);
 
         // if (isACoin) ...
@@ -157,18 +152,25 @@ public sealed class SmartPickup : ILoadable {
         cursor.GotoNext(i => i.SaferMatchCall(Reflection.Player.GetItem_FillEmptyInventorySlot));
         cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdloc0());
 
-        // ++<autoEquip>
+        // ++<autoEquip & autoUpgrade>
         cursor.EmitLdarg0();
-        cursor.EmitLdarg2();
+        cursor.EmitLdloc1();
         cursor.EmitLdarg3();
-        cursor.EmitDelegate((Player self, Item newItem, GetItemSettings settings) => {
-            if (VanillaGetItem || settings.NoText || !Configs.AutoEquip.Enabled) return newItem;
-            return AutoEquip(self, newItem, settings);
+        cursor.EmitDelegate((Player self, Item item, GetItemSettings settings) => {
+            if (VanillaGetItem || settings.NoText) return item;
+
+            if (Configs.AutoEquip.Enabled) item = AutoEquip(self, item, settings);
+            if (Configs.AutoUpgrade.Enabled) item = AutoUpgrade(self, item, settings);
+            return item;
         });
         cursor.EmitDup();
-        cursor.EmitStarg(2);
+        cursor.EmitStloc1();
 
         // ++if (newItem.IsAir) return new()
+        EmitRetAir(cursor);
+    }
+
+    private static void EmitRetAir(ILCursor cursor) {
         cursor.EmitDelegate((Item item) => item.IsAir);
         ILLabel skip = cursor.DefineLabel();
         cursor.EmitBrfalse(skip);
@@ -176,6 +178,7 @@ public sealed class SmartPickup : ILoadable {
         cursor.EmitRet();
         cursor.MarkLabel(skip);
     }
+
     internal static void ILHotbarLast(ILContext il) {
         ILCursor cursor = new(il);
 
@@ -220,13 +223,45 @@ public sealed class SmartPickup : ILoadable {
         }
         return item;
     }
-    public static Item AutoEquip(Player self, Item newItem, GetItemSettings settings) {
-        foreach (ModSubInventory inv in InventoryLoader.Special.Where(i => i is not Hotbar &&  i.Accepts(newItem))) {
-            if (!Configs.AutoEquip.Value.nonPrimary && !inv.IsPrimaryFor(newItem)) continue;
-            newItem = inv.GetItem(self, newItem, settings);
-            if (newItem.IsAir) return newItem;
+    public static Item AutoEquip(Player player, Item item, GetItemSettings settings) {
+        foreach (ModSubInventory inv in InventoryLoader.Special.Where(i => i is not Hotbar &&  i.Accepts(item))) {
+            if (!Configs.AutoEquip.Value.nonPrimary && !inv.IsPrimaryFor(item)) continue;
+            item = inv.GetItem(player, item, settings);
+            if (item.IsAir) return item;
         }
-        return newItem;
+        return item;
+    }
+    public static Item AutoUpgrade(Player player, Item item, GetItemSettings settings) {
+        item = UpgradeTools(player, item);
+        item = UpgradeRecovery(player, item);
+        item = UpgradeHook(player, item);
+        return item;
+    }
+
+    private static Item UpgradeTools(Player player, Item item) {
+        static bool IsTool(Item item) => item.pick > 0 || item.axe > 0 || item.hammer > 0;
+        static bool AreComparable(Item a, Item b) => a.pick * b.pick + a.axe * b.axe + a.hammer * b.hammer > 0;
+        static int CompareTools(Item a, Item b) => a.pick.CompareTo(b.pick) + a.axe.CompareTo(b.axe) + a.hammer.CompareTo(b.hammer);
+
+        if (!IsTool(item)) return item;
+        int rep = -1;
+        for (int i = 0; i < player.inventory.Length; i++) {
+            if (!(!Configs.AutoUpgrade.Value.favoritedOnly || player.inventory[i].favorited) || !IsTool(player.inventory[i]) || !AreComparable(player.inventory[i], item)) continue;
+            if ((rep == -1 || CompareTools(player.inventory[i], player.inventory[rep]) > 0) && CompareTools(item, player.inventory[i]) > 0) rep = i;
+        }
+        if (rep != -1) {
+            (player.inventory[rep], item) = (item, player.inventory[rep]);
+            (player.inventory[rep].favorited, item.favorited) = (item.favorited, player.inventory[rep].favorited);
+
+        }
+
+        return item;
+    }
+    private static Item UpgradeRecovery(Player player, Item item) {
+        return item;
+    }
+    private static Item UpgradeHook(Player player, Item item) {
+        return item;
     }
 
     public static bool IsMarked(int type) => s_marks.TryGetValue(type, out var marks) && marks.Count > 0;

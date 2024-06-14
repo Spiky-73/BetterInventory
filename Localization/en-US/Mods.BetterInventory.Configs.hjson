@@ -143,6 +143,11 @@ InventoryManagement: {
 		Label: Pickup To Hotbar Last
 		Tooltip: Picked up items will fill the hotbar slots last
 	}
+
+	autoUpgrade: {
+		Label: auto Upgrade
+		Tooltip: ""
+	}
 }
 
 SmartConsumption: {
@@ -276,6 +281,15 @@ AutoEquip: {
 	nonPrimary: {
 		Label: Non Primary slots
 		Tooltip: Equipment go to any slot they can go in (includes Dyes). Armors and Accessories can go to social slots.
+	}
+}
+
+AutoUpgrade: {
+	Tooltip: ""
+
+	favoritedOnly: {
+		Label: Favorited Items Only
+		Tooltip: Only upgrades favorited items
 	}
 }
 
@@ -723,6 +737,11 @@ UnloadedInventoryManagement: {
 
 	autoEquip: {
 		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.autoEquip.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	autoUpgrade: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.autoUpgrade.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 

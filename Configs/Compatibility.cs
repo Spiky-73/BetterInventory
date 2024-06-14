@@ -31,6 +31,7 @@ public sealed class Compatibility : ModConfig {
             QuickMove.Value.displayHotkeys.Parent = HotkeyDisplayMode.Off;
             QuickMove.Value.displayHotkeys.Value.highlightIntensity = 0;
             InventoryManagement.Instance.autoEquip.Parent = false;
+            InventoryManagement.Instance.autoUpgrade.Parent = false;
             InventoryManagement.Instance.favoriteInBanks = false;
             InventoryManagement.Instance.hotbarLast = false;
             InventoryManagement.Instance.shiftRight = false;
@@ -72,6 +73,7 @@ public sealed class UnloadedCrafting {
 
 public sealed class UnloadedInventoryManagement {
     public bool autoEquip = false;
+    public bool autoUpgrade = false;
     public bool favoriteInBanks = false;
     public bool hotbarLast = false;
     public bool shiftRight = false;

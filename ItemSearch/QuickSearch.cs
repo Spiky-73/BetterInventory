@@ -51,7 +51,7 @@ public sealed class QuickSearch : ILoadable {
             orig(self, time);
             (Main.mouseLeft, Main.mouseRight) = (left, right);
         }
-        Guide.forcedTooltip = null; // ? move to guide file
+        Guide.forcedTooltip = null;
     }
 
     public static void ProcessTriggers() {
