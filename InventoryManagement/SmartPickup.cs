@@ -23,7 +23,10 @@ public sealed class SmartPickup : ILoadable {
         On_ItemSlot.RightClick_ItemArray_int_int += HookRightSaveType;
         On_Player.DropItems += HookMarkItemsOnDeath;
     }
-    public void Unload() { }
+    public void Unload() {
+        foreach (ModPickupUpgrader up in s_upgraders) ModConfigExtensions.SetInstance(up, true);
+        s_upgraders.Clear();
+    }
 
     private static void HookLeftSaveType(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) => UpdateMark((inv, context, slot) => orig(inv, context, slot), inv, context, slot, Main.mouseLeft && Main.mouseLeftRelease);
     private static void HookRightSaveType(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) => UpdateMark((inv, context, slot) => orig(inv, context, slot), inv, context, slot, Main.mouseRight);
@@ -261,51 +264,9 @@ public sealed class SmartPickup : ILoadable {
         return item;
     }
     public static Item AutoUpgrade(Player player, Item item, GetItemSettings settings) {
-        item = UpgradeTools(player, item);
-        item = UpgradeRecovery(player, item);
-        item = UpgradeHook(player, item);
-        return item;
-    }
-
-    private static Item UpgradeTools(Player player, Item item) {
-        static bool IsTool(Item item) => item.pick > 0 || item.axe > 0 || item.hammer > 0;
-        static bool AreComparable(Item a, Item b) => a.pick * b.pick + a.axe * b.axe + a.hammer * b.hammer > 0;
-        static int CompareTools(Item a, Item b) => a.pick.CompareTo(b.pick) + a.axe.CompareTo(b.axe) + a.hammer.CompareTo(b.hammer);
-
-        if (!IsTool(item)) return item;
-        int rep = -1;
-        for (int i = 0; i < player.inventory.Length; i++) {
-            if (!(!Configs.AutoUpgrade.Value.favoritedOnly || player.inventory[i].favorited) || !IsTool(player.inventory[i]) || !AreComparable(player.inventory[i], item)) continue;
-            if ((rep == -1 || CompareTools(player.inventory[i], player.inventory[rep]) > 0) && CompareTools(item, player.inventory[i]) > 0) rep = i;
+        foreach (var upgrader in s_upgraders) {
+            if (upgrader.AppliesTo(item)) item = upgrader.AttemptUpgrade(player, item);
         }
-        if (rep != -1) {
-            (player.inventory[rep], item) = (item, player.inventory[rep]);
-            (player.inventory[rep].favorited, item.favorited) = (item.favorited, player.inventory[rep].favorited);
-
-        }
-
-        return item;
-    }
-    private static Item UpgradeRecovery(Player player, Item item) {
-        static bool IsRecovery(Item item) => item.healLife > 0 || item.healMana > 0;
-        static bool AreComparable(Item a, Item b) => a.healLife * b.healLife + a.healMana * b.healMana > 0;
-        static int CompareRecovery(Item a, Item b) => a.healLife.CompareTo(b.healLife) + a.healLife.CompareTo(b.healLife);
-
-        if (!IsRecovery(item)) return item;
-        int rep = -1;
-        for (int i = 0; i < player.inventory.Length; i++) {
-            if (!(!Configs.AutoUpgrade.Value.favoritedOnly || player.inventory[i].favorited) || !IsRecovery(player.inventory[i]) || !AreComparable(player.inventory[i], item)) continue;
-            if ((rep == -1 || CompareRecovery(player.inventory[i], player.inventory[rep]) > 0) && CompareRecovery(item, player.inventory[i]) > 0) rep = i;
-        }
-        if (rep != -1) {
-            (player.inventory[rep], item) = (item, player.inventory[rep]);
-            (player.inventory[rep].favorited, item.favorited) = (item.favorited, player.inventory[rep].favorited);
-
-        }
-
-        return item;
-    }
-    private static Item UpgradeHook(Player player, Item item) {
         return item;
     }
 
@@ -359,4 +320,11 @@ public sealed class SmartPickup : ILoadable {
 
     private static readonly Dictionary<Slot, Item> s_marksData = new();
     private static readonly Dictionary<int, List<Slot>> s_marks = new();
+
+    internal static void Register(ModPickupUpgrader upgrader) {
+        ModConfigExtensions.SetInstance(upgrader);
+        s_upgraders.Add(upgrader);
+    }
+
+    private static readonly List<ModPickupUpgrader> s_upgraders = [];
 }
