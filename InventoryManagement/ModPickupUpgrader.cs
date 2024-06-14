@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -9,6 +10,9 @@ public abstract class ModPickupUpgrader : ModType, ILocalizedModType {
         ModTypeLookup<ModPickupUpgrader>.Register(this);
         SmartPickup.Register(this);
     }
+
+    public virtual bool Enabled => Configs.QuickSearch.Enabled && Configs.AutoUpgrade.Value.upgraders.GetValueOrDefault(new(this), true);
+
     public abstract bool AppliesTo(Item item);
     public abstract Item AttemptUpgrade(Player player, Item item);
 

@@ -3,6 +3,9 @@ using Terraria.ModLoader.Config;
 using Terraria.UI;
 using SpikysLib.Configs;
 using Microsoft.Xna.Framework;
+using SpikysLib.Configs.UI;
+using System.Collections.Generic;
+using BetterInventory.InventoryManagement;
 
 namespace BetterInventory.Configs;
 
@@ -96,6 +99,16 @@ public sealed class AutoEquip {
 }
 public sealed class AutoUpgrade {
     [DefaultValue(false)] public bool favoritedOnly = false;
+    [CustomModConfigItem(typeof(DictionaryValuesElement))]
+    public Dictionary<ModPickupUpgraderDefinition, bool> upgraders {
+        get => _upgraders;
+        set {
+            foreach (ModPickupUpgrader upgrader in global::BetterInventory.InventoryManagement.SmartPickup.Upgraders) value.TryAdd(new(upgrader), true);
+            _upgraders = value;
+        }
+
+    }
+    private Dictionary<ModPickupUpgraderDefinition, bool> _upgraders = [];
 
     public static bool Enabled => !UnloadedInventoryManagement.Value.autoUpgrade && InventoryManagement.Instance.autoUpgrade;
     public static AutoUpgrade Value => InventoryManagement.Instance.autoUpgrade.Value;

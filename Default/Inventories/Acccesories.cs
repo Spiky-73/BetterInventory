@@ -9,7 +9,7 @@ using ContextID = Terraria.UI.ItemSlot.Context;
 
 namespace BetterInventory.Default.Inventories;
 
-public abstract class AAccessories<T> : ModSubInventory<T> where T : AAccessories<T> {
+public abstract class AAccessories : ModSubInventory {
     public sealed override bool FitsSlot(Player player, Item item, int slot, out IList<Slot> itemsToMove) {
         List<int> vanillaSlots = UnlockedVanillaSlots(player);
         List<int> moddedSlots = UnlockedModdedSlots(player);
@@ -56,7 +56,8 @@ public abstract class AAccessories<T> : ModSubInventory<T> where T : AAccessorie
     }
     public static Item[] ModdedAccessories(Player player) => Reflection.ModAccessorySlotPlayer.exAccessorySlot.GetValue(player.GetModPlayer<ModAccessorySlotPlayer>());
 }
-public sealed class Accessories : AAccessories<Accessories> {
+public sealed class Accessories : AAccessories {
+    public static Accessories Instance = null!;
     public override bool Accepts(Item item) => item.accessory && !item.vanity;
     public override bool IsPrimaryFor(Item item) => true;
     public override int Context => ContextID.EquipAccessory;
@@ -65,7 +66,9 @@ public sealed class Accessories : AAccessories<Accessories> {
         new ListIndices<Item>(ModdedAccessories(player), UnlockedModdedSlots(player))
     );
 }
-public sealed class VanityAccessories : AAccessories<VanityAccessories> {
+public sealed class VanityAccessories : AAccessories {
+    public static VanityAccessories Instance = null!;
+
     public override bool Accepts(Item item) => item.accessory;
     public override bool IsPrimaryFor(Item item) => item.vanity && item.FitsAccessoryVanitySlot;
     public override int Context => ContextID.EquipAccessoryVanity;

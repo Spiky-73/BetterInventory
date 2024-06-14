@@ -17,10 +17,6 @@ public readonly record struct Slot(ModSubInventory Inventory, int Index) {
     public void OnSlotChange(Player player) => Inventory.OnSlotChange(player, Index);
 }
 
-public abstract class ModSubInventory<TInventory> : ModSubInventory where TInventory : ModSubInventory<TInventory> {
-    public static TInventory Instance = null!;
-}
-
 public abstract class ModSubInventory : ModType, ILocalizedModType {
     public bool CanBePrimary { get; internal set; }
 

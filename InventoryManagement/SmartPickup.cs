@@ -13,6 +13,7 @@ using System.Diagnostics.CodeAnalysis;
 using Terraria.UI.Gamepad;
 using System.Linq;
 using BetterInventory.Default.Inventories;
+using System.Collections.ObjectModel;
 
 namespace BetterInventory.InventoryManagement;
 
@@ -265,7 +266,7 @@ public sealed class SmartPickup : ILoadable {
     }
     public static Item AutoUpgrade(Player player, Item item, GetItemSettings settings) {
         foreach (var upgrader in s_upgraders) {
-            if (upgrader.AppliesTo(item)) item = upgrader.AttemptUpgrade(player, item);
+            if (upgrader.Enabled && upgrader.AppliesTo(item)) item = upgrader.AttemptUpgrade(player, item);
         }
         return item;
     }
@@ -326,5 +327,7 @@ public sealed class SmartPickup : ILoadable {
         s_upgraders.Add(upgrader);
     }
 
+    public static ModPickupUpgrader? GetPickupUpgrader(string mod, string name) => s_upgraders.Find(p => p.Mod.Name == mod && p.Name == name);
+    public static ReadOnlyCollection<ModPickupUpgrader> Upgraders => s_upgraders.AsReadOnly();
     private static readonly List<ModPickupUpgrader> s_upgraders = [];
 }
