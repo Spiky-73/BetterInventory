@@ -143,7 +143,7 @@ public sealed class SmartPickup : ILoadable {
         return true;
     }
 
-    internal static void ILAutoEquipUprade(ILContext il) {
+    internal static void ILAutoEquip(ILContext il) {
         ILCursor cursor = new(il);
 
         // if (isACoin) ...
@@ -157,17 +157,46 @@ public sealed class SmartPickup : ILoadable {
         cursor.EmitLdloc1();
         cursor.EmitLdarg3();
         cursor.EmitDelegate((Player self, Item item, GetItemSettings settings) => {
-            if (VanillaGetItem || settings.NoText) return item;
-
-            if (Configs.AutoEquip.Enabled) item = AutoEquip(self, item, settings);
-            if (Configs.AutoUpgrade.Enabled) item = AutoUpgrade(self, item, settings);
-            return item;
+            if (VanillaGetItem || settings.NoText || !Configs.AutoEquip.Enabled) return item;
+            return item = AutoEquip(self, item, settings);
         });
         cursor.EmitDup();
         cursor.EmitStloc1();
 
         // ++if (newItem.IsAir) return new()
         EmitRetAir(cursor);
+    }
+    internal static void ILAutoUprade(ILContext il) {
+        ILCursor cursor = new(il);
+
+        // if (isACoin) ...
+        // if (item.FitsAmmoSlot()) ...
+        // for(...) ...
+        cursor.GotoNext(i => i.SaferMatchCall(Reflection.Player.GetItem_FillEmptyInventorySlot));
+        cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdloc0());
+
+        // ++<autoEquip & autoUpgrade>
+        cursor.EmitLdarg0();
+        cursor.EmitLdloc1();
+        cursor.EmitLdarg3();
+        cursor.EmitDelegate((Player self, Item item, GetItemSettings settings) => {
+            if (VanillaGetItem || settings.NoText || !Configs.AutoUpgrade.Enabled) return item;
+            return AutoUpgrade(self, item, settings);
+        });
+        cursor.EmitDup();
+        cursor.EmitStloc1();
+
+        // ++if (newItem.IsAir) return new()
+        EmitRetAir(cursor);
+    }
+    internal static void ILFixNewItem(ILContext il) {
+        ILCursor cursor = new(il);
+        cursor.GotoNext(MoveType.After, i => i.MatchStloc1());
+        while(cursor.TryGotoNext(MoveType.Before, i => i.MatchLdarg2() && i.Next.MatchLdfld(out _))){
+            cursor.Remove();
+            cursor.GotoNext(MoveType.AfterLabel);
+            cursor.EmitLdloc1();
+        }
     }
 
     private static void EmitRetAir(ILCursor cursor) {
@@ -258,6 +287,22 @@ public sealed class SmartPickup : ILoadable {
         return item;
     }
     private static Item UpgradeRecovery(Player player, Item item) {
+        static bool IsRecovery(Item item) => item.healLife > 0 || item.healMana > 0;
+        static bool AreComparable(Item a, Item b) => a.healLife * b.healLife + a.healMana * b.healMana > 0;
+        static int CompareRecovery(Item a, Item b) => a.healLife.CompareTo(b.healLife) + a.healLife.CompareTo(b.healLife);
+
+        if (!IsRecovery(item)) return item;
+        int rep = -1;
+        for (int i = 0; i < player.inventory.Length; i++) {
+            if (!(!Configs.AutoUpgrade.Value.favoritedOnly || player.inventory[i].favorited) || !IsRecovery(player.inventory[i]) || !AreComparable(player.inventory[i], item)) continue;
+            if ((rep == -1 || CompareRecovery(player.inventory[i], player.inventory[rep]) > 0) && CompareRecovery(item, player.inventory[i]) > 0) rep = i;
+        }
+        if (rep != -1) {
+            (player.inventory[rep], item) = (item, player.inventory[rep]);
+            (player.inventory[rep].favorited, item.favorited) = (item.favorited, player.inventory[rep].favorited);
+
+        }
+
         return item;
     }
     private static Item UpgradeHook(Player player, Item item) {

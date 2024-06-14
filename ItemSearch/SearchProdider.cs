@@ -5,7 +5,7 @@ using Terraria.ModLoader;
 
 namespace BetterInventory.ItemSearch;
 
-public abstract class SearchProvider : ModType, ILocalizedModType {
+public abstract class SearchProvider : ModType, ILocalizedModType { // TODO rename
     protected sealed override void Register() {
         ModTypeLookup<SearchProvider>.Register(this);
         QuickSearch.Register(this);

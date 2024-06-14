@@ -46,7 +46,9 @@ public class Hooks : ILoadable {
 
     private void ILGetItem(ILContext il) {
         if (!ApplyIL(il, SmartPickup.ILSmartPickup, Configs.SmartPickup.Enabled)) Configs.UnloadedInventoryManagement.Value.smartPickup = true;
-        if (!ApplyIL(il, SmartPickup.ILAutoEquipUprade, Configs.AutoEquip.Enabled || Configs.AutoUpgrade.Enabled)) Configs.UnloadedInventoryManagement.Value.autoEquip = Configs.UnloadedInventoryManagement.Value.autoUpgrade = true;
+        if (!ApplyIL(il, SmartPickup.ILAutoEquip, Configs.AutoEquip.Enabled)) Configs.UnloadedInventoryManagement.Value.autoEquip = true;
+        if (!ApplyIL(il, SmartPickup.ILAutoUprade, Configs.AutoUpgrade.Enabled)) Configs.UnloadedInventoryManagement.Value.autoUpgrade = true;
+        ApplyIL(il, SmartPickup.ILFixNewItem, Configs.SmartPickup.Enabled || Configs.AutoEquip.Enabled || Configs.AutoUpgrade.Enabled); // Does not break the features if it fails 
         if (!ApplyIL(il, SmartPickup.ILHotbarLast, Configs.InventoryManagement.HotbarLast)) Configs.UnloadedInventoryManagement.Value.hotbarLast = true;
     }
     private void ILPickAndConsumeBait(ILContext il){
