@@ -70,8 +70,8 @@ RecipeFilters: {
 		Tooltip: Hides filter with no recipes
 	}
 
-	width: {
-		Label: Width
+	filtersPerLine: {
+		Label: Filters Per Line
 		Tooltip: The number of filters per line
 	}
 }
@@ -79,7 +79,7 @@ RecipeFilters: {
 CraftOnList: {
 	Tooltip: ""
 
-	focusRecipe: {
+	focusHovered: {
 		Label: Focus Hovered Recipe
 		Tooltip: Automatically selects the hovered recipe
 	}
@@ -94,8 +94,8 @@ InventoryManagement: {
 	}
 
 	smartPickup: {
-		Label: smart Pickup
-		Tooltip: ""
+		Label: "[i:4131] Smart Item Pickup"
+		Tooltip: Modifies where items go in your inventory when picked up
 	}
 
 	quickMove: {
@@ -104,8 +104,14 @@ InventoryManagement: {
 			'''
 			Quickly move items between special slots in the inventory
 			Hover over an item in your inventory or equipment and press a hotbar key to move it to this slot
-			Press the same key to move to the next special slots in the cycle
+			Press the same key multiple times to move to the next slots in the chain
 			'''
+	}
+
+	craftStack: {
+		Name: Craft Stack
+		Label: "[i:5075] {$Mods.BetterInventory.Configs.InventoryManagement.craftStack.Name}"
+		Tooltip: Left Click to craft or buy items in stacks
 	}
 
 	favoriteInBanks: {
@@ -113,10 +119,6 @@ InventoryManagement: {
 		Tooltip: Favorite items in the Piggy Bank, Safe, ...
 	}
 
-	craftStack: {
-		Label: "[i:5075] Craft Stack"
-		Tooltip: Left Click to craft or buy items in stacks
-	}
 
 	shiftRight: {
 		Name: Shift Right Click
@@ -164,7 +166,7 @@ SmartConsumption: {
 	}
 
 	mouse: {
-		Label: Pick Mouse Item
+		Label: Consume Mouse Item
 		Tooltip: Includes the mouse item when searching for the item to consume
 	}
 }
@@ -173,17 +175,27 @@ SmartPickup: {
 	Tooltip: ""
 
 	previousSlot: {
-		Label: Previous Slot
-		Tooltip: Items go their previous slot in your inventory when picked up
+		Label: Return To Previous Slot
+		Tooltip:
+			'''
+			Items go their previous slot in your inventory when picked up
+			{$Mods.BetterInventory.Configs.ItemPickupLevel.ImportantItems.Label}: Applies to Favorited and Equiped items
+			{$Mods.BetterInventory.Configs.ItemPickupLevel.AllItems.Label}: Applies to All items
+			'''
 	}
 
 	autoEquip: {
 		Label: Auto Equip
-		Tooltip: Automatically equips items such as Armors, Accessories or Equipment
+		Tooltip:
+			'''
+			Automatically equips items such as Armors, Accessories or Equipment
+			{$Mods.BetterInventory.Configs.AutoEquipLevel.PrimarySlots.Label}: Equipment go to their default slots if available
+			{$Mods.BetterInventory.Configs.AutoEquipLevel.AnySlot.Label}: Equipment go to any slot they can go in (includes Dyes). Armors and Accessories can go to social slots.
+			'''
 	}
 
-	autoUpgrade: {
-		Label: Auto Upgrade
+	upgradeItems: {
+		Label: Upgrade Items
 		Tooltip: Items go to the slot of items of the same kind if they are better
 	}
 
@@ -191,15 +203,32 @@ SmartPickup: {
 		Label: Hotbar Last
 		Tooltip: Picked up items will fill the hotbar slots last
 	}
+	fixSlot: {
+		Label: Fix Unexpected Slot
+		Tooltip: Fixes some cases where the item does not go to the expected slot
+	}
 }
 
+ItemPickupLevel: {
+	Tooltip: ""
+	None.Label: Off
+	ImportantItems.Label: Favorited and Equiped Items
+	AllItems.Label: All Items
+}
+
+AutoEquipLevel: {
+	Tooltip: ""
+	None.Label: Off
+	PrimarySlots.Label: Primary Slots
+	AnySlot.Label: Any Slot
+}
 
 PreviousSlot: {
 	Tooltip: ""
 
 	mouse: {
 		Label: Mouse Items
-		Tooltip: Applies to items moved to the mouse
+		Tooltip: Applies to items moved with the mouse
 	}
 
 	mediumCore: {
@@ -207,29 +236,22 @@ PreviousSlot: {
 		Tooltip: Applies to items dropped on death
 	}
 
-	overrideMarks: {
-		Label: Override Marks
+	overridePrevious: {
+		Label: Override Previous Slots
 		Tooltip:
 			'''
-			Allows marks to be overriden by other marks
-			This happens for instance when the items you pick up cover marks and are moved with the mouse
+			Allows an item's previous slot to be overriden by another item
+			This happens for instance when the items you pick up cover a previously occupied slot and are moved with the mouse
 			'''
 	}
 
-	displayMarks: {
-		Label: Display Marks
-		Tooltip: Displays the item marked to a slot inside it
+	displayPrevious: {
+		Label: Display Previous Slots
+		Tooltip: Displays the previous slots of items
 	}
 }
 
-ItemPickupLevel: {
-	Tooltip: ""
-	None.Label: None
-	ImportantItems.Label: Favorited and Equiped Items
-	AllItems.Label: All Items
-}
-
-MarksDisplay: {
+PreviousDisplay: {
 	Tooltip: ""
 
 	fakeItem: {
@@ -285,20 +307,8 @@ IconDisplay: {
 	}
 }
 
-AutoEquipLevel: {
+UpgradeItems: {
 	Tooltip: ""
-	None.Label: None
-	PrimarySlots.Label: Primary Slots
-	AnySlot.Label: Any Slot
-}
-
-AutoUpgrade: {
-	Tooltip: ""
-
-	favoritedOnly: {
-		Label: Favorited Items Only
-		Tooltip: Only upgrades favorited items
-	}
 
 	upgraders: {
 		Label: Upgraders
@@ -311,65 +321,8 @@ AutoUpgrade: {
 	}
 }
 
-CraftStack: {
-	Tooltip: ""
-
-	invertClicks: {
-		Label: Invert Clicks
-		Tooltip: Invert the behavior of the left and right clicks when crafting or buying items
-	}
-
-	maxAmount: {
-		Label: Max Items Per Click
-		Tooltip:
-			'''
-			The maximum amount of items crafted or bought with Left Click
-			Setting this to "{$Mods.BetterInventory.Configs.MaxCraftAmount.spic.Label}" requires the mod "Spy's Infinite Consumables"
-			'''
-	}
-
-	single: {
-		Label: Single Click
-		Tooltip: Holding Left Click will only craft / buy a stack once
-	}
-
-	tooltip: {
-		Label: Tooltip
-		Tooltip: Adds a tooltip line when the action is available
-	}
-}
-
-MaxCraftAmount: {
-	Tooltip: ""
-
-	amount: {
-		Label: Amount
-		Tooltip: ""
-	}
-
-	spic: {
-		Label: Spy's Infinite Consumables Requirement
-		Tooltip: ""
-	}
-}
-
 QuickMove: {
 	Tooltip: ""
-
-	chainTime: {
-		Label: Chain Interval
-		Tooltip: Frame interval until the current chain resets ({$Mods.BetterInventory.UI.FramesToSec})
-	}
-
-	tooltip: {
-		Label: Tooltip
-		Tooltip: Adds a tooltip line to displays the Quick Move chain
-	}
-
-	returnToSlot: {
-		Label: Return to Original Slot
-		Tooltip: Return the item to its original slot when moving at the end of the chain
-	}
 
 	hotkeyMode: {
 		Label: Hotkey Mapping
@@ -382,23 +335,29 @@ QuickMove: {
 			'''
 	}
 
+	resetTime: {
+		Label: Reset Time
+		Tooltip: Frame interval until the current chain resets ({$Mods.BetterInventory.UI.FramesToSec})
+	}
+
+	returnToSlot: {
+		Label: Return to Original Slot
+		Tooltip: Return the item to its original slot when moving at the end of the chain
+	}
+
 	displayHotkeys: {
 		Label: Display Hotkeys
 		Tooltip:
 			'''
 			Displays hotkeys on the slots where an item can be moved to
-			{$Mods.BetterInventory.Configs.HotkeyDisplayMode.First.Label}: Next slots in the chain
+			{$Mods.BetterInventory.Configs.HotkeyDisplayMode.Next.Label}: Next slot in the chain
 			{$Mods.BetterInventory.Configs.HotkeyDisplayMode.All.Label}: All slots in the chain
 			'''
 	}
-}
 
-DisplayedHotkeys: {
-	Tooltip: ""
-
-	highlightIntensity: {
-		Label: Slot Highlight Intensity
-		Tooltip: Highlight the slots where an item can be quick moved to
+	tooltip: {
+		Label: Tooltip
+		Tooltip: Adds a tooltip line to displays the Quick Move chain
 	}
 }
 
@@ -412,8 +371,60 @@ HotkeyMode: {
 HotkeyDisplayMode: {
 	Tooltip: ""
 	None.Label: Off
-	First.Label: First
+	Next.Label: Next
 	All.Label: All
+}
+
+DisplayedHotkeys: {
+	Tooltip: ""
+
+	highlightIntensity: {
+		Label: Slot Highlight Intensity
+		Tooltip: Highlight the slots where an item can be quick moved to
+	}
+}
+
+CraftStack: {
+	Tooltip: ""
+
+	maxItems: {
+		Label: Max Items Per Click
+		Tooltip:
+			'''
+			The maximum amount of items crafted or bought with Left Click
+			Setting this to "{$Mods.BetterInventory.Configs.MaxCraftAmount.spic.Label}" requires the mod "Spy's Infinite Consumables"
+			'''
+	}
+
+	repeat: {
+		Label: Repeat Clicks
+		Tooltip: Holding Left Click will craft / buy a stack multiple times
+	}
+
+	invertClicks: {
+		Label: Invert Clicks
+		Tooltip: Invert the behavior of the left and right clicks when crafting or buying items
+	}
+
+
+	tooltip: {
+		Label: Tooltip
+		Tooltip: Adds a tooltip line when {$Mods.BetterInventory.Configs.InventoryManagement.craftStack.Name} is available
+	}
+}
+
+MaxCraftAmount: {
+	Tooltip: ""
+
+	amount: {
+		Label: Amount
+		Tooltip: ""
+	}
+
+	spicRequirement: {
+		Label: Spy's Infinite Consumables Requirement
+		Tooltip: ""
+	}
 }
 
 ItemActions: {
@@ -499,13 +510,13 @@ BetterGuide: {
 			'''
 	}
 
-	favoriteRecipes: {
-		Label: Favorite Recipes
+	favoritedRecipes: {
+		Label: Favorited Recipes
 		Tooltip: Favorite or blacklist recipes
 	}
 
-	tile: {
-		Label: Guide Tile
+	craftingStation: {
+		Label: Filter by Crafting Station
 		Tooltip:
 			'''
 			Adds a second slot next to the guide item to filter by crafting station or condition
@@ -523,8 +534,8 @@ BetterGuide: {
 			'''
 	}
 
-	craftText: {
-		Label: Craft Tiles and Conditions
+	conditionsDisplay: {
+		Label: Overhauled Conditions Display
 		Tooltip: Overhauls the way crafting station and conditions of recipes are displayed
 	}
 
@@ -540,7 +551,7 @@ BetterGuide: {
 	}
 }
 
-FavoriteRecipes: {
+FavoritedRecipes: {
 	Tooltip: ""
 
 	unfavoriteOnCraft: {
@@ -554,12 +565,20 @@ UnfavoriteOnCraft: {
 	None.Label: Off
 	Favorited.Label: Favorited
 	Blacklisted.Label: Blacklisted
-	Both.Label: Favorited and Blacklisted
-	Off.Label: Off
+	Both.Label: Favorited or Blacklisted
 }
 
 BetterBestiary: {
 	Tooltip: ""
+
+	displayedInfo: {
+		Label: Minimum Displayed Info
+		Tooltip:
+			'''
+			Forces the minimal displayed information for unlocked entries
+			{$Mods.BetterInventory.UI.NoBestiaryEffect}
+			'''
+	}
 
 	showBagContent: {
 		Label: Show Treasure Bag Content
@@ -567,17 +586,8 @@ BetterBestiary: {
 	}
 
 	unlockFilter: {
-		Label: Override Unlock Filter
+		Label: "Non Fully Unlocked Filter"
 		Tooltip: Replace the filter "{$BestiaryInfo.IfUnlocked}" with "{$Mods.BetterInventory.UI.FullUnlock}"
-	}
-
-	displayedUnlock: {
-		Label: Minimum Displayed Info
-		Tooltip:
-			'''
-			Forces the minimal displayed information for unlocked entries
-			{$Mods.BetterInventory.UI.NoBestiaryEffect}
-			'''
 	}
 
 	unknownDisplay: {
@@ -607,12 +617,24 @@ QuickSearch: {
 
 	individualKeybinds: {
 		Label: Individual Keybinds
-		Tooltip: ""
+		Tooltip:
+			'''
+			Navigate with a keybind per catalogue
+			{$Mods.BetterInventory.Configs.SearchAction.Search.Label}: Search the hovered item
+			{$Mods.BetterInventory.Configs.SearchAction.Toggle.Label}: Toggle the catalogue
+			{$Mods.BetterInventory.Configs.SearchAction.Both.Label}: Search the hovered item or toggle the catalogue when not hovering an item
+			'''
 	}
 
 	sharedKeybind: {
 		Label: Shared Keybind
-		Tooltip: ""
+		Tooltip:
+			'''
+			Navigate with a single keybind. Press it multiple times to cycle between catalogues
+			{$Mods.BetterInventory.Configs.SearchAction.Search.Label}: Search the hovered item
+			{$Mods.BetterInventory.Configs.SearchAction.Toggle.Label}: Toggle a catalogue
+			{$Mods.BetterInventory.Configs.SearchAction.Both.Label}: Search the hovered item or toggle a catalogue when not hovering an item
+			'''
 	}
 
 	rightClick: {
@@ -621,7 +643,7 @@ QuickSearch: {
 			'''
 			Right Click the bestiary text field or the guide item to perform an action
 			{$Mods.BetterInventory.Configs.RightClickAction.Clear.Label}: Clear the field
-			{$Mods.BetterInventory.Configs.RightClickAction.SearchPrevious.Label}: Search previous entry
+			{$Mods.BetterInventory.Configs.RightClickAction.SearchPrevious.Label}: Search the previous entry
 			'''
 	}
 
@@ -644,7 +666,7 @@ IndividualKeybinds: {
 
 	composite: {
 		Label: Compose With {$Mods.BetterInventory.Keybinds.QuickSearch.DisplayName}
-		Tooltip: ""
+		Tooltip: Hold {$Mods.BetterInventory.Keybinds.QuickSearch.DisplayName} and then press a keybind to seach or toggle
 	}
 }
 
@@ -700,17 +722,22 @@ Compatibility: {
 			'''
 	}
 
-	UnloadedCrafting: {
+	unloadedCrafting: {
 		Label: "[i:398] Unloaded {$Mods.BetterInventory.Configs.Crafting.DisplayName} Features"
 		Tooltip: ""
 	}
 
-	UnloadedInventoryManagement: {
-		Label: "[i:5075] Unloaded {$Mods.BetterInventory.Configs.InventoryManagement.DisplayName} Features"
+	unloadedInventoryManagement: {
+		Label: "[i:4131] Unloaded {$Mods.BetterInventory.Configs.InventoryManagement.DisplayName} Features"
 		Tooltip: ""
 	}
 
-	UnloadedItemSearch: {
+	unloadedItemActions: {
+		Label: "[i:5075] Unloaded {$Mods.BetterInventory.Configs.ItemActions.DisplayName} Features"
+		Tooltip: ""
+	}
+
+	unloadedItemSearch: {
 		Label: "[i:487] Unloaded {$Mods.BetterInventory.Configs.ItemSearch.DisplayName} Features"
 		Tooltip: ""
 	}
@@ -734,8 +761,8 @@ UnloadedCrafting: {
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
-	recipeFiltering: {
-		Label: "{$Mods.BetterInventory.Configs.Crafting.recipeFiltering.Label}"
+	recipeFilters: {
+		Label: "{$Mods.BetterInventory.Configs.Crafting.recipeFilters.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
@@ -744,39 +771,10 @@ UnloadedCrafting: {
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
-	recipeFilters: {
-		Label: recipe Filters
-		Tooltip: ""
-	}
 }
 
 UnloadedInventoryManagement: {
 	Tooltip: ""
-
-	autoEquip: {
-		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.autoEquip.Label}"
-		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
-	}
-
-	autoUpgrade: {
-		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.autoUpgrade.Label}"
-		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
-	}
-
-	favoriteInBanks: {
-		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.favoriteInBanks.Label}"
-		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
-	}
-
-	shiftRight: {
-		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.shiftRight.Label}"
-		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
-	}
-
-	stackTrash: {
-		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.stackTrash.Label}"
-		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
-	}
 
 	baits: {
 		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartConsumption.Label} @ {$Mods.BetterInventory.Configs.SmartConsumption.baits.Label}"
@@ -789,7 +787,17 @@ UnloadedInventoryManagement: {
 	}
 
 	previousSlot: {
-		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ {$Mods.BetterInventory.Configs.PreviousSlot.markIntensity.Label}"
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ {$Mods.BetterInventory.Configs.SmartPickup.previousSlot.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	autoEquip: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ {$Mods.BetterInventory.Configs.SmartPickup.autoEquip.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+	
+	upgradeItems: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ {$Mods.BetterInventory.Configs.SmartPickup.upgradeItems.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
@@ -800,6 +808,16 @@ UnloadedInventoryManagement: {
 
 	fixSlot: {
 		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ {$Mods.BetterInventory.Configs.SmartPickup.fixSlot.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	displayFakeItem: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ {$Mods.BetterInventory.Configs.SmartPickup.previousSlot.Label} @ {$Mods.BetterInventory.Configs.PreviousDisplay.displayDisplay.fakeItem.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	displayIcon: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ {$Mods.BetterInventory.Configs.SmartPickup.previousSlot.Label} @ {$Mods.BetterInventory.Configs.PreviousDisplay.displayDisplay.icon.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
@@ -818,42 +836,31 @@ UnloadedInventoryManagement: {
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
-	marksFakeItem: {
-		Label: "{$Mods.BetterInventory.Configs.MarksDisplay.fakeItem.Label}"
+	favoriteInBanks: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.favoriteInBanks.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
-	marksIcon: {
-		Label: "{$Mods.BetterInventory.Configs.MarksDisplay.icon.Label}"
+	shiftRight: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.shiftRight.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
+
+	stackTrash: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.stackTrash.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+}
+
+UnloadedItemActions: {
+	Tooltip: ""
 }
 
 UnloadedItemSearch: {
 	Tooltip: ""
 
-	searchRecipes: {
-		Label: "{$Mods.BetterInventory.Configs.ItemSearch.searchRecipes.Label}"
-		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
-	}
-
-	searchDrops: {
-		Label: "{$Mods.BetterInventory.Configs.ItemSearch.searchDrops.Label}"
-		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
-	}
-
-	guideMoreRecipes: {
-		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.moreRecipes.Label}"
-		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
-	}
-
-	guideFavorite: {
-		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.favoriteRecipes.Label}"
-		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
-	}
-
-	guideUnfavoriteOnCraft: {
-		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.favoriteRecipes.Label} @ {$Mods.BetterInventory.Configs.FavoriteRecipes.unfavoriteOnCraft.Label}"
+	guideFavorited: {
+		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.favoritedRecipes.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
@@ -862,8 +869,28 @@ UnloadedItemSearch: {
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
+	guideMoreRecipes: {
+		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.moreRecipes.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	guideCraftingStation: {
+		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.craftingStation.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
 	guideUnknown: {
 		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.unknownDisplay.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	guideUnfavoriteOnCraft: {
+		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.favoritedRecipes.Label} @ {$Mods.BetterInventory.Configs.FavoriteRecipes.unfavoriteOnCraft.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	bestiaryDisplayedInfo: {
+		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterBestiary.Label} @ {$Mods.BetterInventory.Configs.BetterBestiary.displayedUnlock.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
@@ -872,8 +899,8 @@ UnloadedItemSearch: {
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
-	bestiaryDisplayedUnlock: {
-		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterBestiary.Label} @ {$Mods.BetterInventory.Configs.BetterBestiary.displayedUnlock.Label}"
+	recipeList: {
+		Label: "{$Mods.BetterInventory.Configs.ItemSearch.quickSearch.Label} @ {$Mods.BetterInventory.Configs.ItemSearch.recipeList.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 }
@@ -906,23 +933,3 @@ Version: {
 		Tooltip: ""
 	}
 }
-
-Toggle`1.Tooltip: ""
-
-ChildValue`2: {
-	Parent: {
-		Label: Parent
-		Tooltip: ""
-	}
-
-	Value: {
-		Label: Value
-		Tooltip: ""
-	}
-
-	Tooltip: ""
-}
-
-Text.Tooltip: ""
-SearchProviderDefinition.Tooltip: ""
-ModPickupUpgraderDefinition.Tooltip: ""

@@ -1,5 +1,5 @@
 using System.ComponentModel;
-using BetterInventory.Default.SearchProviders;
+using BetterInventory.Default.Catalogues;
 using Newtonsoft.Json;
 using SpikysLib.Configs.UI;
 using SpikysLib.Extensions;
@@ -27,12 +27,12 @@ public sealed class Compatibility : ModConfig {
             SmartConsumption.Value.materials = false;
             SmartConsumption.Value.baits = false;
             SmartPickup.Value.previousSlot.Parent = ItemPickupLevel.None;
-            MarksDisplay.Value.fakeItem.Parent = false;
-            MarksDisplay.Value.icon.Parent = false;
             SmartPickup.Value.autoEquip = AutoEquipLevel.None;
-            SmartPickup.Value.autoUpgrade.Parent = false;
+            SmartPickup.Value.upgradeItems.Parent = false;
             SmartPickup.Value.hotbarLast = false;
             SmartPickup.Value.fixSlot = false;
+            PreviousDisplay.Value.fakeItem.Parent = false;
+            PreviousDisplay.Value.icon.Parent = false;
             QuickMove.Value.displayHotkeys.Parent = HotkeyDisplayMode.None;
             QuickMove.Value.displayHotkeys.Value.highlightIntensity = 0;
             InventoryManagement.Instance.favoriteInBanks = false;
@@ -42,19 +42,22 @@ public sealed class Compatibility : ModConfig {
             InventoryManagement.Instance.Save();
 
             BetterGuide.Value.moreRecipes = false;
+            BetterGuide.Value.craftingStation = false;
+            BetterGuide.Value.favoritedRecipes.Parent = false;
             BetterGuide.Value.craftInMenu = false;
             BetterGuide.Value.unknownDisplay = UnknownDisplay.Vanilla;
-            FavoriteRecipes.Value.unfavoriteOnCraft = UnfavoriteOnCraft.None;
+            FavoritedRecipes.Value.unfavoriteOnCraft = UnfavoriteOnCraft.None;
+            BetterBestiary.Value.displayedInfo = UnlockLevel.Vanilla;
             BetterBestiary.Value.unknownDisplay = UnknownDisplay.Vanilla;
-            BetterBestiary.Value.displayedUnlock = UnlockLevel.Vanilla;
             QuickSearch.Value.catalogues[new(RecipeList.Instance)] = false;
             ItemSearch.Instance.Save();
         }
     }
 
-    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedCrafting UnloadedCrafting {get; set;} = new();
-    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedInventoryManagement UnloadedInventoryManagement {get; set;} = new();
-    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedItemSearch UnloadedItemSearch {get; set;} = new();
+    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedCrafting unloadedCrafting {get; set;} = new();
+    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedInventoryManagement unloadedInventoryManagement {get; set;} = new();
+    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedItemActions unloadedItemActions { get; set;} = new();
+    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedItemSearch unloadedItemSearch {get; set;} = new();
 
     public static bool CompatibilityMode => Instance.compatibilityMode;
     public static Compatibility Instance = null!;
@@ -69,7 +72,7 @@ public sealed class UnloadedCrafting {
     public bool recipeFilters = false;
     public bool craftOnList = false;
 
-    public static UnloadedCrafting Value => Compatibility.Instance.UnloadedCrafting;
+    public static UnloadedCrafting Value => Compatibility.Instance.unloadedCrafting;
 }
 
 public sealed class UnloadedInventoryManagement {
@@ -77,33 +80,38 @@ public sealed class UnloadedInventoryManagement {
     public bool baits = false;
     public bool previousSlot = false;
     public bool autoEquip = false;
-    public bool autoUpgrade = false;
+    public bool upgradeItems = false;
     public bool hotbarLast = false;
     public bool fixSlot = false;
+    public bool displayFakeItem = false;
+    public bool displayIcon = false;
+    public bool quickMoveHotkeys = false;
+    public bool quickMoveHighlight = false;
     public bool favoriteInBanks = false;
     public bool shiftRight = false;
     public bool stackTrash = false;
-    public bool marksFakeItem = false;
-    public bool marksIcon = false;
-    public bool quickMoveHotkeys = false;
-    public bool quickMoveHighlight = false;
     public bool craftStack = false;
     
-    public static UnloadedInventoryManagement Value => Compatibility.Instance.UnloadedInventoryManagement;
+    public static UnloadedInventoryManagement Value => Compatibility.Instance.unloadedInventoryManagement;
+}
+
+public sealed class UnloadedItemActions {
+    public static UnloadedItemActions Value => Compatibility.Instance.unloadedItemActions;
 }
 
 public sealed class UnloadedItemSearch {
-    public bool searchRecipes = false;
     public bool guideMoreRecipes = false;
-    public bool guideFavorite = false;
-    public bool guideUnfavoriteOnCraft = false;
+    public bool guideCraftingStation = false;
+    public bool guideFavorited = false;
     public bool guideCraftInMenu = false;
     public bool guideUnknown = false;
+    public bool guideUnfavoriteOnCraft = false;
+    public bool bestiaryDisplayedInfo = false;
     public bool bestiaryUnknown = false;
-    public bool bestiaryDisplayedUnlock = false;
+    public bool recipeList = false;
 
-    [JsonIgnore] public bool BestiaryUnlock { set { bestiaryUnknown = value; bestiaryDisplayedUnlock = value; } }
-    [JsonIgnore] public bool GuideAvailableRecipes { set { guideFavorite = value; guideCraftInMenu = value; guideUnknown = value; } }
+    [JsonIgnore] public bool BestiaryUnlock { set { bestiaryUnknown = value; bestiaryDisplayedInfo = value; } }
+    [JsonIgnore] public bool GuideAvailableRecipes { set { guideFavorited = value; guideCraftInMenu = value; guideUnknown = value; } }
     
-    public static UnloadedItemSearch Value => Compatibility.Instance.UnloadedItemSearch;
+    public static UnloadedItemSearch Value => Compatibility.Instance.unloadedItemSearch;
 }

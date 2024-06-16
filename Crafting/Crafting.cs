@@ -27,7 +27,7 @@ public static class Crafting {
         cursor.EmitDelegate((int i) => {
             if (!Configs.CraftOnList.Enabled) return false;
             int f = Main.focusRecipe;
-            if (Configs.CraftOnList.Value.focusRecipe) Main.focusRecipe = i;
+            if (Configs.CraftOnList.Value.focusHovered) Main.focusRecipe = i;
             Reflection.Main.HoverOverCraftingItemButton.Invoke(i);
             if (f != Main.focusRecipe) Main.recFastScroll = true;
             Main.craftingHide = false;
@@ -44,7 +44,7 @@ public static class Crafting {
         cursor.EmitLdloc(153);
         cursor.EmitDelegate((int i) => {
             if (!Configs.CraftOnList.Enabled) return;
-            if (Main.numAvailableRecipes > 0 && Main.focusRecipe == i && !Configs.CraftOnList.Value.focusRecipe) ItemSlot.DrawGoldBGForCraftingMaterial = true;
+            if (Main.numAvailableRecipes > 0 && Main.focusRecipe == i && !Configs.CraftOnList.Value.focusHovered) ItemSlot.DrawGoldBGForCraftingMaterial = true;
         });
         //     }
         // }

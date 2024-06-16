@@ -19,51 +19,51 @@ public sealed class ItemSearch : ModConfig {
     public override ConfigScope Mode => ConfigScope.ClientSide;
 
     public override void OnChanged() {
-        if (!Main.gameMenu) Default.SearchProviders.RecipeList.UpdateGuide();
+        if (!Main.gameMenu) Default.Catalogues.RecipeList.UpdateGuide();
     }
 }
 
 public enum UnknownDisplay { Vanilla, Hidden, Unknown, Known }
 
 public sealed class BetterGuide {
-    public Toggle<FavoriteRecipes> favoriteRecipes = new(true);
+    public Toggle<FavoritedRecipes> favoritedRecipes = new(true);
     [DefaultValue(true)] public bool craftInMenu = true;
     [DefaultValue(true)] public bool moreRecipes = true;
-    [DefaultValue(true)] public bool tile = true;
-    [DefaultValue(true)] public bool craftText = true;
+    [DefaultValue(true)] public bool craftingStation = true;
+    [DefaultValue(true)] public bool conditionsDisplay = true;
     [DefaultValue(Configs.UnknownDisplay.Unknown)] public UnknownDisplay unknownDisplay = Configs.UnknownDisplay.Unknown;
 
     public static bool Enabled => ItemSearch.Instance.betterGuide;
     public static bool MoreRecipes => Enabled && Value.moreRecipes && !UnloadedItemSearch.Value.guideMoreRecipes;
-    public static bool CraftText => Enabled && Value.craftText;
-    public static bool FavoriteRecipes => Enabled && Value.favoriteRecipes && !UnloadedItemSearch.Value.guideFavorite;
+    public static bool ConditionsDisplay => Enabled && Value.conditionsDisplay;
+    public static bool FavoritedRecipes => Enabled && Value.favoritedRecipes && !UnloadedItemSearch.Value.guideFavorited;
     public static bool CraftInMenu => Enabled && Value.craftInMenu && !UnloadedItemSearch.Value.guideCraftInMenu;
-    public static bool Tile => Enabled && Value.tile;
+    public static bool CraftingStation => Enabled && Value.craftingStation && !UnloadedItemSearch.Value.guideCraftingStation;
     public static bool UnknownDisplay => Enabled && Value.unknownDisplay > Configs.UnknownDisplay.Vanilla && !UnloadedItemSearch.Value.guideUnknown;
-    public static bool AvailableRecipes => FavoriteRecipes || CraftInMenu || UnknownDisplay;
+    public static bool AvailableRecipes => FavoritedRecipes || CraftInMenu || UnknownDisplay;
     public static BetterGuide Value => ItemSearch.Instance.betterGuide.Value;
 }
 
-public sealed class FavoriteRecipes {
+public sealed class FavoritedRecipes {
     [DefaultValue(Configs.UnfavoriteOnCraft.Favorited)] public UnfavoriteOnCraft unfavoriteOnCraft = Configs.UnfavoriteOnCraft.Favorited;
 
-    public static bool UnfavoriteOnCraft => BetterGuide.FavoriteRecipes && Value.unfavoriteOnCraft != Configs.UnfavoriteOnCraft.None && !UnloadedItemSearch.Value.guideUnfavoriteOnCraft;
-    public static FavoriteRecipes Value => BetterGuide.Value.favoriteRecipes.Value;
+    public static bool UnfavoriteOnCraft => BetterGuide.FavoritedRecipes && Value.unfavoriteOnCraft != Configs.UnfavoriteOnCraft.None && !UnloadedItemSearch.Value.guideUnfavoriteOnCraft;
+    public static FavoritedRecipes Value => BetterGuide.Value.favoritedRecipes.Value;
 }
 [Flags] public enum UnfavoriteOnCraft { None = 0b00, Favorited = 0b01, Blacklisted = 0b10, Both = Favorited | Blacklisted }
 
 public sealed class BetterBestiary {
-    [DefaultValue(UnlockLevel.Drops)] public UnlockLevel displayedUnlock = UnlockLevel.Drops;
+    [DefaultValue(UnlockLevel.Drops)] public UnlockLevel displayedInfo = UnlockLevel.Drops;
     [DefaultValue(true)] public bool showBagContent = true;
     [DefaultValue(true)] public bool unlockFilter = true;
     [DefaultValue(Configs.UnknownDisplay.Unknown)] public UnknownDisplay unknownDisplay = Configs.UnknownDisplay.Unknown;
 
     public static bool Enabled => ItemSearch.Instance.betterBestiary;
-    public static bool DisplayedUnlock => Enabled && Value.displayedUnlock != UnlockLevel.Vanilla && !UnloadedItemSearch.Value.bestiaryDisplayedUnlock;
+    public static bool DisplayedInfo => Enabled && Value.displayedInfo != UnlockLevel.Vanilla && !UnloadedItemSearch.Value.bestiaryDisplayedInfo;
     public static bool ShowBagContent => Enabled && Value.showBagContent;
     public static bool UnlockFilter => Enabled && Value.unlockFilter;
     public static bool UnknownDisplay => Enabled && Value.unknownDisplay > Configs.UnknownDisplay.Vanilla && !UnloadedItemSearch.Value.bestiaryUnknown;
-    public static bool Unlock => UnknownDisplay || DisplayedUnlock;
+    public static bool Unlock => UnknownDisplay || DisplayedInfo;
     public static BetterBestiary Value => ItemSearch.Instance.betterBestiary.Value;
 }
 public enum UnlockLevel { Vanilla, Name, Stats, Drops, DropRates }

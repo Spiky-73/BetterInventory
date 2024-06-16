@@ -8,7 +8,6 @@ public sealed class ItemActions : ModConfig {
     [DefaultValue(true)] public bool fastContainerOpening;
     [DefaultValue(true)] public bool fastExtractinator;
     public Toggle<ItemRightClick> itemRightClick = new(true);
-
     [DefaultValue(true)] public bool favoritedBuff;
     [DefaultValue(true)] public bool builderAccs;
 

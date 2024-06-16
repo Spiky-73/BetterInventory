@@ -20,7 +20,7 @@ using ContextID = Terraria.UI.ItemSlot.Context;
 using BetterInventory.ItemActions;
 using SpikysLib.Extensions;
 using SpikysLib;
-using BetterInventory.Default.SearchProviders;
+using BetterInventory.Default.Catalogues;
 
 namespace BetterInventory.ItemSearch;
 
@@ -50,7 +50,7 @@ public sealed class Guide : ModSystem {
     }
 
     private void HookGuideTileAir(On_Main.orig_HoverOverCraftingItemButton orig, int recipeIndex){
-        if (!Configs.BetterGuide.Tile || guideTile.IsAir || !Main.guideItem.IsAir) {
+        if (!Configs.BetterGuide.CraftingStation || guideTile.IsAir || !Main.guideItem.IsAir) {
             orig(recipeIndex);
             return;
         }
@@ -72,7 +72,7 @@ public sealed class Guide : ModSystem {
         SmartPickup.ClearMarks();
     }
     public override void PostAddRecipes() {
-        Default.SearchProviders.Bestiary.HooksBestiaryUI();
+        Default.Catalogues.Bestiary.HooksBestiaryUI();
         for (int r = 0; r < Recipe.numRecipes; r++) {
             foreach (int tile in Main.recipe[r].requiredTile) CraftingStationsItems[tile] = 0;
         }
@@ -95,10 +95,10 @@ public sealed class Guide : ModSystem {
 
         if (Configs.BetterGuide.CraftInMenu) HandleVisibility(inventoryX, inventoryY);
         
-        if (Configs.BetterGuide.CraftText) DrawGuideItems(inventoryX, inventoryY);
+        if (Configs.BetterGuide.ConditionsDisplay) DrawGuideItems(inventoryX, inventoryY);
         else orig(adjY, craftingTipColor, out inventoryX, out inventoryY);
 
-        if (Configs.BetterGuide.Tile) DrawGuideTile(inventoryX, inventoryY);
+        if (Configs.BetterGuide.CraftingStation) DrawGuideTile(inventoryX, inventoryY);
     }
 
     private static void DrawGuideItems(int inventoryX, int inventoryY) {
@@ -405,7 +405,7 @@ public sealed class Guide : ModSystem {
             return;
         }
         if (!Configs.BetterGuide.AvailableRecipes) {
-            if (Configs.BetterGuide.Tile && !guideTile.IsAir) FindGuideRecipes();
+            if (Configs.BetterGuide.CraftingStation && !guideTile.IsAir) FindGuideRecipes();
             else orig(canDelayCheck);
             return;
         }
@@ -519,7 +519,7 @@ public sealed class Guide : ModSystem {
         //         if(<recipeOk> ++[&& !custom]) {
         cursor.EmitLdloc1();
         cursor.EmitDelegate((int r) => {
-        if (!(Configs.BetterGuide.AvailableRecipes || Configs.BetterGuide.Tile || Configs.RecipeFilters.Enabled)) return false;
+        if (!(Configs.BetterGuide.AvailableRecipes || Configs.BetterGuide.CraftingStation || Configs.RecipeFilters.Enabled)) return false;
             Reflection.Recipe.AddToAvailableRecipes.Invoke(r);
             return true;
         });
@@ -555,24 +555,24 @@ public sealed class Guide : ModSystem {
                 s_unknownRecipes.Add(r);
                 return true;
             }
-            if (!Configs.BetterGuide.FavoriteRecipes) return false;
+            if (!Configs.BetterGuide.FavoritedRecipes) return false;
             if (LocalFilters.FavoritedRecipes.Contains(r)) return true;
             if (LocalFilters.BlacklistedRecipes.Contains(r)) return true;
             return false;
         }
 
-        if (Configs.BetterGuide.FavoriteRecipes) foreach (int r in LocalFilters.FavoritedRecipes) yield return r;
+        if (Configs.BetterGuide.FavoritedRecipes) foreach (int r in LocalFilters.FavoritedRecipes) yield return r;
         if (LocalFilters.ShowAllRecipes) {
             for (int r = 0; r < Recipe.numRecipes; r++) {
                 if (!Skip(r)) yield return r;
             }
-            if (Configs.BetterGuide.FavoriteRecipes) foreach (int r in LocalFilters.BlacklistedRecipes) yield return r;
+            if (Configs.BetterGuide.FavoritedRecipes) foreach (int r in LocalFilters.BlacklistedRecipes) yield return r;
             if (Configs.BetterGuide.UnknownDisplay && Configs.BetterGuide.Value.unknownDisplay == Configs.UnknownDisplay.Unknown) foreach (int r in s_unknownRecipes) yield return r;
         } else {
             foreach (int r in s_availableRecipes) {
                 if (!Skip(r)) yield return r;
             }
-            if(Configs.BetterGuide.FavoriteRecipes && !Configs.BetterGuide.CraftInMenu) foreach (int r in LocalFilters.BlacklistedRecipes) yield return r;
+            if(Configs.BetterGuide.FavoritedRecipes && !Configs.BetterGuide.CraftInMenu) foreach (int r in LocalFilters.BlacklistedRecipes) yield return r;
         }
     }
 
@@ -581,7 +581,7 @@ public sealed class Guide : ModSystem {
             s_availableRecipes.Add(recipeIndex);
             return;
         }
-        if ((Configs.BetterGuide.Tile && !CheckGuideFilters(recipeIndex)) || (Configs.RecipeFilters.Enabled && !RecipeFiltering.FitsFilters(recipeIndex))) return;
+        if ((Configs.BetterGuide.CraftingStation && !CheckGuideFilters(recipeIndex)) || (Configs.RecipeFilters.Enabled && !RecipeFiltering.FitsFilters(recipeIndex))) return;
         orig(recipeIndex);
     }
 
@@ -614,7 +614,7 @@ public sealed class Guide : ModSystem {
                 forcedTooltip = Language.GetText($"{Localization.Keys.UI}.Unknown");
                 return false;
             }
-            if (Configs.BetterGuide.FavoriteRecipes) {
+            if (Configs.BetterGuide.FavoritedRecipes) {
                 bool click = Main.mouseLeft && Main.mouseLeftRelease;
                 if (Main.keyState.IsKeyDown(Main.FavoriteKey)) {
                     Main.cursorOverride = CursorOverrideID.FavoriteStar;
@@ -662,10 +662,10 @@ public sealed class Guide : ModSystem {
         // ++ <unFavorite>
         cursor.EmitLdarg0();
         cursor.EmitDelegate((Recipe r) => {
-            if (!Configs.FavoriteRecipes.UnfavoriteOnCraft) return;
+            if (!Configs.FavoritedRecipes.UnfavoriteOnCraft) return;
             if (!(GetFavoriteState(r.RecipeIndex) switch {
-                FavoriteState.Favorited => Configs.FavoriteRecipes.Value.unfavoriteOnCraft.HasFlag(Configs.UnfavoriteOnCraft.Favorited),
-                FavoriteState.Blacklisted => Configs.FavoriteRecipes.Value.unfavoriteOnCraft.HasFlag(Configs.UnfavoriteOnCraft.Blacklisted),
+                FavoriteState.Favorited => Configs.FavoritedRecipes.Value.unfavoriteOnCraft.HasFlag(Configs.UnfavoriteOnCraft.Favorited),
+                FavoriteState.Blacklisted => Configs.FavoritedRecipes.Value.unfavoriteOnCraft.HasFlag(Configs.UnfavoriteOnCraft.Blacklisted),
                 FavoriteState.Default or _ => false,
             })) return;
             LocalFilters.ResetRecipeState(r.RecipeIndex);
@@ -686,14 +686,14 @@ public sealed class Guide : ModSystem {
     
     private static void HookGuideTileAdj(On_Player.orig_AdjTiles orig, Player self) {
         orig(self);
-        if (!Configs.BetterGuide.AvailableRecipes || !Configs.BetterGuide.Tile || RecipeList.Instance.Enabled || guideTile.createTile < TileID.Dirt) return;
+        if (!Configs.BetterGuide.AvailableRecipes || !Configs.BetterGuide.CraftingStation || RecipeList.Instance.Enabled || guideTile.createTile < TileID.Dirt) return;
         self.adjTile[guideTile.createTile] = true;
         Recipe.FindRecipes();
     }
     private static int HookAllowGuideItem(On_ItemSlot.orig_PickItemMovementAction orig, Item[] inv, int context, int slot, Item checkItem) {
         if (context != ContextID.GuideItem) return orig(inv, context, slot, checkItem);
         if (Configs.BetterGuide.MoreRecipes && slot == 0 && GetPlaceholderType(Main.mouseItem) == PlaceholderType.None) return 0;
-        if (Configs.BetterGuide.Tile && slot == 1 && FitsCraftingTile(Main.mouseItem)) return 0;
+        if (Configs.BetterGuide.CraftingStation && slot == 1 && FitsCraftingTile(Main.mouseItem)) return 0;
         return -1;
     }
     public static bool OverrideHover(Item[] inv, int context, int slot) {
@@ -707,7 +707,7 @@ public sealed class Guide : ModSystem {
             (int cursor, Main.cursorOverride) = (Main.cursorOverride, 0);
 
             Item[] items = GuideItems;
-            ItemSlot.LeftClick(items, ContextID.GuideItem, Configs.BetterGuide.Tile && IsCraftingStation(Main.mouseItem) ? 1 : 0);
+            ItemSlot.LeftClick(items, ContextID.GuideItem, Configs.BetterGuide.CraftingStation && IsCraftingStation(Main.mouseItem) ? 1 : 0);
             GuideItems = items;
 
             if (Configs.BetterGuide.Enabled && !RecipeList.Instance.Enabled) Main.LocalPlayer.GetDropItem(ref Main.mouseItem);
@@ -788,7 +788,7 @@ public sealed class Guide : ModSystem {
     }
 
     public static FavoriteState GetFavoriteState(int recipe) {
-        if (!Configs.BetterGuide.FavoriteRecipes) return FavoriteState.Default;
+        if (!Configs.BetterGuide.FavoritedRecipes) return FavoriteState.Default;
         if (LocalFilters.IsFavorited(recipe)) return FavoriteState.Favorited;
         if (LocalFilters.IsBlacklisted(recipe)) return FavoriteState.Blacklisted;
         return FavoriteState.Default;

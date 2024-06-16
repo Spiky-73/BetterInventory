@@ -87,7 +87,7 @@ public sealed class ClickOverrides : ILoadable {
         cursor.EmitLdarg2();
         cursor.EmitLdarg3();
         cursor.EmitDelegate((bool rightClickIsValid, bool leftClickIsValid) => {
-            if (Configs.CraftStack.Enabled && (Configs.CraftStack.Value.invertClicks ? (rightClickIsValid && Configs.CraftStack.Value.single && !Main.mouseRightRelease) : (leftClickIsValid && Configs.CraftStack.Value.single && !Main.mouseLeftRelease))) return true;
+            if (Configs.CraftStack.Enabled && (Configs.CraftStack.Value.invertClicks ? (rightClickIsValid && !Configs.CraftStack.Value.repeat && !Main.mouseRightRelease) : (leftClickIsValid && !Configs.CraftStack.Value.repeat && !Main.mouseLeftRelease))) return true;
             return false;
         });
         ILLabel skip = cursor.DefineLabel();
@@ -111,7 +111,7 @@ public sealed class ClickOverrides : ILoadable {
             int buy = GetMaxBuyAmount(inv[slot], price);
             int available = inv[slot].buyOnce ? inv[slot].stack : inv[slot].maxStack;
             int pickup = GetMaxPickupAmount(inv[slot]);
-            int stack = Configs.CraftStack.Value.maxAmount == 0 && SpysInfiniteConsumables.Enabled ? (int)SpysInfiniteConsumables.GetMixedRequirement(Main.LocalPlayer, inv[slot]) : Configs.CraftStack.Value.maxAmount;
+            int stack = Configs.CraftStack.Value.maxItems == 0 && SpysInfiniteConsumables.Enabled ? (int)SpysInfiniteConsumables.GetMixedRequirement(Main.LocalPlayer, inv[slot]) : Configs.CraftStack.Value.maxItems;
             s_ilShopMultiplier = Math.Max(MathX.Min(buy, available, pickup, stack), 1);
             return price;
         });
@@ -182,7 +182,7 @@ public sealed class ClickOverrides : ILoadable {
 
     private static bool HookTryAllowingToCraftRecipe(On_Main.orig_TryAllowingToCraftRecipe orig, Recipe currentRecipe, bool tryFittingItemInInventoryToAllowCrafting, out bool movedAnItemToAllowCrafting) {
         movedAnItemToAllowCrafting = false;
-        if (Configs.CraftStack.Enabled && (Configs.CraftStack.Value.invertClicks ? (Main.mouseRight && Configs.CraftStack.Value.single && !Main.mouseRightRelease) : (Main.mouseLeft && Configs.CraftStack.Value.single && !Main.mouseLeftRelease))) return false;
+        if (Configs.CraftStack.Enabled && (Configs.CraftStack.Value.invertClicks ? (Main.mouseRight && !Configs.CraftStack.Value.repeat && !Main.mouseRightRelease) : (Main.mouseLeft && !Configs.CraftStack.Value.repeat && !Main.mouseLeftRelease))) return false;
         if (Configs.InventoryManagement.ShiftRight && Main.cursorOverride == CraftCursorID) return Main.LocalPlayer.ItemSpace(currentRecipe.createItem).CanTakeItem;
         return orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting, out movedAnItemToAllowCrafting);
     }
@@ -225,7 +225,7 @@ public sealed class ClickOverrides : ILoadable {
             int craft = GetMaxCraftAmount(r);
             int pickup = GetMaxPickupAmount(r.createItem);
             int stack = GetMaxStackAmount(r.createItem);
-            s_ilCraftMultiplier = Math.Max(MathX.Min(craft, pickup / r.createItem.stack, Configs.CraftStack.Value.maxAmount / r.createItem.stack), 1);
+            s_ilCraftMultiplier = Math.Max(MathX.Min(craft, pickup / r.createItem.stack, Configs.CraftStack.Value.maxItems / r.createItem.stack), 1);
             return r;
         });
         // Item crafted = r.createItem.Clone();
@@ -356,7 +356,7 @@ public sealed class ClickOverrides : ILoadable {
     }
 
     public static int GetMaxStackAmount(Item item) {
-        if (Configs.CraftStack.Value.maxAmount != 0 || !SpysInfiniteConsumables.Enabled) return Configs.CraftStack.Value.maxAmount.amount;
+        if (Configs.CraftStack.Value.maxItems != 0 || !SpysInfiniteConsumables.Enabled) return Configs.CraftStack.Value.maxItems.amount;
         return (int)SpysInfiniteConsumables.GetMixedRequirement(Main.LocalPlayer, item);
     }
 

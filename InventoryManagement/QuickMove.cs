@@ -82,7 +82,7 @@ public sealed class QuickMove : ILoadable {
     public static void UpdateChain(Slot source) {
         if (s_moveTime > 0) {
             s_moveTime--;
-            if (s_moveTime == Configs.QuickMove.Value.chainTime - 1) s_validSlots.Add(source);
+            if (s_moveTime == Configs.QuickMove.Value.resetTime - 1) s_validSlots.Add(source);
             else if (!s_validSlots.Contains(source)) s_moveTime = 0;
         }
 
@@ -113,7 +113,7 @@ public sealed class QuickMove : ILoadable {
         if (s_moveIndex == 0) s_moveTime = 0;
         else {
             s_movedItems = Move(player, s_moveChain[0], s_moveChain[s_moveIndex]);
-            s_moveTime = Configs.QuickMove.Value.chainTime;
+            s_moveTime = Configs.QuickMove.Value.resetTime;
         }
 
         SoundEngine.PlaySound(SoundID.Grab);
@@ -196,7 +196,7 @@ public sealed class QuickMove : ILoadable {
         cursor.EmitLdloc2();
         cursor.EmitDelegate((SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, float scale) => {
             if (!Configs.QuickMove.Highlight) return;
-            if (!IsTargetableSlot(inv, context, slot, out int number, out int key) || (Configs.QuickMove.Value.displayHotkeys == Configs.HotkeyDisplayMode.First ? number != 1 : number == 0)) return;
+            if (!IsTargetableSlot(inv, context, slot, out int number, out int key) || (Configs.QuickMove.Value.displayHotkeys == Configs.HotkeyDisplayMode.Next ? number != 1 : number == 0)) return;
             spriteBatch.Draw(TextureAssets.InventoryBack18.Value, position, null, Main.OurFavoriteColor * (Configs.QuickMove.Value.displayHotkeys.Value.highlightIntensity / number) * Main.cursorAlpha, 0f, default, scale, 0, 0f);
         });
         // }
@@ -229,7 +229,7 @@ public sealed class QuickMove : ILoadable {
         cursor.EmitLdloc2();
         cursor.EmitDelegate((SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, float scale) => {
             if (!Configs.QuickMove.DisplayHotkeys) return;
-            if (!IsTargetableSlot(inv, context, slot, out int number, out int key) || (Configs.QuickMove.Value.displayHotkeys == Configs.HotkeyDisplayMode.First ? number != 1 : number == 0)) return;
+            if (!IsTargetableSlot(inv, context, slot, out int number, out int key) || (Configs.QuickMove.Value.displayHotkeys == Configs.HotkeyDisplayMode.Next ? number != 1 : number == 0)) return;
             key = (key + 1) % 10;
             StringBuilder text = new();
             text.Append(key);

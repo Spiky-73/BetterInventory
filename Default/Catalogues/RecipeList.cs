@@ -9,13 +9,13 @@ using Terraria.ModLoader;
 using Terraria.UI;
 using ContextID = Terraria.UI.ItemSlot.Context;
 
-namespace BetterInventory.Default.SearchProviders;
+namespace BetterInventory.Default.Catalogues;
 
 public sealed class RecipeList : ModEntityCatalogue {
 
     public static RecipeList Instance = null!;
 
-    public override bool Enabled => base.Enabled && !Configs.UnloadedItemSearch.Value.searchRecipes;
+    public override bool Enabled => base.Enabled && !Configs.UnloadedItemSearch.Value.recipeList;
 
     public override void Load() {
         Keybind = KeybindLoader.RegisterKeybind(Mod, Name, "Mouse1");
@@ -101,8 +101,8 @@ public sealed class RecipeList : ModEntityCatalogue {
             if (slot == -1 || slot == 0) ItemSlot.LeftClick(items, ContextID.GuideItem, 0);
             if (slot == -1 || slot == 1) ItemSlot.LeftClick(items, ContextID.GuideItem, 1);
         } else {
-            if (slot == -1) slot = Configs.BetterGuide.Tile && Guide.IsCraftingStation(item) ? 1 : 0;
-            if (Configs.BetterGuide.Tile && Guide.FitsCraftingTile(item) && Guide.GetPlaceholderType(item) == PlaceholderType.None) {
+            if (slot == -1) slot = Configs.BetterGuide.CraftingStation && Guide.IsCraftingStation(item) ? 1 : 0;
+            if (Configs.BetterGuide.CraftingStation && Guide.FitsCraftingTile(item) && Guide.GetPlaceholderType(item) == PlaceholderType.None) {
                 bool clearOtherSlot = item.tooltipContext != ContextID.GuideItem;
                 if (Guide.AreSame(items[slot], item)) {
                     if (clearOtherSlot) SearchPrevious(items, slot, true);

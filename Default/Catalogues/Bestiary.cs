@@ -9,7 +9,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI;
 
-namespace BetterInventory.Default.SearchProviders;
+namespace BetterInventory.Default.Catalogues;
 
 public sealed class Bestiary : ModEntityCatalogue {
 

@@ -11,7 +11,7 @@ public abstract class ModPickupUpgrader : ModType, ILocalizedModType {
         SmartPickup.Register(this);
     }
 
-    public virtual bool Enabled => Configs.QuickSearch.Enabled && Configs.AutoUpgrade.Value.upgraders.GetValueOrDefault(new(this), true);
+    public virtual bool Enabled => Configs.QuickSearch.Enabled && Configs.UpgradeItems.Value.upgraders.GetValueOrDefault(new(this), true);
 
     public abstract bool AppliesTo(Item item);
     public abstract Item AttemptUpgrade(Player player, Item item);

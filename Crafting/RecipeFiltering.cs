@@ -60,7 +60,7 @@ public static class RecipeFiltering {
         int y = hammerY + TextureAssets.CraftToggle[0].Height() - TextureAssets.InfoIcon[0].Width()/2;
         while (i < LocalFilters.Filterer.AvailableFilters.Count) {
             int x = hammerX - TextureAssets.InfoIcon[0].Width() - 1;
-            for(int d = 0; i < filters.AvailableFilters.Count && d < Configs.RecipeFilters.Value.width; i++){
+            for(int d = 0; i < filters.AvailableFilters.Count && d < Configs.RecipeFilters.Value.filtersPerLine; i++){
                 bool active = filters.IsFilterActive(i);
                 if (Configs.RecipeFilters.Value.hideUnavailable && s_recipesInFilter[i] == 0 && !active) continue;
                 Rectangle hitbox = new(x, y, RecipeFilterBack.Width(), RecipeFilterBack.Height());

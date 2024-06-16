@@ -45,9 +45,9 @@ public class Hooks : ILoadable {
     }
 
     private void ILGetItem(ILContext il) {
-        if (!ApplyIL(il, SmartPickup.ILSmartPickup, Configs.PreviousSlot.Enabled)) Configs.UnloadedInventoryManagement.Value.previousSlot = true;
+        if (!ApplyIL(il, SmartPickup.ILPreviousSlot, Configs.PreviousSlot.Enabled)) Configs.UnloadedInventoryManagement.Value.previousSlot = true;
         if (!ApplyIL(il, SmartPickup.ILAutoEquip, Configs.SmartPickup.AutoEquip)) Configs.UnloadedInventoryManagement.Value.autoEquip = true;
-        if (!ApplyIL(il, SmartPickup.ILAutoUprade, Configs.AutoUpgrade.Enabled)) Configs.UnloadedInventoryManagement.Value.autoUpgrade = true;
+        if (!ApplyIL(il, SmartPickup.ILUpradeItems, Configs.UpgradeItems.Enabled)) Configs.UnloadedInventoryManagement.Value.upgradeItems = true;
         if (!ApplyIL(il, SmartPickup.ILHotbarLast, Configs.SmartPickup.HotbarLast)) Configs.UnloadedInventoryManagement.Value.hotbarLast = true;
         if (!ApplyIL(il, SmartPickup.ILFixNewItem, Configs.SmartPickup.FixSlot)) Configs.UnloadedInventoryManagement.Value.fixSlot = true;
     }
@@ -64,7 +64,7 @@ public class Hooks : ILoadable {
         if (!ApplyIL(il, FixedUI.ILListScrollFix, Configs.FixedUI.ListScroll)) Configs.UnloadedCrafting.Value.listScroll = true;
         if (!ApplyIL(il, FixedUI.ILMaterialWrapping, Configs.FixedUI.Wrapping)) Configs.UnloadedCrafting.Value.wrapping = true;
         if (!ApplyIL(il, Crafting.Crafting.ILCraftOnList, Configs.CraftOnList.Enabled)) Configs.UnloadedCrafting.Value.craftOnList = true;
-        if (!ApplyIL(il, Default.SearchProviders.RecipeList.ILForceGuideDisplay, Default.SearchProviders.RecipeList.Instance.Enabled)) Configs.UnloadedItemSearch.Value.searchRecipes = true;
+        if (!ApplyIL(il, Default.Catalogues.RecipeList.ILForceGuideDisplay, Default.Catalogues.RecipeList.Instance.Enabled)) Configs.UnloadedItemSearch.Value.recipeList = true;
         if (!ApplyIL(il, Guide.ILDrawVisibility, Configs.BetterGuide.CraftInMenu)) Configs.UnloadedItemSearch.Value.guideCraftInMenu = true;
         if (!ApplyIL(il, Guide.ILCustomDrawCreateItem, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = true;
         if (!ApplyIL(il, Guide.ILCustomDrawMaterials, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = true;
@@ -80,7 +80,7 @@ public class Hooks : ILoadable {
         if (!ApplyIL(il, ClickOverrides.ILCraftMultiplier, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
         if (!ApplyIL(il, ClickOverrides.ILCraftStackAndPickup, Configs.CraftStack.Enabled || Configs.InventoryManagement.ShiftRight)) Configs.UnloadedInventoryManagement.Value.craftStack = Configs.UnloadedInventoryManagement.Value.shiftRight = true;
         if (!ApplyIL(il, ClickOverrides.ILCraftFixMouseText, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
-        if (!ApplyIL(il, Guide.IlUnfavoriteOnCraft, Configs.FavoriteRecipes.UnfavoriteOnCraft)) Configs.UnloadedItemSearch.Value.guideUnfavoriteOnCraft = true;
+        if (!ApplyIL(il, Guide.IlUnfavoriteOnCraft, Configs.FavoritedRecipes.UnfavoriteOnCraft)) Configs.UnloadedItemSearch.Value.guideUnfavoriteOnCraft = true;
     }
 
     private void ILFindRecipes(ILContext il){
@@ -89,7 +89,7 @@ public class Hooks : ILoadable {
     }
     private void ILOverrideGuideRecipes(ILContext il){
         if (!ApplyIL(il, Guide.ILMoreGuideRecipes, Configs.BetterGuide.MoreRecipes)) Configs.UnloadedItemSearch.Value.guideMoreRecipes = true;
-        if (!ApplyIL(il, Guide.ILForceAddToAvailable, Configs.BetterGuide.AvailableRecipes || Configs.BetterGuide.Tile || Configs.RecipeFilters.Enabled)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = Configs.UnloadedItemSearch.Value.guideMoreRecipes = Configs.UnloadedCrafting.Value.recipeFilters = true;
+        if (!ApplyIL(il, Guide.ILForceAddToAvailable, Configs.BetterGuide.AvailableRecipes || Configs.BetterGuide.CraftingStation || Configs.RecipeFilters.Enabled)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = Configs.UnloadedItemSearch.Value.guideCraftingStation = Configs.UnloadedCrafting.Value.recipeFilters = true;
         if (!ApplyIL(il, Guide.ILGuideRecipeOrder, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = true;
     }
     private void ILConsumeForCraft(ILContext il) {
@@ -112,15 +112,15 @@ public class Hooks : ILoadable {
         if (!ApplyIL(il, ClickOverrides.ILStackTrash, Configs.InventoryManagement.StackTrash)) Configs.UnloadedInventoryManagement.Value.stackTrash = true;
     }
     private void ILDrawSlot(ILContext il) {
-        if (!ApplyIL(il, SmartPickup.ILDrawFakeItem, Configs.MarksDisplay.FakeItem)) Configs.UnloadedInventoryManagement.Value.marksFakeItem = true;
-        if (!ApplyIL(il, SmartPickup.ILDrawIcon, Configs.MarksDisplay.Icon)) Configs.UnloadedInventoryManagement.Value.marksIcon = true;
+        if (!ApplyIL(il, SmartPickup.ILDrawFakeItem, Configs.PreviousDisplay.FakeItem)) Configs.UnloadedInventoryManagement.Value.displayFakeItem = true;
+        if (!ApplyIL(il, SmartPickup.ILDrawIcon, Configs.PreviousDisplay.Icon)) Configs.UnloadedInventoryManagement.Value.displayIcon = true;
         if (!ApplyIL(il, QuickMove.ILHighlightSlot, Configs.QuickMove.Highlight)) Configs.UnloadedInventoryManagement.Value.quickMoveHighlight = true;
         if (!ApplyIL(il, QuickMove.ILDisplayHotkey, Configs.QuickMove.DisplayHotkeys)) Configs.UnloadedInventoryManagement.Value.quickMoveHotkeys = true;
         if (!ApplyIL(il, ClickOverrides.ILFavoritedBankBackground, Configs.InventoryManagement.FavoriteInBanks)) Configs.UnloadedInventoryManagement.Value.favoriteInBanks = true;
     }
 
     private void ILFilters_BySearch(ILContext il) {
-        if (!ApplyIL(il, Bestiary.ILSearchAddEntries, Configs.BetterBestiary.DisplayedUnlock)) Configs.UnloadedItemSearch.Value.bestiaryDisplayedUnlock = true;
+        if (!ApplyIL(il, Bestiary.ILSearchAddEntries, Configs.BetterBestiary.DisplayedInfo)) Configs.UnloadedItemSearch.Value.bestiaryDisplayedInfo = true;
     }
     private void ILEntryIcon_Update(ILContext il) {
         if (!ApplyIL(il, Bestiary.ILIconUpdateFakeUnlock, Configs.BetterBestiary.Unlock)) Configs.UnloadedItemSearch.Value.BestiaryUnlock = true;

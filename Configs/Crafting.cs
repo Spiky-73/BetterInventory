@@ -38,14 +38,14 @@ public sealed class FastScroll {
 
 public sealed class RecipeFilters {
     [DefaultValue(true)] public bool hideUnavailable = true;
-    [Range(0, 6), DefaultValue(4)] public int width = 4;
+    [Range(1, 6), DefaultValue(4)] public int filtersPerLine = 4;
 
     public static bool Enabled => Crafting.Instance.recipeFilters && !UnloadedCrafting.Value.recipeFilters;
     public static RecipeFilters Value => Crafting.Instance.recipeFilters.Value;
 }
 
 public sealed class CraftOnList {
-    [DefaultValue(false)] public bool focusRecipe = false;
+    [DefaultValue(false)] public bool focusHovered = false;
 
     public static bool Enabled => Crafting.Instance.craftOnList && !UnloadedCrafting.Value.craftOnList;
     public static CraftOnList Value => Crafting.Instance.craftOnList.Value;

@@ -12,9 +12,7 @@ namespace BetterInventory.Configs;
 public sealed class InventoryManagement : ModConfig {
     public Toggle<SmartConsumption> smartConsumption = new(true);
     public Toggle<SmartPickup> smartPickup = new(true);
-
     public Toggle<QuickMove> quickMove = new(true);
-
     public Toggle<CraftStack> craftStack = new(true);
     [DefaultValue(true)] public bool favoriteInBanks;
     [DefaultValue(true)] public bool shiftRight;
@@ -54,7 +52,7 @@ public sealed class SmartConsumption {
 public sealed class SmartPickup { // TODO port settings
     public NestedValue<ItemPickupLevel, PreviousSlot> previousSlot = new(ItemPickupLevel.AllItems);
     [DefaultValue(AutoEquipLevel.PrimarySlots)] public AutoEquipLevel autoEquip = AutoEquipLevel.PrimarySlots;
-    public Toggle<AutoUpgrade> autoUpgrade = new(true);
+    public Toggle<UpgradeItems> upgradeItems = new(true);
     [DefaultValue(true)] public bool hotbarLast = true;
     [DefaultValue(true)] public bool fixSlot = true;
 
@@ -64,44 +62,44 @@ public sealed class SmartPickup { // TODO port settings
     public static bool FixSlot => !UnloadedInventoryManagement.Value.fixSlot && Enabled && Value.fixSlot;
     public static SmartPickup Value => InventoryManagement.Instance.smartPickup.Value;
 }
+public enum ItemPickupLevel { None, ImportantItems, AllItems }
 public enum AutoEquipLevel { None, PrimarySlots, AnySlot }
 
 public sealed class PreviousSlot {
     [DefaultValue(true)] public bool mouse = true;
     [DefaultValue(true)] public bool mediumCore = true;
-    [DefaultValue(false)] public bool overrideMarks = false;
-    public Toggle<MarksDisplay> displayMarks = new(true); // TODO port settings
+    [DefaultValue(false)] public bool overridePrevious = false;
+    public Toggle<PreviousDisplay> displayPrevious = new(true); // TODO port settings
 
     public static bool Enabled => SmartPickup.Enabled && !UnloadedInventoryManagement.Value.previousSlot && SmartPickup.Value.previousSlot.Parent > ItemPickupLevel.None;
     public static bool Mouse => Enabled && Value.mouse;
     public static bool MediumCore => Enabled && Value.mediumCore;
     public static PreviousSlot Value => SmartPickup.Value.previousSlot.Value;
 }
-public enum ItemPickupLevel { None, ImportantItems, AllItems }
 
-public sealed class MarksDisplay {
+public sealed class PreviousDisplay {
     public Toggle<FakeItemDisplay> fakeItem = new(true);
     public Toggle<IconDisplay> icon = new(true);
     
-    public static bool Enabled => SmartPickup.Enabled && PreviousSlot.Value.displayMarks;
-    public static bool FakeItem => Enabled && Value.icon && !UnloadedInventoryManagement.Value.marksFakeItem;
-    public static bool Icon => Enabled && Value.icon && !UnloadedInventoryManagement.Value.marksIcon;
-    public static MarksDisplay Value => PreviousSlot.Value.displayMarks.Value;
+    public static bool Enabled => SmartPickup.Enabled && PreviousSlot.Value.displayPrevious;
+    public static bool FakeItem => Enabled && Value.icon && !UnloadedInventoryManagement.Value.displayFakeItem;
+    public static bool Icon => Enabled && Value.icon && !UnloadedInventoryManagement.Value.displayIcon;
+    public static PreviousDisplay Value => PreviousSlot.Value.displayPrevious.Value;
 }
 
-public interface IMarkDisplay { Vector2 position { get; } float scale { get; } float intensity { get; } }
-public sealed class FakeItemDisplay : IMarkDisplay {
+public interface IPreviousDisplay { Vector2 position { get; } float scale { get; } float intensity { get; } }
+public sealed class FakeItemDisplay : IPreviousDisplay {
     [DefaultValue(typeof(Vector2), "0.5, 0.5")] public Vector2 position { get; set; } = new(0.5f, 0.5f);
     [DefaultValue(1f)] public float scale { get; set; } = 1f;
     [DefaultValue(0.33f)] public float intensity { get; set; } = 0.33f;
 }
-public sealed class IconDisplay : IMarkDisplay {
+public sealed class IconDisplay : IPreviousDisplay {
     [DefaultValue(typeof(Vector2), "0.8, 0.8")] public Vector2 position { get; set; } = new(0.8f, 0.8f);
     [DefaultValue(1f)] public float scale { get; set; } = 0.4f;
     [DefaultValue(1f)] public float intensity { get; set; } = 1f;
 }
 
-public sealed class AutoUpgrade {
+public sealed class UpgradeItems {
     [CustomModConfigItem(typeof(DictionaryValuesElement))]
     public Dictionary<ModPickupUpgraderDefinition, bool> upgraders {
         get => _upgraders;
@@ -112,18 +110,18 @@ public sealed class AutoUpgrade {
     }
     [DefaultValue(true)] public bool importantOnly { get; set; } = true;
 
-    public static bool Enabled => SmartPickup.Enabled && !UnloadedInventoryManagement.Value.autoUpgrade && SmartPickup.Value.autoUpgrade;
-    public static AutoUpgrade Value => SmartPickup.Value.autoUpgrade.Value;
+    public static bool Enabled => SmartPickup.Enabled && !UnloadedInventoryManagement.Value.upgradeItems && SmartPickup.Value.upgradeItems;
+    public static UpgradeItems Value => SmartPickup.Value.upgradeItems.Value;
     
     private Dictionary<ModPickupUpgraderDefinition, bool> _upgraders = [];
 }
 
 public sealed class QuickMove {
-    [Range(0, 3600), DefaultValue(60*3)] public int chainTime = 60*3;
-    [DefaultValue(true)] public bool returnToSlot = true;
-    [DefaultValue(false)] public bool tooltip = false;
     [DefaultValue(HotkeyMode.Hotbar)] public HotkeyMode hotkeyMode = HotkeyMode.Hotbar;
+    [Range(0, 3600), DefaultValue(60*3)] public int resetTime = 60*3;
+    [DefaultValue(true)] public bool returnToSlot = true;
     public NestedValue<HotkeyDisplayMode, DisplayedHotkeys> displayHotkeys = new(HotkeyDisplayMode.All);
+    [DefaultValue(false)] public bool tooltip = false;
 
     public static bool Enabled => InventoryManagement.Instance.quickMove;
     public static bool DisplayHotkeys => Value.displayHotkeys != HotkeyDisplayMode.None && !UnloadedInventoryManagement.Value.quickMoveHotkeys;
@@ -131,7 +129,7 @@ public sealed class QuickMove {
     public static QuickMove Value => InventoryManagement.Instance.quickMove.Value;
 }
 
-public enum HotkeyDisplayMode { None, First, All }
+public enum HotkeyDisplayMode { None, Next, All }
 public enum HotkeyMode { Hotbar, FromEnd, Reversed }
 
 public sealed class DisplayedHotkeys {
@@ -139,9 +137,9 @@ public sealed class DisplayedHotkeys {
 }
 
 public sealed class CraftStack {
-    [DefaultValue(false)] public bool single = false;
+    public MaxCraftAmount maxItems = new(999);
+    [DefaultValue(true)] public bool repeat = true;
     [DefaultValue(false)] public bool invertClicks = false;
-    public MaxCraftAmount maxAmount = new(999);
     [DefaultValue(false)] public bool tooltip = false;
 
     public static bool Enabled => !UnloadedInventoryManagement.Value.craftStack && InventoryManagement.Instance.craftStack;
@@ -154,12 +152,12 @@ public sealed class MaxCraftAmount : MultiChoice<int> {
     public MaxCraftAmount(int value) : base(value) { }
 
     [Choice, Range(1, 9999), DefaultValue(999)] public int amount = 999;
-    [Choice] public Text? spic { get; set; }
+    [Choice] public Text? spicRequirement { get; set; } // TODO warn if no mod
 
     public override int Value {
-        get => Choice == nameof(spic) ? 0 : amount;
+        get => Choice == nameof(spicRequirement) ? 0 : amount;
         set {
-            if (value == 0) Choice = nameof(spic);
+            if (value == 0) Choice = nameof(spicRequirement);
             else {
                 Choice = nameof(amount);
                 amount = value;
