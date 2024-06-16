@@ -11,21 +11,16 @@ namespace BetterInventory.Configs;
 
 public sealed class InventoryManagement : ModConfig {
     public Toggle<SmartConsumption> smartConsumption = new(true);
-    
-    public Toggle<SmartPickup> smartPickup = new(true); // TODO port settings
-    public Toggle<AutoEquip> autoEquip = new(true); // TODO port settings
-    public Toggle<AutoUpgrade> autoUpgrade = new(true);
-    [DefaultValue(true)] public bool hotbarLast;
-        
-    [DefaultValue(true)] public bool favoriteInBanks;
-    public Toggle<QuickMove> quickMove = new(true);
-    public Toggle<CraftStack> craftStack = new(true);
+    public Toggle<SmartPickup> smartPickup = new(true);
 
+    public Toggle<QuickMove> quickMove = new(true);
+
+    public Toggle<CraftStack> craftStack = new(true);
+    [DefaultValue(true)] public bool favoriteInBanks;
     [DefaultValue(true)] public bool shiftRight;
     [DefaultValue(true)] public bool stackTrash;
 
     public static bool FavoriteInBanks => !UnloadedInventoryManagement.Value.favoriteInBanks && Instance.favoriteInBanks;
-    public static bool HotbarLast => !UnloadedInventoryManagement.Value.hotbarLast && Instance.hotbarLast;
     public static bool ShiftRight => !UnloadedInventoryManagement.Value.shiftRight && Instance.shiftRight;
     public static bool StackTrash => !UnloadedInventoryManagement.Value.stackTrash && Instance.stackTrash;
 
@@ -56,27 +51,42 @@ public sealed class SmartConsumption {
     public static SmartConsumption Value => InventoryManagement.Instance.smartConsumption.Value;
 }
 
-public sealed class SmartPickup {
-    [DefaultValue(MousePickupLevel.AllItems)] public MousePickupLevel mouse = MousePickupLevel.AllItems; // TODO port settings
-    [DefaultValue(MousePickupLevel.AllItems)] public MousePickupLevel mediumCore = MousePickupLevel.AllItems;
+public sealed class SmartPickup { // TODO port settings
+    public NestedValue<ItemPickupLevel, PreviousSlot> previousSlot = new(ItemPickupLevel.AllItems);
+    [DefaultValue(AutoEquipLevel.PrimarySlots)] public AutoEquipLevel autoEquip = AutoEquipLevel.PrimarySlots;
+    public Toggle<AutoUpgrade> autoUpgrade = new(true);
+    [DefaultValue(true)] public bool hotbarLast = true;
+    [DefaultValue(true)] public bool fixSlot = true;
+
+    public static bool Enabled => InventoryManagement.Instance.smartPickup.Parent;
+    public static bool AutoEquip => !UnloadedInventoryManagement.Value.autoEquip && Enabled && Value.autoEquip > AutoEquipLevel.None;
+    public static bool HotbarLast => !UnloadedInventoryManagement.Value.hotbarLast && Enabled && Value.hotbarLast;
+    public static bool FixSlot => !UnloadedInventoryManagement.Value.fixSlot && Enabled && Value.fixSlot;
+    public static SmartPickup Value => InventoryManagement.Instance.smartPickup.Value;
+}
+public enum AutoEquipLevel { None, PrimarySlots, AnySlot }
+
+public sealed class PreviousSlot {
+    [DefaultValue(true)] public bool mouse = true;
+    [DefaultValue(true)] public bool mediumCore = true;
     [DefaultValue(false)] public bool overrideMarks = false;
     public Toggle<MarksDisplay> displayMarks = new(true); // TODO port settings
 
-    public static bool Enabled => !UnloadedInventoryManagement.Value.smartPickup && InventoryManagement.Instance.smartPickup.Parent;
-    public static bool Mouse => Enabled && Value.mouse > MousePickupLevel.Off;
-    public static bool MediumCore => Enabled && Value.mediumCore > MousePickupLevel.Off;
-    public static SmartPickup Value => InventoryManagement.Instance.smartPickup.Value;
+    public static bool Enabled => SmartPickup.Enabled && !UnloadedInventoryManagement.Value.previousSlot && SmartPickup.Value.previousSlot.Parent > ItemPickupLevel.None;
+    public static bool Mouse => Enabled && Value.mouse;
+    public static bool MediumCore => Enabled && Value.mediumCore;
+    public static PreviousSlot Value => SmartPickup.Value.previousSlot.Value;
 }
-public enum MousePickupLevel { Off, FavoritedOnly, AllItems }
+public enum ItemPickupLevel { None, ImportantItems, AllItems }
 
 public sealed class MarksDisplay {
     public Toggle<FakeItemDisplay> fakeItem = new(true);
     public Toggle<IconDisplay> icon = new(true);
     
-    public static bool Enabled => SmartPickup.Value.displayMarks;
-    public static bool FakeItem => Enabled && Value.icon && !UnloadedInventoryManagement.Value.fakeItem;
+    public static bool Enabled => SmartPickup.Enabled && PreviousSlot.Value.displayMarks;
+    public static bool FakeItem => Enabled && Value.icon && !UnloadedInventoryManagement.Value.marksFakeItem;
     public static bool Icon => Enabled && Value.icon && !UnloadedInventoryManagement.Value.marksIcon;
-    public static MarksDisplay Value => SmartPickup.Value.displayMarks.Value;
+    public static MarksDisplay Value => PreviousSlot.Value.displayMarks.Value;
 }
 
 public interface IMarkDisplay { Vector2 position { get; } float scale { get; } float intensity { get; } }
@@ -91,14 +101,7 @@ public sealed class IconDisplay : IMarkDisplay {
     [DefaultValue(1f)] public float intensity { get; set; } = 1f;
 }
 
-public sealed class AutoEquip {
-    [DefaultValue(false)] public bool nonPrimary = false;
-
-    public static bool Enabled => !UnloadedInventoryManagement.Value.autoEquip && InventoryManagement.Instance.autoEquip;
-    public static AutoEquip Value => InventoryManagement.Instance.autoEquip.Value;
-}
 public sealed class AutoUpgrade {
-    [DefaultValue(false)] public bool favoritedOnly = false;
     [CustomModConfigItem(typeof(DictionaryValuesElement))]
     public Dictionary<ModPickupUpgraderDefinition, bool> upgraders {
         get => _upgraders;
@@ -106,12 +109,13 @@ public sealed class AutoUpgrade {
             foreach (ModPickupUpgrader upgrader in global::BetterInventory.InventoryManagement.SmartPickup.Upgraders) value.TryAdd(new(upgrader), true);
             _upgraders = value;
         }
-
     }
-    private Dictionary<ModPickupUpgraderDefinition, bool> _upgraders = [];
+    [DefaultValue(true)] public bool importantOnly { get; set; } = true;
 
-    public static bool Enabled => !UnloadedInventoryManagement.Value.autoUpgrade && InventoryManagement.Instance.autoUpgrade;
-    public static AutoUpgrade Value => InventoryManagement.Instance.autoUpgrade.Value;
+    public static bool Enabled => SmartPickup.Enabled && !UnloadedInventoryManagement.Value.autoUpgrade && SmartPickup.Value.autoUpgrade;
+    public static AutoUpgrade Value => SmartPickup.Value.autoUpgrade.Value;
+    
+    private Dictionary<ModPickupUpgraderDefinition, bool> _upgraders = [];
 }
 
 public sealed class QuickMove {
@@ -122,12 +126,12 @@ public sealed class QuickMove {
     public NestedValue<HotkeyDisplayMode, DisplayedHotkeys> displayHotkeys = new(HotkeyDisplayMode.All);
 
     public static bool Enabled => InventoryManagement.Instance.quickMove;
-    public static bool DisplayHotkeys => Value.displayHotkeys != HotkeyDisplayMode.Off && !UnloadedInventoryManagement.Value.quickMoveHotkeys;
+    public static bool DisplayHotkeys => Value.displayHotkeys != HotkeyDisplayMode.None && !UnloadedInventoryManagement.Value.quickMoveHotkeys;
     public static bool Highlight => DisplayHotkeys && Value.displayHotkeys.Value.highlightIntensity != 0 && !UnloadedInventoryManagement.Value.quickMoveHighlight;
     public static QuickMove Value => InventoryManagement.Instance.quickMove.Value;
 }
 
-public enum HotkeyDisplayMode { Off, First, All }
+public enum HotkeyDisplayMode { None, First, All }
 public enum HotkeyMode { Hotbar, FromEnd, Reversed }
 
 public sealed class DisplayedHotkeys {

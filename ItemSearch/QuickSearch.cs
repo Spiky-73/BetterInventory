@@ -23,8 +23,8 @@ public sealed class QuickSearch : ILoadable {
     }
 
     public void Unload() {
-        foreach(SearchProvider provider in s_providers) ModConfigExtensions.SetInstance(provider, true);
-        s_providers.Clear();
+        foreach(ModEntityCatalogue catalogue in s_catalogues) ModConfigExtensions.SetInstance(catalogue, true);
+        s_catalogues.Clear();
     }
 
     private static void HookRedirectCursor(On_Main.orig_DrawCursor orig, Vector2 bonus, bool smart) {
@@ -65,14 +65,14 @@ public sealed class QuickSearch : ILoadable {
         if (!s_individualCanClick) return;
 
         Main.LocalPlayer.mouseInterface = true;
-        foreach(SearchProvider provider in Providers) {
-            if(provider.Enabled && provider.Keybind.JustPressed) {
+        foreach(ModEntityCatalogue catalogue in EntityCatalogue) {
+            if(catalogue.Enabled && catalogue.Keybind.JustPressed) {
                 if (Configs.QuickSearch.Value.individualKeybinds.Parent.HasFlag(Configs.SearchAction.Search) && !Main.HoverItem.IsAir) {
-                    provider.Toggle(true);
-                    if (Guide.forcedTooltip?.Key != $"{Localization.Keys.UI}.Unknown") provider.Search(Main.HoverItem);
+                    catalogue.Toggle(true);
+                    if (Guide.forcedTooltip?.Key != $"{Localization.Keys.UI}.Unknown") catalogue.Search(Main.HoverItem);
                     SoundEngine.PlaySound(SoundID.Grab);
                 } else if (Configs.QuickSearch.Value.individualKeybinds.Parent.HasFlag(Configs.SearchAction.Toggle)) {
-                    provider.Toggle();
+                    catalogue.Toggle();
                     SoundEngine.PlaySound(SoundID.MenuTick);
                 }
             }
@@ -88,7 +88,7 @@ public sealed class QuickSearch : ILoadable {
                 bool first = s_taps == -1;
                 if (first) {
                     s_sharedItem = Main.HoverItem.Clone();
-                    s_enabledProviders = Providers.Where(p => p.Enabled).ToList();
+                    s_enabledProviders = EntityCatalogue.Where(p => p.Enabled).ToList();
                     s_taps = Math.Max(s_enabledProviders.FindIndex(p => p.Visible), 0);
                 }
                 if (s_enabledProviders.Count == 0) return;
@@ -117,25 +117,25 @@ public sealed class QuickSearch : ILoadable {
         s_timer++;
     }
 
-    internal static void Register(SearchProvider provider) {
-        ModConfigExtensions.SetInstance(provider);
+    internal static void Register(ModEntityCatalogue catalogue) {
+        ModConfigExtensions.SetInstance(catalogue);
 
-        int before = s_providers.FindIndex(p => provider.ComparePositionTo(p) < 0 || p.ComparePositionTo(provider) > 0);
-        if (before != -1) s_providers.Insert(before, provider);
-        else s_providers.Add(provider);
+        int before = s_catalogues.FindIndex(p => catalogue.ComparePositionTo(p) < 0 || p.ComparePositionTo(catalogue) > 0);
+        if (before != -1) s_catalogues.Insert(before, catalogue);
+        else s_catalogues.Add(catalogue);
     }
 
-    public static SearchProvider? GetProvider(string mod, string name) => s_providers.Find(p => p.Mod.Name == mod && p.Name == name);
+    public static ModEntityCatalogue? GetEntityCatalogue(string mod, string name) => s_catalogues.Find(p => p.Mod.Name == mod && p.Name == name);
 
     public static ModKeybind QuickSearchKb { get; private set; } = null!;
-    public static ReadOnlyCollection<SearchProvider> Providers => s_providers.AsReadOnly();
+    public static ReadOnlyCollection<ModEntityCatalogue> EntityCatalogue => s_catalogues.AsReadOnly();
 
-    private static readonly List<SearchProvider> s_providers = [];
+    private static readonly List<ModEntityCatalogue> s_catalogues = [];
     private static bool s_redirect = false;
 
     private static bool s_individualCanClick = false;
 
     private static int s_timer = 0, s_taps = 0;
     private static Item s_sharedItem = new();
-    private static List<SearchProvider> s_enabledProviders = new();
+    private static List<ModEntityCatalogue> s_enabledProviders = new();
 }

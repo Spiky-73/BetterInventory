@@ -11,7 +11,7 @@ using Terraria.UI;
 
 namespace BetterInventory.Default.SearchProviders;
 
-public sealed class Bestiary : SearchProvider {
+public sealed class Bestiary : ModEntityCatalogue {
 
     public static Bestiary Instance = null!;    
 
@@ -102,7 +102,7 @@ public sealed class Bestiary : SearchProvider {
         }
     }
 
-    public override int ComparePositionTo(SearchProvider other) => other is RecipeList ? 1 : 0;
+    public override int ComparePositionTo(ModEntityCatalogue other) => other is RecipeList ? 1 : 0;
 
     private static UISearchBar _npcSearchBar = null!;
     private static string? s_bestiaryDelayed;

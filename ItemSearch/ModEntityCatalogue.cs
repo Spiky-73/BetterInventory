@@ -5,13 +5,13 @@ using Terraria.ModLoader;
 
 namespace BetterInventory.ItemSearch;
 
-public abstract class SearchProvider : ModType, ILocalizedModType { // TODO rename
+public abstract class ModEntityCatalogue : ModType, ILocalizedModType {
     protected sealed override void Register() {
-        ModTypeLookup<SearchProvider>.Register(this);
+        ModTypeLookup<ModEntityCatalogue>.Register(this);
         QuickSearch.Register(this);
     }
 
-    public virtual bool Enabled => Configs.QuickSearch.Enabled && Configs.QuickSearch.Value.providers.GetValueOrDefault(new(this), true);
+    public virtual bool Enabled => Configs.QuickSearch.Enabled && Configs.QuickSearch.Value.catalogues.GetValueOrDefault(new(this), true);
 
     public ModKeybind Keybind { get; protected set; } = null!;
     public abstract bool Visible { get; }
@@ -21,8 +21,8 @@ public abstract class SearchProvider : ModType, ILocalizedModType { // TODO rena
 
     public sealed override void SetupContent() => SetStaticDefaults();
 
-    public string LocalizationCategory => "SearchProviders";
+    public string LocalizationCategory => "EntityCatalogues";
     public virtual LocalizedText DisplayName => this.GetLocalization("DisplayName", PrettyPrintName);
 
-    public virtual int ComparePositionTo(SearchProvider other) => 0;
+    public virtual int ComparePositionTo(ModEntityCatalogue other) => 0;
 }

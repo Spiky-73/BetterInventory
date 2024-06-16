@@ -11,7 +11,7 @@ public sealed class ToolUpgrader : ModPickupUpgrader {
     public override Item AttemptUpgrade(Player player, Item item) {
         int rep = -1;
         for (int i = 0; i < player.inventory.Length; i++) {
-            if (!(!Configs.AutoUpgrade.Value.favoritedOnly || player.inventory[i].favorited) || !AppliesTo(player.inventory[i]) || !AreComparable(player.inventory[i], item)) continue;
+            if (!(!Configs.AutoUpgrade.Value.importantOnly || player.inventory[i].favorited) || !AppliesTo(player.inventory[i]) || !AreComparable(player.inventory[i], item)) continue;
             if ((rep == -1 || CompareTools(player.inventory[i], player.inventory[rep]) > 0) && CompareTools(item, player.inventory[i]) > 0) rep = i;
         }
         if (rep == -1) return item;

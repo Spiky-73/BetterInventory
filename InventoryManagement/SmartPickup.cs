@@ -32,7 +32,7 @@ public sealed class SmartPickup : ILoadable {
     private static void HookLeftSaveType(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) => UpdateMark((inv, context, slot) => orig(inv, context, slot), inv, context, slot, Main.mouseLeft && Main.mouseLeftRelease);
     private static void HookRightSaveType(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) => UpdateMark((inv, context, slot) => orig(inv, context, slot), inv, context, slot, Main.mouseRight);
     private static void UpdateMark(Action<Item[], int, int> orig, Item[] inv, int context, int slot, bool update) {
-        if (!update || !Configs.SmartPickup.Mouse || !InventoryLoader.IsInventorySlot(Main.LocalPlayer, inv, context, slot, out Slot mark)) {
+        if (!update || !Configs.PreviousSlot.Mouse || !InventoryLoader.IsInventorySlot(Main.LocalPlayer, inv, context, slot, out Slot mark)) {
             orig(inv, context, slot);
             return;
         }
@@ -40,8 +40,8 @@ public sealed class SmartPickup : ILoadable {
         orig(inv, context, slot);
         if (Main.mouseItem.type == oldMouse) return;
 
-        bool removed = oldType != ItemID.None && (Configs.SmartPickup.Value.mouse == Configs.MousePickupLevel.AllItems || mark.Inventory.CanBePrimary || oldFav);
-        bool placed = inv[slot].type != ItemID.None && (Configs.SmartPickup.Value.mouse == Configs.MousePickupLevel.AllItems || mark.Inventory.CanBePrimary || inv[slot].favorited);
+        bool removed = oldType != ItemID.None && (Configs.SmartPickup.Value.previousSlot == Configs.ItemPickupLevel.AllItems || mark.Inventory.CanBePrimary || oldFav);
+        bool placed = inv[slot].type != ItemID.None && (Configs.SmartPickup.Value.previousSlot == Configs.ItemPickupLevel.AllItems || mark.Inventory.CanBePrimary || inv[slot].favorited);
 
         if (placed && removed) Remark(inv[slot].type, oldType, oldFav);
         else if (removed) Mark(oldType, mark, oldFav);
@@ -49,7 +49,7 @@ public sealed class SmartPickup : ILoadable {
         if (placed) Unmark(mark);
     }
     private static void HookMarkItemsOnDeath(On_Player.orig_DropItems orig, Player self) {
-        if (!Configs.SmartPickup.MediumCore) {
+        if (!Configs.PreviousSlot.MediumCore) {
             orig(self);
             return;
         }
@@ -57,7 +57,7 @@ public sealed class SmartPickup : ILoadable {
         foreach (ModSubInventory inventory in InventoryLoader.SubInventories) {
             IList<Item> items = inventory.Items(self);
             for (int i = 0; i < items.Count; i++) {
-                if (!items[i].IsAir && (Configs.SmartPickup.Value.mouse == Configs.MousePickupLevel.AllItems || inventory.CanBePrimary || items[i].favorited)) Mark(items[i].type, new(inventory, i), items[i].favorited);
+                if (!items[i].IsAir && (Configs.SmartPickup.Value.previousSlot == Configs.ItemPickupLevel.AllItems || inventory.CanBePrimary || items[i].favorited)) Mark(items[i].type, new(inventory, i), items[i].favorited);
             }
         }
         orig(self);
@@ -74,12 +74,12 @@ public sealed class SmartPickup : ILoadable {
             return;
         }
 
-        // ++ item = <smartPickup>
+        // ++ item = <previousSlot>
         cursor.EmitLdarg0();
         cursor.EmitLdloc1();
         cursor.EmitLdarg3();
         cursor.EmitDelegate((Player self, Item item, GetItemSettings settings) => {
-            if (VanillaGetItem || !Configs.SmartPickup.Enabled) return item;
+            if (VanillaGetItem || !Configs.PreviousSlot.Enabled) return item;
             else return SmartGetItem(self, item, settings);
         });
         cursor.EmitDup();
@@ -161,7 +161,7 @@ public sealed class SmartPickup : ILoadable {
         cursor.EmitLdloc1();
         cursor.EmitLdarg3();
         cursor.EmitDelegate((Player self, Item item, GetItemSettings settings) => {
-            if (VanillaGetItem || settings.NoText || !Configs.AutoEquip.Enabled) return item;
+            if (VanillaGetItem || settings.NoText || !Configs.SmartPickup.AutoEquip) return item;
             return item = AutoEquip(self, item, settings);
         });
         cursor.EmitDup();
@@ -196,10 +196,10 @@ public sealed class SmartPickup : ILoadable {
     internal static void ILFixNewItem(ILContext il) {
         ILCursor cursor = new(il);
         cursor.GotoNext(MoveType.After, i => i.MatchStloc1());
-        while(cursor.TryGotoNext(MoveType.Before, i => i.MatchLdarg2() && i.Next.MatchLdfld(out _))){
-            cursor.Remove();
-            cursor.GotoNext(MoveType.AfterLabel);
+        while (cursor.TryGotoNext(MoveType.After, i => i.MatchLdarg2() && i.Next.MatchLdfld(out _))) {
             cursor.EmitLdloc1();
+            cursor.EmitDelegate((Item newItem, Item item) => Configs.SmartPickup.FixSlot ? item : newItem);
+            cursor.GotoNext(MoveType.After, i => i.Next.MatchLdfld(out _));
         }
     }
 
@@ -219,7 +219,7 @@ public sealed class SmartPickup : ILoadable {
         cursor.GotoNext(MoveType.After, i => i.MatchLdfld(Reflection.Item.useStyle));
 
         cursor.EmitDelegate((int style) => {
-            if (Configs.InventoryManagement.HotbarLast) return ItemUseStyleID.None;
+            if (Configs.SmartPickup.HotbarLast) return ItemUseStyleID.None;
             return style;
         });
     }
@@ -258,7 +258,7 @@ public sealed class SmartPickup : ILoadable {
     }
     public static Item AutoEquip(Player player, Item item, GetItemSettings settings) {
         foreach (ModSubInventory inv in InventoryLoader.Special.Where(i => i is not Hotbar &&  i.Accepts(item))) {
-            if (!Configs.AutoEquip.Value.nonPrimary && !inv.IsPrimaryFor(item)) continue;
+            if (Configs.SmartPickup.Value.autoEquip < Configs.AutoEquipLevel.AnySlot && !inv.IsPrimaryFor(item)) continue;
             item = inv.GetItem(player, item, settings);
             if (item.IsAir) return item;
         }
@@ -287,7 +287,7 @@ public sealed class SmartPickup : ILoadable {
 
     public static void Mark(int type, Slot slot, bool favorited) {
         if (IsMarked(slot)) {
-            if(!Configs.SmartPickup.Value.overrideMarks) return;
+            if(!Configs.PreviousSlot.Value.overrideMarks) return;
             Unmark(slot);
         }
         s_marks.TryAdd(type, new());

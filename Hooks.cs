@@ -45,11 +45,11 @@ public class Hooks : ILoadable {
     }
 
     private void ILGetItem(ILContext il) {
-        if (!ApplyIL(il, SmartPickup.ILSmartPickup, Configs.SmartPickup.Enabled)) Configs.UnloadedInventoryManagement.Value.smartPickup = true;
-        if (!ApplyIL(il, SmartPickup.ILAutoEquip, Configs.AutoEquip.Enabled)) Configs.UnloadedInventoryManagement.Value.autoEquip = true;
+        if (!ApplyIL(il, SmartPickup.ILSmartPickup, Configs.PreviousSlot.Enabled)) Configs.UnloadedInventoryManagement.Value.previousSlot = true;
+        if (!ApplyIL(il, SmartPickup.ILAutoEquip, Configs.SmartPickup.AutoEquip)) Configs.UnloadedInventoryManagement.Value.autoEquip = true;
         if (!ApplyIL(il, SmartPickup.ILAutoUprade, Configs.AutoUpgrade.Enabled)) Configs.UnloadedInventoryManagement.Value.autoUpgrade = true;
-        ApplyIL(il, SmartPickup.ILFixNewItem, Configs.SmartPickup.Enabled || Configs.AutoEquip.Enabled || Configs.AutoUpgrade.Enabled); // Does not break the features if it fails 
-        if (!ApplyIL(il, SmartPickup.ILHotbarLast, Configs.InventoryManagement.HotbarLast)) Configs.UnloadedInventoryManagement.Value.hotbarLast = true;
+        if (!ApplyIL(il, SmartPickup.ILHotbarLast, Configs.SmartPickup.HotbarLast)) Configs.UnloadedInventoryManagement.Value.hotbarLast = true;
+        if (!ApplyIL(il, SmartPickup.ILFixNewItem, Configs.SmartPickup.FixSlot)) Configs.UnloadedInventoryManagement.Value.fixSlot = true;
     }
     private void ILPickAndConsumeBait(ILContext il){
         if (!ApplyIL(il, SmartConsumptionItem.ILOnConsumeBait, Configs.SmartConsumption.Baits)) Configs.UnloadedInventoryManagement.Value.baits = true;
@@ -112,7 +112,7 @@ public class Hooks : ILoadable {
         if (!ApplyIL(il, ClickOverrides.ILStackTrash, Configs.InventoryManagement.StackTrash)) Configs.UnloadedInventoryManagement.Value.stackTrash = true;
     }
     private void ILDrawSlot(ILContext il) {
-        if (!ApplyIL(il, SmartPickup.ILDrawFakeItem, Configs.MarksDisplay.FakeItem)) Configs.UnloadedInventoryManagement.Value.fakeItem = true;
+        if (!ApplyIL(il, SmartPickup.ILDrawFakeItem, Configs.MarksDisplay.FakeItem)) Configs.UnloadedInventoryManagement.Value.marksFakeItem = true;
         if (!ApplyIL(il, SmartPickup.ILDrawIcon, Configs.MarksDisplay.Icon)) Configs.UnloadedInventoryManagement.Value.marksIcon = true;
         if (!ApplyIL(il, QuickMove.ILHighlightSlot, Configs.QuickMove.Highlight)) Configs.UnloadedInventoryManagement.Value.quickMoveHighlight = true;
         if (!ApplyIL(il, QuickMove.ILDisplayHotkey, Configs.QuickMove.DisplayHotkeys)) Configs.UnloadedInventoryManagement.Value.quickMoveHotkeys = true;

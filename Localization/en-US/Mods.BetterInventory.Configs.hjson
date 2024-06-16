@@ -94,23 +94,8 @@ InventoryManagement: {
 	}
 
 	smartPickup: {
-		Label: "[i:4131] Smart Item Pickup"
-		Tooltip: Items go their previous slot in your inventory when picked up
-	}
-
-	autoEquip: {
-		Label: "[i:83] Auto Equip Items"
-		Tooltip: Automatically equips items such as Armors, Accessories or Equipment
-	}
-
-	autoUpgrade: {
-		Label: "[i:3485] Auto Upgrade Items"
-		Tooltip: Items go to the slot of items of the same kind if they are better
-	}
-
-	hotbarLast: {
-		Label: "[i:4346] Pickup To Hotbar Last"
-		Tooltip: Picked up items will fill the hotbar slots last
+		Label: smart Pickup
+		Tooltip: ""
 	}
 
 	quickMove: {
@@ -187,6 +172,31 @@ SmartConsumption: {
 SmartPickup: {
 	Tooltip: ""
 
+	previousSlot: {
+		Label: Previous Slot
+		Tooltip: Items go their previous slot in your inventory when picked up
+	}
+
+	autoEquip: {
+		Label: Auto Equip
+		Tooltip: Automatically equips items such as Armors, Accessories or Equipment
+	}
+
+	autoUpgrade: {
+		Label: Auto Upgrade
+		Tooltip: Items go to the slot of items of the same kind if they are better
+	}
+
+	hotbarLast: {
+		Label: Hotbar Last
+		Tooltip: Picked up items will fill the hotbar slots last
+	}
+}
+
+
+PreviousSlot: {
+	Tooltip: ""
+
 	mouse: {
 		Label: Mouse Items
 		Tooltip: Applies to items moved to the mouse
@@ -212,10 +222,10 @@ SmartPickup: {
 	}
 }
 
-MousePickupLevel: {
+ItemPickupLevel: {
 	Tooltip: ""
-	Off.Label: Off
-	FavoritedOnly.Label: Favorited Items Only
+	None.Label: None
+	ImportantItems.Label: Favorited and Equiped Items
 	AllItems.Label: All Items
 }
 
@@ -275,13 +285,11 @@ IconDisplay: {
 	}
 }
 
-AutoEquip: {
+AutoEquipLevel: {
 	Tooltip: ""
-
-	nonPrimary: {
-		Label: Non Primary slots
-		Tooltip: Equipment go to any slot they can go in (includes Dyes). Armors and Accessories can go to social slots.
-	}
+	None.Label: None
+	PrimarySlots.Label: Primary Slots
+	AnySlot.Label: Any Slot
 }
 
 AutoUpgrade: {
@@ -295,6 +303,11 @@ AutoUpgrade: {
 	upgraders: {
 		Label: Upgraders
 		Tooltip: ""
+	}
+
+	importantOnly: {
+		Label: "{$Mods.BetterInventory.Configs.ItemPickupLevel.ImportantItems.Label} only"
+		Tooltip: Only upgrades favorited and Equiped items
 	}
 }
 
@@ -398,7 +411,7 @@ HotkeyMode: {
 
 HotkeyDisplayMode: {
 	Tooltip: ""
-	Off.Label: Off
+	None.Label: Off
 	First.Label: First
 	All.Label: All
 }
@@ -468,10 +481,10 @@ ItemSearch: {
 
 UnknownDisplay: {
 	Tooltip: ""
+	Vanilla.Label: Vanilla (Off)
 	Hidden.Label: Hidden
 	Unknown.Label: "{$Mods.BetterInventory.UI.Unknown}"
 	Known.Label: Known
-	Off.Label: Off
 }
 
 BetterGuide: {
@@ -582,7 +595,7 @@ BetterBestiary: {
 
 UnlockLevel: {
 	Tooltip: ""
-	Off.Label: Off
+	Vanilla.Label: Vanilla (Off)
 	Name.Label: Name
 	Stats.Label: Detailed Stats
 	Drops.Label: Drops
@@ -612,15 +625,15 @@ QuickSearch: {
 			'''
 	}
 
-	providers: {
-		Label: Search Providers
+	catalogues: {
+		Label: Catalogues
 		Tooltip: ""
 	}
 }
 
 SearchAction: {
 	Tooltip: ""
-	Off.Label: Off
+	None.Label: Off
 	Search.Label: Search
 	Toggle.Label: Toggle
 	Both.Label: Search and Toggle
@@ -651,7 +664,7 @@ SharedKeybind: {
 
 RightClickAction: {
 	Tooltip: ""
-	Off.Label: Off
+	None.Label: Off
 	Clear.Label: Clear
 	SearchPrevious.Label: Search Previous
 }
@@ -775,13 +788,18 @@ UnloadedInventoryManagement: {
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
-	smartPickup: {
-		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label}"
+	previousSlot: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ {$Mods.BetterInventory.Configs.PreviousSlot.markIntensity.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
-	marks: {
-		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ {$Mods.BetterInventory.Configs.SmartPickup.markIntensity.Label}"
+	hotbarLast: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ {$Mods.BetterInventory.Configs.SmartPickup.hotbarLast.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	fixSlot: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ {$Mods.BetterInventory.Configs.SmartPickup.fixSlot.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
@@ -808,16 +826,6 @@ UnloadedInventoryManagement: {
 	marksIcon: {
 		Label: "{$Mods.BetterInventory.Configs.MarksDisplay.icon.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
-	}
-
-	fakeItem: {
-		Label: fake Item
-		Tooltip: ""
-	}
-
-	hotbarLast: {
-		Label: hotbar Last
-		Tooltip: ""
 	}
 }
 

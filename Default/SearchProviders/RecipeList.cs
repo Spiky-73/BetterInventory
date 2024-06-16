@@ -11,7 +11,7 @@ using ContextID = Terraria.UI.ItemSlot.Context;
 
 namespace BetterInventory.Default.SearchProviders;
 
-public sealed class RecipeList : SearchProvider {
+public sealed class RecipeList : ModEntityCatalogue {
 
     public static RecipeList Instance = null!;
 

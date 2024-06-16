@@ -26,27 +26,28 @@ public sealed class Compatibility : ModConfig {
 
             SmartConsumption.Value.materials = false;
             SmartConsumption.Value.baits = false;
+            SmartPickup.Value.previousSlot.Parent = ItemPickupLevel.None;
             MarksDisplay.Value.fakeItem.Parent = false;
             MarksDisplay.Value.icon.Parent = false;
-            QuickMove.Value.displayHotkeys.Parent = HotkeyDisplayMode.Off;
+            SmartPickup.Value.autoEquip = AutoEquipLevel.None;
+            SmartPickup.Value.autoUpgrade.Parent = false;
+            SmartPickup.Value.hotbarLast = false;
+            SmartPickup.Value.fixSlot = false;
+            QuickMove.Value.displayHotkeys.Parent = HotkeyDisplayMode.None;
             QuickMove.Value.displayHotkeys.Value.highlightIntensity = 0;
-            InventoryManagement.Instance.autoEquip.Parent = false;
-            InventoryManagement.Instance.autoUpgrade.Parent = false;
             InventoryManagement.Instance.favoriteInBanks = false;
-            InventoryManagement.Instance.hotbarLast = false;
             InventoryManagement.Instance.shiftRight = false;
             InventoryManagement.Instance.stackTrash = false;
             InventoryManagement.Instance.craftStack.Parent = false;
-            InventoryManagement.Instance.smartPickup.Parent = false;
             InventoryManagement.Instance.Save();
 
             BetterGuide.Value.moreRecipes = false;
             BetterGuide.Value.craftInMenu = false;
-            BetterGuide.Value.unknownDisplay = UnknownDisplay.Off;
-            FavoriteRecipes.Value.unfavoriteOnCraft = UnfavoriteOnCraft.Off;
-            BetterBestiary.Value.unknownDisplay = UnknownDisplay.Off;
-            BetterBestiary.Value.displayedUnlock = UnlockLevel.Off;
-            QuickSearch.Value.providers[new(RecipeList.Instance)] = false;
+            BetterGuide.Value.unknownDisplay = UnknownDisplay.Vanilla;
+            FavoriteRecipes.Value.unfavoriteOnCraft = UnfavoriteOnCraft.None;
+            BetterBestiary.Value.unknownDisplay = UnknownDisplay.Vanilla;
+            BetterBestiary.Value.displayedUnlock = UnlockLevel.Vanilla;
+            QuickSearch.Value.catalogues[new(RecipeList.Instance)] = false;
             ItemSearch.Instance.Save();
         }
     }
@@ -72,16 +73,17 @@ public sealed class UnloadedCrafting {
 }
 
 public sealed class UnloadedInventoryManagement {
-    public bool autoEquip = false;
-    public bool autoUpgrade = false;
-    public bool favoriteInBanks = false;
-    public bool hotbarLast = false;
-    public bool shiftRight = false;
-    public bool stackTrash = false;
     public bool materials = false;
     public bool baits = false;
-    public bool smartPickup = false;
-    public bool fakeItem = false;
+    public bool previousSlot = false;
+    public bool autoEquip = false;
+    public bool autoUpgrade = false;
+    public bool hotbarLast = false;
+    public bool fixSlot = false;
+    public bool favoriteInBanks = false;
+    public bool shiftRight = false;
+    public bool stackTrash = false;
+    public bool marksFakeItem = false;
     public bool marksIcon = false;
     public bool quickMoveHotkeys = false;
     public bool quickMoveHighlight = false;
