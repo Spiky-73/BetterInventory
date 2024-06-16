@@ -119,7 +119,6 @@ InventoryManagement: {
 		Tooltip: Favorite items in the Piggy Bank, Safe, ...
 	}
 
-
 	shiftRight: {
 		Name: Shift Right Click
 		Label: "[i:48] {$Mods.BetterInventory.Configs.InventoryManagement.shiftRight.Name}"
@@ -203,6 +202,7 @@ SmartPickup: {
 		Label: Hotbar Last
 		Tooltip: Picked up items will fill the hotbar slots last
 	}
+
 	fixSlot: {
 		Label: Fix Unexpected Slot
 		Tooltip: Fixes some cases where the item does not go to the expected slot
@@ -392,7 +392,7 @@ CraftStack: {
 		Tooltip:
 			'''
 			The maximum amount of items crafted or bought with Left Click
-			Setting this to "{$Mods.BetterInventory.Configs.MaxCraftAmount.spic.Label}" requires the mod "Spy's Infinite Consumables"
+			Setting this to "{$Mods.BetterInventory.Configs.MaxCraftAmount.spicRequirement.Label}" requires the mod "Spy's Infinite Consumables"
 			'''
 	}
 
@@ -405,7 +405,6 @@ CraftStack: {
 		Label: Invert Clicks
 		Tooltip: Invert the behavior of the left and right clicks when crafting or buying items
 	}
-
 
 	tooltip: {
 		Label: Tooltip
@@ -586,7 +585,7 @@ BetterBestiary: {
 	}
 
 	unlockFilter: {
-		Label: "Non Fully Unlocked Filter"
+		Label: Non Fully Unlocked Filter
 		Tooltip: Replace the filter "{$BestiaryInfo.IfUnlocked}" with "{$Mods.BetterInventory.UI.FullUnlock}"
 	}
 
@@ -770,7 +769,6 @@ UnloadedCrafting: {
 		Label: "{$Mods.BetterInventory.Configs.Crafting.craftOnList.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
-
 }
 
 UnloadedInventoryManagement: {
@@ -795,7 +793,7 @@ UnloadedInventoryManagement: {
 		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ {$Mods.BetterInventory.Configs.SmartPickup.autoEquip.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
-	
+
 	upgradeItems: {
 		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ {$Mods.BetterInventory.Configs.SmartPickup.upgradeItems.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
@@ -852,9 +850,7 @@ UnloadedInventoryManagement: {
 	}
 }
 
-UnloadedItemActions: {
-	Tooltip: ""
-}
+UnloadedItemActions.Tooltip: ""
 
 UnloadedItemSearch: {
 	Tooltip: ""
@@ -933,3 +929,6 @@ Version: {
 		Tooltip: ""
 	}
 }
+
+PickupUpgraderDefinition.Tooltip: ""
+EntityCatalogueDefinition.Tooltip: ""

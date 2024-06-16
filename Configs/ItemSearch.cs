@@ -12,7 +12,7 @@ namespace BetterInventory.Configs;
 public sealed class ItemSearch : ModConfig {  
     public Toggle<BetterGuide> betterGuide = new(true);
     public Toggle<BetterBestiary> betterBestiary = new(true);
-    public Toggle<QuickSearch> quickSearch = new(true); // TODO port settings
+    public Toggle<QuickSearch> quickSearch = new(true);
 
     public static ItemSearch Instance = null!;
     

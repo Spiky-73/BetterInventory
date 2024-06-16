@@ -49,7 +49,7 @@ public sealed class SmartConsumption {
     public static SmartConsumption Value => InventoryManagement.Instance.smartConsumption.Value;
 }
 
-public sealed class SmartPickup { // TODO port settings
+public sealed class SmartPickup {
     public NestedValue<ItemPickupLevel, PreviousSlot> previousSlot = new(ItemPickupLevel.AllItems);
     [DefaultValue(AutoEquipLevel.PrimarySlots)] public AutoEquipLevel autoEquip = AutoEquipLevel.PrimarySlots;
     public Toggle<UpgradeItems> upgradeItems = new(true);
@@ -69,7 +69,7 @@ public sealed class PreviousSlot {
     [DefaultValue(true)] public bool mouse = true;
     [DefaultValue(true)] public bool mediumCore = true;
     [DefaultValue(false)] public bool overridePrevious = false;
-    public Toggle<PreviousDisplay> displayPrevious = new(true); // TODO port settings
+    public Toggle<PreviousDisplay> displayPrevious = new(true);
 
     public static bool Enabled => SmartPickup.Enabled && !UnloadedInventoryManagement.Value.previousSlot && SmartPickup.Value.previousSlot.Parent > ItemPickupLevel.None;
     public static bool Mouse => Enabled && Value.mouse;
@@ -101,7 +101,7 @@ public sealed class IconDisplay : IPreviousDisplay {
 
 public sealed class UpgradeItems {
     [CustomModConfigItem(typeof(DictionaryValuesElement))]
-    public Dictionary<ModPickupUpgraderDefinition, bool> upgraders {
+    public Dictionary<PickupUpgraderDefinition, bool> upgraders {
         get => _upgraders;
         set {
             foreach (ModPickupUpgrader upgrader in global::BetterInventory.InventoryManagement.SmartPickup.Upgraders) value.TryAdd(new(upgrader), true);
@@ -113,7 +113,7 @@ public sealed class UpgradeItems {
     public static bool Enabled => SmartPickup.Enabled && !UnloadedInventoryManagement.Value.upgradeItems && SmartPickup.Value.upgradeItems;
     public static UpgradeItems Value => SmartPickup.Value.upgradeItems.Value;
     
-    private Dictionary<ModPickupUpgraderDefinition, bool> _upgraders = [];
+    private Dictionary<PickupUpgraderDefinition, bool> _upgraders = [];
 }
 
 public sealed class QuickMove {

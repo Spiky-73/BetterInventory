@@ -23,16 +23,16 @@ public sealed class EntityCatalogueDefinition : EntityDefinition<EntityCatalogue
 }
 
 [TypeConverter("BetterInventory.IO.ToFromStringConverterFix")]
-public sealed class ModPickupUpgraderDefinition : EntityDefinition<ModPickupUpgraderDefinition> {
-    public ModPickupUpgraderDefinition() : base() { }
-    public ModPickupUpgraderDefinition(string key) : base(key) { }
-    public ModPickupUpgraderDefinition(string mod, string name) : base(mod, name) { }
-    public ModPickupUpgraderDefinition(ModPickupUpgrader catalogue) : this(catalogue.Mod.Name, catalogue.Name) { }
+public sealed class PickupUpgraderDefinition : EntityDefinition<PickupUpgraderDefinition> {
+    public PickupUpgraderDefinition() : base() { }
+    public PickupUpgraderDefinition(string key) : base(key) { }
+    public PickupUpgraderDefinition(string mod, string name) : base(mod, name) { }
+    public PickupUpgraderDefinition(ModPickupUpgrader catalogue) : this(catalogue.Mod.Name, catalogue.Name) { }
 
     public override int Type => global::BetterInventory.InventoryManagement.SmartPickup.GetPickupUpgrader(Mod, Name) is null ? -1 : 1;
 
     public override string DisplayName => global::BetterInventory.InventoryManagement.SmartPickup.GetPickupUpgrader(Mod, Name)?.DisplayName.Value ?? base.DisplayName;
     public override string? Tooltip => global::BetterInventory.InventoryManagement.SmartPickup.GetPickupUpgrader(Mod, Name)?.GetLocalization("Tooltip").Value;
 
-    public override ModPickupUpgraderDefinition[] GetValues() => global::BetterInventory.InventoryManagement.SmartPickup.Upgraders.Select(up => new ModPickupUpgraderDefinition(up)).ToArray();
+    public override PickupUpgraderDefinition[] GetValues() => global::BetterInventory.InventoryManagement.SmartPickup.Upgraders.Select(up => new PickupUpgraderDefinition(up)).ToArray();
 }
