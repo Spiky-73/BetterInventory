@@ -69,6 +69,7 @@ public sealed class PreviousSlot {
     [DefaultValue(true)] public bool mouse = true;
     [DefaultValue(true)] public bool mediumCore = true;
     [DefaultValue(false)] public bool overridePrevious = false;
+    [DefaultValue(true)] public bool materials = true;
     public Toggle<PreviousDisplay> displayPrevious = new(true);
 
     public static bool Enabled => SmartPickup.Enabled && !UnloadedInventoryManagement.Value.previousSlot && SmartPickup.Value.previousSlot.Parent > ItemPickupLevel.None;

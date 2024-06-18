@@ -80,7 +80,7 @@ public sealed class SmartPickup : ILoadable {
         cursor.EmitLdarg3();
         cursor.EmitDelegate((Player self, Item item, GetItemSettings settings) => {
             if (VanillaGetItem || !Configs.PreviousSlot.Enabled) return item;
-            else return SmartGetItem(self, item, settings);
+            else return PickupItemToPreviousSlot(self, item, settings);
         });
         cursor.EmitDup();
         cursor.EmitStloc1();
@@ -231,8 +231,8 @@ public sealed class SmartPickup : ILoadable {
         return i;
     }
 
-    public static Item SmartGetItem(Player player, Item item, GetItemSettings settings) {
-        if (player.whoAmI != Main.myPlayer || !IsMarked(item.type)) return item;
+    public static Item PickupItemToPreviousSlot(Player player, Item item, GetItemSettings settings) {
+        if (player.whoAmI != Main.myPlayer) return item;
 
         List<Slot> slots = new();
         while (ConsumeMark(item.type, out (Slot slot, bool favorited) mark)) {
@@ -280,6 +280,12 @@ public sealed class SmartPickup : ILoadable {
             mark = (slot, s_marksData[slot].favorited);
             Unmark(slot);
             return true;
+        } else if (Configs.PreviousSlot.Value.materials) {
+            foreach (int recipeIndex in ItemID.Sets.CraftingRecipeIndices[type]) {
+                foreach (Item material in Main.recipe[recipeIndex].requiredItem) {
+                    if (ConsumeMark(material.type, out mark)) return true;
+                }
+            }
         }
         mark = default;
         return false;

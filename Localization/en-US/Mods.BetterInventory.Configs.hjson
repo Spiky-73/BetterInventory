@@ -249,6 +249,11 @@ PreviousSlot: {
 		Label: Display Previous Slots
 		Tooltip: Displays the previous slots of items
 	}
+
+	materials: {
+		Label: Materials
+		Tooltip: Materials crafted into another item will go to their previous slot in your inventory
+	}
 }
 
 PreviousDisplay: {
