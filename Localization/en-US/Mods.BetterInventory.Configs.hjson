@@ -195,7 +195,7 @@ SmartPickup: {
 
 	upgradeItems: {
 		Label: Upgrade Items
-		Tooltip: Items go to the slot of items of the same kind if they are better
+		Tooltip: Picked up items go to the slot of items of the same kind if they are better
 	}
 
 	hotbarLast: {

@@ -7,11 +7,19 @@ Compatibility: View the [c/05c8ff:{$Mods.BetterInventory.Configs.Compatibility.D
 ModName: Better Inventory
 Homepage: homepage
 Workshop: Steam Workshop page
-Version: 0.5.1.3
-Info: More Bug Fixes
-Important: ""
+Version: 0.6
+Info: Some new features and loads of rewrites 
+Important: "" // TODO do
 Changelog:
 	'''
-	- Fixed Smart consumption not consuming mouse items
-	- Fixed recipes not update with SmartPickup
+	- Renamed Smart Pickup to Previous Slot
+	- Grouped pickup related features in Smart Pickup
+	- Added Hotbar Slots Last in Smart Pickup
+	- Added Upgrade Items in Smart Pickup
+	- Added more options to Previous Slot's item display
+	- Added Spy's Infinite Consumables Requirement to Craft Stack
+	- Remade Quick List and Search Item
+	- Improved Quick Move under the hood
+	- Updated dependencies
+	- Fixed a bug with Previous Slot
 	'''

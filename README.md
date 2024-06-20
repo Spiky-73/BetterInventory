@@ -13,12 +13,15 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 ## Features
 
 ### Inventory Management
-- `Smart Item consumption`: Consume items from a different stack to reduce changes in the selected item
-- `Smart Item Pickup`: Items go their previous slot in your inventory when picked up
+- `Smart Item Consumption`: Consume items from a different stack to reduce changes in the selected item
+- `Pickup to Previous Slot`: Items go their previous slot in your inventory when picked up
 - `Auto Equip Items`:  Automatically equip items such as Armors, Accessories or Equipment
+- `Pickup to Hotbar Last`: Picked up items will fill the hotbar slots last
+- `Upgrade Items on Pickup`: Picked up items go to the slot of items of the same kind if they are better
+
 - `Quick Move`: Quickly move items between special slots in the inventory
-- `Favorite Items in Personal Storages`: Favorite items in the Piggy Bank, Safe, ...
 - `Craft Stack`: Left Click to craft or buy items in stacks
+- `Favorite Items in Personal Storages`: Favorite items in the Piggy Bank, Safe, ...
 - `Shift Right Click`: Shift or Control Right Click to transfer one item
 - `Stack Trashed and Sold Items` Items sold or trashed multiple times will stack
 
@@ -38,17 +41,28 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 ### Item Search
 - `Favorite Recipes`: Allows you to favorite or blacklist recipes
 - `Craft in Guide Menu`: Allow you to craft items when talking to the guide and toggle between "All Recipes" and "Available Recipes"
-- `Guide Tile`: Adds a second slot next to the guide item to filter by crafting station or condition
+- `Filter by Crafting Station`: Adds a second slot next to the guide item to filter by crafting station or condition
 - `More recipes`: Adds recipes crafting the item to the guide results
-- `Craft Tiles and Conditions`: Overhauls the way crafting station and conditions of recipes are displayed
+- `Overhauled Conditions Display`: Overhauls the way crafting station and conditions of recipes are displayed
 - `Show Treasure Bag Content`: Displays items dropped by Treasure Bags in the Bestiary
 - `Minimum Displayed Info`: Force the minimal displayed information for Bestiary entries
 - `Override Unlock Filter`: Replace the Bestiary filter "If Unlocked" with "Not Full Unlocked"
-- `Search Item` Quickly open the recipe list or the Bestiary, search recipes using a material or NPCs dropping an item with a simple keybind
-- `Search History`: Search the previously searched entry
 - `Unknown Entity Display`: Change how unknown items, recipes or NPCs are displayed
+- `Quick Search` Quickly search recipes or NPC drops and navigate between those menus
 
 ## Changelog
+
+### v0.6
+- Renamed Smart Pickup to Previous Slot
+- Grouped pickup related features in Smart Pickup
+- Added Hotbar Slots Last in Smart Pickup
+- Added Upgrade Items in Smart Pickup
+- Added more options to Previous Slot's item display
+- Added Spy's Infinite Consumables Requirement to Craft Stack
+- Remade Quick List and Search Item
+- Improved Quick Move under the hood
+- Updated dependencies
+- Fixed a bug with Previous Slot
 
 ### v0.5.1.3
 - Fixed SmartConsumption not consuming mouse item

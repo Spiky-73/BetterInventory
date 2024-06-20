@@ -10,7 +10,7 @@ Visit the homepage for more info.
  - Smart item consumption and pickup
  - Quickly move items between special slots in the inventory
  - Favorite, Blacklist and Filter recipes
- - Quickly search recipes using a material or NPCs dropping an item with a simple keybind
+ - Quickly search recipes or NPCs drops
  - See the content of Treasure Bags and force the minimal displayed information in the Bestiary
  - Craft and Buy items in stacks
  - Quick buff using favorited potions only
