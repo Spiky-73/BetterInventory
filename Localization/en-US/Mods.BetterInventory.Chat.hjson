@@ -7,9 +7,10 @@ Compatibility: View the [c/05c8ff:{$Mods.BetterInventory.Configs.Compatibility.D
 ModName: Better Inventory
 Homepage: homepage
 Workshop: Steam Workshop page
-Version: 0.6
-Info: Some new features and loads of rewrites 
-Important: "" // TODO do
+Version: "0.6"
+Info: Some new features and loads of rewrites
+// TODO do
+Important: ""
 Changelog:
 	'''
 	- Renamed Smart Pickup to Previous Slot

@@ -96,8 +96,8 @@ public sealed class FakeItemDisplay : IPreviousDisplay {
 }
 public sealed class IconDisplay : IPreviousDisplay {
     [DefaultValue(typeof(Vector2), "0.8, 0.8")] public Vector2 position { get; set; } = new(0.8f, 0.8f);
-    [DefaultValue(1f)] public float scale { get; set; } = 0.4f;
-    [DefaultValue(1f)] public float intensity { get; set; } = 1f;
+    [DefaultValue(0.4f)] public float scale { get; set; } = 0.4f;
+    [DefaultValue(0.8f)] public float intensity { get; set; } = 0.8f;
 }
 
 public sealed class UpgradeItems {
