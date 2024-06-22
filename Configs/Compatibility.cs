@@ -33,8 +33,8 @@ public sealed class Compatibility : ModConfig {
             SmartPickup.Value.fixSlot = false;
             PreviousDisplay.Value.fakeItem.Parent = false;
             PreviousDisplay.Value.icon.Parent = false;
-            QuickMove.Value.displayHotkeys.Parent = HotkeyDisplayMode.None;
-            QuickMove.Value.displayHotkeys.Value.highlightIntensity = 0;
+            QuickMove.Value.displayedHotkeys.Parent = HotkeyDisplayMode.None;
+            QuickMove.Value.displayedHotkeys.Value.highlightIntensity = 0;
             InventoryManagement.Instance.favoriteInBanks = false;
             InventoryManagement.Instance.shiftRight = false;
             InventoryManagement.Instance.stackTrash = false;

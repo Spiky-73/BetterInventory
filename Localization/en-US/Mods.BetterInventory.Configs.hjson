@@ -350,8 +350,8 @@ QuickMove: {
 		Tooltip: Return the item to its original slot when moving at the end of the chain
 	}
 
-	displayHotkeys: {
-		Label: Display Hotkeys
+	displayedHotkeys: {
+		Label: Displayed Hotkeys
 		Tooltip:
 			'''
 			Displays hotkeys on the slots where an item can be moved to

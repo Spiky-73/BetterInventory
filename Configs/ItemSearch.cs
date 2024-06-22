@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using BetterInventory.ItemSearch;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using SpikysLib.Configs;
 using SpikysLib.Configs.UI;
+using SpikysLib.Extensions;
 using Terraria;
 using Terraria.ModLoader.Config;
 
@@ -13,6 +16,19 @@ public sealed class ItemSearch : ModConfig {
     public Toggle<BetterGuide> betterGuide = new(true);
     public Toggle<BetterBestiary> betterBestiary = new(true);
     public Toggle<QuickSearch> quickSearch = new(true);
+
+    // Compatibility version < v0.6
+    [JsonProperty] private Toggle<QuickList>? quickList { set => ModConfigExtensions.MoveMember(value is not null, _ => {
+        quickSearch.Value.sharedKeybind.Parent = value!.Parent ? SearchAction.None : SearchAction.Toggle;
+        quickSearch.Value.sharedKeybind.Value.tap = value.Value.tap;
+        quickSearch.Value.sharedKeybind.Value.delay = value.Value.delay;
+    }); }
+    [JsonProperty] private Toggle<SearchItems>? searchItems { set => ModConfigExtensions.MoveMember(value is not null, _ => {
+        quickSearch.Value.individualKeybinds.Parent = value!.Parent ? SearchAction.None : SearchAction.Both;
+        quickSearch.Value.catalogues[new(Mod.Name, nameof(Default.Catalogues.RecipeList))] = value.Value.recipes;
+        quickSearch.Value.catalogues[new(Mod.Name, nameof(Default.Catalogues.Bestiary))] = value.Value.drops;
+        quickSearch.Value.rightClick = value.Value.rightClick;
+    }); }
 
     public static ItemSearch Instance = null!;
     
@@ -42,6 +58,11 @@ public sealed class BetterGuide {
     public static bool UnknownDisplay => Enabled && Value.unknownDisplay > Configs.UnknownDisplay.Vanilla && !UnloadedItemSearch.Value.guideUnknown;
     public static bool AvailableRecipes => FavoritedRecipes || CraftInMenu || UnknownDisplay;
     public static BetterGuide Value => ItemSearch.Instance.betterGuide.Value;
+    
+    // Compatibility version < v0.6
+    [JsonProperty] private Toggle<FavoritedRecipes>? favoriteRecipes { set => ModConfigExtensions.MoveMember(value is not null, _ => favoritedRecipes = value!); }
+    [JsonProperty, DefaultValue(true)] private bool tile { set => ModConfigExtensions.MoveMember(value, _ => craftingStation = value); }
+    [JsonProperty, DefaultValue(true)] private bool craftText { set => ModConfigExtensions.MoveMember(value, _ => conditionsDisplay = value); }
 }
 
 public sealed class FavoritedRecipes {
@@ -65,6 +86,9 @@ public sealed class BetterBestiary {
     public static bool UnknownDisplay => Enabled && Value.unknownDisplay > Configs.UnknownDisplay.Vanilla && !UnloadedItemSearch.Value.bestiaryUnknown;
     public static bool Unlock => UnknownDisplay || DisplayedInfo;
     public static BetterBestiary Value => ItemSearch.Instance.betterBestiary.Value;
+
+    // Compatibility version < v0.6
+    [JsonProperty, DefaultValue(UnlockLevel.Drops)] private UnlockLevel displayedUnlock { set => ModConfigExtensions.MoveMember(value != UnlockLevel.Drops, _ => displayedInfo = value); }
 }
 public enum UnlockLevel { Vanilla, Name, Stats, Drops, DropRates }
 
@@ -81,7 +105,6 @@ public sealed class QuickSearch {
 
     }
     [DefaultValue(RightClickAction.SearchPrevious)] public RightClickAction rightClick { get; set; } = RightClickAction.SearchPrevious;
-    // [DefaultValue(false)] public bool air = false;
 
     private Dictionary<EntityCatalogueDefinition, bool> _catalogues = [];
 
@@ -104,4 +127,15 @@ public sealed class SharedKeybind {
     [DefaultValue(10)] public int delay = 10;
 
     public static SharedKeybind Value => QuickSearch.Value.sharedKeybind.Value;
+}
+
+// Compatibility version < v0.6
+class QuickList {
+    [DefaultValue(10)] public int tap = 10;
+    [DefaultValue(10)] public int delay = 10;
+}
+class SearchItems {
+    [DefaultValue(true)] public bool recipes = true;
+    [DefaultValue(true)] public bool drops = true;
+    [DefaultValue(true)] public RightClickAction rightClick = RightClickAction.SearchPrevious;
 }

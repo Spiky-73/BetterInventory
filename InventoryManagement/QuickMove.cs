@@ -196,8 +196,8 @@ public sealed class QuickMove : ILoadable {
         cursor.EmitLdloc2();
         cursor.EmitDelegate((SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, float scale) => {
             if (!Configs.QuickMove.Highlight) return;
-            if (!IsTargetableSlot(inv, context, slot, out int number, out int key) || (Configs.QuickMove.Value.displayHotkeys == Configs.HotkeyDisplayMode.Next ? number != 1 : number == 0)) return;
-            spriteBatch.Draw(TextureAssets.InventoryBack18.Value, position, null, Main.OurFavoriteColor * (Configs.QuickMove.Value.displayHotkeys.Value.highlightIntensity / number) * Main.cursorAlpha, 0f, default, scale, 0, 0f);
+            if (!IsTargetableSlot(inv, context, slot, out int number, out int key) || (Configs.QuickMove.Value.displayedHotkeys == Configs.HotkeyDisplayMode.Next ? number != 1 : number == 0)) return;
+            spriteBatch.Draw(TextureAssets.InventoryBack18.Value, position, null, Main.OurFavoriteColor * (Configs.QuickMove.Value.displayedHotkeys.Value.highlightIntensity / number) * Main.cursorAlpha, 0f, default, scale, 0, 0f);
         });
         // }
 
@@ -229,7 +229,7 @@ public sealed class QuickMove : ILoadable {
         cursor.EmitLdloc2();
         cursor.EmitDelegate((SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, float scale) => {
             if (!Configs.QuickMove.DisplayHotkeys) return;
-            if (!IsTargetableSlot(inv, context, slot, out int number, out int key) || (Configs.QuickMove.Value.displayHotkeys == Configs.HotkeyDisplayMode.Next ? number != 1 : number == 0)) return;
+            if (!IsTargetableSlot(inv, context, slot, out int number, out int key) || (Configs.QuickMove.Value.displayedHotkeys == Configs.HotkeyDisplayMode.Next ? number != 1 : number == 0)) return;
             key = (key + 1) % 10;
             StringBuilder text = new();
             text.Append(key);

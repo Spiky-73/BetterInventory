@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using Terraria.ModLoader.Config;
 using SpikysLib.Configs;
+using Newtonsoft.Json;
+using SpikysLib.Extensions;
 
 namespace BetterInventory.Configs;
 
@@ -42,6 +44,9 @@ public sealed class RecipeFilters {
 
     public static bool Enabled => Crafting.Instance.recipeFilters && !UnloadedCrafting.Value.recipeFilters;
     public static RecipeFilters Value => Crafting.Instance.recipeFilters.Value;
+
+    // Compatibility version < v0.6
+    [JsonProperty, DefaultValue(4)] private int width { set => ModConfigExtensions.MoveMember(value != 4, _ => filtersPerLine = value); }
 }
 
 public sealed class CraftOnList {
@@ -49,4 +54,7 @@ public sealed class CraftOnList {
 
     public static bool Enabled => Crafting.Instance.craftOnList && !UnloadedCrafting.Value.craftOnList;
     public static CraftOnList Value => Crafting.Instance.craftOnList.Value;
+
+    // Compatibility version < v0.6
+    [JsonProperty, DefaultValue(false)] private bool focusRecipe { set => ModConfigExtensions.MoveMember(value, _ => focusHovered = value); }
 }
