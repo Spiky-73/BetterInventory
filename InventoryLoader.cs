@@ -58,14 +58,25 @@ public sealed class InventoryLoader : ILoadable {
     public static Slot? GetInventorySlot(Player player, Item[] inventory, int context, int slot) => player == Main.LocalPlayer ? s_slotToInv.GetOrAdd(new(inventory, context, slot)) : ComputeInventorySlot(player, inventory, context, slot);
     private static Slot? ComputeInventorySlot(Player player, Item[] inventory, int context, int slot) {
         foreach (ModSubInventory slots in SubInventories) {
-            int slotOffset = 0;
-            foreach (ListIndices<Item> items in slots.Items(player).Lists) {
-                int index = items.FromInnerIndex(slot);
-                if (items.List == inventory && index != -1) return new(slots, index + slotOffset);
-                slotOffset += items.Count;
-            }
+            int i = GetSlotIndex(slots.Items(player), inventory, context, slot);
+            if (i != -1) return new(slots, i);
         }
         return null;
+    }
+    private static int GetSlotIndex(IList<Item> list, Item[] inv, int ctxt, int slot) {
+        if (list == inv) return slot;
+        else if(list is JoinedLists<Item> joined) {
+            int offset = 0;
+            foreach (IList<Item> l in joined.Lists) {
+                int i = GetSlotIndex(l, inv, ctxt, slot);
+                if (i != -1) return offset + i;
+                offset += l.Count;
+            }
+        } else if (list is ListIndices<Item> li) {
+            int i = GetSlotIndex(li.List, inv, ctxt, slot);
+            if (i != -1) return li.FromInnerIndex(i);
+        }
+        return -1;
     }
 
     public static void ClearCache() => s_slotToInv.Clear();

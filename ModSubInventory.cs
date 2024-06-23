@@ -26,7 +26,7 @@ public abstract class ModSubInventory : ModType, ILocalizedModType {
     public virtual bool Accepts(Item item) => true;
     public virtual bool IsPrimaryFor(Item item) => false;
 
-    public abstract Joined<ListIndices<Item>, Item> Items(Player player);
+    public abstract IList<Item> Items(Player player);
     public virtual bool FitsSlot(Player player, Item item, int slot, out IList<Slot> itemsToMove) {
         itemsToMove = Array.Empty<Slot>();
         return true;

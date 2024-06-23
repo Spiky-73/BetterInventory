@@ -61,7 +61,7 @@ public sealed class Accessories : AAccessories {
     public override bool Accepts(Item item) => item.accessory && !item.vanity;
     public override bool IsPrimaryFor(Item item) => true;
     public override int Context => ContextID.EquipAccessory;
-    public override Joined<ListIndices<Item>, Item> Items(Player player) => new(
+    public override JoinedLists<Item> Items(Player player) => new(
         new ListIndices<Item>(player.armor, UnlockedVanillaSlots(player)),
         new ListIndices<Item>(ModdedAccessories(player), UnlockedModdedSlots(player))
     );
@@ -72,7 +72,7 @@ public sealed class VanityAccessories : AAccessories {
     public override bool Accepts(Item item) => item.accessory;
     public override bool IsPrimaryFor(Item item) => item.vanity && item.FitsAccessoryVanitySlot;
     public override int Context => ContextID.EquipAccessoryVanity;
-    public override Joined<ListIndices<Item>, Item> Items(Player player) => new(
+    public override JoinedLists<Item> Items(Player player) => new(
         new ListIndices<Item>(player.armor, UnlockedVanillaSlots(player, AArmor.Count + AccessorySlotLoader.MaxVanillaSlotCount)),
         new ListIndices<Item>(ModdedAccessories(player), UnlockedModdedSlots(player, ModdedAccessories(player).Length / 2))
     );

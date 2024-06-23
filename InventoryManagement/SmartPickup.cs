@@ -236,7 +236,7 @@ public sealed class SmartPickup : ILoadable {
 
         List<Slot> slots = new();
         while (ConsumeMark(item.type, out (Slot slot, bool favorited) mark)) {
-            Joined<ListIndices<Item>, Item> items = mark.slot.Inventory.Items(player);
+            IList<Item> items = mark.slot.Inventory.Items(player);
             if (mark.slot.Index >= items.Count) continue;
             if (!(item.favorited || mark.favorited) && items[mark.slot.Index].favorited) continue;
 

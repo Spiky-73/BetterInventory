@@ -17,33 +17,33 @@ public sealed class Compatibility : ModConfig {
     [JsonIgnore, ShowDespiteJsonIgnore, NullAllowed] public object? DisableAll {
         get => null;
         set {
-            FixedUI.Value.fastScroll.Parent = false;
+            FixedUI.Value.fastScroll.Key = false;
             FixedUI.Value.listScroll = false;
             FixedUI.Value.wrapping = false;
-            Crafting.Instance.recipeFilters.Parent = false;
-            Crafting.Instance.craftOnList.Parent = false;
+            Crafting.Instance.recipeFilters.Key = false;
+            Crafting.Instance.craftOnList.Key = false;
             Crafting.Instance.Save();
 
             SmartConsumption.Value.materials = false;
             SmartConsumption.Value.baits = false;
-            SmartPickup.Value.previousSlot.Parent = ItemPickupLevel.None;
+            SmartPickup.Value.previousSlot.Key = ItemPickupLevel.None;
             SmartPickup.Value.autoEquip = AutoEquipLevel.None;
-            SmartPickup.Value.upgradeItems.Parent = false;
+            SmartPickup.Value.upgradeItems.Key = false;
             SmartPickup.Value.hotbarLast = false;
             SmartPickup.Value.fixSlot = false;
-            PreviousDisplay.Value.fakeItem.Parent = false;
-            PreviousDisplay.Value.icon.Parent = false;
-            QuickMove.Value.displayedHotkeys.Parent = HotkeyDisplayMode.None;
+            PreviousDisplay.Value.fakeItem.Key = false;
+            PreviousDisplay.Value.icon.Key = false;
+            QuickMove.Value.displayedHotkeys.Key = HotkeyDisplayMode.None;
             QuickMove.Value.displayedHotkeys.Value.highlightIntensity = 0;
             InventoryManagement.Instance.favoriteInBanks = false;
             InventoryManagement.Instance.shiftRight = false;
             InventoryManagement.Instance.stackTrash = false;
-            InventoryManagement.Instance.craftStack.Parent = false;
+            InventoryManagement.Instance.craftStack.Key = false;
             InventoryManagement.Instance.Save();
 
             BetterGuide.Value.moreRecipes = false;
             BetterGuide.Value.craftingStation = false;
-            BetterGuide.Value.favoritedRecipes.Parent = false;
+            BetterGuide.Value.favoritedRecipes.Key = false;
             BetterGuide.Value.craftInMenu = false;
             BetterGuide.Value.unknownDisplay = UnknownDisplay.Vanilla;
             FavoritedRecipes.Value.unfavoriteOnCraft = UnfavoriteOnCraft.None;

@@ -16,10 +16,10 @@ public abstract class Dyes : ModSubInventory {
     public static Item[] ModdedDyes(Player player) => Reflection.ModAccessorySlotPlayer.exDyesAccessory.GetValue(player.GetModPlayer<ModAccessorySlotPlayer>());
 }
 public sealed class ArmorDyes : Dyes {
-    public sealed override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.dye, Range.FromCount(0, AArmor.Count));
+    public sealed override ListIndices<Item> Items(Player player) => new(player.dye, Range.FromCount(0, AArmor.Count));
 }
 public sealed class AccessoryDyes : Dyes {
-    public sealed override Joined<ListIndices<Item>, Item> Items(Player player) => new(
+    public sealed override JoinedLists<Item> Items(Player player) => new(
         new ListIndices<Item>(player.dye, Accessories.UnlockedVanillaSlots(player)),
         new ListIndices<Item>(ModdedDyes(player), Accessories.UnlockedModdedSlots(player))
     );
@@ -28,6 +28,6 @@ public sealed class AccessoryDyes : Dyes {
 public sealed class EquipmentDyes : Dyes {
     public sealed override int Context => ContextID.EquipMiscDye;
     public sealed override void Focus(Player player, int slot) => Main.EquipPageSelected = 2;
-    public sealed override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.miscDyes);
+    public sealed override Item[] Items(Player player) => player.miscDyes;
     public override int ComparePositionTo(ModSubInventory other) => other is AccessoryDyes ? 1 : 0;
 }

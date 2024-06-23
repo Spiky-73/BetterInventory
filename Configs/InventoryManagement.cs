@@ -6,8 +6,8 @@ using Microsoft.Xna.Framework;
 using SpikysLib.Configs.UI;
 using System.Collections.Generic;
 using BetterInventory.InventoryManagement;
-using SpikysLib.Extensions;
 using Newtonsoft.Json;
+using SpikysLib;
 
 namespace BetterInventory.Configs;
 
@@ -26,7 +26,7 @@ public sealed class InventoryManagement : ModConfig {
     public static bool StackTrash => !UnloadedInventoryManagement.Value.stackTrash && Instance.stackTrash;
 
     // Compatibility version < v0.6
-    [JsonProperty, DefaultValue(AutoEquipLevel.PrimarySlots)] private AutoEquipLevel autoEquip { set => ModConfigExtensions.MoveMember(value != AutoEquipLevel.PrimarySlots, _ => smartPickup.Value.autoEquip = value); }
+    [JsonProperty, DefaultValue(AutoEquipLevel.PrimarySlots)] private AutoEquipLevel autoEquip { set => PortConfig.MoveMember(value != AutoEquipLevel.PrimarySlots, _ => smartPickup.Value.autoEquip = value); }
 
     public override void OnChanged() {
         Reflection.ItemSlot.canFavoriteAt.GetValue()[ItemSlot.Context.BankItem] = FavoriteInBanks;
@@ -60,16 +60,16 @@ public sealed class SmartPickup {
     [DefaultValue(true)] public bool hotbarLast = true;
     [DefaultValue(true)] public bool fixSlot = true;
 
-    public static bool Enabled => InventoryManagement.Instance.smartPickup.Parent;
+    public static bool Enabled => InventoryManagement.Instance.smartPickup.Key;
     public static bool AutoEquip => !UnloadedInventoryManagement.Value.autoEquip && Enabled && Value.autoEquip > AutoEquipLevel.None;
     public static bool HotbarLast => !UnloadedInventoryManagement.Value.hotbarLast && Enabled && Value.hotbarLast;
     public static bool FixSlot => !UnloadedInventoryManagement.Value.fixSlot && Enabled && Value.fixSlot;
     public static SmartPickup Value => InventoryManagement.Instance.smartPickup.Value;
 
     // Compatibility version < v0.6
-    [JsonProperty, DefaultValue(true)] private bool mediumCore { set => ModConfigExtensions.MoveMember(!value, _ => previousSlot.Value.mediumCore = value); }
-    [JsonProperty, DefaultValue(0.33f)] private float markIntensity { set => ModConfigExtensions.MoveMember(value != 0.33f, _ => {
-        if (value == 0) previousSlot.Value.displayPrevious.Parent = false;
+    [JsonProperty, DefaultValue(true)] private bool mediumCore { set => PortConfig.MoveMember(!value, _ => previousSlot.Value.mediumCore = value); }
+    [JsonProperty, DefaultValue(0.33f)] private float markIntensity { set => PortConfig.MoveMember(value != 0.33f, _ => {
+        if (value == 0) previousSlot.Value.displayPrevious.Key = false;
         else previousSlot.Value.displayPrevious.Value.fakeItem.Value.intensity = value;
     }); }
 }
@@ -83,7 +83,7 @@ public sealed class PreviousSlot {
     [DefaultValue(true)] public bool materials = true;
     public Toggle<PreviousDisplay> displayPrevious = new(true);
 
-    public static bool Enabled => SmartPickup.Enabled && !UnloadedInventoryManagement.Value.previousSlot && SmartPickup.Value.previousSlot.Parent > ItemPickupLevel.None;
+    public static bool Enabled => SmartPickup.Enabled && !UnloadedInventoryManagement.Value.previousSlot && SmartPickup.Value.previousSlot.Key > ItemPickupLevel.None;
     public static bool Mouse => Enabled && Value.mouse;
     public static bool MediumCore => Enabled && Value.mediumCore;
     public static PreviousSlot Value => SmartPickup.Value.previousSlot.Value;
@@ -141,9 +141,9 @@ public sealed class QuickMove {
     public static QuickMove Value => InventoryManagement.Instance.quickMove.Value;
 
     // Compatibility version < v0.6
-    [JsonProperty, DefaultValue(60 * 3)] internal int chainTime { set => ModConfigExtensions.MoveMember(value != 60*3, _ => resetTime = value); }
-    [JsonProperty, DefaultValue(false)] internal bool showTooltip { set => ModConfigExtensions.MoveMember(value, _ => tooltip = value); }
-    [JsonProperty] internal NestedValue<HotkeyDisplayMode, DisplayedHotkeys> displayHotkeys { set => ModConfigExtensions.MoveMember(value is not null, _ => displayedHotkeys = value!); }
+    [JsonProperty, DefaultValue(60 * 3)] internal int chainTime { set => PortConfig.MoveMember(value != 60*3, _ => resetTime = value); }
+    [JsonProperty, DefaultValue(false)] internal bool showTooltip { set => PortConfig.MoveMember(value, _ => tooltip = value); }
+    [JsonProperty] internal NestedValue<HotkeyDisplayMode, DisplayedHotkeys> displayHotkeys { set => PortConfig.MoveMember(value is not null, _ => displayedHotkeys = value!); }
 }
 
 public enum HotkeyDisplayMode { None, Next, All }
@@ -164,8 +164,8 @@ public sealed class CraftStack {
     public static CraftStack Value => InventoryManagement.Instance.craftStack.Value;
 
     // Compatibility version < v0.6
-    [JsonProperty, DefaultValue(false)] internal bool single { set => ModConfigExtensions.MoveMember(value, _ => repeat = !value); }
-    [JsonProperty, DefaultValue(999)] internal int maxAmount { set => ModConfigExtensions.MoveMember(value != 999, _ => maxItems = value); }
+    [JsonProperty, DefaultValue(false)] internal bool single { set => PortConfig.MoveMember(value, _ => repeat = !value); }
+    [JsonProperty, DefaultValue(999)] internal int maxAmount { set => PortConfig.MoveMember(value != 999, _ => maxItems = value); }
 }
 
 public sealed class MaxCraftAmount : MultiChoice<int> {

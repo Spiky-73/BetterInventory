@@ -61,17 +61,17 @@ public sealed class QuickSearch : ILoadable {
     }
 
     private static void ProcessIndividualKeybinds() {
-        s_individualCanClick = (QuickSearchKb.Current || !Configs.IndividualKeybinds.Value.composite) && (Configs.QuickSearch.Value.individualKeybinds.Parent.HasFlag(Configs.SearchAction.Toggle) || !Main.HoverItem.IsAir);
+        s_individualCanClick = (QuickSearchKb.Current || !Configs.IndividualKeybinds.Value.composite) && (Configs.QuickSearch.Value.individualKeybinds.Key.HasFlag(Configs.SearchAction.Toggle) || !Main.HoverItem.IsAir);
         if (!s_individualCanClick) return;
 
         Main.LocalPlayer.mouseInterface = true;
         foreach(ModEntityCatalogue catalogue in EntityCatalogue) {
             if(catalogue.Enabled && catalogue.Keybind.JustPressed) {
-                if (Configs.QuickSearch.Value.individualKeybinds.Parent.HasFlag(Configs.SearchAction.Search) && !Main.HoverItem.IsAir) {
+                if (Configs.QuickSearch.Value.individualKeybinds.Key.HasFlag(Configs.SearchAction.Search) && !Main.HoverItem.IsAir) {
                     catalogue.Toggle(true);
                     if (Guide.forcedTooltip?.Key != $"{Localization.Keys.UI}.Unknown") catalogue.Search(Main.HoverItem);
                     SoundEngine.PlaySound(SoundID.Grab);
-                } else if (Configs.QuickSearch.Value.individualKeybinds.Parent.HasFlag(Configs.SearchAction.Toggle)) {
+                } else if (Configs.QuickSearch.Value.individualKeybinds.Key.HasFlag(Configs.SearchAction.Toggle)) {
                     catalogue.Toggle();
                     SoundEngine.PlaySound(SoundID.MenuTick);
                 }
@@ -96,12 +96,12 @@ public sealed class QuickSearch : ILoadable {
                 int last = s_taps;
                 if (!first) s_taps = (s_taps + 1) % s_enabledProviders.Count;
 
-                if (Configs.QuickSearch.Value.sharedKeybind.Parent.HasFlag(Configs.SearchAction.Search) && !s_sharedItem.IsAir) {
+                if (Configs.QuickSearch.Value.sharedKeybind.Key.HasFlag(Configs.SearchAction.Search) && !s_sharedItem.IsAir) {
                     if (!first) s_enabledProviders[last].Toggle(false);
                     s_enabledProviders[s_taps].Toggle(true);
                     if (Guide.forcedTooltip?.Key != $"{Localization.Keys.UI}.Unknown") s_enabledProviders[s_taps].Search(s_sharedItem);
                     SoundEngine.PlaySound(SoundID.Grab);
-                } else if (Configs.QuickSearch.Value.sharedKeybind.Parent.HasFlag(Configs.SearchAction.Toggle)) {
+                } else if (Configs.QuickSearch.Value.sharedKeybind.Key.HasFlag(Configs.SearchAction.Toggle)) {
                     if (first) s_enabledProviders[s_taps].Toggle();
                     else {
                         s_enabledProviders[last].Toggle(false);

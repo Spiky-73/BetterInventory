@@ -12,7 +12,7 @@ public abstract class AArmor : ModSubInventory {
     public override int Context => ContextID.EquipArmor;
     public override bool Accepts(Item item) => IsArmor(item) && !item.vanity;
     public override bool IsPrimaryFor(Item item) => true;
-    public override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.armor, Index);
+    public override ListIndices<Item> Items(Player player) => new(player.armor, Index);
 
     public sealed override void Focus(Player player, int slot) => Main.EquipPageSelected = 0;
     public const int Count = 3;
@@ -21,7 +21,7 @@ public abstract class AVanityArmor : AArmor {
     public sealed override int Context => ContextID.EquipArmorVanity;
     public override bool Accepts(Item item) => IsArmor(item);
     public override bool IsPrimaryFor(Item item) => item.vanity;
-    public sealed override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.armor, Index + Count + AccessorySlotLoader.MaxVanillaSlotCount);
+    public sealed override ListIndices<Item> Items(Player player) => new(player.armor, Index + Count + AccessorySlotLoader.MaxVanillaSlotCount);
 }
 public sealed class HeadArmor : AArmor {
     public sealed override bool IsArmor(Item item) => item.headSlot != -1;
