@@ -94,7 +94,7 @@ public sealed class FixedUI : ILoadable {
         //     ...
         // }
     }
-    internal static void ILListScrollFix(ILContext il) {
+    internal static void ILScrollButtonsFix(ILContext il) {
         ILCursor cursor = new(il);
         // Main.hidePlayerCraftingMenu = false;
         // if(<recBigListVisible>) {
@@ -113,7 +113,7 @@ public sealed class FixedUI : ILoadable {
 
             //         ++ <listScroll>
             c.EmitDelegate(() => {
-                if (!!Configs.FixedUI.ListScroll || !Main.mouseLeft) return;
+                if (!Configs.FixedUI.ScrollButtons || !Main.mouseLeft) return;
                 if (Main.mouseLeftRelease || _recDelay == 0) {
                     Main.mouseLeftRelease = true;
                     _recDelay = 1;

@@ -141,9 +141,9 @@ public sealed class QuickMove {
     public static QuickMove Value => InventoryManagement.Instance.quickMove.Value;
 
     // Compatibility version < v0.6
-    [JsonProperty, DefaultValue(60 * 3)] internal int chainTime { set => PortConfig.MoveMember(value != 60*3, _ => resetTime = value); }
-    [JsonProperty, DefaultValue(false)] internal bool showTooltip { set => PortConfig.MoveMember(value, _ => tooltip = value); }
-    [JsonProperty] internal NestedValue<HotkeyDisplayMode, DisplayedHotkeys> displayHotkeys { set => PortConfig.MoveMember(value is not null, _ => displayedHotkeys = value!); }
+    [JsonProperty, DefaultValue(60 * 3)] private int chainTime { set => PortConfig.MoveMember(value != 60*3, _ => resetTime = value); }
+    [JsonProperty, DefaultValue(false)] private bool showTooltip { set => PortConfig.MoveMember(value, _ => tooltip = value); }
+    [JsonProperty] private NestedValue<HotkeyDisplayMode, DisplayedHotkeys> displayHotkeys { set => PortConfig.MoveMember(value is not null, _ => displayedHotkeys = value!); }
 }
 
 public enum HotkeyDisplayMode { None, Next, All }
@@ -164,8 +164,8 @@ public sealed class CraftStack {
     public static CraftStack Value => InventoryManagement.Instance.craftStack.Value;
 
     // Compatibility version < v0.6
-    [JsonProperty, DefaultValue(false)] internal bool single { set => PortConfig.MoveMember(value, _ => repeat = !value); }
-    [JsonProperty, DefaultValue(999)] internal int maxAmount { set => PortConfig.MoveMember(value != 999, _ => maxItems = value); }
+    [JsonProperty, DefaultValue(false)] private bool single { set => PortConfig.MoveMember(value, _ => repeat = !value); }
+    [JsonProperty, DefaultValue(999)] private int maxAmount { set => PortConfig.MoveMember(value != 999, _ => maxItems = value); }
 }
 
 public sealed class MaxCraftAmount : MultiChoice<int> {
@@ -173,7 +173,7 @@ public sealed class MaxCraftAmount : MultiChoice<int> {
     public MaxCraftAmount(int value) : base(value) { }
 
     [Choice, Range(1, 9999), DefaultValue(999)] public int amount = 999;
-    [Choice] public Text? spicRequirement { get; set; } // TODO warn if no mod
+    [Choice] public Text? spicRequirement { get; set; }
 
     public override int Value {
         get => Choice == nameof(spicRequirement) ? 0 : amount;

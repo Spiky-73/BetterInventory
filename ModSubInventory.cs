@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using SpikysLib.DataStructures;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;

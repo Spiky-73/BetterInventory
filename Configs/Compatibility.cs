@@ -18,7 +18,7 @@ public sealed class Compatibility : ModConfig {
         get => null;
         set {
             FixedUI.Value.fastScroll.Key = false;
-            FixedUI.Value.listScroll = false;
+            FixedUI.Value.scrollButtons = false;
             FixedUI.Value.wrapping = false;
             Crafting.Instance.recipeFilters.Key = false;
             Crafting.Instance.craftOnList.Key = false;
@@ -67,7 +67,7 @@ public sealed class Compatibility : ModConfig {
 
 public sealed class UnloadedCrafting {
     public bool fastScroll = false;
-    public bool listScroll = false;
+    public bool scrollButtons = false;
     public bool wrapping = false;
     public bool recipeFilters = false;
     public bool craftOnList = false;

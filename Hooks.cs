@@ -61,7 +61,7 @@ public class Hooks : ILoadable {
     private void ILDrawInventory(ILContext il) {
         if (!ApplyIL(il, RecipeFiltering.ILDrawFilters, Configs.RecipeFilters.Enabled)) Configs.UnloadedCrafting.Value.recipeFilters = true;
         if (!ApplyIL(il, FixedUI.ILFastScroll, Configs.FixedUI.FastScroll)) Configs.UnloadedCrafting.Value.fastScroll = true;
-        if (!ApplyIL(il, FixedUI.ILListScrollFix, Configs.FixedUI.ListScroll)) Configs.UnloadedCrafting.Value.listScroll = true;
+        if (!ApplyIL(il, FixedUI.ILScrollButtonsFix, Configs.FixedUI.ScrollButtons)) Configs.UnloadedCrafting.Value.scrollButtons = true;
         if (!ApplyIL(il, FixedUI.ILMaterialWrapping, Configs.FixedUI.Wrapping)) Configs.UnloadedCrafting.Value.wrapping = true;
         if (!ApplyIL(il, Crafting.Crafting.ILCraftOnList, Configs.CraftOnList.Enabled)) Configs.UnloadedCrafting.Value.craftOnList = true;
         if (!ApplyIL(il, Default.Catalogues.RecipeList.ILForceGuideDisplay, Default.Catalogues.RecipeList.Instance.Enabled)) Configs.UnloadedItemSearch.Value.recipeList = true;

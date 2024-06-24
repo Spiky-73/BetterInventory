@@ -63,6 +63,7 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 - Improved Quick Move under the hood
 - Updated dependencies
 - Fixed a bug with Previous Slot
+- Fixed FixedUI ScrollButtons
 
 ### v0.5.1.3
 - Fixed SmartConsumption not consuming mouse item

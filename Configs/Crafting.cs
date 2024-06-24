@@ -20,16 +20,18 @@ public sealed class Crafting : ModConfig {
 
 public sealed class FixedUI {
     public Toggle<FastScroll> fastScroll = new(true);
-    [DefaultValue(true)] public bool listScroll = true;
+    [DefaultValue(true)] public bool scrollButtons = true;
     [DefaultValue(true)] public bool wrapping = true;
     [DefaultValue(true)] public bool craftWhenHolding = true;
 
     public static bool Enabled => Crafting.Instance.fixedUI;
     public static bool FastScroll => Enabled && Value.fastScroll && !UnloadedCrafting.Value.fastScroll;
-    public static bool ListScroll => Enabled && Value.listScroll && !UnloadedCrafting.Value.listScroll;
+    public static bool ScrollButtons => Enabled && Value.scrollButtons && !UnloadedCrafting.Value.scrollButtons;
     public static bool Wrapping => Enabled && Value.wrapping && !UnloadedCrafting.Value.wrapping;
     public static bool CraftWhenHolding => Enabled && Value.craftWhenHolding;
     public static FixedUI Value => Crafting.Instance.fixedUI.Value;
+    
+    [JsonProperty, DefaultValue(true)] private bool listScroll { set => PortConfig.MoveMember(!value, _ => scrollButtons = value); }
 }
 
 public sealed class FastScroll {

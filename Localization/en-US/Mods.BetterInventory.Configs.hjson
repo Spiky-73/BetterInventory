@@ -34,12 +34,12 @@ FixedUI: {
 
 	fastScroll: {
 		Label: Fast Recipe Scroll
-		Tooltip: Make the recipe scroll very fast
+		Tooltip: Makes the recipe scroll very fast
 	}
 
-	listScroll: {
-		Label: Scroll in Recipe List
-		Tooltip: Replaces the instant scroll when the recipe list is open with an extremely fast one
+	scrollButtons: {
+		Label: Scroll Buttons
+		Tooltip: Allows you to hold the recipe list's up/down buttons
 	}
 
 	wrapping: {
@@ -426,7 +426,7 @@ MaxCraftAmount: {
 	}
 
 	spicRequirement: {
-		Label: Spy's Infinite Consumables Requirement
+		Label: "{$Mods.BetterInventory.Chat.SPIC.ModName} Requirement"
 		Tooltip: ""
 	}
 }
@@ -755,8 +755,8 @@ UnloadedCrafting: {
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
-	listScroll: {
-		Label: "{$Mods.BetterInventory.Configs.Crafting.fixedUI.Label} @ {$Mods.BetterInventory.Configs.FixedUI.listScroll.Label}"
+	scrollButtons: {
+		Label: "{$Mods.BetterInventory.Configs.Crafting.fixedUI.Label} @ {$Mods.BetterInventory.Configs.FixedUI.scrollButtons.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
