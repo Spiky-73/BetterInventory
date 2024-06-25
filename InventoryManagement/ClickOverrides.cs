@@ -30,6 +30,37 @@ public sealed class ClickOverrides : ILoadable {
 
         On_Chest.AddItemToShop += HookStackSold;
 
+        IL_Player.PayCurrency += il => {
+            if(!il.ApplyTo(ILPayStack, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
+        };
+
+        IL_Recipe.Create += il => {
+            if(!il.ApplyTo(ILRecipeConsumeStack, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
+        };
+        IL_ItemSlot.LeftClick_ItemArray_int_int += il => {
+            if(!il.ApplyTo(ILKeepFavoriteInBanks, Configs.InventoryManagement.FavoriteInBanks)) Configs.UnloadedInventoryManagement.Value.favoriteInBanks = true;
+        };
+        IL_ItemSlot.HandleShopSlot += il => {
+            if(!il.ApplyTo(ILPreventChainBuy, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
+            if(!il.ApplyTo(ILBuyMultiplier, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
+            if(!il.ApplyTo(ILBuyStack, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
+            if(!il.ApplyTo(ILRestoreShopItem, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
+        };
+        IL_ItemSlot.SellOrTrash += il => {
+            if(!il.ApplyTo(ILStackTrash, Configs.InventoryManagement.StackTrash)) Configs.UnloadedInventoryManagement.Value.stackTrash = true;
+        };
+        IL_Main.HoverOverCraftingItemButton += il => {
+            if (!il.ApplyTo(ILShiftRightCursorOverride, Configs.InventoryManagement.ShiftRight)) Configs.UnloadedInventoryManagement.Value.shiftRight = true;
+        };
+        IL_Main.CraftItem += il => {
+            if (!il.ApplyTo(ILShiftCraft, Configs.InventoryManagement.ShiftRight)) Configs.UnloadedInventoryManagement.Value.shiftRight = true;
+            if (!il.ApplyTo(ILCraftMultiplier, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
+            if (!il.ApplyTo(ILCraftStackAndPickup, Configs.CraftStack.Enabled || Configs.InventoryManagement.ShiftRight)) Configs.UnloadedInventoryManagement.Value.craftStack = Configs.UnloadedInventoryManagement.Value.shiftRight = true;
+            if (!il.ApplyTo(ILCraftFixMouseText, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
+        };
+        IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += il => {
+            if (!il.ApplyTo(ILFavoritedBankBackground, Configs.InventoryManagement.FavoriteInBanks)) Configs.UnloadedInventoryManagement.Value.favoriteInBanks = true;
+        };
     }
     public void Unload() { }
 
@@ -81,7 +112,7 @@ public sealed class ClickOverrides : ILoadable {
         }
         return false;
     }
-    internal static void ILPreventChainBuy(ILContext il) {
+    private static void ILPreventChainBuy(ILContext il) {
         ILCursor cursor = new(il);
 
         cursor.EmitLdarg2();
@@ -95,7 +126,7 @@ public sealed class ClickOverrides : ILoadable {
         cursor.EmitRet();
         cursor.MarkLabel(skip);
     }
-    internal static void ILBuyMultiplier(ILContext il) {
+    private static void ILBuyMultiplier(ILContext il) {
         ILCursor cursor = new(il);
         cursor.GotoNext(MoveType.After, i => i.MatchCallvirt(typeof(Player), nameof(Player.GetItemExpectedPrice)));
         cursor.EmitLdarg0();
@@ -117,7 +148,7 @@ public sealed class ClickOverrides : ILoadable {
         });
         cursor.EmitStloc(4);
     }
-    internal static void ILBuyStack(ILContext il) {
+    private static void ILBuyStack(ILContext il) {
         ILCursor cursor = new(il);
 
         cursor.GotoNext(MoveType.Before, i => i.MatchStfld(typeof(Item), nameof(Item.stack)));
@@ -133,14 +164,14 @@ public sealed class ClickOverrides : ILoadable {
         cursor.EmitDelegate((int? one) => !Configs.CraftStack.Enabled || s_ilShopMultiplier == 1 ? one : s_ilShopMultiplier );
 
     }
-    internal static void ILPayStack(ILContext il) {
+    private static void ILPayStack(ILContext il) {
         ILCursor cursor = new(il);
 
         cursor.EmitLdarg1();
         cursor.EmitDelegate((int price) => Configs.CraftStack.Enabled && s_ilShopMultiplier != 1 ? (price * s_ilShopMultiplier) : price);
         cursor.EmitStarg(1);
     }
-    internal static void ILRestoreShopItem(ILContext il) {
+    private static void ILRestoreShopItem(ILContext il) {
         ILCursor cursor = new(il);
         cursor.GotoNext(MoveType.After, i => i.SaferMatchCall(typeof(ItemSlot), nameof(ItemSlot.RefreshStackSplitCooldown)));
         cursor.EmitLdarg0();
@@ -155,7 +186,7 @@ public sealed class ClickOverrides : ILoadable {
     }
 
 
-    internal static void ILShiftRightCursorOverride(ILContext context) {
+    private static void ILShiftRightCursorOverride(ILContext context) {
         ILCursor cursor = new(context);
 
         // if (Main.focusRecipe == recipeIndex && ++[Main.guideItem.IsAir || <allowCraft>]) {
@@ -186,7 +217,7 @@ public sealed class ClickOverrides : ILoadable {
         if (Configs.InventoryManagement.ShiftRight && Main.cursorOverride == CraftCursorID) return Main.LocalPlayer.ItemSpace(currentRecipe.createItem).CanTakeItem;
         return orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting, out movedAnItemToAllowCrafting);
     }
-    internal static void ILShiftCraft(ILContext il) {
+    private static void ILShiftCraft(ILContext il) {
         ILCursor cursor = new(il);
 
         // ++ if(<Shift>){
@@ -213,7 +244,7 @@ public sealed class ClickOverrides : ILoadable {
         cursor.MarkLabel(skipVanillaCheck);
         // if (<cannotCraft>) return;
     }
-    internal static void ILCraftMultiplier(ILContext il) {
+    private static void ILCraftMultiplier(ILContext il) {
         ILCursor cursor = new(il);
         // if (<cannotCraft>) return;
         // ++ r `*=` <amountOfCrafts>
@@ -231,7 +262,7 @@ public sealed class ClickOverrides : ILoadable {
         // Item crafted = r.createItem.Clone();
         // ...
     }
-    internal static void ILRecipeConsumeStack(ILContext il) {
+    private static void ILRecipeConsumeStack(ILContext il) {
         ILCursor cursor = new(il);
 
         // foreach (<requiredItem>) {
@@ -247,7 +278,7 @@ public sealed class ClickOverrides : ILoadable {
         // }
         // ...
     }
-    internal static void ILCraftStackAndPickup(ILContext il) {
+    private static void ILCraftStackAndPickup(ILContext il) {
         ILCursor cursor = new(il);
 
         // Item crafted = r.createItem.Clone();
@@ -275,7 +306,7 @@ public sealed class ClickOverrides : ILoadable {
         cursor.EmitRet();
         cursor.MarkLabel(normalCraftItemCode);
     }
-    internal static void ILCraftFixMouseText(ILContext il) {
+    private static void ILCraftFixMouseText(ILContext il) {
         ILCursor cursor = new(il);
 
         cursor.GotoNext(i => i.SaferMatchCall(typeof(PopupText), nameof(PopupText.NewText)));
@@ -285,7 +316,7 @@ public sealed class ClickOverrides : ILoadable {
         // ...
     }
 
-    internal static void ILStackTrash(ILContext il) {
+    private static void ILStackTrash(ILContext il) {
         ILCursor cursor = new(il);
         // if (<shop>){
         //     ...
@@ -322,7 +353,7 @@ public sealed class ClickOverrides : ILoadable {
     }
 
 
-    internal static void ILKeepFavoriteInBanks(ILContext il) {
+    private static void ILKeepFavoriteInBanks(ILContext il) {
         ILCursor cursor = new(il);
         cursor.GotoNext(MoveType.Before, i => i.MatchStfld(Reflection.Item.favorited));
         cursor.EmitLdarg0();
@@ -343,7 +374,7 @@ public sealed class ClickOverrides : ILoadable {
         if (!sync && Configs.InventoryManagement.FavoriteInBanks) ItemExtensions.RunWithHiddenItems(items, () => orig(), i => i.favorited);
         else orig();
     }
-    internal static void ILFavoritedBankBackground(ILContext il) {
+    private static void ILFavoritedBankBackground(ILContext il) {
         ILCursor cursor = new(il);
 
         // if (item.type > 0 && item.stack > 0 && item.favorited && context != 13 && context != 21 && context != 22 && context != 14) {

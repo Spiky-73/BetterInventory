@@ -36,9 +36,25 @@ public sealed class Bestiary : ILoadable {
         On_UIBestiaryFilteringOptionsGrid.UpdateButtonSelections += HookDarkenFilters;
 
         On_UIBestiaryTest.FilterEntries += HookBestiaryFilterRemoveHiddenEntries;
+
+        IL_Filters.BySearch.FitsFilter += il => {
+            if (!il.ApplyTo(ILSearchAddEntries, Configs.BetterBestiary.DisplayedInfo)) Configs.UnloadedItemSearch.Value.bestiaryDisplayedInfo = true;
+        };
+        IL_UIBestiaryEntryIcon.Update += il => {
+            if(!il.ApplyTo(ILIconUpdateFakeUnlock, Configs.BetterBestiary.Unlock)) Configs.UnloadedItemSearch.Value.BestiaryUnlock = true;
+        };
+        IL_UIBestiaryEntryIcon.DrawSelf += il => {
+            if(!il.ApplyTo(ILIconDrawFakeUnlock, Configs.BetterBestiary.UnknownDisplay)) Configs.UnloadedItemSearch.Value.bestiaryUnknown = true;
+        };
+        IL_UIBestiaryEntryInfoPage.AddInfoToList += il => {
+            if(!il.ApplyTo(IlEntryPageFakeUnlock, Configs.BetterBestiary.Unlock)) Configs.UnloadedItemSearch.Value.BestiaryUnlock = true;
+        };
+        IL_UIBestiaryFilteringOptionsGrid.UpdateAvailability += il => {
+            if(!il.ApplyTo(ILFakeUnlockFilters, Configs.BetterBestiary.UnknownDisplay)) Configs.UnloadedItemSearch.Value.bestiaryUnknown = true;
+            if(!il.ApplyTo(ILFixPosition, Configs.BetterBestiary.UnknownDisplay)) Configs.UnloadedItemSearch.Value.bestiaryUnknown = true;
+        };
     }
     public void Unload() => _bossBagSearch.Clear();
-
 
     private static void HookFixDropRates(On_FewFromOptionsNotScaledWithLuckDropRule.orig_ReportDroprates orig, FewFromOptionsNotScaledWithLuckDropRule self, List<DropRateInfo> drops, DropRateInfoChainFeed ratesInfo) {
         if (!Configs.BetterBestiary.Enabled) {
@@ -52,7 +68,7 @@ public sealed class Bestiary : ILoadable {
         Chains.ReportDroprates(self.ChainedRules, personalDroprate, drops, ratesInfo);
     }
     
-    internal static void ILSearchAddEntries(ILContext il) {
+    private static void ILSearchAddEntries(ILContext il) {
         ILCursor cursor = new(il);
 
         // ...
@@ -113,7 +129,7 @@ public sealed class Bestiary : ILoadable {
     private static bool HookCustomUnlockFilter(On_Filters.ByUnlockState.orig_FitsFilter orig, Filters.ByUnlockState self, BestiaryEntry entry) => Configs.BetterBestiary.UnlockFilter ? entry.UIInfoProvider.GetEntryUICollectionInfo().UnlockState != BestiaryEntryUnlockState.CanShowDropsWithDropRates_4 : orig(self, entry);
 
 
-    internal static void ILIconUpdateFakeUnlock(ILContext il) {
+    private static void ILIconUpdateFakeUnlock(ILContext il) {
         ILCursor cursor = new(il);
 
         // this._collectionInfo = this._entry.UIInfoProvider.GetEntryUICollectionInfo();
@@ -127,7 +143,7 @@ public sealed class Bestiary : ILoadable {
         });
         // ...
     }
-    internal static void ILIconDrawFakeUnlock(ILContext il) {
+    private static void ILIconDrawFakeUnlock(ILContext il) {
         ILCursor cursor = new(il);
 
         // ...
@@ -145,7 +161,7 @@ public sealed class Bestiary : ILoadable {
         Reflection.UIBestiaryEntryButton._bordersGlow.GetValue(self).Color.ApplyRGB(IconDark);
     }
 
-    internal static void IlEntryPageFakeUnlock(ILContext il) {
+    private static void IlEntryPageFakeUnlock(ILContext il) {
         ILCursor cursor = new(il);
 
         // BestiaryUICollectionInfo uICollectionInfo = this.GetUICollectionInfo(entry, extraInfo);
@@ -169,7 +185,7 @@ public sealed class Bestiary : ILoadable {
         if (s_darkPage) DarkenElement(Reflection.UIBestiaryEntryInfoPage._list.GetValue(self), PageDark);
     }
 
-    internal static void ILFakeUnlockFilters(ILContext il) {
+    private static void ILFakeUnlockFilters(ILContext il) {
         ILCursor cursor = new(il);
         cursor.EmitDelegate(() => { s_ilSkipped = 0; });
 
@@ -201,7 +217,7 @@ public sealed class Bestiary : ILoadable {
         cursor.EmitBrtrue(cont!);
         cursor.EmitDelegate(() => s_ilOn);
     }
-    internal static void ILFixPosition(ILContext il) {
+    private static void ILFixPosition(ILContext il) {
         ILCursor cursor = new(il);
 
         cursor.GotoNext(i => i.MatchStloc(11)).GotoPrev(MoveType.After, i => i.MatchLdloc(10));

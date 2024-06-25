@@ -1,11 +1,17 @@
 using System;
+using System.Runtime.CompilerServices;
+using MonoMod.Cil;
 using Terraria;
+using Terraria.ModLoader;
 
 namespace BetterInventory;
 
 [Flags] public enum AllowedItems : byte { None = 0b00, Self = 0b01, Mouse = 0b10}
 
 public static class Utility {
+
+    public static int FailedILs { get; private set; }
+
     public static Item? LastStack(this Player player, Item item, AllowedItems allowedItems = AllowedItems.None) {
         bool Check(Item i) => item.type == i.type && (allowedItems.HasFlag(AllowedItems.Self) || i != item);
 
@@ -25,5 +31,22 @@ public static class Utility {
         for (int i = 57; i >= 50; i--) Check(player.inventory[i]);
         if (allowedItems.HasFlag(AllowedItems.Mouse)) Check(player.inventory[58]);
         return min;
+    }
+
+    public static bool ApplyTo(this ILContext context, Action<ILContext> ilEdit, bool enabled, [CallerArgumentExpression("ilEdit")] string name = "") {
+        if (Configs.Compatibility.CompatibilityMode && !enabled) {
+            BetterInventory.Instance.Logger.Info($"{name} was not loaded. Related features will be disabled until reload");
+            return false;
+        }
+        try {
+            ilEdit(context);
+        } catch (Exception e) {
+            MonoModHooks.DumpIL(BetterInventory.Instance, context);
+            FailedILs++;
+            BetterInventory.Instance.Logger.Warn($"{name} failed to load. Related features will be disabled until reload", e);
+
+            return false;
+        }
+        return true;
     }
 }

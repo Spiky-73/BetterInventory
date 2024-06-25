@@ -14,6 +14,7 @@ using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using Terraria.UI;
 using Terraria.UI.Chat;
 using Terraria.UI.Gamepad;
 
@@ -23,6 +24,10 @@ public sealed class QuickMove : ILoadable {
 
     public void Load(Mod mod) {
         On_Main.DrawInterface_36_Cursor += HookAlternateChain;
+        IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += il => {
+            if (!il.ApplyTo(ILHighlightSlot, Configs.QuickMove.Highlight)) Configs.UnloadedInventoryManagement.Value.quickMoveHighlight = true;
+            if (!il.ApplyTo(ILDisplayHotkey, Configs.QuickMove.DisplayHotkeys)) Configs.UnloadedInventoryManagement.Value.quickMoveHotkeys = true;
+        };
     }
     public void Unload() {}
 
@@ -179,7 +184,7 @@ public sealed class QuickMove : ILoadable {
     }
 
 
-    internal static void ILHighlightSlot(ILContext il) {
+    private static void ILHighlightSlot(ILContext il) {
         ILCursor cursor = new(il);
 
         // ...
@@ -202,7 +207,7 @@ public sealed class QuickMove : ILoadable {
         // }
 
     }
-    internal static void ILDisplayHotkey(ILContext il){
+    private static void ILDisplayHotkey(ILContext il){
         ILCursor cursor = new(il);
 
         // ...

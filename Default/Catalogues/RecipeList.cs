@@ -24,6 +24,9 @@ public sealed class RecipeList : ModEntityCatalogue {
         On_ItemSlot.LeftClick_ItemArray_int_int += HookLeftClick;
 
         On_Player.dropItemCheck += HookDropItems;
+        IL_Main.DrawInventory += il => {
+            if (!il.ApplyTo(ILForceGuideDisplay, Enabled)) Configs.UnloadedItemSearch.Value.recipeList = true;
+        };
     }
 
     public override void Unload() {
@@ -31,7 +34,7 @@ public sealed class RecipeList : ModEntityCatalogue {
         _guideHistory[1].Clear();
     }
 
-    internal static void ILForceGuideDisplay(ILContext il) {
+    private static void ILForceGuideDisplay(ILContext il) {
         ILCursor cursor = new(il);
 
         // if(Main.InReforgeMenu){

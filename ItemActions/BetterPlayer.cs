@@ -58,6 +58,10 @@ public sealed class BetterPlayer : ModPlayer {
         DisplaySpicWarning();
     }
 
+    public override void ResetEffects() {
+        Guide.forcedTooltip = null;
+    }
+
     public void DisplayUpdate() {
         bool download;
         if (Configs.Version.Instance.lastPlayedVersion.Length == 0) download = true;
@@ -77,22 +81,25 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public static void DisplayCompatibility() {
-        bool failed;
-        if (Hooks.FailedILs > Configs.Compatibility.Instance.failedILs) failed = true;
-        else if (Hooks.FailedILs < Configs.Compatibility.Instance.failedILs) failed = false;
+        bool more;
+        if (Utility.FailedILs > Configs.Compatibility.Instance.failedILs) more = true;
+        else if (Utility.FailedILs < Configs.Compatibility.Instance.failedILs) more = false;
         else return;
-        Configs.Compatibility.Instance.failedILs = Hooks.FailedILs;
+        Configs.Compatibility.Instance.failedILs = Utility.FailedILs;
         Configs.Compatibility.Instance.Save();
 
-        List<ITextLine> lines = new() { failed ? new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.UnloadedMore"), Colors.RarityAmber) : new(Language.GetText($"{Localization.Keys.Chat}.UnloadedLess"), Colors.RarityGreen) };
-        InGameNotificationsTracker.AddNotification(new InGameNotification(ModContent.Request<Texture2D>($"BetterInventory/icon"), [.. lines]));
+        InGameNotificationsTracker.AddNotification(new InGameNotification(
+            ModContent.Request<Texture2D>($"BetterInventory/icon"),
+            more ? new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.UnloadedMore"), Colors.RarityAmber) : new(Language.GetText($"{Localization.Keys.Chat}.UnloadedLess"), Colors.RarityGreen)
+        ));
     }
 
     public static void DisplaySpicWarning() {
         if (!Configs.CraftStack.Enabled || Configs.CraftStack.Value.maxItems.Choice != nameof(Configs.MaxCraftAmount.spicRequirement) || SpysInfiniteConsumables.Enabled) return;
-
-        List<ITextLine> lines = new() { new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.SPICWarning"), Colors.RarityAmber)};
-        InGameNotificationsTracker.AddNotification(new InGameNotification(ModContent.Request<Texture2D>($"BetterInventory/icon"), [.. lines]));
+        InGameNotificationsTracker.AddNotification(new InGameNotification(
+            ModContent.Request<Texture2D>($"BetterInventory/icon"),
+            new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.SPICWarning"), Colors.RarityAmber)
+        ));
     }
 
     public override void SetControls() {

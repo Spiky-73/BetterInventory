@@ -1,13 +1,21 @@
 using MonoMod.Cil;
 using SpikysLib.Extensions;
 using Terraria;
+using Terraria.ModLoader;
 using Terraria.UI;
 
 namespace BetterInventory.Crafting;
 
-public static class Crafting {
+public sealed class Crafting : ILoadable {
 
-    internal static void ILCraftOnList(ILContext il) {
+    public void Load(Mod mod) {
+        IL_Main.DrawInventory += il => {
+            if (!il.ApplyTo(ILCraftOnList, Configs.CraftOnList.Enabled)) Configs.UnloadedCrafting.Value.craftOnList = true;
+        };
+    }
+    public void Unload() { }
+
+    private static void ILCraftOnList(ILContext il) {
         ILCursor cursor = new(il);
 
         // if(<recBigListVisible>) {

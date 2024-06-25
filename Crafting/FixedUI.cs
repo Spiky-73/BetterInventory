@@ -13,10 +13,16 @@ public sealed class FixedUI : ILoadable {
 
     public void Load(Mod mod) {
         On_Main.TryAllowingToCraftRecipe += HookTryAllowingToCraftRecipe;
+        IL_Main.DrawInventory += il => {
+            if (!il.ApplyTo(ILFastScroll, Configs.FixedUI.FastScroll)) Configs.UnloadedCrafting.Value.fastScroll = true;
+            if (!il.ApplyTo(ILScrollButtonsFix, Configs.FixedUI.ScrollButtons)) Configs.UnloadedCrafting.Value.scrollButtons = true;
+            if (!il.ApplyTo(ILMaterialWrapping, Configs.FixedUI.Wrapping)) Configs.UnloadedCrafting.Value.wrapping = true;
+        };
+
     }
     public void Unload(){}
 
-    internal static void ILFastScroll(ILContext il) {
+    private static void ILFastScroll(ILContext il) {
         ILCursor cursor = new(il);
 
         // ...
@@ -54,7 +60,7 @@ public sealed class FixedUI : ILoadable {
         //     ...
         // }
     }
-    internal static void ILMaterialWrapping(ILContext il) {
+    private static void ILMaterialWrapping(ILContext il) {
         ILCursor cursor = new(il);
 
         // if(<showRecipes>){
@@ -94,7 +100,7 @@ public sealed class FixedUI : ILoadable {
         //     ...
         // }
     }
-    internal static void ILScrollButtonsFix(ILContext il) {
+    private static void ILScrollButtonsFix(ILContext il) {
         ILCursor cursor = new(il);
         // Main.hidePlayerCraftingMenu = false;
         // if(<recBigListVisible>) {
@@ -130,7 +136,7 @@ public sealed class FixedUI : ILoadable {
         => orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting || Configs.FixedUI.CraftWhenHolding, out movedAnItemToAllowCrafting);
 
     private static int _recDelay = 0;
-    public static readonly int[] MaterialsPerLine = new int[] { 6, 4 };
+    public static readonly int[] MaterialsPerLine = [6, 4];
 
     public const int VanillaMaterialSpacing = 40;
     public const int VanillaCorrection = -2;

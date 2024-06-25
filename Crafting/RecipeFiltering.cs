@@ -15,11 +15,19 @@ using Terraria.ModLoader.UI;
 
 namespace BetterInventory.Crafting;
 
-public static class RecipeFiltering {
+public sealed class RecipeFiltering : ILoadable {
 
     public static RecipeFilters LocalFilters => ItemActions.BetterPlayer.LocalPlayer.RecipeFilters;
 
-    internal static void ILDrawFilters(ILContext il) {
+    public void Load(Mod mod) {
+        IL_Main.DrawInventory += il => {
+            if (!il.ApplyTo(ILDrawFilters, Configs.RecipeFilters.Enabled)) Configs.UnloadedCrafting.Value.recipeFilters = true;
+        };
+    }
+
+    public void Unload() {}
+
+    private static void ILDrawFilters(ILContext il) {
         ILCursor cursor = new(il);
 
         // ...

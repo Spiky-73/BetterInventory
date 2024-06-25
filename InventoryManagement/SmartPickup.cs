@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using SpikysLib.Extensions;
-using SpikysLib.DataStructures;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -20,6 +19,17 @@ namespace BetterInventory.InventoryManagement;
 public sealed class SmartPickup : ILoadable {
 
     public void Load(Mod mod) {
+        IL_Player.GetItem += il => {
+            if(!il.ApplyTo(ILPreviousSlot, Configs.PreviousSlot.Enabled)) Configs.UnloadedInventoryManagement.Value.previousSlot = true;
+            if(!il.ApplyTo(ILAutoEquip, Configs.SmartPickup.AutoEquip)) Configs.UnloadedInventoryManagement.Value.autoEquip = true;
+            if(!il.ApplyTo(ILUpradeItems, Configs.UpgradeItems.Enabled)) Configs.UnloadedInventoryManagement.Value.upgradeItems = true;
+            if(!il.ApplyTo(ILHotbarLast, Configs.SmartPickup.HotbarLast)) Configs.UnloadedInventoryManagement.Value.hotbarLast = true;
+            if(!il.ApplyTo(ILFixNewItem, Configs.SmartPickup.FixSlot)) Configs.UnloadedInventoryManagement.Value.fixSlot = true;
+        };
+        IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += il => {
+            if (!il.ApplyTo(ILDrawFakeItem, Configs.PreviousDisplay.FakeItem)) Configs.UnloadedInventoryManagement.Value.displayFakeItem = true;
+            if (!il.ApplyTo(ILDrawIcon, Configs.PreviousDisplay.Icon)) Configs.UnloadedInventoryManagement.Value.displayIcon = true;
+        };
         On_ItemSlot.LeftClick_ItemArray_int_int += HookLeftSaveType;
         On_ItemSlot.RightClick_ItemArray_int_int += HookRightSaveType;
         On_Player.DropItems += HookMarkItemsOnDeath;
@@ -63,7 +73,7 @@ public sealed class SmartPickup : ILoadable {
         orig(self);
     }
 
-    internal static void ILPreviousSlot(ILContext il) {
+    private static void ILPreviousSlot(ILContext il) {
         ILCursor cursor = new(il);
 
         // ...
@@ -88,7 +98,7 @@ public sealed class SmartPickup : ILoadable {
         // ++if (newItem.IsAir) return new()
         EmitRetAir(cursor);
     }
-    internal static void ILDrawFakeItem(ILContext il) {
+    private static void ILDrawFakeItem(ILContext il) {
         ILCursor cursor = new(il);
 
         // ...
@@ -109,7 +119,7 @@ public sealed class SmartPickup : ILoadable {
             return -1;
         });
     }
-    internal static void ILDrawIcon(ILContext il) {
+    private static void ILDrawIcon(ILContext il) {
         ILCursor cursor = new(il);
 
         // ...
@@ -147,7 +157,7 @@ public sealed class SmartPickup : ILoadable {
         return true;
     }
 
-    internal static void ILAutoEquip(ILContext il) {
+    private static void ILAutoEquip(ILContext il) {
         ILCursor cursor = new(il);
 
         // if (isACoin) ...
@@ -170,7 +180,7 @@ public sealed class SmartPickup : ILoadable {
         // ++if (newItem.IsAir) return new()
         EmitRetAir(cursor);
     }
-    internal static void ILUpradeItems(ILContext il) {
+    private static void ILUpradeItems(ILContext il) {
         ILCursor cursor = new(il);
 
         // if (isACoin) ...
@@ -193,7 +203,7 @@ public sealed class SmartPickup : ILoadable {
         // ++if (newItem.IsAir) return new()
         EmitRetAir(cursor);
     }
-    internal static void ILFixNewItem(ILContext il) {
+    private static void ILFixNewItem(ILContext il) {
         ILCursor cursor = new(il);
         cursor.GotoNext(MoveType.After, i => i.MatchStloc1());
         while (cursor.TryGotoNext(MoveType.After, i => i.MatchLdarg2() && i.Next.MatchLdfld(out _))) {
@@ -212,7 +222,7 @@ public sealed class SmartPickup : ILoadable {
         cursor.MarkLabel(skip);
     }
 
-    internal static void ILHotbarLast(ILContext il) {
+    private static void ILHotbarLast(ILContext il) {
         ILCursor cursor = new(il);
 
         // if (!isACoin ++[&& !<hotbarLast>] && newItem.useStyle != 0) <hotbar>

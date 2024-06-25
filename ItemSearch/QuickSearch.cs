@@ -51,7 +51,6 @@ public sealed class QuickSearch : ILoadable {
             orig(self, time);
             (Main.mouseLeft, Main.mouseRight) = (left, right);
         }
-        Guide.forcedTooltip = null;
     }
 
     public static void ProcessTriggers() {
@@ -69,8 +68,12 @@ public sealed class QuickSearch : ILoadable {
             if(catalogue.Enabled && catalogue.Keybind.JustPressed) {
                 if (Configs.QuickSearch.Value.individualKeybinds.Key.HasFlag(Configs.SearchAction.Search) && !Main.HoverItem.IsAir) {
                     catalogue.Toggle(true);
-                    if (Guide.forcedTooltip?.Key != $"{Localization.Keys.UI}.Unknown") catalogue.Search(Main.HoverItem);
-                    SoundEngine.PlaySound(SoundID.Grab);
+                    if (Guide.forcedTooltip?.Key != $"{Localization.Keys.UI}.Unknown") {
+                        catalogue.Search(Main.HoverItem);
+                        SoundEngine.PlaySound(SoundID.Grab); 
+                    } else {
+                        SoundEngine.PlaySound(SoundID.MenuTick); 
+                    }
                 } else if (Configs.QuickSearch.Value.individualKeybinds.Key.HasFlag(Configs.SearchAction.Toggle)) {
                     catalogue.Toggle();
                     SoundEngine.PlaySound(SoundID.MenuTick);

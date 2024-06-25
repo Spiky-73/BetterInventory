@@ -9,6 +9,16 @@ namespace BetterInventory.InventoryManagement;
 
 public sealed class SmartConsumptionItem : GlobalItem {
 
+    public override void Load() {
+        IL_Player.ItemCheck_CheckFishingBobber_PickAndConsumeBait += il => {
+            if(!il.ApplyTo(ILOnConsumeBait, Configs.SmartConsumption.Baits)) Configs.UnloadedInventoryManagement.Value.baits = true;
+
+        };
+        IL_Recipe.ConsumeForCraft += il => {
+            if (!il.ApplyTo(ILOnConsumedMaterial, Configs.SmartConsumption.Materials)) Configs.UnloadedInventoryManagement.Value.materials = true;
+        };
+
+    }
     public override void OnConsumeItem(Item item, Player player) {
         if (item.PaintOrCoating) {
             if (Configs.SmartConsumption.Paints) SmartConsume(player, item, () => player.LastStack(item, Configs.SmartConsumption.Mouse));
@@ -21,7 +31,7 @@ public sealed class SmartConsumptionItem : GlobalItem {
         if (Configs.SmartConsumption.Ammo) SmartConsume(player, ammo, () => player.LastStack(ammo, Configs.SmartConsumption.Mouse));
     }
 
-    internal static void ILOnConsumedMaterial(ILContext il) {
+    private static void ILOnConsumedMaterial(ILContext il) {
         ILCursor cursor = new(il);
 
         cursor.GotoNext(MoveType.Before, i => i.MatchLdsfld(Reflection.RecipeLoader.ConsumedItems));
@@ -32,7 +42,7 @@ public sealed class SmartConsumptionItem : GlobalItem {
         });
     }
 
-    internal static void ILOnConsumeBait(ILContext il) {
+    private static void ILOnConsumeBait(ILContext il) {
         ILCursor cursor = new(il);
         cursor.GotoNext(i => i.SaferMatchCall(Reflection.NPC.LadyBugKilled));
         cursor.GotoNext(MoveType.After, i => i.MatchStfld(Reflection.Item.stack));
