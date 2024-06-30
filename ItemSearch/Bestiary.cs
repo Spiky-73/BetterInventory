@@ -37,19 +37,19 @@ public sealed class Bestiary : ILoadable {
 
         On_UIBestiaryTest.FilterEntries += HookBestiaryFilterRemoveHiddenEntries;
 
-        IL_Filters.BySearch.FitsFilter += il => {
+        IL_Filters.BySearch.FitsFilter += static il => {
             if (!il.ApplyTo(ILSearchAddEntries, Configs.BetterBestiary.DisplayedInfo)) Configs.UnloadedItemSearch.Value.bestiaryDisplayedInfo = true;
         };
-        IL_UIBestiaryEntryIcon.Update += il => {
+        IL_UIBestiaryEntryIcon.Update += static il => {
             if(!il.ApplyTo(ILIconUpdateFakeUnlock, Configs.BetterBestiary.Unlock)) Configs.UnloadedItemSearch.Value.BestiaryUnlock = true;
         };
-        IL_UIBestiaryEntryIcon.DrawSelf += il => {
+        IL_UIBestiaryEntryIcon.DrawSelf += static il => {
             if(!il.ApplyTo(ILIconDrawFakeUnlock, Configs.BetterBestiary.UnknownDisplay)) Configs.UnloadedItemSearch.Value.bestiaryUnknown = true;
         };
-        IL_UIBestiaryEntryInfoPage.AddInfoToList += il => {
+        IL_UIBestiaryEntryInfoPage.AddInfoToList += static il => {
             if(!il.ApplyTo(IlEntryPageFakeUnlock, Configs.BetterBestiary.Unlock)) Configs.UnloadedItemSearch.Value.BestiaryUnlock = true;
         };
-        IL_UIBestiaryFilteringOptionsGrid.UpdateAvailability += il => {
+        IL_UIBestiaryFilteringOptionsGrid.UpdateAvailability += static il => {
             if(!il.ApplyTo(ILFakeUnlockFilters, Configs.BetterBestiary.UnknownDisplay)) Configs.UnloadedItemSearch.Value.bestiaryUnknown = true;
             if(!il.ApplyTo(ILFixPosition, Configs.BetterBestiary.UnknownDisplay)) Configs.UnloadedItemSearch.Value.bestiaryUnknown = true;
         };
@@ -189,6 +189,10 @@ public sealed class Bestiary : ILoadable {
         ILCursor cursor = new(il);
         cursor.EmitDelegate(() => { s_ilSkipped = 0; });
 
+        cursor.GotoNext(MoveType.After, i => i.MatchLdfld(Reflection.EntryFilterer<BestiaryEntry, IBestiaryEntryFilter>.AvailableFilters));
+        cursor.GotoNextLoc(out int filter, i => true, 13);
+        cursor.GotoNext(MoveType.After, i => i.MatchLdfld(Reflection.UIBestiaryFilteringOptionsGrid._filterAvailabilityTests));
+        cursor.GotoNextLoc(out int entries, i => true, 14);
         // ...
         // for (<filter>) {
         //     ...
@@ -199,8 +203,8 @@ public sealed class Bestiary : ILoadable {
         cursor.FindNext(out _, i => i.MatchBr(out cont));
 
         //     ++ <fakeUnlock> 
-        cursor.EmitLdloc(13);
-        cursor.EmitLdloc(14);
+        cursor.EmitLdloc(filter);
+        cursor.EmitLdloc(entries);
         cursor.EmitDelegate((bool on, IBestiaryEntryFilter filter, List<BestiaryEntry> entries) => {
             s_ilOn = on;
             if(!Configs.BetterBestiary.UnknownDisplay || on || filter.ForcedDisplay.HasValue) return false;
@@ -220,9 +224,12 @@ public sealed class Bestiary : ILoadable {
     private static void ILFixPosition(ILContext il) {
         ILCursor cursor = new(il);
 
-        cursor.GotoNext(i => i.MatchStloc(11)).GotoPrev(MoveType.After, i => i.MatchLdloc(10));
+        cursor.GotoNext(i => i.MatchLdcI4(0));
+        cursor.GotoNextLoc(out int index, i => i.Next.MatchBr(out _), 10);
+
+        cursor.GotoNext(i => i.MatchStloc(out _) && i.Previous.MatchDiv()).GotoPrev(MoveType.After, i => i.MatchLdloc(index));
         cursor.EmitDelegate((int i) => i-s_ilSkipped);
-        cursor.GotoNext(i => i.MatchStloc(12)).GotoPrev(MoveType.After, i => i.MatchLdloc(10));
+        cursor.GotoNext(i => i.MatchStloc(out _) && i.Previous.MatchRem()).GotoPrev(MoveType.After, i => i.MatchLdloc(index));
         cursor.EmitDelegate((int i) => i-s_ilSkipped);
 
         cursor.GotoNext(MoveType.Before, i => i.MatchRet());

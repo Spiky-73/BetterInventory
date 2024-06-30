@@ -24,7 +24,7 @@ public sealed class QuickMove : ILoadable {
 
     public void Load(Mod mod) {
         On_Main.DrawInterface_36_Cursor += HookAlternateChain;
-        IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += il => {
+        IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += static il => {
             if (!il.ApplyTo(ILHighlightSlot, Configs.QuickMove.Highlight)) Configs.UnloadedInventoryManagement.Value.quickMoveHighlight = true;
             if (!il.ApplyTo(ILDisplayHotkey, Configs.QuickMove.DisplayHotkeys)) Configs.UnloadedInventoryManagement.Value.quickMoveHotkeys = true;
         };
@@ -187,18 +187,15 @@ public sealed class QuickMove : ILoadable {
     private static void ILHighlightSlot(ILContext il) {
         ILCursor cursor = new(il);
 
+        cursor.GotoNextLoc(out int scale, i => i.Previous.MatchLdsfld(Reflection.Main.inventoryScale), 2);
+
         // ...
         // if (!flag2) {
         //     spriteBatch.Draw(value, position, null, color2, 0f, default(Vector2), inventoryScale, 0, 0f);
         cursor.GotoNext(MoveType.After, i => i.MatchCallvirt(typeof(SpriteBatch), nameof(SpriteBatch.Draw)));
 
         // ++ <highlightSlot>
-        cursor.EmitLdarg0();
-        cursor.EmitLdarg1();
-        cursor.EmitLdarg2();
-        cursor.EmitLdarg3();
-        cursor.EmitLdarg(4);
-        cursor.EmitLdloc2();
+        cursor.EmitLdarg0().EmitLdarg1().EmitLdarg2().EmitLdarg3().EmitLdarg(4).EmitLdloc(scale);
         cursor.EmitDelegate((SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, float scale) => {
             if (!Configs.QuickMove.Highlight) return;
             if (!IsTargetableSlot(inv, context, slot, out int number, out int key) || (Configs.QuickMove.Value.displayedHotkeys == Configs.HotkeyDisplayMode.Next ? number != 1 : number == 0)) return;
@@ -209,6 +206,8 @@ public sealed class QuickMove : ILoadable {
     }
     private static void ILDisplayHotkey(ILContext il){
         ILCursor cursor = new(il);
+
+        cursor.GotoNextLoc(out int scale, i => i.Previous.MatchLdsfld(Reflection.Main.inventoryScale), 2);
 
         // ...
         // if(...) {
@@ -226,12 +225,7 @@ public sealed class QuickMove : ILoadable {
         cursor.GotoNext(MoveType.AfterLabel, i => i.MatchRet());
 
         // ++ <drawSlotNumbers>
-        cursor.EmitLdarg0();
-        cursor.EmitLdarg1();
-        cursor.EmitLdarg2();
-        cursor.EmitLdarg3();
-        cursor.EmitLdarg(4);
-        cursor.EmitLdloc2();
+        cursor.EmitLdarg0().EmitLdarg1().EmitLdarg2().EmitLdarg3().EmitLdarg(4).EmitLdloc(scale);
         cursor.EmitDelegate((SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, float scale) => {
             if (!Configs.QuickMove.DisplayHotkeys) return;
             if (!IsTargetableSlot(inv, context, slot, out int number, out int key) || (Configs.QuickMove.Value.displayedHotkeys == Configs.HotkeyDisplayMode.Next ? number != 1 : number == 0)) return;

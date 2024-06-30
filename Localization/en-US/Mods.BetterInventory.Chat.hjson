@@ -3,6 +3,7 @@ Update: "{$Mods.BetterInventory.Chat.ModName} was updated to v{$Mods.BetterInven
 Bug: This mod is still in development. If you found a bug, please report it on the [c/05c8ff:{$Mods.BetterInventory.Chat.Workshop}] or the [c/05c8ff:{$Mods.BetterInventory.Chat.Homepage}]
 UnloadedMore: Some features failed to load and will have no effect in game. {$Mods.BetterInventory.Chat.Compatibility}
 UnloadedLess: Some previously unloaded features were successfully loaded. {$Mods.BetterInventory.Chat.Compatibility}
+UnloadedNone: All previously unloaded features were successfully loaded
 Compatibility: View the [c/05c8ff:{$Mods.BetterInventory.Configs.Compatibility.DisplayName}] config to see the list of unloaded features
 SPICWarning: "{$Mods.BetterInventory.Configs.MaxCraftAmount.spicRequirement.Label} is selected but SPIC is not loaded"
 ModName: Better Inventory

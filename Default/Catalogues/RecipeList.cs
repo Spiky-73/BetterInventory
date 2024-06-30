@@ -42,15 +42,15 @@ public sealed class RecipeList : ModEntityCatalogue {
         // } else if(Main.InGuideCraftMenu) {
         //     if(<closeGuideUI>) ...
         //     else {
-        ILLabel? endGuide = null;
+        ILLabel endGuide = null!;
         cursor.GotoNext(i => i.SaferMatchCall(typeof(Main), "DrawGuideCraftText"));
-        cursor.GotoPrev(MoveType.After, i => i.MatchBr(out endGuide));
+        cursor.GotoPrev(MoveType.After, i => i.MatchBr(out endGuide!));
 
         //         ++ guide:
         ILLabel guide = cursor.DefineLabel();
         cursor.MarkLabel(guide);
 
-        cursor.GotoLabel(endGuide!, MoveType.Before);
+        cursor.GotoLabel(endGuide, MoveType.Before);
 
         //         ++ if(<alternateGuideDraw>) goto recipe;
         ILLabel recipe = cursor.DefineLabel();
@@ -62,9 +62,8 @@ public sealed class RecipeList : ModEntityCatalogue {
 
         // ...
         // if(<showRecipes>){
-        cursor.GotoNext(i => i.MatchStloc(124)); // int num63
-        cursor.GotoPrev(MoveType.After, i => i.MatchStsfld(Reflection.UILinkPointNavigator.CRAFT_CurrentRecipeSmall));
-
+        cursor.GotoRecipeDraw();
+        
         //     ++ if(<alternateGuideDraw>) goto guide;
         cursor.EmitDelegate(() => Instance.Enabled && !Main.InGuideCraftMenu);
         cursor.EmitBrtrue(guide);

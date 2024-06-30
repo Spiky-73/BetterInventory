@@ -13,10 +13,14 @@ namespace BetterInventory.Reflection;
 public static class Main {
     public static readonly StaticField<int[]> availableRecipe = new(typeof(TMain), nameof(TMain.availableRecipe));
     public static readonly StaticField<int> numAvailableRecipes = new(typeof(TMain), nameof(TMain.numAvailableRecipes));
+    public static readonly StaticField<int> recStart = new(typeof(TMain), nameof(TMain.recStart));
+    public static readonly StaticField<float> inventoryScale = new(typeof(TMain), nameof(TMain.inventoryScale));
     public static readonly StaticField<bool> recBigList = new(typeof(TMain), nameof(TMain.recBigList));
     public static readonly StaticField<bool> recFastScroll = new(typeof(TMain), nameof(TMain.recFastScroll));
     public static readonly StaticField<int> focusRecipe = new(typeof(TMain), nameof(TMain.focusRecipe));
     public static readonly StaticField<bool> craftingHide = new(typeof(TMain), nameof(TMain.craftingHide));
+    public static readonly StaticField<bool> hidePlayerCraftingMenu = new(typeof(TMain), nameof(TMain.hidePlayerCraftingMenu));
+    public static readonly StaticField<int> screenHeight = new(typeof(TMain), nameof(TMain.screenHeight));
     public static readonly StaticField<bool> InGuideCraftMenu = new(typeof(TMain), nameof(TMain.InGuideCraftMenu));
     public static readonly StaticField<TItem> guideItem = new(typeof(TMain), nameof(TMain.guideItem));
     public static readonly StaticField<bool> _preventCraftingBecauseClickWasUsedToChangeFocusedRecipe = new(typeof(TMain), nameof(_preventCraftingBecauseClickWasUsedToChangeFocusedRecipe));
@@ -41,7 +45,9 @@ public static class Item {
     public static readonly Field<TItem, int> useStyle = new(nameof(TItem.useStyle));
     public static readonly Field<TItem, bool> favorited = new(nameof(TItem.favorited));
     public static readonly Property<TItem, bool> IsAir = new(nameof(TItem.IsAir));
+    public static readonly Property<TItem, bool> IsACoin = new(nameof(TItem.IsACoin));
     public static readonly Method<TItem, bool> FitsAmmoSlot = new(nameof(TItem.FitsAmmoSlot));
+    public static readonly Method<TItem, TItem> Clone = new(nameof(TItem.Clone));
 }
 
 public static class NPC {

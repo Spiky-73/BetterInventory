@@ -10,11 +10,11 @@ namespace BetterInventory.InventoryManagement;
 public sealed class SmartConsumptionItem : GlobalItem {
 
     public override void Load() {
-        IL_Player.ItemCheck_CheckFishingBobber_PickAndConsumeBait += il => {
+        IL_Player.ItemCheck_CheckFishingBobber_PickAndConsumeBait += static il => {
             if(!il.ApplyTo(ILOnConsumeBait, Configs.SmartConsumption.Baits)) Configs.UnloadedInventoryManagement.Value.baits = true;
 
         };
-        IL_Recipe.ConsumeForCraft += il => {
+        IL_Recipe.ConsumeForCraft += static il => {
             if (!il.ApplyTo(ILOnConsumedMaterial, Configs.SmartConsumption.Materials)) Configs.UnloadedInventoryManagement.Value.materials = true;
         };
 
@@ -34,9 +34,11 @@ public sealed class SmartConsumptionItem : GlobalItem {
     private static void ILOnConsumedMaterial(ILContext il) {
         ILCursor cursor = new(il);
 
+        cursor.GotoNextLoc(out int consumed, i => i.Previous.SaferMatchCallvirt(Reflection.Item.Clone), 0);
+
         cursor.GotoNext(MoveType.Before, i => i.MatchLdsfld(Reflection.RecipeLoader.ConsumedItems));
         cursor.EmitLdarg1();
-        cursor.EmitLdloc0();
+        cursor.EmitLdloc(consumed);
         cursor.EmitDelegate((Item item, Item consumed) => {
             if (Configs.SmartConsumption.Materials) SmartConsume(Main.LocalPlayer, item, () => Main.LocalPlayer.SmallestStack(item, AllowedItems.Self | Configs.SmartConsumption.Mouse), consumed.stack);
         });
@@ -44,12 +46,15 @@ public sealed class SmartConsumptionItem : GlobalItem {
 
     private static void ILOnConsumeBait(ILContext il) {
         ILCursor cursor = new(il);
+
+        cursor.GotoNextLoc(out int i, i => i.Previous.MatchLdcI4(-1), 0);
+
         cursor.GotoNext(i => i.SaferMatchCall(Reflection.NPC.LadyBugKilled));
         cursor.GotoNext(MoveType.After, i => i.MatchStfld(Reflection.Item.stack));
         cursor.EmitLdarg0();
-        cursor.EmitLdloc1();
-        cursor.EmitDelegate((Player self, Item item) => {
-            if (Configs.SmartConsumption.Baits) SmartConsume(self, item, () => self.LastStack(item, Configs.SmartConsumption.Mouse));
+        cursor.EmitLdloc(i);
+        cursor.EmitDelegate((Player self, int i) => {
+            if (Configs.SmartConsumption.Baits) SmartConsume(self, self.inventory[i], () => self.LastStack(self.inventory[i], Configs.SmartConsumption.Mouse));
         });
     }
 

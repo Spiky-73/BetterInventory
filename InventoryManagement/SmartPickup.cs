@@ -19,14 +19,14 @@ namespace BetterInventory.InventoryManagement;
 public sealed class SmartPickup : ILoadable {
 
     public void Load(Mod mod) {
-        IL_Player.GetItem += il => {
+        IL_Player.GetItem += static il => {
             if(!il.ApplyTo(ILPreviousSlot, Configs.PreviousSlot.Enabled)) Configs.UnloadedInventoryManagement.Value.previousSlot = true;
             if(!il.ApplyTo(ILAutoEquip, Configs.SmartPickup.AutoEquip)) Configs.UnloadedInventoryManagement.Value.autoEquip = true;
             if(!il.ApplyTo(ILUpradeItems, Configs.UpgradeItems.Enabled)) Configs.UnloadedInventoryManagement.Value.upgradeItems = true;
             if(!il.ApplyTo(ILHotbarLast, Configs.SmartPickup.HotbarLast)) Configs.UnloadedInventoryManagement.Value.hotbarLast = true;
             if(!il.ApplyTo(ILFixNewItem, Configs.SmartPickup.FixSlot)) Configs.UnloadedInventoryManagement.Value.fixSlot = true;
         };
-        IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += il => {
+        IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += static il => {
             if (!il.ApplyTo(ILDrawFakeItem, Configs.PreviousDisplay.FakeItem)) Configs.UnloadedInventoryManagement.Value.displayFakeItem = true;
             if (!il.ApplyTo(ILDrawIcon, Configs.PreviousDisplay.Icon)) Configs.UnloadedInventoryManagement.Value.displayIcon = true;
         };
@@ -76,43 +76,42 @@ public sealed class SmartPickup : ILoadable {
     private static void ILPreviousSlot(ILContext il) {
         ILCursor cursor = new(il);
 
+        cursor.GotoNextLoc(out int coin, i => i.Previous.MatchCallvirt(Reflection.Item.IsACoin.GetMethod!), 0);
+        cursor.GotoNextLoc(out int newitem, i => i.Previous.MatchLdarg2(), 1);
+
         // ...
         // if (newItem.uniqueStack && this.HasItem(newItem.type)) return item;
-        if (!cursor.TryGotoNext(i => i.SaferMatchCall(Reflection.Player.HasItem))
-                || !cursor.TryGotoNext(MoveType.AfterLabel, i => i.MatchLdloc0())) {// bool isACoin
-            BetterInventory.Instance.Logger.Error($"{nameof(ILPreviousSlot)} failled to load");
-            return;
-        }
+        cursor.GotoNext(i => i.SaferMatchCall(Reflection.Player.HasItem));
+        cursor.GotoNext(MoveType.AfterLabel, i => i.MatchLdloc(coin));
 
         // ++ item = <previousSlot>
-        cursor.EmitLdarg0();
-        cursor.EmitLdloc1();
-        cursor.EmitLdarg3();
-        cursor.EmitDelegate((Player self, Item item, GetItemSettings settings) => {
+        EmitSmartPickup(cursor, newitem, (Player self, Item item, GetItemSettings settings) => {
             if (VanillaGetItem || !Configs.PreviousSlot.Enabled) return item;
             else return PickupItemToPreviousSlot(self, item, settings);
         });
-        cursor.EmitDup();
-        cursor.EmitStloc1();
-
-        // ++if (newItem.IsAir) return new()
-        EmitRetAir(cursor);
     }
     private static void ILDrawFakeItem(ILContext il) {
         ILCursor cursor = new(il);
 
+        cursor.GotoNextLoc(out int scale, i => i.Previous.MatchLdsfld(Reflection.Main.inventoryScale), 2);
+        cursor.GotoNextLoc(out int color, i => i.Previous.MatchCall(Reflection.Color.White.GetMethod!), 3);
+        cursor.GotoNextLoc(out int texture, i => i.Previous.MatchCallvirt(Reflection.Asset<Texture2D>.Value.GetMethod!), 7);
+
+        cursor.GotoNext(i => i.SaferMatchCallvirt(Reflection.AccessorySlotLoader.DrawSlotTexture));
+        cursor.GotoPrevLoc(out int icon, i => i.Previous.MatchLdcI4(0) && i.Next.MatchBr(out _), 11);
+
         // ...
         // int num9 = context switch { ... };
         // if ((item.type <= 0 || item.stack <= 0) && ++[!<drawMark>] && num9 != -1) <drawSlotTexture>
-        cursor.GotoNext(MoveType.After, i => i.MatchLdloc(11));
+        cursor.GotoNext(MoveType.After, i => i.MatchLdloc(icon));
         cursor.EmitLdarg0();
         cursor.EmitLdarg1();
         cursor.EmitLdarg2();
         cursor.EmitLdarg3();
         cursor.EmitLdarg(4);
-        cursor.EmitLdloc2();
-        cursor.EmitLdloc(7);
-        cursor.EmitLdloc(3);
+        cursor.EmitLdloc(scale);
+        cursor.EmitLdloc(texture);
+        cursor.EmitLdloc(color);
         cursor.EmitDelegate((int num9, SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, float scale, Texture2D texture, Color color) => {
             if (!Configs.PreviousDisplay.FakeItem || !TryDrawMark(spriteBatch, inv, context, slot, position, scale, texture, color, Configs.PreviousDisplay.Value.fakeItem.Value)) return num9;
             s_ilBackgroundMark = true;
@@ -121,6 +120,10 @@ public sealed class SmartPickup : ILoadable {
     }
     private static void ILDrawIcon(ILContext il) {
         ILCursor cursor = new(il);
+
+        cursor.GotoNextLoc(out int scale, i => i.Previous.MatchLdsfld(Reflection.Main.inventoryScale), 2);
+        cursor.GotoNextLoc(out int color, i => i.Previous.MatchCall(Reflection.Color.White.GetMethod!), 3);
+        cursor.GotoNextLoc(out int texture, i => i.Previous.MatchCallvirt(Reflection.Asset<Texture2D>.Value.GetMethod!), 7);
 
         // ...
         // if(...) {
@@ -141,9 +144,9 @@ public sealed class SmartPickup : ILoadable {
         cursor.EmitLdarg2();
         cursor.EmitLdarg3();
         cursor.EmitLdarg(4);
-        cursor.EmitLdloc2();
-        cursor.EmitLdloc(7);
-        cursor.EmitLdloc(3);
+        cursor.EmitLdloc(scale);
+        cursor.EmitLdloc(texture);
+        cursor.EmitLdloc(color);
         cursor.EmitDelegate((SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, float scale, Texture2D texture, Color color) => {
             if (!Main.gameMenu && !s_ilBackgroundMark && Configs.PreviousDisplay.Icon) TryDrawMark(spriteBatch, inv, context, slot, position, scale, texture, color, Configs.PreviousDisplay.Value.icon.Value);
             s_ilBackgroundMark = false;
@@ -160,60 +163,61 @@ public sealed class SmartPickup : ILoadable {
     private static void ILAutoEquip(ILContext il) {
         ILCursor cursor = new(il);
 
+        cursor.GotoNextLoc(out int coin, i => i.Previous.MatchCallvirt(Reflection.Item.IsACoin.GetMethod!), 0);
+        cursor.GotoNextLoc(out int newitem, i => i.Previous.MatchLdarg2(), 1);
+
         // if (isACoin) ...
         // if (item.FitsAmmoSlot()) ...
         // for(...) ...
         cursor.GotoNext(i => i.SaferMatchCall(Reflection.Player.GetItem_FillEmptyInventorySlot));
-        cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdloc0());
+        cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdloc(coin));
 
-        // ++<autoEquip & upgradeItems>
-        cursor.EmitLdarg0();
-        cursor.EmitLdloc1();
-        cursor.EmitLdarg3();
-        cursor.EmitDelegate((Player self, Item item, GetItemSettings settings) => {
+        // ++<autoEquip>
+        EmitSmartPickup(cursor, newitem, (Player self, Item item, GetItemSettings settings) => {
             if (VanillaGetItem || settings.NoText || !Configs.SmartPickup.AutoEquip) return item;
             return item = AutoEquip(self, item, settings);
         });
-        cursor.EmitDup();
-        cursor.EmitStloc1();
-
-        // ++if (newItem.IsAir) return new()
-        EmitRetAir(cursor);
     }
     private static void ILUpradeItems(ILContext il) {
         ILCursor cursor = new(il);
 
+        cursor.GotoNextLoc(out int coin, i => i.Previous.MatchCallvirt(Reflection.Item.IsACoin.GetMethod!), 0);
+        cursor.GotoNextLoc(out int newitem, i => i.Previous.MatchLdarg2(), 1);
+
         // if (isACoin) ...
         // if (item.FitsAmmoSlot()) ...
         // for(...) ...
         cursor.GotoNext(i => i.SaferMatchCall(Reflection.Player.GetItem_FillEmptyInventorySlot));
-        cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdloc0());
+        cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdloc(coin));
 
-        // ++<autoEquip & upgradeItems>
-        cursor.EmitLdarg0();
-        cursor.EmitLdloc1();
-        cursor.EmitLdarg3();
-        cursor.EmitDelegate((Player self, Item item, GetItemSettings settings) => {
+        // ++<upgradeItems>
+        EmitSmartPickup(cursor, newitem, (Player self, Item item, GetItemSettings settings) => {
             if (VanillaGetItem || settings.NoText || !Configs.UpgradeItems.Enabled) return item;
             return UpgradeItems(self, item, settings);
         });
-        cursor.EmitDup();
-        cursor.EmitStloc1();
-
-        // ++if (newItem.IsAir) return new()
-        EmitRetAir(cursor);
     }
     private static void ILFixNewItem(ILContext il) {
         ILCursor cursor = new(il);
-        cursor.GotoNext(MoveType.After, i => i.MatchStloc1());
+
+        cursor.GotoNextLoc(out int newitem, i => i.Previous.MatchLdarg2(), 1);
+
+        cursor.GotoNext(MoveType.After, i => i.MatchStloc(newitem));
         while (cursor.TryGotoNext(MoveType.After, i => i.MatchLdarg2() && i.Next.MatchLdfld(out _))) {
-            cursor.EmitLdloc1();
+            cursor.EmitLdloc(newitem);
             cursor.EmitDelegate((Item newItem, Item item) => Configs.SmartPickup.FixSlot ? item : newItem);
             cursor.GotoNext(MoveType.After, i => i.Next.MatchLdfld(out _));
         }
     }
 
-    private static void EmitRetAir(ILCursor cursor) {
+    private static void EmitSmartPickup(ILCursor cursor, int newitem, Func<Player, Item, GetItemSettings, Item> cb) {
+        cursor.EmitLdarg0();
+        cursor.EmitLdloc(newitem);
+        cursor.EmitLdarg3();
+        cursor.EmitDelegate(cb);
+        cursor.EmitDup();
+        cursor.EmitStloc(newitem);
+
+        // ++if (newItem.IsAir) return new()
         cursor.EmitDelegate((Item item) => item.IsAir);
         ILLabel skip = cursor.DefineLabel();
         cursor.EmitBrfalse(skip);

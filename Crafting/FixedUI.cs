@@ -13,10 +13,10 @@ public sealed class FixedUI : ILoadable {
 
     public void Load(Mod mod) {
         On_Main.TryAllowingToCraftRecipe += HookTryAllowingToCraftRecipe;
-        IL_Main.DrawInventory += il => {
+        IL_Main.DrawInventory += static il => {
             if (!il.ApplyTo(ILFastScroll, Configs.FixedUI.FastScroll)) Configs.UnloadedCrafting.Value.fastScroll = true;
-            if (!il.ApplyTo(ILScrollButtonsFix, Configs.FixedUI.ScrollButtons)) Configs.UnloadedCrafting.Value.scrollButtons = true;
             if (!il.ApplyTo(ILMaterialWrapping, Configs.FixedUI.Wrapping)) Configs.UnloadedCrafting.Value.wrapping = true;
+            if (!il.ApplyTo(ILScrollButtonsFix, Configs.FixedUI.ScrollButtons)) Configs.UnloadedCrafting.Value.scrollButtons = true;
         };
 
     }
@@ -25,10 +25,12 @@ public sealed class FixedUI : ILoadable {
     private static void ILFastScroll(ILContext il) {
         ILCursor cursor = new(il);
 
+        cursor.GotoRecipeDraw();
+
         // ...
         // if(<showRecipes>){
         //     for (<recipeIndex>) { 
-        cursor.GotoNext(i => i.MatchStloc(124)); // int num63
+        cursor.GotoNextLoc(out int recipeIndex, i => i.Next.MatchBr(out _), 124);
 
         for (int j = 0; j < 2; j++) { // Up and Down
 
@@ -36,10 +38,10 @@ public sealed class FixedUI : ILoadable {
             //         if(...) SoundEngine.PlaySound(...);
             //         Main.availableRecipeY[num63] += 6.5f;
             cursor.GotoNext(i => i.SaferMatchCall(typeof(SoundEngine), nameof(SoundEngine.PlaySound)));
-            cursor.GotoNext(i => i.MatchLdsfld(Reflection.Main.recFastScroll));
+            cursor.GotoNext(MoveType.AfterLabel, i => i.MatchLdsfld(Reflection.Main.recFastScroll));
 
             // ++ <fastScroll>
-            cursor.EmitLdloc(124); // int num63
+            cursor.EmitLdloc(recipeIndex); // int num63
             int s = j == 0 ? -1 : 1;
             cursor.EmitDelegate((int r) => {
                 if (!Configs.FixedUI.FastScroll) return;
@@ -69,12 +71,15 @@ public sealed class FixedUI : ILoadable {
         //         for (<focusRecipeMaterialIndex>) {
         //             ...
         cursor.GotoNext(i => i.MatchStsfld(Reflection.UILinkPointNavigator.CRAFT_CurrentIngredientsCount));
-        
+
+        cursor.FindPrevLoc(out _, out int materialIndex, i => true, 130); // int num68
+
         //             int num69 = 80 + num68 * 40;
-        cursor.GotoNext(MoveType.Before, i => i.MatchStloc(131)); // int num69
+        cursor.GotoNext(i => i.MatchLdcI4(40));
+        cursor.GotoNext(MoveType.Before, i => i.MatchStloc(out _));
 
         //             ++ <wrappingX>
-        cursor.EmitLdloc(130); // int num68
+        cursor.EmitLdloc(materialIndex);
         cursor.EmitDelegate((int x, int i) => {
             if (!Configs.FixedUI.Wrapping) return x;
             if (!Main.recBigList) return x + VanillaCorrection * i;
@@ -84,10 +89,11 @@ public sealed class FixedUI : ILoadable {
         });
 
         //             int num70 = 380 + num51;
-        cursor.GotoNext(MoveType.Before, i => i.MatchStloc(132)); // int num70
+        cursor.GotoNext(i => i.MatchLdcI4(380));
+        cursor.GotoNext(MoveType.Before, i => i.MatchStloc(out _)); // int num70
 
         //             ++ <wrappingY>
-        cursor.EmitLdloc(130); // int num68
+        cursor.EmitLdloc(materialIndex);
         cursor.EmitDelegate((int y, int i) => {
             if (!Configs.FixedUI.Wrapping || !Main.recBigList) return y;
             i = i < MaterialsPerLine[0] ? 0 : ((i - MaterialsPerLine[0]) / MaterialsPerLine[1] + 1);

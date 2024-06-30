@@ -46,24 +46,24 @@ public sealed class Guide : ModSystem {
         On_ItemSlot.DrawItemIcon += HookDrawPlaceholder;
         MonoModHooks.Add(typeof(ItemLoader).GetMethod(nameof(ItemLoader.ModifyTooltips)), HookHideTooltip);
 
-        IL_Main.DrawInventory += il => {
+        IL_Main.DrawInventory += static il => {
             if(!il.ApplyTo(ILDrawVisibility, Configs.BetterGuide.CraftInMenu)) Configs.UnloadedItemSearch.Value.guideCraftInMenu = true;
             if(!il.ApplyTo(ILCustomDrawCreateItem, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = true;
             if(!il.ApplyTo(ILCustomDrawMaterials, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = true;
             if(!il.ApplyTo(ILCustomDrawRecipeList, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = true;
         };
-        IL_Main.CraftItem += il => {
+        IL_Main.CraftItem += static il => {
             if(!il.ApplyTo(IlUnfavoriteOnCraft, Configs.FavoritedRecipes.UnfavoriteOnCraft)) Configs.UnloadedItemSearch.Value.guideUnfavoriteOnCraft = true;
         };
-        IL_Main.HoverOverCraftingItemButton += il => {
+        IL_Main.HoverOverCraftingItemButton += static il => {
             if(!il.ApplyTo(ILFavoriteRecipe, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = true;
             if(!il.ApplyTo(ILCraftInGuideMenu, Configs.BetterGuide.CraftInMenu)) Configs.UnloadedItemSearch.Value.guideCraftInMenu = true;
         };
-        IL_Recipe.FindRecipes += il => {
+        IL_Recipe.FindRecipes += static il => {
             if(!il.ApplyTo(ILSkipGuideRecipes, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = true;
             if(!il.ApplyTo(ILUpdateOwnedItems, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = true;
         };
-        IL_Recipe.CollectGuideRecipes += il => {
+        IL_Recipe.CollectGuideRecipes += static il => {
             if(!il.ApplyTo(ILMoreGuideRecipes, Configs.BetterGuide.MoreRecipes)) Configs.UnloadedItemSearch.Value.guideMoreRecipes = true;
             if(!il.ApplyTo(ILForceAddToAvailable, Configs.BetterGuide.AvailableRecipes || Configs.BetterGuide.CraftingStation || Configs.RecipeFilters.Enabled)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = Configs.UnloadedItemSearch.Value.guideCraftingStation = Configs.UnloadedCrafting.Value.recipeFilters = true;
             if(!il.ApplyTo(ILGuideRecipeOrder, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = true;
@@ -245,6 +245,10 @@ public sealed class Guide : ModSystem {
     private static void ILCustomDrawCreateItem(ILContext il) {
         ILCursor cursor = new(il);
 
+        cursor.GotoRecipeDraw();
+        
+        cursor.GotoNextLoc(out int recipeIndex, i => i.Next.MatchBr(out _), 124);
+
         //     for (<recipeIndex>) {
         //         ...
         //         if(<visible>) {
@@ -252,11 +256,11 @@ public sealed class Guide : ModSystem {
         //             if (Main.numAvailableRecipes > 0) {
         //                 ...
         //                 Main.inventoryBack = ...;
-        cursor.GotoNext(i => i.SaferMatchCall(typeof(Main), "HoverOverCraftingItemButton"));
+        cursor.GotoNext(i => i.SaferMatchCall(Reflection.Main.HoverOverCraftingItemButton));
         cursor.GotoNext(MoveType.Before, i => i.SaferMatchCall(typeof(ItemSlot), nameof(ItemSlot.Draw)));
 
         //                 ++ <overrideBackground>
-        cursor.EmitLdloc(124); // int num63
+        cursor.EmitLdloc(recipeIndex); // int num63
         cursor.EmitDelegate((int i) => {
             if (!Configs.BetterGuide.AvailableRecipes) return;
             OverrideRecipeTexture(GetFavoriteState(Main.availableRecipe[i]), ItemSlot.DrawGoldBGForCraftingMaterial, IsAvailable(Main.availableRecipe[i]));
@@ -282,6 +286,9 @@ public sealed class Guide : ModSystem {
         cursor.GotoPrev(MoveType.After, i => i.MatchLdsfld(Reflection.Main.numAvailableRecipes));
         cursor.EmitDelegate((int num) => num == 0 || Configs.BetterGuide.UnknownDisplay && IsUnknown(Main.availableRecipe[Main.focusRecipe]) ? 0 : num);
 
+        cursor.GotoNext(i => i.MatchStsfld(Reflection.UILinkPointNavigator.CRAFT_CurrentRecipeSmall));
+        cursor.GotoNextLoc(out int materialIndex, i => i.Previous.MatchLdcI4(0), 130);
+
         //         for (<focusRecipeMaterialIndex>) {
         //             ...
         //             Item tempItem = ...;
@@ -289,7 +296,7 @@ public sealed class Guide : ModSystem {
         cursor.GotoNext(MoveType.Before, i => i.SaferMatchCall(typeof(ItemSlot), nameof(ItemSlot.Draw)));
 
         //             ++ <overrideBackground>
-        cursor.EmitLdloc(130); // int num68
+        cursor.EmitLdloc(materialIndex);
         cursor.EmitDelegate((int matI) => {
             if (!Configs.BetterGuide.AvailableRecipes) return;
             Recipe recipe = Main.recipe[Main.availableRecipe[Main.focusRecipe]];
@@ -327,7 +334,7 @@ public sealed class Guide : ModSystem {
         // if(<recBigListVisible>) {
         //     ...
         //     while (<showingRecipes>) {
-        cursor.GotoNext(MoveType.After, i => i.MatchStloc(153));
+        cursor.GotoNextLoc(out int recipeListIndex, i => i.Previous.MatchLdsfld(Reflection.Main.recStart), 153);
 
         //         ...
         //         if (<mouseHover>) {
@@ -337,7 +344,7 @@ public sealed class Guide : ModSystem {
         cursor.GotoNext(MoveType.After, i => i.MatchStsfld(Reflection.Main.craftingHide));
 
         //             ++ <GuideHover>
-        cursor.EmitLdloc(153); // int num87
+        cursor.EmitLdloc(recipeListIndex); // int num87
         cursor.EmitDelegate((int r) => {
             if (Configs.BetterGuide.UnknownDisplay && IsUnknown(Main.availableRecipe[r])) forcedTooltip = Language.GetText($"{Localization.Keys.UI}.Unknown");
         });
@@ -350,7 +357,7 @@ public sealed class Guide : ModSystem {
         cursor.GotoNext(MoveType.Before, i => i.SaferMatchCall(typeof(ItemSlot), nameof(ItemSlot.Draw)));
 
         //             ++ <overrideBackground>
-        cursor.EmitLdloc(153);
+        cursor.EmitLdloc(recipeListIndex);
         cursor.EmitDelegate((int i) => {
             if (!Configs.BetterGuide.AvailableRecipes) return;
             OverrideRecipeTexture(GetFavoriteState(Main.availableRecipe[i]), ItemSlot.DrawGoldBGForCraftingMaterial, s_availableRecipes.Contains(Main.availableRecipe[i]));
@@ -502,28 +509,32 @@ public sealed class Guide : ModSystem {
 
     }
 
-    private static ILLabel GotoRecipeDisabled(ILCursor cursor) {
-        ILLabel? endLoop = null;
-
+    private static ILCursor GotoRecipeDisabled(ILCursor cursor, out ILLabel endLoop, out int index, out int recipe) {
+        cursor.GotoNextLoc(out index, i => i.Previous.MatchLdcI4(0), 1);
         // for (<recipeIndex>) {
         //     ...
         //     if (recipe.Disabled) continue;
         cursor.GotoNext(i => i.MatchCallvirt(Reflection.Recipe.Disabled.GetMethod!));
-        cursor.GotoNext(i => i.MatchBrtrue(out endLoop));
+        int r = 2;
+        cursor.FindPrev(out _, i => i.MatchLdloc(out r));
+        recipe = r;
+        ILLabel end = null!;
+        cursor.GotoNext(i => i.MatchBrtrue(out end!));
         cursor.GotoNext(MoveType.AfterLabel);
-        return endLoop!;
+        endLoop = end;
+        return cursor;
     }
     private static void ILMoreGuideRecipes(ILContext il) {
         ILCursor cursor = new(il);
 
-        ILLabel endLoop = GotoRecipeDisabled(cursor);
+        GotoRecipeDisabled(cursor, out ILLabel endLoop, out _, out int recipe);
         
         //     ++ if(<extraRecipe>) {
         //     ++     <addRecipe>
         //     ++     continue;
         //     ++ }
-        cursor.EmitLdloc2();
-        cursor.EmitDelegate<Func<Recipe, bool>>(recipe => {
+        cursor.EmitLdloc(recipe);
+        cursor.EmitDelegate((Recipe recipe) => {
             if (Configs.BetterGuide.MoreRecipes && Main.guideItem.type == ItemID.None || recipe.HasResult(Main.guideItem.type)) {
                 Reflection.Recipe.AddToAvailableRecipes.Invoke(recipe.RecipeIndex);
                 return true;
@@ -535,13 +546,13 @@ public sealed class Guide : ModSystem {
     private static void ILForceAddToAvailable(ILContext il) {
         ILCursor cursor = new(il);
 
-        ILLabel endLoop = GotoRecipeDisabled(cursor);
-        
+        GotoRecipeDisabled(cursor, out ILLabel endLoop, out int index, out _);
+
         //     for(<material>) {
         cursor.GotoNext(MoveType.AfterLabel, i => i.MatchLdsfld(Reflection.Main.availableRecipe));
 
         //         if(<recipeOk> ++[&& !custom]) {
-        cursor.EmitLdloc1();
+        cursor.EmitLdloc(index);
         cursor.EmitDelegate((int r) => {
         if (!(Configs.BetterGuide.AvailableRecipes || Configs.BetterGuide.CraftingStation || Configs.RecipeFilters.Enabled)) return false;
             Reflection.Recipe.AddToAvailableRecipes.Invoke(r);
@@ -559,16 +570,17 @@ public sealed class Guide : ModSystem {
     private static void ILGuideRecipeOrder(ILContext il) {
         ILCursor cursor = new(il);
 
-        ILLabel endLoop = GotoRecipeDisabled(cursor);
+        GotoRecipeDisabled(cursor, out ILLabel endLoop, out int index, out _);
+
         cursor.GotoLabel(endLoop!);
-        cursor.GotoNext(i => i.MatchStloc1());
-        cursor.GotoNext(MoveType.After, i => i.MatchLdloc1());
+        cursor.GotoNext(i => i.MatchStloc(index));
+        cursor.GotoNext(MoveType.After, i => i.MatchLdloc(index));
         cursor.EmitDelegate((int index) => {
             if (!Configs.BetterGuide.AvailableRecipes) return index;
             return s_ilRecipes!.MoveNext() ? s_ilRecipes.Current : Recipe.numRecipes;
         });
         cursor.EmitDup();
-        cursor.EmitStloc1();
+        cursor.EmitStloc(index);
 
         //     }
         // }

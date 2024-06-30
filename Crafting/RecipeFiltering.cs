@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using ReLogic.Content;
+using SpikysLib.Extensions;
 using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
@@ -20,7 +21,7 @@ public sealed class RecipeFiltering : ILoadable {
     public static RecipeFilters LocalFilters => ItemActions.BetterPlayer.LocalPlayer.RecipeFilters;
 
     public void Load(Mod mod) {
-        IL_Main.DrawInventory += il => {
+        IL_Main.DrawInventory += static il => {
             if (!il.ApplyTo(ILDrawFilters, Configs.RecipeFilters.Enabled)) Configs.UnloadedCrafting.Value.recipeFilters = true;
         };
     }
@@ -30,15 +31,18 @@ public sealed class RecipeFiltering : ILoadable {
     private static void ILDrawFilters(ILContext il) {
         ILCursor cursor = new(il);
 
+        cursor.GotoNext(i => i.SaferMatchCallvirt(Reflection.AccessorySlotLoader.DrawAccSlots));
+        cursor.GotoNext(i => i.MatchLdsfld(Reflection.Main.screenHeight));
+        cursor.GotoNextLoc(out int screenY, i => true, 13);
+
         // ...
         // if(<showRecipes>){
-        cursor.GotoNext(i => i.MatchStloc(124)); // int num63
-        cursor.GotoPrev(MoveType.After, i => i.MatchStsfld(Reflection.UILinkPointNavigator.CRAFT_CurrentRecipeSmall));
+        cursor.GotoRecipeDraw();
 
         //     ++<drawFilters>
-        cursor.EmitLdloc(13); // int num54
-        cursor.EmitDelegate((int screenY) => {
-            if (Configs.RecipeFilters.Enabled && s_recipes != 0) DrawFilters(94, 450 + screenY);
+        cursor.EmitLdloc(screenY); // int num54
+        cursor.EmitDelegate((int y) => {
+            if (Configs.RecipeFilters.Enabled && s_recipes != 0) DrawFilters(94, 450 + y);
         });
 
         //     ...

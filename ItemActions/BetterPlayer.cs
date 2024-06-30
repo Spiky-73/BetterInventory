@@ -71,7 +71,7 @@ public sealed class BetterPlayer : ModPlayer {
         List<ITextLine> lines = new();
         if (download) lines.Add(new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.Download")));
         else lines.Add(new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.Update")));
-        lines.Add(new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.Bug")));
+        // lines.Add(new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.Bug")));
         LocalizedLine important = new(Language.GetText($"{Localization.Keys.Chat}.Important"), Colors.RarityAmber);
         if (!download && important.Value.Length != 0) lines.Add(important);
         InGameNotificationsTracker.AddNotification(new InGameNotification(ModContent.Request<Texture2D>($"BetterInventory/icon"), [.. lines]) { timeLeft = 15 * 60 });
@@ -90,7 +90,8 @@ public sealed class BetterPlayer : ModPlayer {
 
         InGameNotificationsTracker.AddNotification(new InGameNotification(
             ModContent.Request<Texture2D>($"BetterInventory/icon"),
-            more ? new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.UnloadedMore"), Colors.RarityAmber) : new(Language.GetText($"{Localization.Keys.Chat}.UnloadedLess"), Colors.RarityGreen)
+            more ? new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.UnloadedMore"), Colors.RarityAmber) :
+                Utility.FailedILs == 0 ? new(Language.GetText($"{Localization.Keys.Chat}.UnloadedNone"), Colors.RarityGreen) : new(Language.GetText($"{Localization.Keys.Chat}.UnloadedLess"), Colors.RarityGreen)
         ));
     }
 
