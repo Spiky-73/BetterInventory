@@ -12,7 +12,7 @@ using Terraria.ModLoader.Config;
 
 namespace BetterInventory.Configs;
 
-public sealed class ItemSearch : ModConfig {  
+public sealed class ItemSearch : ModConfig {
     public Toggle<BetterGuide> betterGuide = new(true);
     public Toggle<BetterBestiary> betterBestiary = new(true);
     public Toggle<QuickSearch> quickSearch = new(true);
@@ -94,6 +94,7 @@ public enum UnlockLevel { Vanilla, Name, Stats, Drops, DropRates }
 
 
 public sealed class QuickSearch {
+    public QuickSearch() => catalogues = [];
     public NestedValue<SearchAction, IndividualKeybinds> individualKeybinds = new(SearchAction.Both);
     public NestedValue<SearchAction, SharedKeybind> sharedKeybind = new(SearchAction.Toggle);
     [CustomModConfigItem(typeof(DictionaryValuesElement))] public Dictionary<EntityCatalogueDefinition, bool> catalogues {
@@ -102,7 +103,6 @@ public sealed class QuickSearch {
             foreach (ModEntityCatalogue catalogue in global::BetterInventory.ItemSearch.QuickSearch.EntityCatalogue) value.TryAdd(new(catalogue), true);
             _catalogues = value;
         }
-
     }
     [DefaultValue(RightClickAction.SearchPrevious)] public RightClickAction rightClick { get; set; } = RightClickAction.SearchPrevious;
 
