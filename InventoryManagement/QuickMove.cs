@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using SpikysLib;
+using SpikysLib.Constants;
 using SpikysLib.Extensions;
 using Terraria;
 using Terraria.Audio;
@@ -229,7 +230,7 @@ public sealed class QuickMove : ILoadable {
         cursor.EmitDelegate((SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, float scale) => {
             if (!Configs.QuickMove.DisplayHotkeys) return;
             if (!IsTargetableSlot(inv, context, slot, out int number, out int key) || (Configs.QuickMove.Value.displayedHotkeys == Configs.HotkeyDisplayMode.Next ? number != 1 : number == 0)) return;
-            key = (key + 1) % 10;
+            key = (key + 1) % MoveKeys.Length;
             StringBuilder text = new();
             text.Append(key);
             for (int i = 1; i < number; i++) {
@@ -244,12 +245,7 @@ public sealed class QuickMove : ILoadable {
         cursor.GotoPrev(i => i.MatchLdarg2());
         cursor.GotoNext(MoveType.After, i => i.MatchLdarg3());
 
-        cursor.EmitDelegate((int slot) => {
-            if (!Configs.QuickMove.DisplayHotkeys) return slot;
-            if (s_moveTime > 0) return 10;
-            if (s_hover && s_displayedChain.Count != 0) return 10;
-            return slot;
-        });
+        cursor.EmitDelegate((int slot) => !Configs.QuickMove.DisplayHotkeys || s_moveTime <= 0 && (!s_hover || s_displayedChain.Count == 0) ? slot : InventorySlots.Hotbar.End);
     }
 
     public static bool IsTargetableSlot(Item[] inv, int context, int slot, out int numberInChain, out int key) {

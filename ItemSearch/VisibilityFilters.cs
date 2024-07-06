@@ -89,7 +89,7 @@ public sealed class VisibilityFiltersSerializer : TagSerializer<VisibilityFilter
         foreach((string mod, RangeSet set) in value.OwnedItems) {
             foreach (Range range in set.Ranges) {
                 owned.Add(new(range.Start));
-                owned.Add(new(range.End));
+                owned.Add(new(range.End-1));
             }
         }
         owned.AddRange(value.UnloadedItems);
@@ -136,7 +136,7 @@ public sealed class VisibilityFiltersSerializer : TagSerializer<VisibilityFilter
                     value.UnloadedItems.Add(owned[i+1]);
                 } else {
                     if (!value.OwnedItems.ContainsKey(owned[i].Mod)) value.OwnedItems.Add(owned[i].Mod, new());
-                    value.OwnedItems[owned[i].Mod].Add(new Range(owned[i].Type, owned[i+1].Type));
+                    value.OwnedItems[owned[i].Mod].Add(new Range(owned[i].Type, owned[i+1].Type+1));
                 }
             }
         }

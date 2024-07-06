@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using MonoMod.Cil;
+using SpikysLib.Constants;
 using SpikysLib.Extensions;
 using Terraria;
 using Terraria.ModLoader;
@@ -71,8 +72,8 @@ public sealed class SmartConsumptionItem : GlobalItem {
             item.stack += amount;
             i.stack -= amount;
             if(player.whoAmI == Main.myPlayer) {
-                if (item == player.inventory[58]) Main.mouseItem.stack += amount;
-                if (i == player.inventory[58]) Main.mouseItem.stack -= amount;
+                if (item == player.inventory[InventorySlots.Mouse]) Main.mouseItem.stack += amount;
+                if (i == player.inventory[InventorySlots.Mouse]) Main.mouseItem.stack -= amount;
             }
             consumed -= amount;
             if (i.stack == 0) i.TurnToAir();

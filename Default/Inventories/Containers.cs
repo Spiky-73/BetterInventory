@@ -6,6 +6,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.UI;
 using ContextID = Terraria.UI.ItemSlot.Context;
+using SpikysLib.Constants;
 
 namespace BetterInventory.Default.Inventories;
 
@@ -13,24 +14,24 @@ public sealed class Hotbar : ModSubInventory {
     public override int Context => ContextID.InventoryItem;
     public override bool IsPrimaryFor(Item item) => item.favorited;
     public override void Focus(Player player, int slot) => player.selectedItem = slot;
-    public override ListIndices<Item> Items(Player player) => new(player.inventory, SpikysLib.DataStructures.Range.FromCount(0, 10));
+    public override ListIndices<Item> Items(Player player) => new(player.inventory, InventorySlots.Hotbar);
     public override int ComparePositionTo(ModSubInventory other) => 1;
 }
 public sealed class Inventory : ModSubInventory {
     public override int Context => ContextID.InventoryItem;
-    public override ListIndices<Item> Items(Player player) => new(player.inventory, SpikysLib.DataStructures.Range.FromCount(10, 40));
+    public override ListIndices<Item> Items(Player player) => new(player.inventory, new SpikysLib.DataStructures.Range(InventorySlots.Hotbar.End, InventorySlots.Coins.Start));
     public override Item GetItem(Player player, Item item, GetItemSettings settings) => SmartPickup.GetItem_Inner(player, player.whoAmI, item, settings);
 }
-public sealed class Coin : ModSubInventory {
+public sealed class Coins : ModSubInventory {
     public override int Context => ContextID.InventoryCoin;
     public sealed override bool Accepts(Item item) => item.IsACoin;
-    public override ListIndices<Item> Items(Player player) => new(player.inventory, SpikysLib.DataStructures.Range.FromCount(50, 4));
+    public override ListIndices<Item> Items(Player player) => new(player.inventory, InventorySlots.Coins);
 }
 public sealed class Ammo : ModSubInventory {
     public override int Context => ContextID.InventoryAmmo;
     public override bool IsPrimaryFor(Item item) => true;
     public sealed override bool Accepts(Item item) => !item.IsAir && item.FitsAmmoSlot();
-    public override ListIndices<Item> Items(Player player) => new(player.inventory, SpikysLib.DataStructures.Range.FromCount(54, 4));
+    public override ListIndices<Item> Items(Player player) => new(player.inventory, InventorySlots.Ammo);
 }
 
 public abstract class Container : ModSubInventory {

@@ -1,3 +1,4 @@
+using SpikysLib.Constants;
 using SpikysLib.DataStructures;
 using Terraria;
 using Terraria.ModLoader.Default;
@@ -16,7 +17,7 @@ public abstract class Dyes : ModSubInventory {
     public static Item[] ModdedDyes(Player player) => Reflection.ModAccessorySlotPlayer.exDyesAccessory.GetValue(player.GetModPlayer<ModAccessorySlotPlayer>());
 }
 public sealed class ArmorDyes : Dyes {
-    public sealed override ListIndices<Item> Items(Player player) => new(player.dye, Range.FromCount(0, AArmor.Count));
+    public sealed override ListIndices<Item> Items(Player player) => new(player.dye, Range.FromCount(0, ArmorSlots.Count));
 }
 public sealed class AccessoryDyes : Dyes {
     public sealed override JoinedLists<Item> Items(Player player) => new(

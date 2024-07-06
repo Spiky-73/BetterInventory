@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using SpikysLib.Constants;
 using SpikysLib.DataStructures;
 using Terraria;
 using Terraria.ModLoader;
@@ -15,12 +16,12 @@ public abstract class AAccessories : ModSubInventory {
         List<int> moddedSlots = UnlockedModdedSlots(player);
 
         if (!(slot < vanillaSlots.Count ?
-                ItemLoader.CanEquipAccessory(item, slot + 3, false) :
+                ItemLoader.CanEquipAccessory(item, slot + ArmorSlots.Count, false) :
                 ItemLoader.CanEquipAccessory(item, moddedSlots[slot - vanillaSlots.Count], true) && LoaderManager.Get<AccessorySlotLoader>().CanAcceptItem(moddedSlots[slot - vanillaSlots.Count], item, -Context))) {
             itemsToMove = Array.Empty<Slot>();
             return false;
         }
-        itemsToMove = GetIncompatibleItems(player, item, Context == 11, out bool canAllMove);
+        itemsToMove = GetIncompatibleItems(player, item, Context == ContextID.EquipAccessoryVanity, out bool canAllMove);
         return canAllMove;
     }
 
@@ -45,7 +46,7 @@ public abstract class AAccessories : ModSubInventory {
 
     public static List<int> UnlockedVanillaSlots(Player player, int offset = 0) {
         List<int> unlocked = new();
-        for (int i = 0; i < AccessorySlotLoader.MaxVanillaSlotCount; i++) if (player.IsItemSlotUnlockedAndUsable(i + AArmor.Count)) unlocked.Add(i + AArmor.Count + offset);
+        for (int i = 0; i < AccessorySlotLoader.MaxVanillaSlotCount; i++) if (player.IsItemSlotUnlockedAndUsable(i + ArmorSlots.Count)) unlocked.Add(i + ArmorSlots.Count + offset);
         return unlocked;
     }
     public static List<int> UnlockedModdedSlots(Player player, int offset = 0) {
@@ -73,7 +74,7 @@ public sealed class VanityAccessories : AAccessories {
     public override bool IsPrimaryFor(Item item) => item.vanity && item.FitsAccessoryVanitySlot;
     public override int Context => ContextID.EquipAccessoryVanity;
     public override JoinedLists<Item> Items(Player player) => new(
-        new ListIndices<Item>(player.armor, UnlockedVanillaSlots(player, AArmor.Count + AccessorySlotLoader.MaxVanillaSlotCount)),
+        new ListIndices<Item>(player.armor, UnlockedVanillaSlots(player, ArmorSlots.Count + AccessorySlotLoader.MaxVanillaSlotCount)),
         new ListIndices<Item>(ModdedAccessories(player), UnlockedModdedSlots(player, ModdedAccessories(player).Length / 2))
     );
 }

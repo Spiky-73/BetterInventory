@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using ReLogic.Content;
 using SpikysLib;
+using SpikysLib.Constants;
 using SpikysLib.CrossMod;
 using SpikysLib.Extensions;
 using Terraria;
@@ -426,9 +427,9 @@ public sealed class ClickOverrides : ILoadable {
     }
     public static int GetMaxPickupAmount(Item item) {
         if (!Configs.InventoryManagement.ShiftRight || Main.cursorOverride != CraftCursorID) return item.maxStack - Main.mouseItem.stack;
-        int free = GetFreeSpace(Main.LocalPlayer.inventory, item, 58);
+        int free = GetFreeSpace(Main.LocalPlayer.inventory, item, InventorySlots.Mouse);
         if (Main.LocalPlayer.InChest(out Item[]? chest)) free += GetFreeSpace(chest, item);
-        if (Main.LocalPlayer.useVoidBag() && Main.LocalPlayer.chest != -5) free += GetFreeSpace(Main.LocalPlayer.bank4.item, item);
+        if (Main.LocalPlayer.useVoidBag() && Main.LocalPlayer.chest != InventorySlots.VoidBag) free += GetFreeSpace(Main.LocalPlayer.bank4.item, item);
         return free;
     }
     public static int GetFreeSpace(Item[] inv, Item item, params int[] ignored) {

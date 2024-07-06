@@ -68,7 +68,7 @@ public sealed class RecipeFiltering : ILoadable {
         EntryFilterer<Item, CreativeFilterWrapper> filters = LocalFilters.Filterer;
         
         int i = 0;
-        int delta = TextureAssets.InfoIcon[13].Width() + 2;
+        int delta = FiltersOutline.Width() + 2;
         int y = hammerY + TextureAssets.CraftToggle[0].Height() - TextureAssets.InfoIcon[0].Width()/2;
         while (i < LocalFilters.Filterer.AvailableFilters.Count) {
             int x = hammerX - TextureAssets.InfoIcon[0].Width() - 1;
@@ -92,7 +92,7 @@ public sealed class RecipeFiltering : ILoadable {
                             OnFilterChanges();
                         }
                         name = Language.GetTextValue($"{Localization.Keys.UI}.Filter", name, s_recipesInFilter[i]);
-                        Main.spriteBatch.Draw(TextureAssets.InfoIcon[13].Value, hitbox.Center(), null, Main.OurFavoriteColor, 0, TextureAssets.InfoIcon[13].Size() / 2, 1, SpriteEffects.None, 0);
+                        Main.spriteBatch.Draw(FiltersOutline.Value, hitbox.Center(), null, Main.OurFavoriteColor, 0, FiltersOutline.Size() / 2, 1, SpriteEffects.None, 0);
                     }
                     if (s_recipesInFilter[i] == 0) rare = -1;
                     Main.instance.MouseText(name, rare);
@@ -141,4 +141,5 @@ public sealed class RecipeFiltering : ILoadable {
     public static Asset<Texture2D> RecipeFilterBack => ModContent.Request<Texture2D>($"BetterInventory/Assets/Recipe_Filter_Back");
     public static Asset<Texture2D> RecipeFilters => ModContent.Request<Texture2D>($"BetterInventory/Assets/Recipe_Filters");
     public static Asset<Texture2D> RecipeFilter2 => ModContent.Request<Texture2D>($"BetterInventory/Assets/Recipe_Filters2");
+    public static Asset<Texture2D> FiltersOutline => TextureAssets.InfoIcon[13];
 }

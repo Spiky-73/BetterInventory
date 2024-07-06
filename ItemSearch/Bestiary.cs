@@ -93,9 +93,7 @@ public sealed class Bestiary : ILoadable {
                 Height = StyleDimension.FromPixelsAndPercent(0, 1f),
             };
             uIList.SetPadding(0);
-            uIList.PaddingBottom = 4;
-            uIList.PaddingBottom = 4;
-            uIList.ListPadding = 4;
+            uIList.PaddingBottom = uIList.ListPadding = 4;
             uIList.Top.Set(self.Height.Pixels + uIList.PaddingTop, 0);
             self.Append(uIList);
 

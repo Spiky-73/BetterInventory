@@ -147,7 +147,7 @@ public sealed class Guide : ModSystem {
         for (int i = 0; i < s_textTiles.Count; i++) {
             Item tile = s_textTiles[i];
             Color inventoryBack = Main.inventoryBack;
-            OverrideRecipeTexture(TileTextures, false, tile.createTile == -2 || Main.LocalPlayer.adjTile[tile.createTile]);
+            OverrideRecipeTexture(TileTextures, false, GetPlaceholderType(tile) == PlaceholderType.ByHand || Main.LocalPlayer.adjTile[tile.createTile]);
             ItemSlot.Draw(Main.spriteBatch, ref tile, ContextID.CraftingMaterial, position);
             TextureAssets.InventoryBack4 = s_inventoryBack4;
             Rectangle hitbox = new((int)position.X, (int)position.Y, (int)(TextureAssets.InventoryBack.Width() * Main.inventoryScale), (int)(TextureAssets.InventoryBack.Height() * Main.inventoryScale));
@@ -182,18 +182,19 @@ public sealed class Guide : ModSystem {
         s_textConditions.Clear();
         if (Main.numAvailableRecipes != 0 && !IsUnknown(Main.availableRecipe[Main.focusRecipe])) {
             s_textRecipe = recipe.RecipeIndex;
-            if (recipe.requiredTile.Count == 0) s_textTiles.Add(new(CraftingItem.type) {createTile = -2});
+            if (recipe.requiredTile.Count == 0) s_textTiles.Add(ByHandPlaceholder);
             else {
                 for (int i = 0; i < recipe.requiredTile.Count && recipe.requiredTile[i] != -1; i++) {
                     if (CraftingStationsItems.TryGetValue(recipe.requiredTile[i], out int type) && type != ItemID.None) s_textTiles.Add(new(type));
-                    else s_textTiles.Add(new(CraftingItem.type) { createTile = recipe.requiredTile[i] });
+                    // else s_textTiles.Add(new(CraftingItem.type) { createTile = recipe.requiredTile[i] });
+                    else s_textTiles.Add(TilePlaceholder(recipe.requiredTile[i]));
                 }
             }
 
             foreach (Condition condition in recipe.Conditions) {
                 Item item;
                 if (ConditionItems.TryGetValue(condition.Description.Key, out int type)) item = new(type);
-                else item = new(CraftingItem.type) { BestiaryNotes = ConditionMark + condition.Description.Key };
+                else item = ConditionPlaceholder(condition);
                 s_textConditions.Add((item, condition));
             }
         } else s_textRecipe = -1;
@@ -208,15 +209,15 @@ public sealed class Guide : ModSystem {
         if (!s_visibilityHover && hitbox.Contains(Main.mouseX, Main.mouseY) && !PlayerInput.IgnoreMouseInterface) {
             Main.player[Main.myPlayer].mouseInterface = true;
             Main.craftingHide = true;
-            ItemSlot.OverrideHover(items, 7, 1);
-            ItemSlot.LeftClick(items, 7, 1);
+            ItemSlot.OverrideHover(items, ContextID.GuideItem, 1);
+            ItemSlot.LeftClick(items, ContextID.GuideItem, 1);
             if (Main.mouseLeftRelease && Main.mouseLeft) {
                 Recipe.FindRecipes();
             }
-            ItemSlot.RightClick(items, 7, 1);
-            ItemSlot.MouseHover(items, 7, 1);
+            ItemSlot.RightClick(items, ContextID.GuideItem, 1);
+            ItemSlot.MouseHover(items, ContextID.GuideItem, 1);
         }
-        ItemSlot.Draw(Main.spriteBatch, items, 7, 1, hitbox.TopLeft());
+        ItemSlot.Draw(Main.spriteBatch, items, ContextID.GuideItem, 1, hitbox.TopLeft());
         GuideItems = items;
         Main.inventoryScale /= TileScale;
     }
@@ -515,9 +516,8 @@ public sealed class Guide : ModSystem {
         //     ...
         //     if (recipe.Disabled) continue;
         cursor.GotoNext(i => i.MatchCallvirt(Reflection.Recipe.Disabled.GetMethod!));
-        int r = 2;
-        cursor.FindPrev(out _, i => i.MatchLdloc(out r));
-        recipe = r;
+        int r = 0;
+        recipe = cursor.TryFindPrev(out _, i => i.MatchLdloc(out r)) ? r : 2;
         ILLabel end = null!;
         cursor.GotoNext(i => i.MatchBrtrue(out end!));
         cursor.GotoNext(MoveType.AfterLabel);
@@ -762,7 +762,7 @@ public sealed class Guide : ModSystem {
                 Recipe.FindRecipes();
                 SoundEngine.PlaySound(SoundID.Grab);
             } else if (inv[slot].IsAir && (Main.mouseItem.IsAir || !FitsCraftingTile(Main.mouseItem))) {
-                inv[slot] = new(CraftingItem.type) { createTile = -2 };
+                inv[slot] = ByHandPlaceholder;
                 guideTile = inv[slot];
                 Recipe.FindRecipes();
                 SoundEngine.PlaySound(SoundID.Grab);
@@ -775,7 +775,7 @@ public sealed class Guide : ModSystem {
 
     private static void HookHideItem(On_ItemSlot.orig_Draw_SpriteBatch_refItem_int_Vector2_Color orig, SpriteBatch spriteBatch, ref Item inv, int context, Vector2 position, Color lightColor) {
         if (s_hideNextItem) {
-            Item item = CraftingItem;
+            Item item = Placeholder;
             orig(spriteBatch, ref item, context, position, lightColor);
             s_hideNextItem = false;
         } else {
@@ -843,9 +843,15 @@ public sealed class Guide : ModSystem {
         if (!available) Main.inventoryBack.ApplyRGB(0.5f);
     }
 
+    public static readonly Item Placeholder = new(ItemID.Lens);
+    public const string ConditionMark = "@BI:";
+    public const int ByHandCreateTile = -2;
+    public static Item ByHandPlaceholder => new(Placeholder.type) { createTile = ByHandCreateTile };
+    public static Item ConditionPlaceholder(Condition condition) => new(Placeholder.type) { BestiaryNotes = ConditionMark + condition.Description.Key };
+    public static Item TilePlaceholder(int type) => new(Placeholder.type) { createTile = type };
     public static PlaceholderType GetPlaceholderType(Item item) {
-        if (item.type != CraftingItem.type || item.stack != 1) return PlaceholderType.None;
-        if (item.createTile == -2) return PlaceholderType.ByHand;
+        if (item.type != Placeholder.type || item.stack != 1) return PlaceholderType.None;
+        if (item.createTile == ByHandCreateTile) return PlaceholderType.ByHand;
         if (item.createTile != -1) return PlaceholderType.Tile;
         if (item.BestiaryNotes?.StartsWith(ConditionMark) == true) return PlaceholderType.Condition;
         return PlaceholderType.None;
@@ -873,9 +879,6 @@ public sealed class Guide : ModSystem {
 
     public static void ClearAvailableRecipes() => s_availableRecipes.Clear();
     public static void ClearUnknownRecipes() => s_unknownRecipes.Clear();
-
-    public static readonly Item CraftingItem = new(ItemID.Lens);
-    public const string ConditionMark = "@BI:";
 
     public static readonly Dictionary<int, int> CraftingStationsItems = new(); // tile -> item
     public static readonly Dictionary<string, int> ConditionItems = new(); // description -> id

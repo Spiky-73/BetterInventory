@@ -14,6 +14,7 @@ using SpikysLib.UI;
 using Terraria.Localization;
 using Microsoft.Xna.Framework.Graphics;
 using SpikysLib.CrossMod;
+using SpikysLib.Constants;
 
 namespace BetterInventory.ItemActions;
 
@@ -125,7 +126,7 @@ public sealed class BetterPlayer : ModPlayer {
     public override bool PreItemCheck() {
         if (Main.myPlayer == Player.whoAmI && Configs.ItemRightClick.Enabled && Player.controlUseTile && Player.releaseUseItem && !Player.controlUseItem && !Player.tileInteractionHappened
                 && !Player.mouseInterface && !Terraria.Graphics.Capture.CaptureManager.Instance.Active && !Main.HoveringOverAnNPC && !Main.SmartInteractShowingGenuine
-                && Main.HoverItem.IsAir && Player.altFunctionUse == 0 && Player.selectedItem < 10) {
+                && Main.HoverItem.IsAir && Player.altFunctionUse == 0 && Player.selectedItem < InventorySlots.Hotbar.End) {
             Player.itemAnimation--;
             if(Main.stackSplit == 1) Player.itemAnimation = 0;
             if (!Configs.ItemRightClick.Value.stackableItems) s_noMousePickup = true;
