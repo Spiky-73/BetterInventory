@@ -31,9 +31,12 @@ public sealed class RecipeFiltering : ILoadable {
     private static void ILDrawFilters(ILContext il) {
         ILCursor cursor = new(il);
 
-        cursor.GotoNext(i => i.SaferMatchCallvirt(Reflection.AccessorySlotLoader.DrawAccSlots));
-        cursor.GotoNext(i => i.MatchLdsfld(Reflection.Main.screenHeight));
-        cursor.GotoNextLoc(out int screenY, i => true, 13);
+        // BetterGameUI Compatibility
+        int screenY = 13;
+        if(cursor.TryGotoNext(i => i.SaferMatchCallvirt(Reflection.AccessorySlotLoader.DrawAccSlots))) {
+            cursor.GotoNext(i => i.MatchLdsfld(Reflection.Main.screenHeight));
+            cursor.GotoNextLoc(out screenY, i => true, 13);
+        }
 
         // ...
         // if(<showRecipes>){

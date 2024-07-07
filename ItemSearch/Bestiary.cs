@@ -21,7 +21,7 @@ namespace BetterInventory.ItemSearch;
 public sealed class Bestiary : ILoadable {
 
     public void Load(Mod mod) {
-        On_FewFromOptionsNotScaledWithLuckDropRule.ReportDroprates += HookFixDropRates;
+        // On_FewFromOptionsNotScaledWithLuckDropRule.ReportDroprates += HookFixDropRates;
         
         On_UIBestiaryInfoItemLine.ctor += HookShowBagContent;
         On_ItemDropBestiaryInfoElement.GetSearchString += HookSearchBagText;

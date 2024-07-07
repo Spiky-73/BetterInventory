@@ -61,6 +61,7 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 - Added Spy's Infinite Consumables Requirement to Craft Stack
 - Remade Quick List and Search Item
 - Improved Quick Move under the hood
+- Simplified notifications
 - Updated dependencies
 - Fixed a bug with Previous Slot
 - Fixed FixedUI ScrollButtons

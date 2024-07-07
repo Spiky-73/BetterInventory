@@ -914,13 +914,13 @@ Version: {
 		Changelog: Changelog
 	}
 
-	Info: {
-		Label: "{$Mods.BetterInventory.Chat.Info}"
+	Sumary: {
+		Label: "{$Mods.BetterInventory.Chat.Sumary}"
 		Tooltip: ""
 	}
 
-	Important: {
-		Label: "{$Mods.BetterInventory.Chat.Important}"
+	Details: {
+		Label: "{$Mods.BetterInventory.Chat.Details}"
 		Tooltip: ""
 	}
 

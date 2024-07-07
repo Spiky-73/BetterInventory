@@ -1,6 +1,6 @@
-Download: Thank you for downloading {$Mods.BetterInventory.Chat.ModName}! Make sure to view and adjust the configs before playing
-Update: "{$Mods.BetterInventory.Chat.ModName} was updated to v{$Mods.BetterInventory.Chat.Version}! View the [c/05c8ff:{$Mods.BetterInventory.Configs.Version.DisplayName}] config to learn more about the update"
-Bug: This mod is still in development. If you found a bug, please report it on the [c/05c8ff:{$Mods.BetterInventory.Chat.Workshop}] or the [c/05c8ff:{$Mods.BetterInventory.Chat.Homepage}]
+Download: Thank you for downloading {$Mods.BetterInventory.Chat.ModName}! Make sure adjust the configs before playing
+Update: "{$Mods.BetterInventory.Chat.Sumary}. View the [c/05c8ff:{$Mods.BetterInventory.Configs.Version.DisplayName}] config for more details"
+Bug: If you find a bug, please refer to the [c/05c8ff:{$Mods.BetterInventory.Configs.Compatibility.DisplayName}] config
 UnloadedMore: Some features failed to load and will have no effect in game. {$Mods.BetterInventory.Chat.Compatibility}
 UnloadedLess: Some previously unloaded features were successfully loaded. {$Mods.BetterInventory.Chat.Compatibility}
 UnloadedNone: All previously unloaded features were successfully loaded
@@ -11,9 +11,8 @@ SPIC.ModName: Spy's Infinite Consumables
 Homepage: homepage
 Workshop: Steam Workshop page
 Version: "0.6"
-Info: Some new features and loads of rewrites
-// TODO do
-Important: ""
+Sumary: New features were added to Inventory Management and Item Search
+Details: ""
 Changelog:
 	'''
 	- Renamed Smart Pickup to Previous Slot
@@ -25,6 +24,7 @@ Changelog:
 	- Remade Quick List and Search Item
 	- Improved Quick Move under the hood
 	- Updated dependencies
+	- Simplified notifications
 	- Fixed a bug with Previous Slot
 	- Fixed FixedUI ScrollButtons
 	'''
