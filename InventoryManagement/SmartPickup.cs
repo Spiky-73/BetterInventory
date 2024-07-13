@@ -289,15 +289,24 @@ public sealed class SmartPickup : ILoadable {
     public static bool IsMarked(Slot slot) => s_marksData.ContainsKey(slot);
     public static bool TryGetMark(Slot slot, [MaybeNullWhen(false)] out Item mark) => s_marksData.TryGetValue(slot, out mark);
     public static bool ConsumeMark(int type, [MaybeNullWhen(false)] out (Slot slot, bool favorited) mark) {
-        if (IsMarked(type)) {
-            Slot slot = s_marks[type][^1];
-            mark = (slot, s_marksData[slot].favorited);
-            Unmark(slot);
-            return true;
-        } else if (Configs.PreviousSlot.Value.materials) {
-            foreach (int recipeIndex in ItemID.Sets.CraftingRecipeIndices[type]) {
+        Queue<(int type, int depth)> items = [];
+        int checksLeft = Configs.PreviousSlot.Value.materials ? Configs.PreviousSlot.Value.materials.Value.maxChecks : 1;
+        items.Enqueue((type, Configs.PreviousSlot.Value.materials.Value.maxDepth));
+        HashSet<int> added = [type];
+        while (items.TryDequeue(out var item)) {
+            if (IsMarked(item.type)) {
+                Slot slot = s_marks[item.type][^1];
+                mark = (slot, s_marksData[slot].favorited);
+                Unmark(slot);
+                return true;
+            }
+            checksLeft--;
+            if (checksLeft == 0) break;
+            item.depth--;
+            if (item.depth == 0) continue;
+            foreach (int recipeIndex in ItemID.Sets.CraftingRecipeIndices[item.type]) {
                 foreach (Item material in Main.recipe[recipeIndex].requiredItem) {
-                    if (ConsumeMark(material.type, out mark)) return true;
+                    if (added.Add(material.type)) items.Enqueue((material.type, item.depth));
                 }
             }
         }

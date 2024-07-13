@@ -256,6 +256,20 @@ PreviousSlot: {
 	}
 }
 
+Materials: {
+	maxDepth: {
+		Label: Max Depth
+		Tooltip: The maximum depth of the search. Large numbers can cause lag on pickup
+	}
+
+	maxChecks: {
+		Label: Max Checks
+		Tooltip: The maximum number of items tested. Large numbers can cause lag on pickup
+	}
+
+	Tooltip: ""
+}
+
 PreviousDisplay: {
 	Tooltip: ""
 

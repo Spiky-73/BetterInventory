@@ -18,7 +18,6 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 - `Auto Equip Items`:  Automatically equip items such as Armors, Accessories or Equipment
 - `Pickup to Hotbar Last`: Picked up items will fill the hotbar slots last
 - `Upgrade Items on Pickup`: Picked up items go to the slot of items of the same kind if they are better
-
 - `Quick Move`: Quickly move items between special slots in the inventory
 - `Craft Stack`: Left Click to craft or buy items in stacks
 - `Favorite Items in Personal Storages`: Favorite items in the Piggy Bank, Safe, ...

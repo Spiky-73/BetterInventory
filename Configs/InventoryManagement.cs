@@ -80,7 +80,7 @@ public sealed class PreviousSlot {
     [DefaultValue(true)] public bool mouse = true;
     [DefaultValue(true)] public bool mediumCore = true;
     [DefaultValue(false)] public bool overridePrevious = false;
-    [DefaultValue(true)] public bool materials = true;
+    public Toggle<Materials> materials = new(true);
     public Toggle<PreviousDisplay> displayPrevious = new(true);
 
     public static bool Enabled => SmartPickup.Enabled && !UnloadedInventoryManagement.Value.previousSlot && SmartPickup.Value.previousSlot.Key > ItemPickupLevel.None;
@@ -97,6 +97,11 @@ public sealed class PreviousDisplay {
     public static bool FakeItem => Enabled && Value.icon && !UnloadedInventoryManagement.Value.displayFakeItem;
     public static bool Icon => Enabled && Value.icon && !UnloadedInventoryManagement.Value.displayIcon;
     public static PreviousDisplay Value => PreviousSlot.Value.displayPrevious.Value;
+}
+
+public sealed class Materials {
+    [Range(1, 100), DefaultValue(3)] public int maxDepth = 3;
+    [Range(1, 9999), DefaultValue(250)] public int maxChecks = 250;
 }
 
 public interface IPreviousDisplay { Vector2 position { get; } float scale { get; } float intensity { get; } }
