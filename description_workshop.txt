@@ -2,9 +2,9 @@ This mods adds loads of small features designed to improve the player Inventory 
 I STRONGLY ADVISE you to read the mod configs to learn about all the features and enable/disable them.
 Feel free to suggest new features If you think of any! 
 
-Keep in mind, this mod is still in development. If you find a bug, please report it here or on the [url=https://github.com/Spiky-73/BetterInventory/tree/master]homepage[/url].
+If you find a bug, please follow the steps [url=https://github.com/Spiky-73/BetterInventory/blob/master/ReportingBugs.md]here[/url].
 
-Visit the [url=https://github.com/Spiky-73/BetterInventory/tree/master]homepage[/url] for more info.
+Visit the [url=https://github.com/Spiky-73/BetterInventory/blob/master/README.md]homepage[/url] for more info.
 
 [h2]Key Features[/h2]
  - Smart item consumption and pickup

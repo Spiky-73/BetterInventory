@@ -2,7 +2,7 @@ This mods adds loads of small features designed to improve the player Inventory 
 I STRONGLY ADVISE you to read the mod configs to learn about all the features and enable/disable them.
 Feel free to suggest new features If you think of any! 
 
-Keep in mind, this mod is still in development. If you find a bug, please report it on the Steam Workshop page or the homepage.
+If you find a bug, please follow the steps in the Reporting bugs section of the homepage.
 
 Visit the homepage for more info.
 

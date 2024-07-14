@@ -49,6 +49,9 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 - `Unknown Entity Display`: Change how unknown items, recipes or NPCs are displayed
 - `Quick Search` Quickly search recipes or NPC drops and navigate between those menus
 
+## Reporting bugs
+See [Reporting Bugs](ReportingBugs.md)
+
 ## Changelog
 
 ### v0.6
@@ -58,6 +61,7 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 - Added Upgrade Items in Smart Pickup
 - Added more options to Previous Slot's item display
 - Added Spy's Infinite Consumables Requirement to Craft Stack
+- Added bug reporting steps
 - Remade Quick List and Search Item
 - Improved Quick Move under the hood
 - Simplified notifications

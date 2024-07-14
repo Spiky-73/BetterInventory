@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using BetterInventory.Default.Catalogues;
 using Newtonsoft.Json;
+using SpikysLib.Configs;
 using SpikysLib.Configs.UI;
 using SpikysLib.Extensions;
 using Terraria.ModLoader.Config;
@@ -9,59 +10,62 @@ namespace BetterInventory.Configs;
 
 public sealed class Compatibility : ModConfig {
 
-    [DefaultValue(0), JsonProperty] internal int failedILs = 0;
+    [Header("Bug")]
+    [ReloadRequired] public Text? bug;
 
-
+    [Header("Compatibility")]
     [ReloadRequired, DefaultValue(false)] public bool compatibilityMode;
 
-    [JsonIgnore, ShowDespiteJsonIgnore, NullAllowed] public object? DisableAll {
-        get => null;
-        set {
-            FixedUI.Value.fastScroll.Key = false;
-            FixedUI.Value.scrollButtons = false;
-            FixedUI.Value.wrapping = false;
-            Crafting.Instance.recipeFilters.Key = false;
-            Crafting.Instance.craftOnList.Key = false;
-            Crafting.Instance.Save();
+    [JsonIgnore, ShowDespiteJsonIgnore, NullAllowed] public object? DisableAll { get => null; set => DisableILSettings(); }
 
-            SmartConsumption.Value.materials = false;
-            SmartConsumption.Value.baits = false;
-            SmartPickup.Value.previousSlot.Key = ItemPickupLevel.None;
-            SmartPickup.Value.autoEquip = AutoEquipLevel.None;
-            SmartPickup.Value.upgradeItems.Key = false;
-            SmartPickup.Value.hotbarLast = false;
-            SmartPickup.Value.fixSlot = false;
-            PreviousDisplay.Value.fakeItem.Key = false;
-            PreviousDisplay.Value.icon.Key = false;
-            QuickMove.Value.displayedHotkeys.Key = HotkeyDisplayMode.None;
-            QuickMove.Value.displayedHotkeys.Value.highlightIntensity = 0;
-            InventoryManagement.Instance.favoriteInBanks = false;
-            InventoryManagement.Instance.shiftRight = false;
-            InventoryManagement.Instance.stackTrash = false;
-            InventoryManagement.Instance.craftStack.Key = false;
-            InventoryManagement.Instance.Save();
-
-            BetterGuide.Value.moreRecipes = false;
-            BetterGuide.Value.craftingStation = false;
-            BetterGuide.Value.favoritedRecipes.Key = false;
-            BetterGuide.Value.craftInMenu = false;
-            BetterGuide.Value.unknownDisplay = UnknownDisplay.Vanilla;
-            FavoritedRecipes.Value.unfavoriteOnCraft = UnfavoriteOnCraft.None;
-            BetterBestiary.Value.displayedInfo = UnlockLevel.Vanilla;
-            BetterBestiary.Value.unknownDisplay = UnknownDisplay.Vanilla;
-            QuickSearch.Value.catalogues[new(RecipeList.Instance)] = false;
-            ItemSearch.Instance.Save();
-        }
-    }
 
     [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedCrafting unloadedCrafting {get; set;} = new();
     [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedInventoryManagement unloadedInventoryManagement {get; set;} = new();
     [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedItemActions unloadedItemActions { get; set;} = new();
     [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedItemSearch unloadedItemSearch {get; set;} = new();
+    
+    [DefaultValue(0), JsonProperty] internal int failedILs = 0;
 
     public static bool CompatibilityMode => Instance.compatibilityMode;
     public static Compatibility Instance = null!;
-    
+
+    private static void DisableILSettings() {
+        FixedUI.Value.fastScroll.Key = false;
+        FixedUI.Value.scrollButtons = false;
+        FixedUI.Value.wrapping = false;
+        Crafting.Instance.recipeFilters.Key = false;
+        Crafting.Instance.craftOnList.Key = false;
+        Crafting.Instance.Save();
+
+        SmartConsumption.Value.materials = false;
+        SmartConsumption.Value.baits = false;
+        SmartPickup.Value.previousSlot.Key = ItemPickupLevel.None;
+        SmartPickup.Value.autoEquip = AutoEquipLevel.None;
+        SmartPickup.Value.upgradeItems.Key = false;
+        SmartPickup.Value.hotbarLast = false;
+        SmartPickup.Value.fixSlot = false;
+        PreviousDisplay.Value.fakeItem.Key = false;
+        PreviousDisplay.Value.icon.Key = false;
+        QuickMove.Value.displayedHotkeys.Key = HotkeyDisplayMode.None;
+        QuickMove.Value.displayedHotkeys.Value.highlightIntensity = 0;
+        InventoryManagement.Instance.favoriteInBanks = false;
+        InventoryManagement.Instance.shiftRight = false;
+        InventoryManagement.Instance.stackTrash = false;
+        InventoryManagement.Instance.craftStack.Key = false;
+        InventoryManagement.Instance.Save();
+
+        BetterGuide.Value.moreRecipes = false;
+        BetterGuide.Value.craftingStation = false;
+        BetterGuide.Value.favoritedRecipes.Key = false;
+        BetterGuide.Value.craftInMenu = false;
+        BetterGuide.Value.unknownDisplay = UnknownDisplay.Vanilla;
+        FavoritedRecipes.Value.unfavoriteOnCraft = UnfavoriteOnCraft.None;
+        BetterBestiary.Value.displayedInfo = UnlockLevel.Vanilla;
+        BetterBestiary.Value.unknownDisplay = UnknownDisplay.Vanilla;
+        QuickSearch.Value.catalogues[new(RecipeList.Instance)] = false;
+        ItemSearch.Instance.Save();
+    }
+
     public override ConfigScope Mode => ConfigScope.ClientSide;
 }
 

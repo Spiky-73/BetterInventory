@@ -710,7 +710,53 @@ RightClickAction: {
 }
 
 Compatibility: {
-	DisplayName: Mod Compatibility
+	DisplayName: Reporting Bugs
+
+	Headers: {
+		Bug: Reporting Bugs
+		Compatibility: Compatibility
+	}
+
+	bug: {
+		Label:
+			'''
+			[c/bbbbbb:Goto the] [c/0000bb:Reporting Bugs] [c/bbbbbb:section of the homepage for a more readable version]
+			If you encounter a bug with {$Mods.BetterInventory.Chat.ModName}, please report it on the [c/05c8ff:{$Mods.BetterInventory.Chat.Homepage}] or the [c/05c8ff:{$Mods.BetterInventory.Chat.Workshop}],  including the following in your report if possible:
+
+			[c/cccc88:1. What is the bug ?]
+			Add as many details as possible about the bug, such as:
+			- What happens
+			- Does it happen in single player or multiplayer
+			- Your `client.log` files (located in the `tModLoader-Logs` folder in your tModLoader install directory)
+			- Any details that could be important
+
+			[c/cccc88:2. How to reproduce the it ?]
+			List the steps to execute to cause the bug.
+
+			[c/cccc88:3. Which feature(s) causes it ?]
+			Since features have no impact on the game if disabled, disabling the ones responsible for the bug allows you to keep using the mod until I fix the bug.
+
+			The process is quite simple:
+			1. Disable a bunch of feature
+			2. Re-enable them one by one until the bug happens. The last feature you enabled is probably the one causing the bug.
+			3. Keep this feature disabled and re-enable the rest. If the bug still happens, go back to step 1.
+
+			[c/aaaa55:Gameplay Bugs]
+			1. Disable all the features in a config.
+			2. If the bug still happens, re-enable the features and redo step 1 with another config
+			3. Re-enable the features one by one until the bug happens. The last feature you enabled is probably the one causing the bug.
+			4. Keep this feature disabled and re-enable the rest. If the bug still happens, go back to step 1.
+
+			[c/aaaa55:Mod Loading Bugs]
+			1) Disadle all mods but Better Inventory
+			2) [c/ff8800:Enable] [c/dddd22:{$Mods.BetterInventory.Configs.Compatibility.compatibilityMode.Name}] and initialize [c/dddd22:{$Mods.BetterInventory.Configs.Compatibility.DisableAll.Name}]
+			3) Reload with all your mods enabled
+			4) Re-enable a feature and Reload. If the loading fails, keep it disabled
+			5) Repeat step 4 with every features you want to enable
+			[c/ff8800:Include the list of unloaded features and your mod list in your report]
+			'''
+		Tooltip: ""
+	}
 
 	compatibilityMode: {
 		Name: Compatibility Mode
@@ -718,15 +764,7 @@ Compatibility: {
 		Tooltip:
 			'''
 			Disabled features will not be loaded and will have no effect even when Enabled
-			Enable this if {$Mods.BetterInventory.Chat.ModName} fails to load or causes crashes when loading other mods
-
-			If you are is this situation:
-			1) Enable "{$Mods.BetterInventory.Configs.Compatibility.compatibilityMode.Name}" and initialize "{$Mods.BetterInventory.Configs.Compatibility.DisableAll.Name}"
-			2) Reload
-			3) Re-enable a feature and Reload. If the loading fails, disable it
-			4) Repeat step 3 with every features you want to enable
-
-			Also, please report the mods you had and the features you had to disable on the {$Mods.BetterInventory.Chat.Workshop} or the {$Mods.BetterInventory.Chat.Homepage}
+			Enable this if {$Mods.BetterInventory.Chat.ModName} fails to load or causes errors when loading other mods
 			'''
 	}
 
