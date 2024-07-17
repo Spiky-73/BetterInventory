@@ -9,6 +9,8 @@ public abstract class ModEntityCatalogue : ModType, ILocalizedModType {
     protected sealed override void Register() {
         ModTypeLookup<ModEntityCatalogue>.Register(this);
         QuickSearch.Register(this);
+        Language.GetOrRegister(this.GetLocalizationKey("DisplayName"), PrettyPrintName);
+        Language.GetOrRegister(this.GetLocalizationKey("Tooltip"), () => string.Empty);
     }
 
     public virtual bool Enabled => Configs.QuickSearch.Enabled && Configs.QuickSearch.Value.catalogues.GetValueOrDefault(new(this), true);
@@ -22,7 +24,7 @@ public abstract class ModEntityCatalogue : ModType, ILocalizedModType {
     public sealed override void SetupContent() => SetStaticDefaults();
 
     public string LocalizationCategory => "EntityCatalogues";
-    public virtual LocalizedText DisplayName => this.GetLocalization("DisplayName", PrettyPrintName);
+    public virtual LocalizedText DisplayName => this.GetLocalization("DisplayName");
 
     public virtual int ComparePositionTo(ModEntityCatalogue other) => 0;
 }

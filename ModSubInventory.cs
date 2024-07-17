@@ -65,9 +65,10 @@ public abstract class ModSubInventory : ModType, ILocalizedModType {
     protected sealed override void Register() {
         ModTypeLookup<ModSubInventory>.Register(this);
         InventoryLoader.Register(this);
+        Language.GetOrRegister(this.GetLocalizationKey("DisplayName"), PrettyPrintName);
     }
     public sealed override void SetupContent() => SetStaticDefaults();
 
-    public string LocalizationCategory => "Inventories";
-    public virtual LocalizedText DisplayName => this.GetLocalization("DisplayName", PrettyPrintName);
+    public string LocalizationCategory => "SubInventories";
+    public virtual LocalizedText DisplayName => this.GetLocalization("DisplayName");
 }

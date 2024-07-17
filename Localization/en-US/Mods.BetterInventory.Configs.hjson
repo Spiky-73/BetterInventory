@@ -720,7 +720,7 @@ Compatibility: {
 	bug: {
 		Label:
 			'''
-			[c/bbbbbb:Goto the] [c/0000bb:Reporting Bugs] [c/bbbbbb:section of the homepage for a more readable version]
+			[c/bbbbbb:Goto the] [c/00bbbbb:Reporting Bugs] [c/bbbbbb:section of the homepage for a more readable version]
 			If you encounter a bug with {$Mods.BetterInventory.Chat.ModName}, please report it on the [c/05c8ff:{$Mods.BetterInventory.Chat.Homepage}] or the [c/05c8ff:{$Mods.BetterInventory.Chat.Workshop}],  including the following in your report if possible:
 
 			[c/cccc88:1. What is the bug ?]

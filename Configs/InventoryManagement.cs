@@ -117,7 +117,9 @@ public sealed class IconDisplay : IPreviousDisplay {
 }
 
 public sealed class UpgradeItems {
-    [CustomModConfigItem(typeof(DictionaryValuesElement))]
+    public UpgradeItems() => upgraders = [];
+
+    [CustomModConfigItem(typeof(DictionaryValuesElement)), ValueWrapper(typeof(EntityDefinitionValueWrapper<,>))]
     public Dictionary<PickupUpgraderDefinition, bool> upgraders {
         get => _upgraders;
         set {

@@ -9,6 +9,8 @@ public abstract class ModPickupUpgrader : ModType, ILocalizedModType {
     protected sealed override void Register() {
         ModTypeLookup<ModPickupUpgrader>.Register(this);
         SmartPickup.Register(this);
+        Language.GetOrRegister(this.GetLocalizationKey("DisplayName"), PrettyPrintName);
+        Language.GetOrRegister(this.GetLocalizationKey("Tooltip"), () => string.Empty);
     }
 
     public virtual bool Enabled => Configs.QuickSearch.Enabled && Configs.UpgradeItems.Value.upgraders.GetValueOrDefault(new(this), true);
@@ -19,5 +21,5 @@ public abstract class ModPickupUpgrader : ModType, ILocalizedModType {
     public sealed override void SetupContent() => SetStaticDefaults();
 
     public string LocalizationCategory => "PickupUpgraders";
-    public virtual LocalizedText DisplayName => this.GetLocalization("DisplayName", PrettyPrintName);
+    public virtual LocalizedText DisplayName => this.GetLocalization("DisplayName");
 }

@@ -45,7 +45,7 @@ public sealed class BetterPlayer : ModPlayer {
                 WireDisplayToggles.Add(toggle);
                 continue;
             }
-            BuilderTogglesKb.Add((toggle, KeybindLoader.RegisterKeybind(Mod, toggle.Name.Replace("BuilderToggle", ""), Microsoft.Xna.Framework.Input.Keys.None)));
+            BuilderTogglesKb.Add((toggle, KeybindLoader.RegisterKeybind(Mod, toggle.Name.Replace("BuilderToggle",string.Empty), Microsoft.Xna.Framework.Input.Keys.None)));
         }
     }
 

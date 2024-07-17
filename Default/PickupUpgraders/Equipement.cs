@@ -6,7 +6,7 @@ using Terraria.ModLoader;
 
 namespace BetterInventory.Default.PickupUpgraders;
 
-public sealed class EquipementUpgrader : ModPickupUpgrader {
+public sealed class Equipement : ModPickupUpgrader {
     public override bool AppliesTo(Item item) => Main.projHook[item.shoot] || item.wingSlot != -1;
 
     public override Item AttemptUpgrade(Player player, Item item) {

@@ -11,7 +11,7 @@ namespace BetterInventory.Configs;
 public sealed class Compatibility : ModConfig {
 
     [Header("Bug")]
-    [ReloadRequired] public Text? bug;
+    public Text? bug;
 
     [Header("Compatibility")]
     [ReloadRequired, DefaultValue(false)] public bool compatibilityMode;

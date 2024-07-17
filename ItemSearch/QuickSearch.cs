@@ -64,7 +64,7 @@ public sealed class QuickSearch : ILoadable {
         if (!s_individualCanClick) return;
 
         Main.LocalPlayer.mouseInterface = true;
-        foreach(ModEntityCatalogue catalogue in EntityCatalogue) {
+        foreach(ModEntityCatalogue catalogue in EntityCatalogues) {
             if(catalogue.Enabled && catalogue.Keybind.JustPressed) {
                 if (Configs.QuickSearch.Value.individualKeybinds.Key.HasFlag(Configs.SearchAction.Search) && !Main.HoverItem.IsAir) {
                     catalogue.Toggle(true);
@@ -91,7 +91,7 @@ public sealed class QuickSearch : ILoadable {
                 bool first = s_taps == -1;
                 if (first) {
                     s_sharedItem = Main.HoverItem.Clone();
-                    s_enabledProviders = EntityCatalogue.Where(p => p.Enabled).ToList();
+                    s_enabledProviders = EntityCatalogues.Where(p => p.Enabled).ToList();
                     s_taps = Math.Max(s_enabledProviders.FindIndex(p => p.Visible), 0);
                 }
                 if (s_enabledProviders.Count == 0) return;
@@ -131,7 +131,7 @@ public sealed class QuickSearch : ILoadable {
     public static ModEntityCatalogue? GetEntityCatalogue(string mod, string name) => s_catalogues.Find(p => p.Mod.Name == mod && p.Name == name);
 
     public static ModKeybind QuickSearchKb { get; private set; } = null!;
-    public static ReadOnlyCollection<ModEntityCatalogue> EntityCatalogue => s_catalogues.AsReadOnly();
+    public static ReadOnlyCollection<ModEntityCatalogue> EntityCatalogues => s_catalogues.AsReadOnly();
 
     private static readonly List<ModEntityCatalogue> s_catalogues = [];
     private static bool s_redirect = false;

@@ -68,7 +68,7 @@ public sealed class Bestiary : ModEntityCatalogue {
             if (enabled == false) return;
             Main.LocalPlayer.SetTalkNPC(-1, false);
             Main.npcChatCornerItem = 0;
-            Main.npcChatText = "";
+            Main.npcChatText = string.Empty;
             Main.mouseLeftRelease = false;
             IngameFancyUI.OpenUIState(Main.BestiaryUI);
             Main.BestiaryUI.OnOpenPage();

@@ -97,10 +97,11 @@ public sealed class QuickSearch {
     public QuickSearch() => catalogues = [];
     public NestedValue<SearchAction, IndividualKeybinds> individualKeybinds = new(SearchAction.Both);
     public NestedValue<SearchAction, SharedKeybind> sharedKeybind = new(SearchAction.Toggle);
-    [CustomModConfigItem(typeof(DictionaryValuesElement))] public Dictionary<EntityCatalogueDefinition, bool> catalogues {
+    [CustomModConfigItem(typeof(DictionaryValuesElement)), ValueWrapper(typeof(EntityDefinitionValueWrapper<,>))]
+    public Dictionary<EntityCatalogueDefinition, bool> catalogues {
         get => _catalogues;
         set {
-            foreach (ModEntityCatalogue catalogue in global::BetterInventory.ItemSearch.QuickSearch.EntityCatalogue) value.TryAdd(new(catalogue), true);
+            foreach (ModEntityCatalogue catalogue in global::BetterInventory.ItemSearch.QuickSearch.EntityCatalogues) value.TryAdd(new(catalogue), true);
             _catalogues = value;
         }
     }
