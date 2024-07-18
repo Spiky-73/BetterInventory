@@ -31,6 +31,8 @@ public sealed class ClickOverrides : ILoadable {
 
         On_Chest.AddItemToShop += HookStackSold;
 
+        On_Recipe.FindRecipes += HookFindRecipes;
+
         IL_Player.PayCurrency += static il => {
             if(!il.ApplyTo(ILPayStack, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
         };
@@ -62,16 +64,26 @@ public sealed class ClickOverrides : ILoadable {
             if (!il.ApplyTo(ILFavoritedBankBackground, Configs.InventoryManagement.FavoriteInBanks)) Configs.UnloadedInventoryManagement.Value.favoriteInBanks = true;
         };
     }
+
     public void Unload() { }
 
+    private static void HookFindRecipes(On_Recipe.orig_FindRecipes orig, bool canDelayCheck) {
+        s_craftMultipliers.Clear();
+        s_shopMultipliers.Clear();
+    }
+
     public static void AddCraftStackLine(Item item, List<TooltipLine> tooltips) {
-        if (!Configs.CraftStack.Tooltip || !(item.tooltipContext == ItemSlot.Context.ShopItem || (item.tooltipContext == ItemSlot.Context.CraftingMaterial && !item.IsNotSameTypePrefixAndStack(Main.recipe[Main.availableRecipe[Main.focusRecipe]].createItem)))) return;
+        if (!Configs.CraftStack.Tooltip) return;
+        bool recipe;
+        if (item.tooltipContext == ItemSlot.Context.CraftingMaterial && !item.IsNotSameTypePrefixAndStack(Main.recipe[Main.availableRecipe[Main.focusRecipe]].createItem)) recipe = true;
+        else if (item.tooltipContext == ItemSlot.Context.ShopItem) recipe = false;
+        else return;
         tooltips.Add(new(
             BetterInventory.Instance, "CraftStack",
             Language.GetTextValue($"{Localization.Keys.UI}.CraftStackTooltip",
                 Lang.SupportGlyphs(Configs.CraftStack.Value.invertClicks ? "<right>" : "<left>"),
-                Language.GetTextValue($"{Localization.Keys.UI}.{(item.tooltipContext == ItemSlot.Context.ShopItem ? "Buy" : "Craft")}"),
-                GetMaxStackAmount(item)
+                Language.GetTextValue($"{Localization.Keys.UI}.{(recipe ? "Craft" : "Buy")}"),
+                recipe ? GetCraftMultiplier(Main.recipe[Main.availableRecipe[Main.focusRecipe]]) : GetShotMultiplier(item, null)
         )));
     }
 
@@ -139,15 +151,8 @@ public sealed class ClickOverrides : ILoadable {
         cursor.EmitLdarg3();
         cursor.EmitLdloc(calcForBuying); // long calcForBuying
         cursor.EmitDelegate((Item[] inv, int slot, bool rightClickIsValid, bool leftClickIsValid, long price) => {
-            if (!Configs.CraftStack.Enabled || !(Configs.CraftStack.Value.invertClicks ? rightClickIsValid : leftClickIsValid)) {
-                s_ilShopMultiplier = 1;
-                return price;
-            }
-            int buy = GetMaxBuyAmount(inv[slot], price);
-            int available = inv[slot].buyOnce ? inv[slot].stack : inv[slot].maxStack;
-            int pickup = GetMaxPickupAmount(inv[slot]);
-            int stack = Configs.CraftStack.Value.maxItems == 0 && SpysInfiniteConsumables.Enabled ? (int)SpysInfiniteConsumables.GetMixedRequirement(Main.LocalPlayer, inv[slot]) : Configs.CraftStack.Value.maxItems;
-            s_ilShopMultiplier = Math.Max(MathX.Min(buy, available, pickup, stack), 1);
+            s_ilShopMultiplier = Configs.CraftStack.Enabled && (Configs.CraftStack.Value.invertClicks ? rightClickIsValid : leftClickIsValid)
+                ? GetShotMultiplier(inv[slot], price) : 1;
             return price;
         });
         cursor.EmitStloc(calcForBuying);
@@ -262,12 +267,8 @@ public sealed class ClickOverrides : ILoadable {
         cursor.GotoNextLoc(out _, i => i.Previous.SaferMatchCallvirt(Reflection.Item.Clone), 0);
         cursor.GotoPrev(MoveType.After, i => i.MatchLdarg0());
         cursor.EmitDelegate((Recipe r) => {
-            s_ilCraftMultiplier = 1;
-            if (!Configs.CraftStack.Enabled || !(Configs.CraftStack.Value.invertClicks ? Main.mouseRight : Main.mouseLeft)) return r;
-            int craft = GetMaxCraftAmount(r);
-            int pickup = GetMaxPickupAmount(r.createItem);
-            int stack = GetMaxStackAmount(r.createItem);
-            s_ilCraftMultiplier = Math.Max(MathX.Min(craft, pickup / r.createItem.stack, Configs.CraftStack.Value.maxItems / r.createItem.stack), 1);
+            s_ilCraftMultiplier = Configs.CraftStack.Enabled && (Configs.CraftStack.Value.invertClicks ? Main.mouseRight : Main.mouseLeft) ?
+                GetCraftMultiplier(r) : 1;
             return r;
         });
         // Item crafted = r.createItem.Clone();
@@ -443,6 +444,27 @@ public sealed class ClickOverrides : ILoadable {
         return free;
     }
 
+    public static int GetCraftMultiplier(Recipe recipe) => s_craftMultipliers.GetOrAdd(recipe.RecipeIndex, () => {
+        int craft = GetMaxCraftAmount(recipe);
+        int pickup = GetMaxPickupAmount(recipe.createItem);
+        int stack = GetMaxStackAmount(recipe.createItem);
+        return Math.Max(MathX.Min(craft, pickup / recipe.createItem.stack, stack / recipe.createItem.stack), 1);
+    });
+
+    public static int GetShotMultiplier(Item item, long? price) => s_shopMultipliers.GetOrAdd(item.type, () => {
+        long p;
+        if (price.HasValue) p = price.Value;
+        else Main.LocalPlayer.GetItemExpectedPrice(item, out _, out p);
+        int buy = GetMaxBuyAmount(item, p);
+        int available = item.buyOnce ? item.stack : item.maxStack;
+        int pickup = GetMaxPickupAmount(item);
+        int stack = Configs.CraftStack.Value.maxItems == 0 && SpysInfiniteConsumables.Enabled ? (int)SpysInfiniteConsumables.GetMixedRequirement(Main.LocalPlayer, item) : Configs.CraftStack.Value.maxItems;
+        return Math.Max(MathX.Min(buy, available, pickup, stack), 1);
+    });
+    
+    private readonly static Dictionary<int, int> s_craftMultipliers = [];
+    private readonly static Dictionary<int, int> s_shopMultipliers = [];
+
     private static int s_ilCraftMultiplier = 1;
     private static int s_ilShopMultiplier = 1;
 
@@ -450,5 +472,4 @@ public sealed class ClickOverrides : ILoadable {
     public static Asset<Texture2D> CursorCraft => ModContent.Request<Texture2D>($"BetterInventory/Assets/Cursor_Craft");
 
     public static readonly int[] TransportCursors = [CursorOverrideID.TrashCan, CursorOverrideID.InventoryToChest, CursorOverrideID.ChestToInventory];
-
 }

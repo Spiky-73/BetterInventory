@@ -61,7 +61,7 @@ See [Reporting Bugs](ReportingBugs.md)
 - Added Upgrade Items in Smart Pickup
 - Added more options to Previous Slot's item display
 - Added Spy's Infinite Consumables Requirement to Craft Stack
-- Added bug reporting steps
+- Added the Reporting Bug config
 - Remade Quick List and Search Item
 - Improved Quick Move under the hood
 - Simplified notifications

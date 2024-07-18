@@ -55,14 +55,13 @@ public sealed class InventoryLoader : ILoadable {
         itemSlot = s ?? default;
         return s.HasValue;
     }
-    public static Slot? GetInventorySlot(Player player, Item[] inventory, int context, int slot) => player == Main.LocalPlayer ? s_slotToInv.GetOrAdd(new(inventory, context, slot)) : ComputeInventorySlot(player, inventory, context, slot);
-    private static Slot? ComputeInventorySlot(Player player, Item[] inventory, int context, int slot) {
+    public static Slot? GetInventorySlot(Player player, Item[] inventory, int context, int slot) => s_slotToInv.GetOrAdd((new(player.whoAmI, inventory, context, slot)), () => {
         foreach (ModSubInventory slots in SubInventories) {
             int i = GetSlotIndex(slots.Items(player), inventory, context, slot);
             if (i != -1) return new(slots, i);
         }
         return null;
-    }
+    });
     private static int GetSlotIndex(IList<Item> list, Item[] inv, int ctxt, int slot) {
         if (list == inv) return slot;
         else if(list is JoinedLists<Item> joined) {
@@ -84,9 +83,7 @@ public sealed class InventoryLoader : ILoadable {
     private static readonly List<ModSubInventory> _classic = [];
     private static readonly List<ModSubInventory> _special = [];
 
-    private static readonly Cache<VanillaSlot, Slot?> s_slotToInv = new(slot => ComputeInventorySlot(Main.LocalPlayer, slot.Inv, slot.Context, slot.Slot)) {
-        EstimateValueSize = slot => sizeof(int) + IntPtr.Size
-    };
+    private static readonly Dictionary<VanillaSlot, Slot?> s_slotToInv = [];
 }
 
-public readonly record struct VanillaSlot(Item[] Inv, int Context, int Slot);
+public readonly record struct VanillaSlot(int Player, Item[] Inventory, int Context, int Slot);
