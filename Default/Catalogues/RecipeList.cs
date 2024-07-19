@@ -103,8 +103,8 @@ public sealed class RecipeList : ModEntityCatalogue {
             if (slot == -1 || slot == 0) ItemSlot.LeftClick(items, ContextID.GuideItem, 0);
             if (slot == -1 || slot == 1) ItemSlot.LeftClick(items, ContextID.GuideItem, 1);
         } else {
-            if (slot == -1) slot = Configs.BetterGuide.CraftingStation && Guide.IsCraftingStation(item) ? 1 : 0;
-            if (Configs.BetterGuide.CraftingStation && Guide.FitsCraftingTile(item) && Guide.GetPlaceholderType(item) == PlaceholderType.None) {
+            if (slot == -1) slot = Guide.textTiles.Exist(i => Guide.AreSame(i, item)) || Guide.textConditions.Exist(i => Guide.AreSame(i.item, item)) ? 1 : 0;
+            if (ItemSlot.PickItemMovementAction(items, ContextID.GuideItem, 1 - slot, item) != -1) {
                 bool clearOtherSlot = item.tooltipContext != ContextID.GuideItem;
                 if (Guide.AreSame(items[slot], item)) {
                     if (clearOtherSlot) SearchPrevious(items, slot, true);
@@ -143,8 +143,9 @@ public sealed class RecipeList : ModEntityCatalogue {
     }
 
     public static bool OverrideHover(Item[] inv, int context, int slot) {
-        if (!Instance.Enabled || context != ContextID.GuideItem) return false;
-        if (!inv[slot].IsAir && (Main.mouseItem.IsAir || ItemSlot.ShiftInUse || ItemSlot.ControlInUse)) Main.cursorOverride = CursorOverrideID.TrashCan;
+        if (!Instance.Enabled || context != ContextID.GuideItem || inv[slot].IsAir) return false;
+        if (Main.mouseItem.IsAir || ItemSlot.ShiftInUse || ItemSlot.ControlInUse) Main.cursorOverride = CursorOverrideID.TrashCan;
+        if (ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) == -1) Main.cursorOverride = CursorOverrideID.TrashCan;
         return true;
     }
 
@@ -167,22 +168,14 @@ public sealed class RecipeList : ModEntityCatalogue {
 
         if (Configs.QuickSearch.RightClick && Configs.QuickSearch.Value.rightClick == Configs.RightClickAction.SearchPrevious && !Guide.AreSame(Main.mouseItem, inv[slot])) _guideHistory[slot].Add(inv[slot].Clone());
 
-        (Item mouse, int cursor) = (Main.mouseItem, Main.cursorOverride);
-        inv[slot].TurnToAir();
-        if (Main.cursorOverride > CursorOverrideID.DefaultCursor) {
-            SoundEngine.PlaySound(SoundID.Grab);
-            return;
-        } else {
-            Main.mouseItem = Main.mouseItem.Clone();
-            if (!Main.mouseItem.IsAir) {
-                Main.mouseItem.stack = 1;
-                inv[slot].TurnToAir();
-            }
+        Item mouse = Main.mouseItem;
+        if (Main.cursorOverride <= CursorOverrideID.DefaultCursor) {
+            if (!mouse.IsAir) inv[slot].TurnToAir();
+            Main.mouseItem = mouse.Clone();
+            Main.mouseItem.stack = 1;
         }
-
         orig(inv, context, slot);
-
-        (Main.mouseItem, Main.cursorOverride) = (mouse, cursor);
+        Main.mouseItem = mouse;
     }
 
     private static void HookRightClickHistory(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {

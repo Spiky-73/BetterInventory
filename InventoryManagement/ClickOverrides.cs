@@ -152,8 +152,8 @@ public sealed class ClickOverrides : ILoadable {
         cursor.EmitLdarg3();
         cursor.EmitLdloc(calcForBuying); // long calcForBuying
         cursor.EmitDelegate((Item[] inv, int slot, bool rightClickIsValid, bool leftClickIsValid, long price) => {
-            s_ilShopMultiplier = Configs.CraftStack.Enabled && (Configs.CraftStack.Value.invertClicks ? rightClickIsValid : leftClickIsValid)
-                ? GetShotMultiplier(inv[slot], price) : 1;
+            s_ilShopMultiplier = Configs.CraftStack.Enabled && (Configs.CraftStack.Value.invertClicks ? rightClickIsValid : leftClickIsValid) ?
+                GetShotMultiplier(inv[slot], price) : 1;
             return price;
         });
         cursor.EmitStloc(calcForBuying);

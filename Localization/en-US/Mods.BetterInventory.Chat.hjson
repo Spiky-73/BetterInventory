@@ -28,4 +28,5 @@ Changelog:
 	- Simplified notifications
 	- Fixed a bug with Previous Slot
 	- Fixed FixedUI ScrollButtons
+	- Fixed some wierd behaviour with GuideTile
 	'''

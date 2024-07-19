@@ -100,6 +100,7 @@ See [Reporting Bugs](ReportingBugs.md)
 - Fixed favorite items in banks not been saved
 - Fixed crash on load with Better Game UI
 - Fixed bugs with shops
+- Fixed some wierd behaviour with GuideTile
 
 ### v0.4.1
 - Optimized Better Guide and Recipe Filtering
