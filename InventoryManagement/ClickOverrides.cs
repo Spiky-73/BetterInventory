@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
-using ReLogic.Content;
 using SpikysLib;
 using SpikysLib.Constants;
 using SpikysLib.CrossMod;
 using SpikysLib.Extensions;
+using SpikysLib.UI;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ID;
@@ -20,7 +19,8 @@ namespace BetterInventory.InventoryManagement;
 public sealed class ClickOverrides : ILoadable {
 
     public void Load(Mod mod) {
-        On_Main.DrawInterface_36_Cursor += HookDrawCustomCursor;
+        CraftCursor = CursorLoader.RegisterCursor(mod, ModContent.Request<Texture2D>($"BetterInventory/Assets/Cursor_Craft"));
+
         On_Main.TryAllowingToCraftRecipe += HookTryAllowingToCraftRecipe;
 
         On_ChestUI.LootAll += HookLootAll;
@@ -70,6 +70,7 @@ public sealed class ClickOverrides : ILoadable {
     private static void HookFindRecipes(On_Recipe.orig_FindRecipes orig, bool canDelayCheck) {
         s_craftMultipliers.Clear();
         s_shopMultipliers.Clear();
+        orig(canDelayCheck);
     }
 
     public static void AddCraftStackLine(Item item, List<TooltipLine> tooltips) {
@@ -83,7 +84,7 @@ public sealed class ClickOverrides : ILoadable {
             Language.GetTextValue($"{Localization.Keys.UI}.CraftStackTooltip",
                 Lang.SupportGlyphs(Configs.CraftStack.Value.invertClicks ? "<right>" : "<left>"),
                 Language.GetTextValue($"{Localization.Keys.UI}.{(recipe ? "Craft" : "Buy")}"),
-                recipe ? GetCraftMultiplier(Main.recipe[Main.availableRecipe[Main.focusRecipe]]) : GetShotMultiplier(item, null)
+                recipe ? (GetCraftMultiplier(Main.recipe[Main.availableRecipe[Main.focusRecipe]]) * Main.recipe[Main.availableRecipe[Main.focusRecipe]].createItem.stack) : GetShotMultiplier(item, null)
         )));
     }
 
@@ -214,23 +215,15 @@ public sealed class ClickOverrides : ILoadable {
         cursor.EmitLdloc(flag5);
         cursor.EmitDelegate((bool canCraft, bool crafting) => {
             if (!Configs.InventoryManagement.ShiftRight || !ItemSlot.ShiftInUse) return;
-            if (canCraft && Main.LocalPlayer.ItemSpace(Main.recipe[Main.availableRecipe[Main.focusRecipe]].createItem).CanTakeItem && !crafting && Main.stackSplit <= 1) Main.cursorOverride = CraftCursorID;
+            if (canCraft && Main.LocalPlayer.ItemSpace(Main.recipe[Main.availableRecipe[Main.focusRecipe]].createItem).CanTakeItem && !crafting && Main.stackSplit <= 1) CraftCursor.SetAsCurrent();
         });
         //     ...
         // }
     }
-    private static void HookDrawCustomCursor(On_Main.orig_DrawInterface_36_Cursor orig) {
-        if (Configs.InventoryManagement.ShiftRight && Main.cursorOverride == CraftCursorID) {
-            Main.spriteBatch.End();
-            Main.spriteBatch.Begin(0, BlendState.AlphaBlend, Main.SamplerStateForCursor, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
-            Main.spriteBatch.Draw(CursorCraft.Value, new Vector2(Main.mouseX, Main.mouseY), null, Color.White, 0, default, Main.cursorScale, 0, 0f);
-        } else orig();
-    }
-
     private static bool HookTryAllowingToCraftRecipe(On_Main.orig_TryAllowingToCraftRecipe orig, Recipe currentRecipe, bool tryFittingItemInInventoryToAllowCrafting, out bool movedAnItemToAllowCrafting) {
         movedAnItemToAllowCrafting = false;
         if (Configs.CraftStack.Enabled && (Configs.CraftStack.Value.invertClicks ? (Main.mouseRight && !Configs.CraftStack.Value.repeat && !Main.mouseRightRelease) : (Main.mouseLeft && !Configs.CraftStack.Value.repeat && !Main.mouseLeftRelease))) return false;
-        if (Configs.InventoryManagement.ShiftRight && Main.cursorOverride == CraftCursorID) return Main.LocalPlayer.ItemSpace(currentRecipe.createItem).CanTakeItem;
+        if (Configs.InventoryManagement.ShiftRight && CraftCursor.IsCurrent) return Main.LocalPlayer.ItemSpace(currentRecipe.createItem).CanTakeItem;
         return orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting, out movedAnItemToAllowCrafting);
     }
     private static void ILShiftCraft(ILContext il) {
@@ -243,7 +236,7 @@ public sealed class ClickOverrides : ILoadable {
         ILLabel skipVanillaCheck = cursor.DefineLabel();
         ILLabel vanillaCheck = cursor.DefineLabel();
         cursor.EmitLdarg0();
-        cursor.EmitDelegate((Recipe r) => Configs.InventoryManagement.ShiftRight && Main.cursorOverride == CraftCursorID);
+        cursor.EmitDelegate((Recipe r) => Configs.InventoryManagement.ShiftRight && CraftCursor.IsCurrent);
         cursor.EmitBrfalse(vanillaCheck);
         cursor.EmitLdarg0();
         cursor.EmitDelegate((Recipe r) => Main.LocalPlayer.ItemSpace(r.createItem).CanTakeItem);
@@ -312,7 +305,7 @@ public sealed class ClickOverrides : ILoadable {
         cursor.EmitLdloc(crafted);
         cursor.EmitDelegate((Recipe r, Item crafted) => {
             if (Configs.CraftStack.Enabled && s_ilCraftMultiplier != 1) crafted.stack *= s_ilCraftMultiplier;
-            if (Configs.InventoryManagement.ShiftRight && Main.cursorOverride == CraftCursorID) {
+            if (Configs.InventoryManagement.ShiftRight && CraftCursor.IsCurrent) {
                 Main.LocalPlayer.GetDropItem(ref crafted, GetItemSettings.InventoryUIToInventorySettingsShowAsNew);
                 return true;
             }
@@ -421,13 +414,13 @@ public sealed class ClickOverrides : ILoadable {
 
         int amount = 0;
         foreach (Item material in recipe.requiredItem) {
-            int a = PlayerExtensions.OwnedItems[groupItems.GetValueOrDefault(material.type, material.type)] / material.stack;
+            int a = PlayerExtensions.OwnedItems.GetValueOrDefault(groupItems.GetValueOrDefault(material.type, material.type), 0) / material.stack;
             if (amount == 0 || a < amount) amount = a;
         }
         return amount;
     }
     public static int GetMaxPickupAmount(Item item) {
-        if (!Configs.InventoryManagement.ShiftRight || Main.cursorOverride != CraftCursorID) return item.maxStack - Main.mouseItem.stack;
+        if (!Configs.InventoryManagement.ShiftRight || Main.cursorOverride != CraftCursor.Type) return item.maxStack - Main.mouseItem.stack;
         int free = GetFreeSpace(Main.LocalPlayer.inventory, item, InventorySlots.Mouse);
         if (Main.LocalPlayer.InChest(out Item[]? chest)) free += GetFreeSpace(chest, item);
         if (Main.LocalPlayer.useVoidBag() && Main.LocalPlayer.chest != InventorySlots.VoidBag) free += GetFreeSpace(Main.LocalPlayer.bank4.item, item);
@@ -468,8 +461,7 @@ public sealed class ClickOverrides : ILoadable {
     private static int s_ilCraftMultiplier = 1;
     private static int s_ilShopMultiplier = 1;
 
-    public const int CraftCursorID = 22;
-    public static Asset<Texture2D> CursorCraft => ModContent.Request<Texture2D>($"BetterInventory/Assets/Cursor_Craft");
+    public static ModCursor CraftCursor { get; private set; } = null!;
 
     public static readonly int[] TransportCursors = [CursorOverrideID.TrashCan, CursorOverrideID.InventoryToChest, CursorOverrideID.ChestToInventory];
 }
