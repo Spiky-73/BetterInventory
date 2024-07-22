@@ -1,7 +1,11 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using MonoMod.Cil;
 using SpikysLib.Constants;
+using SpikysLib.Extensions;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -49,6 +53,27 @@ public static class Utility {
             return false;
         }
         return true;
+    }
+
+    public static int GetMouseFreeSpace(Item item) => GetFreeSpace(Main.mouseItem, item);
+    public static int GetInventoryFreeSpace(Player player, Item item) {
+        int free = 0;
+        foreach(ModSubInventory inv in InventoryLoader.SubInventories) {
+            if (PlayerExtensions.InventoryContexts.Contains(inv.Context)) free += GetFreeSpace(inv.Items(player), item);
+        }
+        return free;
+    }
+    public static int GetFreeSpace(IList<Item> inv, Item item, params int[] ignored) {
+        int free = 0;
+        for (int i = 0; i < inv.Count; i++) {
+            if (Array.IndexOf(ignored, i) == -1) free += GetFreeSpace(inv[i], item);
+        }
+        return free;
+    }
+    public static int GetFreeSpace(Item test, Item item) {
+        if (test.IsAir) return item.maxStack;
+        if (test.type == item.type) return item.maxStack - test.stack;
+        return 0;
     }
 
     public static ILCursor GotoRecipeDraw(this ILCursor cursor) {

@@ -62,12 +62,15 @@ See [Reporting Bugs](ReportingBugs.md)
 - Added more options to Previous Slot's item display
 - Added Spy's Infinite Consumables Requirement to Craft Stack
 - Added the Reporting Bug config
+- Added Better Shift Click settings
 - Remade Quick List and Search Item
 - Improved Quick Move under the hood
-- Simplified notifications
 - Updated dependencies
+- Updated Craft cursor icon
+- Simplified notifications
 - Fixed a bug with Previous Slot
 - Fixed FixedUI ScrollButtons
+- Fixed some wierd behaviour with GuideTile
 
 ### v0.5.1.3
 - Fixed SmartConsumption not consuming mouse item

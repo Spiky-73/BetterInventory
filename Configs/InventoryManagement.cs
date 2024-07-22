@@ -17,16 +17,16 @@ public sealed class InventoryManagement : ModConfig {
     public Toggle<QuickMove> quickMove = new(true);
     public Toggle<CraftStack> craftStack = new(true);
     [DefaultValue(true)] public bool favoriteInBanks;
-    [DefaultValue(true)] public bool shiftRight;
+    public Toggle<BetterShiftClick> betterShiftClick = new(true);
     [DefaultValue(true)] public bool stackTrash;
 
     public static InventoryManagement Instance = null!;
     public static bool FavoriteInBanks => !UnloadedInventoryManagement.Value.favoriteInBanks && Instance.favoriteInBanks;
-    public static bool ShiftRight => !UnloadedInventoryManagement.Value.shiftRight && Instance.shiftRight;
     public static bool StackTrash => !UnloadedInventoryManagement.Value.stackTrash && Instance.stackTrash;
 
     // Compatibility version < v0.6
     [JsonProperty, DefaultValue(AutoEquipLevel.PrimarySlots)] private AutoEquipLevel autoEquip { set => PortConfig.MoveMember(value != AutoEquipLevel.PrimarySlots, _ => smartPickup.Value.autoEquip = value); }
+    [JsonProperty, DefaultValue(true)] private bool shiftRight { set => PortConfig.MoveMember(!value, _ => Instance.betterShiftClick.Key = value); }
 
     public override void OnChanged() {
         Reflection.ItemSlot.canFavoriteAt.GetValue()[ItemSlot.Context.BankItem] = FavoriteInBanks;
@@ -161,7 +161,7 @@ public sealed class DisplayedHotkeys {
 }
 
 public sealed class CraftStack {
-    public MaxCraftAmount maxItems = new(999);
+    public NestedValue<MaxCraftAmount, MaxRounding> maxItems = new(999);
     [DefaultValue(true)] public bool repeat = true;
     [DefaultValue(false)] public bool invertClicks = false;
     [DefaultValue(false)] public bool tooltip = false;
@@ -172,7 +172,7 @@ public sealed class CraftStack {
 
     // Compatibility version < v0.6
     [JsonProperty, DefaultValue(false)] private bool single { set => PortConfig.MoveMember(value, _ => repeat = !value); }
-    [JsonProperty, DefaultValue(999)] private int maxAmount { set => PortConfig.MoveMember(value != 999, _ => maxItems = value); }
+    [JsonProperty, DefaultValue(999)] private int maxAmount { set => PortConfig.MoveMember(value != 999, _ => maxItems.Key = value); }
 }
 
 public sealed class MaxCraftAmount : MultiChoice<int> {
@@ -195,4 +195,18 @@ public sealed class MaxCraftAmount : MultiChoice<int> {
 
     public static implicit operator MaxCraftAmount(int count) => new(count);
     public static MaxCraftAmount FromString(string s) => new(int.Parse(s));
+}
+
+public sealed class MaxRounding {
+    [DefaultValue(true)] public bool above = true;
+}
+
+public sealed class BetterShiftClick {
+    [DefaultValue(true)] public bool shiftRight = true;
+    [DefaultValue(true)] public bool universalShift = true;
+
+    public static bool Enabled => InventoryManagement.Instance.betterShiftClick;
+    public static bool ShiftRight => !UnloadedInventoryManagement.Value.shiftRight && Value.shiftRight && Enabled;
+    public static bool UniversalShift => !UnloadedInventoryManagement.Value.universalShift && Value.universalShift && Enabled;
+    public static BetterShiftClick Value => InventoryManagement.Instance.betterShiftClick.Value;
 }

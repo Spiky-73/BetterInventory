@@ -48,8 +48,9 @@ public sealed class Compatibility : ModConfig {
         PreviousDisplay.Value.icon.Key = false;
         QuickMove.Value.displayedHotkeys.Key = HotkeyDisplayMode.None;
         QuickMove.Value.displayedHotkeys.Value.highlightIntensity = 0;
+        InventoryManagement.Instance.betterShiftClick.Value.shiftRight = false;
+        InventoryManagement.Instance.betterShiftClick.Value.universalShift = false;
         InventoryManagement.Instance.favoriteInBanks = false;
-        InventoryManagement.Instance.shiftRight = false;
         InventoryManagement.Instance.stackTrash = false;
         InventoryManagement.Instance.craftStack.Key = false;
         InventoryManagement.Instance.Save();
@@ -93,6 +94,7 @@ public sealed class UnloadedInventoryManagement {
     public bool quickMoveHighlight = false;
     public bool favoriteInBanks = false;
     public bool shiftRight = false;
+    public bool universalShift = false;
     public bool stackTrash = false;
     public bool craftStack = false;
     

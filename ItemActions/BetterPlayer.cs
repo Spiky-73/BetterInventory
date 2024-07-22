@@ -86,7 +86,7 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public void DisplaySpicWarning() {
-        if (!Configs.CraftStack.Enabled || Configs.CraftStack.Value.maxItems.Choice != nameof(Configs.MaxCraftAmount.spicRequirement) || SpysInfiniteConsumables.Enabled) return;
+        if (!Configs.CraftStack.Enabled || Configs.CraftStack.Value.maxItems.Key.Choice != nameof(Configs.MaxCraftAmount.spicRequirement) || SpysInfiniteConsumables.Enabled) return;
         InGameNotificationsTracker.AddNotification(new InGameNotification(Mod, new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.SPICWarning"), Colors.RarityAmber)));
     }
 

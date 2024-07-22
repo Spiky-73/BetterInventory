@@ -119,10 +119,9 @@ InventoryManagement: {
 		Tooltip: Favorite items in the Piggy Bank, Safe, ...
 	}
 
-	shiftRight: {
-		Name: Shift Right Click
-		Label: "[i:48] {$Mods.BetterInventory.Configs.InventoryManagement.shiftRight.Name}"
-		Tooltip: Shift or Control Right Click to transfer one item
+	betterShiftClick: {
+		Label: "[i:48] Better Shift Click"
+		Tooltip: Improves Shift click
 	}
 
 	stackTrash: {
@@ -131,7 +130,7 @@ InventoryManagement: {
 			'''
 			Items sold or multiple times will stack in a single slot
 			Items trashed multiple in a row times will stack instead of replacing the old one
-			Highly recommended with "{$Mods.BetterInventory.Configs.InventoryManagement.shiftRight.Name}"
+			Highly recommended with "{$Mods.BetterInventory.Configs.BetterShiftClick.shiftRight.Label}"
 			'''
 	}
 }
@@ -442,6 +441,33 @@ MaxCraftAmount: {
 	spicRequirement: {
 		Label: "{$Mods.BetterInventory.Chat.SPIC.ModName} Requirement"
 		Tooltip: ""
+	}
+}
+
+MaxRounding: {
+	Tooltip: ""
+
+	above: {
+		Label: Above if not Exact
+		Tooltip:
+			'''
+			Recipes crafting more than 1 item will craft 1 time extra if they don't reach them max exactly
+			e.g. With a max of 99, you will craft 100 walls instead of 96
+			'''
+	}
+}
+
+BetterShiftClick: {
+	Tooltip: ""
+
+	shiftRight: {
+		Label: Shift Right Click
+		Tooltip: Shift or Control Right Click to transfer one item
+	}
+
+	universalShift: {
+		Label: Universal Shift
+		Tooltip: Shift click when crafting or buying items
 	}
 }
 
@@ -896,8 +922,13 @@ UnloadedInventoryManagement: {
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
+	universalShift: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.betterShiftClick.Label} @ {$Mods.BetterInventory.Configs.BetterShiftClick.universalShift.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
 	shiftRight: {
-		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.shiftRight.Label}"
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.betterShiftClick.Label} @ {$Mods.BetterInventory.Configs.BetterShiftClick.shiftRight.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
