@@ -1,0 +1,14 @@
+Equipement: {
+	DisplayName: Equipement
+	Tooltip: Upgrades hooks and wings
+}
+
+Recovery: {
+	DisplayName: Recovery items
+	Tooltip: Upgrades health and mana potions
+}
+
+Tools: {
+	DisplayName: Tools
+	Tooltip: Upgrades pickaxes, axes and hammers
+}

@@ -1,11 +1,13 @@
 using TShortcuts = Terraria.UI.Gamepad.UILinkPointNavigator.Shortcuts;
 using SpikysLib.Reflection;
 using TItemSlot = Terraria.UI.ItemSlot;
-
+using TPlayer = Terraria.Player;
+using TItem = Terraria.Item;
 namespace BetterInventory.Reflection;
 
 public static class ItemSlot {
     public static readonly StaticField<bool[]> canFavoriteAt = new(typeof(TItemSlot), nameof(canFavoriteAt));
+    public static readonly StaticMethod<bool> AccessorySwap = new(typeof(TItemSlot), nameof(AccessorySwap), typeof(TPlayer), typeof(TItem), typeof(TItem).MakeByRefType()); // bool AccessorySwap(Player player, Item item, ref Item result)
 }
 
 public static class UILinkPointNavigator {

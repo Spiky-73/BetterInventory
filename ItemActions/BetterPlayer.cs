@@ -13,6 +13,8 @@ using SpikysLib.Extensions;
 using SpikysLib.UI;
 using Terraria.Localization;
 using Microsoft.Xna.Framework.Graphics;
+using SpikysLib.CrossMod;
+using SpikysLib.Constants;
 
 namespace BetterInventory.ItemActions;
 
@@ -43,7 +45,7 @@ public sealed class BetterPlayer : ModPlayer {
                 WireDisplayToggles.Add(toggle);
                 continue;
             }
-            BuilderTogglesKb.Add((toggle, KeybindLoader.RegisterKeybind(Mod, toggle.Name.Replace("BuilderToggle", ""), Microsoft.Xna.Framework.Input.Keys.None)));
+            BuilderTogglesKb.Add((toggle, KeybindLoader.RegisterKeybind(Mod, toggle.Name.Replace("BuilderToggle",string.Empty), Microsoft.Xna.Framework.Input.Keys.None)));
         }
     }
 
@@ -54,36 +56,38 @@ public sealed class BetterPlayer : ModPlayer {
 
         DisplayUpdate();
         DisplayCompatibility();
+        DisplaySpicWarning();
+    }
+
+    public override void ResetEffects() {
+        Guide.forcedTooltip = null;
     }
 
     public void DisplayUpdate() {
-        bool download;
-        if (Configs.Version.Instance.lastPlayedVersion.Length == 0) download = true;
-        else if (Mod.Version > new System.Version(Configs.Version.Instance.lastPlayedVersion)) download = false;
+        LocalizedLine line;
+        if (Configs.Version.Instance.lastPlayedVersion.Length == 0) line = new(Language.GetText($"{Localization.Keys.Chat}.Download"));
+        else if (Mod.Version > new System.Version(Configs.Version.Instance.lastPlayedVersion)) line = new(Language.GetText($"{Localization.Keys.Chat}.Update"));
         else return;
-
-        List<ITextLine> lines = new();
-        if (download) lines.Add(new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.Download")));
-        else lines.Add(new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.Update")));
-        lines.Add(new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.Bug")));
-        LocalizedLine important = new(Language.GetText($"{Localization.Keys.Chat}.Important"), Colors.RarityAmber);
-        if (!download && important.Value.Length != 0) lines.Add(important);
-        InGameNotificationsTracker.AddNotification(new InGameNotification(ModContent.Request<Texture2D>($"BetterInventory/icon"), lines.ToArray()) { timeLeft = 15 * 60 });
-
         Configs.Version.Instance.lastPlayedVersion = Mod.Version.ToString();
         Configs.Version.Instance.Save();
+
+        InGameNotificationsTracker.AddNotification(new InGameNotification(Mod, line, new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.Bug"), Colors.RarityAmber)) { timeLeft = 15 * 60 });
     }
 
-    public static void DisplayCompatibility() {
-        bool failed;
-        if (Hooks.FailedILs > Configs.Compatibility.Instance.failedILs) failed = true;
-        else if (Hooks.FailedILs < Configs.Compatibility.Instance.failedILs) failed = false;
+    public void DisplayCompatibility() {
+        LocalizedLine line;
+        if (Utility.FailedILs > Configs.Compatibility.Instance.failedILs) line = new(Language.GetText($"{Localization.Keys.Chat}.UnloadedMore"), Colors.RarityAmber);
+        else if (Utility.FailedILs < Configs.Compatibility.Instance.failedILs) line = new(Language.GetText(Utility.FailedILs == 0 ? $"{Localization.Keys.Chat}.UnloadedNone" : $"{Localization.Keys.Chat}.UnloadedLess"), Colors.RarityGreen);
         else return;
-        Configs.Compatibility.Instance.failedILs = Hooks.FailedILs;
+        Configs.Compatibility.Instance.failedILs = Utility.FailedILs;
         Configs.Compatibility.Instance.Save();
 
-        List<ITextLine> lines = new() { failed ? new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.UnloadedMore"), Colors.RarityAmber) : new(Language.GetText($"{Localization.Keys.Chat}.UnloadedLess"), Colors.RarityGreen) };
-        InGameNotificationsTracker.AddNotification(new InGameNotification(ModContent.Request<Texture2D>($"BetterInventory/icon"), lines.ToArray()));
+        InGameNotificationsTracker.AddNotification(new InGameNotification(Mod, line));
+    }
+
+    public void DisplaySpicWarning() {
+        if (!Configs.CraftStack.Enabled || Configs.CraftStack.Value.maxItems.Key.Choice != nameof(Configs.MaxCraftAmount.spicRequirement) || SpysInfiniteConsumables.Enabled) return;
+        InGameNotificationsTracker.AddNotification(new InGameNotification(Mod, new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.SPICWarning"), Colors.RarityAmber)));
     }
 
     public override void SetControls() {
@@ -91,15 +95,15 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public override void ProcessTriggers(TriggersSet triggersSet) {
-        if(Configs.QuickMove.Enabled) QuickMove.ProcessTriggers();
-        if(Configs.QuickList.Enabled) SearchItem.ProcessSearchTap();
+        QuickMove.ProcessTriggers();
+        QuickSearch.ProcessTriggers();
         if (Configs.ItemActions.FavoritedBuff && FavoritedBuffKb.JustPressed) FavoritedBuff(Player);
         if (Configs.ItemActions.BuilderAccs) BuilderKeys();
     }
 
     public override bool HoverSlot(Item[] inventory, int context, int slot) {
         QuickMove.HoverItem(inventory, context, slot);
-        if (SearchItem.OverrideHover(inventory, context, slot)) return true;
+        if (Default.Catalogues.RecipeList.OverrideHover(inventory, context, slot)) return true;
         if (Guide.OverrideHover(inventory, context, slot)) return true;
         if (ClickOverrides.OverrideHover(inventory, context, slot)) return true;
         return false;
@@ -108,7 +112,7 @@ public sealed class BetterPlayer : ModPlayer {
     public override bool PreItemCheck() {
         if (Main.myPlayer == Player.whoAmI && Configs.ItemRightClick.Enabled && Player.controlUseTile && Player.releaseUseItem && !Player.controlUseItem && !Player.tileInteractionHappened
                 && !Player.mouseInterface && !Terraria.Graphics.Capture.CaptureManager.Instance.Active && !Main.HoveringOverAnNPC && !Main.SmartInteractShowingGenuine
-                && Main.HoverItem.IsAir && Player.altFunctionUse == 0 && Player.selectedItem < 10) {
+                && Main.HoverItem.IsAir && Player.altFunctionUse == 0 && Player.selectedItem < InventorySlots.Hotbar.End) {
             Player.itemAnimation--;
             if(Main.stackSplit == 1) Player.itemAnimation = 0;
             if (!Configs.ItemRightClick.Value.stackableItems) s_noMousePickup = true;

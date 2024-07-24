@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using SpikysLib.DataStructures;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -13,20 +12,20 @@ namespace BetterInventory;
 public readonly record struct Slot(ModSubInventory Inventory, int Index) {
     public Item Item(Player player) => Inventory.Items(player)[Index];
     public Item GetItem(Player player, Item item, GetItemSettings settings) => Inventory.GetItem(player, item, Index, settings);
-}
-
-public abstract class ModSubInventory<TInventory> : ModSubInventory where TInventory : ModSubInventory<TInventory> {
-    public static TInventory Instance = null!;
+    public void Focus(Player player) => Inventory.Focus(player, Index);
+    public void OnSlotChange(Player player) => Inventory.OnSlotChange(player, Index);
 }
 
 public abstract class ModSubInventory : ModType, ILocalizedModType {
+    public bool CanBePrimary { get; internal set; }
+
     public abstract int Context { get; }
     public virtual int? MaxStack => null;
 
     public virtual bool Accepts(Item item) => true;
-    public virtual bool IsDefault(Item item) => false;
+    public virtual bool IsPrimaryFor(Item item) => false;
 
-    public abstract Joined<ListIndices<Item>, Item> Items(Player player);
+    public abstract IList<Item> Items(Player player);
     public virtual bool FitsSlot(Player player, Item item, int slot, out IList<Slot> itemsToMove) {
         itemsToMove = Array.Empty<Slot>();
         return true;
@@ -42,7 +41,7 @@ public abstract class ModSubInventory : ModType, ILocalizedModType {
         Recipe.FindRecipes();
         return item;
     }
-    
+
     public Item GetItem(Player player, Item item, int slot, GetItemSettings settings) {
         if (!Accepts(item)) return item;
         TryStackItem(player, item, slot, settings, Items(player));
@@ -66,9 +65,10 @@ public abstract class ModSubInventory : ModType, ILocalizedModType {
     protected sealed override void Register() {
         ModTypeLookup<ModSubInventory>.Register(this);
         InventoryLoader.Register(this);
+        Language.GetOrRegister(this.GetLocalizationKey("DisplayName"), PrettyPrintName);
     }
     public sealed override void SetupContent() => SetStaticDefaults();
 
-    public string LocalizationCategory => "Inventories";
-    public virtual LocalizedText DisplayName => this.GetLocalization("DisplayName", PrettyPrintName);
+    public string LocalizationCategory => "SubInventories";
+    public virtual LocalizedText DisplayName => this.GetLocalization("DisplayName");
 }

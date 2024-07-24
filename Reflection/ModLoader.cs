@@ -4,14 +4,24 @@ using Terraria.ModLoader;
 using TItem = Terraria.Item;
 using TRecipe = Terraria.Recipe;
 using TAccPlayer = Terraria.ModLoader.Default.ModAccessorySlotPlayer;
+using TAccLoader = Terraria.ModLoader.AccessorySlotLoader;
 using TBuilderLoader = Terraria.ModLoader.BuilderToggleLoader;
 using TLoader = Terraria.ModLoader.RecipeLoader;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
+using TColor = Microsoft.Xna.Framework.Color;
+
 
 namespace BetterInventory.Reflection;
 
 public static class ModAccessorySlotPlayer {
     public static readonly Field<TAccPlayer, TItem[]> exAccessorySlot = new(nameof(exAccessorySlot));
     public static readonly Field<TAccPlayer, TItem[]> exDyesAccessory = new(nameof(exDyesAccessory));
+}
+
+public static class AccessorySlotLoader {
+    public static readonly Method<TAccLoader, object?> DrawAccSlots = new(nameof(TAccLoader.DrawAccSlots), typeof(int));
+    public static readonly Method<TAccLoader, object?> DrawSlotTexture = new(nameof(DrawSlotTexture), typeof(Texture2D), typeof(Vector2), typeof(Rectangle), typeof(TColor), typeof(float), typeof(Vector2), typeof(float), typeof(SpriteEffects), typeof(float), typeof(int), typeof(int));
 }
 
 public static class BuilderToggleLoader {

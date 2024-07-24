@@ -1,6 +1,6 @@
 Hotbar.DisplayName: Hotbar
 Inventory.DisplayName: Inventory
-Coin.DisplayName: Coin
+Coins.DisplayName: Coins
 Ammo.DisplayName: Ammo
 Chest.DisplayName: Chest
 PiggyBank.DisplayName: Piggy Bank
@@ -21,7 +21,7 @@ Pet.DisplayName: Equipment
 LightPet.DisplayName: Equipment
 Minecart.DisplayName: Equipment
 Mount.DisplayName: Equipment
-Hook.DisplayName: Equipment
+Grapple.DisplayName: Equipment
 ArmorDyes.DisplayName: Armor Dye
 AccessoryDyes.DisplayName: Accessory Dye
 EquipmentDyes.DisplayName: Equipment Dye

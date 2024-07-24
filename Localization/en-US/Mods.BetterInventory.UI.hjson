@@ -5,6 +5,9 @@ Filter: "{0} ({1})"
 Unknown: ???
 ByHand: By Hand
 QuickMoveTooltip: Quick move chain
+CraftStackTooltip: "{0} to {1} {2} {^2:item;items}"
+Buy: buy
+Craft: craft
 NoBestiaryEffect: Does not affect Bestiary completion
 FeatureUnloaded: This feature was not loaded and will have no effect even when Enabled
 FramesToSec: 60 = 1s

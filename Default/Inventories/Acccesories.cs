@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using SpikysLib.Constants;
 using SpikysLib.DataStructures;
 using Terraria;
 using Terraria.ModLoader;
@@ -9,18 +10,18 @@ using ContextID = Terraria.UI.ItemSlot.Context;
 
 namespace BetterInventory.Default.Inventories;
 
-public abstract class AAccessories<T> : ModSubInventory<T> where T : AAccessories<T> {
+public abstract class AAccessories : ModSubInventory {
     public sealed override bool FitsSlot(Player player, Item item, int slot, out IList<Slot> itemsToMove) {
         List<int> vanillaSlots = UnlockedVanillaSlots(player);
         List<int> moddedSlots = UnlockedModdedSlots(player);
 
         if (!(slot < vanillaSlots.Count ?
-                ItemLoader.CanEquipAccessory(item, slot + 3, false) :
+                ItemLoader.CanEquipAccessory(item, slot + ArmorSlots.Count, false) :
                 ItemLoader.CanEquipAccessory(item, moddedSlots[slot - vanillaSlots.Count], true) && LoaderManager.Get<AccessorySlotLoader>().CanAcceptItem(moddedSlots[slot - vanillaSlots.Count], item, -Context))) {
             itemsToMove = Array.Empty<Slot>();
             return false;
         }
-        itemsToMove = GetIncompatibleItems(player, item, Context == 11, out bool canAllMove);
+        itemsToMove = GetIncompatibleItems(player, item, Context == ContextID.EquipAccessoryVanity, out bool canAllMove);
         return canAllMove;
     }
 
@@ -45,7 +46,7 @@ public abstract class AAccessories<T> : ModSubInventory<T> where T : AAccessorie
 
     public static List<int> UnlockedVanillaSlots(Player player, int offset = 0) {
         List<int> unlocked = new();
-        for (int i = 0; i < AccessorySlotLoader.MaxVanillaSlotCount; i++) if (player.IsItemSlotUnlockedAndUsable(i + AArmor.Count)) unlocked.Add(i + AArmor.Count + offset);
+        for (int i = 0; i < AccessorySlotLoader.MaxVanillaSlotCount; i++) if (player.IsItemSlotUnlockedAndUsable(i + ArmorSlots.Count)) unlocked.Add(i + ArmorSlots.Count + offset);
         return unlocked;
     }
     public static List<int> UnlockedModdedSlots(Player player, int offset = 0) {
@@ -56,21 +57,24 @@ public abstract class AAccessories<T> : ModSubInventory<T> where T : AAccessorie
     }
     public static Item[] ModdedAccessories(Player player) => Reflection.ModAccessorySlotPlayer.exAccessorySlot.GetValue(player.GetModPlayer<ModAccessorySlotPlayer>());
 }
-public sealed class Accessories : AAccessories<Accessories> {
+public sealed class Accessories : AAccessories {
+    public static Accessories Instance = null!;
     public override bool Accepts(Item item) => item.accessory && !item.vanity;
-    public override bool IsDefault(Item item) => true;
+    public override bool IsPrimaryFor(Item item) => true;
     public override int Context => ContextID.EquipAccessory;
-    public override Joined<ListIndices<Item>, Item> Items(Player player) => new(
+    public override JoinedLists<Item> Items(Player player) => new(
         new ListIndices<Item>(player.armor, UnlockedVanillaSlots(player)),
         new ListIndices<Item>(ModdedAccessories(player), UnlockedModdedSlots(player))
     );
 }
-public sealed class VanityAccessories : AAccessories<VanityAccessories> {
+public sealed class VanityAccessories : AAccessories {
+    public static VanityAccessories Instance = null!;
+
     public override bool Accepts(Item item) => item.accessory;
-    public override bool IsDefault(Item item) => item.vanity && item.FitsAccessoryVanitySlot;
+    public override bool IsPrimaryFor(Item item) => item.vanity && item.FitsAccessoryVanitySlot;
     public override int Context => ContextID.EquipAccessoryVanity;
-    public override Joined<ListIndices<Item>, Item> Items(Player player) => new(
-        new ListIndices<Item>(player.armor, UnlockedVanillaSlots(player, AArmor.Count + AccessorySlotLoader.MaxVanillaSlotCount)),
+    public override JoinedLists<Item> Items(Player player) => new(
+        new ListIndices<Item>(player.armor, UnlockedVanillaSlots(player, ArmorSlots.Count + AccessorySlotLoader.MaxVanillaSlotCount)),
         new ListIndices<Item>(ModdedAccessories(player), UnlockedModdedSlots(player, ModdedAccessories(player).Length / 2))
     );
 }

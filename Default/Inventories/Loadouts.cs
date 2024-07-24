@@ -1,11 +1,10 @@
-using SpikysLib.DataStructures;
 using Terraria;
 namespace BetterInventory.Default.Inventories;
 
 public abstract class ALoadout : ModSubInventory {
     public abstract int Index { get; }
     public sealed override int? MaxStack => 1;
-    public sealed override Joined<ListIndices<Item>, Item> Items(Player player) => new ListIndices<Item>(player.Loadouts[player.CurrentLoadoutIndex <= Index ? (Index + 1) : Index].Armor);
+    public sealed override Item[] Items(Player player) => player.Loadouts[player.CurrentLoadoutIndex <= Index ? (Index + 1) : Index].Armor;
 }
 public abstract class Loadout1 : ALoadout {
     public sealed override int Index => 1;

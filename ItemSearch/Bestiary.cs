@@ -21,7 +21,7 @@ namespace BetterInventory.ItemSearch;
 public sealed class Bestiary : ILoadable {
 
     public void Load(Mod mod) {
-        On_FewFromOptionsNotScaledWithLuckDropRule.ReportDroprates += HookFixDropRates;
+        // On_FewFromOptionsNotScaledWithLuckDropRule.ReportDroprates += HookFixDropRates;
         
         On_UIBestiaryInfoItemLine.ctor += HookShowBagContent;
         On_ItemDropBestiaryInfoElement.GetSearchString += HookSearchBagText;
@@ -36,9 +36,25 @@ public sealed class Bestiary : ILoadable {
         On_UIBestiaryFilteringOptionsGrid.UpdateButtonSelections += HookDarkenFilters;
 
         On_UIBestiaryTest.FilterEntries += HookBestiaryFilterRemoveHiddenEntries;
+
+        IL_Filters.BySearch.FitsFilter += static il => {
+            if (!il.ApplyTo(ILSearchAddEntries, Configs.BetterBestiary.DisplayedInfo)) Configs.UnloadedItemSearch.Value.bestiaryDisplayedInfo = true;
+        };
+        IL_UIBestiaryEntryIcon.Update += static il => {
+            if(!il.ApplyTo(ILIconUpdateFakeUnlock, Configs.BetterBestiary.Unlock)) Configs.UnloadedItemSearch.Value.BestiaryUnlock = true;
+        };
+        IL_UIBestiaryEntryIcon.DrawSelf += static il => {
+            if(!il.ApplyTo(ILIconDrawFakeUnlock, Configs.BetterBestiary.UnknownDisplay)) Configs.UnloadedItemSearch.Value.bestiaryUnknown = true;
+        };
+        IL_UIBestiaryEntryInfoPage.AddInfoToList += static il => {
+            if(!il.ApplyTo(IlEntryPageFakeUnlock, Configs.BetterBestiary.Unlock)) Configs.UnloadedItemSearch.Value.BestiaryUnlock = true;
+        };
+        IL_UIBestiaryFilteringOptionsGrid.UpdateAvailability += static il => {
+            if(!il.ApplyTo(ILFakeUnlockFilters, Configs.BetterBestiary.UnknownDisplay)) Configs.UnloadedItemSearch.Value.bestiaryUnknown = true;
+            if(!il.ApplyTo(ILFixPosition, Configs.BetterBestiary.UnknownDisplay)) Configs.UnloadedItemSearch.Value.bestiaryUnknown = true;
+        };
     }
     public void Unload() => _bossBagSearch.Clear();
-
 
     private static void HookFixDropRates(On_FewFromOptionsNotScaledWithLuckDropRule.orig_ReportDroprates orig, FewFromOptionsNotScaledWithLuckDropRule self, List<DropRateInfo> drops, DropRateInfoChainFeed ratesInfo) {
         if (!Configs.BetterBestiary.Enabled) {
@@ -52,7 +68,7 @@ public sealed class Bestiary : ILoadable {
         Chains.ReportDroprates(self.ChainedRules, personalDroprate, drops, ratesInfo);
     }
     
-    internal static void ILSearchAddEntries(ILContext il) {
+    private static void ILSearchAddEntries(ILContext il) {
         ILCursor cursor = new(il);
 
         // ...
@@ -61,7 +77,7 @@ public sealed class Bestiary : ILoadable {
 
         // ++ <fakeUnlock> 
         cursor.EmitDelegate((BestiaryUICollectionInfo info) => {
-            if (Configs.BetterBestiary.DisplayedUnlock) info.UnlockState = GetDisplayedUnlockLevel(info.UnlockState);
+            if (Configs.BetterBestiary.DisplayedInfo) info.UnlockState = GetDisplayedUnlockLevel(info.UnlockState);
             return info;
         });
         // ...
@@ -77,9 +93,7 @@ public sealed class Bestiary : ILoadable {
                 Height = StyleDimension.FromPixelsAndPercent(0, 1f),
             };
             uIList.SetPadding(0);
-            uIList.PaddingBottom = 4;
-            uIList.PaddingBottom = 4;
-            uIList.ListPadding = 4;
+            uIList.PaddingBottom = uIList.ListPadding = 4;
             uIList.Top.Set(self.Height.Pixels + uIList.PaddingTop, 0);
             self.Append(uIList);
 
@@ -113,7 +127,7 @@ public sealed class Bestiary : ILoadable {
     private static bool HookCustomUnlockFilter(On_Filters.ByUnlockState.orig_FitsFilter orig, Filters.ByUnlockState self, BestiaryEntry entry) => Configs.BetterBestiary.UnlockFilter ? entry.UIInfoProvider.GetEntryUICollectionInfo().UnlockState != BestiaryEntryUnlockState.CanShowDropsWithDropRates_4 : orig(self, entry);
 
 
-    internal static void ILIconUpdateFakeUnlock(ILContext il) {
+    private static void ILIconUpdateFakeUnlock(ILContext il) {
         ILCursor cursor = new(il);
 
         // this._collectionInfo = this._entry.UIInfoProvider.GetEntryUICollectionInfo();
@@ -122,12 +136,12 @@ public sealed class Bestiary : ILoadable {
         // ++ <fakeUnlock> 
         cursor.EmitDelegate((BestiaryUICollectionInfo info) => {
             if (Configs.BetterBestiary.UnknownDisplay && Configs.BetterBestiary.Value.unknownDisplay == Configs.UnknownDisplay.Known && info.UnlockState == BestiaryEntryUnlockState.NotKnownAtAll_0) info.UnlockState = BestiaryEntryUnlockState.CanShowPortraitOnly_1;
-            if (Configs.BetterBestiary.DisplayedUnlock && info.UnlockState > BestiaryEntryUnlockState.NotKnownAtAll_0) info.UnlockState = GetDisplayedUnlockLevel(info.UnlockState);
+            if (Configs.BetterBestiary.DisplayedInfo && info.UnlockState > BestiaryEntryUnlockState.NotKnownAtAll_0) info.UnlockState = GetDisplayedUnlockLevel(info.UnlockState);
             return info;
         });
         // ...
     }
-    internal static void ILIconDrawFakeUnlock(ILContext il) {
+    private static void ILIconDrawFakeUnlock(ILContext il) {
         ILCursor cursor = new(il);
 
         // ...
@@ -145,7 +159,7 @@ public sealed class Bestiary : ILoadable {
         Reflection.UIBestiaryEntryButton._bordersGlow.GetValue(self).Color.ApplyRGB(IconDark);
     }
 
-    internal static void IlEntryPageFakeUnlock(ILContext il) {
+    private static void IlEntryPageFakeUnlock(ILContext il) {
         ILCursor cursor = new(il);
 
         // BestiaryUICollectionInfo uICollectionInfo = this.GetUICollectionInfo(entry, extraInfo);
@@ -154,7 +168,7 @@ public sealed class Bestiary : ILoadable {
         // ++ <fakeUnlock>
         cursor.EmitDelegate((BestiaryUICollectionInfo info) => {
             if (Configs.BetterBestiary.UnknownDisplay && Configs.BetterBestiary.Value.unknownDisplay == Configs.UnknownDisplay.Known && info.UnlockState <= BestiaryEntryUnlockState.NotKnownAtAll_0) info.UnlockState = BestiaryEntryUnlockState.CanShowPortraitOnly_1;
-            if (Configs.BetterBestiary.DisplayedUnlock && info.UnlockState > BestiaryEntryUnlockState.NotKnownAtAll_0) info.UnlockState = GetDisplayedUnlockLevel(info.UnlockState);
+            if (Configs.BetterBestiary.DisplayedInfo && info.UnlockState > BestiaryEntryUnlockState.NotKnownAtAll_0) info.UnlockState = GetDisplayedUnlockLevel(info.UnlockState);
             return info;
         });
         // ...
@@ -169,10 +183,14 @@ public sealed class Bestiary : ILoadable {
         if (s_darkPage) DarkenElement(Reflection.UIBestiaryEntryInfoPage._list.GetValue(self), PageDark);
     }
 
-    internal static void ILFakeUnlockFilters(ILContext il) {
+    private static void ILFakeUnlockFilters(ILContext il) {
         ILCursor cursor = new(il);
         cursor.EmitDelegate(() => { s_ilSkipped = 0; });
 
+        cursor.GotoNext(MoveType.After, i => i.MatchLdfld(Reflection.EntryFilterer<BestiaryEntry, IBestiaryEntryFilter>.AvailableFilters));
+        cursor.GotoNextLoc(out int filter, i => true, 13);
+        cursor.GotoNext(MoveType.After, i => i.MatchLdfld(Reflection.UIBestiaryFilteringOptionsGrid._filterAvailabilityTests));
+        cursor.GotoNextLoc(out int entries, i => true, 14);
         // ...
         // for (<filter>) {
         //     ...
@@ -183,8 +201,8 @@ public sealed class Bestiary : ILoadable {
         cursor.FindNext(out _, i => i.MatchBr(out cont));
 
         //     ++ <fakeUnlock> 
-        cursor.EmitLdloc(13);
-        cursor.EmitLdloc(14);
+        cursor.EmitLdloc(filter);
+        cursor.EmitLdloc(entries);
         cursor.EmitDelegate((bool on, IBestiaryEntryFilter filter, List<BestiaryEntry> entries) => {
             s_ilOn = on;
             if(!Configs.BetterBestiary.UnknownDisplay || on || filter.ForcedDisplay.HasValue) return false;
@@ -201,12 +219,15 @@ public sealed class Bestiary : ILoadable {
         cursor.EmitBrtrue(cont!);
         cursor.EmitDelegate(() => s_ilOn);
     }
-    internal static void ILFixPosition(ILContext il) {
+    private static void ILFixPosition(ILContext il) {
         ILCursor cursor = new(il);
 
-        cursor.GotoNext(i => i.MatchStloc(11)).GotoPrev(MoveType.After, i => i.MatchLdloc(10));
+        cursor.GotoNext(i => i.MatchLdcI4(0));
+        cursor.GotoNextLoc(out int index, i => i.Next.MatchBr(out _), 10);
+
+        cursor.GotoNext(i => i.MatchStloc(out _) && i.Previous.MatchDiv()).GotoPrev(MoveType.After, i => i.MatchLdloc(index));
         cursor.EmitDelegate((int i) => i-s_ilSkipped);
-        cursor.GotoNext(i => i.MatchStloc(12)).GotoPrev(MoveType.After, i => i.MatchLdloc(10));
+        cursor.GotoNext(i => i.MatchStloc(out _) && i.Previous.MatchRem()).GotoPrev(MoveType.After, i => i.MatchLdloc(index));
         cursor.EmitDelegate((int i) => i-s_ilSkipped);
 
         cursor.GotoNext(MoveType.Before, i => i.MatchRet());
@@ -248,7 +269,7 @@ public sealed class Bestiary : ILoadable {
     }
 
 
-    public static BestiaryEntryUnlockState GetDisplayedUnlockLevel(BestiaryEntryUnlockState state) => state < (BestiaryEntryUnlockState)Configs.BetterBestiary.Value.displayedUnlock ? (BestiaryEntryUnlockState)Configs.BetterBestiary.Value.displayedUnlock : state;
+    public static BestiaryEntryUnlockState GetDisplayedUnlockLevel(BestiaryEntryUnlockState state) => state < (BestiaryEntryUnlockState)Configs.BetterBestiary.Value.displayedInfo ? (BestiaryEntryUnlockState)Configs.BetterBestiary.Value.displayedInfo : state;
 
     public static void DarkenElement(UIElement element, float dark, int depth = -1){
         if (element is UIHorizontalSeparator sep) sep.Color.ApplyRGB(dark);
@@ -285,22 +306,6 @@ public sealed class Bestiary : ILoadable {
         }
         return _bossBagSearch[bossBag.itemId] = string.Join('|', names);
     }
-
-    public static void ToggleBestiary(bool? enabled = null) {
-        if (Main.InGameUI.CurrentState == Main.BestiaryUI) {
-            if (enabled == true) return;
-            IngameFancyUI.Close();
-        } else {
-            if (enabled == false) return;
-            Main.LocalPlayer.SetTalkNPC(-1, false);
-            Main.npcChatCornerItem = 0;
-            Main.npcChatText = "";
-            Main.mouseLeftRelease = false;
-            IngameFancyUI.OpenUIState(Main.BestiaryUI);
-            Main.BestiaryUI.OnOpenPage();
-        }
-    }
-
 
     public const float PageDark = 0.7f;
     public const float IconDark = 0.5f;
