@@ -19,7 +19,7 @@ The process is quite simple:
 2. Re-enable them one by one until the bug happens. The last feature you enabled is probably the one causing the bug.
 3. Keep this feature disabled and re-enable the rest. If the bug still happens, go back to step 1.
 
-#### Gameplay Bugs
+####  Gameplay Bugs
 1. Disable all the features in a config.
 2. If the bug still happens, re-enable the features and redo step 1 with another config
 3. Re-enable the features one by one until the bug happens. The last feature you enabled is probably the one causing the bug.

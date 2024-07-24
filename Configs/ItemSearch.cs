@@ -19,12 +19,12 @@ public sealed class ItemSearch : ModConfig {
 
     // Compatibility version < v0.6
     [JsonProperty] private Toggle<QuickList>? quickList { set => PortConfig.MoveMember(value is not null, _ => {
-        quickSearch.Value.sharedKeybind.Key = value!.Key ? SearchAction.None : SearchAction.Toggle;
+        quickSearch.Value.sharedKeybind.Key = value!.Key ? SearchAction.Toggle : SearchAction.None;
         quickSearch.Value.sharedKeybind.Value.tap = value.Value.tap;
         quickSearch.Value.sharedKeybind.Value.delay = value.Value.delay;
     }); }
     [JsonProperty] private Toggle<SearchItems>? searchItems { set => PortConfig.MoveMember(value is not null, _ => {
-        quickSearch.Value.individualKeybinds.Key = value!.Key ? SearchAction.None : SearchAction.Both;
+        quickSearch.Value.individualKeybinds.Key = value!.Key ? SearchAction.Both : SearchAction.None;
         quickSearch.Value.catalogues[new(Mod.Name, nameof(Default.Catalogues.RecipeList))] = value.Value.recipes;
         quickSearch.Value.catalogues[new(Mod.Name, nameof(Default.Catalogues.Bestiary))] = value.Value.drops;
         quickSearch.Value.rightClick = value.Value.rightClick;
@@ -61,8 +61,8 @@ public sealed class BetterGuide {
     
     // Compatibility version < v0.6
     [JsonProperty] private Toggle<FavoritedRecipes>? favoriteRecipes { set => PortConfig.MoveMember(value is not null, _ => favoritedRecipes = value!); }
-    [JsonProperty, DefaultValue(true)] private bool tile { set => PortConfig.MoveMember(value, _ => craftingStation = value); }
-    [JsonProperty, DefaultValue(true)] private bool craftText { set => PortConfig.MoveMember(value, _ => conditionsDisplay = value); }
+    [JsonProperty, DefaultValue(true)] private bool tile { set => PortConfig.MoveMember(!value, _ => craftingStation = value); }
+    [JsonProperty, DefaultValue(true)] private bool craftText { set => PortConfig.MoveMember(!value, _ => conditionsDisplay = value); }
 }
 
 public sealed class FavoritedRecipes {

@@ -26,7 +26,7 @@ public sealed class InventoryManagement : ModConfig {
 
     // Compatibility version < v0.6
     [JsonProperty, DefaultValue(AutoEquipLevel.PrimarySlots)] private AutoEquipLevel autoEquip { set => PortConfig.MoveMember(value != AutoEquipLevel.PrimarySlots, _ => smartPickup.Value.autoEquip = value); }
-    [JsonProperty, DefaultValue(true)] private bool shiftRight { set => PortConfig.MoveMember(!value, _ => Instance.betterShiftClick.Key = value); }
+    [JsonProperty, DefaultValue(true)] private bool shiftRight { set => PortConfig.MoveMember<InventoryManagement>(!value, c => c.betterShiftClick.Key = value); }
 
     public override void OnChanged() {
         Reflection.ItemSlot.canFavoriteAt.GetValue()[ItemSlot.Context.BankItem] = FavoriteInBanks;
