@@ -997,8 +997,8 @@ Version: {
 		Changelog: Changelog
 	}
 
-	Sumary: {
-		Label: "{$Mods.BetterInventory.Chat.Sumary}"
+	Summary: {
+		Label: "{$Mods.BetterInventory.Chat.Summary}"
 		Tooltip: ""
 	}
 

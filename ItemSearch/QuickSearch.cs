@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.Xna.Framework;
-using SpikysLib.Extensions;
+using SpikysLib.Configs;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
@@ -23,7 +23,7 @@ public sealed class QuickSearch : ILoadable {
     }
 
     public void Unload() {
-        foreach(ModEntityCatalogue catalogue in s_catalogues) ModConfigExtensions.SetInstance(catalogue, true);
+        foreach(ModEntityCatalogue catalogue in s_catalogues) ConfigHelper.SetInstance(catalogue, true);
         s_catalogues.Clear();
     }
 
@@ -121,7 +121,7 @@ public sealed class QuickSearch : ILoadable {
     }
 
     internal static void Register(ModEntityCatalogue catalogue) {
-        ModConfigExtensions.SetInstance(catalogue);
+        ConfigHelper.SetInstance(catalogue);
 
         int before = s_catalogues.FindIndex(p => catalogue.ComparePositionTo(p) < 0 || p.ComparePositionTo(catalogue) > 0);
         if (before != -1) s_catalogues.Insert(before, catalogue);

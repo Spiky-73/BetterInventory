@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using SpikysLib.Collections;
+using SpikysLib.Configs;
 using SpikysLib.DataStructures;
-using SpikysLib.Extensions;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Core;
@@ -25,7 +26,7 @@ public sealed class InventoryLoader : ILoadable {
     public void Unload() {
         ClearCache();
         static void Clear(IList<ModSubInventory> list) {
-            foreach (var inventory in list) ModConfigExtensions.SetInstance(inventory, true);
+            foreach (var inventory in list) ConfigHelper.SetInstance(inventory, true);
             list.Clear();
         }
         Clear(_classic);
@@ -33,7 +34,7 @@ public sealed class InventoryLoader : ILoadable {
     }
 
     internal static void Register(ModSubInventory inventory) {
-        ModConfigExtensions.SetInstance(inventory);
+        ConfigHelper.SetInstance(inventory);
         inventory.CanBePrimary = LoaderUtils.HasOverride(inventory, i => i.IsPrimaryFor);
         List<ModSubInventory> list = inventory.CanBePrimary ? _special : _classic;
 
@@ -55,7 +56,7 @@ public sealed class InventoryLoader : ILoadable {
         itemSlot = s ?? default;
         return s.HasValue;
     }
-    public static Slot? GetInventorySlot(Player player, Item[] inventory, int context, int slot) => s_slotToInv.GetOrAdd((new(player.whoAmI, inventory, context, slot)), () => {
+    public static Slot? GetInventorySlot(Player player, Item[] inventory, int context, int slot) => s_slotToInv.GetOrAdd(new(player.whoAmI, inventory, context, slot), _ => {
         foreach (ModSubInventory slots in SubInventories) {
             int i = GetSlotIndex(slots.Items(player), inventory, context, slot);
             if (i != -1) return new(slots, i);

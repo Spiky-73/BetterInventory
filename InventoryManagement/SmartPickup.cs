@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
-using SpikysLib.Extensions;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -13,6 +12,9 @@ using Terraria.UI.Gamepad;
 using System.Linq;
 using BetterInventory.Default.Inventories;
 using System.Collections.ObjectModel;
+using SpikysLib;
+using SpikysLib.Configs;
+using SpikysLib.IL;
 
 namespace BetterInventory.InventoryManagement;
 
@@ -35,7 +37,7 @@ public sealed class SmartPickup : ILoadable {
         On_Player.DropItems += HookMarkItemsOnDeath;
     }
     public void Unload() {
-        foreach (ModPickupUpgrader up in s_upgraders) ModConfigExtensions.SetInstance(up, true);
+        foreach (ModPickupUpgrader up in s_upgraders) ConfigHelper.SetInstance(up, true);
         s_upgraders.Clear();
     }
 
@@ -352,7 +354,7 @@ public sealed class SmartPickup : ILoadable {
     private static readonly Dictionary<int, List<Slot>> s_marks = new();
 
     internal static void Register(ModPickupUpgrader upgrader) {
-        ModConfigExtensions.SetInstance(upgrader);
+        ConfigHelper.SetInstance(upgrader);
         s_upgraders.Add(upgrader);
     }
 

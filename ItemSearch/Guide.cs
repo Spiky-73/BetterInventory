@@ -18,7 +18,7 @@ using Terraria.ModLoader;
 using Terraria.UI;
 using ContextID = Terraria.UI.ItemSlot.Context;
 using BetterInventory.ItemActions;
-using SpikysLib.Extensions;
+using SpikysLib.IL;
 using SpikysLib;
 using BetterInventory.Default.Catalogues;
 
@@ -304,12 +304,12 @@ public sealed class Guide : ModSystem {
             bool canCraft = IsAvailable(recipe.RecipeIndex);
             if (!canCraft) {
                 Item material = recipe.requiredItem[matI];
-                canCraft = PlayerExtensions.OwnedItems.GetValueOrDefault(material.type, 0) >= material.stack;
+                canCraft = PlayerHelper.OwnedItems.GetValueOrDefault(material.type, 0) >= material.stack;
                 if(!canCraft) {
                     int g = recipe.acceptedGroups.FindIndex(g => RecipeGroup.recipeGroups[g].IconicItemId == material.type);
                     if (g != -1) {
                         RecipeGroup group = RecipeGroup.recipeGroups[recipe.acceptedGroups[g]];
-                        canCraft = PlayerExtensions.OwnedItems.GetValueOrDefault(group.GetGroupFakeItemId(), 0) >= material.stack;
+                        canCraft = PlayerHelper.OwnedItems.GetValueOrDefault(group.GetGroupFakeItemId(), 0) >= material.stack;
                     }
                 }
             }
@@ -739,7 +739,7 @@ public sealed class Guide : ModSystem {
             return true;
         }
         if (Configs.BetterGuide.MoreRecipes && ItemSlot.ShiftInUse && !inv[slot].favorited
-                && Main.InGuideCraftMenu && Array.IndexOf(PlayerExtensions.InventoryContexts, context) != -1 && !inv[slot].IsAir
+                && Main.InGuideCraftMenu && Array.IndexOf(PlayerHelper.InventoryContexts, context) != -1 && !inv[slot].IsAir
                 && ItemSlot.PickItemMovementAction(inv, ContextID.GuideItem, 0, inv[slot]) == 0) {
             Main.cursorOverride = CursorOverrideID.InventoryToChest;
             return true;
@@ -802,7 +802,7 @@ public sealed class Guide : ModSystem {
             Main.instance.LoadItem(ItemID.BoneGlove);
             return DrawTexture(spriteBatch, TextureAssets.Item[ItemID.BoneGlove].Value, Color.White, screenPositionForItemCenter, ref scale, sizeLimit, environmentColor);
         case PlaceholderType.Tile:
-            Graphics.DrawTileFrame(spriteBatch, item.createTile, screenPositionForItemCenter, new Vector2(0.5f, 0.5f), scale);
+            GraphicsHelper.DrawTileFrame(spriteBatch, item.createTile, screenPositionForItemCenter, new Vector2(0.5f, 0.5f), scale);
             return scale;
         }
         return orig(item, context, spriteBatch, screenPositionForItemCenter, scale, sizeLimit, environmentColor);

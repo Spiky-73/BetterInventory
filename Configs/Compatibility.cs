@@ -3,7 +3,6 @@ using BetterInventory.Default.Catalogues;
 using Newtonsoft.Json;
 using SpikysLib.Configs;
 using SpikysLib.Configs.UI;
-using SpikysLib.Extensions;
 using Terraria.ModLoader.Config;
 
 namespace BetterInventory.Configs;
@@ -16,7 +15,7 @@ public sealed class Compatibility : ModConfig {
     [Header("Compatibility")]
     [ReloadRequired, DefaultValue(false)] public bool compatibilityMode;
 
-    [JsonIgnore, ShowDespiteJsonIgnore, NullAllowed] public object? DisableAll { get => null; set => DisableILSettings(); }
+    [JsonIgnore, ShowDespiteJsonIgnore, NullAllowed] public Empty? DisableAll { get => null; set => DisableILSettings(); }
 
 
     [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedCrafting unloadedCrafting {get; set;} = new();

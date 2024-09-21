@@ -54,6 +54,11 @@ See [Reporting Bugs](ReportingBugs.md)
 
 ## Changelog
 
+### v0.6.1
+- Updated SPIC dependency to v4.0
+- Updated Spiky's Lib dependency to v1.2
+- Fixed a bug with Quick move when HotkeyMode was set to FromEnd
+
 ### v0.6
 - Renamed Smart Pickup to Previous Slot
 - Grouped pickup related features in Smart Pickup

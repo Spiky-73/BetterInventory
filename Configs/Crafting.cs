@@ -31,7 +31,7 @@ public sealed class FixedUI {
     public static bool CraftWhenHolding => Enabled && Value.craftWhenHolding;
     public static FixedUI Value => Crafting.Instance.fixedUI.Value;
     
-    [JsonProperty, DefaultValue(true)] private bool listScroll { set => PortConfig.MoveMember(!value, _ => scrollButtons = value); }
+    [JsonProperty, DefaultValue(true)] private bool listScroll { set => ConfigHelper.MoveMember(!value, _ => scrollButtons = value); }
 }
 
 public sealed class FastScroll {
@@ -48,7 +48,7 @@ public sealed class RecipeFilters {
     public static RecipeFilters Value => Crafting.Instance.recipeFilters.Value;
 
     // Compatibility version < v0.6
-    [JsonProperty, DefaultValue(4)] private int width { set => PortConfig.MoveMember(value != 4, _ => filtersPerLine = value); }
+    [JsonProperty, DefaultValue(4)] private int width { set => ConfigHelper.MoveMember(value != 4, _ => filtersPerLine = value); }
 }
 
 public sealed class CraftOnList {
@@ -58,5 +58,5 @@ public sealed class CraftOnList {
     public static CraftOnList Value => Crafting.Instance.craftOnList.Value;
 
     // Compatibility version < v0.6
-    [JsonProperty, DefaultValue(false)] private bool focusRecipe { set => PortConfig.MoveMember(value, _ => focusHovered = value); }
+    [JsonProperty, DefaultValue(false)] private bool focusRecipe { set => ConfigHelper.MoveMember(value, _ => focusHovered = value); }
 }

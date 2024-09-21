@@ -18,12 +18,12 @@ public sealed class ItemSearch : ModConfig {
     public Toggle<QuickSearch> quickSearch = new(true);
 
     // Compatibility version < v0.6
-    [JsonProperty] private Toggle<QuickList>? quickList { set => PortConfig.MoveMember(value is not null, _ => {
+    [JsonProperty] private Toggle<QuickList>? quickList { set => ConfigHelper.MoveMember(value is not null, _ => {
         quickSearch.Value.sharedKeybind.Key = value!.Key ? SearchAction.Toggle : SearchAction.None;
         quickSearch.Value.sharedKeybind.Value.tap = value.Value.tap;
         quickSearch.Value.sharedKeybind.Value.delay = value.Value.delay;
     }); }
-    [JsonProperty] private Toggle<SearchItems>? searchItems { set => PortConfig.MoveMember(value is not null, _ => {
+    [JsonProperty] private Toggle<SearchItems>? searchItems { set => ConfigHelper.MoveMember(value is not null, _ => {
         quickSearch.Value.individualKeybinds.Key = value!.Key ? SearchAction.Both : SearchAction.None;
         quickSearch.Value.catalogues[new(Mod.Name, nameof(Default.Catalogues.RecipeList))] = value.Value.recipes;
         quickSearch.Value.catalogues[new(Mod.Name, nameof(Default.Catalogues.Bestiary))] = value.Value.drops;
@@ -60,9 +60,9 @@ public sealed class BetterGuide {
     public static BetterGuide Value => ItemSearch.Instance.betterGuide.Value;
     
     // Compatibility version < v0.6
-    [JsonProperty] private Toggle<FavoritedRecipes>? favoriteRecipes { set => PortConfig.MoveMember(value is not null, _ => favoritedRecipes = value!); }
-    [JsonProperty, DefaultValue(true)] private bool tile { set => PortConfig.MoveMember(!value, _ => craftingStation = value); }
-    [JsonProperty, DefaultValue(true)] private bool craftText { set => PortConfig.MoveMember(!value, _ => conditionsDisplay = value); }
+    [JsonProperty] private Toggle<FavoritedRecipes>? favoriteRecipes { set => ConfigHelper.MoveMember(value is not null, _ => favoritedRecipes = value!); }
+    [JsonProperty, DefaultValue(true)] private bool tile { set => ConfigHelper.MoveMember(!value, _ => craftingStation = value); }
+    [JsonProperty, DefaultValue(true)] private bool craftText { set => ConfigHelper.MoveMember(!value, _ => conditionsDisplay = value); }
 }
 
 public sealed class FavoritedRecipes {
@@ -88,7 +88,7 @@ public sealed class BetterBestiary {
     public static BetterBestiary Value => ItemSearch.Instance.betterBestiary.Value;
 
     // Compatibility version < v0.6
-    [JsonProperty, DefaultValue(UnlockLevel.Drops)] private UnlockLevel displayedUnlock { set => PortConfig.MoveMember(value != UnlockLevel.Drops, _ => displayedInfo = value); }
+    [JsonProperty, DefaultValue(UnlockLevel.Drops)] private UnlockLevel displayedUnlock { set => ConfigHelper.MoveMember(value != UnlockLevel.Drops, _ => displayedInfo = value); }
 }
 public enum UnlockLevel { Vanilla, Name, Stats, Drops, DropRates }
 
@@ -97,7 +97,7 @@ public sealed class QuickSearch {
     public QuickSearch() => catalogues = [];
     public NestedValue<SearchAction, IndividualKeybinds> individualKeybinds = new(SearchAction.Both);
     public NestedValue<SearchAction, SharedKeybind> sharedKeybind = new(SearchAction.Toggle);
-    [CustomModConfigItem(typeof(DictionaryValuesElement)), ValueWrapper(typeof(EntityDefinitionValueWrapper<,>))]
+    [CustomModConfigItem(typeof(DictionaryValuesElement)), KeyValueWrapper(typeof(EntityDefinitionValueWrapper<,>))]
     public Dictionary<EntityCatalogueDefinition, bool> catalogues {
         get => _catalogues;
         set {

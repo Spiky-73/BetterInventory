@@ -1,11 +1,10 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using MonoMod.Cil;
+using SpikysLib;
 using SpikysLib.Constants;
-using SpikysLib.Extensions;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -59,7 +58,7 @@ public static class Utility {
     public static int GetInventoryFreeSpace(Player player, Item item) {
         int free = 0;
         foreach(ModSubInventory inv in InventoryLoader.SubInventories) {
-            if (PlayerExtensions.InventoryContexts.Contains(inv.Context)) free += GetFreeSpace(inv.Items(player), item);
+            if (PlayerHelper.InventoryContexts.Contains(inv.Context)) free += GetFreeSpace(inv.Items(player), item);
         }
         return free;
     }

@@ -1,6 +1,8 @@
 using Terraria.ModLoader;
 
 namespace BetterInventory;
+
+// TODO assets loading
 public sealed class BetterInventory : Mod {
     public static BetterInventory Instance { get; private set; } = null!;
 

@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using BetterInventory.ItemSearch;
 using MonoMod.Cil;
-using SpikysLib.Extensions;
+using SpikysLib;
+using SpikysLib.Collections;
+using SpikysLib.IL;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;

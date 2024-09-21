@@ -1,7 +1,7 @@
 using System;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
-using SpikysLib.Extensions;
+using SpikysLib.IL;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
