@@ -4,7 +4,6 @@ using System.ComponentModel;
 using BetterInventory.ItemSearch;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using SpikysLib;
 using SpikysLib.Configs;
 using SpikysLib.Configs.UI;
 using Terraria;
@@ -97,7 +96,6 @@ public sealed class QuickSearch {
     public QuickSearch() => catalogues = [];
     public NestedValue<SearchAction, IndividualKeybinds> individualKeybinds = new(SearchAction.Both);
     public NestedValue<SearchAction, SharedKeybind> sharedKeybind = new(SearchAction.Toggle);
-    [CustomModConfigItem(typeof(DictionaryValuesElement)), KeyValueWrapper(typeof(EntityDefinitionValueWrapper<,>))]
     public Dictionary<EntityCatalogueDefinition, bool> catalogues {
         get => _catalogues;
         set {

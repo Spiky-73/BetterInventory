@@ -15,5 +15,5 @@ public static class SpysInfiniteConsumables {
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static long GetItemRequirement(Item item) => InfinityManager.GetRequirement(item, ConsumableItem.Instance);
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public static long GetCountToInfinity(Player player, Item item) => GetItemRequirement(item) - GetItemInfinity(player, item);
+    public static long GetCountToInfinity(Player player, Item item) => GetItemRequirement(item) - InfinityManager.CountConsumables(player, item, ConsumableItem.Instance);
 }

@@ -91,7 +91,7 @@ public sealed class PreviousSlot {
 
 public sealed class PreviousDisplay {
     public Toggle<FakeItemDisplay> fakeItem = new(true);
-    public Toggle<IconDisplay> icon = new(true);
+    public Toggle<IconDisplay> icon = new(true, new());
     
     public static bool Enabled => SmartPickup.Enabled && PreviousSlot.Value.displayPrevious;
     public static bool FakeItem => Enabled && Value.icon && !UnloadedInventoryManagement.Value.displayFakeItem;
@@ -119,7 +119,6 @@ public sealed class IconDisplay : IPreviousDisplay {
 public sealed class UpgradeItems {
     public UpgradeItems() => upgraders = [];
 
-    [CustomModConfigItem(typeof(DictionaryValuesElement)), KeyValueWrapper(typeof(EntityDefinitionValueWrapper<,>))]
     public Dictionary<PickupUpgraderDefinition, bool> upgraders {
         get => _upgraders;
         set {
