@@ -56,7 +56,7 @@ public sealed class InventoryLoader : ILoadable {
         itemSlot = s ?? default;
         return s.HasValue;
     }
-    public static Slot? GetInventorySlot(Player player, Item[] inventory, int context, int slot) => s_slotToInv.GetOrAdd(new(player.whoAmI, inventory, context, slot), _ => {
+    public static Slot? GetInventorySlot(Player player, Item[] inventory, int context, int slot) => s_slotToInv.GetOrAdd(new(player.whoAmI, inventory, context, slot), () => {
         foreach (ModSubInventory slots in SubInventories) {
             int i = GetSlotIndex(slots.Items(player), inventory, context, slot);
             if (i != -1) return new(slots, i);

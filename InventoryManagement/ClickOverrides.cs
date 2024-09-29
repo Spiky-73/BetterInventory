@@ -430,7 +430,7 @@ public sealed class ClickOverrides : ILoadable {
         return amount;
     }
 
-    public static Multipliers GetCraftMultipliers(Recipe recipe) => s_craftMultipliers.GetOrAdd(recipe.RecipeIndex, _ => {
+    public static Multipliers GetCraftMultipliers(Recipe recipe) => s_craftMultipliers.GetOrAdd(recipe.RecipeIndex, () => {
         int ToMultiplier(int amount) => (Configs.CraftStack.Value.maxItems.Value.above ? (amount + recipe.createItem.stack-1) : amount) / recipe.createItem.stack; 
         int craft = GetMaxCraftMultiplier(recipe);
         if (craft > 0) craft = Math.Max(1, Math.Min(craft, ToMultiplier(GetMaxStackAmount(recipe.createItem))));
@@ -439,7 +439,7 @@ public sealed class ClickOverrides : ILoadable {
         return new(Math.Min(craft, mouse), Math.Min(craft, inventory));
     });
 
-    public static Multipliers GetShopMultipliers(Item item, long? price) => s_shopMultipliers.GetOrAdd(item.type, _ => {
+    public static Multipliers GetShopMultipliers(Item item, long? price) => s_shopMultipliers.GetOrAdd(item.type, () => {
         long p;
         if (price.HasValue) p = price.Value;
         else Main.LocalPlayer.GetItemExpectedPrice(item, out long _, out p);
