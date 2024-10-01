@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.Serialization;
 using BetterInventory.ItemSearch;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -93,25 +94,21 @@ public enum UnlockLevel { Vanilla, Name, Stats, Drops, DropRates }
 
 
 public sealed class QuickSearch {
-    public QuickSearch() => catalogues = [];
     public NestedValue<SearchAction, IndividualKeybinds> individualKeybinds = new(SearchAction.Both);
     public NestedValue<SearchAction, SharedKeybind> sharedKeybind = new(SearchAction.Toggle);
-    public Dictionary<EntityCatalogueDefinition, bool> catalogues {
-        get => _catalogues;
-        set {
-            foreach (ModEntityCatalogue catalogue in global::BetterInventory.ItemSearch.QuickSearch.EntityCatalogues) value.TryAdd(new(catalogue), true);
-            _catalogues = value;
-        }
-    }
-    [DefaultValue(RightClickAction.SearchPrevious)] public RightClickAction rightClick { get; set; } = RightClickAction.SearchPrevious;
-
-    private Dictionary<EntityCatalogueDefinition, bool> _catalogues = [];
+    [CustomModConfigItem(typeof(DictionaryValuesElement))] public Dictionary<EntityCatalogueDefinition, bool> catalogues = [];
+    [DefaultValue(RightClickAction.SearchPrevious)] public RightClickAction rightClick = RightClickAction.SearchPrevious;
 
     public static bool Enabled => ItemSearch.Instance.quickSearch;
     public static bool IndividualKeybinds => Enabled && Value.individualKeybinds > SearchAction.None;
     public static bool SharedKeybind => Enabled && Value.sharedKeybind > SearchAction.None;
     public static bool RightClick => Enabled && Value.rightClick != RightClickAction.None;
     public static QuickSearch Value => ItemSearch.Instance.quickSearch.Value;
+
+    [OnDeserialized]
+    private void OnDeserialized(StreamingContext context) {
+        foreach (ModEntityCatalogue catalogue in global::BetterInventory.ItemSearch.QuickSearch.EntityCatalogues) catalogues.TryAdd(new(catalogue), true);
+    }
 }
 [Flags] public enum SearchAction { None, Search, Toggle, Both }
 public enum RightClickAction { None, Clear, SearchPrevious }

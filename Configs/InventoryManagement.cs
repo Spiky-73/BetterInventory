@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Runtime.Serialization;
 using Terraria.ModLoader.Config;
 using Terraria.UI;
 using SpikysLib.Configs;
@@ -7,7 +8,6 @@ using SpikysLib.Configs.UI;
 using System.Collections.Generic;
 using BetterInventory.InventoryManagement;
 using Newtonsoft.Json;
-using SpikysLib;
 
 namespace BetterInventory.Configs;
 
@@ -117,21 +117,16 @@ public sealed class IconDisplay : IPreviousDisplay {
 }
 
 public sealed class UpgradeItems {
-    public UpgradeItems() => upgraders = [];
-
-    public Dictionary<PickupUpgraderDefinition, bool> upgraders {
-        get => _upgraders;
-        set {
-            foreach (ModPickupUpgrader upgrader in global::BetterInventory.InventoryManagement.SmartPickup.Upgraders) value.TryAdd(new(upgrader), true);
-            _upgraders = value;
-        }
-    }
-    [DefaultValue(true)] public bool importantOnly { get; set; } = true;
+    [CustomModConfigItem(typeof(DictionaryValuesElement))] public Dictionary<PickupUpgraderDefinition, bool> upgraders = [];
+    [DefaultValue(true)] public bool importantOnly = true;
 
     public static bool Enabled => SmartPickup.Enabled && !UnloadedInventoryManagement.Value.upgradeItems && SmartPickup.Value.upgradeItems;
     public static UpgradeItems Value => SmartPickup.Value.upgradeItems.Value;
     
-    private Dictionary<PickupUpgraderDefinition, bool> _upgraders = [];
+    [OnDeserialized]
+    private void OnDeserialized(StreamingContext context) {
+        foreach (ModPickupUpgrader upgrader in global::BetterInventory.InventoryManagement.SmartPickup.Upgraders) upgraders.TryAdd(new(upgrader), true);
+    }
 }
 
 public sealed class QuickMove {
@@ -179,7 +174,7 @@ public sealed class MaxCraftAmount : MultiChoice<int> {
     public MaxCraftAmount(int value) : base(value) { }
 
     [Choice, Range(1, 9999), DefaultValue(999)] public int amount = 999;
-    [Choice] public Text? spicRequirement { get; set; }
+    [Choice] public Text? spicRequirement;
 
     public override int Value {
         get => Choice == nameof(spicRequirement) ? 0 : amount;
