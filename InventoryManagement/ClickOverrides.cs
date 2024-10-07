@@ -406,6 +406,7 @@ public sealed class ClickOverrides : ILoadable {
 
     public static int GetMaxStackAmount(Item item) {
         if (Configs.CraftStack.Value.maxItems.Key != 0 || !SpysInfiniteConsumables.Enabled) return Configs.CraftStack.Value.maxItems.Key.amount;
+        if (SpysInfiniteConsumables.GetItemRequirement(item) == 0) return 99;
         return SpysInfiniteConsumables.GetItemInfinity(Main.LocalPlayer, item) == 0 ?
             (int)SpysInfiniteConsumables.GetCountToInfinity(Main.LocalPlayer, item) :
             (int)SpysInfiniteConsumables.GetItemRequirement(item);

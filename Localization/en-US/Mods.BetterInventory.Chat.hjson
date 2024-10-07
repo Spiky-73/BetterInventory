@@ -18,4 +18,5 @@ Changelog:
 	- Updated SPIC dependency to v4.0
 	- Updated Spiky's Lib dependency to v1.2
 	- Fixed a bug with Quick move when HotkeyMode was set to FromEnd
+	- Fixed Craft Stack not working for items with no SPIC requirements
 	'''
