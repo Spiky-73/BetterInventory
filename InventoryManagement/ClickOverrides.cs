@@ -19,7 +19,7 @@ namespace BetterInventory.InventoryManagement;
 public sealed class ClickOverrides : ILoadable {
 
     public void Load(Mod mod) {
-        CraftCursor = CursorLoader.RegisterCursor(mod, ModContent.Request<Texture2D>($"BetterInventory/Assets/Cursor_Craft"));
+        CraftCursor = CursorLoader.RegisterCursor(mod, mod.Assets.Request<Texture2D>($"Assets/Cursor_Craft"));
 
         On_Main.TryAllowingToCraftRecipe += HookTryAllowingToCraftRecipe;
 
@@ -404,7 +404,7 @@ public sealed class ClickOverrides : ILoadable {
         // }
     }
 
-    public static int GetMaxStackAmount(Item item) {
+    public static int GetMaxCraftStackAmount(Item item) {
         if (Configs.CraftStack.Value.maxItems.Key != 0 || !SpysInfiniteConsumables.Enabled) return Configs.CraftStack.Value.maxItems.Key.amount;
         if (SpysInfiniteConsumables.GetItemRequirement(item) == 0) return 99;
         return SpysInfiniteConsumables.GetItemInfinity(Main.LocalPlayer, item) == 0 ?
@@ -414,10 +414,10 @@ public sealed class ClickOverrides : ILoadable {
 
     public static int GetMaxBuyAmount(Item item, long price) {
         if (price == 0) return item.maxStack;
-        else return (int)Math.Clamp(Main.LocalPlayer.CountCurrency(item.shopSpecialCurrency) / price, 1, item.maxStack - Main.mouseItem.stack);
+        else return (int)Math.Max(Main.LocalPlayer.CountCurrency(item.shopSpecialCurrency) / price, 1);
     }
     public static int GetMaxCraftMultiplier(Recipe recipe) {
-        Dictionary<int, int> groupItems = new();
+        Dictionary<int, int> groupItems = [];
         foreach (int id in recipe.acceptedGroups) {
             RecipeGroup group = RecipeGroup.recipeGroups[id];
             groupItems.Add(group.IconicItemId, group.GetGroupFakeItemId());
@@ -433,8 +433,9 @@ public sealed class ClickOverrides : ILoadable {
 
     public static Multipliers GetCraftMultipliers(Recipe recipe) => s_craftMultipliers.GetOrAdd(recipe.RecipeIndex, () => {
         int ToMultiplier(int amount) => (Configs.CraftStack.Value.maxItems.Value.above ? (amount + recipe.createItem.stack-1) : amount) / recipe.createItem.stack; 
-        int craft = GetMaxCraftMultiplier(recipe);
-        if (craft > 0) craft = Math.Max(1, Math.Min(craft, ToMultiplier(GetMaxStackAmount(recipe.createItem))));
+        int craft = Math.Clamp(GetMaxCraftMultiplier(recipe), 0, ToMultiplier(recipe.createItem.maxStack));
+        if (craft > 0) craft = Math.Max(1, Math.Min(craft, ToMultiplier(GetMaxCraftStackAmount(recipe.createItem))));
+
         int mouse = ToMultiplier(Utility.GetMouseFreeSpace(recipe.createItem));
         int inventory = ToMultiplier(Utility.GetInventoryFreeSpace(Main.LocalPlayer, recipe.createItem));
         return new(Math.Min(craft, mouse), Math.Min(craft, inventory));
@@ -444,8 +445,9 @@ public sealed class ClickOverrides : ILoadable {
         long p;
         if (price.HasValue) p = price.Value;
         else Main.LocalPlayer.GetItemExpectedPrice(item, out long _, out p);
-        int buy = Math.Min(GetMaxBuyAmount(item, p), item.buyOnce ? item.stack : item.maxStack);
-        if (buy > 0) buy = Math.Max(1, Math.Min(buy, GetMaxStackAmount(item)));
+        int buy = Math.Clamp(GetMaxBuyAmount(item, p), 0, item.buyOnce ? item.stack : item.maxStack);
+        if (buy > 0) buy = Math.Max(1, Math.Min(buy, GetMaxCraftStackAmount(item)));
+
         int mouse = Utility.GetMouseFreeSpace(item);
         int inventory = Utility.GetInventoryFreeSpace(Main.LocalPlayer, item);
         return new(Math.Min(buy, mouse), Math.Min(buy, inventory));

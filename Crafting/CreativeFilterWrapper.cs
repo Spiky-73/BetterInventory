@@ -17,5 +17,5 @@ public sealed class CreativeFilterWrapper : IItemEntryFilter {
     public string GetDisplayNameKey() => Filter.GetDisplayNameKey();
     public UIElement GetImage() => Filter.GetImage();
 
-    public Rectangle GetSourceFrame() => RecipeFiltering.RecipeFilters.Frame(11, 1, frameX: Index);
+    public Rectangle GetSourceFrame() => RecipeFiltering.s_recipeFilters.Frame(11, 1, frameX: Index);
 }

@@ -69,8 +69,14 @@ public sealed class Guide : ModSystem {
             if(!il.ApplyTo(ILGuideRecipeOrder, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = true;
         };
 
-
         s_inventoryBack4 = TextureAssets.InventoryBack4;
+        s_defaultTextures = new(TextureAssets.InventoryBack4, TextureAssets.InventoryBack14);
+        s_favoriteTextures = new(TextureAssets.InventoryBack10, TextureAssets.InventoryBack17);
+        s_blacklistedTextures = new(TextureAssets.InventoryBack5, TextureAssets.InventoryBack11);
+        s_tileTextures = new(TextureAssets.InventoryBack3, TextureAssets.InventoryBack6);
+        s_conditionTextures = new(TextureAssets.InventoryBack12, TextureAssets.InventoryBack8);
+        s_inventoryTickBorder = Mod.Assets.Request<Texture2D>($"Assets/Inventory_Tick_Border");
+        s_unknownTexture = Mod.Assets.Request<Texture2D>($"Assets/Unknown_Item");
     }
     
     private void HookGuideTileAir(On_Main.orig_HoverOverCraftingItemButton orig, int recipeIndex){
@@ -147,7 +153,7 @@ public sealed class Guide : ModSystem {
         for (int i = 0; i < textTiles.Count; i++) {
             Item tile = textTiles[i];
             Color inventoryBack = Main.inventoryBack;
-            OverrideRecipeTexture(TileTextures, false, GetPlaceholderType(tile) == PlaceholderType.ByHand || Main.LocalPlayer.adjTile[tile.createTile]);
+            OverrideRecipeTexture(s_tileTextures, false, GetPlaceholderType(tile) == PlaceholderType.ByHand || Main.LocalPlayer.adjTile[tile.createTile]);
             ItemSlot.Draw(Main.spriteBatch, ref tile, ContextID.CraftingMaterial, position);
             TextureAssets.InventoryBack4 = s_inventoryBack4;
             Rectangle hitbox = new((int)position.X, (int)position.Y, (int)(TextureAssets.InventoryBack.Width() * Main.inventoryScale), (int)(TextureAssets.InventoryBack.Height() * Main.inventoryScale));
@@ -162,7 +168,7 @@ public sealed class Guide : ModSystem {
         for (int i = 0; i < textConditions.Count; i++) {
             (Item item, Condition condition) = textConditions[i];
             Color inventoryBack = Main.inventoryBack;
-            OverrideRecipeTexture(ConditionTextures, false, condition.Predicate());
+            OverrideRecipeTexture(s_conditionTextures, false, condition.Predicate());
             ItemSlot.Draw(Main.spriteBatch, ref item, ContextID.CraftingMaterial, position);
             TextureAssets.InventoryBack4 = s_inventoryBack4;
             Rectangle hitbox = new((int)position.X, (int)position.Y, (int)(TextureAssets.InventoryBack.Width() * Main.inventoryScale), (int)(TextureAssets.InventoryBack.Height() * Main.inventoryScale));
@@ -383,7 +389,7 @@ public sealed class Guide : ModSystem {
         s_visibilityHover = false;
         x += (int)((TextureAssets.InventoryBack.Width() - 2) * Main.inventoryScale);
         y += (int)(4 * Main.inventoryScale);
-        Vector2 size = InventoryTickBorder.Size() * Main.inventoryScale;
+        Vector2 size = s_inventoryTickBorder.Size() * Main.inventoryScale;
         s_hitBox = new(x - (int)(size.X / 2f), y - (int)(size.Y / 2f), (int)size.X, (int)size.Y);
 
         if (PlayerInput.IgnoreMouseInterface || !s_hitBox.Contains(Main.mouseX, Main.mouseY)) return;
@@ -404,7 +410,7 @@ public sealed class Guide : ModSystem {
         if (s_visibilityHover) {
             string key = filters.ShowAllRecipes ? $"{Localization.Keys.UI}.ShowAll" : $"{Localization.Keys.UI}.ShowAvailable";
             Main.instance.MouseText(Language.GetTextValue(key));
-            Main.spriteBatch.Draw(InventoryTickBorder.Value, s_hitBox.Center(), null, color, 0f, InventoryTickBorder.Value.Size() / 2, 1, 0, 0f);
+            Main.spriteBatch.Draw(s_inventoryTickBorder.Value, s_hitBox.Center(), null, color, 0f, s_inventoryTickBorder.Value.Size() / 2, 1, 0, 0f);
         }
     }
 
@@ -795,7 +801,7 @@ public sealed class Guide : ModSystem {
     }
     private static float HookDrawPlaceholder(On_ItemSlot.orig_DrawItemIcon orig, Item item, int context, SpriteBatch spriteBatch, Vector2 screenPositionForItemCenter, float scale, float sizeLimit, Color environmentColor) {
         if (s_hideNextItem) {
-            return DrawTexture(spriteBatch, UnknownTexture.Value, Color.White, screenPositionForItemCenter, ref scale, sizeLimit, environmentColor);
+            return DrawTexture(spriteBatch, s_unknownTexture.Value, Color.White, screenPositionForItemCenter, ref scale, sizeLimit, environmentColor);
         }
         switch (GetPlaceholderType(item)) {
         case PlaceholderType.ByHand:
@@ -844,13 +850,13 @@ public sealed class Guide : ModSystem {
     public static bool IsAvailable(int recipe) => s_availableRecipes.Contains(recipe);
     public static bool IsUnknown(int recipe) => s_unknownRecipes.Contains(recipe);
 
-    public static void OverrideRecipeTexture(FavoriteState state, bool selected, bool available) => OverrideRecipeTexture(state switch {
-        FavoriteState.Default => DefaultTextures,
-        FavoriteState.Favorited => FavoriteTextures,
-        FavoriteState.Blacklisted or _ => BlacklistedTextures,
-    }, selected, available);
-    public static void OverrideRecipeTexture(Asset<Texture2D>[] textures, bool selected, bool available) {
-        TextureAssets.InventoryBack4 = textures[selected ? 1 : 0];
+    public static void OverrideRecipeTexture(FavoriteState state, bool highlight, bool available) => OverrideRecipeTexture(state switch {
+        FavoriteState.Default => s_defaultTextures,
+        FavoriteState.Favorited => s_favoriteTextures,
+        FavoriteState.Blacklisted or _ => s_blacklistedTextures,
+    }, highlight, available);
+    public static void OverrideRecipeTexture(TextureHighlight textures, bool highlight, bool available) {
+        TextureAssets.InventoryBack4 = highlight ? textures.Highlight : textures.Default;
         if (!available) Main.inventoryBack.ApplyRGB(0.5f);
     }
 
@@ -905,15 +911,13 @@ public sealed class Guide : ModSystem {
     private static readonly Item[] s_guideItems = new Item[2];
 
 
-    public static readonly Asset<Texture2D>[] DefaultTextures = [ TextureAssets.InventoryBack4, TextureAssets.InventoryBack14 ];
-    public static readonly Asset<Texture2D>[] FavoriteTextures = [ TextureAssets.InventoryBack10, TextureAssets.InventoryBack17 ];
-    public static readonly Asset<Texture2D>[] BlacklistedTextures = [ TextureAssets.InventoryBack5, TextureAssets.InventoryBack11 ];
-    public static readonly Asset<Texture2D>[] TileTextures = [ TextureAssets.InventoryBack3, TextureAssets.InventoryBack6 ];
-    public static readonly Asset<Texture2D>[] ConditionTextures = [ TextureAssets.InventoryBack12, TextureAssets.InventoryBack8 ];
-
-    public static Asset<Texture2D> InventoryTickBorder => ModContent.Request<Texture2D>($"BetterInventory/Assets/Inventory_Tick_Border");
-    public static Asset<Texture2D> UnknownTexture => ModContent.Request<Texture2D>($"BetterInventory/Assets/Unknown_Item");
-
+    private static TextureHighlight s_defaultTextures = null!;
+    private static TextureHighlight s_favoriteTextures = null!;
+    private static TextureHighlight s_blacklistedTextures = null!;
+    private static TextureHighlight s_tileTextures = null!;
+    private static TextureHighlight s_conditionTextures = null!;
+    private static Asset<Texture2D> s_inventoryTickBorder = null!;
+    private static Asset<Texture2D> s_unknownTexture = null!;
     private static Asset<Texture2D> s_inventoryBack4 = null!;
 
     private static bool s_collectingGuide;
@@ -942,3 +946,5 @@ public sealed class Guide : ModSystem {
 
 public enum PlaceholderType { None, ByHand, Tile, Condition}
 public enum FavoriteState : byte { Default, Blacklisted, Favorited }
+
+public record class TextureHighlight(Asset<Texture2D> Default, Asset<Texture2D> Highlight);

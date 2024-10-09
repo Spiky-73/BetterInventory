@@ -109,7 +109,7 @@ public sealed class QuickMove : ILoadable {
         s_movedItems = [];
         s_validSlots = [source];
     }
-    private static void ContinueChain() { // TODO accessory only goes to one slot
+    private static void ContinueChain() {
         Player player = Main.LocalPlayer;
         player.selectedItem = s_oldSelectedItem;
         s_ignoreHotbar = s_moveKey;

@@ -57,8 +57,10 @@ See [Reporting Bugs](ReportingBugs.md)
 ### v0.6.1
 - Updated SPIC dependency to v4.0
 - Updated Spiky's Lib dependency to v1.2
+- Updated assets loading
 - Fixed a bug with Quick move when HotkeyMode was set to FromEnd
 - Fixed Craft Stack not working for items with no SPIC requirements
+- Fixed Craft Stack crafting items stack greater than maxStack
 
 ### v0.6
 - Renamed Smart Pickup to Previous Slot
