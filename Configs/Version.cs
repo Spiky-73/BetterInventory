@@ -10,7 +10,7 @@ public sealed class Version : ModConfig {
 
     [Header("Info")]
     [JsonIgnore, ShowDespiteJsonIgnore] public Text? Summary;
-    // [JsonIgnore, ShowDespiteJsonIgnore] public Text? Details;
+    [JsonIgnore, ShowDespiteJsonIgnore] public Text? Details;
     [JsonIgnore, ShowDespiteJsonIgnore] public Text? Bug;
     [Header("Changelog")]
     [JsonIgnore, ShowDespiteJsonIgnore] public Text? Changelog;

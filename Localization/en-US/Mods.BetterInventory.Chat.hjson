@@ -11,8 +11,8 @@ SPIC.ModName: Spy's Infinite Consumables
 Homepage: homepage
 Workshop: Steam Workshop page
 Version: 0.6.1
-Summary: Updated dependency versions
-Details: ""
+Summary: ""
+Details: Updated dependency versions
 Changelog:
 	'''
 	- Updated SPIC dependency to v4.0
