@@ -546,7 +546,7 @@ BetterGuide: {
 	Tooltip: ""
 
 	moreRecipes: {
-		Label: More recipes
+		Label: More Recipes
 		Tooltip:
 			'''
 			Adds recipes crafting the item to the guide results

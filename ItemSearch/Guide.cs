@@ -35,12 +35,11 @@ public sealed class Guide : ModSystem {
         On_Recipe.ClearAvailableRecipes += HookClearRecipes;
         On_Recipe.FindRecipes += HookFindRecipes;
         On_Recipe.CollectGuideRecipes += HookCollectGuideRecipes;
-        On_Recipe.AddToAvailableRecipes += HookAddToAvailableRecipes;
+        On_Recipe.AddToAvailableRecipes += HookFilterAddedRecipe;
 
         On_Player.AdjTiles += HookGuideTileAdj;
         On_ItemSlot.PickItemMovementAction += HookAllowGuideItem;
         On_ItemSlot.OverrideLeftClick += HookOverrideLeftClick;
-        On_Main.HoverOverCraftingItemButton += HookGuideTileAir;
 
         On_ItemSlot.Draw_SpriteBatch_refItem_int_Vector2_Color += HookHideItem;
         On_ItemSlot.DrawItemIcon += HookDrawPlaceholder;
@@ -77,16 +76,6 @@ public sealed class Guide : ModSystem {
         s_conditionTextures = new(TextureAssets.InventoryBack12, TextureAssets.InventoryBack8);
         s_inventoryTickBorder = Mod.Assets.Request<Texture2D>($"Assets/Inventory_Tick_Border");
         s_unknownTexture = Mod.Assets.Request<Texture2D>($"Assets/Unknown_Item");
-    }
-    
-    private void HookGuideTileAir(On_Main.orig_HoverOverCraftingItemButton orig, int recipeIndex){
-        if (!Configs.BetterGuide.CraftingStation || guideTile.IsAir || !Main.guideItem.IsAir) {
-            orig(recipeIndex);
-            return;
-        }
-        (Item item, Main.guideItem) = (Main.guideItem, guideTile);
-        orig(recipeIndex);
-        Main.guideItem = item;
     }
 
     public override void Unload() {
@@ -217,14 +206,13 @@ public sealed class Guide : ModSystem {
             Main.craftingHide = true;
             ItemSlot.OverrideHover(items, ContextID.GuideItem, 1);
             ItemSlot.LeftClick(items, ContextID.GuideItem, 1);
-            if (Main.mouseLeftRelease && Main.mouseLeft) {
-                Recipe.FindRecipes();
-            }
+            GuideItems = items;
+            if (Main.mouseLeftRelease && Main.mouseLeft) Recipe.FindRecipes();
             ItemSlot.RightClick(items, ContextID.GuideItem, 1);
             ItemSlot.MouseHover(items, ContextID.GuideItem, 1);
+            GuideItems = items;
         }
         ItemSlot.Draw(Main.spriteBatch, items, ContextID.GuideItem, 1, hitbox.TopLeft());
-        GuideItems = items;
         Main.inventoryScale /= TileScale;
     }
 
@@ -541,11 +529,12 @@ public sealed class Guide : ModSystem {
         //     ++ }
         cursor.EmitLdloc(recipe);
         cursor.EmitDelegate((Recipe recipe) => {
-            if (Configs.BetterGuide.MoreRecipes && Main.guideItem.type == ItemID.None || recipe.HasResult(Main.guideItem.type)) {
-                Reflection.Recipe.AddToAvailableRecipes.Invoke(recipe.RecipeIndex);
-                return true;
-            }
-            return false;
+            bool flag = false;
+            if (Configs.BetterGuide.CraftingStation && Main.guideItem.type == ItemID.None) flag = true;
+            else if (Configs.BetterGuide.MoreRecipes && recipe.HasResult(Main.guideItem.type)) flag = true;
+
+            if (flag) Reflection.Recipe.AddToAvailableRecipes.Invoke(recipe.RecipeIndex);
+            return flag;
         });
         cursor.EmitBrtrue(endLoop);
     }
@@ -618,7 +607,7 @@ public sealed class Guide : ModSystem {
         }
     }
 
-    private static void HookAddToAvailableRecipes(On_Recipe.orig_AddToAvailableRecipes orig, int recipeIndex) {
+    private static void HookFilterAddedRecipe(On_Recipe.orig_AddToAvailableRecipes orig, int recipeIndex) {
         if (Configs.BetterGuide.AvailableRecipes && !s_collectingGuide){
             s_availableRecipes.Add(recipeIndex);
             return;
@@ -734,9 +723,11 @@ public sealed class Guide : ModSystem {
     }
     private static int HookAllowGuideItem(On_ItemSlot.orig_PickItemMovementAction orig, Item[] inv, int context, int slot, Item checkItem) {
         if (context != ContextID.GuideItem) return orig(inv, context, slot, checkItem);
-        if (slot == 0 && Configs.BetterGuide.MoreRecipes && GetPlaceholderType(Main.mouseItem) == PlaceholderType.None) return 0;
-        if (slot == 1 && Configs.BetterGuide.CraftingStation && (checkItem.IsAir || FitsCraftingTile(Main.mouseItem))) return 0;
-        return -1;
+        return slot switch {
+            0 when Configs.BetterGuide.MoreRecipes && GetPlaceholderType(Main.mouseItem) == PlaceholderType.None || orig(inv, context, slot, checkItem) != -1 => 0,
+            1 when Configs.BetterGuide.CraftingStation && (checkItem.IsAir || FitsCraftingTile(Main.mouseItem)) => 0,
+            _ => -1,
+        };
     }
     public static bool OverrideHover(Item[] inv, int context, int slot) {
         if (GetPlaceholderType(inv[slot]) != PlaceholderType.None
