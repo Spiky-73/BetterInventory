@@ -6,8 +6,9 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using SpikysLib;
+using SpikysLib.Collections;
 using SpikysLib.Constants;
-using SpikysLib.Extensions;
+using SpikysLib.IL;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
@@ -133,7 +134,10 @@ public sealed class QuickMove : ILoadable {
         Configs.HotkeyMode.Reversed => MoveKeys.Length - slot - 1,
         Configs.HotkeyMode.Hotbar or _ => slot
     };
-    public static int HotkeyToSlot(int hotkey, int slotCount) => Math.Clamp(SlotToHotkey(hotkey, slotCount), 0, slotCount - 1);
+    public static int HotkeyToSlot(int hotkey, int slotCount) => Math.Clamp(Configs.QuickMove.Value.hotkeyMode switch {
+        Configs.HotkeyMode.FromEnd => hotkey - MoveKeys.Length + slotCount,
+        _ => SlotToHotkey(hotkey, slotCount)
+    }, 0, slotCount - 1);
 
     private static List<MovedItem> Move(Player player, Slot source, Slot target) {
         Item item = source.Item(player);
@@ -155,8 +159,8 @@ public sealed class QuickMove : ILoadable {
         foreach (Slot slot in itemsToMove) FreeTargetItem(slot);
 
         bool canFavorite = Reflection.ItemSlot.canFavoriteAt.GetValue()[Math.Abs(target.Inventory.Context)];
-        items[target.Index] = ItemExtensions.MoveInto(items[target.Index], item, out _, target.Inventory.MaxStack, canFavorite);
-        items[target.Index] = ItemExtensions.MoveInto(items[target.Index], freeItems[0], out _, target.Inventory.MaxStack, canFavorite);
+        items[target.Index] = ItemHelper.MoveInto(items[target.Index], item, out _, target.Inventory.MaxStack, canFavorite);
+        items[target.Index] = ItemHelper.MoveInto(items[target.Index], freeItems[0], out _, target.Inventory.MaxStack, canFavorite);
         source.Inventory.OnSlotChange(player, source.Index);
         target.Inventory.OnSlotChange(player, target.Index);
 
@@ -270,7 +274,7 @@ public sealed class QuickMove : ILoadable {
             }
             s_slotMoveInfo[itemSlot] = (numberInChain, key);
         }
-        return MathX.InRange(key, 0, MoveKeys.Length, MathX.InclusionFlag.Min);
+        return 0 <= key && key < MoveKeys.Length;
     }
     private static readonly Dictionary<Slot, (int number, int key)> s_slotMoveInfo = new();
 

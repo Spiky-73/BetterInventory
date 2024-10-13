@@ -12,7 +12,7 @@ using Terraria.GameContent.UI.States;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI;
-using SpikysLib.Extensions;
+using SpikysLib.IL;
 using SpikysLib;
 
 namespace BetterInventory.ItemSearch;
@@ -101,7 +101,7 @@ public sealed class Bestiary : ILoadable {
             DropRateInfoChainFeed ratesInfo = new(1f);
             foreach (IItemDropRule itemDropRule in Main.ItemDropsDB.GetRulesForItemID(info.itemId)) itemDropRule.ReportDroprates(drops, ratesInfo);
             foreach (DropRateInfo drop in drops) {
-                if (MathX.InRange(drop.itemId, ItemID.CopperCoin, ItemID.PlatinumCoin)) continue;
+                if (ItemID.CopperCoin <= drop.itemId && drop.itemId <= ItemID.PlatinumCoin) continue;
                 ItemDropBestiaryInfoElement element = new(drop);
                 UIElement? dropLine = element.ProvideUIElement(uiinfo);
                 if (dropLine is null) continue;
@@ -302,7 +302,7 @@ public sealed class Bestiary : ILoadable {
         List<string> names = new();
         foreach (IItemDropRule itemDropRule in Main.ItemDropsDB.GetRulesForItemID(bossBag.itemId)) itemDropRule.ReportDroprates(drops, ratesInfo);
         foreach (DropRateInfo drop in drops) {
-            if (!MathX.InRange(drop.itemId, ItemID.CopperCoin, ItemID.PlatinumCoin)) names.Add(Lang.GetItemNameValue(drop.itemId));
+            if (drop.itemId < ItemID.CopperCoin || ItemID.PlatinumCoin < drop.itemId) names.Add(Lang.GetItemNameValue(drop.itemId));
         }
         return _bossBagSearch[bossBag.itemId] = string.Join('|', names);
     }

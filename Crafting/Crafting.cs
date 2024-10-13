@@ -1,6 +1,5 @@
-using System;
 using MonoMod.Cil;
-using SpikysLib.Extensions;
+using SpikysLib.IL;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.UI;

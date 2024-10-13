@@ -1,5 +1,5 @@
 Download: Thank you for downloading {$Mods.BetterInventory.Chat.ModName}! Make sure adjust the configs before playing
-Update: "{$Mods.BetterInventory.Chat.Sumary}. View the [c/05c8ff:{$Mods.BetterInventory.Configs.Version.DisplayName}] config for more details"
+Update: "{$Mods.BetterInventory.Chat.Summary}. View the [c/05c8ff:{$Mods.BetterInventory.Configs.Version.DisplayName}] config for more details"
 Bug: If you find a bug, please refer to the [c/05c8ff:{$Mods.BetterInventory.Configs.Compatibility.DisplayName}] config
 UnloadedMore: Some features failed to load and will have no effect in game. {$Mods.BetterInventory.Chat.Compatibility}
 UnloadedLess: Some previously unloaded features were successfully loaded. {$Mods.BetterInventory.Chat.Compatibility}
@@ -10,25 +10,15 @@ ModName: Better Inventory
 SPIC.ModName: Spy's Infinite Consumables
 Homepage: homepage
 Workshop: Steam Workshop page
-Version: "0.6"
-Sumary: New features were added to Inventory Management and Item Search
-Details: ""
+Version: 0.6.1
+Summary: ""
+Details: Updated dependency versions
 Changelog:
 	'''
-	- Renamed Smart Pickup to Previous Slot
-	- Grouped pickup related features in Smart Pickup
-	- Added Hotbar Slots Last in Smart Pickup
-	- Added Upgrade Items in Smart Pickup
-	- Added more options to Previous Slot's item display
-	- Added Spy's Infinite Consumables Requirement to Craft Stack
-	- Added the Reporting Bug config
-	- Added Better Shift Click settings
-	- Remade Quick List and Search Item
-	- Improved Quick Move under the hood
-	- Updated dependencies
-	- Updated Craft cursor icon
-	- Simplified notifications
-	- Fixed a bug with Previous Slot
-	- Fixed FixedUI ScrollButtons
-	- Fixed some wierd behaviour with GuideTile
+	- Updated SPIC dependency to v4.0
+	- Updated Spiky's Lib dependency to v1.2
+	- Updated assets loading
+	- Fixed a bug with Quick move when HotkeyMode was set to FromEnd
+	- Fixed Craft Stack not working for items with no SPIC requirements
+	- Fixed Craft Stack crafting items stack greater than maxStack
 	'''

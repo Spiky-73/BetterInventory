@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using MonoMod.Cil;
 using SpikysLib.Constants;
-using SpikysLib.Extensions;
+using SpikysLib.IL;
 using Terraria;
 using Terraria.ModLoader;
 

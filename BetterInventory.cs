@@ -1,14 +1,12 @@
+using SpikysLib;
 using Terraria.ModLoader;
 
 namespace BetterInventory;
-public sealed class BetterInventory : Mod {
+
+public sealed class BetterInventory : Mod, IPreLoadMod {
     public static BetterInventory Instance { get; private set; } = null!;
 
-    public override void Load() {
-        Instance = this;
-    }
 
-    public override void Unload() {
-        Instance = null!;
-    }
+    public void PreLoadMod() => Instance = this;
+    public override void Unload() => Instance = null!;
 }

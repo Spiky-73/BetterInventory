@@ -9,12 +9,12 @@ using Terraria.UI;
 using BetterInventory.InventoryManagement;
 using Terraria.Audio;
 using Terraria.ID;
-using SpikysLib.Extensions;
 using SpikysLib.UI;
 using Terraria.Localization;
-using Microsoft.Xna.Framework.Graphics;
 using SpikysLib.CrossMod;
 using SpikysLib.Constants;
+using SpikysLib.Configs;
+using SpikysLib;
 
 namespace BetterInventory.ItemActions;
 
@@ -71,7 +71,9 @@ public sealed class BetterPlayer : ModPlayer {
         Configs.Version.Instance.lastPlayedVersion = Mod.Version.ToString();
         Configs.Version.Instance.Save();
 
-        InGameNotificationsTracker.AddNotification(new InGameNotification(Mod, line, new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.Bug"), Colors.RarityAmber)) { timeLeft = 15 * 60 });
+        if (Language.GetText($"{Localization.Keys.Chat}.Summary").Value.Length != 0) {
+            InGameNotificationsTracker.AddNotification(new InGameNotification(Mod, line, new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.Bug"), Colors.RarityAmber)) { timeLeft = 15 * 60 });
+        }
     }
 
     public void DisplayCompatibility() {
@@ -159,7 +161,7 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public static void CycleBuilderState(Player player, BuilderToggle toggle, int? state = null) => player.builderAccStatus[toggle.Type] = (state ?? (player.builderAccStatus[toggle.Type] + 1)) % toggle.NumberOfStates;
-    public static void FavoritedBuff(Player player) => ItemExtensions.RunWithHiddenItems(player.inventory, player.QuickBuff, i => !i.favorited);
+    public static void FavoritedBuff(Player player) => ItemHelper.RunWithHiddenItems(player.inventory, player.QuickBuff, i => !i.favorited);
     private void BuilderKeys() {
         foreach ((BuilderToggle? builder, ModKeybind kb) in BuilderTogglesKb) {
             if (!kb.JustPressed) continue;

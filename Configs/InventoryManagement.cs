@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Runtime.Serialization;
 using Terraria.ModLoader.Config;
 using Terraria.UI;
 using SpikysLib.Configs;
@@ -7,7 +8,6 @@ using SpikysLib.Configs.UI;
 using System.Collections.Generic;
 using BetterInventory.InventoryManagement;
 using Newtonsoft.Json;
-using SpikysLib;
 
 namespace BetterInventory.Configs;
 
@@ -25,8 +25,8 @@ public sealed class InventoryManagement : ModConfig {
     public static bool StackTrash => !UnloadedInventoryManagement.Value.stackTrash && Instance.stackTrash;
 
     // Compatibility version < v0.6
-    [JsonProperty, DefaultValue(AutoEquipLevel.PrimarySlots)] private AutoEquipLevel autoEquip { set => PortConfig.MoveMember(value != AutoEquipLevel.PrimarySlots, _ => smartPickup.Value.autoEquip = value); }
-    [JsonProperty, DefaultValue(true)] private bool shiftRight { set => PortConfig.MoveMember<InventoryManagement>(!value, c => c.betterShiftClick.Key = value); }
+    [JsonProperty, DefaultValue(AutoEquipLevel.PrimarySlots)] private AutoEquipLevel autoEquip { set => ConfigHelper.MoveMember(value != AutoEquipLevel.PrimarySlots, _ => smartPickup.Value.autoEquip = value); }
+    [JsonProperty, DefaultValue(true)] private bool shiftRight { set => ConfigHelper.MoveMember<InventoryManagement>(!value, c => c.betterShiftClick.Key = value); }
 
     public override void OnChanged() {
         Reflection.ItemSlot.canFavoriteAt.GetValue()[ItemSlot.Context.BankItem] = FavoriteInBanks;
@@ -67,8 +67,8 @@ public sealed class SmartPickup {
     public static SmartPickup Value => InventoryManagement.Instance.smartPickup.Value;
 
     // Compatibility version < v0.6
-    [JsonProperty, DefaultValue(true)] private bool mediumCore { set => PortConfig.MoveMember(!value, _ => previousSlot.Value.mediumCore = value); }
-    [JsonProperty, DefaultValue(0.33f)] private float markIntensity { set => PortConfig.MoveMember(value != 0.33f, _ => {
+    [JsonProperty, DefaultValue(true)] private bool mediumCore { set => ConfigHelper.MoveMember(!value, _ => previousSlot.Value.mediumCore = value); }
+    [JsonProperty, DefaultValue(0.33f)] private float markIntensity { set => ConfigHelper.MoveMember(value != 0.33f, _ => {
         if (value == 0) previousSlot.Value.displayPrevious.Key = false;
         else previousSlot.Value.displayPrevious.Value.fakeItem.Value.intensity = value;
     }); }
@@ -91,7 +91,7 @@ public sealed class PreviousSlot {
 
 public sealed class PreviousDisplay {
     public Toggle<FakeItemDisplay> fakeItem = new(true);
-    public Toggle<IconDisplay> icon = new(true);
+    public Toggle<IconDisplay> icon = new(true, new());
     
     public static bool Enabled => SmartPickup.Enabled && PreviousSlot.Value.displayPrevious;
     public static bool FakeItem => Enabled && Value.icon && !UnloadedInventoryManagement.Value.displayFakeItem;
@@ -117,22 +117,16 @@ public sealed class IconDisplay : IPreviousDisplay {
 }
 
 public sealed class UpgradeItems {
-    public UpgradeItems() => upgraders = [];
-
-    [CustomModConfigItem(typeof(DictionaryValuesElement)), ValueWrapper(typeof(EntityDefinitionValueWrapper<,>))]
-    public Dictionary<PickupUpgraderDefinition, bool> upgraders {
-        get => _upgraders;
-        set {
-            foreach (ModPickupUpgrader upgrader in global::BetterInventory.InventoryManagement.SmartPickup.Upgraders) value.TryAdd(new(upgrader), true);
-            _upgraders = value;
-        }
-    }
-    [DefaultValue(true)] public bool importantOnly { get; set; } = true;
+    [CustomModConfigItem(typeof(DictionaryValuesElement))] public Dictionary<PickupUpgraderDefinition, bool> upgraders = [];
+    [DefaultValue(true)] public bool importantOnly = true;
 
     public static bool Enabled => SmartPickup.Enabled && !UnloadedInventoryManagement.Value.upgradeItems && SmartPickup.Value.upgradeItems;
     public static UpgradeItems Value => SmartPickup.Value.upgradeItems.Value;
     
-    private Dictionary<PickupUpgraderDefinition, bool> _upgraders = [];
+    [OnDeserialized]
+    private void OnDeserialized(StreamingContext context) {
+        foreach (ModPickupUpgrader upgrader in global::BetterInventory.InventoryManagement.SmartPickup.Upgraders) upgraders.TryAdd(new(upgrader), true);
+    }
 }
 
 public sealed class QuickMove {
@@ -148,9 +142,9 @@ public sealed class QuickMove {
     public static QuickMove Value => InventoryManagement.Instance.quickMove.Value;
 
     // Compatibility version < v0.6
-    [JsonProperty, DefaultValue(60 * 3)] private int chainTime { set => PortConfig.MoveMember(value != 60*3, _ => resetTime = value); }
-    [JsonProperty, DefaultValue(false)] private bool showTooltip { set => PortConfig.MoveMember(value, _ => tooltip = value); }
-    [JsonProperty] private NestedValue<HotkeyDisplayMode, DisplayedHotkeys> displayHotkeys { set => PortConfig.MoveMember(value is not null, _ => displayedHotkeys = value!); }
+    [JsonProperty, DefaultValue(60 * 3)] private int chainTime { set => ConfigHelper.MoveMember(value != 60*3, _ => resetTime = value); }
+    [JsonProperty, DefaultValue(false)] private bool showTooltip { set => ConfigHelper.MoveMember(value, _ => tooltip = value); }
+    [JsonProperty] private NestedValue<HotkeyDisplayMode, DisplayedHotkeys> displayHotkeys { set => ConfigHelper.MoveMember(value is not null, _ => displayedHotkeys = value!); }
 }
 
 public enum HotkeyDisplayMode { None, Next, All }
@@ -171,8 +165,8 @@ public sealed class CraftStack {
     public static CraftStack Value => InventoryManagement.Instance.craftStack.Value;
 
     // Compatibility version < v0.6
-    [JsonProperty, DefaultValue(false)] private bool single { set => PortConfig.MoveMember(value, _ => repeat = !value); }
-    [JsonProperty, DefaultValue(999)] private int maxAmount { set => PortConfig.MoveMember(value != 999, _ => maxItems.Key = value); }
+    [JsonProperty, DefaultValue(false)] private bool single { set => ConfigHelper.MoveMember(value, _ => repeat = !value); }
+    [JsonProperty, DefaultValue(999)] private int maxAmount { set => ConfigHelper.MoveMember(value != 999, _ => maxItems.Key = value); }
 }
 
 public sealed class MaxCraftAmount : MultiChoice<int> {
@@ -180,7 +174,7 @@ public sealed class MaxCraftAmount : MultiChoice<int> {
     public MaxCraftAmount(int value) : base(value) { }
 
     [Choice, Range(1, 9999), DefaultValue(999)] public int amount = 999;
-    [Choice] public Text? spicRequirement { get; set; }
+    [Choice] public Text? spicRequirement;
 
     public override int Value {
         get => Choice == nameof(spicRequirement) ? 0 : amount;

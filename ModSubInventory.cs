@@ -5,7 +5,7 @@ using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.Audio;
 using Terraria.ID;
-using SpikysLib.Extensions;
+using SpikysLib;
 
 namespace BetterInventory;
 
@@ -51,7 +51,7 @@ public abstract class ModSubInventory : ModType, ILocalizedModType {
 
     private void TryStackItem(Player player, Item item, int slot, GetItemSettings settings, IList<Item> items) {
         if (!FitsSlot(player, item, slot, out var itemsToMove) || itemsToMove.Count != 0) return;
-        items[slot] = ItemExtensions.MoveInto(items[slot], item, out int transferred, MaxStack);
+        items[slot] = ItemHelper.MoveInto(items[slot], item, out int transferred, MaxStack);
         if (transferred == 0) return;
         SoundEngine.PlaySound(SoundID.Grab);
         items[slot].position = player.position;

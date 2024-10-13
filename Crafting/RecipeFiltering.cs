@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using ReLogic.Content;
-using SpikysLib.Extensions;
+using SpikysLib.IL;
 using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
@@ -24,6 +24,11 @@ public sealed class RecipeFiltering : ILoadable {
         IL_Main.DrawInventory += static il => {
             if (!il.ApplyTo(ILDrawFilters, Configs.RecipeFilters.Enabled)) Configs.UnloadedCrafting.Value.recipeFilters = true;
         };
+
+        s_recipeFilterBack = mod.Assets.Request<Texture2D>($"Assets/Recipe_Filter_Back");
+        s_recipeFilters = mod.Assets.Request<Texture2D>($"Assets/Recipe_Filters");
+        s_recipeFiltersGray = mod.Assets.Request<Texture2D>($"Assets/Recipe_Filters_Gray");
+        s_filtersOutline = TextureAssets.InfoIcon[13];
     }
 
     public void Unload() {}
@@ -71,14 +76,14 @@ public sealed class RecipeFiltering : ILoadable {
         EntryFilterer<Item, CreativeFilterWrapper> filters = LocalFilters.Filterer;
         
         int i = 0;
-        int delta = FiltersOutline.Width() + 2;
+        int delta = s_filtersOutline.Width() + 2;
         int y = hammerY + TextureAssets.CraftToggle[0].Height() - TextureAssets.InfoIcon[0].Width()/2;
         while (i < LocalFilters.Filterer.AvailableFilters.Count) {
             int x = hammerX - TextureAssets.InfoIcon[0].Width() - 1;
             for(int d = 0; i < filters.AvailableFilters.Count && d < Configs.RecipeFilters.Value.filtersPerLine; i++){
                 bool active = filters.IsFilterActive(i);
                 if (Configs.RecipeFilters.Value.hideUnavailable && s_recipesInFilter[i] == 0 && !active) continue;
-                Rectangle hitbox = new(x, y, RecipeFilterBack.Width(), RecipeFilterBack.Height());
+                Rectangle hitbox = new(x, y, s_recipeFilterBack.Width(), s_recipeFilterBack.Height());
                 if (hitbox.Contains(Main.mouseX, Main.mouseY)) {
                     Main.LocalPlayer.mouseInterface = true;
                     int rare = 0;
@@ -95,7 +100,7 @@ public sealed class RecipeFiltering : ILoadable {
                             OnFilterChanges();
                         }
                         name = Language.GetTextValue($"{Localization.Keys.UI}.Filter", name, s_recipesInFilter[i]);
-                        Main.spriteBatch.Draw(FiltersOutline.Value, hitbox.Center(), null, Main.OurFavoriteColor, 0, FiltersOutline.Size() / 2, 1, SpriteEffects.None, 0);
+                        Main.spriteBatch.Draw(s_filtersOutline.Value, hitbox.Center(), null, Main.OurFavoriteColor, 0, s_filtersOutline.Size() / 2, 1, SpriteEffects.None, 0);
                     }
                     if (s_recipesInFilter[i] == 0) rare = -1;
                     Main.instance.MouseText(name, rare);
@@ -108,9 +113,9 @@ public sealed class RecipeFiltering : ILoadable {
                     colorBack = colorBack.MultiplyRGBA(new(80, 80, 80, 70));
                 }
 
-                Main.spriteBatch.Draw(RecipeFilterBack.Value, hitbox.Center(), null, colorBack, 0, RecipeFilterBack.Size() / 2, 1, SpriteEffects.None, 0);
+                Main.spriteBatch.Draw(s_recipeFilterBack.Value, hitbox.Center(), null, colorBack, 0, s_recipeFilterBack.Size() / 2, 1, SpriteEffects.None, 0);
                 Rectangle frame = filters.AvailableFilters[i].GetSourceFrame();
-                Main.spriteBatch.Draw((s_recipesInFilter[i] != 0 ? RecipeFilters : RecipeFilter2).Value, hitbox.Center(), frame, color, 0, frame.Size() / 2, 1, SpriteEffects.None, 0);
+                Main.spriteBatch.Draw((s_recipesInFilter[i] != 0 ? s_recipeFilters : s_recipeFiltersGray).Value, hitbox.Center(), frame, color, 0, frame.Size() / 2, 1, SpriteEffects.None, 0);
 
                 x += delta;
                 d++;
@@ -138,11 +143,11 @@ public sealed class RecipeFiltering : ILoadable {
         return fits;
     }
 
-    private static readonly List<int> s_recipesInFilter = new();
+    private static readonly List<int> s_recipesInFilter = [];
     private static int s_recipes;
 
-    public static Asset<Texture2D> RecipeFilterBack => ModContent.Request<Texture2D>($"BetterInventory/Assets/Recipe_Filter_Back");
-    public static Asset<Texture2D> RecipeFilters => ModContent.Request<Texture2D>($"BetterInventory/Assets/Recipe_Filters");
-    public static Asset<Texture2D> RecipeFilter2 => ModContent.Request<Texture2D>($"BetterInventory/Assets/Recipe_Filters2");
-    public static Asset<Texture2D> FiltersOutline => TextureAssets.InfoIcon[13];
+    private static Asset<Texture2D> s_recipeFilterBack = null!;
+    internal static Asset<Texture2D> s_recipeFilters = null!;
+    private static Asset<Texture2D> s_recipeFiltersGray = null!;
+    private static Asset<Texture2D> s_filtersOutline = null!;
 }
