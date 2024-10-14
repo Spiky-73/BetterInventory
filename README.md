@@ -54,6 +54,15 @@ See [Reporting Bugs](ReportingBugs.md)
 
 ## Changelog
 
+### v0.6.1.1
+- Fixed MoreRecipes always been active
+- Fixed been able to craft with a guideTile
+- Fixed CraftInMenu and FavoriteRecipe been broken when MoreRecipes was disabled
+- Fixed required items positions when guideTile was disabled
+- Fixed the recipe list been empty when Favoring an item and having a guideTile
+- Fixed QuickSearch failing when searching a crafting stations and guideTile is disabled
+- Fixed CraftInMenu visibility taken into account when disabled
+
 ### v0.6.1
 - Updated SPIC dependency to v4.0
 - Updated Spiky's Lib dependency to v1.2

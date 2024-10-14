@@ -21,9 +21,14 @@ public sealed class RecipeFiltering : ILoadable {
     public static RecipeFilters LocalFilters => ItemActions.BetterPlayer.LocalPlayer.RecipeFilters;
 
     public void Load(Mod mod) {
+        On_Recipe.AddToAvailableRecipes += HookFilterAddedRecipe;
         IL_Main.DrawInventory += static il => {
             if (!il.ApplyTo(ILDrawFilters, Configs.RecipeFilters.Enabled)) Configs.UnloadedCrafting.Value.recipeFilters = true;
         };
+        IL_Recipe.CollectGuideRecipes += static il => {
+            if (!il.ApplyTo(ILForceAddToAvailable, Configs.RecipeFilters.Enabled)) Configs.UnloadedCrafting.Value.recipeFilters = true;
+        };
+
 
         s_recipeFilterBack = mod.Assets.Request<Texture2D>($"Assets/Recipe_Filter_Back");
         s_recipeFilters = mod.Assets.Request<Texture2D>($"Assets/Recipe_Filters");
@@ -68,8 +73,8 @@ public sealed class RecipeFiltering : ILoadable {
 
     public static void DrawFilters(int hammerX, int hammerY){
         static void OnFilterChanges() {
-            if (!Configs.BetterGuide.AvailableRecipes) Recipe.FindRecipes();
-            else Guide.FindGuideRecipes();
+            if (Configs.BetterGuide.AvailableRecipes) Guide.FindGuideRecipes();
+            else Recipe.FindRecipes();
             SoundEngine.PlaySound(SoundID.MenuTick);
         }
 
@@ -130,6 +135,36 @@ public sealed class RecipeFiltering : ILoadable {
         for (int i = 0; i < LocalFilters.Filterer.AvailableFilters.Count; i++) s_recipesInFilter.Add(0);
     }
 
+    private static void ILForceAddToAvailable(ILContext il) {
+        ILCursor cursor = new(il);
+
+        Utility.GotoRecipeDisabled(cursor, out ILLabel endLoop, out int index, out _);
+
+        //     for(<material>) {
+        cursor.GotoNext(MoveType.AfterLabel, i => i.MatchLdsfld(Reflection.Main.availableRecipe));
+
+        //         if(<recipeOk> ++[&& !custom]) {
+        cursor.EmitLdloc(index);
+        cursor.EmitDelegate((int r) => {
+            if (!Configs.RecipeFilters.Enabled) return false;
+            Reflection.Recipe.AddToAvailableRecipes.Invoke(r);
+            return true;
+        });
+        cursor.EmitBrtrue(endLoop!);
+
+        //             Main.availableRecipe[Main.numAvailableRecipes] = i;
+        //             Main.numAvailableRecipes++;
+        //             break;
+        //         }
+        //     }
+        // }
+    }
+
+    private static void HookFilterAddedRecipe(On_Recipe.orig_AddToAvailableRecipes orig, int recipeIndex) {
+        if (Guide.HighjackAddRecipe(recipeIndex)) return;
+        if (Configs.RecipeFilters.Enabled && !FitsFilters(recipeIndex)) return;
+        orig(recipeIndex);
+    }
     public static bool FitsFilters(int recipe){
         EntryFilterer<Item, CreativeFilterWrapper> filterer = LocalFilters.Filterer;
         bool fits = false;

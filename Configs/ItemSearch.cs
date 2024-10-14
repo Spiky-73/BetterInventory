@@ -54,9 +54,11 @@ public sealed class BetterGuide {
     public static bool ConditionsDisplay => Enabled && Value.conditionsDisplay;
     public static bool FavoritedRecipes => Enabled && Value.favoritedRecipes && !UnloadedItemSearch.Value.guideFavorited;
     public static bool CraftInMenu => Enabled && Value.craftInMenu && !UnloadedItemSearch.Value.guideCraftInMenu;
-    public static bool CraftingStation => Enabled && Value.craftingStation && !UnloadedItemSearch.Value.guideCraftingStation;
+    public static bool GuideTile => Enabled && Value.craftingStation && !UnloadedItemSearch.Value.guideCraftingStation;
     public static bool UnknownDisplay => Enabled && Value.unknownDisplay > Configs.UnknownDisplay.Vanilla && !UnloadedItemSearch.Value.guideUnknown;
-    public static bool AvailableRecipes => FavoritedRecipes || CraftInMenu || UnknownDisplay;
+
+    public static bool AvailableRecipes => FavoritedRecipes || CraftInMenu;
+    public static bool RecipeOrdering => FavoritedRecipes || UnknownDisplay;
     public static BetterGuide Value => ItemSearch.Instance.betterGuide.Value;
     
     // Compatibility version < v0.6

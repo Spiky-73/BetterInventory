@@ -9,7 +9,7 @@ namespace BetterInventory.ItemSearch;
 
 public sealed class VisibilityFilters {
     
-    public static Flags CurrentVisibility => (Main.guideItem.IsAir && (!Configs.BetterGuide.CraftingStation || Guide.guideTile.IsAir)) ? Flags.ShowAllAir : Flags.ShowAllGuide;
+    public static Flags CurrentVisibility => (Main.guideItem.IsAir && (!Configs.BetterGuide.GuideTile || Guide.guideTile.IsAir)) ? Flags.ShowAllAir : Flags.ShowAllGuide;
     public bool ShowAllRecipes {
         get => Visibility.HasFlag(CurrentVisibility);
         set => SetFlag(CurrentVisibility, value);
