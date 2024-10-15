@@ -116,7 +116,8 @@ public sealed class UnloadedItemSearch {
     public bool recipeList = false;
 
     [JsonIgnore] public bool BestiaryUnlock { set { bestiaryUnknown = value; bestiaryDisplayedInfo = value; } }
-    [JsonIgnore] public bool GuideAvailableRecipes { set { guideFavorited = value; guideCraftInMenu = value; guideUnknown = value; } }
+    [JsonIgnore] public bool GuideAvailableRecipes { set { guideFavorited = value; guideCraftInMenu = value; } }
+    [JsonIgnore] public bool GuideRecipeOrdering { set { guideUnknown = value; guideFavorited = value; } }
     
     public static UnloadedItemSearch Value => Compatibility.Instance.unloadedItemSearch;
 }

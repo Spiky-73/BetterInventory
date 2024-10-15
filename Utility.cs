@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using MonoMod.Cil;
 using SpikysLib;
 using SpikysLib.Constants;
+using SpikysLib.IL;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -84,5 +85,21 @@ public static class Utility {
         cursor.GotoNext(i => i.MatchLdsfld(Reflection.Main.hidePlayerCraftingMenu));
         cursor.GotoNext(MoveType.After, i => i.MatchStsfld(Reflection.UILinkPointNavigator.CRAFT_CurrentRecipeSmall));
         return cursor;
-    }    
+    }
+
+    public static ILCursor GotoRecipeDisabled(ILCursor cursor, out ILLabel endLoop, out int index, out int recipe) {
+        cursor.GotoNextLoc(out index, i => i.Previous.MatchLdcI4(0), 1);
+        // for (<recipeIndex>) {
+        //     ...
+        //     if (recipe.Disabled) continue;
+        cursor.GotoNext(i => i.MatchCallvirt(Reflection.Recipe.Disabled.GetMethod!));
+        int r = 0;
+        recipe = cursor.TryFindPrev(out _, i => i.MatchLdloc(out r)) ? r : 2;
+        ILLabel end = null!;
+        cursor.GotoNext(i => i.MatchBrtrue(out end!));
+        cursor.GotoNext(MoveType.AfterLabel);
+        endLoop = end;
+        return cursor;
+    }
+
 }

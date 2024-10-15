@@ -105,7 +105,7 @@ public sealed class RecipeList : ModEntityCatalogue {
             if (slot == -1 || slot == 0) ItemSlot.LeftClick(items, ContextID.GuideItem, 0);
             if (slot == -1 || slot == 1) ItemSlot.LeftClick(items, ContextID.GuideItem, 1);
         } else {
-            if (slot == -1) slot = Guide.textTiles.Exist(i => Guide.AreSame(i, item)) || Guide.textConditions.Exist(i => Guide.AreSame(i.item, item)) ? 1 : 0;
+            if (slot == -1) slot = Configs.BetterGuide.GuideTile && Guide.IsCraftingStation(item) ? 1 : 0;
             if (ItemSlot.PickItemMovementAction(items, ContextID.GuideItem, 1 - slot, item) != -1) {
                 bool clearOtherSlot = item.tooltipContext != ContextID.GuideItem;
                 if (Guide.AreSame(items[slot], item)) {
@@ -194,13 +194,13 @@ public sealed class RecipeList : ModEntityCatalogue {
     private static void HookDropItems(On_Player.orig_dropItemCheck orig, Player self) {
         if (!Instance.Enabled) {
             orig(self);
-            Guide.dropItemCheck(self);
+            Guide.dropGuideTileCheck(self);
             return;
         }
         bool old = Main.InGuideCraftMenu;
         Main.InGuideCraftMenu = true;
         orig(self);
-        Guide.dropItemCheck(self);
+        Guide.dropGuideTileCheck(self);
         Main.InGuideCraftMenu = old;
     }
 

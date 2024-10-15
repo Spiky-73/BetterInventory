@@ -10,15 +10,18 @@ ModName: Better Inventory
 SPIC.ModName: Spy's Infinite Consumables
 Homepage: homepage
 Workshop: Steam Workshop page
-Version: 0.6.1
+Version: 0.6.1.1
 Summary: ""
-Details: Updated dependency versions
+Details: Bug fixes for BetterGuide
 Changelog:
 	'''
-	- Updated SPIC dependency to v4.0
-	- Updated Spiky's Lib dependency to v1.2
-	- Updated assets loading
-	- Fixed a bug with Quick move when HotkeyMode was set to FromEnd
-	- Fixed Craft Stack not working for items with no SPIC requirements
-	- Fixed Craft Stack crafting items stack greater than maxStack
+	- Added recipe count on Available recipes toggle
+	- Fixed MoreRecipes always been active
+	- Fixed been able to craft with a guideTile
+	- Fixed CraftInMenu and FavoriteRecipe been broken when MoreRecipes was disabled
+	- Fixed required items positions when guideTile was disabled
+	- Fixed the recipe list been empty when Favoring an recipe and having a guideTile
+	- Fixed QuickSearch failing when searching a crafting stations and guideTile is disabled
+	- Fixed CraftInMenu visibility taken into account when disabled
+	- Fixed Recipes not updating when change the BetterGuide settings
 	'''
