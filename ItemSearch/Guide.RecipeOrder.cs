@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using ReLogic.Content;
+using SpikysLib;
 using SpikysLib.DataStructures;
 using SpikysLib.IL;
 using Terraria;
@@ -182,6 +183,16 @@ public sealed partial class Guide : ModSystem {
         if (LocalFilters.IsFavorited(recipe)) return FavoriteState.Favorited;
         if (LocalFilters.IsBlacklisted(recipe)) return FavoriteState.Blacklisted;
         return FavoriteState.Default;
+    }
+
+    public static bool UpdateOwnedItems() {
+        bool added = false;
+        if (!Main.mouseItem.IsAir) added |= LocalFilters.AddOwnedItem(Main.mouseItem);
+        foreach (Item item in Main.LocalPlayer.inventory) if (!item.IsAir) added |= LocalFilters.AddOwnedItem(item);
+        if (Main.LocalPlayer.InChest(out Item[]? chest)) {
+            foreach (Item item in chest) if (!item.IsAir) added |= LocalFilters.AddOwnedItem(item);
+        }
+        return added;
     }
 
     public static bool IsUnknown(int recipe) => s_unknownRecipes.Contains(recipe);

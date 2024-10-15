@@ -50,7 +50,6 @@ public sealed partial class Guide : ModSystem {
         };
         IL_Recipe.FindRecipes += static il => {
             if (!il.ApplyTo(ILSkipGuideRecipes, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = true;
-            if (!il.ApplyTo(ILUpdateOwnedItems, Configs.BetterGuide.UnknownDisplay || Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.guideUnknown = Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = true;
         };
         IL_Recipe.CollectGuideRecipes += static il => {
             if (!il.ApplyTo(ILMoreGuideRecipes, Configs.BetterGuide.AvailableRecipes || Configs.BetterGuide.MoreRecipes || Configs.BetterGuide.GuideTile))

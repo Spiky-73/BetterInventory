@@ -55,13 +55,15 @@ See [Reporting Bugs](ReportingBugs.md)
 ## Changelog
 
 ### v0.6.1.1
+- Added recipe count on Available recipes toggle
 - Fixed MoreRecipes always been active
 - Fixed been able to craft with a guideTile
 - Fixed CraftInMenu and FavoriteRecipe been broken when MoreRecipes was disabled
 - Fixed required items positions when guideTile was disabled
-- Fixed the recipe list been empty when Favoring an item and having a guideTile
+- Fixed the recipe list been empty when Favoring an recipe and having a guideTile
 - Fixed QuickSearch failing when searching a crafting stations and guideTile is disabled
 - Fixed CraftInMenu visibility taken into account when disabled
+- Fixed Recipes not updating when change the BetterGuide settings
 
 ### v0.6.1
 - Updated SPIC dependency to v4.0
@@ -87,7 +89,7 @@ See [Reporting Bugs](ReportingBugs.md)
 - Simplified notifications
 - Fixed a bug with Previous Slot
 - Fixed FixedUI ScrollButtons
-- Fixed some wierd behaviour with GuideTile
+- Fixed some weird behaviour with GuideTile
 
 ### v0.5.1.3
 - Fixed SmartConsumption not consuming mouse item

@@ -191,7 +191,7 @@ public sealed partial class Guide : ModSystem {
         Main.spriteBatch.Draw(tick.Value, s_hitBox.Center(), null, color, 0f, tick.Value.Size() / 2, 1, 0, 0f);
         if (s_visibilityHover) {
             string key = filters.ShowAllRecipes ? $"{Localization.Keys.UI}.ShowAll" : $"{Localization.Keys.UI}.ShowAvailable";
-            Main.instance.MouseText(Language.GetTextValue(key));
+            Main.instance.MouseText(Language.GetTextValue($"{Localization.Keys.UI}.Filter", Language.GetTextValue(key), Main.numAvailableRecipes)); // TODO display x-y (total) next to recipe list arrows
             Main.spriteBatch.Draw(s_inventoryTickBorder.Value, s_hitBox.Center(), null, color, 0f, s_inventoryTickBorder.Value.Size() / 2, 1, 0, 0f);
         }
     }
@@ -238,11 +238,17 @@ public sealed partial class Guide : ModSystem {
             orig(canDelayCheck);
             return;
         }
+
+        // Add owned items before updating recipes
+        bool forced = Configs.BetterGuide.UnknownDisplay && UpdateOwnedItems();
+
         if (Configs.BetterGuide.AvailableRecipes) {
-            // Update guide if called because guide items changed
-            if (!AreSame(Main.guideItem, s_dispGuide) || !AreSame(guideTile, s_dispTile)) FindGuideRecipes();
-            // Update available otherwise
-            else orig(canDelayCheck);
+            // Update available if no guide item changed
+            bool guideChange = !AreSame(Main.guideItem, s_dispGuide) || !AreSame(guideTile, s_dispTile);
+            if (!guideChange) orig(canDelayCheck);            
+            // Update guide recipes if we don't show everything
+            if (forced || guideChange || !ShowAllRecipes()) FindGuideRecipes();
+
         } else {
             // Display guide recipes if there's a guide tile
             if (Configs.BetterGuide.GuideTile && !guideTile.IsAir) FindGuideRecipes();
@@ -272,32 +278,6 @@ public sealed partial class Guide : ModSystem {
         cursor.GotoNext(MoveType.After, i => i.SaferMatchCall(Reflection.Recipe.CollectItemsToCraftWithFrom));
         cursor.GotoPrev(MoveType.After, i => i.MatchRet());
         cursor.MarkLabel(skipGuide);
-    }
-    private static void ILUpdateOwnedItems(ILContext il) {
-        ILCursor cursor = new(il);
-
-        // <availableRecipes>
-        cursor.GotoNext(i => i.SaferMatchCall(Reflection.Recipe.CollectItemsToCraftWithFrom));
-        cursor.GotoNext(MoveType.AfterLabel, i => i.SaferMatchCall(Reflection.Recipe.TryRefocusingRecipe));
-
-        // ++<updateDisplay>
-        cursor.EmitDelegate(() => {
-            if (!Configs.BetterGuide.UnknownDisplay) return;
-
-            // Add discovered items
-            bool added = false;
-            if (!Main.mouseItem.IsAir) added |= LocalFilters.AddOwnedItem(Main.mouseItem);
-            foreach (Item item in Main.LocalPlayer.inventory) if (!item.IsAir) added |= LocalFilters.AddOwnedItem(item);
-            if (Main.LocalPlayer.InChest(out Item[]? chest)) {
-                foreach (Item item in chest) if (!item.IsAir) added |= LocalFilters.AddOwnedItem(item);
-            }
-
-            // Update the displayed recipes as the order could have changed
-            if (Configs.BetterGuide.AvailableRecipes && (added || !ShowAllRecipes())) FindGuideRecipes();
-
-        });
-        // Recipe.TryRefocusingRecipe(oldRecipe);
-        // Recipe.VisuallyRepositionRecipes(focusY);
     }
 
     internal static bool HighjackAddRecipe(int recipeIndex) {
