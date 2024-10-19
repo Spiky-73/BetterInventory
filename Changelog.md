@@ -1,5 +1,8 @@
 # Better Inventory changelog
 
+## dev
+- Added an options to keep swapped items favorited
+
 ## v0.6.1.2
 - Fixed guideTile not working for condition items
 - Fixed guideTile been saved as a lens

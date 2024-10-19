@@ -502,6 +502,11 @@ ItemActions: {
 			Builder Keybinds are at the bottom of the Keybindings' page
 			'''
 	}
+
+	keepSwappedFavorited: {
+		Label: "[i:75] Keep Swapped Items Favorited"
+		Tooltip: When swapping a favorited item to a slot where it cannot be favorited, the item it swaps with will be favorited
+	}
 }
 
 ItemRightClick: {
