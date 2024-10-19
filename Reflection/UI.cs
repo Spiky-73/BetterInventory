@@ -12,6 +12,6 @@ public static class ItemSlot {
 
 public static class UILinkPointNavigator {
     public static readonly StaticField<int> CRAFT_CurrentIngredientsCount = new(typeof(TShortcuts), nameof(TShortcuts.CRAFT_CurrentIngredientsCount));
-    public static readonly StaticField<int> CRAFT_IconsPerRow = new(typeof(TShortcuts), nameof(TShortcuts.CRAFT_IconsPerRow));
+    public static readonly StaticField<int> CRAFT_IconsPerColumn = new(typeof(TShortcuts), nameof(TShortcuts.CRAFT_IconsPerColumn));
     public static readonly StaticField<int> CRAFT_CurrentRecipeSmall = new(typeof(TShortcuts), nameof(TShortcuts.CRAFT_CurrentRecipeSmall));
 }

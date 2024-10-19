@@ -51,6 +51,16 @@ FixedUI: {
 		Label: Craft When Holding an Item
 		Tooltip: Allows you to craft when holding an item
 	}
+
+	recipeCount: {
+		Label: Display Recipe Count
+		Tooltip: The range of recipes displayed on the recipe list
+	}
+
+	noRecStartOffset: {
+		Label: Disable recipe list offset
+		Tooltip: Prevent the recipe list from offsetting to fill the last line when reaching  the bottom of the list
+	}
 }
 
 FastScroll: {
@@ -502,6 +512,11 @@ ItemActions: {
 			Builder Keybinds are at the bottom of the Keybindings' page
 			'''
 	}
+
+	keepSwappedFavorited: {
+		Label: "[i:75] Keep Swapped Items Favorited"
+		Tooltip: When swapping a favorited item to a slot where it cannot be favorited, the item it swaps with will be favorited
+	}
 }
 
 ItemRightClick: {
@@ -840,6 +855,16 @@ UnloadedCrafting: {
 
 	wrapping: {
 		Label: "{$Mods.BetterInventory.Configs.Crafting.fixedUI.Label} @ {$Mods.BetterInventory.Configs.FixedUI.wrapping.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	recipeCount: {
+		Label: "{$Mods.BetterInventory.Configs.Crafting.fixedUI.Label} @ {$Mods.BetterInventory.Configs.FixedUI.recipeCount.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	noRecStartOffset: {
+		Label: "{$Mods.BetterInventory.Configs.Crafting.fixedUI.Label} @ {$Mods.BetterInventory.Configs.FixedUI.noRecStartOffset.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 

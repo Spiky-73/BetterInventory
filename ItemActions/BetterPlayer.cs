@@ -23,8 +23,8 @@ public sealed class BetterPlayer : ModPlayer {
     public static BetterPlayer LocalPlayer => Main.LocalPlayer.GetModPlayer<BetterPlayer>();
 
     public static ModKeybind FavoritedBuffKb { get; private set; } = null!;
-    public static readonly List<(BuilderToggle? toggle, ModKeybind kb)> BuilderTogglesKb = new();
-    public static readonly List<BuilderToggle> WireDisplayToggles = new();
+    public static readonly List<(BuilderToggle? toggle, ModKeybind kb)> BuilderTogglesKb = [];
+    public static readonly List<BuilderToggle> WireDisplayToggles = [];
 
     public override void Load() {
         FavoritedBuffKb = KeybindLoader.RegisterKeybind(Mod, "FavoritedQuickBuff", Microsoft.Xna.Framework.Input.Keys.B);
@@ -32,7 +32,12 @@ public sealed class BetterPlayer : ModPlayer {
         On_Player.DropItemFromExtractinator += HookFastExtractinator;
 
         On_ItemSlot.PickupItemIntoMouse += HookNoPickupMouse;
+
+        On_ItemSlot.DyeSwap += HookDyeSwapFavorited;
+        On_ItemSlot.ArmorSwap += HookArmorSwapFavorited;
+        On_ItemSlot.EquipSwap += HookEquipSwapFavorited;
     }
+
     public override void Unload() {
         FavoritedBuffKb = null!;
         BuilderTogglesKb.Clear();
@@ -133,7 +138,7 @@ public sealed class BetterPlayer : ModPlayer {
 
 
     public override IEnumerable<Item> AddMaterialsForCrafting(out ItemConsumedCallback itemConsumedCallback) {
-        List<Item> items = new();
+        List<Item> items = [];
         Item? mat;
         if((mat = Guide.GetGuideMaterials()) != null) items.Add(mat);
         if(Main.myPlayer == Player.whoAmI && (mat = Crafting.Crafting.GetMouseMaterial()) != null) items.Add(mat);
@@ -194,6 +199,18 @@ public sealed class BetterPlayer : ModPlayer {
     public VisibilityFilters VisibilityFilters { get; set; } = new();
 
     private static bool s_noMousePickup;
+
+    private static Item HookEquipSwapFavorited(On_ItemSlot.orig_EquipSwap orig, Item item, Item[] inv, int slot, out bool success) => EquipSwapFavorited((out bool success) => orig(item, inv, slot, out success), item, out success);
+    private static Item HookArmorSwapFavorited(On_ItemSlot.orig_ArmorSwap orig, Item item, out bool success) => EquipSwapFavorited((out bool success) => orig(item, out success), item, out success);
+    private static Item HookDyeSwapFavorited(On_ItemSlot.orig_DyeSwap orig, Item item, out bool success) => EquipSwapFavorited((out bool success) => orig(item, out success), item, out success);
+
+    private delegate Item EquipSwapFn(out bool success);
+    private static Item EquipSwapFavorited(EquipSwapFn swap, Item item, out bool success) {
+        bool favorited = item.favorited;
+        Item swapped = swap(out success);
+        if (success && favorited && Configs.ItemActions.KeepSwappedFavorited) swapped.favorited = true;
+        return swapped;
+    }
 
     public const string VisibilityTag = "visibility";
     public const string RecipesTag = "recipes";

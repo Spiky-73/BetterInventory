@@ -141,11 +141,11 @@ public sealed class QuickMove : ILoadable {
 
     private static List<MovedItem> Move(Player player, Slot source, Slot target) {
         Item item = source.Item(player);
-        if (!target.Inventory.FitsSlot(player, item, target.Index, out var itemsToMove)) return new();
+        if (!target.Inventory.FitsSlot(player, item, target.Index, out var itemsToMove)) return [];
 
         IList<Item> items = target.Inventory.Items(player);
-        List<Item> freeItems = new();
-        List<MovedItem> movedItems = new() { new(source, target.Inventory, item.type, item.prefix, item.favorited) };
+        List<Item> freeItems = [];
+        List<MovedItem> movedItems = [new(source, target.Inventory, item.type, item.prefix, item.favorited)];
         
         void FreeTargetItem(Slot slot) {
             Item item = slot.Item(player);
@@ -159,6 +159,7 @@ public sealed class QuickMove : ILoadable {
         foreach (Slot slot in itemsToMove) FreeTargetItem(slot);
 
         bool canFavorite = Reflection.ItemSlot.canFavoriteAt.GetValue()[Math.Abs(target.Inventory.Context)];
+        bool keepFavorited = !canFavorite && item.favorited; // Only apply when the items would be unfavorited, to avoid "generating" favorited items 
         items[target.Index] = ItemHelper.MoveInto(items[target.Index], item, out _, target.Inventory.MaxStack, canFavorite);
         items[target.Index] = ItemHelper.MoveInto(items[target.Index], freeItems[0], out _, target.Inventory.MaxStack, canFavorite);
         source.Inventory.OnSlotChange(player, source.Index);
@@ -167,7 +168,10 @@ public sealed class QuickMove : ILoadable {
         for (int i = 0; i < freeItems.Count; i++) {
             Item free = freeItems[i];
             if (free.IsAir) continue;
+            bool f = free.favorited;
+            if (Configs.ItemActions.KeepSwappedFavorited && keepFavorited) free.favorited = true;
             free = source.GetItem(player, free, GetItemSettings.GetItemInDropItemCheck);
+            free.favorited = f;
             player.GetDropItem(ref free);
         }
 
@@ -302,14 +306,14 @@ public sealed class QuickMove : ILoadable {
     }
 
     private static int s_displayedItem = ItemID.None;
-    private static List<ModSubInventory> s_displayedChain = new();
+    private static List<ModSubInventory> s_displayedChain = [];
 
     private static int s_moveKey;
     private static int s_moveTime;
-    private static List<Slot> s_moveChain = new();
+    private static List<Slot> s_moveChain = [];
     private static int s_moveIndex = -1;
-    private static HashSet<Slot> s_validSlots = new();
-    private static List<MovedItem> s_movedItems = new();
+    private static HashSet<Slot> s_validSlots = [];
+    private static List<MovedItem> s_movedItems = [];
 
     private static bool s_hover, s_frameHover;
     private static int s_ignoreHotbar = -1, s_oldSelectedItem;

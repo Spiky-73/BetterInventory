@@ -10,11 +10,13 @@ public sealed class ItemActions : ModConfig {
     public Toggle<ItemRightClick> itemRightClick = new(true);
     [DefaultValue(true)] public bool favoritedBuff;
     [DefaultValue(true)] public bool builderAccs;
+    [DefaultValue(true)] public bool keepSwappedFavorited;
 
     public static bool FastContainerOpening => Instance.fastContainerOpening;
     public static bool FastExtractinator => Instance.fastExtractinator;
     public static bool FavoritedBuff => Instance.favoritedBuff;
     public static bool BuilderAccs => Instance.builderAccs;
+    public static bool KeepSwappedFavorited => Instance.keepSwappedFavorited;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
     public static ItemActions Instance = null!;

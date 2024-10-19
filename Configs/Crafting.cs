@@ -2,7 +2,6 @@ using System.ComponentModel;
 using Terraria.ModLoader.Config;
 using SpikysLib.Configs;
 using Newtonsoft.Json;
-using SpikysLib;
 
 namespace BetterInventory.Configs;
 
@@ -23,14 +22,19 @@ public sealed class FixedUI {
     [DefaultValue(true)] public bool scrollButtons = true;
     [DefaultValue(true)] public bool wrapping = true;
     [DefaultValue(true)] public bool craftWhenHolding = true;
+    [DefaultValue(true)] public bool recipeCount = true;
+    [DefaultValue(true)] public bool noRecStartOffset = true;
 
     public static bool Enabled => Crafting.Instance.fixedUI;
     public static bool FastScroll => Enabled && Value.fastScroll && !UnloadedCrafting.Value.fastScroll;
     public static bool ScrollButtons => Enabled && Value.scrollButtons && !UnloadedCrafting.Value.scrollButtons;
     public static bool Wrapping => Enabled && Value.wrapping && !UnloadedCrafting.Value.wrapping;
     public static bool CraftWhenHolding => Enabled && Value.craftWhenHolding;
+    public static bool RecipeCount => Enabled && Value.recipeCount && !UnloadedCrafting.Value.recipeCount;
+    public static bool NoRecStartOffset => Enabled && Value.noRecStartOffset && !UnloadedCrafting.Value.noRecStartOffset;
     public static FixedUI Value => Crafting.Instance.fixedUI.Value;
     
+    // Compatibility version < v0.6
     [JsonProperty, DefaultValue(true)] private bool listScroll { set => ConfigHelper.MoveMember(!value, _ => scrollButtons = value); }
 }
 

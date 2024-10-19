@@ -1,11 +1,16 @@
 using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
+using ReLogic.Graphics;
+using SpikysLib;
 using SpikysLib.IL;
 using Terraria;
 using Terraria.Audio;
+using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.UI.Gamepad;
 
 namespace BetterInventory.Crafting;
 
@@ -17,6 +22,8 @@ public sealed class FixedUI : ILoadable {
             if (!il.ApplyTo(ILFastScroll, Configs.FixedUI.FastScroll)) Configs.UnloadedCrafting.Value.fastScroll = true;
             if (!il.ApplyTo(ILMaterialWrapping, Configs.FixedUI.Wrapping)) Configs.UnloadedCrafting.Value.wrapping = true;
             if (!il.ApplyTo(ILScrollButtonsFix, Configs.FixedUI.ScrollButtons)) Configs.UnloadedCrafting.Value.scrollButtons = true;
+            if (!il.ApplyTo(ILRecipeCount, Configs.FixedUI.RecipeCount)) Configs.UnloadedCrafting.Value.recipeCount = true;
+            if (!il.ApplyTo(ILNoRecStartOffset, Configs.FixedUI.NoRecStartOffset)) Configs.UnloadedCrafting.Value.noRecStartOffset = true;
         };
 
     }
@@ -111,7 +118,7 @@ public sealed class FixedUI : ILoadable {
         // Main.hidePlayerCraftingMenu = false;
         // if(<recBigListVisible>) {
         //     ...
-        cursor.GotoNext(i => i.MatchStsfld(Reflection.UILinkPointNavigator.CRAFT_IconsPerRow));
+        cursor.GotoNext(i => i.MatchStsfld(Reflection.UILinkPointNavigator.CRAFT_IconsPerColumn));
 
         cursor.FindNext(out ILCursor[] cursors,
             i => i.MatchLdsfld(Reflection.TextureAssets.CraftUpButton) && i.Next.MatchCallvirt(Reflection.Asset<Texture2D>.Value.GetMethod!),
@@ -135,6 +142,61 @@ public sealed class FixedUI : ILoadable {
             // }
         }
         // }
+
+    }
+
+    private static void ILRecipeCount(ILContext il) {
+        ILCursor cursor = new(il);
+
+        // Main.hidePlayerCraftingMenu = false;
+        // if(<recBigListVisible>) {
+        //     ...
+        //     int num77 = 340; // y
+        //     int num78 = 310; // x
+        //     UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow = num79;
+        //     UILinkPointNavigator.Shortcuts.CRAFT_IconsPerColumn = num80;
+        cursor.GotoNext(MoveType.After, i => i.MatchStsfld(Reflection.UILinkPointNavigator.CRAFT_IconsPerColumn));
+        cursor.FindPrevLoc(out _, out int y, i => i.Previous.MatchLdcI4(340), 143);
+        cursor.FindPrevLoc(out _, out int x, i => i.Previous.MatchLdcI4(310), 144);
+
+        //     <up/down buttons>
+        cursor.GotoNextLoc(MoveType.After, out int recipeListIndex, i => i.Previous.MatchLdsfld(Reflection.Main.recStart), 153);
+
+        //     ++ <drawRecipeCount>
+        cursor.EmitLdloc(x).EmitLdloc(y);
+        cursor.EmitDelegate(DraxRecipeCount);
+
+        //     while (...) <recipeList>
+        // }
+    }
+    private static void DraxRecipeCount(int x, int y) {
+        if (!Configs.FixedUI.RecipeCount) return;
+        int padding = 20 - TextureAssets.CraftUpButton.Width();
+        x -= 20 + padding;
+        y += 2 + TextureAssets.CraftUpButton.Width() + padding / 2;
+        DynamicSpriteFont font = FontAssets.ItemStack.Value;
+        int displayedRecipes = UILinkPointNavigator.Shortcuts.CRAFT_IconsPerColumn * UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow;
+        string text = $"{Main.recStart+1}-{Math.Min(Main.numAvailableRecipes, Main.recStart + displayedRecipes)} ({Main.numAvailableRecipes})";
+        Vector2 origin = font.MeasureString(text);
+        origin.Y *= 0.5f;
+
+        Main.spriteBatch.DrawStringWithShadow(font, text, new(x, y), Color.White, 0, origin, Vector2.One);
+    }
+
+    private static void ILNoRecStartOffset(ILContext il) {
+        ILCursor cursor = new(il);
+
+        // Main.hidePlayerCraftingMenu = false;
+        // if(<recBigListVisible>) {
+        //     ...
+        cursor.GotoNext(i => i.MatchStsfld(Reflection.UILinkPointNavigator.CRAFT_IconsPerColumn));
+        cursor.GotoNext(MoveType.AfterLabel, i => i.MatchStsfld(Reflection.Main.recStart));
+        cursor.EmitDelegate((int rs) => {
+            if (!Configs.FixedUI.NoRecStartOffset) return rs;
+            int emptySlots = Main.recStart + UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow * UILinkPointNavigator.Shortcuts.CRAFT_IconsPerColumn - Main.numAvailableRecipes;
+            if (emptySlots > UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow) Main.recStart -= SpikysLib.MathHelper.Snap(emptySlots,UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow, SpikysLib.MathHelper.SnapMode.Floor);
+            return Main.recStart;
+        } );
 
     }
 

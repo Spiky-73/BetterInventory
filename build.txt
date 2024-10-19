@@ -3,5 +3,5 @@ author = Spiky
 version = 0.6.1.3
 homepage = https://github.com/Spiky-73/BetterInventory/blob/master/README.md
 side = Client
-modReferences = SpikysLib@1.2
+modReferences = SpikysLib@1.3
 weakReferences = SPIC@4.0
