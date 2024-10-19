@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using BetterInventory.Default.Catalogues;
 using BetterInventory.InventoryManagement;
+using BetterInventory.ItemActions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
@@ -232,7 +233,7 @@ public sealed partial class Guide : ModSystem {
     }
 
 
-    public static void SaveData(TagCompound tag) {
+    public static void SaveData(BetterPlayer player, TagCompound tag) {
         if (!guideTile.IsAir) {
             switch (GetPlaceholderType(guideTile)) {
             case PlaceholderType.ByHand:
@@ -250,11 +251,15 @@ public sealed partial class Guide : ModSystem {
             }
         }
     }
-    public static void LoadData(TagCompound tag) {
-        if (tag.ContainsKey(GuideTileHandTag)) guideTile = ByHandPlaceholder;
-        if (tag.TryGet(GuideTileTileTag, out TileDefinition tile)) guideTile = TilePlaceholder(tile);
-        if (tag.TryGet(GuideTileConditionTag, out string condition)) guideTile = ConditionPlaceholder(condition);
-        if (tag.TryGet(GuideTileTag, out Item guide)) guideTile = guide;
+    public static void LoadData(BetterPlayer player, TagCompound tag) {
+        if (tag.ContainsKey(GuideTileHandTag)) player._tempGuideTile = ByHandPlaceholder;
+        else if (tag.TryGet(GuideTileTileTag, out TileDefinition tile)) player._tempGuideTile = TilePlaceholder(tile);
+        else if (tag.TryGet(GuideTileConditionTag, out string condition)) player._tempGuideTile = ConditionPlaceholder(condition);
+        else if (tag.TryGet(GuideTileTag, out Item guide)) player._tempGuideTile = guide;
+        else player._tempGuideTile = new();
+    }
+    internal static void SetGuideItem(BetterPlayer player) {
+        if (player._tempGuideTile is not null) guideTile = player._tempGuideTile;
     }
 
     public const string GuideTileHandTag = "guideTileHand";

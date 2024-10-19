@@ -54,6 +54,9 @@ See [Reporting Bugs](ReportingBugs.md)
 
 ## Changelog
 
+### v0.6.1.3
+- Fixed guideTile saving as lens when empty
+
 ### v0.6.1.2
 - Fixed guideTile not working for condition items
 - Fixed guideTile been saved as a lens
