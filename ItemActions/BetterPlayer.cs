@@ -62,6 +62,8 @@ public sealed class BetterPlayer : ModPlayer {
         DisplayUpdate();
         DisplayCompatibility();
         DisplaySpicWarning();
+
+        Guide.SetGuideItem(this);
     }
 
     public override void ResetEffects() {
@@ -180,14 +182,14 @@ public sealed class BetterPlayer : ModPlayer {
         }
     }
     public override void SaveData(TagCompound tag) {
-        Guide.SaveData(tag);
+        Guide.SaveData(this, tag);
         tag[VisibilityTag] = VisibilityFilters;
         tag[RecipesTag] = RecipeFilters;
         tag[FavoritedInBanksTag] = new FavoritedInBanks(Player);
     }
 
     public override void LoadData(TagCompound tag) {
-        Guide.LoadData(tag);
+        Guide.LoadData(this, tag);
         if (tag.TryGet(VisibilityTag, out VisibilityFilters visibility)) VisibilityFilters = visibility;
         if (tag.TryGet(RecipesTag, out RecipeFilters recipe)) RecipeFilters = recipe;
         if (Configs.InventoryManagement.FavoriteInBanks && tag.TryGet(FavoritedInBanksTag, out FavoritedInBanks favorited)) favorited.Apply(Player);
@@ -213,4 +215,6 @@ public sealed class BetterPlayer : ModPlayer {
     public const string VisibilityTag = "visibility";
     public const string RecipesTag = "recipes";
     public const string FavoritedInBanksTag = "favorited";
+
+    internal Item? _tempGuideTile;
 }
