@@ -175,14 +175,14 @@ public sealed class BetterPlayer : ModPlayer {
         }
     }
     public override void SaveData(TagCompound tag) {
-        if (!Guide.guideTile.IsAir) tag[GuideTileTag] = Guide.guideTile;
+        Guide.SaveData(tag);
         tag[VisibilityTag] = VisibilityFilters;
         tag[RecipesTag] = RecipeFilters;
         tag[FavoritedInBanksTag] = new FavoritedInBanks(Player);
     }
 
     public override void LoadData(TagCompound tag) {
-        if (tag.TryGet(GuideTileTag, out Item guide)) Guide.guideTile = guide;
+        Guide.LoadData(tag);
         if (tag.TryGet(VisibilityTag, out VisibilityFilters visibility)) VisibilityFilters = visibility;
         if (tag.TryGet(RecipesTag, out RecipeFilters recipe)) RecipeFilters = recipe;
         if (Configs.InventoryManagement.FavoriteInBanks && tag.TryGet(FavoritedInBanksTag, out FavoritedInBanks favorited)) favorited.Apply(Player);

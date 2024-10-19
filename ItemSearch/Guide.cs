@@ -11,6 +11,8 @@ using Terraria.Audio;
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.ModLoader.Config;
+using Terraria.ModLoader.IO;
 using Terraria.UI;
 using ContextID = Terraria.UI.ItemSlot.Context;
 
@@ -205,8 +207,10 @@ public sealed partial class Guide : ModSystem {
     public const string ConditionMark = "@BI:";
     public const int ByHandCreateTile = -2;
     public static Item ByHandPlaceholder => new(Placeholder.type) { createTile = ByHandCreateTile };
-    public static Item ConditionPlaceholder(Condition condition) => new(Placeholder.type) { BestiaryNotes = ConditionMark + condition.Description.Key };
-    public static Item TilePlaceholder(int type) => new(Placeholder.type) { createTile = type };
+    public static Item ConditionPlaceholder(Condition condition) => ConditionPlaceholder(condition.Description.Key);
+    public static Item ConditionPlaceholder(string conditionKey) => new(Placeholder.type) { BestiaryNotes = ConditionMark + conditionKey };
+    public static Item TilePlaceholder(TileDefinition tile) => TilePlaceholder(tile.Type);
+    public static Item TilePlaceholder(int tileType) => new(Placeholder.type) { createTile = tileType };
     public static PlaceholderType GetPlaceholderType(Item item) {
         if (item.type != Placeholder.type || item.stack != 1) return PlaceholderType.None;
         if (item.createTile == ByHandCreateTile) return PlaceholderType.ByHand;
@@ -226,6 +230,38 @@ public sealed partial class Guide : ModSystem {
             PlaceholderType.None or _ => item.type == other.type,
         });
     }
+
+
+    public static void SaveData(TagCompound tag) {
+        if (!guideTile.IsAir) {
+            switch (GetPlaceholderType(guideTile)) {
+            case PlaceholderType.ByHand:
+                tag[GuideTileHandTag] = true;
+                break;
+            case PlaceholderType.Tile or PlaceholderType.ByHand:
+                tag[GuideTileTileTag] = new TileDefinition(guideTile.createTile);
+                break;
+            case PlaceholderType.Condition:
+                tag[GuideTileConditionTag] = guideTile.BestiaryNotes[ConditionMark.Length..];
+                break;
+            default:
+                tag[GuideTileTag] = guideTile;
+                break;
+            }
+        }
+    }
+    public static void LoadData(TagCompound tag) {
+        if (tag.ContainsKey(GuideTileHandTag)) guideTile = ByHandPlaceholder;
+        if (tag.TryGet(GuideTileTileTag, out TileDefinition tile)) guideTile = TilePlaceholder(tile);
+        if (tag.TryGet(GuideTileConditionTag, out string condition)) guideTile = ConditionPlaceholder(condition);
+        if (tag.TryGet(GuideTileTag, out Item guide)) guideTile = guide;
+    }
+
+    public const string GuideTileHandTag = "guideTileHand";
+    public const string GuideTileTileTag = "guideTileTile";
+    public const string GuideTileConditionTag = "guideTileCondition";
+    public const string GuideTileTag = "guideTile";
+
 
     public static Item[] GuideItems {
         get {

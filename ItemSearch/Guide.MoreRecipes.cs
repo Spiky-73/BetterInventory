@@ -77,7 +77,7 @@ public sealed partial class Guide : ModSystem {
             PlaceholderType.ByHand => recipe.requiredTile.Count == 0,
             PlaceholderType.Tile => recipe.requiredTile.Contains(guideTile.createTile),
             PlaceholderType.Condition => recipe.Conditions.Exists(c => c.Description.Key == guideTile.BestiaryNotes[ConditionMark.Length..]),
-            _ => guideTile.createTile != -1 ? // Real Item
+            _ => IsCraftingStation(guideTile) ? // Condition displayed item
                 recipe.requiredTile.Contains(guideTile.createTile) :
                 recipe.Conditions.Exists(c => ConditionItems.TryGetValue(c.Description.Key, out int type) && type == guideTile.type),
         };

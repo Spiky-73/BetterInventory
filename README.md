@@ -54,6 +54,10 @@ See [Reporting Bugs](ReportingBugs.md)
 
 ## Changelog
 
+### v0.6.1.2
+- Fixed guideTile not working for condition items
+- Fixed guideTile been saved as a lens
+
 ### v0.6.1.1
 - Added recipe count on Available recipes toggle
 - Fixed MoreRecipes always been active
