@@ -59,6 +59,7 @@ public static class GroupOptionButton<T> {
 
 public static class ItemDropBestiaryInfoElement {
     public static readonly Field<TItemDropE, DropRateInfo> _droprateInfo = new(nameof(_droprateInfo));
+    public static readonly StaticMethod<bool> ShouldShowItem = new(typeof(TItemDropE), nameof(ShouldShowItem), typeof(DropRateInfo).MakeByRefType());
 }
 public static class UISearchBar {
     public static readonly Field<TSearchBar, string> actualContents = new(nameof(actualContents));

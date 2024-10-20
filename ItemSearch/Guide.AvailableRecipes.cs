@@ -191,7 +191,7 @@ public sealed partial class Guide : ModSystem {
         Main.spriteBatch.Draw(tick.Value, s_hitBox.Center(), null, color, 0f, tick.Value.Size() / 2, 1, 0, 0f);
         if (s_visibilityHover) {
             string key = filters.ShowAllRecipes ? $"{Localization.Keys.UI}.ShowAll" : $"{Localization.Keys.UI}.ShowAvailable";
-            Main.instance.MouseText(Language.GetTextValue($"{Localization.Keys.UI}.Filter", Language.GetTextValue(key), Main.numAvailableRecipes)); // TODO display x-y (total) next to recipe list arrows
+            Main.instance.MouseText(Language.GetTextValue($"{Localization.Keys.UI}.Filter", Language.GetTextValue(key), Main.numAvailableRecipes));
             Main.spriteBatch.Draw(s_inventoryTickBorder.Value, s_hitBox.Center(), null, color, 0f, s_inventoryTickBorder.Value.Size() / 2, 1, 0, 0f);
         }
     }

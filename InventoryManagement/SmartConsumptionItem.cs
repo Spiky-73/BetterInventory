@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using BetterInventory.ItemActions;
 using MonoMod.Cil;
 using SpikysLib.Constants;
 using SpikysLib.IL;
@@ -62,6 +63,7 @@ public sealed class SmartConsumptionItem : GlobalItem {
     public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
         QuickMove.AddMoveChainLine(item, tooltips);
         ClickOverrides.AddCraftStackLine(item, tooltips);
+        BetterPlayer.AddBagContentTooltips(item, tooltips);
     }
 
     public static void SmartConsume(Player player, Item item, Func<Item?> stackPicker, int consumed = 1) {

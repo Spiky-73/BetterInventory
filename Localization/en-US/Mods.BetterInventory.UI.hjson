@@ -11,3 +11,4 @@ Craft: craft
 NoBestiaryEffect: Does not affect Bestiary completion
 FeatureUnloaded: This feature was not loaded and will have no effect even when Enabled
 FramesToSec: 60 = 1s
+BagContent: Contains the following items:

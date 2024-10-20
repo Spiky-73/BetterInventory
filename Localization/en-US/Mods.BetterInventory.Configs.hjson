@@ -517,6 +517,15 @@ ItemActions: {
 		Label: "[i:75] Keep Swapped Items Favorited"
 		Tooltip: When swapping a favorited item to a slot where it cannot be favorited, the item it swaps with will be favorited
 	}
+
+	showBagContent: {
+		Label: Show Grab Bag Content
+		Tooltip:
+			'''
+			Display items dropped by grab bags in their tooltip
+			Enabling {$Mods.BetterInventory.Configs.ItemActions.tooltipScroll.Name} is recommended 
+			'''
+	}
 }
 
 ItemRightClick: {
@@ -525,6 +534,15 @@ ItemRightClick: {
 	stackableItems: {
 		Label: Stackable Items
 		Tooltip: Right Click a stackable item to throw an item of the stack
+	}
+}
+
+ShowBagContent: {
+	Tooltip: ""
+
+	compact: {
+		Label: Compact Display
+		Tooltip: Regroup items with the same drop rate on the same line
 	}
 }
 
