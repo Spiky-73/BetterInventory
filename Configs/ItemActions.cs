@@ -39,7 +39,7 @@ public sealed class ItemRightClick {
 }
 
 public sealed class ShowBagContent {
-    public bool compact;
+    [DefaultValue(true)] public bool compact = true;
     
     public static bool Enabled => ItemActions.Instance.showBagContent;
     public static ShowBagContent Value => ItemActions.Instance.showBagContent.Value;
