@@ -27,6 +27,11 @@ Crafting: {
 	}
 
 	Tooltip: ""
+
+	availableMaterials: {
+		Label: Display Available Materials
+		Tooltip: Display how much of each of the selected's recipe materials you have
+	}
 }
 
 FixedUI: {
@@ -92,6 +97,20 @@ CraftOnList: {
 	focusHovered: {
 		Label: Focus Hovered Recipe
 		Tooltip: Automatically selects the hovered recipe
+	}
+}
+
+AvailableMaterials: {
+	Tooltip: ""
+
+	tooltip: {
+		Label: Tooltip
+		Tooltip: Display how much material you have on the material's tooltip
+	}
+
+	itemSlot: {
+		Label: Item slot
+		Tooltip: Display how much material you have on the item slot
 	}
 }
 
@@ -907,6 +926,11 @@ UnloadedCrafting: {
 
 	craftOnList: {
 		Label: "{$Mods.BetterInventory.Configs.Crafting.craftOnList.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	availableMaterialsItemSlot: {
+		Label: "{$Mods.BetterInventory.Configs.Crafting.availableMaterials.Label} @ {$Mods.BetterInventory.Configs.AvailableMaterials.itemSlot.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 }

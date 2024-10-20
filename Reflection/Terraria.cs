@@ -48,6 +48,7 @@ public static class Item {
     public static readonly Property<TItem, bool> IsACoin = new(nameof(TItem.IsACoin));
     public static readonly Method<TItem, bool> FitsAmmoSlot = new(nameof(TItem.FitsAmmoSlot));
     public static readonly Method<TItem, TItem> Clone = new(nameof(TItem.Clone));
+    public static readonly Field<TItem, bool> DD2Summon = new(nameof(TItem.DD2Summon));
 }
 
 public static class NPC {

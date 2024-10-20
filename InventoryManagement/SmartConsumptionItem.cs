@@ -61,6 +61,7 @@ public sealed class SmartConsumptionItem : GlobalItem {
     }
 
     public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
+        Crafting.Crafting.AddAvailableMaterials(item, tooltips);
         QuickMove.AddMoveChainLine(item, tooltips);
         ClickOverrides.AddCraftStackLine(item, tooltips);
         BetterPlayer.AddBagContentTooltips(item, tooltips);
