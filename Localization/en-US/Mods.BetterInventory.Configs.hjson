@@ -526,6 +526,11 @@ ItemActions: {
 			Enabling {$Mods.BetterInventory.Configs.ItemActions.tooltipScroll.Name} is recommended 
 			'''
 	}
+
+	tooltipScroll: {
+		Label: Tooltip Scroll
+		Tooltip: Makes tooltips scrollable when they are too tall
+	}
 }
 
 ItemRightClick: {
@@ -543,6 +548,15 @@ ShowBagContent: {
 	compact: {
 		Label: Compact Display
 		Tooltip: Regroup items with the same drop rate on the same line
+	}
+}
+
+TooltipScroll: {
+	Tooltip: ""
+
+	maximumHeight: {
+		Label: Maximum Screen Height
+		Tooltip: The maximum height of item tooltips
 	}
 }
 

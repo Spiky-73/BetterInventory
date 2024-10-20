@@ -32,3 +32,7 @@ public static class RecipeLoader {
     public static readonly StaticMethod<object?> OnCraft = new(typeof(TLoader), nameof(TLoader.OnCraft), typeof(TItem), typeof(TRecipe), typeof(List<TItem>), typeof(TItem));
     public static readonly StaticField<List<TItem>> ConsumedItems = new(typeof(TLoader), nameof(ConsumedItems));
 }
+
+public static class ItemLoader {
+    public delegate List<TooltipLine> ModifyTooltipsFn(TItem item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out TColor?[] overrideColor, int prefixlineIndex);
+}

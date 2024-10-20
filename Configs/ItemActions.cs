@@ -14,6 +14,7 @@ public sealed class ItemActions : ModConfig {
     [DefaultValue(true)] public bool builderAccs;
     [DefaultValue(true)] public bool keepSwappedFavorited;
     public Toggle<ShowBagContent> showBagContent = new(true);
+    public Toggle<TooltipScroll> tooltipScroll = new(true);
 
     public static bool FastContainerOpening => Instance.fastContainerOpening;
     public static bool FastExtractinator => Instance.fastExtractinator;
@@ -42,4 +43,11 @@ public sealed class ShowBagContent {
     
     public static bool Enabled => ItemActions.Instance.showBagContent;
     public static ShowBagContent Value => ItemActions.Instance.showBagContent.Value;
+}
+
+public sealed class TooltipScroll {
+    [DefaultValue(1)] public float maximumHeight = 1;
+
+    public static bool Enabled => ItemActions.Instance.tooltipScroll;
+    public static TooltipScroll Value => ItemActions.Instance.tooltipScroll.Value;
 }

@@ -5,6 +5,7 @@
 - Added the number of visible recipes to the recipe list
 - Prevented the offset of the recipes when at the bottom of the recipe list
 - Added grab bag drops in their tooltip
+- Added scrollable tooltips
 
 ### v0.6.1.3
 - Fixed guideTile saving as lens when empty
