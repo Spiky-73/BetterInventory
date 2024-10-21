@@ -15,13 +15,13 @@ public sealed class ItemActions : ModConfig {
     [DefaultValue(true)] public bool keepSwappedFavorited;
     public Toggle<ShowBagContent> showBagContent = new(true);
     public Toggle<TooltipScroll> tooltipScroll = new(true);
+    public Toggle<ItemAmmo> itemAmmo = new(true);
 
     public static bool FastContainerOpening => Instance.fastContainerOpening;
     public static bool FastExtractinator => Instance.fastExtractinator;
     public static bool FavoritedBuff => Instance.favoritedBuff;
     public static bool BuilderAccs => Instance.builderAccs;
     public static bool KeepSwappedFavorited => Instance.keepSwappedFavorited;
-    public static bool ShowBagContent => Instance.showBagContent;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
     public static ItemActions Instance = null!;
@@ -51,3 +51,20 @@ public sealed class TooltipScroll {
     public static bool Enabled => ItemActions.Instance.tooltipScroll;
     public static TooltipScroll Value => ItemActions.Instance.tooltipScroll.Value;
 }
+
+public sealed class ItemAmmo {
+    [DefaultValue(true)] public bool tooltip = true;
+    public Toggle<ItemSlotAmmo> itemSlot = new(true);
+
+    public static bool Enabled => ItemActions.Instance.itemAmmo;
+    public static ItemAmmo Value => ItemActions.Instance.itemAmmo.Value;
+    public static bool Tooltip => Enabled && Value.tooltip;
+    public static bool ItemSlot => Enabled && Value.itemSlot;
+}
+public sealed class ItemSlotAmmo {
+    [DefaultValue(0.55f)] public float size = 0.55f;
+    [DefaultValue(Corner.BottomRight)] public Corner position = Corner.BottomRight;
+    [DefaultValue(true)] public bool hover = true;
+}
+
+public enum Corner { TopLeft, TopRight, BottomLeft, BottomRight }

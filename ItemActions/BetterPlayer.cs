@@ -229,7 +229,7 @@ public sealed class BetterPlayer : ModPlayer {
 
     public static List<TooltipLine> GetGrabBagContent(int itemType) {
         if (_bagContentItemType != itemType) UpdateGrabBagContent(itemType);
-        List<TooltipLine> tooltips = [new(BetterInventory.Instance, $"bagContent#0", Language.GetTextValue($"{Localization.Keys.UI}.BagContent"))];
+        List<TooltipLine> tooltips = [new(BetterInventory.Instance, $"BagContent0", Language.GetTextValue($"{Localization.Keys.UI}.BagContent"))];
         for (int i = _bagContentCurrencies.Count - 1; i >= 0; i--) {
             var (currency, min, max) = _bagContentCurrencies[i];
 
@@ -245,7 +245,7 @@ public sealed class BetterPlayer : ModPlayer {
                     else priceText += $" - {priceTextMax}";
                 } else priceText += $" - {priceTextMax}";
             }
-            tooltips.Add(new(BetterInventory.Instance, $"bagContentCurrency#{i}", priceText));
+            tooltips.Add(new(BetterInventory.Instance, $"BagContentCurrency{i}", priceText));
         }
         tooltips.AddRange(_bagContentTooltips);
         return tooltips;
@@ -272,7 +272,7 @@ public sealed class BetterPlayer : ModPlayer {
         for (int i = 0; i < drops.Count; i++) {
             DropRateInfo drop = drops[i];
             if (drop.dropRate == 1 && CurrencyHelper.IsPartOfACurrency(drop.itemId, out int currency)) AddGrabBagContent_Currency(drop, currency);
-            else tooltips.Add(new(BetterInventory.Instance, $"bagContent#{tooltips.Count}", $"[i:{drop.itemId}] {Lang.GetItemName(drop.itemId)} {GetDropRate(drop)}"));
+            else tooltips.Add(new(BetterInventory.Instance, $"BagContent{tooltips.Count}", $"[i:{drop.itemId}] {Lang.GetItemName(drop.itemId)} {GetDropRate(drop)}"));
         }
     }
     private static void AddGrabBagContent_Compact(List<TooltipLine> tooltips, List<DropRateInfo> drops) {
@@ -281,7 +281,7 @@ public sealed class BetterPlayer : ModPlayer {
         void AddLine() {
             if (items.Count == 0) return;
             string sprites = items.Count == 1 ? $"[i:{items[0]}] {Lang.GetItemName(items[0])}" : string.Join(string.Empty, items.Select(i => $"[i:{i}]"));
-            tooltips.Add(new(BetterInventory.Instance, $"bagContent#{tooltips.Count}", $"{sprites} {dropRate}"));
+            tooltips.Add(new(BetterInventory.Instance, $"BagContent{tooltips.Count}", $"{sprites} {dropRate}"));
             items.Clear();
         }
         for (int i = 0; i < drops.Count; i++) {
@@ -367,7 +367,6 @@ public sealed class BetterPlayer : ModPlayer {
         int s = tooltipStart;
         tooltipStart -= scroll;
         tooltipStart = Math.Clamp(tooltipStart, 1, numTooltips - visibleLines);
-        if (s != tooltipStart) SoundEngine.PlaySound(SoundID.MenuTick);
     }
 
     public const string VisibilityTag = "visibility";

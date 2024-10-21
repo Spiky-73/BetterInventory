@@ -6,6 +6,9 @@
 - Prevented the offset of the recipes when at the bottom of the recipe list
 - Added grab bag drops in their tooltip
 - Added scrollable tooltips
+- Added available materials display
+- Added weapon ammo display
+- Updated Spiky's Lib dependency to v1.3
 
 ### v0.6.1.3
 - Fixed guideTile saving as lens when empty

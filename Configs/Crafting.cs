@@ -74,5 +74,4 @@ public class AvailableMaterials {
     public static AvailableMaterials Value => Crafting.Instance.availableMaterials.Value;
     public static bool Tooltip => Enabled && Value.tooltip;
     public static bool ItemSlot => Enabled && Value.itemSlot && !UnloadedCrafting.Value.availableMaterialsItemSlot;
-
 }

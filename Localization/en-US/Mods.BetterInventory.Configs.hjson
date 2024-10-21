@@ -547,8 +547,13 @@ ItemActions: {
 	}
 
 	tooltipScroll: {
-		Label: Tooltip Scroll
+		Label: "[i:171] Scrollable tooltips"
 		Tooltip: Makes tooltips scrollable when they are too tall
+	}
+
+	itemAmmo: {
+		Label: "[i:40] Display Item Ammo"
+		Tooltip: Display the ammo used by various items
 	}
 }
 
@@ -577,6 +582,47 @@ TooltipScroll: {
 		Label: Maximum Screen Height
 		Tooltip: The maximum height of item tooltips
 	}
+}
+
+ItemAmmo: {
+	Tooltip: ""
+
+	tooltip: {
+		Label: Tooltip line
+		Tooltip: Add a tooltip lines similar to Tile Wand's line
+	}
+
+	itemSlot: {
+		Label: Item Slot
+		Tooltip: Display the ammo alongside the item in the inventory
+	}
+}
+
+ItemSlotAmmo: {
+	Tooltip: ""
+
+	size: {
+		Label: Ammo Size
+		Tooltip: The size taken by the ammo in the item slot
+	}
+
+	position: {
+		Label: Position
+		Tooltip: The position of the ammo around the weapon
+	}
+
+	hover: {
+		Label: Ammo Hover
+		Tooltip: Display the tooltip of the ammo when it is hovered
+	}
+}
+
+Corner: {
+	Tooltip: ""
+	TopLeft.Label: Top Left
+	TopRight.Label: Top Right
+	BottomLeft.Label: Bottom Left
+	BottomRight.Label: Bottom Right
 }
 
 ItemSearch: {

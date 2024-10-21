@@ -38,7 +38,7 @@ public static class Utility {
         return min;
     }
 
-    public static bool ApplyTo(this ILContext context, Action<ILContext> ilEdit, bool enabled, [CallerArgumentExpression("ilEdit")] string name = "") {
+    public static bool ApplyTo(this ILContext context, Action<ILContext> ilEdit, bool enabled, [CallerArgumentExpression(nameof(ilEdit))] string name = "") {
         Mod mod = ModContent.GetInstance<BetterInventory>();
         if (Configs.Compatibility.CompatibilityMode && !enabled) {
             mod.Logger.Info($"ILHook {name} was not loaded. Related features will be disabled until reload");
@@ -101,5 +101,4 @@ public static class Utility {
         endLoop = end;
         return cursor;
     }
-
 }
