@@ -8,10 +8,10 @@ namespace BetterInventory.Crafting;
 
 public sealed class RecipeFilters {
 
-    public EntryFilterer<Item, CreativeFilterWrapper> Filterer { get; } = new();
+    public EntryFilterer<Item, IRecipeFilter> Filterer { get; } = new();
 
     public RecipeFilters(){
-        List<IItemEntryFilter> filters = new(){
+        List<IItemEntryFilter> filters = [
             new ItemFilters.Weapon(),
             new ItemFilters.Armor(),
             new ItemFilters.Vanity(),
@@ -22,14 +22,13 @@ public sealed class RecipeFilters {
             new ItemFilters.Consumables(),
             new ItemFilters.Tools(),
             new ItemFilters.Materials()
-        };
-        int[] indexes = new int[] { 0, 2, 8, 4, 7, 1, 9, 3, 6, 10 };
+        ];
+        int[] indexes = [0, 2, 8, 4, 7, 1, 9, 3, 6, 10];
 
-        List<CreativeFilterWrapper> allFilters = new();
-        for (int i = 0; i < filters.Count; i++) allFilters.Add(new(filters[i], indexes[i]));
-        allFilters.Add(new(new ItemFilters.MiscFallback(filters), 5));
+        List<IRecipeFilter> allFilters = [];
+        for (int i = 0; i < filters.Count; i++) allFilters.Add(new CreativeFilterWrapper(filters[i], indexes[i]));
+        allFilters.Add(new CreativeFilterWrapper(new ItemFilters.MiscFallback(filters), 5));
         Filterer.AddFilters(allFilters);
-    
     }
 
 }

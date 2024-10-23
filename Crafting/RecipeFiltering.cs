@@ -7,12 +7,10 @@ using ReLogic.Content;
 using SpikysLib.IL;
 using Terraria;
 using Terraria.Audio;
-using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
-using Terraria.ModLoader.UI;
 
 namespace BetterInventory.Crafting;
 
@@ -29,11 +27,9 @@ public sealed class RecipeFiltering : ILoadable {
             if (!il.ApplyTo(ILForceAddToAvailable, Configs.RecipeFilters.Enabled)) Configs.UnloadedCrafting.Value.recipeFilters = true;
         };
 
-
-        s_recipeFilterBack = mod.Assets.Request<Texture2D>($"Assets/Recipe_Filter_Back");
-        s_recipeFilters = mod.Assets.Request<Texture2D>($"Assets/Recipe_Filters");
-        s_recipeFiltersGray = mod.Assets.Request<Texture2D>($"Assets/Recipe_Filters_Gray");
         s_filtersOutline = TextureAssets.InfoIcon[13];
+        recipeFilters = mod.Assets.Request<Texture2D>($"Assets/Recipe_Filters");
+        recipeFiltersGray = mod.Assets.Request<Texture2D>($"Assets/Recipe_Filters_Gray");
     }
 
     public void Unload() {}
@@ -78,7 +74,7 @@ public sealed class RecipeFiltering : ILoadable {
             SoundEngine.PlaySound(SoundID.MenuTick);
         }
 
-        EntryFilterer<Item, CreativeFilterWrapper> filters = LocalFilters.Filterer;
+        var filters = LocalFilters.Filterer;
         
         int i = 0;
         int delta = s_filtersOutline.Width() + 2;
@@ -88,16 +84,18 @@ public sealed class RecipeFiltering : ILoadable {
             for(int d = 0; i < filters.AvailableFilters.Count && d < Configs.RecipeFilters.Value.filtersPerLine; i++){
                 bool active = filters.IsFilterActive(i);
                 if (Configs.RecipeFilters.Value.hideUnavailable && s_recipesInFilter[i] == 0 && !active) continue;
-                Rectangle hitbox = new(x, y, s_recipeFilterBack.Width(), s_recipeFilterBack.Height());
+                var filter = filters.AvailableFilters[i];
+                Rectangle frame = filter.GetSourceFrame();
+                Rectangle hitbox = new(x, y, frame.Width, frame.Height);
                 if (hitbox.Contains(Main.mouseX, Main.mouseY)) {
                     Main.LocalPlayer.mouseInterface = true;
                     int rare = 0;
-                    string name = Language.GetTextValue(filters.AvailableFilters[i].GetDisplayNameKey());
+                    string name = Language.GetTextValue(filter.GetDisplayNameKey());
                     if (s_recipesInFilter[i] != 0 || active) {
                         if (Main.mouseLeft && Main.mouseLeftRelease) {
                             bool keepOn = !active || filters.ActiveFilters.Count > 1;
                             filters.ActiveFilters.Clear();
-                            if (keepOn) filters.ActiveFilters.Add(filters.AvailableFilters[i]);
+                            if (keepOn) filters.ActiveFilters.Add(filter);
                             OnFilterChanges();
                         }
                         else if (Main.mouseRight && Main.mouseRightRelease) {
@@ -112,15 +110,9 @@ public sealed class RecipeFiltering : ILoadable {
                 }
 
                 Color color = Color.White;
-                Color colorBack = s_recipesInFilter[i] != 0 ? UICommon.DefaultUIBlue : new(64, 64, 64);
-                if (!active) {
-                    color = color.MultiplyRGBA(new(80, 80, 80, 70));
-                    colorBack = colorBack.MultiplyRGBA(new(80, 80, 80, 70));
-                }
+                if (!active) color = color.MultiplyRGBA(new(80, 80, 80, 70));
 
-                Main.spriteBatch.Draw(s_recipeFilterBack.Value, hitbox.Center(), null, colorBack, 0, s_recipeFilterBack.Size() / 2, 1, SpriteEffects.None, 0);
-                Rectangle frame = filters.AvailableFilters[i].GetSourceFrame();
-                Main.spriteBatch.Draw((s_recipesInFilter[i] != 0 ? s_recipeFilters : s_recipeFiltersGray).Value, hitbox.Center(), frame, color, 0, frame.Size() / 2, 1, SpriteEffects.None, 0);
+                Main.spriteBatch.Draw(filter.GetSource(s_recipesInFilter[i] != 0), hitbox.Center(), frame, color, 0, frame.Size() / 2, 1, SpriteEffects.None, 0);
 
                 x += delta;
                 d++;
@@ -166,7 +158,7 @@ public sealed class RecipeFiltering : ILoadable {
         orig(recipeIndex);
     }
     public static bool FitsFilters(int recipe){
-        EntryFilterer<Item, CreativeFilterWrapper> filterer = LocalFilters.Filterer;
+        var filterer = LocalFilters.Filterer;
         bool fits = false;
         s_recipes++;
         for (int i = 0; i < filterer.AvailableFilters.Count; i++) {
@@ -181,8 +173,7 @@ public sealed class RecipeFiltering : ILoadable {
     private static readonly List<int> s_recipesInFilter = [];
     private static int s_recipes;
 
-    private static Asset<Texture2D> s_recipeFilterBack = null!;
-    internal static Asset<Texture2D> s_recipeFilters = null!;
-    private static Asset<Texture2D> s_recipeFiltersGray = null!;
+    internal static Asset<Texture2D> recipeFilters = null!;
+    internal static Asset<Texture2D> recipeFiltersGray = null!;
     private static Asset<Texture2D> s_filtersOutline = null!;
 }
