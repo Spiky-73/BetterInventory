@@ -17,13 +17,22 @@ using SpikysLib.IL;
 using SpikysLib;
 using BetterInventory.Default.Catalogues;
 using System.Collections.Generic;
+using BetterInventory.Crafting.UI;
 
 namespace BetterInventory.ItemSearch;
 
 public sealed partial class Guide : ModSystem {
 
+    internal static GameTime _lastUpdateUiGameTime = null!;
+    internal static UserInterface recipeInterface = null!;
+    internal static RecipeFiltersCanvas recipeFiltersUI = null!;
+
     public static VisibilityFilters LocalFilters => BetterPlayer.LocalPlayer.VisibilityFilters;
 
+    public override void UpdateUI(GameTime gameTime) {
+        _lastUpdateUiGameTime = gameTime;
+        recipeInterface.Update(gameTime);
+    }
 
     private static void ILCustomDrawCreateItem(ILContext il) {
         ILCursor cursor = new(il);
@@ -245,7 +254,7 @@ public sealed partial class Guide : ModSystem {
         if (Configs.BetterGuide.AvailableRecipes) {
             // Update available if no guide item changed
             bool guideChange = !AreSame(Main.guideItem, s_dispGuide) || !AreSame(guideTile, s_dispTile);
-            if (!guideChange) orig(canDelayCheck);            
+            if (!guideChange) orig(canDelayCheck);
             // Update guide recipes if we don't show everything
             if (forced || guideChange || !ShowAllRecipes()) FindGuideRecipes();
 

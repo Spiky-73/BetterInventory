@@ -8,6 +8,7 @@
 - Added scrollable tooltips
 - Added available materials display
 - Added weapon ammo display
+- Reworked RecipeFilters to use UIElements
 - Updated recipe filter icons
 - Updated Spiky's Lib dependency to v1.3
 

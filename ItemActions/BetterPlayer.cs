@@ -11,7 +11,7 @@ using Terraria.Audio;
 using Terraria.ID;
 using SpikysLib.UI;
 using Terraria.Localization;
-using SpikysLib.CrossMod;
+using BetterInventory.CrossMod;
 using SpikysLib.Constants;
 using SpikysLib.Configs;
 using SpikysLib;

@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using SpikysLib;
 using SpikysLib.Collections;
-using SpikysLib.CrossMod;
+using BetterInventory.CrossMod;
 using SpikysLib.IL;
 using SpikysLib.UI;
 using Terraria;
