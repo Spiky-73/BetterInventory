@@ -3,21 +3,26 @@ using Terraria.ModLoader.Config;
 using SpikysLib.Configs;
 using Newtonsoft.Json;
 using BetterInventory.ItemSearch;
+using Terraria;
 
 namespace BetterInventory.Configs;
 
 public sealed class Crafting : ModConfig {
     public Toggle<FixedUI> fixedUI = new(true);
+    [DefaultValue(true)] public bool recipeSearchBar;
     public Toggle<RecipeFilters> recipeFilters = new(true);
     public Toggle<CraftOnList> craftOnList = new(true);
     [DefaultValue(true)] public bool mouseMaterial;
     public Toggle<AvailableMaterials> availableMaterials = new(true);
 
     public static bool MouseMaterial => Instance.mouseMaterial;
+    public static bool RecipeSearchBar => Instance.recipeSearchBar;
+    public static bool RecipeUI => RecipeSearchBar || Instance.recipeFilters;
     public static Crafting Instance = null!;
 
     public override void OnChanged() {
-        if (Guide.recipeFiltersUI?.filters is not null) Guide.recipeFiltersUI.filters.ItemsPerLine = RecipeFilters.Value.filtersPerLine;
+        if (Guide.recipeUI?.filters is not null) Guide.recipeUI.filters.ItemsPerLine = RecipeFilters.Value.filtersPerLine;
+        if (!Main.gameMenu && Guide.recipeUI is not null) Guide.recipeUI.RebuildList();
     }
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
@@ -51,6 +56,7 @@ public sealed class FastScroll {
 }
 
 public sealed class RecipeFilters {
+    [DefaultValue(true)] public bool searchBar = true;
     [DefaultValue(true)] public bool hideUnavailable = true;
     [Range(1, 6), DefaultValue(4)] public int filtersPerLine = 4;
 

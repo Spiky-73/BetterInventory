@@ -25,7 +25,7 @@ public sealed partial class Guide : ModSystem {
 
     internal static GameTime _lastUpdateUiGameTime = null!;
     internal static UserInterface recipeInterface = null!;
-    internal static RecipeFiltersCanvas recipeFiltersUI = null!;
+    internal static RecipeUI recipeUI = null!;
 
     public static VisibilityFilters LocalFilters => BetterPlayer.LocalPlayer.VisibilityFilters;
 

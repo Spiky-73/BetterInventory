@@ -45,7 +45,7 @@ public sealed class RecipeFiltering : ILoadable {
         //     ++<drawFilters>
         cursor.EmitLdloc(screenY); // int num54
         cursor.EmitDelegate((int y) => {
-            if (Configs.RecipeFilters.Enabled && LocalFilters.AllRecipes != 0) DrawFilters(94, 450 + y);
+            if (Configs.Crafting.RecipeUI && LocalFilters.AllRecipes != 0) DrawRecipeUI(94, 450 + y);
         });
 
         //     ...
@@ -61,13 +61,13 @@ public sealed class RecipeFiltering : ILoadable {
         //     }
     }
 
-    public static void DrawFilters(int hammerX, int hammerY){
-        Guide.recipeFiltersUI.container.Top.Pixels = hammerY + TextureAssets.CraftToggle[0].Height() - TextureAssets.InfoIcon[0].Width() / 2;
-        Guide.recipeFiltersUI.container.Left.Pixels = hammerX - TextureAssets.InfoIcon[0].Width() - 1;
+    public static void DrawRecipeUI(int hammerX, int hammerY){
+        Guide.recipeUI.container.Top.Pixels = hammerY + TextureAssets.CraftToggle[0].Height() - TextureAssets.InfoIcon[0].Width() / 2;
+        Guide.recipeUI.container.Left.Pixels = hammerX - TextureAssets.InfoIcon[0].Width() - 1;
 
-        if (_needsRefresh) {
-            Guide.recipeFiltersUI.RebuildRecipeGrid();
-            _needsRefresh = false;
+        if (_needsFilterRefresh) {
+            Guide.recipeUI.RebuildRecipeGrid();
+            _needsFilterRefresh = false;
         }
         Guide.recipeInterface.Draw(Main.spriteBatch, Guide._lastUpdateUiGameTime);
     }
@@ -116,12 +116,12 @@ public sealed class RecipeFiltering : ILoadable {
         for (int i = 0; i < filterer.AvailableFilters.Count; i++) {
             if (filterer.AvailableFilters[i].FitsFilter(item)) LocalFilters.RecipeInFilter[i]++;
         }
-        _needsRefresh = true;
+        _needsFilterRefresh = true;
         
         return filterer.FitsFilter(item);
     }
 
-    private static bool _needsRefresh;
+    private static bool _needsFilterRefresh;
 
     internal static Asset<Texture2D> recipeFilters = null!;
     internal static Asset<Texture2D> recipeFiltersGray = null!;

@@ -204,7 +204,7 @@ public sealed class RecipeList : ModEntityCatalogue {
         Main.InGuideCraftMenu = old;
     }
 
-    internal static void OnRecipeUIInit(RecipeFiltersCanvas element) {
+    internal static void OnRecipeUIInit(RecipeUI element) {
         var searchBar = element.searchBar;
         searchBar.Parent.OnRightClick += (_, _) => {
             if (!Instance.Enabled || !Configs.QuickSearch.RightClick) return;

@@ -6,8 +6,13 @@ Crafting: {
 		Tooltip: Fixes inconsistencies with the crafting UI
 	}
 
+	recipeSearchBar: {
+		Label: "[i:38] Recipe Search Bar"
+		Tooltip: Add a search bar to filter recipe by name
+	}
+
 	recipeFilters: {
-		Label: "[i: 38] Recipe Filters"
+		Label: "[i:29] Recipe Filters"
 		Tooltip:
 			'''
 			Filter recipes by their created item
@@ -88,6 +93,11 @@ RecipeFilters: {
 	filtersPerLine: {
 		Label: Filters Per Line
 		Tooltip: The number of filters per line
+	}
+
+	searchBar: {
+		Label: search Bar
+		Tooltip: ""
 	}
 }
 

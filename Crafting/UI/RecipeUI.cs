@@ -13,7 +13,7 @@ using Terraria.UI;
 
 namespace BetterInventory.Crafting.UI;
 
-public sealed class RecipeFiltersCanvas : UIState {
+public sealed class RecipeUI : UIState {
     public UIFlexList container = null!;
     public UIPanel searchPanel = null!;
     public UISearchBar searchBar = null!;
@@ -21,11 +21,20 @@ public sealed class RecipeFiltersCanvas : UIState {
 
     public sealed override void OnInitialize() {
         container = new() { ListPadding = 6 };
-        AddSearchBar(container);
-        AddFilters(container);
+        InitSearchBar();
+        InitFilters();
+
+        RebuildList();
         Append(container);
 
         RecipeList.OnRecipeUIInit(this);
+    }
+
+    public void RebuildList () {
+        container.Clear();
+
+        if (Configs.Crafting.RecipeSearchBar) container.Add(searchPanel);
+        if (Configs.RecipeFilters.Enabled) container.Add(filters);
     }
 
     public override void Update(GameTime gameTime) {
@@ -42,12 +51,14 @@ public sealed class RecipeFiltersCanvas : UIState {
     public override void RecalculateChildren() {
         base.RecalculateChildren();
 
-        if (searchPanel is not null) searchPanel.Width.Pixels = Math.Max(container.Width.Pixels, 14*4+3*6);
+        if (searchPanel is not null) {
+            if (Main.recBigList) searchPanel.Width.Pixels = 220;
+            else searchPanel.Width.Pixels = Math.Max(filters.Width.Pixels, 14 * 4 + 3 * 6);
+        }
     }
 
-    private void AddFilters(UIList container) {
+    private void InitFilters() {
         filters = new() { ListPadding = 6 };
-        container.Add(filters);
     }
 
     public void RebuildRecipeGrid() {
@@ -88,14 +99,13 @@ public sealed class RecipeFiltersCanvas : UIState {
         Recalculate();
     }
 
-    private void AddSearchBar(UIList searchArea) {
+    private void InitSearchBar() {
         searchPanel = new() {
             Height = new StyleDimension(24f, 0),
             BackgroundColor = new Color(35, 40, 83),
-            BorderColor = new Color(35, 40, 83)
+            BorderColor = new Color(15, 20, 40)
         };
         searchPanel.SetPadding(0f);
-        searchArea.Add(searchPanel);
 
         searchBar = new(Language.GetText("UI.PlayerNameSlot"), 0.8f) {
             Width = new StyleDimension(0f, 1f),
@@ -107,7 +117,7 @@ public sealed class RecipeFiltersCanvas : UIState {
         };
 
         searchBar.OnStartTakingInput += () => searchPanel.BorderColor = Main.OurFavoriteColor;
-        searchBar.OnEndTakingInput += () => searchPanel.BorderColor = new Color(35, 40, 83);
+        searchBar.OnEndTakingInput += () => searchPanel.BorderColor = new Color(15, 20, 40);
         searchPanel.OnLeftClick += (evt, _) => {
             if (evt.Target.Parent != searchPanel) searchBar.ToggleTakingText();
         };

@@ -69,10 +69,10 @@ public sealed partial class Guide : ModSystem {
         s_inventoryTickBorder = Mod.Assets.Request<Texture2D>($"Assets/Inventory_Tick_Border");
         s_unknownTexture = Mod.Assets.Request<Texture2D>($"Assets/Unknown_Item");
 
-        recipeFiltersUI = new();
-        recipeFiltersUI.Activate();
+        recipeUI = new();
+        recipeUI.Activate();
         recipeInterface = new();
-        recipeInterface.SetState(recipeFiltersUI);
+        recipeInterface.SetState(recipeUI);
     }
 
     public override void Unload() {
