@@ -1,4 +1,5 @@
 using System;
+using BetterInventory.Default.Catalogues;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SpikysLib.UI.Elements;
@@ -23,6 +24,8 @@ public sealed class RecipeFiltersCanvas : UIState {
         AddSearchBar(container);
         AddFilters(container);
         Append(container);
+
+        RecipeList.OnRecipeUIInit(this);
     }
 
     public override void Update(GameTime gameTime) {
