@@ -4,7 +4,6 @@ using SpikysLib.UI.Elements;
 using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
-using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.UI;
@@ -19,11 +18,6 @@ public sealed class RecipeFiltersCanvas : UIState {
             ListPadding = 6,
             ItemWidth = 14
         };
-        for (int i = 1; i < 11; i++) {
-            UIImageFramed testI = new(RecipeFiltering.recipeFilters, RecipeFiltering.recipeFilters.Frame(horizontalFrames: 11, frameX: i, sizeOffsetX: -2));
-            filterList.Add(testI);
-        }
-
         Append(filterList);
     }
 
@@ -39,9 +33,6 @@ public sealed class RecipeFiltersCanvas : UIState {
             SoundEngine.PlaySound(SoundID.MenuTick);
         }
         filterList.Clear();
-        filterList.Height.Pixels = filterList.GetTotalHeight();
-        filterList.Width.Pixels = filterList.GetTotalHeight();
-
 
         EntryFilterer<Item, IRecipeFilter> filters = RecipeFiltering.LocalFilters.Filterer;
         for (int i = 0; i < filters.AvailableFilters.Count; i++) {
