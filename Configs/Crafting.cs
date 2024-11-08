@@ -17,7 +17,7 @@ public sealed class Crafting : ModConfig {
     public static Crafting Instance = null!;
 
     public override void OnChanged() {
-        if (Guide.recipeFiltersUI?.filterList is not null) Guide.recipeFiltersUI.filterList.ItemsPerLine = RecipeFilters.Value.filtersPerLine;
+        if (Guide.recipeFiltersUI?.filters is not null) Guide.recipeFiltersUI.filters.ItemsPerLine = RecipeFilters.Value.filtersPerLine;
     }
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
@@ -53,7 +53,6 @@ public sealed class FastScroll {
 public sealed class RecipeFilters {
     [DefaultValue(true)] public bool hideUnavailable = true;
     [Range(1, 6), DefaultValue(4)] public int filtersPerLine = 4;
-    [DefaultValue(false)] public bool searchNoRecList = false;
 
     public static bool Enabled => Crafting.Instance.recipeFilters && !UnloadedCrafting.Value.recipeFilters;
     public static RecipeFilters Value => Crafting.Instance.recipeFilters.Value;

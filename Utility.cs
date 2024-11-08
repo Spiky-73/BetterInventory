@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using BetterInventory.ItemSearch;
 using MonoMod.Cil;
 using SpikysLib;
 using SpikysLib.Constants;
@@ -100,5 +101,10 @@ public static class Utility {
         cursor.GotoNext(MoveType.AfterLabel);
         endLoop = end;
         return cursor;
+    }
+
+    public static void FindRecipes() {
+        if (Configs.BetterGuide.AvailableRecipes) Guide.FindGuideRecipes();
+        else Recipe.FindRecipes();
     }
 }

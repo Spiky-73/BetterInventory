@@ -3,6 +3,7 @@
 ## dev
 - Added an options to keep swapped items favorited
 - Added the number of visible recipes to the recipe list
+- Added a recipe search bar
 - Prevented the offset of the recipes when at the bottom of the recipe list
 - Added grab bag drops in their tooltip
 - Added scrollable tooltips

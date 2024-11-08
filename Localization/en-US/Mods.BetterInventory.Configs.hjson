@@ -89,11 +89,6 @@ RecipeFilters: {
 		Label: Filters Per Line
 		Tooltip: The number of filters per line
 	}
-
-	searchNoRecList: {
-		Label: search No Rec List
-		Tooltip: ""
-	}
 }
 
 CraftOnList: {

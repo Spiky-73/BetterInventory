@@ -62,8 +62,8 @@ public sealed class RecipeFiltering : ILoadable {
     }
 
     public static void DrawFilters(int hammerX, int hammerY){
-        Guide.recipeFiltersUI.filterList.Top.Pixels = hammerY + TextureAssets.CraftToggle[0].Height() - TextureAssets.InfoIcon[0].Width() / 2;
-        Guide.recipeFiltersUI.filterList.Left.Pixels = hammerX - TextureAssets.InfoIcon[0].Width() - 1;
+        Guide.recipeFiltersUI.container.Top.Pixels = hammerY + TextureAssets.CraftToggle[0].Height() - TextureAssets.InfoIcon[0].Width() / 2;
+        Guide.recipeFiltersUI.container.Left.Pixels = hammerX - TextureAssets.InfoIcon[0].Width() - 1;
 
         if (_needsRefresh) {
             Guide.recipeFiltersUI.RebuildRecipeGrid();
@@ -109,17 +109,16 @@ public sealed class RecipeFiltering : ILoadable {
         orig(recipeIndex);
     }
     public static bool FitsFilters(int recipe) {
+        Item item = Main.recipe[recipe].createItem;
         var filterer = LocalFilters.Filterer;
-        bool fits = false;
-        _needsRefresh = true;
+
         LocalFilters.AllRecipes++;
         for (int i = 0; i < filterer.AvailableFilters.Count; i++) {
-            if (filterer.AvailableFilters[i].FitsFilter(Main.recipe[recipe].createItem)) {
-                LocalFilters.RecipeInFilter[i]++;
-                fits |= filterer.ActiveFilters.Count == 0 || filterer.IsFilterActive(i);
-            }
+            if (filterer.AvailableFilters[i].FitsFilter(item)) LocalFilters.RecipeInFilter[i]++;
         }
-        return fits;
+        _needsRefresh = true;
+        
+        return filterer.FitsFilter(item);
     }
 
     private static bool _needsRefresh;

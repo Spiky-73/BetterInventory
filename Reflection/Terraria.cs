@@ -4,9 +4,11 @@ using TPlayer = Terraria.Player;
 using TItem = Terraria.Item;
 using TNPC = Terraria.NPC;
 using TRecipe = Terraria.Recipe;
+using TPlayerInput = Terraria.GameInput.PlayerInput;
 using SpikysLib.Reflection;
 using Terraria;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace BetterInventory.Reflection;
 
@@ -71,4 +73,9 @@ public static class Recipe {
     public static readonly StaticMethod<object?> AddToAvailableRecipes = new(typeof(TRecipe), nameof(AddToAvailableRecipes), typeof(int));
     public static readonly StaticMethod<object?> ClearAvailableRecipes = new(typeof(TRecipe), nameof(TRecipe.ClearAvailableRecipes));
     public static readonly StaticMethod<object?> CollectItemsToCraftWithFrom = new(typeof(TRecipe), nameof(CollectItemsToCraftWithFrom), typeof(TPlayer));
+}
+
+public static class PlayerInput {
+    public static readonly StaticField<List<string>> MouseInModdedUI = new(typeof(TPlayerInput), nameof(MouseInModdedUI));
+
 }

@@ -6,7 +6,6 @@ using Terraria.ModLoader.IO;
 
 namespace BetterInventory.Crafting;
 
-// TODO search filter
 public sealed class RecipeFilters {
 
     public EntryFilterer<Item, IRecipeFilter> Filterer { get; } = new();
@@ -30,9 +29,10 @@ public sealed class RecipeFilters {
         int[] indexes = [0, 2, 8, 4, 7, 1, 9, 3, 6, 10];
 
         List<IRecipeFilter> allFilters = [];
-        for (int i = 0; i < filters.Count; i++) allFilters.Add(new CreativeFilterWrapper(filters[i], indexes[i]));
-        allFilters.Add(new CreativeFilterWrapper(new ItemFilters.MiscFallback(filters), 5));
+        for (int i = 0; i < filters.Count; i++) allFilters.Add(new ItemFilterWrapper(filters[i], indexes[i]));
+        allFilters.Add(new ItemFilterWrapper(new ItemFilters.MiscFallback(filters), 5));
         Filterer.AddFilters(allFilters);
+        Filterer.SetSearchFilterObject(new ItemSearchFilterWrapper());
     }
 
 }
