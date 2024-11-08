@@ -1,8 +1,8 @@
 using System.Collections.Generic;
+using BetterInventory.Crafting.UI;
 using BetterInventory.ItemSearch;
 using MonoMod.Cil;
 using SpikysLib;
-using SpikysLib.Collections;
 using SpikysLib.IL;
 using Terraria;
 using Terraria.Audio;
@@ -204,5 +204,31 @@ public sealed class RecipeList : ModEntityCatalogue {
         Main.InGuideCraftMenu = old;
     }
 
+    internal static void OnRecipeUIInit(RecipeFiltersCanvas element) {
+        var searchBar = element.searchBar;
+        searchBar.Parent.OnRightClick += (_, _) => {
+            if (!Instance.Enabled || !Configs.QuickSearch.RightClick) return;
+            int count = 0;
+            if (Configs.QuickSearch.Value.rightClick == Configs.RightClickAction.SearchPrevious && _searchHistory.Count != 0) {
+                string text = _searchHistory[^1];
+                _searchHistory.RemoveAt(_searchHistory.Count - 1);
+                count = _searchHistory.Count;
+                searchBar.SetContents(text);
+                SoundEngine.PlaySound(SoundID.Grab);
+            } else if (searchBar.HasContents) {
+                searchBar.SetContents(null!);
+                SoundEngine.PlaySound(SoundID.Grab);
+            }
+            if (_searchHistory.Count > count) _searchHistory.RemoveAt(_searchHistory.Count - 1);
+        };
+        searchBar.OnStartTakingInput += () => {
+            if (!Instance.Enabled || Configs.QuickSearch.Value.rightClick != Configs.RightClickAction.SearchPrevious) return;
+            string? text = Reflection.UISearchBar.actualContents.GetValue(searchBar);
+            if (text is null || text.Length == 0 || (_searchHistory.Count > 0 && _searchHistory[^1] == text)) return;
+            _searchHistory.Add(text);
+        };
+    }
+
     private static readonly List<Item>[] _guideHistory = [[], []];
+    private static readonly List<string> _searchHistory = [];
 }
