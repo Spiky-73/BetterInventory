@@ -16,10 +16,10 @@ public sealed class RecipeFiltering : ILoadable {
     public void Load(Mod mod) {
         On_Recipe.AddToAvailableRecipes += HookFilterAddedRecipe;
         IL_Main.DrawInventory += static il => {
-            if (!il.ApplyTo(ILDrawFilters, Configs.RecipeFilters.Enabled)) Configs.UnloadedCrafting.Value.recipeFilters = true;
+            if (!il.ApplyTo(ILDrawUI, Configs.Crafting.RecipeUI)) Configs.UnloadedCrafting.Value.RecipeUI = true;
         };
         IL_Recipe.CollectGuideRecipes += static il => {
-            if (!il.ApplyTo(ILForceAddToAvailable, Configs.RecipeFilters.Enabled)) Configs.UnloadedCrafting.Value.recipeFilters = true;
+            if (!il.ApplyTo(ILForceAddToAvailable, Configs.Crafting.RecipeUI)) Configs.UnloadedCrafting.Value.RecipeUI = true;
         };
 
         recipeFilters = mod.Assets.Request<Texture2D>($"Assets/Recipe_Filters");
@@ -28,7 +28,7 @@ public sealed class RecipeFiltering : ILoadable {
 
     public void Unload() {}
 
-    private static void ILDrawFilters(ILContext il) {
+    private static void ILDrawUI(ILContext il) {
         ILCursor cursor = new(il);
 
         // BetterGameUI Compatibility

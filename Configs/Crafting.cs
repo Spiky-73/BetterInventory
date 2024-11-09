@@ -9,15 +9,14 @@ namespace BetterInventory.Configs;
 
 public sealed class Crafting : ModConfig {
     public Toggle<FixedUI> fixedUI = new(true);
-    [DefaultValue(true)] public bool recipeSearchBar;
+    public Toggle<RecipeSearchBar> recipeSearchBar = new(true);
     public Toggle<RecipeFilters> recipeFilters = new(true);
     public Toggle<CraftOnList> craftOnList = new(true);
     [DefaultValue(true)] public bool mouseMaterial;
     public Toggle<AvailableMaterials> availableMaterials = new(true);
 
     public static bool MouseMaterial => Instance.mouseMaterial;
-    public static bool RecipeSearchBar => Instance.recipeSearchBar;
-    public static bool RecipeUI => RecipeSearchBar || Instance.recipeFilters;
+    public static bool RecipeUI => Instance.recipeSearchBar || Instance.recipeFilters;
     public static Crafting Instance = null!;
 
     public override void OnChanged() {
@@ -67,6 +66,14 @@ public sealed class RecipeFilters {
 
     // Compatibility version < v0.6
     [JsonProperty, DefaultValue(4)] private int width { set => ConfigHelper.MoveMember(value != 4, _ => filtersPerLine = value); }
+}
+
+public sealed class RecipeSearchBar {
+    [DefaultValue(true)] public bool expand = true;
+    [DefaultValue(14 * 4 + 3 * 6), Range(0, 220)] public int minWidth = 14 * 4 + 3 * 6;
+
+    public static bool Enabled => Crafting.Instance.recipeSearchBar && !UnloadedCrafting.Value.recipeSearchBar;
+    public static RecipeSearchBar Value => Crafting.Instance.recipeSearchBar.Value;
 }
 
 public sealed class CraftOnList {

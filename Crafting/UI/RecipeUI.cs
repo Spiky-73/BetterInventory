@@ -33,7 +33,7 @@ public sealed class RecipeUI : UIState {
     public void RebuildList () {
         container.Clear();
 
-        if (Configs.Crafting.RecipeSearchBar) container.Add(searchPanel);
+        if (Configs.RecipeSearchBar.Enabled) container.Add(searchPanel);
         if (Configs.RecipeFilters.Enabled) container.Add(filters);
     }
 
@@ -51,9 +51,9 @@ public sealed class RecipeUI : UIState {
     public override void RecalculateChildren() {
         base.RecalculateChildren();
 
-        if (searchPanel is not null) {
-            if (Main.recBigList) searchPanel.Width.Pixels = 220;
-            else searchPanel.Width.Pixels = Math.Max(filters.Width.Pixels, 14 * 4 + 3 * 6);
+        if (Configs.RecipeSearchBar.Enabled && searchPanel is not null) {
+            if (Configs.RecipeSearchBar.Value.expand && Main.recBigList) searchPanel.Width.Pixels = 220;
+            else searchPanel.Width.Pixels = Math.Max(filters.Width.Pixels, Configs.RecipeSearchBar.Value.minWidth);
         }
     }
 

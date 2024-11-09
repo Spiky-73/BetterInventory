@@ -106,6 +106,20 @@ RecipeFilters: {
 	}
 }
 
+RecipeSearchBar: {
+	Tooltip: ""
+
+	expand: {
+		Label: Expand
+		Tooltip: Increases the width of the search bar when the recipe list is opened
+	}
+
+	minWidth: {
+		Label: Min Width
+		Tooltip: The minimum width of the search bar. It will never go bellow the width of the other filters.
+	}
+}
+
 CraftOnList: {
 	Tooltip: ""
 
@@ -987,6 +1001,11 @@ UnloadedCrafting: {
 
 	recipeFilters: {
 		Label: "{$Mods.BetterInventory.Configs.Crafting.recipeFilters.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+	
+	recipeSearchBar: {
+		Label: "{$Mods.BetterInventory.Configs.Crafting.recipeSearchBar.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 

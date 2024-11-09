@@ -79,8 +79,11 @@ public sealed class UnloadedCrafting {
     public bool noRecStartOffset = false;
     public bool noRecListClose = false;
     public bool recipeFilters = false;
+    public bool recipeSearchBar = false;
     public bool craftOnList = false;
     public bool availableMaterialsItemSlot;
+
+    [JsonIgnore] public bool RecipeUI { set { recipeFilters = value; recipeSearchBar = value; } }
 
     public static UnloadedCrafting Value => Compatibility.Instance.unloadedCrafting;
 }
