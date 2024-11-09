@@ -5,6 +5,7 @@
 - Added the number of visible recipes to the recipe list
 - Added a recipe search bar
 - Prevented the offset of the recipes when at the bottom of the recipe list
+- Prevented the recipe list from closing on its own
 - Added grab bag drops in their tooltip
 - Added scrollable tooltips
 - Added available materials display

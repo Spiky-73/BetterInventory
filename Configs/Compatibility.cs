@@ -77,6 +77,7 @@ public sealed class UnloadedCrafting {
     public bool wrapping = false;
     public bool recipeCount = false;
     public bool noRecStartOffset = false;
+    public bool noRecListClose = false;
     public bool recipeFilters = false;
     public bool craftOnList = false;
     public bool availableMaterialsItemSlot;
