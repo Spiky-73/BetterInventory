@@ -584,6 +584,11 @@ ItemActions: {
 		Label: "[i:40] Display Item Ammo"
 		Tooltip: Display the ammo used by various items
 	}
+
+	fixedtooltip: {
+		Label: "[i:4319] Fixed Item Tooltip position"
+		Tooltip: Positions the tooltip relative to the hovered item and not relative to the mouse
+	}
 }
 
 ItemRightClick: {
@@ -1003,7 +1008,7 @@ UnloadedCrafting: {
 		Label: "{$Mods.BetterInventory.Configs.Crafting.recipeFilters.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
-	
+
 	recipeSearchBar: {
 		Label: "{$Mods.BetterInventory.Configs.Crafting.recipeSearchBar.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
@@ -1104,7 +1109,14 @@ UnloadedInventoryManagement: {
 	}
 }
 
-UnloadedItemActions.Tooltip: ""
+UnloadedItemActions: {
+	Tooltip: ""
+
+	fixedTooltip: {
+		Label: "{$Mods.BetterInventory.Configs.ItemActions.fixedTooltip.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+}
 
 UnloadedItemSearch: {
 	Tooltip: ""

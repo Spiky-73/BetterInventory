@@ -103,7 +103,7 @@ public static class Utility {
         return cursor;
     }
 
-    public static void FindRecipes() {
+    public static void FindDisplayedRecipes() {
         if (Configs.BetterGuide.AvailableRecipes) Guide.FindGuideRecipes();
         else Recipe.FindRecipes();
     }

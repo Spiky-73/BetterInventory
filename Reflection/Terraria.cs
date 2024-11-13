@@ -9,6 +9,7 @@ using SpikysLib.Reflection;
 using Terraria;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
+using System;
 
 namespace BetterInventory.Reflection;
 
@@ -31,8 +32,10 @@ public static class Main {
     public static readonly StaticMethod<object?> LockCraftingForThisCraftClickDuration = new(typeof(TMain), nameof(TMain.LockCraftingForThisCraftClickDuration));
     public static readonly StaticMethod<object?> SetRecipeMaterialDisplayName = new(typeof(TMain), nameof(SetRecipeMaterialDisplayName), typeof(int));
     
+    public static readonly Type MouseTextCache = typeof(TMain).GetNestedType(nameof(MouseTextCache), BindingFlags.NonPublic)!;
+    public static readonly Method<TMain, object?> MouseText_DrawItemTooltip = new(nameof(MouseText_DrawItemTooltip), MouseTextCache, typeof(int), typeof(byte), typeof(int), typeof(int));
     public static readonly FieldInfo _mouseTextCache = typeof(TMain).GetField(nameof(_mouseTextCache), BindingFlags.Instance | BindingFlags.NonPublic)!;
-    public static readonly FieldInfo _mouseTextCache_isValid = typeof(TMain).GetNestedType("MouseTextCache", BindingFlags.NonPublic)!.GetField("isValid", BindingFlags.Instance | BindingFlags.Public)!;
+    public static readonly FieldInfo _mouseTextCache_isValid = MouseTextCache.GetField("isValid", BindingFlags.Instance | BindingFlags.Public)!;
 }
 
 public static class Player {

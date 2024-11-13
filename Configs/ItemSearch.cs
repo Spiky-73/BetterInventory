@@ -35,7 +35,7 @@ public sealed class ItemSearch : ModConfig {
     public override ConfigScope Mode => ConfigScope.ClientSide;
 
     public override void OnChanged() {
-        if (!Main.gameMenu) Utility.FindRecipes();
+        if (!Main.gameMenu) Utility.FindDisplayedRecipes();
     }
 }
 

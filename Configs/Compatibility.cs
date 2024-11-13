@@ -110,6 +110,7 @@ public sealed class UnloadedInventoryManagement {
 }
 
 public sealed class UnloadedItemActions {
+    public bool fixedTooltip;
     public static UnloadedItemActions Value => Compatibility.Instance.unloadedItemActions;
 }
 

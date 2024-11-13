@@ -15,6 +15,7 @@ public sealed class ItemActions : ModConfig {
     [DefaultValue(true)] public bool keepSwappedFavorited;
     public Toggle<ShowBagContent> showBagContent = new(true);
     public Toggle<TooltipScroll> tooltipScroll = new(true);
+    public bool fixedtooltip;
     public Toggle<ItemAmmo> itemAmmo = new(true);
 
     public static bool FastContainerOpening => Instance.fastContainerOpening;
@@ -22,6 +23,7 @@ public sealed class ItemActions : ModConfig {
     public static bool FavoritedBuff => Instance.favoritedBuff;
     public static bool BuilderAccs => Instance.builderAccs;
     public static bool KeepSwappedFavorited => Instance.keepSwappedFavorited;
+    public static bool FixedTooltip => Instance.fixedtooltip;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
     public static ItemActions Instance = null!;

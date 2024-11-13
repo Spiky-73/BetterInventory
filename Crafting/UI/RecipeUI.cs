@@ -63,7 +63,7 @@ public sealed class RecipeUI : UIState {
 
     public void RebuildRecipeGrid() {
         static void OnFilterChanges() {
-            Utility.FindRecipes();
+            Utility.FindDisplayedRecipes();
             SoundEngine.PlaySound(SoundID.MenuTick);
         }
         this.filters.Clear();
@@ -142,6 +142,6 @@ public sealed class RecipeUI : UIState {
     private void OnSearchContentChange(string? content) {
         if (Main.gameMenu) return;
         RecipeFiltering.LocalFilters.Filterer.SetSearchFilter(content);
-        Utility.FindRecipes();
+        Utility.FindDisplayedRecipes();
     }
 }
