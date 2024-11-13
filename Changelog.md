@@ -1,6 +1,6 @@
 # Better Inventory changelog
 
-## dev
+## 0.7
 - Added an options to keep swapped items favorited
 - Added the number of visible recipes to the recipe list
 - Added a recipe search bar
@@ -10,6 +10,7 @@
 - Added scrollable tooltips
 - Added available materials display
 - Added weapon ammo display
+- Added Fixed item tooltip position
 - Reworked RecipeFilters to use UIElements
 - Updated recipe filter icons
 - Updated Spiky's Lib dependency to v1.3

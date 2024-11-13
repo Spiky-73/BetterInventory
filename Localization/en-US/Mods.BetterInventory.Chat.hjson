@@ -10,7 +10,7 @@ ModName: Better Inventory
 SPIC.ModName: Spy's Infinite Consumables
 Homepage: homepage
 Workshop: Steam Workshop page
-Version: 0.6.1.3
+Version: 0.7
 Summary: ""
 Details: More bug fixes for BetterGuide
 Changelog:
@@ -24,6 +24,7 @@ Changelog:
 	- Added scrollable tooltips
 	- Added available materials display
 	- Added weapon ammo display
+	- Added Fixed item tooltip position
 	- Reworked RecipeFilters to use UIElements
 	- Updated recipe filter icons
 	- Updated Spiky's Lib dependency to v1.3
