@@ -10,9 +10,9 @@ ModName: Better Inventory
 SPIC.ModName: Spy's Infinite Consumables
 Homepage: homepage
 Workshop: Steam Workshop page
-Version: 0.7
-Summary: ""
-Details: More bug fixes for BetterGuide
+Version: "0.7"
+Summary: New features were added, mostly around the recipe list and item tooltips
+Details: ""
 Changelog:
 	'''
 	- Added an options to keep swapped items favorited

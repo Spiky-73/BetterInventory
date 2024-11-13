@@ -34,8 +34,11 @@ public sealed class Compatibility : ModConfig {
         FixedUI.Value.wrapping = false;
         FixedUI.Value.recipeCount = false;
         FixedUI.Value.noRecStartOffset = false;
+        FixedUI.Value.noRecListClose = false;
         Crafting.Instance.recipeFilters.Key = false;
+        Crafting.Instance.recipeSearchBar.Key = false;
         Crafting.Instance.craftOnList.Key = false;
+        AvailableMaterials.Value.itemSlot = false;
         Crafting.Instance.Save();
 
         SmartConsumption.Value.materials = false;
@@ -55,6 +58,9 @@ public sealed class Compatibility : ModConfig {
         InventoryManagement.Instance.stackTrash = false;
         InventoryManagement.Instance.craftStack.Key = false;
         InventoryManagement.Instance.Save();
+
+        ItemActions.Instance.fixedtooltip = false;
+        ItemActions.Instance.Save();
 
         BetterGuide.Value.moreRecipes = false;
         BetterGuide.Value.craftingStation = false;

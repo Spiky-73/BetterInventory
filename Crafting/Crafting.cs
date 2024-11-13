@@ -103,11 +103,12 @@ public sealed class Crafting : ILoadable {
         return PlayerHelper.OwnedItems.GetValueOrDefault(group == -1 ? item.type : RecipeGroup.recipeGroups[selectedRecipe.acceptedGroups[group]].GetGroupFakeItemId());
     }
 
+    // BUG Displayed for on recipe createItem with same type
     private static bool ShouldDisplayStack(Item item, int context) {
         if (context != ItemSlot.Context.CraftingMaterial) return false;
         if ((!Main.guideItem.IsAir || Configs.BetterGuide.GuideTile && !Guide.guideTile.IsAir) && !Configs.BetterGuide.CraftInMenu) return false;
         Recipe selectedRecipe = Main.recipe[Main.availableRecipe[Main.focusRecipe]];
-        if (!selectedRecipe.requiredItem.Exists(i => i.type == item.type)) return false;
+        if (!selectedRecipe.requiredItem.Exists(i => !i.IsNotSameTypePrefixAndStack(item))) return false;
         return true;
     }
 }

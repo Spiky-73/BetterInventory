@@ -34,8 +34,12 @@ Crafting: {
 	Tooltip: ""
 
 	availableMaterials: {
-		Label: Display Available Materials
-		Tooltip: Display how much of each of the selected's recipe materials you have
+		Label: "[i:4131] Display Available Materials"
+		Tooltip:
+			'''
+			Display how much of each of the selected's recipe materials you have
+			There's currently an bug where the amount will also be displayed on other recipe crafting a material of the selected one
+			'''
 	}
 }
 
