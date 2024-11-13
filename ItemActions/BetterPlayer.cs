@@ -15,12 +15,6 @@ using BetterInventory.CrossMod;
 using SpikysLib.Constants;
 using SpikysLib.Configs;
 using SpikysLib;
-using Terraria.GameContent.ItemDropRules;
-using System.Linq;
-using System.Text.RegularExpressions;
-using Microsoft.Xna.Framework;
-using System;
-using Terraria.GameContent;
 
 namespace BetterInventory.ItemActions;
 
@@ -42,8 +36,6 @@ public sealed class BetterPlayer : ModPlayer {
         On_ItemSlot.DyeSwap += HookDyeSwapFavorited;
         On_ItemSlot.ArmorSwap += HookArmorSwapFavorited;
         On_ItemSlot.EquipSwap += HookEquipSwapFavorited;
-
-        MonoModHooks.Add(typeof(ItemLoader).GetMethod(nameof(ItemLoader.ModifyTooltips)), HookHideTooltip);
     }
 
     public override void Unload() {
@@ -220,167 +212,9 @@ public sealed class BetterPlayer : ModPlayer {
         return swapped;
     }
 
-    public static void AddBagContentTooltips(Item item, List<TooltipLine> tooltips) {
-        if (!Configs.ShowBagContent.Enabled) return;
-        List<IItemDropRule> itemDropRules = Main.ItemDropsDB.GetRulesForItemID(item.type);
-        if (itemDropRules.Count == 0) return;
-        tooltips.AddRange(GetGrabBagContent(item.type));
-    }
-
-    public static List<TooltipLine> GetGrabBagContent(int itemType) {
-        if (_bagContentItemType != itemType) UpdateGrabBagContent(itemType);
-        List<TooltipLine> tooltips = [new(BetterInventory.Instance, $"BagContent0", Language.GetTextValue($"{Localization.Keys.UI}.BagContent"))];
-        for (int i = _bagContentCurrencies.Count - 1; i >= 0; i--) {
-            var (currency, min, max) = _bagContentCurrencies[i];
-
-            string priceText = CurrencyHelper.PriceText(currency, min);
-            var match = _coinRegex.Match(priceText);
-            string priceTextMax = CurrencyHelper.PriceText(currency, max);
-            if (min != max) {
-                if (match.Success) {
-                    Regex regexMax = new($"""^{Regex.Escape(match.Groups[1].Value)}(\d+){Regex.Escape(match.Groups[3].Value)}{Regex.Escape(match.Groups[4].Value)}$""");
-                    var matchMax = regexMax.Match(priceTextMax);
-
-                    if (match.Success) priceText = $"{match.Groups[1]}{match.Groups[2]}-{matchMax.Groups[1]}{match.Groups[3]}{match.Groups[4]}";
-                    else priceText += $" - {priceTextMax}";
-                } else priceText += $" - {priceTextMax}";
-            }
-            tooltips.Add(new(BetterInventory.Instance, $"BagContentCurrency{i}", priceText));
-        }
-        tooltips.AddRange(_bagContentTooltips);
-        return tooltips;
-    }
-    private static void UpdateGrabBagContent(int itemType) {
-        _bagContentItemType = itemType;
-        _bagContentTooltips.Clear();
-        _bagContentCurrencies.Clear();
-
-        List<IItemDropRule> itemDropRules = Main.ItemDropsDB.GetRulesForItemID(itemType);
-        if (itemDropRules.Count > 0) {
-            foreach (IItemDropRule itemDropRule in itemDropRules) {
-                List<DropRateInfo> drops = [];
-                DropRateInfoChainFeed ratesInfo = new(1f);
-                itemDropRule.ReportDroprates(drops, ratesInfo);
-                drops.RemoveAll(dri => !Reflection.ItemDropBestiaryInfoElement.ShouldShowItem.Invoke(dri));
-                if (!Configs.ShowBagContent.Value.compact) AddGrabBagContent(_bagContentTooltips, drops);
-                else AddGrabBagContent_Compact(_bagContentTooltips, drops);
-            }
-        }
-        _bagContentCurrencies.Sort((a, b) => a.currency.CompareTo(b.currency));
-    }
-    private static void AddGrabBagContent(List<TooltipLine> tooltips, List<DropRateInfo> drops) {
-        for (int i = 0; i < drops.Count; i++) {
-            DropRateInfo drop = drops[i];
-            if (drop.dropRate == 1 && CurrencyHelper.IsPartOfACurrency(drop.itemId, out int currency)) AddGrabBagContent_Currency(drop, currency);
-            else tooltips.Add(new(BetterInventory.Instance, $"BagContent{tooltips.Count}", $"[i:{drop.itemId}] {Lang.GetItemName(drop.itemId)} {GetDropRate(drop)}"));
-        }
-    }
-    private static void AddGrabBagContent_Compact(List<TooltipLine> tooltips, List<DropRateInfo> drops) {
-        string dropRate = string.Empty;
-        List<int> items = [];
-        void AddLine() {
-            if (items.Count == 0) return;
-            string sprites = items.Count == 1 ? $"[i:{items[0]}] {Lang.GetItemName(items[0])}" : string.Join(string.Empty, items.Select(i => $"[i:{i}]"));
-            tooltips.Add(new(BetterInventory.Instance, $"BagContent{tooltips.Count}", $"{sprites} {dropRate}"));
-            items.Clear();
-        }
-        for (int i = 0; i < drops.Count; i++) {
-            DropRateInfo drop = drops[i];
-            Item item = new(drop.itemId);
-            if (drop.dropRate == 1 && CurrencyHelper.IsPartOfACurrency(drop.itemId, out int currency)) {
-                AddGrabBagContent_Currency(drop, currency);
-                continue;
-            }
-            string s = GetDropRate(drop);
-            if (s != dropRate) {
-                AddLine();
-                dropRate = s;
-            }
-            items.Add(drop.itemId);
-        }
-        AddLine();
-    }
-    private static void AddGrabBagContent_Currency(DropRateInfo drop, int currency) {
-        int value = CurrencyHelper.CurrencyValue(drop.itemId);
-        _bagContentCurrencies.Add((currency, drop.stackMin * value, drop.stackMax * value));
-    }
-
-    // Adapted From UIBestiaryInfoItemLine.cs
-    public static string GetDropRate(DropRateInfo dropRateInfo) {
-        string str = string.Empty;
-        if (dropRateInfo.stackMin != dropRateInfo.stackMax) str+= $"({dropRateInfo.stackMin}-{dropRateInfo.stackMax}) ";
-        else if (dropRateInfo.stackMin != 1) str+= $"({dropRateInfo.stackMin}) ";
-        
-        string originalFormat = dropRateInfo.dropRate >= 0.001 ? "P" : "P4";        
-        str += dropRateInfo.dropRate != 1f ? Utils.PrettifyPercentDisplay(dropRateInfo.dropRate, originalFormat) : "100%";
-        return str;
-    }
-
-    private static List<TooltipLine> HookHideTooltip(Reflection.ItemLoader.ModifyTooltipsFn orig, Item item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out Color?[] overrideColor, int prefixlineIndex) {
-        var tooltipsAll = orig.Invoke(item, ref numTooltips, names, ref text, ref modifier, ref badModifier, ref oneDropLogo, out overrideColor, prefixlineIndex);
-        if (!Configs.TooltipScroll.Enabled) return tooltipsAll;
-        if (_tooltipType != item.type) {
-            _tooltipType = item.type;
-            tooltipStart = 1;
-        }
-
-        int inset = Main.SettingsEnabled_OpaqueBoxBehindTooltips ? 18 : 4;
-        int count = Math.Max(1, (int)((Main.screenHeight-inset) * Configs.TooltipScroll.Value.maximumHeight / FontAssets.MouseText.Value.LineSpacing) - 2);
-        if (numTooltips <= count+1) return tooltipsAll;
-        HandleTooltipScroll(numTooltips, count);
-
-        (T[] text, T[]) NewArray<T>(T[] array) {
-            T[] a = new T[count+2];
-            a[0] = array[0];
-            return (array, a);
-        }
-        (var numTooltipsAll, numTooltips) = (numTooltips, count + 2);
-        List<TooltipLine> tooltips = new(count+2) { tooltipsAll[0] };
-        (var textAll, text) = NewArray(text);
-        (var modifierAll, modifier) = NewArray(modifier);
-        (var badModifierAll, badModifier) = NewArray(badModifier);
-        (var oneDropLogoAll, oneDropLogo) = (oneDropLogo, -1);
-        (var overrideColorAll, overrideColor) = NewArray(overrideColor);
-
-        for (int i = 0; i < count; i++) {
-            int iAll = tooltipStart + i;
-            tooltips.Add(tooltipsAll[iAll]);
-            text[i+1] = textAll[iAll];
-            modifier[i+1] = modifierAll[iAll];
-            badModifier[i+1] = badModifierAll[iAll];
-            if (oneDropLogoAll == iAll) oneDropLogo = i+1;
-            overrideColor[i+1] = overrideColorAll[iAll];
-        }
-
-        TooltipLine scrollLine = new(BetterInventory.Instance, "scrollTooltip", Language.GetTextValue($"{Localization.Keys.UI}.ScrollTooltip", tooltipStart, tooltipStart+count-1, numTooltipsAll-1)) { OverrideColor = Colors.RarityTrash };
-        tooltips.Add(scrollLine);
-        text[count+1] = scrollLine.Text;
-        overrideColor[count+1] = scrollLine.OverrideColor;
-
-        return tooltips;
-    }
-
-    private static void HandleTooltipScroll(int numTooltips, int visibleLines) {
-        PlayerInput.LockVanillaMouseScroll("BetterInventory: Scrollable Tooltip");
-        int scroll = PlayerInput.ScrollWheelDelta / 120;
-        if (scroll == 0) return;
-        int s = tooltipStart;
-        tooltipStart -= scroll;
-        tooltipStart = Math.Clamp(tooltipStart, 1, numTooltips - visibleLines);
-    }
-
     public const string VisibilityTag = "visibility";
     public const string RecipesTag = "recipes";
     public const string FavoritedInBanksTag = "favorited";
 
-    private static int _bagContentItemType;
-    private static List<(int currency, int min, int max)> _bagContentCurrencies = [];
-    private readonly static List<TooltipLine> _bagContentTooltips = [];
-
     internal Item? _tempGuideTile;
-
-    private static int _tooltipType;
-    public static int tooltipStart;
-
-    private static readonly Regex _coinRegex = new("""^(\[c\/[0-9a-fA-F]{6}:)?(\d+)( [a-zA-Z ]+)(\])?$""");
 }

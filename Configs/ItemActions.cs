@@ -29,7 +29,7 @@ public sealed class ItemActions : ModConfig {
     public static ItemActions Instance = null!;
 
     public sealed override void OnChanged() {
-        BetterPlayer.GetGrabBagContent(ItemID.None);
+        GrabBagContentItem.GetGrabBagContent(ItemID.None);
     }
 }
 

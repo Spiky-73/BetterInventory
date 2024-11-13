@@ -72,7 +72,6 @@ public sealed class SmartConsumptionItem : GlobalItem {
         Crafting.Crafting.AddAvailableMaterials(item, tooltips);
         QuickMove.AddMoveChainLine(item, tooltips);
         ClickOverrides.AddCraftStackLine(item, tooltips);
-        BetterPlayer.AddBagContentTooltips(item, tooltips);
     }
 
     private static void AddWeaponConsumeLine(Item item, List<TooltipLine> tooltips) {
