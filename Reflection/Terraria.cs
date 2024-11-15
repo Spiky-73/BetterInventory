@@ -28,6 +28,7 @@ public static class Main {
     public static readonly StaticField<TItem> guideItem = new(typeof(TMain), nameof(TMain.guideItem));
     public static readonly StaticField<bool> _preventCraftingBecauseClickWasUsedToChangeFocusedRecipe = new(typeof(TMain), nameof(_preventCraftingBecauseClickWasUsedToChangeFocusedRecipe));
     public static readonly StaticField<int> toolTipDistance = new(typeof(TMain), nameof(toolTipDistance));
+    public static readonly StaticField<bool> SettingsEnabled_OpaqueBoxBehindTooltips = new(typeof(TMain), nameof(TMain.SettingsEnabled_OpaqueBoxBehindTooltips));
     public static readonly StaticMethod<object?> DrawInterface_36_Cursor = new(typeof(TMain), nameof(DrawInterface_36_Cursor));
     public static readonly StaticMethod<object?> HoverOverCraftingItemButton = new(typeof(TMain), nameof(HoverOverCraftingItemButton), typeof(int));
     public static readonly StaticMethod<object?> LockCraftingForThisCraftClickDuration = new(typeof(TMain), nameof(TMain.LockCraftingForThisCraftClickDuration));

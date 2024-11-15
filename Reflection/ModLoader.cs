@@ -12,6 +12,7 @@ using Microsoft.Xna.Framework;
 using TColor = Microsoft.Xna.Framework.Color;
 using TItemLoader = Terraria.ModLoader.ItemLoader;
 using TVector2 = Microsoft.Xna.Framework.Vector2;
+using System.Collections.ObjectModel;
 
 namespace BetterInventory.Reflection;
 
@@ -35,6 +36,7 @@ public static class RecipeLoader {
 }
 
 public static class ItemLoader {
+    public static readonly StaticMethod<bool> PreDrawTooltip = new(typeof(TItemLoader), nameof(TItemLoader.PreDrawTooltip), typeof(TItem), typeof(ReadOnlyCollection<TooltipLine>), typeof(int).MakeByRefType(), typeof(int).MakeByRefType());
     public static readonly StaticMethod<List<TooltipLine>> ModifyTooltips = new(typeof(TItemLoader), nameof(TItemLoader.ModifyTooltips), typeof(TItem), typeof(int).MakeByRefType(), typeof(string[]), typeof(string[]).MakeByRefType(), typeof(bool[]).MakeByRefType(), typeof(bool[]).MakeByRefType(), typeof(int).MakeByRefType(), typeof(TColor?[]).MakeByRefType(), typeof(int));
     public delegate List<TooltipLine> ModifyTooltipsFn(TItem item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out TColor?[] overrideColor, int prefixlineIndex);
 }

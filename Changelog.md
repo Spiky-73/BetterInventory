@@ -8,6 +8,7 @@
 - Prevented the recipe list from closing on its own
 - Added grab bag drops in their tooltip
 - Added scrollable tooltips
+- Added a hotkey to hover tooltips
 - Added available materials display
 - Added weapon ammo display
 - Added Fixed item tooltip position
