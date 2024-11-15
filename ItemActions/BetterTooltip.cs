@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
+using SpikysLib.IL;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.GameInput;
@@ -10,19 +11,113 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
+using Terraria.UI.Chat;
 
 namespace BetterInventory.ItemActions;
 
-public class BetterTooltipPlayer: ModPlayer {
-    public override void Load() {
-        MonoModHooks.Add(typeof(ItemLoader).GetMethod(nameof(ItemLoader.ModifyTooltips)), HookHideTooltip);
-        On_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += HookFindSlotPosition;
-        IL_Main.MouseText_DrawItemTooltip += static il => {
-            if (!il.ApplyTo(ILFixTooltip, Configs.ItemActions.FixedTooltip)) Configs.UnloadedItemActions.Value.fixedTooltip = true;
-        };
+public class BetterTooltipSystem : ModSystem {
+    public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers) => BetterTooltipPlayer.ModifyInterfaceLayers(layers);
+
+}
+
+public class BetterTooltipPlayer : ModPlayer {
+    
+    private static readonly LegacyGameInterfaceLayer frozenTooltipInterface = new(
+        "BetterInventory: Frozen Tooltips",
+        () => {
+            DrawInterface_FrozenTooltips();
+            return true;
+        },
+        InterfaceScaleType.UI
+    );
+
+    internal static void ModifyInterfaceLayers(List<GameInterfaceLayer> layers) {
+        int mouseTextIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Cursor"));
+        if (mouseTextIndex != -1) layers.Insert(mouseTextIndex, frozenTooltipInterface);
     }
 
-    private static List<TooltipLine> HookHideTooltip(Reflection.ItemLoader.ModifyTooltipsFn orig, Item item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out Color?[] overrideColor, int prefixlineIndex) {
+    // TODO check if click when hover / frozen
+    private static void DrawInterface_FrozenTooltips() {
+        if (_forcedFreezeTime > 0) _forcedFreezeTime--;
+
+        if (!Configs.ItemActions.HoverableTooltip || !Main.playerInventory || _frozenTooltips.Count <= 0) return;
+        
+        Reflection.Main._mouseTextCache.SetValue(Main.instance, Activator.CreateInstance(Reflection.Main.MouseTextCache));
+
+        _drawingFrozenTooltips = true;
+        foreach (var tooltip in _frozenTooltips) {
+            (var hover, Main.HoverItem) = (Main.HoverItem, tooltip.HoverItem);
+            Reflection.Main.MouseText_DrawItemTooltip.Invoke(Main.instance, Activator.CreateInstance(Reflection.Main.MouseTextCache), 0, tooltip.Diff, tooltip.X, tooltip.Y);
+            Main.HoverItem = hover;
+        }
+        _drawingFrozenTooltips = false;
+
+        for (int i = _frozenTooltips.Count - 1; i >= 0 ; i--) {
+            var (size, hoveredSnippet) = (_frozenTooltipSizes[i], (TextSnippet?)null);
+            Rectangle hitbox = new(_frozenTooltips[i].X, _frozenTooltips[i].Y, (int)size.X, (int)size.Y); // TODO size with background
+            if (hitbox.Contains(Main.mouseX, Main.mouseY)) {
+                _forcedFreezeTime = 30;
+                if (hoveredSnippet is not null) {
+                    hoveredSnippet.OnHover();
+                    if (Main.mouseLeft && Main.mouseLeftRelease) hoveredSnippet.OnClick();
+                }
+            } else if (_forcedFreezeTime <= 0 && !HoverTooltipKb.Current) _frozenTooltips.RemoveAt(i);
+        }
+        _frozenTooltipSizes.Clear();
+    }
+
+    public static ModKeybind HoverTooltipKb { get; private set; } = null!;
+
+    public override void Load() {
+        HoverTooltipKb = KeybindLoader.RegisterKeybind(Mod, "HoverTooltip", Microsoft.Xna.Framework.Input.Keys.None);
+
+        MonoModHooks.Add(typeof(ItemLoader).GetMethod(nameof(ItemLoader.ModifyTooltips)), HookTooltipScroll);
+
+        On_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += HookFindSlotPosition;
+        IL_Main.MouseText_DrawItemTooltip += static il => {
+            // Should be first
+            if (!il.ApplyTo(ILFreezeTooltip, Configs.ItemActions.HoverableTooltip)) Configs.UnloadedItemActions.Value.hoverableTooltip = true;
+            if (!il.ApplyTo(ILTooltipSize, Configs.ItemActions.HoverableTooltip)) Configs.UnloadedItemActions.Value.hoverableTooltip = true;
+            
+            if (!il.ApplyTo(ILFixTooltip, Configs.ItemActions.FixedTooltip)) Configs.UnloadedItemActions.Value.fixedTooltip = true;
+        };
+
+        // Tooltip hover
+    }
+
+    private static void ILTooltipSize(ILContext il) {
+        ILCursor cursor = new(il);
+
+        cursor.GotoNext(i => i.MatchCall(Reflection.ItemLoader.ModifyTooltips));
+        cursor.FindPrevLoc(out _, out int zero, i => i.Previous.MatchCall(Reflection.Vector2.Zero.GetMethod!), 17);
+        cursor.GotoNext(MoveType.AfterLabel, i => i.Previous.MatchLdsfld(Reflection.Main.toolTipDistance));
+        cursor.EmitLdloc(zero);
+        cursor.EmitDelegate((Vector2 zero) => {
+            if (!_drawingFrozenTooltips) return;
+            if (Main.SettingsEnabled_OpaqueBoxBehindTooltips) zero += new Vector2(2 * 14, 9*3/2);
+            _frozenTooltipSizes.Add(zero);
+        });
+    }
+
+    private static void ILFreezeTooltip(ILContext il) {
+        ILCursor cursor = new(il);
+
+        cursor.EmitLdarg(4).EmitLdarg(5).EmitLdarg3();
+        cursor.EmitDelegate((int x, int y, byte diff) => {
+            if (!_drawingFrozenTooltips && Configs.ItemActions.HoverableTooltip && HoverTooltipKb.JustPressed) {
+                _frozenTooltips.Clear(); // TODO only clear when new chain
+                _frozenTooltips.Add(new(x, y, Main.HoverItem.Clone(), diff));
+                _forcedFreezeTime = 30; // TODO config
+            }
+        });
+    }
+
+    private static int _forcedFreezeTime = 0;
+    private static bool _drawingFrozenTooltips = false;
+    private static readonly List<FrozenTooltip> _frozenTooltips = [];
+    private static readonly List<Vector2> _frozenTooltipSizes = [];
+
+    private static List<TooltipLine> HookTooltipScroll(Reflection.ItemLoader.ModifyTooltipsFn orig, Item item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out Color?[] overrideColor, int prefixlineIndex) {
         var tooltipsAll = orig.Invoke(item, ref numTooltips, names, ref text, ref modifier, ref badModifier, ref oneDropLogo, out overrideColor, prefixlineIndex);
         if (!Configs.TooltipScroll.Enabled) return tooltipsAll;
         if (_tooltipType != item.type) {
@@ -98,7 +193,7 @@ public class BetterTooltipPlayer: ModPlayer {
     private static void ILFixTooltip(ILContext il) {
         ILCursor cursor = new(il);
 
-        cursor.EmitDelegate(() => Configs.ItemActions.FixedTooltip && _slotPosition.HasValue);
+        cursor.EmitDelegate(() => !_drawingFrozenTooltips && Configs.ItemActions.FixedTooltip && _slotPosition.HasValue);
         ILLabel notFixed = cursor.DefineLabel();
         cursor.EmitBrfalse(notFixed);
         cursor.EmitDelegate(() => (int)(_slotPosition!.Value.X + TextureAssets.InventoryBack.Width()*_scale*1.1f));
@@ -108,7 +203,7 @@ public class BetterTooltipPlayer: ModPlayer {
             _slotPosition = null;
             return y;
         });
-    cursor.EmitStarg(5);
+        cursor.EmitStarg(5);
         cursor.MarkLabel(notFixed);
     }
 
@@ -118,3 +213,5 @@ public class BetterTooltipPlayer: ModPlayer {
     private static Vector2? _slotPosition = null;
     private static float _scale;
 }
+
+public readonly record struct FrozenTooltip(int X, int Y, Item HoverItem, byte Diff);

@@ -7,7 +7,7 @@ using TRecipe = Terraria.Recipe;
 using TPlayerInput = Terraria.GameInput.PlayerInput;
 using SpikysLib.Reflection;
 using Terraria;
-using Microsoft.Xna.Framework;
+using TVector2 = Microsoft.Xna.Framework.Vector2;
 using System.Collections.Generic;
 using System;
 
@@ -27,6 +27,7 @@ public static class Main {
     public static readonly StaticField<bool> InGuideCraftMenu = new(typeof(TMain), nameof(TMain.InGuideCraftMenu));
     public static readonly StaticField<TItem> guideItem = new(typeof(TMain), nameof(TMain.guideItem));
     public static readonly StaticField<bool> _preventCraftingBecauseClickWasUsedToChangeFocusedRecipe = new(typeof(TMain), nameof(_preventCraftingBecauseClickWasUsedToChangeFocusedRecipe));
+    public static readonly StaticField<int> toolTipDistance = new(typeof(TMain), nameof(toolTipDistance));
     public static readonly StaticMethod<object?> DrawInterface_36_Cursor = new(typeof(TMain), nameof(DrawInterface_36_Cursor));
     public static readonly StaticMethod<object?> HoverOverCraftingItemButton = new(typeof(TMain), nameof(HoverOverCraftingItemButton), typeof(int));
     public static readonly StaticMethod<object?> LockCraftingForThisCraftClickDuration = new(typeof(TMain), nameof(TMain.LockCraftingForThisCraftClickDuration));
@@ -57,7 +58,7 @@ public static class Item {
 }
 
 public static class NPC {
-    public static readonly StaticMethod<object?> LadyBugKilled = new(typeof(TNPC), nameof(TNPC.LadyBugKilled), typeof(Vector2), typeof(bool));
+    public static readonly StaticMethod<object?> LadyBugKilled = new(typeof(TNPC), nameof(TNPC.LadyBugKilled), typeof(TVector2), typeof(bool));
 }
 
 public static class Recipe {

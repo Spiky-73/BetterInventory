@@ -593,6 +593,11 @@ ItemActions: {
 		Label: "[i:4319] Fixed Item Tooltip position"
 		Tooltip: Positions the tooltip relative to the hovered item and not relative to the mouse
 	}
+
+	hoverableTooltips: {
+		Label: hoverable Tooltips
+		Tooltip: ""
+	}
 }
 
 ItemRightClick: {
@@ -1119,6 +1124,11 @@ UnloadedItemActions: {
 	fixedTooltip: {
 		Label: "{$Mods.BetterInventory.Configs.ItemActions.fixedTooltip.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	hoverableTooltip: {
+		Label: hoverable Tooltip
+		Tooltip: ""
 	}
 }
 

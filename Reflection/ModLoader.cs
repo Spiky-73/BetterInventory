@@ -10,7 +10,8 @@ using TLoader = Terraria.ModLoader.RecipeLoader;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using TColor = Microsoft.Xna.Framework.Color;
-
+using TItemLoader = Terraria.ModLoader.ItemLoader;
+using TVector2 = Microsoft.Xna.Framework.Vector2;
 
 namespace BetterInventory.Reflection;
 
@@ -21,7 +22,7 @@ public static class ModAccessorySlotPlayer {
 
 public static class AccessorySlotLoader {
     public static readonly Method<TAccLoader, object?> DrawAccSlots = new(nameof(TAccLoader.DrawAccSlots), typeof(int));
-    public static readonly Method<TAccLoader, object?> DrawSlotTexture = new(nameof(DrawSlotTexture), typeof(Texture2D), typeof(Vector2), typeof(Rectangle), typeof(TColor), typeof(float), typeof(Vector2), typeof(float), typeof(SpriteEffects), typeof(float), typeof(int), typeof(int));
+    public static readonly Method<TAccLoader, object?> DrawSlotTexture = new(nameof(DrawSlotTexture), typeof(Texture2D), typeof(TVector2), typeof(Rectangle), typeof(TColor), typeof(float), typeof(TVector2), typeof(float), typeof(SpriteEffects), typeof(float), typeof(int), typeof(int));
 }
 
 public static class BuilderToggleLoader {
@@ -34,5 +35,6 @@ public static class RecipeLoader {
 }
 
 public static class ItemLoader {
+    public static readonly StaticMethod<List<TooltipLine>> ModifyTooltips = new(typeof(TItemLoader), nameof(TItemLoader.ModifyTooltips), typeof(TItem), typeof(int).MakeByRefType(), typeof(string[]), typeof(string[]).MakeByRefType(), typeof(bool[]).MakeByRefType(), typeof(bool[]).MakeByRefType(), typeof(int).MakeByRefType(), typeof(TColor?[]).MakeByRefType(), typeof(int));
     public delegate List<TooltipLine> ModifyTooltipsFn(TItem item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out TColor?[] overrideColor, int prefixlineIndex);
 }

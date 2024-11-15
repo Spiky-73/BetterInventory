@@ -16,6 +16,7 @@ public sealed class ItemActions : ModConfig {
     public Toggle<ShowBagContent> showBagContent = new(true);
     public Toggle<TooltipScroll> tooltipScroll = new(true);
     public bool fixedtooltip;
+    public bool hoverableTooltips = true;
     public Toggle<ItemAmmo> itemAmmo = new(true);
 
     public static bool FastContainerOpening => Instance.fastContainerOpening;
@@ -24,6 +25,7 @@ public sealed class ItemActions : ModConfig {
     public static bool BuilderAccs => Instance.builderAccs;
     public static bool KeepSwappedFavorited => Instance.keepSwappedFavorited;
     public static bool FixedTooltip => Instance.fixedtooltip;
+    public static bool HoverableTooltip => Instance.hoverableTooltips && !UnloadedItemActions.Value.hoverableTooltip;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
     public static ItemActions Instance = null!;

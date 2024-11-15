@@ -60,6 +60,7 @@ public sealed class Compatibility : ModConfig {
         InventoryManagement.Instance.Save();
 
         ItemActions.Instance.fixedtooltip = false;
+        ItemActions.Instance.hoverableTooltips = false;
         ItemActions.Instance.Save();
 
         BetterGuide.Value.moreRecipes = false;
@@ -117,6 +118,7 @@ public sealed class UnloadedInventoryManagement {
 
 public sealed class UnloadedItemActions {
     public bool fixedTooltip;
+    public bool hoverableTooltip;
     public static UnloadedItemActions Value => Compatibility.Instance.unloadedItemActions;
 }
 
