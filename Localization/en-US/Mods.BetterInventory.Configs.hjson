@@ -589,14 +589,14 @@ ItemActions: {
 		Tooltip: Display the ammo used by various items
 	}
 
-	fixedtooltip: {
-		Label: "[i:4319] Fixed Item Tooltip position"
+	fixedTooltipPosition: {
+		Label: "[i:4319] Fixed Tooltip position"
 		Tooltip: Positions the tooltip relative to the hovered item and not relative to the mouse
 	}
 
-	hoverableTooltips: {
-		Label: hoverable Tooltips
-		Tooltip: ""
+	tooltipHover: {
+		Label: "[i:3036] Tooltip Hover"
+		Tooltip: Press the "{$Mods.BetterInventory.Keybinds.HoverTooltip.DisplayName}" key to hover tooltips
 	}
 }
 
@@ -624,6 +624,15 @@ TooltipScroll: {
 	maximumHeight: {
 		Label: Maximum Screen Height
 		Tooltip: The maximum height of item tooltips
+	}
+}
+
+TooltipHover: {
+	Tooltip: ""
+
+	graceTime: {
+		Label: Grace Time
+		Tooltip: The number of frame before a tooltip disappears when un-hovered or after a key press ({$Mods.BetterInventory.UI.FramesToSec})
 	}
 }
 
@@ -1121,14 +1130,14 @@ UnloadedInventoryManagement: {
 UnloadedItemActions: {
 	Tooltip: ""
 
-	fixedTooltip: {
-		Label: "{$Mods.BetterInventory.Configs.ItemActions.fixedTooltip.Label}"
+	fixedTooltipPosition: {
+		Label: "{$Mods.BetterInventory.Configs.ItemActions.fixedTooltipPosition.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
-	hoverableTooltip: {
-		Label: hoverable Tooltip
-		Tooltip: ""
+	tooltipHover: {
+		Label: "{$Mods.BetterInventory.Configs.ItemActions.tooltipHover.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 }
 

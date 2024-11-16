@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
@@ -38,11 +37,11 @@ public class BetterTooltipPlayer : ModPlayer {
         if (mouseTextIndex != -1) layers.Insert(mouseTextIndex, frozenTooltipInterface);
     }
 
-    // TODO disable ui click when hover / frozen
+    // BUG interface hover under tooltip
     private static void DrawInterface_FrozenTooltips() {
         if (_forcedFreezeTime > 0) _forcedFreezeTime--;
 
-        if (!Configs.ItemActions.HoverableTooltip || !Main.playerInventory || _frozenTooltips.Count <= 0) return;
+        if (!Configs.TooltipHover.Enabled || !Main.playerInventory || _frozenTooltips.Count <= 0) return;
         
         Reflection.Main._mouseTextCache.SetValue(Main.instance, Activator.CreateInstance(Reflection.Main.MouseTextCache));
 
@@ -65,7 +64,7 @@ public class BetterTooltipPlayer : ModPlayer {
                     continue;
                 }
             } else {
-                _forcedFreezeTime = 30;
+                _forcedFreezeTime = Configs.TooltipHover.Value.graceTime;
                 if (hoveredSnippet is not null) {
                     hoveredSnippet.OnHover();
                     if (Main.mouseLeft && Main.mouseLeftRelease) hoveredSnippet.OnClick();
@@ -83,18 +82,18 @@ public class BetterTooltipPlayer : ModPlayer {
     public override void Load() {
         HoverTooltipKb = KeybindLoader.RegisterKeybind(Mod, "HoverTooltip", Microsoft.Xna.Framework.Input.Keys.None);
 
-        MonoModHooks.Add(typeof(ItemLoader).GetMethod(nameof(ItemLoader.ModifyTooltips)), HookTooltipScroll);
+        MonoModHooks.Add(Reflection.ItemLoader.ModifyTooltips, HookTooltipScroll);
 
         On_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += HookFindSlotPosition;
         On_ChatManager.DrawColorCodedString_SpriteBatch_DynamicSpriteFont_TextSnippetArray_Vector2_Color_float_Vector2_Vector2_refInt32_float_bool += HookSnippetHover;
         IL_Main.MouseText_DrawItemTooltip += static il => {
-            if (!il.ApplyTo(ILFreezeTooltip, Configs.ItemActions.HoverableTooltip)) Configs.UnloadedItemActions.Value.hoverableTooltip = true; // Should be first
-            if (!il.ApplyTo(ILTooltipSize, Configs.ItemActions.HoverableTooltip)) Configs.UnloadedItemActions.Value.hoverableTooltip = true;
-            if (!il.ApplyTo(ILFixTooltip, Configs.ItemActions.FixedTooltip)) Configs.UnloadedItemActions.Value.fixedTooltip = true;
+            if (!il.ApplyTo(ILFreezeTooltip, Configs.TooltipHover.Enabled)) Configs.UnloadedItemActions.Value.tooltipHover = true; // Should be first
+            if (!il.ApplyTo(ILTooltipSize, Configs.TooltipHover.Enabled)) Configs.UnloadedItemActions.Value.tooltipHover = true;
+            if (!il.ApplyTo(ILFixTooltip, Configs.ItemActions.FixedTooltipPosition)) Configs.UnloadedItemActions.Value.fixedTooltipPosition = true;
         };
     }
-
-    private Vector2 HookSnippetHover(On_ChatManager.orig_DrawColorCodedString_SpriteBatch_DynamicSpriteFont_TextSnippetArray_Vector2_Color_float_Vector2_Vector2_refInt32_float_bool orig, SpriteBatch spriteBatch, DynamicSpriteFont font, TextSnippet[] snippets, Vector2 position, Color baseColor, float rotation, Vector2 origin, Vector2 baseScale, out int hoveredSnippet, float maxWidth, bool ignoreColors) {
+    
+    private static Vector2 HookSnippetHover(On_ChatManager.orig_DrawColorCodedString_SpriteBatch_DynamicSpriteFont_TextSnippetArray_Vector2_Color_float_Vector2_Vector2_refInt32_float_bool orig, SpriteBatch spriteBatch, DynamicSpriteFont font, TextSnippet[] snippets, Vector2 position, Color baseColor, float rotation, Vector2 origin, Vector2 baseScale, out int hoveredSnippet, float maxWidth, bool ignoreColors) {
         var res = orig(spriteBatch, font, snippets, position, baseColor, rotation, origin, baseScale, out hoveredSnippet, maxWidth, ignoreColors);
         if (_drawingFrozenTooltips && hoveredSnippet >= 0) _hoveredSnippet = snippets[hoveredSnippet];
         return res;
@@ -105,10 +104,10 @@ public class BetterTooltipPlayer : ModPlayer {
 
         cursor.EmitLdarg(4).EmitLdarg(5).EmitLdarg3();
         cursor.EmitDelegate((int x, int y, byte diff) => {
-            if (!_drawingFrozenTooltips && Configs.ItemActions.HoverableTooltip && HoverTooltipKb.JustPressed) {
+            if (!_drawingFrozenTooltips && Configs.TooltipHover.Enabled && HoverTooltipKb.JustPressed) {
                 if (_forcedFreezeTime <= 0) _frozenTooltips.Clear();
                 _frozenTooltips.Add(new(x, y, Main.HoverItem.Clone(), diff));
-                _forcedFreezeTime = 30; // TODO config
+                _forcedFreezeTime = Configs.TooltipHover.Value.graceTime;
             }
         });
     }
@@ -190,7 +189,7 @@ public class BetterTooltipPlayer : ModPlayer {
     }
 
     private static void HookFindSlotPosition(On_ItemSlot.orig_Draw_SpriteBatch_ItemArray_int_int_Vector2_Color orig, SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, Color lightColor) {
-        if (Configs.ItemActions.FixedTooltip) {
+        if (Configs.ItemActions.FixedTooltipPosition) {
             Rectangle rect = new((int)position.X, (int)position.Y, (int)(TextureAssets.InventoryBack.Width() * Main.inventoryScale), (int)(TextureAssets.InventoryBack.Height() * Main.inventoryScale));
             if (rect.Contains(Main.mouseX, Main.mouseY)) {
                 _slotPosition = position;
@@ -212,7 +211,7 @@ public class BetterTooltipPlayer : ModPlayer {
     private static void ILFixTooltip(ILContext il) {
         ILCursor cursor = new(il);
 
-        cursor.EmitDelegate(() => !_drawingFrozenTooltips && Configs.ItemActions.FixedTooltip && _slotPosition.HasValue);
+        cursor.EmitDelegate(() => !_drawingFrozenTooltips && Configs.ItemActions.FixedTooltipPosition && _slotPosition.HasValue);
         ILLabel notFixed = cursor.DefineLabel();
         cursor.EmitBrfalse(notFixed);
         cursor.EmitDelegate(() => (int)(_slotPosition!.Value.X + TextureAssets.InventoryBack.Width()*_scale*1.1f));

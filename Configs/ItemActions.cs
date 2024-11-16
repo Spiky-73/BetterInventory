@@ -15,8 +15,8 @@ public sealed class ItemActions : ModConfig {
     [DefaultValue(true)] public bool keepSwappedFavorited;
     public Toggle<ShowBagContent> showBagContent = new(true);
     public Toggle<TooltipScroll> tooltipScroll = new(true);
-    public bool fixedtooltip;
-    public bool hoverableTooltips = true;
+    public bool fixedTooltipPosition;
+    public Toggle<TooltipHover> tooltipHover = new(true);
     public Toggle<ItemAmmo> itemAmmo = new(true);
 
     public static bool FastContainerOpening => Instance.fastContainerOpening;
@@ -24,8 +24,7 @@ public sealed class ItemActions : ModConfig {
     public static bool FavoritedBuff => Instance.favoritedBuff;
     public static bool BuilderAccs => Instance.builderAccs;
     public static bool KeepSwappedFavorited => Instance.keepSwappedFavorited;
-    public static bool FixedTooltip => Instance.fixedtooltip;
-    public static bool HoverableTooltip => Instance.hoverableTooltips && !UnloadedItemActions.Value.hoverableTooltip;
+    public static bool FixedTooltipPosition => Instance.fixedTooltipPosition && !UnloadedItemActions.Value.fixedTooltipPosition;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
     public static ItemActions Instance = null!;
@@ -54,6 +53,13 @@ public sealed class TooltipScroll {
 
     public static bool Enabled => ItemActions.Instance.tooltipScroll;
     public static TooltipScroll Value => ItemActions.Instance.tooltipScroll.Value;
+}
+
+public sealed class TooltipHover {
+    [DefaultValue(10)] public int graceTime = 10;
+
+    public static bool Enabled => ItemActions.Instance.tooltipHover && !UnloadedItemActions.Value.tooltipHover;
+    public static TooltipHover Value => ItemActions.Instance.tooltipHover.Value;
 }
 
 public sealed class ItemAmmo {
