@@ -13,7 +13,7 @@ public sealed class ItemActions : ModConfig {
     [DefaultValue(true)] public bool favoritedBuff;
     [DefaultValue(true)] public bool builderAccs;
     [DefaultValue(true)] public bool keepSwappedFavorited;
-    public Toggle<ShowBagContent> showBagContent = new(true);
+    public Toggle<GrabBagTooltip> grabBagTooltip = new(true);
     public Toggle<TooltipScroll> tooltipScroll = new(true);
     public bool fixedTooltipPosition;
     public Toggle<TooltipHover> tooltipHover = new(true);
@@ -41,11 +41,11 @@ public sealed class ItemRightClick {
     public static ItemRightClick Value => ItemActions.Instance.itemRightClick.Value;
 }
 
-public sealed class ShowBagContent {
+public sealed class GrabBagTooltip {
     [DefaultValue(true)] public bool compact = true;
     
-    public static bool Enabled => ItemActions.Instance.showBagContent;
-    public static ShowBagContent Value => ItemActions.Instance.showBagContent.Value;
+    public static bool Enabled => ItemActions.Instance.grabBagTooltip;
+    public static GrabBagTooltip Value => ItemActions.Instance.grabBagTooltip.Value;
 }
 
 public sealed class TooltipScroll {

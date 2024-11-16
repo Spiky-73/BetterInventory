@@ -570,8 +570,8 @@ ItemActions: {
 		Tooltip: When swapping a favorited item to a slot where it cannot be favorited, the item it swaps with will be favorited
 	}
 
-	showBagContent: {
-		Label: Show Grab Bag Content
+	grabBagTooltip: {
+		Label: "[i:3318] Grab Bag Tooltip"
 		Tooltip:
 			'''
 			Display items dropped by grab bags in their tooltip
@@ -580,23 +580,23 @@ ItemActions: {
 	}
 
 	tooltipScroll: {
-		Label: "[i:171] Scrollable tooltips"
+		Label: "[i:3291] Tooltip scroll"
 		Tooltip: Makes tooltips scrollable when they are too tall
+	}
+
+	fixedTooltipPosition: {
+		Label: "[i:4320] Fixed Tooltip position"
+		Tooltip: Positions the tooltip relative to the hovered item and not relative to the mouse
+	}
+
+	tooltipHover: {
+		Label: "[i:5075] Tooltip Hover"
+		Tooltip: Press the "{$Mods.BetterInventory.Keybinds.HoverTooltip.DisplayName}" key to hover tooltips
 	}
 
 	itemAmmo: {
 		Label: "[i:40] Display Item Ammo"
 		Tooltip: Display the ammo used by various items
-	}
-
-	fixedTooltipPosition: {
-		Label: "[i:4319] Fixed Tooltip position"
-		Tooltip: Positions the tooltip relative to the hovered item and not relative to the mouse
-	}
-
-	tooltipHover: {
-		Label: "[i:3036] Tooltip Hover"
-		Tooltip: Press the "{$Mods.BetterInventory.Keybinds.HoverTooltip.DisplayName}" key to hover tooltips
 	}
 }
 
@@ -609,7 +609,7 @@ ItemRightClick: {
 	}
 }
 
-ShowBagContent: {
+GrabBagTooltip: {
 	Tooltip: ""
 
 	compact: {

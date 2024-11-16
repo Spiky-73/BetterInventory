@@ -12,7 +12,7 @@ namespace BetterInventory.ItemActions;
 public sealed class GrabBagContentItem : GlobalItem {
 
     public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
-        if (!Configs.ShowBagContent.Enabled) return;
+        if (!Configs.GrabBagTooltip.Enabled) return;
         List<IItemDropRule> itemDropRules = Main.ItemDropsDB.GetRulesForItemID(item.type);
         if (itemDropRules.Count == 0) return;
         tooltips.AddRange(GetGrabBagContent(item.type));
@@ -53,7 +53,7 @@ public sealed class GrabBagContentItem : GlobalItem {
                 DropRateInfoChainFeed ratesInfo = new(1f);
                 itemDropRule.ReportDroprates(drops, ratesInfo);
                 drops.RemoveAll(dri => !Reflection.ItemDropBestiaryInfoElement.ShouldShowItem.Invoke(dri));
-                if (!Configs.ShowBagContent.Value.compact) AddGrabBagContent(_bagContentTooltips, drops);
+                if (!Configs.GrabBagTooltip.Value.compact) AddGrabBagContent(_bagContentTooltips, drops);
                 else AddGrabBagContent_Compact(_bagContentTooltips, drops);
             }
         }
