@@ -30,7 +30,7 @@ public sealed class ItemActions : ModConfig {
     public static ItemActions Instance = null!;
 
     public sealed override void OnChanged() {
-        GrabBagContentItem.GetGrabBagContent(ItemID.None);
+        GrabBagTooltipItem.GetGrabBagContent(ItemID.None);
     }
 }
 

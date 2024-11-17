@@ -9,7 +9,7 @@ using Terraria.ModLoader;
 
 namespace BetterInventory.ItemActions;
 
-public sealed class GrabBagContentItem : GlobalItem {
+public sealed class GrabBagTooltipItem : GlobalItem {
 
     public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
         if (!Configs.GrabBagTooltip.Enabled) return;

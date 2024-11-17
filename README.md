@@ -22,20 +22,29 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 - `Craft Stack`: Left Click to craft or buy items in stacks
 - `Favorite Items in Personal Storages`: Favorite items in the Piggy Bank, Safe, ...
 - `Shift Right Click`: Shift or Control Right Click to transfer one item
+- `Universal Right Click`: Shift click when crafting or buying items
 - `Stack Trashed and Sold Items` Items sold or trashed multiple times will stack
 
 ### Item Actions
 - `Fast Container Opening`: Hold rick click to rapidly open containers
 - `Fast Extractinator`: Much Faster Extractination
-- `Extra Item Right Click`: Item that can be right clicked in the inventory can be right clicked when held
+- `Extra Item Right Click`: Item that can be right clicked in the inventory can be right clicked when selected
 - `Favorited Quick Buff`: Quick buff using favorited potions only
 - `Builder Accessories`: Toggle builder accessories with a keybind
+- `Keep Swapped Items Favorited`: When swapping a favorited item to a slot where it cannot be favorited, the item it swaps with will be favorited
+- `Grab Bag Tooltip`: Display items dropped by grab bags in their tooltip
+- `Tooltip scroll`: Makes tooltips scrollable when they are too tall
+- `Fixed Tooltip position`: Positions the tooltip relative to the hovered item and not relative to the mouse
+- `Tooltip Hover`: Use a keybind to hover tooltips
+- `Display Item Ammo`: Display the ammo used by various items
 
 ### Crafting
 - `Fixed UI`: Fixes inconsistencies with the crafting UI, such as the scrolling and material display
+- `Recipe Search Bar`: Filter recipes by their name
 - `Recipe Filters`: Filter recipes by their created item
 - `Craft on Recipe List`: Craft items directly from the recipe list
 - `Held Material`: Adds the held item to the available materials
+- `Display Available Materials`: Display how much of each of the selected's recipe materials you have
 
 ### Item Search
 - `Favorite Recipes`: Allows you to favorite or blacklist recipes

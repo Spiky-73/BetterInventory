@@ -8,7 +8,7 @@ Crafting: {
 
 	recipeSearchBar: {
 		Label: "[i:38] Recipe Search Bar"
-		Tooltip: Add a search bar to filter recipe by name
+		Tooltip: Filter recipes by their name
 	}
 
 	recipeFilters: {
@@ -548,7 +548,7 @@ ItemActions: {
 
 	itemRightClick: {
 		Label: "[i:1503] Extra Item Right Click"
-		Tooltip: Item that can be right clicked in the inventory can be right clicked when held
+		Tooltip: Item that can be right clicked in the inventory can be right clicked when selected
 	}
 
 	favoritedBuff: {
