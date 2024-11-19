@@ -36,6 +36,7 @@ public class FixedTooltipPosition : ILoadable {
             if (Configs.ItemActions.FixedTooltipPosition && _slotPosition.HasValue) {
                 x = (int)(_slotPosition.Value.X + TextureAssets.InventoryBack.Width() * _scale * 1.1f);
                 y = (int)_slotPosition.Value.Y;
+                _slotPosition = null;
             }
             _ilY = y;
             return x;

@@ -15,7 +15,7 @@ namespace BetterInventory.ItemActions;
 public class TooltipHoverSystem : ModSystem {
 
     public override void Load() {
-        HoverTooltipKb = KeybindLoader.RegisterKeybind(Mod, "HoverTooltip", Microsoft.Xna.Framework.Input.Keys.None);
+        HoverTooltipKb = KeybindLoader.RegisterKeybind(Mod, "HoverTooltip", Microsoft.Xna.Framework.Input.Keys.N);
 
         On_ChatManager.DrawColorCodedString_SpriteBatch_DynamicSpriteFont_TextSnippetArray_Vector2_Color_float_Vector2_Vector2_refInt32_float_bool += HookSnippetHover;
         IL_Main.MouseText_DrawItemTooltip += static il => {
