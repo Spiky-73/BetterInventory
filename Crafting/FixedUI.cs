@@ -165,12 +165,12 @@ public sealed class FixedUI : ILoadable {
 
         //     ++ <drawRecipeCount>
         cursor.EmitLdloc(x).EmitLdloc(y);
-        cursor.EmitDelegate(DraxRecipeCount);
+        cursor.EmitDelegate(DrawRecipeCount);
 
         //     while (...) <recipeList>
         // }
     }
-    private static void DraxRecipeCount(int x, int y) {
+    private static void DrawRecipeCount(int x, int y) {
         if (!Configs.FixedUI.RecipeCount) return;
         int padding = 20 - TextureAssets.CraftUpButton.Width();
         x -= 20 + padding;
