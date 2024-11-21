@@ -76,7 +76,7 @@ public sealed class ClickOverrides : ILoadable {
     public static void AddCraftStackLine(Item item, List<TooltipLine> tooltips) {
         if (!Configs.CraftStack.Tooltip) return;
         bool recipe;
-        if (item.tooltipContext == ItemSlot.Context.CraftingMaterial && !item.IsNotSameTypePrefixAndStack(Main.recipe[Main.availableRecipe[Main.focusRecipe]].createItem)) recipe = true;
+        if (item.tooltipContext == ItemSlot.Context.CraftingMaterial && item.UniqueId() == Main.recipe[Main.availableRecipe[Main.focusRecipe]].createItem.UniqueId()) recipe = true;
         else if (item.tooltipContext == ItemSlot.Context.ShopItem) recipe = false;
         else return;
 

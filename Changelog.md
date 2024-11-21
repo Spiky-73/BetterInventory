@@ -15,6 +15,7 @@
 - Reworked RecipeFilters to use UIElements
 - Updated recipe filter icons
 - Updated Spiky's Lib dependency to v1.3
+- Fixed available materials and CraftStack line displayed on incorrect items
 
 ### v0.6.1.3
 - Fixed guideTile saving as lens when empty
