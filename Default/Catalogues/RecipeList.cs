@@ -6,6 +6,7 @@ using SpikysLib;
 using SpikysLib.IL;
 using Terraria;
 using Terraria.Audio;
+using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI;
@@ -227,6 +228,10 @@ public sealed class RecipeList : ModEntityCatalogue {
             if (text is null || text.Length == 0 || (_searchHistory.Count > 0 && _searchHistory[^1] == text)) return;
             _searchHistory.Add(text);
         };
+    }
+
+    public static void HookSearchRecipe_Cancel(UISearchBar searchBar) {
+        if (Instance.Enabled && Configs.QuickSearch.Value.rightClick == Configs.RightClickAction.SearchPrevious && searchBar.HasContents) _searchHistory.Add(Reflection.UISearchBar.actualContents.GetValue(searchBar));
     }
 
     private static readonly List<Item>[] _guideHistory = [[], []];

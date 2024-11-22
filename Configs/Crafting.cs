@@ -57,7 +57,6 @@ public sealed class FastScroll {
 }
 
 public sealed class RecipeFilters {
-    [DefaultValue(true)] public bool searchBar = true;
     [DefaultValue(true)] public bool hideUnavailable = true;
     [Range(1, 6), DefaultValue(4)] public int filtersPerLine = 4;
 

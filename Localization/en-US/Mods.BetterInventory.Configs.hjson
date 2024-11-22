@@ -31,12 +31,12 @@ Crafting: {
 		Tooltip: Adds the held item to the available materials
 	}
 
-	Tooltip: ""
-
 	availableMaterials: {
 		Label: "[i:4131] Display Available Materials"
 		Tooltip: Display how much of each of the selected's recipe materials you have
 	}
+
+	Tooltip: ""
 }
 
 FixedUI: {
@@ -64,16 +64,16 @@ FixedUI: {
 
 	recipeCount: {
 		Label: Display Recipe Count
-		Tooltip: The range of recipes displayed on the recipe list
+		Tooltip: Display the range of recipes visible on the recipe list
 	}
 
 	noRecStartOffset: {
-		Label: Disable recipe list offset
-		Tooltip: Prevent the recipe list from offsetting to fill the last line when reaching  the bottom of the list
+		Label: Disable Recipe List Offset
+		Tooltip: Prevent the recipe list from offsetting to fill the last line when reaching the bottom of the list
 	}
 
 	noRecListClose: {
-		Label: Disable recipe list auto close
+		Label: Disable Recipe List Auto Close
 		Tooltip: Prevents the recipe list from closing when they are no available recipes
 	}
 }
@@ -98,11 +98,6 @@ RecipeFilters: {
 	filtersPerLine: {
 		Label: Filters Per Line
 		Tooltip: The number of filters per line
-	}
-
-	searchBar: {
-		Label: search Bar
-		Tooltip: ""
 	}
 }
 
@@ -576,7 +571,8 @@ ItemActions: {
 	}
 
 	tooltipScroll: {
-		Label: "[i:3291] Tooltip scroll"
+		Name: Tooltip scroll
+		Label: "[i:3291] {$Mods.BetterInventory.Configs.ItemActions.tooltipScroll.Name}"
 		Tooltip: Makes tooltips scrollable when they are too tall
 	}
 
@@ -619,7 +615,7 @@ TooltipScroll: {
 
 	maximumHeight: {
 		Label: Maximum Screen Height
-		Tooltip: The maximum height of item tooltips
+		Tooltip: The maximum height of item tooltips (1 = 100%)
 	}
 }
 

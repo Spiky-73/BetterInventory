@@ -17,6 +17,7 @@ public sealed class RecipeUI : UIState {
     public UIFlexList container = null!;
     public UIPanel searchPanel = null!;
     public UISearchBar searchBar = null!;
+    public UIImageButton searchCancel = null!;
     public UIFlexGrid filters = null!;
 
     public sealed override void OnInitialize() {
@@ -126,17 +127,18 @@ public sealed class RecipeUI : UIState {
         searchBar.SetContents(null, true);
         searchPanel.Append(searchBar);
 
-        UIImageButton cancelButton = new(Main.Assets.Request<Texture2D>("Images/UI/SearchCancel")) {
+        searchCancel = new(Main.Assets.Request<Texture2D>("Images/UI/SearchCancel")) {
             HAlign = 1f,
             VAlign = 0.5f,
             Left = new StyleDimension(-2f, 0f)
         };
-        cancelButton.OnMouseOver += (_, _) => SoundEngine.PlaySound(SoundID.MenuTick);
-        cancelButton.OnLeftClick += (_, _) => {
+        searchCancel.OnMouseOver += (_, _) => SoundEngine.PlaySound(SoundID.MenuTick);
+        searchCancel.OnLeftClick += (_, _) => {
+            RecipeList.HookSearchRecipe_Cancel(searchBar);
             searchBar.SetContents(null, true);
             SoundEngine.PlaySound(SoundID.MenuTick);
         };
-        searchPanel.Append(cancelButton);
+        searchPanel.Append(searchCancel);
     }
 
     private void OnSearchContentChange(string? content) {
