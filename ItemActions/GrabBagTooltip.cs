@@ -19,29 +19,7 @@ public sealed class GrabBagTooltipItem : GlobalItem {
     }
     
     public static List<TooltipLine> GetGrabBagContent(int itemType) {
-        if (_bagContentItemType != itemType) UpdateGrabBagContent(itemType);
-        List<TooltipLine> tooltips = [new(BetterInventory.Instance, $"BagContent0", Language.GetTextValue($"{Localization.Keys.UI}.BagContent"))];
-        for (int i = _bagContentCurrencies.Count - 1; i >= 0; i--) {
-            var (currency, min, max) = _bagContentCurrencies[i];
-
-            string priceText = CurrencyHelper.PriceText(currency, min);
-            var match = _coinRegex.Match(priceText);
-            string priceTextMax = CurrencyHelper.PriceText(currency, max);
-            if (min != max) {
-                if (match.Success) {
-                    Regex regexMax = new($"""^{Regex.Escape(match.Groups[1].Value)}(\d+){Regex.Escape(match.Groups[3].Value)}{Regex.Escape(match.Groups[4].Value)}$""");
-                    var matchMax = regexMax.Match(priceTextMax);
-
-                    if (match.Success) priceText = $"{match.Groups[1]}{match.Groups[2]}-{matchMax.Groups[1]}{match.Groups[3]}{match.Groups[4]}";
-                    else priceText += $" - {priceTextMax}";
-                } else priceText += $" - {priceTextMax}";
-            }
-            tooltips.Add(new(BetterInventory.Instance, $"BagContentCurrency{i}", priceText));
-        }
-        tooltips.AddRange(_bagContentTooltips);
-        return tooltips;
-    }
-    private static void UpdateGrabBagContent(int itemType) {
+        if (_bagContentItemType == itemType) return _bagContentTooltips;
         _bagContentItemType = itemType;
         _bagContentTooltips.Clear();
         _bagContentCurrencies.Clear();
@@ -57,7 +35,30 @@ public sealed class GrabBagTooltipItem : GlobalItem {
                 else AddGrabBagContent_Compact(_bagContentTooltips, drops);
             }
         }
+
+        List<TooltipLine> tooltips = _bagContentTooltips;
+        _bagContentTooltips = [new(BetterInventory.Instance, $"BagContent0", Language.GetTextValue($"{Localization.Keys.UI}.BagContent"))];
+
         _bagContentCurrencies.Sort((a, b) => a.currency.CompareTo(b.currency));
+        for (int i = _bagContentCurrencies.Count - 1; i >= 0; i--) {
+            var (currency, min, max) = _bagContentCurrencies[i];
+
+            string priceText = CurrencyHelper.PriceText(currency, min);
+            var match = _coinRegex.Match(priceText);
+            string priceTextMax = CurrencyHelper.PriceText(currency, max);
+            if (min != max) {
+                if (match.Success) {
+                    Regex regexMax = new($"""^{Regex.Escape(match.Groups[1].Value)}(\d+){Regex.Escape(match.Groups[3].Value)}{Regex.Escape(match.Groups[4].Value)}$""");
+                    var matchMax = regexMax.Match(priceTextMax);
+
+                    if (match.Success) priceText = $"{match.Groups[1]}{match.Groups[2]}-{matchMax.Groups[1]}{match.Groups[3]}{match.Groups[4]}";
+                    else priceText += $" - {priceTextMax}";
+                } else priceText += $" - {priceTextMax}";
+            }
+            _bagContentTooltips.Add(new(BetterInventory.Instance, $"BagContentCurrency{i}", priceText));
+        }
+        _bagContentTooltips.AddRange(tooltips);
+        return _bagContentTooltips;
     }
     private static void AddGrabBagContent(List<TooltipLine> tooltips, List<DropRateInfo> drops) {
         for (int i = 0; i < drops.Count; i++) {
@@ -109,7 +110,7 @@ public sealed class GrabBagTooltipItem : GlobalItem {
 
     private static int _bagContentItemType;
     private static readonly List<(int currency, int min, int max)> _bagContentCurrencies = [];
-    private static readonly List<TooltipLine> _bagContentTooltips = [];
+    private static List<TooltipLine> _bagContentTooltips = [];
 
     private static readonly Regex _coinRegex = new("""^(\[c\/[0-9a-fA-F]{6}:)?(\d+)( [a-zA-Z ]+)(\])?$""");
 }
