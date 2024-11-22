@@ -400,7 +400,7 @@ QuickMove: {
 		Tooltip:
 			'''
 			Changes the mapping of hotkeys depending of the number of target slots
-			{$Mods.BetterInventory.Configs.HotkeyMode.Default.Label}: Hotbar #1 maps to slot 1, Hotbar #10 to slot 10
+			{$Mods.BetterInventory.Configs.HotkeyMode.Hotbar.Label}: Hotbar #1 maps to slot 1, Hotbar #10 to slot 10
 			{$Mods.BetterInventory.Configs.HotkeyMode.FromEnd.Label}: Hotbar #10 maps to the last slot, Hotbar #1 to 10 slot from the end
 			{$Mods.BetterInventory.Configs.HotkeyMode.Reversed.Label}: Hotbar #10 maps to slot 1, Hotbar #1 to slot 10
 			'''
