@@ -107,4 +107,25 @@ public static class Utility {
         if (Configs.BetterGuide.AvailableRecipes) Guide.FindGuideRecipes();
         else Recipe.FindRecipes();
     }
+
+
+    public static string ToMetricString(this double number, int digits = 4) {
+        int power = number == 0 ? 0 : (int)Math.Log10(number);
+        if (power < digits) return number.ToString();
+        string prefix;
+        if (power <= MetricPrefixes.Length * 3 - 1) {
+            prefix = MetricPrefixes[power / 3];
+            power = power / 3 * 3;
+        } else {
+            prefix = $"e{power}";
+        }
+        if (power > 0) number /= Math.Pow(10, power);
+
+        string str = number.ToString();
+        str = str[0..Math.Min(str.Length, Math.Max(1, digits-prefix.Length))];
+        if (str[^1] == '.') str = str[0..^1];
+        return $"{str}{prefix}";
+    }
+
+    public static readonly string[] MetricPrefixes = [string.Empty, "k", "M", "G", "T", "P"];
 }

@@ -90,9 +90,7 @@ public sealed class Crafting : ILoadable {
         cursor.EmitDelegate((string stack, Item[] inv, int context, int slot) => {
             Item item = inv[slot];
             if (!Configs.AvailableMaterials.ItemSlot || !ShouldDisplayStack(item, context, out Recipe? recipe)) return stack;
-            long count = GetMaterialCount(recipe, item);
-            // TODO metric suffix notation
-            return $"{count}/{item.stack}";
+            return $"{Utility.ToMetricString(GetMaterialCount(recipe, item))}/{item.stack}";
         });
         cursor.GotoPrev(i => i.MatchLdflda(Reflection.Item.stack));
         cursor.GotoPrev(MoveType.After, i => i.MatchLdfld(Reflection.Item.stack));
