@@ -116,6 +116,8 @@ public sealed partial class Guide : ModSystem {
         inventoryX = 73;
         inventoryY = 331 + adjY;
 
+        if (Configs.RecipeTooltip.Enabled) RequiredTooltipItem.OnDrawGuideCraftText();
+
         if (Configs.BetterGuide.CraftInMenu) HandleVisibility(inventoryX, inventoryY);
 
         if (Configs.BetterGuide.ConditionsDisplay) DrawRequiredTiles(inventoryX, inventoryY);

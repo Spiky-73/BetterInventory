@@ -37,6 +37,11 @@ Crafting: {
 	}
 
 	Tooltip: ""
+
+	recipeTooltip: {
+		Label: "[i:398] Recipe Tooltip"
+		Tooltip: Shows recipes' materials and required tiles in their tooltip
+	}
 }
 
 FixedUI: {
@@ -135,6 +140,15 @@ AvailableMaterials: {
 	itemSlot: {
 		Label: Item slot
 		Tooltip: Display how much material you have on the item slot
+	}
+}
+
+RecipeTooltip: {
+	Tooltip: ""
+
+	objectsLine: {
+		Label: Dedicated Required Objects Line
+		Tooltip: Shows the required tiles and conditions on a different line
 	}
 }
 

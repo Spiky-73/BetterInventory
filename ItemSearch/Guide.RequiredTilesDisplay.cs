@@ -9,7 +9,7 @@ using ContextID = Terraria.UI.ItemSlot.Context;
 
 namespace BetterInventory.ItemSearch;
 
-
+// BUG ??? DrawGuideCraftText when disabled
 public sealed partial class Guide : ModSystem {
     private static void DrawRequiredTiles(int inventoryX, int inventoryY) {
         Recipe recipe = Main.recipe[Main.availableRecipe[Main.focusRecipe]];

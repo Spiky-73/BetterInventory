@@ -14,6 +14,7 @@ public sealed class Crafting : ModConfig {
     public Toggle<CraftOnList> craftOnList = new(true);
     [DefaultValue(true)] public bool mouseMaterial;
     public Toggle<AvailableMaterials> availableMaterials = new(true);
+    public Toggle<RecipeTooltip> recipeTooltip = new(true);
 
     public static bool MouseMaterial => Instance.mouseMaterial;
     public static bool RecipeUI => Instance.recipeSearchBar || Instance.recipeFilters;
@@ -85,7 +86,7 @@ public sealed class CraftOnList {
     [JsonProperty, DefaultValue(false)] private bool focusRecipe { set => ConfigHelper.MoveMember(value, _ => focusHovered = value); }
 }
 
-public class AvailableMaterials {
+public sealed class AvailableMaterials {
     [DefaultValue(true)] public bool tooltip = true;
     [DefaultValue(true)] public bool itemSlot = true;
 
@@ -93,4 +94,12 @@ public class AvailableMaterials {
     public static AvailableMaterials Value => Crafting.Instance.availableMaterials.Value;
     public static bool Tooltip => Enabled && Value.tooltip;
     public static bool ItemSlot => Enabled && Value.itemSlot && !UnloadedCrafting.Value.availableMaterialsItemSlot;
+}
+
+public sealed class RecipeTooltip {
+    [DefaultValue(false)] public bool objectsLine = false;
+
+    public static bool Enabled => Crafting.Instance.recipeTooltip;
+    public static RecipeTooltip Value => Crafting.Instance.recipeTooltip.Value;
+
 }
