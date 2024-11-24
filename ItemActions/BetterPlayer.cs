@@ -11,7 +11,7 @@ using Terraria.Audio;
 using Terraria.ID;
 using SpikysLib.UI;
 using Terraria.Localization;
-using SpikysLib.CrossMod;
+using BetterInventory.CrossMod;
 using SpikysLib.Constants;
 using SpikysLib.Configs;
 using SpikysLib;
@@ -140,7 +140,7 @@ public sealed class BetterPlayer : ModPlayer {
     public override IEnumerable<Item> AddMaterialsForCrafting(out ItemConsumedCallback itemConsumedCallback) {
         List<Item> items = [];
         Item? mat;
-        if((mat = Guide.GetGuideMaterials()) != null) items.Add(mat);
+        if(Main.myPlayer == Player.whoAmI && (mat = Guide.GetGuideMaterials()) != null) items.Add(mat);
         if(Main.myPlayer == Player.whoAmI && (mat = Crafting.Crafting.GetMouseMaterial()) != null) items.Add(mat);
         itemConsumedCallback = (item, index) => {
             if (item == Main.mouseItem) item.stack -= Reflection.RecipeLoader.ConsumedItems.GetValue()[^1].stack; // FIXME seems hacky

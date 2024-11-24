@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using BetterInventory.ItemSearch;
 using MonoMod.Cil;
 using SpikysLib;
 using SpikysLib.Constants;
@@ -38,7 +39,7 @@ public static class Utility {
         return min;
     }
 
-    public static bool ApplyTo(this ILContext context, Action<ILContext> ilEdit, bool enabled, [CallerArgumentExpression("ilEdit")] string name = "") {
+    public static bool ApplyTo(this ILContext context, Action<ILContext> ilEdit, bool enabled, [CallerArgumentExpression(nameof(ilEdit))] string name = "") {
         Mod mod = ModContent.GetInstance<BetterInventory>();
         if (Configs.Compatibility.CompatibilityMode && !enabled) {
             mod.Logger.Info($"ILHook {name} was not loaded. Related features will be disabled until reload");
@@ -102,4 +103,8 @@ public static class Utility {
         return cursor;
     }
 
+    public static void FindDisplayedRecipes() {
+        if (Configs.BetterGuide.AvailableRecipes) Guide.FindGuideRecipes();
+        else Recipe.FindRecipes();
+    }
 }

@@ -6,7 +6,8 @@ using TNPC = Terraria.NPC;
 using TRecipe = Terraria.Recipe;
 using SpikysLib.Reflection;
 using Terraria;
-using Microsoft.Xna.Framework;
+using TVector2 = Microsoft.Xna.Framework.Vector2;
+using System;
 
 namespace BetterInventory.Reflection;
 
@@ -24,13 +25,17 @@ public static class Main {
     public static readonly StaticField<bool> InGuideCraftMenu = new(typeof(TMain), nameof(TMain.InGuideCraftMenu));
     public static readonly StaticField<TItem> guideItem = new(typeof(TMain), nameof(TMain.guideItem));
     public static readonly StaticField<bool> _preventCraftingBecauseClickWasUsedToChangeFocusedRecipe = new(typeof(TMain), nameof(_preventCraftingBecauseClickWasUsedToChangeFocusedRecipe));
+    public static readonly StaticField<int> toolTipDistance = new(typeof(TMain), nameof(toolTipDistance));
+    public static readonly StaticField<bool> SettingsEnabled_OpaqueBoxBehindTooltips = new(typeof(TMain), nameof(TMain.SettingsEnabled_OpaqueBoxBehindTooltips));
     public static readonly StaticMethod<object?> DrawInterface_36_Cursor = new(typeof(TMain), nameof(DrawInterface_36_Cursor));
     public static readonly StaticMethod<object?> HoverOverCraftingItemButton = new(typeof(TMain), nameof(HoverOverCraftingItemButton), typeof(int));
     public static readonly StaticMethod<object?> LockCraftingForThisCraftClickDuration = new(typeof(TMain), nameof(TMain.LockCraftingForThisCraftClickDuration));
     public static readonly StaticMethod<object?> SetRecipeMaterialDisplayName = new(typeof(TMain), nameof(SetRecipeMaterialDisplayName), typeof(int));
     
+    public static readonly Type MouseTextCache = typeof(TMain).GetNestedType(nameof(MouseTextCache), BindingFlags.NonPublic)!;
+    public static readonly Method<TMain, object?> MouseText_DrawItemTooltip = new(nameof(MouseText_DrawItemTooltip), MouseTextCache, typeof(int), typeof(byte), typeof(int), typeof(int));
     public static readonly FieldInfo _mouseTextCache = typeof(TMain).GetField(nameof(_mouseTextCache), BindingFlags.Instance | BindingFlags.NonPublic)!;
-    public static readonly FieldInfo _mouseTextCache_isValid = typeof(TMain).GetNestedType("MouseTextCache", BindingFlags.NonPublic)!.GetField("isValid", BindingFlags.Instance | BindingFlags.Public)!;
+    public static readonly FieldInfo _mouseTextCache_isValid = MouseTextCache.GetField("isValid", BindingFlags.Instance | BindingFlags.Public)!;
 }
 
 public static class Player {
@@ -48,10 +53,11 @@ public static class Item {
     public static readonly Property<TItem, bool> IsACoin = new(nameof(TItem.IsACoin));
     public static readonly Method<TItem, bool> FitsAmmoSlot = new(nameof(TItem.FitsAmmoSlot));
     public static readonly Method<TItem, TItem> Clone = new(nameof(TItem.Clone));
+    public static readonly Field<TItem, bool> DD2Summon = new(nameof(TItem.DD2Summon));
 }
 
 public static class NPC {
-    public static readonly StaticMethod<object?> LadyBugKilled = new(typeof(TNPC), nameof(TNPC.LadyBugKilled), typeof(Vector2), typeof(bool));
+    public static readonly StaticMethod<object?> LadyBugKilled = new(typeof(TNPC), nameof(TNPC.LadyBugKilled), typeof(TVector2), typeof(bool));
 }
 
 public static class Recipe {

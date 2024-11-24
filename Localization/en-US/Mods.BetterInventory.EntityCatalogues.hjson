@@ -1,9 +1,9 @@
 Bestiary: {
 	DisplayName: Bestiary
-	Tooltip: ""
+	Tooltip: Navigate through NPCs and their drops
 }
 
 RecipeList: {
 	DisplayName: Recipe List
-	Tooltip: ""
+	Tooltip: Navigate through recipes
 }

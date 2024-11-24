@@ -97,7 +97,7 @@ public sealed class Bestiary : ILoadable {
             uIList.Top.Set(self.Height.Pixels + uIList.PaddingTop, 0);
             self.Append(uIList);
 
-            List<DropRateInfo> drops = new();
+            List<DropRateInfo> drops = [];
             DropRateInfoChainFeed ratesInfo = new(1f);
             foreach (IItemDropRule itemDropRule in Main.ItemDropsDB.GetRulesForItemID(info.itemId)) itemDropRule.ReportDroprates(drops, ratesInfo);
             foreach (DropRateInfo drop in drops) {
@@ -119,6 +119,7 @@ public sealed class Bestiary : ILoadable {
         string s = orig(self, ref info);
         if (!Configs.BetterBestiary.ShowBagContent) return s;
         DropRateInfo dropRateInfo = Reflection.ItemDropBestiaryInfoElement._droprateInfo.GetValue(self);
+        if (!Reflection.ItemDropBestiaryInfoElement.ShouldShowItem.Invoke(dropRateInfo)) return s;
         if (!ItemID.Sets.BossBag[dropRateInfo.itemId]) return s;
         return $"{s}|{GetBossBagSearch(dropRateInfo)}";
     }

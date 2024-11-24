@@ -24,6 +24,7 @@ public sealed class FixedUI : ILoadable {
             if (!il.ApplyTo(ILScrollButtonsFix, Configs.FixedUI.ScrollButtons)) Configs.UnloadedCrafting.Value.scrollButtons = true;
             if (!il.ApplyTo(ILRecipeCount, Configs.FixedUI.RecipeCount)) Configs.UnloadedCrafting.Value.recipeCount = true;
             if (!il.ApplyTo(ILNoRecStartOffset, Configs.FixedUI.NoRecStartOffset)) Configs.UnloadedCrafting.Value.noRecStartOffset = true;
+            if (!il.ApplyTo(ILNoRecListClose, Configs.FixedUI.NoRecListClose)) Configs.UnloadedCrafting.Value.noRecListClose = true;
         };
 
     }
@@ -164,12 +165,12 @@ public sealed class FixedUI : ILoadable {
 
         //     ++ <drawRecipeCount>
         cursor.EmitLdloc(x).EmitLdloc(y);
-        cursor.EmitDelegate(DraxRecipeCount);
+        cursor.EmitDelegate(DrawRecipeCount);
 
         //     while (...) <recipeList>
         // }
     }
-    private static void DraxRecipeCount(int x, int y) {
+    private static void DrawRecipeCount(int x, int y) {
         if (!Configs.FixedUI.RecipeCount) return;
         int padding = 20 - TextureAssets.CraftUpButton.Width();
         x -= 20 + padding;
@@ -198,6 +199,25 @@ public sealed class FixedUI : ILoadable {
             return Main.recStart;
         } );
 
+    }
+
+    private static void ILNoRecListClose(ILContext il) {
+        ILCursor cursor = new(il);
+        // ...
+        // if(<showRecipes>){
+        cursor.GotoRecipeDraw();
+
+        //     ...
+        //     if(Main.numAvailableRecipes == 0) Main.recBigList = false;
+        //     else {
+        //         int num73 = 94;
+        //         int num74 = 450 + num51;
+        //         if (++false && Main.InGuideCraftMenu) num74 -= 150;
+        cursor.GotoNext(i => i.MatchLdsfld(Reflection.TextureAssets.CraftToggle));
+        cursor.GotoPrev(MoveType.After, i => i.MatchLdsfld(Reflection.Main.numAvailableRecipes));
+        cursor.EmitDelegate((int numAvailableRecipes) => Configs.FixedUI.NoRecListClose && numAvailableRecipes == 0 ? 1 : numAvailableRecipes);
+        //         ...
+        //     }
     }
 
     private static bool HookTryAllowingToCraftRecipe(On_Main.orig_TryAllowingToCraftRecipe orig, Recipe currentRecipe, bool tryFittingItemInInventoryToAllowCrafting, out bool movedAnItemToAllowCrafting)

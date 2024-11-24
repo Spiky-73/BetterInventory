@@ -8,5 +8,9 @@ public sealed class BetterInventory : Mod, IPreLoadMod {
 
 
     public void PreLoadMod() => Instance = this;
-    public override void Unload() => Instance = null!;
+
+    public override void Unload() {
+        InventoryManagement.ItemAmmoLoader.Unload();
+        Instance = null!;
+    }
 }

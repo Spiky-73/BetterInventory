@@ -17,13 +17,22 @@ using SpikysLib.IL;
 using SpikysLib;
 using BetterInventory.Default.Catalogues;
 using System.Collections.Generic;
+using BetterInventory.Crafting.UI;
 
 namespace BetterInventory.ItemSearch;
 
 public sealed partial class Guide : ModSystem {
 
+    internal static GameTime _lastUpdateUiGameTime = null!;
+    internal static UserInterface recipeInterface = null!;
+    internal static RecipeUI recipeUI = null!;
+
     public static VisibilityFilters LocalFilters => BetterPlayer.LocalPlayer.VisibilityFilters;
 
+    public override void UpdateUI(GameTime gameTime) {
+        _lastUpdateUiGameTime = gameTime;
+        recipeInterface.Update(gameTime);
+    }
 
     private static void ILCustomDrawCreateItem(ILContext il) {
         ILCursor cursor = new(il);
@@ -191,7 +200,7 @@ public sealed partial class Guide : ModSystem {
         Main.spriteBatch.Draw(tick.Value, s_hitBox.Center(), null, color, 0f, tick.Value.Size() / 2, 1, 0, 0f);
         if (s_visibilityHover) {
             string key = filters.ShowAllRecipes ? $"{Localization.Keys.UI}.ShowAll" : $"{Localization.Keys.UI}.ShowAvailable";
-            Main.instance.MouseText(Language.GetTextValue($"{Localization.Keys.UI}.Filter", Language.GetTextValue(key), Main.numAvailableRecipes)); // TODO display x-y (total) next to recipe list arrows
+            Main.instance.MouseText(Language.GetTextValue($"{Localization.Keys.UI}.Filter", Language.GetTextValue(key), Main.numAvailableRecipes));
             Main.spriteBatch.Draw(s_inventoryTickBorder.Value, s_hitBox.Center(), null, color, 0f, s_inventoryTickBorder.Value.Size() / 2, 1, 0, 0f);
         }
     }
@@ -245,7 +254,7 @@ public sealed partial class Guide : ModSystem {
         if (Configs.BetterGuide.AvailableRecipes) {
             // Update available if no guide item changed
             bool guideChange = !AreSame(Main.guideItem, s_dispGuide) || !AreSame(guideTile, s_dispTile);
-            if (!guideChange) orig(canDelayCheck);            
+            if (!guideChange) orig(canDelayCheck);
             // Update guide recipes if we don't show everything
             if (forced || guideChange || !ShowAllRecipes()) FindGuideRecipes();
 

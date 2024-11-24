@@ -34,8 +34,11 @@ public sealed class Compatibility : ModConfig {
         FixedUI.Value.wrapping = false;
         FixedUI.Value.recipeCount = false;
         FixedUI.Value.noRecStartOffset = false;
+        FixedUI.Value.noRecListClose = false;
         Crafting.Instance.recipeFilters.Key = false;
+        Crafting.Instance.recipeSearchBar.Key = false;
         Crafting.Instance.craftOnList.Key = false;
+        AvailableMaterials.Value.itemSlot = false;
         Crafting.Instance.Save();
 
         SmartConsumption.Value.materials = false;
@@ -55,6 +58,10 @@ public sealed class Compatibility : ModConfig {
         InventoryManagement.Instance.stackTrash = false;
         InventoryManagement.Instance.craftStack.Key = false;
         InventoryManagement.Instance.Save();
+
+        ItemActions.Instance.fixedTooltipPosition = false;
+        ItemActions.Instance.tooltipHover.Key = false;
+        ItemActions.Instance.Save();
 
         BetterGuide.Value.moreRecipes = false;
         BetterGuide.Value.craftingStation = false;
@@ -77,8 +84,13 @@ public sealed class UnloadedCrafting {
     public bool wrapping = false;
     public bool recipeCount = false;
     public bool noRecStartOffset = false;
+    public bool noRecListClose = false;
     public bool recipeFilters = false;
+    public bool recipeSearchBar = false;
     public bool craftOnList = false;
+    public bool availableMaterialsItemSlot;
+
+    [JsonIgnore] public bool RecipeUI { set { recipeFilters = value; recipeSearchBar = value; } }
 
     public static UnloadedCrafting Value => Compatibility.Instance.unloadedCrafting;
 }
@@ -105,6 +117,8 @@ public sealed class UnloadedInventoryManagement {
 }
 
 public sealed class UnloadedItemActions {
+    public bool fixedTooltipPosition;
+    public bool tooltipHover;
     public static UnloadedItemActions Value => Compatibility.Instance.unloadedItemActions;
 }
 

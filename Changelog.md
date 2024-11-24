@@ -1,9 +1,24 @@
 # Better Inventory changelog
 
-## dev
+## 0.7
 - Added an options to keep swapped items favorited
 - Added the number of visible recipes to the recipe list
+- Added a recipe search bar
 - Prevented the offset of the recipes when at the bottom of the recipe list
+- Prevented the recipe list from closing on its own
+- Added grab bag drops in their tooltip
+- Added scrollable tooltips
+- Added a hotkey to hover tooltips
+- Added available materials display
+- Added weapon ammo display
+- Added Fixed item tooltip position
+- Reworked RecipeFilters to use UIElements
+- Updated recipe filter icons
+- Updated Spiky's Lib dependency to v1.3
+- Fixed available materials and CraftStack line displayed on incorrect items
+
+### v0.6.1.3
+- Fixed guideTile saving as lens when empty
 
 ## v0.6.1.2
 - Fixed guideTile not working for condition items

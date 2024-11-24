@@ -2,17 +2,27 @@ using System.ComponentModel;
 using Terraria.ModLoader.Config;
 using SpikysLib.Configs;
 using Newtonsoft.Json;
+using BetterInventory.ItemSearch;
+using Terraria;
 
 namespace BetterInventory.Configs;
 
 public sealed class Crafting : ModConfig {
     public Toggle<FixedUI> fixedUI = new(true);
+    public Toggle<RecipeSearchBar> recipeSearchBar = new(true);
     public Toggle<RecipeFilters> recipeFilters = new(true);
     public Toggle<CraftOnList> craftOnList = new(true);
     [DefaultValue(true)] public bool mouseMaterial;
+    public Toggle<AvailableMaterials> availableMaterials = new(true);
 
     public static bool MouseMaterial => Instance.mouseMaterial;
+    public static bool RecipeUI => Instance.recipeSearchBar || Instance.recipeFilters;
     public static Crafting Instance = null!;
+
+    public override void OnChanged() {
+        if (Guide.recipeUI?.filters is not null) Guide.recipeUI.filters.ItemsPerLine = RecipeFilters.Value.filtersPerLine;
+        if (!Main.gameMenu && Guide.recipeUI is not null) Guide.recipeUI.RebuildList();
+    }
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
 }
@@ -24,6 +34,7 @@ public sealed class FixedUI {
     [DefaultValue(true)] public bool craftWhenHolding = true;
     [DefaultValue(true)] public bool recipeCount = true;
     [DefaultValue(true)] public bool noRecStartOffset = true;
+    [DefaultValue(true)] public bool noRecListClose = true;
 
     public static bool Enabled => Crafting.Instance.fixedUI;
     public static bool FastScroll => Enabled && Value.fastScroll && !UnloadedCrafting.Value.fastScroll;
@@ -32,6 +43,7 @@ public sealed class FixedUI {
     public static bool CraftWhenHolding => Enabled && Value.craftWhenHolding;
     public static bool RecipeCount => Enabled && Value.recipeCount && !UnloadedCrafting.Value.recipeCount;
     public static bool NoRecStartOffset => Enabled && Value.noRecStartOffset && !UnloadedCrafting.Value.noRecStartOffset;
+    public static bool NoRecListClose => Enabled && Value.noRecListClose && !UnloadedCrafting.Value.noRecListClose;
     public static FixedUI Value => Crafting.Instance.fixedUI.Value;
     
     // Compatibility version < v0.6
@@ -55,6 +67,14 @@ public sealed class RecipeFilters {
     [JsonProperty, DefaultValue(4)] private int width { set => ConfigHelper.MoveMember(value != 4, _ => filtersPerLine = value); }
 }
 
+public sealed class RecipeSearchBar {
+    [DefaultValue(true)] public bool expand = true;
+    [DefaultValue(14 * 4 + 3 * 6), Range(0, 220)] public int minWidth = 14 * 4 + 3 * 6;
+
+    public static bool Enabled => Crafting.Instance.recipeSearchBar && !UnloadedCrafting.Value.recipeSearchBar;
+    public static RecipeSearchBar Value => Crafting.Instance.recipeSearchBar.Value;
+}
+
 public sealed class CraftOnList {
     [DefaultValue(false)] public bool focusHovered = false;
 
@@ -63,4 +83,14 @@ public sealed class CraftOnList {
 
     // Compatibility version < v0.6
     [JsonProperty, DefaultValue(false)] private bool focusRecipe { set => ConfigHelper.MoveMember(value, _ => focusHovered = value); }
+}
+
+public class AvailableMaterials {
+    [DefaultValue(true)] public bool tooltip = true;
+    [DefaultValue(true)] public bool itemSlot = true;
+
+    public static bool Enabled => Crafting.Instance.availableMaterials;
+    public static AvailableMaterials Value => Crafting.Instance.availableMaterials.Value;
+    public static bool Tooltip => Enabled && Value.tooltip;
+    public static bool ItemSlot => Enabled && Value.itemSlot && !UnloadedCrafting.Value.availableMaterialsItemSlot;
 }

@@ -6,8 +6,13 @@ Crafting: {
 		Tooltip: Fixes inconsistencies with the crafting UI
 	}
 
+	recipeSearchBar: {
+		Label: "[i:38] Recipe Search Bar"
+		Tooltip: Filter recipes by their name
+	}
+
 	recipeFilters: {
-		Label: "[i: 38] Recipe Filters"
+		Label: "[i:29] Recipe Filters"
 		Tooltip:
 			'''
 			Filter recipes by their created item
@@ -24,6 +29,11 @@ Crafting: {
 	mouseMaterial: {
 		Label: "[i:9] Held Material"
 		Tooltip: Adds the held item to the available materials
+	}
+
+	availableMaterials: {
+		Label: "[i:4131] Display Available Materials"
+		Tooltip: Display how much of each of the selected's recipe materials you have
 	}
 
 	Tooltip: ""
@@ -54,12 +64,17 @@ FixedUI: {
 
 	recipeCount: {
 		Label: Display Recipe Count
-		Tooltip: The range of recipes displayed on the recipe list
+		Tooltip: Display the range of recipes visible on the recipe list
 	}
 
 	noRecStartOffset: {
-		Label: Disable recipe list offset
-		Tooltip: Prevent the recipe list from offsetting to fill the last line when reaching  the bottom of the list
+		Label: Disable Recipe List Offset
+		Tooltip: Prevent the recipe list from offsetting to fill the last line when reaching the bottom of the list
+	}
+
+	noRecListClose: {
+		Label: Disable Recipe List Auto Close
+		Tooltip: Prevents the recipe list from closing when they are no available recipes
 	}
 }
 
@@ -86,12 +101,40 @@ RecipeFilters: {
 	}
 }
 
+RecipeSearchBar: {
+	Tooltip: ""
+
+	expand: {
+		Label: Expand
+		Tooltip: Increases the width of the search bar when the recipe list is opened
+	}
+
+	minWidth: {
+		Label: Min Width
+		Tooltip: The minimum width of the search bar. It will never go bellow the width of the other filters.
+	}
+}
+
 CraftOnList: {
 	Tooltip: ""
 
 	focusHovered: {
 		Label: Focus Hovered Recipe
 		Tooltip: Automatically selects the hovered recipe
+	}
+}
+
+AvailableMaterials: {
+	Tooltip: ""
+
+	tooltip: {
+		Label: Tooltip
+		Tooltip: Display how much material you have on the material's tooltip
+	}
+
+	itemSlot: {
+		Label: Item slot
+		Tooltip: Display how much material you have on the item slot
 	}
 }
 
@@ -357,7 +400,7 @@ QuickMove: {
 		Tooltip:
 			'''
 			Changes the mapping of hotkeys depending of the number of target slots
-			{$Mods.BetterInventory.Configs.HotkeyMode.Default.Label}: Hotbar #1 maps to slot 1, Hotbar #10 to slot 10
+			{$Mods.BetterInventory.Configs.HotkeyMode.Hotbar.Label}: Hotbar #1 maps to slot 1, Hotbar #10 to slot 10
 			{$Mods.BetterInventory.Configs.HotkeyMode.FromEnd.Label}: Hotbar #10 maps to the last slot, Hotbar #1 to 10 slot from the end
 			{$Mods.BetterInventory.Configs.HotkeyMode.Reversed.Label}: Hotbar #10 maps to slot 1, Hotbar #1 to slot 10
 			'''
@@ -496,7 +539,7 @@ ItemActions: {
 
 	itemRightClick: {
 		Label: "[i:1503] Extra Item Right Click"
-		Tooltip: Item that can be right clicked in the inventory can be right clicked when held
+		Tooltip: Item that can be right clicked in the inventory can be right clicked when selected
 	}
 
 	favoritedBuff: {
@@ -517,6 +560,36 @@ ItemActions: {
 		Label: "[i:75] Keep Swapped Items Favorited"
 		Tooltip: When swapping a favorited item to a slot where it cannot be favorited, the item it swaps with will be favorited
 	}
+
+	grabBagTooltip: {
+		Label: "[i:3318] Grab Bag Tooltip"
+		Tooltip:
+			'''
+			Display items dropped by grab bags in their tooltip
+			Enabling {$Mods.BetterInventory.Configs.ItemActions.tooltipScroll.Name} is recommended 
+			'''
+	}
+
+	tooltipScroll: {
+		Name: Tooltip scroll
+		Label: "[i:3291] {$Mods.BetterInventory.Configs.ItemActions.tooltipScroll.Name}"
+		Tooltip: Makes tooltips scrollable when they are too tall
+	}
+
+	fixedTooltipPosition: {
+		Label: "[i:4320] Fixed Tooltip position"
+		Tooltip: Positions the tooltip relative to the hovered item and not relative to the mouse
+	}
+
+	tooltipHover: {
+		Label: "[i:5075] Tooltip Hover"
+		Tooltip: Press the "{$Mods.BetterInventory.Keybinds.HoverTooltip.DisplayName}" key to hover tooltips
+	}
+
+	itemAmmo: {
+		Label: "[i:40] Display Item Ammo"
+		Tooltip: Display the ammo used by various items
+	}
 }
 
 ItemRightClick: {
@@ -526,6 +599,74 @@ ItemRightClick: {
 		Label: Stackable Items
 		Tooltip: Right Click a stackable item to throw an item of the stack
 	}
+}
+
+GrabBagTooltip: {
+	Tooltip: ""
+
+	compact: {
+		Label: Compact Display
+		Tooltip: Regroup items with the same drop rate on the same line
+	}
+}
+
+TooltipScroll: {
+	Tooltip: ""
+
+	maximumHeight: {
+		Label: Maximum Screen Height
+		Tooltip: The maximum height of item tooltips (1 = 100%)
+	}
+}
+
+TooltipHover: {
+	Tooltip: ""
+
+	graceTime: {
+		Label: Grace Time
+		Tooltip: The number of frame before a tooltip disappears when un-hovered or after a key press ({$Mods.BetterInventory.UI.FramesToSec})
+	}
+}
+
+ItemAmmo: {
+	Tooltip: ""
+
+	tooltip: {
+		Label: Tooltip line
+		Tooltip: Add a tooltip lines similar to Tile Wand's line
+	}
+
+	itemSlot: {
+		Label: Item Slot
+		Tooltip: Display the ammo alongside the item in the inventory
+	}
+}
+
+ItemSlotAmmo: {
+	Tooltip: ""
+
+	size: {
+		Label: Ammo Size
+		Tooltip: The size taken by the ammo in the item slot
+	}
+
+	position: {
+		Label: Position
+		Tooltip: The position of the ammo around the weapon
+	}
+
+	hover: {
+		Label: Ammo Hover
+		Tooltip: Display the tooltip of the ammo when it is hovered
+	}
+}
+
+Corner: {
+	Tooltip: ""
+	TopLeft.Label: Top Left
+	TopRight.Label: Top Right
+	BottomLeft.Label: Bottom Left
+	BottomRight.Label: Bottom Right
 }
 
 ItemSearch: {
@@ -868,13 +1009,28 @@ UnloadedCrafting: {
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
+	noRecListClose: {
+		Label: "{$Mods.BetterInventory.Configs.Crafting.fixedUI.Label} @ {$Mods.BetterInventory.Configs.FixedUI.noRecListClose.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
 	recipeFilters: {
 		Label: "{$Mods.BetterInventory.Configs.Crafting.recipeFilters.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
+	recipeSearchBar: {
+		Label: "{$Mods.BetterInventory.Configs.Crafting.recipeSearchBar.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
 	craftOnList: {
 		Label: "{$Mods.BetterInventory.Configs.Crafting.craftOnList.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	availableMaterialsItemSlot: {
+		Label: "{$Mods.BetterInventory.Configs.Crafting.availableMaterials.Label} @ {$Mods.BetterInventory.Configs.AvailableMaterials.itemSlot.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 }
@@ -963,7 +1119,19 @@ UnloadedInventoryManagement: {
 	}
 }
 
-UnloadedItemActions.Tooltip: ""
+UnloadedItemActions: {
+	Tooltip: ""
+
+	fixedTooltipPosition: {
+		Label: "{$Mods.BetterInventory.Configs.ItemActions.fixedTooltipPosition.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	tooltipHover: {
+		Label: "{$Mods.BetterInventory.Configs.ItemActions.tooltipHover.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+}
 
 UnloadedItemSearch: {
 	Tooltip: ""

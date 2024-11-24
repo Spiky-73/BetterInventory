@@ -3,7 +3,7 @@ using SPIC;
 using SPIC.Default.Infinities;
 using Terraria;
 using Terraria.ModLoader;
-namespace SpikysLib.CrossMod;
+namespace BetterInventory.CrossMod;
 
 [JITWhenModsEnabled(ModName)]
 public static class SpysInfiniteConsumables {
