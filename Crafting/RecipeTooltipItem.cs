@@ -73,9 +73,9 @@ public class RequiredTooltipItem : GlobalItem {
                 return Lang.GetMapObjectName(MapHelper.TileToLookup(t, requiredTileStyle));
             }));
             objects.AddRange(recipe.Conditions.Select(c => c.Description.Value));
-            if (objects.Count == 0) objects.Add(Lang.inter[23].Value);
-            if (!Configs.RecipeTooltip.Value.objectsLine) _requiredItemsTooltips[0].Text += $" @ {string.Join(", ", objects)}";
-            else _requiredItemsTooltips.Add(new(BetterInventory.Instance, "RequiredObjects", $"@ {string.Join(", ", objects)}"));
+            string str = objects.Count == 0 ? Lang.inter[23].Value : string.Join(", ", objects);
+            if (!Configs.RecipeTooltip.Value.objectsLine) _requiredItemsTooltips[0].Text += $" @ {str}";
+            else _requiredItemsTooltips.Add(new(BetterInventory.Instance, "RequiredObjects", $"@ {str}"));
         }
         return _requiredItemsTooltips;
     }

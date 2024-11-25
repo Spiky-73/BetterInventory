@@ -67,7 +67,7 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public override void ResetEffects() {
-        Guide.forcedTooltip = null;
+        PlaceholderItem.hideTooltip = false;
     }
 
     public void DisplayUpdate() {

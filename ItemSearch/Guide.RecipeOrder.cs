@@ -10,7 +10,6 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.Localization;
-using Terraria.Map;
 using Terraria.ModLoader;
 using Terraria.UI;
 
@@ -77,34 +76,6 @@ public sealed partial class Guide : ModSystem {
         if (Configs.BetterGuide.UnknownDisplay && Configs.BetterGuide.Value.unknownDisplay == Configs.UnknownDisplay.Unknown) foreach (int r in s_unknownRecipes) yield return r;
     }
 
-    private static List<TooltipLine> HookHideTooltip(Reflection.ItemLoader.ModifyTooltipsFn orig, Item item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out Color?[] overrideColor, int prefixlineIndex) {
-        string? name = GetPlaceholderType(item) switch {
-            PlaceholderType.ByHand => Language.GetTextValue($"{Localization.Keys.UI}.ByHand"),
-            PlaceholderType.Tile => Lang.GetMapObjectName(MapHelper.TileToLookup(item.createTile, item.placeStyle)),
-            PlaceholderType.Condition => Language.GetTextValue(item.BestiaryNotes[ConditionMark.Length..]),
-            _ => forcedTooltip?.Value,
-        };
-        if (name is null) return orig.Invoke(item, ref numTooltips, names, ref text, ref modifier, ref badModifier, ref oneDropLogo, out overrideColor, prefixlineIndex);
-        List<TooltipLine> tooltips = [new(BetterInventory.Instance, names[0], name)];
-        numTooltips = 1;
-        text = [tooltips[0].Text];
-        modifier = [tooltips[0].IsModifier];
-        badModifier = [tooltips[0].IsModifierBad];
-        oneDropLogo = -1;
-        overrideColor = [null];
-        return tooltips;
-    }
-    
-    private static void HookHideItem(On_ItemSlot.orig_Draw_SpriteBatch_refItem_int_Vector2_Color orig, SpriteBatch spriteBatch, ref Item inv, int context, Vector2 position, Color lightColor) {
-        if (s_hideNextItem) {
-            Item item = Placeholder;
-            orig(spriteBatch, ref item, context, position, lightColor);
-            s_hideNextItem = false;
-        } else {
-            orig(spriteBatch, ref inv, context, position, lightColor);
-        }
-    }
-
     private static void ILFavoriteRecipe(ILContext il) {
         ILCursor cursor = new(il);
 
@@ -115,7 +86,7 @@ public sealed partial class Guide : ModSystem {
         cursor.EmitLdarg0();
         cursor.EmitDelegate((int recipeIndex) => {
             if (Configs.BetterGuide.UnknownDisplay && IsUnknown(Main.availableRecipe[recipeIndex])) {
-                forcedTooltip = Language.GetText($"{Localization.Keys.UI}.Unknown");
+                PlaceholderItem.hideTooltip = true;
                 return false;
             }
             if (Configs.BetterGuide.FavoritedRecipes) {
@@ -200,10 +171,7 @@ public sealed partial class Guide : ModSystem {
     private static IEnumerator<int>? s_ilOrderedRecipes;
     private static readonly RangeSet s_unknownRecipes = [];
 
-    private static bool s_hideNextItem;
     public static LocalizedText? forcedTooltip;
-
-    private static Asset<Texture2D> s_unknownTexture = null!;
 }
 
 public enum FavoriteState : byte { Default, Blacklisted, Favorited }

@@ -109,10 +109,10 @@ public sealed class RecipeList : ModEntityCatalogue {
             if (slot == -1) slot = Configs.BetterGuide.GuideTile && Guide.IsCraftingStation(item) ? 1 : 0;
             if (ItemSlot.PickItemMovementAction(items, ContextID.GuideItem, 1 - slot, item) != -1) {
                 bool clearOtherSlot = item.tooltipContext != ContextID.GuideItem;
-                if (Guide.AreSame(items[slot], item)) {
+                if (PlaceholderHelper.AreSame(items[slot], item)) {
                     if (clearOtherSlot) SearchPrevious(items, slot, true);
                     slot = 1 - slot;
-                } else if (Guide.AreSame(items[1 - slot], item) && clearOtherSlot) SearchPrevious(items, 1 - slot, true);
+                } else if (PlaceholderHelper.AreSame(items[1 - slot], item) && clearOtherSlot) SearchPrevious(items, 1 - slot, true);
                 items = Guide.GuideItems;
             }
             ItemSlot.LeftClick(items, ContextID.GuideItem, slot);
@@ -135,7 +135,7 @@ public sealed class RecipeList : ModEntityCatalogue {
             do {
                 item = _guideHistory[slot][^1];
                 _guideHistory[slot].RemoveAt(_guideHistory[slot].Count - 1);
-            } while (_guideHistory[slot].Count > 0 && (!allowAir && item.IsAir || Guide.AreSame(item, inv[slot])));
+            } while (_guideHistory[slot].Count > 0 && (!allowAir && item.IsAir || PlaceholderHelper.AreSame(item, inv[slot])));
             int count = _guideHistory[slot].Count;
             MoveItem(item);
             if (_guideHistory[slot].Count > count) _guideHistory[slot].RemoveAt(_guideHistory[slot].Count - 1);
@@ -169,7 +169,7 @@ public sealed class RecipeList : ModEntityCatalogue {
             return;
         }
 
-        if (Configs.QuickSearch.RightClick && Configs.QuickSearch.Value.rightClick == Configs.RightClickAction.SearchPrevious && !Guide.AreSame(Main.mouseItem, inv[slot])) _guideHistory[slot].Add(inv[slot].Clone());
+        if (Configs.QuickSearch.RightClick && Configs.QuickSearch.Value.rightClick == Configs.RightClickAction.SearchPrevious && !PlaceholderHelper.AreSame(Main.mouseItem, inv[slot])) _guideHistory[slot].Add(inv[slot].Clone());
 
         Item mouse = Main.mouseItem;
         if (Main.cursorOverride <= CursorOverrideID.DefaultCursor) {

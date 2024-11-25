@@ -2,10 +2,10 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.GameContent;
-using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI;
 using ContextID = Terraria.UI.ItemSlot.Context;
+using System.Linq;
 
 namespace BetterInventory.ItemSearch;
 
@@ -38,7 +38,7 @@ public sealed partial class Guide : ModSystem {
 
             // Draw the tile
             Color inventoryBack = Main.inventoryBack;
-            OverrideRecipeTexture(s_tileTextures, false, !Configs.BetterGuide.AvailableRecipes || GetPlaceholderType(tile) == PlaceholderType.ByHand || Main.LocalPlayer.adjTile[tile.createTile]);
+            OverrideRecipeTexture(s_tileTextures, false, !Configs.BetterGuide.AvailableRecipes || i >= recipe.requiredTile.Count || Main.LocalPlayer.adjTile[recipe.requiredTile[i]]);
             ItemSlot.Draw(Main.spriteBatch, ref tile, ContextID.CraftingMaterial, position);
             TextureAssets.InventoryBack4 = s_inventoryBack4;
             Main.inventoryBack = inventoryBack;
@@ -55,11 +55,10 @@ public sealed partial class Guide : ModSystem {
 
         // Display conditions
         for (int i = 0; i < displayedRecipeConditions.Count; i++) {
-            (Item item, Condition condition) = displayedRecipeConditions[i];
-
+            Item item = displayedRecipeConditions[i];
             // Draw the condition
             Color inventoryBack = Main.inventoryBack;
-            OverrideRecipeTexture(s_conditionTextures, false, condition.Predicate());
+            OverrideRecipeTexture(s_conditionTextures, false, recipe.Conditions[i].Predicate());
             ItemSlot.Draw(Main.spriteBatch, ref item, ContextID.CraftingMaterial, position);
             Main.inventoryBack = inventoryBack;
             TextureAssets.InventoryBack4 = s_inventoryBack4;
@@ -68,7 +67,6 @@ public sealed partial class Guide : ModSystem {
             Rectangle hitbox = new((int)position.X, (int)position.Y, (int)(TextureAssets.InventoryBack.Width() * Main.inventoryScale), (int)(TextureAssets.InventoryBack.Height() * Main.inventoryScale));
             if (hitbox.Contains(Main.mouseX, Main.mouseY)) {
                 Main.LocalPlayer.mouseInterface = true;
-                forcedTooltip = condition.Description;
                 ItemSlot.MouseHover(ref item, ContextID.CraftingMaterial);
             }
 
@@ -88,27 +86,14 @@ public sealed partial class Guide : ModSystem {
         }
         s_displayedRecipe = recipe.RecipeIndex;
 
-        // Updates crafting stations
-        if (recipe.requiredTile.Count == 0) displayedRecipeTiles.Add(ByHandPlaceholder);
-        else {
-            for (int i = 0; i < recipe.requiredTile.Count && recipe.requiredTile[i] != -1; i++) {
-                if (CraftingStationsItems.TryGetValue(recipe.requiredTile[i], out int type) && type != ItemID.None) displayedRecipeTiles.Add(new(type));
-                else displayedRecipeTiles.Add(TilePlaceholder(recipe.requiredTile[i]));
-            }
-        }
-
-        // Updates conditions
-        foreach (Condition condition in recipe.Conditions) {
-            Item item;
-            if (ConditionItems.TryGetValue(condition.Description.Key, out int type)) item = new(type);
-            else item = ConditionPlaceholder(condition);
-            displayedRecipeConditions.Add((item, condition));
-        }
+        if (recipe.requiredTile.Count == 0) displayedRecipeTiles.Add(PlaceholderItem.FromTile(PlaceholderItem.ByHandTile));
+        else displayedRecipeTiles.AddRange(recipe.requiredTile.TakeWhile(t => t != -1).Select(PlaceholderItem.FromTile));
+        displayedRecipeConditions.AddRange(recipe.Conditions.Select(PlaceholderItem.FromCondition));
     }
     
     private static int s_displayedRecipe = -1;
     internal static readonly List<Item> displayedRecipeTiles = [];
-    internal static readonly List<(Item item, Condition condition)> displayedRecipeConditions = [];
+    internal static readonly List<Item> displayedRecipeConditions = [];
 
     private static TextureHighlight s_tileTextures = null!;
     private static TextureHighlight s_conditionTextures = null!;

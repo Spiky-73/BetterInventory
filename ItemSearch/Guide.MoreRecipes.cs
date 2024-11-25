@@ -73,21 +73,23 @@ public sealed partial class Guide : ModSystem {
         cursor.EmitBrtrue(endLoop);
     }
     private static bool CheckGuideTileFilter(Recipe recipe) {
-        return guideTile.IsAir || GetPlaceholderType(guideTile) switch {
-            PlaceholderType.ByHand => recipe.requiredTile.Count == 0,
-            PlaceholderType.Tile => recipe.requiredTile.Contains(guideTile.createTile),
-            PlaceholderType.Condition => recipe.Conditions.Exists(c => c.Description.Key == guideTile.BestiaryNotes[ConditionMark.Length..]),
-            _ => IsCraftingStation(guideTile) ? // Condition displayed item
-                recipe.requiredTile.Contains(guideTile.createTile) :
-                recipe.Conditions.Exists(c => ConditionItems.TryGetValue(c.Description.Key, out int type) && type == guideTile.type),
-        };
+        if (guideTile.IsAir) return true;
+        if (guideTile.TryGetGlobalItem(out PlaceholderItem placeholder)) {
+            if (placeholder.tile == PlaceholderItem.ByHandTile) return recipe.requiredTile.Count == 0;
+            if (placeholder.tile >= 0) return recipe.requiredTile.Contains(placeholder.tile);
+            if (placeholder.condition is not null) return recipe.Conditions.Exists(c => c.Description.Key == placeholder.condition.Key);
+        }
+        
+        return CraftingStationsItems.ContainsKey(guideTile.createTile) ?
+            recipe.requiredTile.Contains(guideTile.createTile) :
+            recipe.Conditions.Exists(c => PlaceholderItem.ConditionItems.TryGetValue(c.Description.Key, out int type) && type == guideTile.type);
     }
 
 
     private static int HookAllowGuideItem(On_ItemSlot.orig_PickItemMovementAction orig, Item[] inv, int context, int slot, Item checkItem) {
         if (!Configs.BetterGuide.Enabled || context != ContextID.GuideItem) return orig(inv, context, slot, checkItem);
         return slot switch {
-            0 when (GetPlaceholderType(Main.mouseItem) == PlaceholderType.None) && (Configs.BetterGuide.MoreRecipes || orig(inv, context, slot, checkItem) != -1) => 0,
+        0 when (!Main.mouseItem.IsAPlaceholder()) && (Configs.BetterGuide.MoreRecipes || orig(inv, context, slot, checkItem) != -1) => 0,
             1 when Configs.BetterGuide.GuideTile && (checkItem.IsAir || FitsCraftingTile(Main.mouseItem)) => 0,
             _ => -1,
         };
@@ -95,7 +97,7 @@ public sealed partial class Guide : ModSystem {
 
     public static void dropGuideTileCheck(Player self) {
         if (Main.InGuideCraftMenu || guideTile.IsAir) return;
-        if (GetPlaceholderType(guideTile) != PlaceholderType.None) guideTile.TurnToAir();
+        if (guideTile.IsAPlaceholder()) guideTile.TurnToAir();
         else self.GetDropItem(ref guideTile);
     }
 

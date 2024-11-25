@@ -12,7 +12,6 @@ using Terraria.Audio;
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.ModLoader.Config;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
 using ContextID = Terraria.UI.ItemSlot.Context;
@@ -33,10 +32,6 @@ public sealed partial class Guide : ModSystem {
         On_Player.AdjTiles += HookGuideTileAdj;
         On_ItemSlot.PickItemMovementAction += HookAllowGuideItem;
         On_ItemSlot.OverrideLeftClick += HookOverrideLeftClick;
-
-        On_ItemSlot.Draw_SpriteBatch_refItem_int_Vector2_Color += HookHideItem;
-        On_ItemSlot.DrawItemIcon += HookDrawPlaceholder;
-        MonoModHooks.Add(typeof(ItemLoader).GetMethod(nameof(ItemLoader.ModifyTooltips)), HookHideTooltip);
 
         IL_Main.DrawInventory += static il => {
             if (!il.ApplyTo(ILDrawVisibility, Configs.BetterGuide.CraftInMenu)) Configs.UnloadedItemSearch.Value.guideCraftInMenu = true;
@@ -67,7 +62,6 @@ public sealed partial class Guide : ModSystem {
         s_tileTextures = new(TextureAssets.InventoryBack3, TextureAssets.InventoryBack6);
         s_conditionTextures = new(TextureAssets.InventoryBack12, TextureAssets.InventoryBack8);
         s_inventoryTickBorder = Mod.Assets.Request<Texture2D>($"Assets/Inventory_Tick_Border");
-        s_unknownTexture = Mod.Assets.Request<Texture2D>($"Assets/Unknown_Item");
 
         recipeUI = new();
         recipeUI.Activate();
@@ -78,7 +72,6 @@ public sealed partial class Guide : ModSystem {
     public override void Unload() {
         s_inventoryBack4 = null!;
         CraftingStationsItems.Clear();
-        ConditionItems.Clear();
         guideTile = new();
         s_dispGuide = new();
         s_dispTile = new();
@@ -91,12 +84,6 @@ public sealed partial class Guide : ModSystem {
     public override void PostAddRecipes() {
         Default.Catalogues.Bestiary.HooksBestiaryUI();
         FindCraftingStations();
-
-        ConditionItems["Conditions.NearWater"] = ItemID.WaterBucket;
-        ConditionItems["Conditions.NearLava"] = ItemID.LavaBucket;
-        ConditionItems["Conditions.NearHoney"] = ItemID.HoneyBucket;
-        ConditionItems["Conditions.InGraveyard"] = ItemID.Gravestone;
-        ConditionItems["Conditions.InSnow"] = ItemID.SnowBlock;
     }
     public static void FindCraftingStations() {
         // Gather all used crafting stations
@@ -128,7 +115,7 @@ public sealed partial class Guide : ModSystem {
 
     public static bool OverrideHover(Item[] inv, int context, int slot) {
         // Trash placeholder instead of moving them
-        if (GetPlaceholderType(inv[slot]) != PlaceholderType.None
+        if (inv[slot].IsAPlaceholder()
         && (ItemSlot.ShiftInUse || ItemSlot.ControlInUse || Main.mouseItem.IsAir || ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) == -1)) {
             Main.cursorOverride = CursorOverrideID.TrashCan;
             return true;
@@ -179,10 +166,10 @@ public sealed partial class Guide : ModSystem {
         if (!Main.mouseItem.IsAir && ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) == 0) Main.recBigList = true;
 
         // Prevent placeholder pickup
-        if (GetPlaceholderType(inv[slot]) != PlaceholderType.None) inv[slot].TurnToAir();
+        if (inv[slot].IsAPlaceholder()) inv[slot].TurnToAir();
         // Allow by hand when clicking on guideTile
         else if (Configs.BetterGuide.GuideTile && slot == 1 && inv[slot].IsAir && !FitsCraftingTile(Main.mouseItem)) {
-            inv[slot] = ByHandPlaceholder;
+            inv[slot] = PlaceholderItem.FromTile(PlaceholderItem.ByHandTile);
             Recipe.FindRecipes();
             SoundEngine.PlaySound(SoundID.Grab);
             return true;
@@ -190,88 +177,20 @@ public sealed partial class Guide : ModSystem {
         return orig(inv, context, slot);
     }
 
-    private static float HookDrawPlaceholder(On_ItemSlot.orig_DrawItemIcon orig, Item item, int context, SpriteBatch spriteBatch, Vector2 screenPositionForItemCenter, float scale, float sizeLimit, Color environmentColor) {
-        if (s_hideNextItem) {
-            return DrawTexture(spriteBatch, s_unknownTexture.Value, Color.White, screenPositionForItemCenter, ref scale, sizeLimit, environmentColor);
-        }
-        switch (GetPlaceholderType(item)) {
-        case PlaceholderType.ByHand:
-            Main.instance.LoadItem(ItemID.BoneGlove);
-            return DrawTexture(spriteBatch, TextureAssets.Item[ItemID.BoneGlove].Value, Color.White, screenPositionForItemCenter, ref scale, sizeLimit, environmentColor);
-        case PlaceholderType.Tile:
-            GraphicsHelper.DrawTileFrame(spriteBatch, item.createTile, screenPositionForItemCenter, new Vector2(0.5f, 0.5f), scale);
-            return scale;
-        }
-        return orig(item, context, spriteBatch, screenPositionForItemCenter, scale, sizeLimit, environmentColor);
-    }
-    private static float DrawTexture(SpriteBatch spriteBatch, Texture2D value, Color alpha, Vector2 screenPositionForItemCenter, ref float scale, float sizeLimit, Color environmentColor) {
-        Rectangle frame = value.Frame(1, 1, 0, 0, 0, 0);
-        if (frame.Width > sizeLimit || frame.Height > sizeLimit) scale *= (frame.Width <= frame.Height) ? (sizeLimit / frame.Height) : (sizeLimit / frame.Width);
-        spriteBatch.Draw(value, screenPositionForItemCenter, new Rectangle?(frame), alpha, 0f, frame.Size() / 2f, scale, 0, 0f);
-        return scale;
-    }
-
-    public static readonly Item Placeholder = new(ItemID.Lens);
-    public const string ConditionMark = "@BI:";
-    public const int ByHandCreateTile = -2;
-    public static Item ByHandPlaceholder => new(Placeholder.type) { createTile = ByHandCreateTile };
-    public static Item ConditionPlaceholder(Condition condition) => ConditionPlaceholder(condition.Description.Key);
-    public static Item ConditionPlaceholder(string conditionKey) => new(Placeholder.type) { BestiaryNotes = ConditionMark + conditionKey };
-    public static Item TilePlaceholder(TileDefinition tile) => TilePlaceholder(tile.Type);
-    public static Item TilePlaceholder(int tileType) => new(Placeholder.type) { createTile = tileType };
-    public static PlaceholderType GetPlaceholderType(Item item) {
-        if (item.type != Placeholder.type || item.stack != 1) return PlaceholderType.None;
-        if (item.createTile == ByHandCreateTile) return PlaceholderType.ByHand;
-        if (item.createTile != -1) return PlaceholderType.Tile;
-        if (item.BestiaryNotes?.StartsWith(ConditionMark) == true) return PlaceholderType.Condition;
-        return PlaceholderType.None;
-    }
-    public static bool FitsCraftingTile(Item item) => IsCraftingStation(item) || ConditionItems.ContainsValue(item.type);
-    public static bool IsCraftingStation(Item item) => CraftingStationsItems.ContainsKey(item.createTile) || GetPlaceholderType(item) != PlaceholderType.None;
-    public static bool AreSame(Item item, Item other) {
-        PlaceholderType a = GetPlaceholderType(item);
-        PlaceholderType b = GetPlaceholderType(other);
-        return a == b && (a switch {
-            PlaceholderType.ByHand => true,
-            PlaceholderType.Tile => item.createTile == other.createTile,
-            PlaceholderType.Condition => item.BestiaryNotes == other.BestiaryNotes,
-            PlaceholderType.None or _ => item.type == other.type,
-        });
-    }
-
+    public static bool FitsCraftingTile(Item item) => IsCraftingStation(item) || PlaceholderItem.ConditionItems.ContainsValue(item.type);
+    public static bool IsCraftingStation(Item item) => CraftingStationsItems.ContainsKey(item.createTile) || item.IsAPlaceholder();
 
     public static void SaveData(BetterPlayer player, TagCompound tag) {
-        if (!guideTile.IsAir) {
-            switch (GetPlaceholderType(guideTile)) {
-            case PlaceholderType.ByHand:
-                tag[GuideTileHandTag] = true;
-                break;
-            case PlaceholderType.Tile or PlaceholderType.ByHand:
-                tag[GuideTileTileTag] = new TileDefinition(guideTile.createTile);
-                break;
-            case PlaceholderType.Condition:
-                tag[GuideTileConditionTag] = guideTile.BestiaryNotes[ConditionMark.Length..];
-                break;
-            default:
-                tag[GuideTileTag] = guideTile;
-                break;
-            }
-        }
+        if (!guideTile.IsAir) tag[GuideTileTag] = guideTile;
     }
     public static void LoadData(BetterPlayer player, TagCompound tag) {
-        if (tag.ContainsKey(GuideTileHandTag)) player._tempGuideTile = ByHandPlaceholder;
-        else if (tag.TryGet(GuideTileTileTag, out TileDefinition tile)) player._tempGuideTile = TilePlaceholder(tile);
-        else if (tag.TryGet(GuideTileConditionTag, out string condition)) player._tempGuideTile = ConditionPlaceholder(condition);
-        else if (tag.TryGet(GuideTileTag, out Item guide)) player._tempGuideTile = guide;
+        if (tag.TryGet(GuideTileTag, out Item guide)) player._tempGuideTile = guide;
         else player._tempGuideTile = new();
     }
     internal static void SetGuideItem(BetterPlayer player) {
         if (player._tempGuideTile is not null) guideTile = player._tempGuideTile;
     }
 
-    public const string GuideTileHandTag = "guideTileHand";
-    public const string GuideTileTileTag = "guideTileTile";
-    public const string GuideTileConditionTag = "guideTileCondition";
     public const string GuideTileTag = "guideTile";
 
 
@@ -285,7 +204,6 @@ public sealed partial class Guide : ModSystem {
     private static readonly Item[] s_guideItems = new Item[2];
 
     public static readonly Dictionary<int, int> CraftingStationsItems = []; // tile -> item
-    public static readonly Dictionary<string, int> ConditionItems = []; // description -> id
 }
 
 public enum PlaceholderType { None, ByHand, Tile, Condition }

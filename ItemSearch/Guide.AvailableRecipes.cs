@@ -54,7 +54,7 @@ public sealed partial class Guide : ModSystem {
         //                 ++ <overrideBackground>
         cursor.EmitLdloc(recipeIndex); // int num63
         cursor.EmitDelegate((int i) => {
-            if (Configs.BetterGuide.UnknownDisplay && IsUnknown(Main.availableRecipe[i])) s_hideNextItem = true;
+            if (Configs.BetterGuide.UnknownDisplay && IsUnknown(Main.availableRecipe[i])) PlaceholderItem.hideNextItem = true;
             if (Configs.BetterGuide.AvailableRecipes) {
                 OverrideRecipeTexture(GetFavoriteState(Main.availableRecipe[i]), ItemSlot.DrawGoldBGForCraftingMaterial, IsAvailable(Main.availableRecipe[i]));
                 ItemSlot.DrawGoldBGForCraftingMaterial = false;
@@ -139,7 +139,7 @@ public sealed partial class Guide : ModSystem {
         //             ++ <GuideHover>
         cursor.EmitLdloc(recipeListIndex); // int num87
         cursor.EmitDelegate((int r) => {
-            if (Configs.BetterGuide.UnknownDisplay && IsUnknown(Main.availableRecipe[r])) forcedTooltip = Language.GetText($"{Localization.Keys.UI}.Unknown");
+            if (Configs.BetterGuide.UnknownDisplay && IsUnknown(Main.availableRecipe[r])) PlaceholderItem.hideTooltip = true;
         });
         //             ...
         //         }
@@ -152,7 +152,7 @@ public sealed partial class Guide : ModSystem {
         //             ++ <overrideBackground>
         cursor.EmitLdloc(recipeListIndex);
         cursor.EmitDelegate((int i) => {
-            if (Configs.BetterGuide.UnknownDisplay && IsUnknown(Main.availableRecipe[i])) s_hideNextItem = true;
+            if (Configs.BetterGuide.UnknownDisplay && IsUnknown(Main.availableRecipe[i])) PlaceholderItem.hideNextItem = true;
             if (Configs.BetterGuide.AvailableRecipes) {
                 OverrideRecipeTexture(GetFavoriteState(Main.availableRecipe[i]), ItemSlot.DrawGoldBGForCraftingMaterial, s_availableRecipes.Contains(Main.availableRecipe[i]));
                 ItemSlot.DrawGoldBGForCraftingMaterial = false;
@@ -253,7 +253,7 @@ public sealed partial class Guide : ModSystem {
 
         if (Configs.BetterGuide.AvailableRecipes) {
             // Update available if no guide item changed
-            bool guideChange = !AreSame(Main.guideItem, s_dispGuide) || !AreSame(guideTile, s_dispTile);
+            bool guideChange = !PlaceholderHelper.AreSame(Main.guideItem, s_dispGuide) || !PlaceholderHelper.AreSame(guideTile, s_dispTile);
             if (!guideChange) orig(canDelayCheck);
             // Update guide recipes if we don't show everything
             if (forced || guideChange || !ShowAllRecipes()) FindGuideRecipes();
