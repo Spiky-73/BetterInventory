@@ -73,7 +73,7 @@ public sealed class PlaceholderItem : GlobalItem {
         if (hideNextItem) {
             return spriteBatch.DrawTexture(s_unknownTexture.Value, Color.White, screenPositionForItemCenter, ref scale, sizeLimit);
         }
-        if(item.TryGetGlobalItem(out PlaceholderItem placeholder)) {
+        if(!item.IsAir && item.TryGetGlobalItem(out PlaceholderItem placeholder)) {
             if(placeholder.tile == ByHandTile) {
                 Main.instance.LoadItem(ItemID.BoneGlove);
                 return spriteBatch.DrawTexture(TextureAssets.Item[ItemID.BoneGlove].Value, Color.White, screenPositionForItemCenter, ref scale, sizeLimit);
@@ -89,8 +89,7 @@ public sealed class PlaceholderItem : GlobalItem {
         string? name = null;
         if (hideTooltip) name = Language.GetTextValue($"{Localization.Keys.UI}.Unknown");
 
-
-        if (name is null && item.TryGetGlobalItem(out PlaceholderItem placeholder)) {
+        if (!item.IsAir && name is null && item.TryGetGlobalItem(out PlaceholderItem placeholder)) {
             if(placeholder.tile == ByHandTile) name = Language.GetTextValue($"{Localization.Keys.UI}.ByHand");
             else if (placeholder.tile >= 0) name = Lang.GetMapObjectName(MapHelper.TileToLookup(placeholder.tile, 0));
             else if (placeholder.condition is not null) name = placeholder.condition.Value;
@@ -150,10 +149,10 @@ public sealed class PlaceholderItem : GlobalItem {
 }
 
 public static class PlaceholderHelper {
-    public static bool IsAPlaceholder(this Item item) => item.TryGetGlobalItem(out PlaceholderItem placeholder) && placeholder.IsAPlaceholder;
+    public static bool IsAPlaceholder(this Item item) => item.type == PlaceholderItem.FakeType && item.TryGetGlobalItem(out PlaceholderItem placeholder) && placeholder.IsAPlaceholder;
     
     public static bool AreSame(Item item, Item other) {
-        if (item.type != other.type) return false;
+        if (item.type != other.type || item.IsAir) return false;
         if (!item.TryGetGlobalItem(out PlaceholderItem a) || !other.TryGetGlobalItem(out PlaceholderItem b)) return true;
         if (a.tile != -1) return a.tile == b.tile;
         if (a.condition is not null) return a.condition == b.condition;
