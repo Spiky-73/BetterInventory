@@ -112,7 +112,7 @@ public sealed class BetterPlayer : ModPlayer {
 
     public override bool HoverSlot(Item[] inventory, int context, int slot) {
         QuickMove.HoverItem(inventory, context, slot);
-        if (Default.Catalogues.RecipeList.OverrideHover(inventory, context, slot)) return true;
+        if (PlaceholderItem.OverrideHover(inventory, context, slot)) return true;
         if (Guide.OverrideHover(inventory, context, slot)) return true;
         if (ClickOverrides.OverrideHover(inventory, context, slot)) return true;
         return false;

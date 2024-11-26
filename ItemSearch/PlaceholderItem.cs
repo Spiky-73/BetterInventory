@@ -1,9 +1,11 @@
 using System.Collections.Generic;
+using BetterInventory.Default.Catalogues;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using SpikysLib;
 using Terraria;
+using Terraria.Audio;
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.Localization;
@@ -18,11 +20,13 @@ public sealed class PlaceholderItem : GlobalItem {
     
     public int tile = -1;
     public LocalizedText? condition;
+    public bool IsAPlaceholder => tile != -1 || condition is not null;
 
     public override void Load() {
         On_ItemSlot.DrawItemIcon += HookDrawPlaceholder;
         MonoModHooks.Add(typeof(ItemLoader).GetMethod(nameof(ItemLoader.ModifyTooltips)), HookPlaceholderTooltip);
         On_ItemSlot.Draw_SpriteBatch_refItem_int_Vector2_Color += HookHideItem;
+        On_ItemSlot.OverrideLeftClick += HookFakeItemLeftClick;
 
         ConditionItems["Conditions.NearWater"] = ItemID.WaterBucket;
         ConditionItems["Conditions.NearLava"] = ItemID.LavaBucket;
@@ -36,6 +40,11 @@ public sealed class PlaceholderItem : GlobalItem {
     public override void Unload() {
         ConditionItems.Clear();
     }
+
+    public sealed override bool CanStack(Item destination, Item source) => CanPlaceholderStack(source);
+    public sealed override bool CanStackInWorld(Item destination, Item source) => CanPlaceholderStack(source);
+    public bool CanPlaceholderStack(Item source) => !IsAPlaceholder && !source.IsAPlaceholder();
+
     public sealed override bool InstancePerEntity => true;
     public sealed override bool AppliesToEntity(Item entity, bool lateInstantiation) => entity.type == FakeType;
 
@@ -122,10 +131,26 @@ public sealed class PlaceholderItem : GlobalItem {
     public static bool hideNextItem;
     public static bool hideTooltip;
     private static Asset<Texture2D> s_unknownTexture = null!;
+
+    public static bool IsFakeItem(Item[] inv, int context, int slot) => context == ItemSlot.Context.GuideItem && !inv[slot].IsAir && (RecipeList.Instance.Enabled || inv[slot].IsAPlaceholder());
+    public static bool OverrideHover(Item[] inv, int context, int slot) {
+        if(!IsFakeItem(inv, context, slot)) return false;
+        if (Main.mouseItem.IsAir || ItemSlot.ShiftInUse || ItemSlot.ControlInUse) Main.cursorOverride = CursorOverrideID.TrashCan;
+        if (ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) == -1) Main.cursorOverride = CursorOverrideID.TrashCan;
+        return true;
+    }
+
+    private static bool HookFakeItemLeftClick(On_ItemSlot.orig_OverrideLeftClick orig, Item[] inv, int context, int slot) {
+        if (!IsFakeItem(inv, context, slot)) return orig(inv, context, slot);
+        inv[slot].TurnToAir();
+        Recipe.FindRecipes();
+        SoundEngine.PlaySound(SoundID.Grab);
+        return Main.cursorOverride > CursorOverrideID.DefaultCursor;
+    }
 }
 
 public static class PlaceholderHelper {
-    public static bool IsAPlaceholder(this Item item) => item.TryGetGlobalItem(out PlaceholderItem placeholder) && (placeholder.tile != -1 || placeholder.condition is not null);
+    public static bool IsAPlaceholder(this Item item) => item.TryGetGlobalItem(out PlaceholderItem placeholder) && placeholder.IsAPlaceholder;
     
     public static bool AreSame(Item item, Item other) {
         if (item.type != other.type) return false;

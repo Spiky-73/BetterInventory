@@ -114,13 +114,6 @@ public sealed partial class Guide : ModSystem {
     }
 
     public static bool OverrideHover(Item[] inv, int context, int slot) {
-        // Trash placeholder instead of moving them
-        if (inv[slot].IsAPlaceholder()
-        && (ItemSlot.ShiftInUse || ItemSlot.ControlInUse || Main.mouseItem.IsAir || ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) == -1)) {
-            Main.cursorOverride = CursorOverrideID.TrashCan;
-            return true;
-        }
-
         // Allow any item into guideItem -including from ammo / coin- slots if it could be placed in it
         if (Configs.BetterGuide.MoreRecipes && ItemSlot.ShiftInUse && !inv[slot].favorited
         && Main.InGuideCraftMenu && Array.IndexOf(PlayerHelper.InventoryContexts, context) != -1 && !inv[slot].IsAir
@@ -150,31 +143,20 @@ public sealed partial class Guide : ModSystem {
             return true;
         }
 
-        if (context != ContextID.GuideItem) return orig(inv, context, slot);
-
-        // Trash item if needed
-        if ((Configs.BetterGuide.Enabled || RecipeList.Instance.Enabled) && Main.cursorOverride == CursorOverrideID.TrashCan) {
-            inv[slot].TurnToAir();
-            Recipe.FindRecipes();
-            SoundEngine.PlaySound(SoundID.Grab);
-            return true;
-        }
-
-        if (!Configs.BetterGuide.Enabled) return orig(inv, context, slot);
+        if (context != ContextID.GuideItem || !Configs.BetterGuide.Enabled) return orig(inv, context, slot);
 
         // Auto open recipe list
         if (!Main.mouseItem.IsAir && ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) == 0) Main.recBigList = true;
 
-        // Prevent placeholder pickup
-        if (inv[slot].IsAPlaceholder()) inv[slot].TurnToAir();
+        bool res = orig(inv, context, slot);
+        if (res || !Configs.BetterGuide.GuideTile || slot != 1 || !inv[slot].IsAir || FitsCraftingTile(Main.mouseItem)) return res;
+
         // Allow by hand when clicking on guideTile
-        else if (Configs.BetterGuide.GuideTile && slot == 1 && inv[slot].IsAir && !FitsCraftingTile(Main.mouseItem)) {
-            inv[slot] = PlaceholderItem.FromTile(PlaceholderItem.ByHandTile);
-            Recipe.FindRecipes();
-            SoundEngine.PlaySound(SoundID.Grab);
-            return true;
-        }
-        return orig(inv, context, slot);
+        inv[slot] = PlaceholderItem.FromTile(PlaceholderItem.ByHandTile);
+        Recipe.FindRecipes();
+        SoundEngine.PlaySound(SoundID.Grab);
+        Main.recBigList = true;
+        return true;
     }
 
     public static bool FitsCraftingTile(Item item) => IsCraftingStation(item) || PlaceholderItem.ConditionItems.ContainsValue(item.type);

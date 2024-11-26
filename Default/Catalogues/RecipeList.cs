@@ -145,13 +145,6 @@ public sealed class RecipeList : ModEntityCatalogue {
         }
     }
 
-    public static bool OverrideHover(Item[] inv, int context, int slot) {
-        if (!Instance.Enabled || context != ContextID.GuideItem || inv[slot].IsAir) return false;
-        if (Main.mouseItem.IsAir || ItemSlot.ShiftInUse || ItemSlot.ControlInUse) Main.cursorOverride = CursorOverrideID.TrashCan;
-        if (ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) == -1) Main.cursorOverride = CursorOverrideID.TrashCan;
-        return true;
-    }
-
     public static void UpdateGuide() {
         if (Bestiary.Instance.Enabled && (Main.guideItem.stack > 1 || Main.guideItem.prefix != 0)) {
             (Item item, Main.guideItem) = (Main.guideItem, new(Main.guideItem.type));
@@ -171,12 +164,9 @@ public sealed class RecipeList : ModEntityCatalogue {
 
         if (Configs.QuickSearch.RightClick && Configs.QuickSearch.Value.rightClick == Configs.RightClickAction.SearchPrevious && !PlaceholderHelper.AreSame(Main.mouseItem, inv[slot])) _guideHistory[slot].Add(inv[slot].Clone());
 
-        Item mouse = Main.mouseItem;
-        if (Main.cursorOverride <= CursorOverrideID.DefaultCursor) {
-            if (!mouse.IsAir) inv[slot].TurnToAir();
-            Main.mouseItem = mouse.Clone();
-            Main.mouseItem.stack = 1;
-        }
+        // Moves a fake item instead of the real one
+        (Item mouse, Main.mouseItem) = (Main.mouseItem, Main.mouseItem.Clone());
+        Main.mouseItem.stack = 1;
         orig(inv, context, slot);
         Main.mouseItem = mouse;
     }
