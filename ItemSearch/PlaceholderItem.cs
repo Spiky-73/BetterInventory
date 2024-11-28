@@ -152,6 +152,7 @@ public static class PlaceholderHelper {
     public static bool IsAPlaceholder(this Item item) => item.type == PlaceholderItem.FakeType && item.TryGetGlobalItem(out PlaceholderItem placeholder) && placeholder.IsAPlaceholder;
     
     public static bool AreSame(Item item, Item other) {
+        if (item.IsAir && other.IsAir) return true;
         if (item.type != other.type || item.IsAir) return false;
         if (!item.TryGetGlobalItem(out PlaceholderItem a) || !other.TryGetGlobalItem(out PlaceholderItem b)) return true;
         if (a.tile != -1) return a.tile == b.tile;
