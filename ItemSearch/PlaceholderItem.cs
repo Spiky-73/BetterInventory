@@ -19,7 +19,7 @@ namespace BetterInventory.ItemSearch;
 public sealed class PlaceholderItem : GlobalItem {
     
     public int tile = -1;
-    public LocalizedText? condition;
+    public string? condition;
     public bool IsAPlaceholder => tile != -1 || condition is not null;
 
     public override void Load() {
@@ -50,11 +50,11 @@ public sealed class PlaceholderItem : GlobalItem {
 
     public override void SaveData(Item item, TagCompound tag) {
         if (tile != -1) tag[TileTag] = tile;
-        else if (condition is not null) tag[ConditionTag] = condition.Key;
+        else if (condition is not null) tag[ConditionTag] = condition;
     }
     public override void LoadData(Item item, TagCompound tag) {
         if (tag.TryGet(TileTag, out int t)) tile = t;
-        else if (tag.TryGet(ConditionTag, out string c)) condition = Language.GetText(c);
+        else if (tag.TryGet(ConditionTag, out string c)) condition = c;
     }
     public const string TileTag = "tile";
     public const string ConditionTag = "condition";
@@ -92,7 +92,7 @@ public sealed class PlaceholderItem : GlobalItem {
         if (!item.IsAir && name is null && item.TryGetGlobalItem(out PlaceholderItem placeholder)) {
             if(placeholder.tile == ByHandTile) name = Language.GetTextValue($"{Localization.Keys.UI}.ByHand");
             else if (placeholder.tile >= 0) name = Lang.GetMapObjectName(MapHelper.TileToLookup(placeholder.tile, 0));
-            else if (placeholder.condition is not null) name = placeholder.condition.Value;
+            else if (placeholder.condition is not null) name = Language.GetTextValue(placeholder.condition);
         }
         if (name is null) return orig.Invoke(item, ref numTooltips, names, ref text, ref modifier, ref badModifier, ref oneDropLogo, out overrideColor, prefixlineIndex);
 
@@ -119,7 +119,7 @@ public sealed class PlaceholderItem : GlobalItem {
             return item;
         }
         Item placeholder = new(FakeType);
-        placeholder.GetGlobalItem<PlaceholderItem>().condition = condition.Description;
+        placeholder.GetGlobalItem<PlaceholderItem>().condition = condition.Description.Key;
         return placeholder;
     }
 
