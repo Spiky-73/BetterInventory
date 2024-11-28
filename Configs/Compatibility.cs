@@ -123,7 +123,6 @@ public sealed class UnloadedItemActions {
 }
 
 public sealed class UnloadedItemSearch {
-    public bool guideMoreRecipes = false;
     public bool guideCraftingStation = false;
     public bool guideFavorited = false;
     public bool guideCraftInMenu = false;
@@ -132,6 +131,7 @@ public sealed class UnloadedItemSearch {
     public bool bestiaryDisplayedInfo = false;
     public bool bestiaryUnknown = false;
     public bool recipeList = false;
+    public bool guideRecipeFiltering = false;
 
     [JsonIgnore] public bool BestiaryUnlock { set { bestiaryUnknown = value; bestiaryDisplayedInfo = value; } }
     [JsonIgnore] public bool GuideAvailableRecipes { set { guideFavorited = value; guideCraftInMenu = value; } }

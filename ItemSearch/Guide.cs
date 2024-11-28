@@ -50,8 +50,6 @@ public sealed partial class Guide : ModSystem {
             if (!il.ApplyTo(ILSkipGuideRecipes, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = true;
         };
         IL_Recipe.CollectGuideRecipes += static il => {
-            if (!il.ApplyTo(ILMoreGuideRecipes, Configs.BetterGuide.AvailableRecipes || Configs.BetterGuide.MoreRecipes || Configs.BetterGuide.GuideTile))
-                Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = Configs.UnloadedItemSearch.Value.guideMoreRecipes = Configs.BetterGuide.Value.craftingStation = true;
             if (!il.ApplyTo(ILGuideRecipeOrder, Configs.BetterGuide.RecipeOrdering)) Configs.UnloadedItemSearch.Value.GuideRecipeOrdering = true;
         };
 
@@ -67,6 +65,14 @@ public sealed partial class Guide : ModSystem {
         recipeUI.Activate();
         recipeInterface = new();
         recipeInterface.SetState(recipeUI);
+
+        _guideTileFilters = new(() => Configs.BetterGuide.GuideTile && !guideTile.IsAir, r => CheckGuideTileFilter(r));
+        GuideRecipeFiltering.AddFilter(_guideTileFilters);
+        
+        GuideRecipeFiltering.AddGuideItemFilter(r => Configs.BetterGuide.MoreRecipes && r.HasResult(Main.guideItem.type));
+
+        _availableRecipesFilters = new(() => Configs.BetterGuide.AvailableRecipes && !ShowAllRecipes(), r => IsAvailable(r.RecipeIndex), r => LocalFilters.IsFavorited(r.RecipeIndex));
+        GuideRecipeFiltering.AddFilter(_availableRecipesFilters);
     }
 
     public override void Unload() {

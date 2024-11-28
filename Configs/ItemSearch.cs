@@ -50,15 +50,16 @@ public sealed class BetterGuide {
     [DefaultValue(Configs.UnknownDisplay.Unknown)] public UnknownDisplay unknownDisplay = Configs.UnknownDisplay.Unknown;
 
     public static bool Enabled => ItemSearch.Instance.betterGuide;
-    public static bool MoreRecipes => Enabled && Value.moreRecipes && !UnloadedItemSearch.Value.guideMoreRecipes;
+    public static bool MoreRecipes => Enabled && Value.moreRecipes && !UnloadedItemSearch.Value.guideRecipeFiltering;
     public static bool ConditionsDisplay => Enabled && Value.conditionsDisplay;
-    public static bool FavoritedRecipes => Enabled && Value.favoritedRecipes && !UnloadedItemSearch.Value.guideFavorited;
-    public static bool CraftInMenu => Enabled && Value.craftInMenu && !UnloadedItemSearch.Value.guideCraftInMenu;
-    public static bool GuideTile => Enabled && Value.craftingStation && !UnloadedItemSearch.Value.guideCraftingStation;
-    public static bool UnknownDisplay => Enabled && Value.unknownDisplay > Configs.UnknownDisplay.Vanilla && !UnloadedItemSearch.Value.guideUnknown;
+    public static bool FavoritedRecipes => Enabled && Value.favoritedRecipes && !UnloadedItemSearch.Value.guideFavorited && !UnloadedItemSearch.Value.guideRecipeFiltering;
+    public static bool CraftInMenu => Enabled && Value.craftInMenu && !UnloadedItemSearch.Value.guideCraftInMenu && !UnloadedItemSearch.Value.guideRecipeFiltering;
+    public static bool GuideTile => Enabled && Value.craftingStation && !UnloadedItemSearch.Value.guideCraftingStation && !UnloadedItemSearch.Value.guideRecipeFiltering;
+    public static bool UnknownDisplay => Enabled && Value.unknownDisplay > Configs.UnknownDisplay.Vanilla && !UnloadedItemSearch.Value.guideUnknown && !UnloadedItemSearch.Value.guideRecipeFiltering;
 
     public static bool AvailableRecipes => FavoritedRecipes || CraftInMenu;
     public static bool RecipeOrdering => FavoritedRecipes || UnknownDisplay;
+    public static bool RecipeFiltering => !UnloadedItemSearch.Value.guideRecipeFiltering && (CraftInMenu || FavoritedRecipes || GuideTile || MoreRecipes || UnknownDisplay);
     public static BetterGuide Value => ItemSearch.Instance.betterGuide.Value;
     
     // Compatibility version < v0.6

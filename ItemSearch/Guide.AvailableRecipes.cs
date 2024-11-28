@@ -349,4 +349,7 @@ public sealed partial class Guide : ModSystem {
     private static TextureHighlight s_favoriteTextures = null!;
     private static TextureHighlight s_blacklistedTextures = null!;
     private static Asset<Texture2D> s_inventoryBack4 = null!;
+
+    private static GuideRecipeFilterGroup _availableRecipesFilters = null!;
+
 }

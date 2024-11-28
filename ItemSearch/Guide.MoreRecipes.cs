@@ -1,14 +1,13 @@
 using Microsoft.Xna.Framework;
-using MonoMod.Cil;
 using SpikysLib;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.GameInput;
-using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI;
 using ContextID = Terraria.UI.ItemSlot.Context;
 
+// BUG items not counted when manually placing items into guide slots
 namespace BetterInventory.ItemSearch;
 
 
@@ -37,41 +36,6 @@ public sealed partial class Guide : ModSystem {
         Main.inventoryScale /= TileScale;
     }
 
-    private static void ILMoreGuideRecipes(ILContext il) {
-        ILCursor cursor = new(il);
-
-        Utility.GotoRecipeDisabled(cursor, out ILLabel endLoop, out _, out int recipe);
-
-        //     ++ if(<extraRecipe>) {
-        //     ++     <addRecipe>
-        //     ++     continue;
-        //     ++ }
-        cursor.EmitLdloc(recipe);
-        cursor.EmitDelegate((Recipe recipe) => {
-            bool add = false;
-
-            if (Configs.BetterGuide.AvailableRecipes) {
-                // Removes non available recipes
-                if (!ShowAllRecipes() && !IsAvailable(recipe.RecipeIndex) && GetFavoriteState(recipe.RecipeIndex) != FavoriteState.Favorited) return true;
-
-                // Add all items if no guide item and available recipes
-                if (Main.guideItem.IsAir) add = true;
-            }
-
-            // Check GuideTile
-            if (Configs.BetterGuide.GuideTile) {
-                if (!CheckGuideTileFilter(recipe)) return true;
-                if (Main.guideItem.IsAir) add = true;
-            }
-
-            // Add extra recipes
-            if (Configs.BetterGuide.MoreRecipes && recipe.HasResult(Main.guideItem.type)) add = true;
-
-            if (add) Reflection.Recipe.AddToAvailableRecipes.Invoke(recipe.RecipeIndex);
-            return add;
-        });
-        cursor.EmitBrtrue(endLoop);
-    }
     private static bool CheckGuideTileFilter(Recipe recipe) {
         if (guideTile.IsAir) return true;
         if (guideTile.TryGetGlobalItem(out PlaceholderItem placeholder)) {
@@ -103,4 +67,5 @@ public sealed partial class Guide : ModSystem {
 
 
     public static Item guideTile = new();
+    private static GuideRecipeFilterGroup _guideTileFilters = null!;
 }
