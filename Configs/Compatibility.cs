@@ -123,7 +123,7 @@ public sealed class UnloadedItemActions {
 }
 
 public sealed class UnloadedItemSearch {
-    public bool guideCraftingStation = false;
+    public bool guideTile = false;
     public bool guideFavorited = false;
     public bool guideCraftInMenu = false;
     public bool guideUnknown = false;

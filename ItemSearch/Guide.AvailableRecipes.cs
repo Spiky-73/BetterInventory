@@ -258,11 +258,7 @@ public sealed partial class Guide : ModSystem {
             // Update guide recipes if we don't show everything
             if (forced || guideChange || !ShowAllRecipes()) FindGuideRecipes();
 
-        } else {
-            // Display guide recipes if there's a guide tile
-            if (Configs.BetterGuide.GuideTile && !guideTile.IsAir) FindGuideRecipes();
-            else orig(canDelayCheck);
-        }
+        } else orig(canDelayCheck);
     }
 
     private static void ILSkipGuideRecipes(ILContext il) {

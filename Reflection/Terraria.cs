@@ -49,6 +49,7 @@ public static class Item {
     public static readonly Field<TItem, int> stack = new(nameof(TItem.stack));
     public static readonly Field<TItem, int> useStyle = new(nameof(TItem.useStyle));
     public static readonly Field<TItem, bool> favorited = new(nameof(TItem.favorited));
+    public static readonly Property<TItem, string> Name = new(nameof(TItem.Name));
     public static readonly Property<TItem, bool> IsAir = new(nameof(TItem.IsAir));
     public static readonly Property<TItem, bool> IsACoin = new(nameof(TItem.IsACoin));
     public static readonly Method<TItem, bool> FitsAmmoSlot = new(nameof(TItem.FitsAmmoSlot));

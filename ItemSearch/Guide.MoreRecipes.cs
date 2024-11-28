@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using MonoMod.Cil;
 using SpikysLib;
 using Terraria;
 using Terraria.GameContent;
@@ -12,6 +13,15 @@ namespace BetterInventory.ItemSearch;
 
 
 public sealed partial class Guide : ModSystem {
+
+    private static void ILGuideTileRecipes(ILContext il){
+        ILCursor cursor = new(il);
+        cursor.GotoNext(i => i.MatchCall(Reflection.Recipe.CollectGuideRecipes));
+        cursor.GotoPrev(MoveType.After, i => i.MatchCallvirt(Reflection.Item.IsAir.GetMethod!));
+        cursor.EmitDelegate((bool isAir) => isAir && (!Configs.BetterGuide.GuideTile || guideTile.IsAir));
+        cursor.GotoNext(MoveType.After, i => i.MatchCallvirt(Reflection.Item.Name.GetMethod!));
+        cursor.EmitDelegate((string name) => Configs.BetterGuide.GuideTile && guideTile.Name != "" ? guideTile.Name : name);
+    }
 
     private static void DrawGuideTile(int inventoryX, int inventoryY) {
         float x = inventoryX + TextureAssets.InventoryBack.Width() * Main.inventoryScale * (1 + TileSpacingRatio);
@@ -41,7 +51,7 @@ public sealed partial class Guide : ModSystem {
         if (guideTile.TryGetGlobalItem(out PlaceholderItem placeholder)) {
             if (placeholder.tile == PlaceholderItem.ByHandTile) return recipe.requiredTile.Count == 0;
             if (placeholder.tile >= 0) return recipe.requiredTile.Contains(placeholder.tile);
-            if (placeholder.condition is not null) return recipe.Conditions.Exists(c => c.Description.Key == placeholder.condition.Key);
+            if (placeholder.condition is not null) return recipe.Conditions.Exists(c => c.Description.Key == placeholder.condition);
         }
         
         return CraftingStationsItems.ContainsKey(guideTile.createTile) ?
