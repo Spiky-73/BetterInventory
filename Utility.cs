@@ -108,6 +108,11 @@ public static class Utility {
         else Recipe.FindRecipes();
     }
 
+    public static long GetMaterialCount(this Recipe recipe, Item item) {
+        int group = recipe.acceptedGroups.FindIndex(g => RecipeGroup.recipeGroups[g].IconicItemId == item.type);
+        return PlayerHelper.OwnedItems.GetValueOrDefault(group == -1 ? item.type : RecipeGroup.recipeGroups[recipe.acceptedGroups[group]].GetGroupFakeItemId());
+    }
+
 
     public static string ToMetricString(this double number, int digits = 4) {
         int power = number == 0 ? 0 : (int)Math.Log10(number);

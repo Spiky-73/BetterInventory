@@ -76,7 +76,7 @@ public sealed class Crafting : ILoadable {
     public static void AddAvailableMaterials(Item item, List<TooltipLine> tooltips) {
         if (!Configs.AvailableMaterials.Tooltip || !ShouldDisplayStack(item, item.tooltipContext, out Recipe? recipe)) return;
         if (item.stack != 1) tooltips[0].Text = tooltips[0].Text[0..^(2 + item.stack.ToString().Length)];
-        tooltips[0].Text += $" ({GetMaterialCount(recipe, item)}/{item.stack})";
+        tooltips[0].Text += $" ({recipe.GetMaterialCount(item)}/{item.stack})";
     }
     private static void ILAvailableMaterial(ILContext il) {
         ILCursor cursor = new(il);
@@ -90,17 +90,12 @@ public sealed class Crafting : ILoadable {
         cursor.EmitDelegate((string stack, Item[] inv, int context, int slot) => {
             Item item = inv[slot];
             if (!Configs.AvailableMaterials.ItemSlot || !ShouldDisplayStack(item, context, out Recipe? recipe)) return stack;
-            return $"{Utility.ToMetricString(GetMaterialCount(recipe, item))}/{item.stack}";
+            return $"{Utility.ToMetricString(recipe.GetMaterialCount(item))}/{item.stack}";
         });
         cursor.GotoPrev(i => i.MatchLdflda(Reflection.Item.stack));
         cursor.GotoPrev(MoveType.After, i => i.MatchLdfld(Reflection.Item.stack));
         cursor.EmitLdarg1().EmitLdarg2().EmitLdarg3();
         cursor.EmitDelegate((int stack, Item[] inv, int context, int slot) => Configs.AvailableMaterials.ItemSlot && ShouldDisplayStack(inv[slot], context, out _) ? 2 : stack);
-    }
-
-    private static long GetMaterialCount(Recipe recipe, Item item) {
-        int group = recipe.acceptedGroups.FindIndex(g => RecipeGroup.recipeGroups[g].IconicItemId == item.type);
-        return PlayerHelper.OwnedItems.GetValueOrDefault(group == -1 ? item.type : RecipeGroup.recipeGroups[recipe.acceptedGroups[group]].GetGroupFakeItemId());
     }
 
     private static bool ShouldDisplayStack(Item item, int context, [MaybeNullWhen(false)] out Recipe recipe) {

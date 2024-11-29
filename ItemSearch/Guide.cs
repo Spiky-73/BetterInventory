@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using BetterInventory.Crafting.UI;
 using BetterInventory.Default.Catalogues;
 using BetterInventory.InventoryManagement;
 using BetterInventory.ItemActions;
@@ -21,46 +22,45 @@ namespace BetterInventory.ItemSearch;
 
 public sealed partial class Guide : ModSystem {
 
+    // TODO redo
+    public static void FindGuideRecipes() => Recipe.FindRecipes();
+
+    internal static GameTime _lastUpdateUiGameTime = null!;
+    internal static UserInterface recipeInterface = null!;
+    internal static RecipeUI recipeUI = null!;
+
+    public override void UpdateUI(GameTime gameTime) {
+        _lastUpdateUiGameTime = gameTime;
+        recipeInterface.Update(gameTime);
+    }
+
     public override void Load() {
         On_Main.DrawGuideCraftText += HookGuideCraftText;
-        On_Main.HoverOverCraftingItemButton += HookDisableWhenNonAvailable;
-
-        On_Recipe.ClearAvailableRecipes += HookClearRecipes;
-        On_Recipe.FindRecipes += HookFindRecipes;
         On_Recipe.CollectGuideRecipes += HookCollectGuideRecipes;
 
-        On_Player.AdjTiles += HookGuideTileAdj;
         On_ItemSlot.PickItemMovementAction += HookAllowGuideItem;
         On_ItemSlot.OverrideLeftClick += HookOverrideLeftClick;
 
-        IL_Main.DrawInventory += static il => {
-            if (!il.ApplyTo(ILDrawVisibility, Configs.BetterGuide.CraftInMenu)) Configs.UnloadedItemSearch.Value.guideCraftInMenu = true;
-            if (!il.ApplyTo(ILCustomDrawCreateItem, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = true;
-            if (!il.ApplyTo(ILCustomDrawMaterials, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = true;
-            if (!il.ApplyTo(ILCustomDrawRecipeList, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = true;
-        };
+        On_Recipe.CollectItemsToCraftWithFrom += HookUpdatedOwnedItems;
+        On_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += HookRequiredObjectBackground;
+        On_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += HookFavoritedBackground;
+
         IL_Main.CraftItem += static il => {
             if (!il.ApplyTo(IlUnfavoriteOnCraft, Configs.FavoritedRecipes.UnfavoriteOnCraft)) Configs.UnloadedItemSearch.Value.guideUnfavoriteOnCraft = true;
         };
         IL_Main.HoverOverCraftingItemButton += static il => {
             if (!il.ApplyTo(ILFavoriteRecipe, Configs.BetterGuide.RecipeOrdering)) Configs.UnloadedItemSearch.Value.GuideRecipeOrdering = true;
-            if (!il.ApplyTo(ILCraftInGuideMenu, Configs.BetterGuide.CraftInMenu)) Configs.UnloadedItemSearch.Value.guideCraftInMenu = true;
         };
         IL_Recipe.FindRecipes += static il => {
-            if (!il.ApplyTo(ILSkipGuideRecipes, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = true;
             if (!il.ApplyTo(ILGuideTileRecipes, Configs.BetterGuide.GuideTile)) Configs.UnloadedItemSearch.Value.guideTile = true;
         };
         IL_Recipe.CollectGuideRecipes += static il => {
             if (!il.ApplyTo(ILGuideRecipeOrder, Configs.BetterGuide.RecipeOrdering)) Configs.UnloadedItemSearch.Value.GuideRecipeOrdering = true;
         };
 
-        s_inventoryBack4 = TextureAssets.InventoryBack4;
         s_defaultTextures = new(TextureAssets.InventoryBack4, TextureAssets.InventoryBack14);
         s_favoriteTextures = new(TextureAssets.InventoryBack10, TextureAssets.InventoryBack17);
         s_blacklistedTextures = new(TextureAssets.InventoryBack5, TextureAssets.InventoryBack11);
-        s_tileTextures = new(TextureAssets.InventoryBack3, TextureAssets.InventoryBack6);
-        s_conditionTextures = new(TextureAssets.InventoryBack12, TextureAssets.InventoryBack8);
-        s_inventoryTickBorder = Mod.Assets.Request<Texture2D>($"Assets/Inventory_Tick_Border");
 
         recipeUI = new();
         recipeUI.Activate();
@@ -71,17 +71,11 @@ public sealed partial class Guide : ModSystem {
         GuideRecipeFiltering.AddFilter(_guideTileFilters);
         
         GuideRecipeFiltering.AddGuideItemFilter(r => Configs.BetterGuide.MoreRecipes && r.HasResult(Main.guideItem.type));
-
-        _availableRecipesFilters = new(() => Configs.BetterGuide.AvailableRecipes && !ShowAllRecipes(), r => IsAvailable(r.RecipeIndex), r => LocalFilters.IsFavorited(r.RecipeIndex));
-        GuideRecipeFiltering.AddFilter(_availableRecipesFilters);
     }
 
     public override void Unload() {
-        s_inventoryBack4 = null!;
         CraftingStationsItems.Clear();
         guideTile = new();
-        s_dispGuide = new();
-        s_dispTile = new();
     }
 
     public override void ClearWorld() {
@@ -106,18 +100,10 @@ public sealed partial class Guide : ModSystem {
     }
 
     private static void HookGuideCraftText(On_Main.orig_DrawGuideCraftText orig, int adjY, Color craftingTipColor, out int inventoryX, out int inventoryY) {
-        // Main.guideItem's positions
-        inventoryX = 73;
-        inventoryY = 331 + adjY;
-
         if (Configs.RecipeTooltip.Enabled) RequiredTooltipItem.OnDrawGuideCraftText();
 
-        if (Configs.BetterGuide.CraftInMenu) HandleVisibility(inventoryX, inventoryY);
-
-        if (Configs.BetterGuide.ConditionsDisplay) DrawRequiredTiles(inventoryX, inventoryY);
+        if (Configs.BetterGuide.ConditionsDisplay) DrawRequiredTiles(adjY, out inventoryX, out inventoryY);
         else orig(adjY, craftingTipColor, out inventoryX, out inventoryY);
-
-        if (Configs.BetterGuide.GuideTile) DrawGuideTile(inventoryX, inventoryY);
     }
 
     public static bool OverrideHover(Item[] inv, int context, int slot) {
@@ -191,6 +177,11 @@ public sealed partial class Guide : ModSystem {
         set => (Main.guideItem, guideTile) = (value[0], value[1]);
     }
     private static readonly Item[] s_guideItems = new Item[2];
+
+    private static TextureHighlight s_defaultTextures = null!;
+    private static TextureHighlight s_favoriteTextures = null!;
+    private static TextureHighlight s_blacklistedTextures = null!;
+    private static Asset<Texture2D> s_inventoryBack4 = null!;
 
     public static readonly Dictionary<int, int> CraftingStationsItems = []; // tile -> item
 }

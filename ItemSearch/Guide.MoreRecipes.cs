@@ -23,7 +23,7 @@ public sealed partial class Guide : ModSystem {
         cursor.EmitDelegate((string name) => Configs.BetterGuide.GuideTile && guideTile.Name != "" ? guideTile.Name : name);
     }
 
-    private static void DrawGuideTile(int inventoryX, int inventoryY) {
+    internal static void DrawGuideTile(int inventoryX, int inventoryY) {
         float x = inventoryX + TextureAssets.InventoryBack.Width() * Main.inventoryScale * (1 + TileSpacingRatio);
         float y = inventoryY;
         Main.inventoryScale *= TileScale;
@@ -31,7 +31,7 @@ public sealed partial class Guide : ModSystem {
 
         // Handle Mouse hover
         Rectangle hitbox = new((int)x, (int)y, (int)(TextureAssets.InventoryBack.Width() * Main.inventoryScale), (int)(TextureAssets.InventoryBack.Height() * Main.inventoryScale));
-        if (!s_visibilityHover && hitbox.Contains(Main.mouseX, Main.mouseY) && !PlayerInput.IgnoreMouseInterface) {
+        if (!Main.player[Main.myPlayer].mouseInterface && hitbox.Contains(Main.mouseX, Main.mouseY) && !PlayerInput.IgnoreMouseInterface) {
             Main.player[Main.myPlayer].mouseInterface = true;
             Main.craftingHide = true;
             ItemSlot.OverrideHover(items, ContextID.GuideItem, 1);

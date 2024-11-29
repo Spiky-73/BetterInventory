@@ -9,6 +9,7 @@ using Terraria.ModLoader;
 
 namespace BetterInventory.Crafting;
 
+// TODO re add filtering and sorting
 public sealed class RecipeFiltering : ILoadable {
 
     public static RecipeFilters LocalFilters => ItemActions.BetterPlayer.LocalPlayer.RecipeFilters;
@@ -104,7 +105,6 @@ public sealed class RecipeFiltering : ILoadable {
     }
 
     private static void HookFilterAddedRecipe(On_Recipe.orig_AddToAvailableRecipes orig, int recipeIndex) {
-        if (Guide.HighjackAddRecipe(recipeIndex)) return;
         if (Configs.RecipeFilters.Enabled && !FitsFilters(recipeIndex)) return;
         orig(recipeIndex);
     }

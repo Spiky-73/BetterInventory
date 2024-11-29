@@ -6,6 +6,7 @@ using TNPC = Terraria.NPC;
 using TRecipe = Terraria.Recipe;
 using SpikysLib.Reflection;
 using Terraria;
+using TColor = Microsoft.Xna.Framework.Color;
 using TVector2 = Microsoft.Xna.Framework.Vector2;
 using System;
 
@@ -31,6 +32,7 @@ public static class Main {
     public static readonly StaticMethod<object?> HoverOverCraftingItemButton = new(typeof(TMain), nameof(HoverOverCraftingItemButton), typeof(int));
     public static readonly StaticMethod<object?> LockCraftingForThisCraftClickDuration = new(typeof(TMain), nameof(TMain.LockCraftingForThisCraftClickDuration));
     public static readonly StaticMethod<object?> SetRecipeMaterialDisplayName = new(typeof(TMain), nameof(SetRecipeMaterialDisplayName), typeof(int));
+    public static readonly StaticMethod<object?> DrawGuideCraftText = new(typeof(TMain), nameof(DrawGuideCraftText), typeof(int), typeof(TColor), typeof(int).MakeByRefType(), typeof(int).MakeByRefType());
     
     public static readonly Type MouseTextCache = typeof(TMain).GetNestedType(nameof(MouseTextCache), BindingFlags.NonPublic)!;
     public static readonly Method<TMain, object?> MouseText_DrawItemTooltip = new(nameof(MouseText_DrawItemTooltip), MouseTextCache, typeof(int), typeof(byte), typeof(int), typeof(int));

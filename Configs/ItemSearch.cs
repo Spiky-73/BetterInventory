@@ -52,8 +52,8 @@ public sealed class BetterGuide {
     public static bool Enabled => ItemSearch.Instance.betterGuide;
     public static bool MoreRecipes => Enabled && Value.moreRecipes && !UnloadedItemSearch.Value.guideRecipeFiltering;
     public static bool ConditionsDisplay => Enabled && Value.conditionsDisplay;
-    public static bool FavoritedRecipes => Enabled && Value.favoritedRecipes && !UnloadedItemSearch.Value.guideFavorited && !UnloadedItemSearch.Value.guideRecipeFiltering;
-    public static bool CraftInMenu => Enabled && Value.craftInMenu && !UnloadedItemSearch.Value.guideCraftInMenu && !UnloadedItemSearch.Value.guideRecipeFiltering;
+    public static bool FavoritedRecipes => Enabled && Value.favoritedRecipes && !UnloadedItemSearch.Value.guideFavorited && !UnloadedItemSearch.Value.guideRecipeFiltering && !UnloadedItemSearch.Value.guideAvailableRecipes;
+    public static bool CraftInMenu => Enabled && Value.craftInMenu && !UnloadedItemSearch.Value.guideCraftInMenu && !UnloadedItemSearch.Value.guideRecipeFiltering && !UnloadedItemSearch.Value.guideAvailableRecipes;
     public static bool GuideTile => Enabled && Value.craftingStation && !UnloadedItemSearch.Value.guideTile && !UnloadedItemSearch.Value.guideRecipeFiltering;
     public static bool UnknownDisplay => Enabled && Value.unknownDisplay > Configs.UnknownDisplay.Vanilla && !UnloadedItemSearch.Value.guideUnknown && !UnloadedItemSearch.Value.guideRecipeFiltering;
 
