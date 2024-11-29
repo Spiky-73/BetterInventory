@@ -107,7 +107,7 @@ public sealed class PlaceholderItem : GlobalItem {
     }
 
     public static Item FromTile(int tile) {
-        if (Guide.CraftingStationsItems.TryGetValue(tile, out int type) && type != ItemID.None) return new(type);
+        if (GuideGuideTile.CraftingStationsItems.TryGetValue(tile, out int type) && type != ItemID.None) return new(type);
         Item item = new(FakeType);
         item.GetGlobalItem<PlaceholderItem>().tile = tile;
         return item;

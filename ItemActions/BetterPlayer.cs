@@ -62,8 +62,6 @@ public sealed class BetterPlayer : ModPlayer {
         DisplayUpdate();
         DisplayCompatibility();
         DisplaySpicWarning();
-
-        Guide.SetGuideItem(this);
     }
 
     public override void ResetEffects() {
@@ -113,7 +111,6 @@ public sealed class BetterPlayer : ModPlayer {
     public override bool HoverSlot(Item[] inventory, int context, int slot) {
         QuickMove.HoverItem(inventory, context, slot);
         if (PlaceholderItem.OverrideHover(inventory, context, slot)) return true;
-        if (Guide.OverrideHover(inventory, context, slot)) return true;
         if (ClickOverrides.OverrideHover(inventory, context, slot)) return true;
         return false;
     }
@@ -183,14 +180,12 @@ public sealed class BetterPlayer : ModPlayer {
         }
     }
     public override void SaveData(TagCompound tag) {
-        Guide.SaveData(this, tag);
         tag[VisibilityTag] = VisibilityFilters;
         tag[RecipesTag] = RecipeFilters;
         tag[FavoritedInBanksTag] = new FavoritedInBanks(Player);
     }
 
     public override void LoadData(TagCompound tag) {
-        Guide.LoadData(this, tag);
         if (tag.TryGet(VisibilityTag, out VisibilityFilters visibility)) VisibilityFilters = visibility;
         if (tag.TryGet(RecipesTag, out RecipeFilters recipe)) RecipeFilters = recipe;
         if (Configs.InventoryManagement.FavoriteInBanks && tag.TryGet(FavoritedInBanksTag, out FavoritedInBanks favorited)) favorited.Apply(Player);
@@ -216,6 +211,4 @@ public sealed class BetterPlayer : ModPlayer {
     public const string VisibilityTag = "visibility";
     public const string RecipesTag = "recipes";
     public const string FavoritedInBanksTag = "favorited";
-
-    internal Item? _tempGuideTile;
 }

@@ -106,7 +106,7 @@ public sealed class RecipeList : ModEntityCatalogue {
             if (slot == -1 || slot == 0) ItemSlot.LeftClick(items, ContextID.GuideItem, 0);
             if (slot == -1 || slot == 1) ItemSlot.LeftClick(items, ContextID.GuideItem, 1);
         } else {
-            if (slot == -1) slot = Configs.BetterGuide.GuideTile && Guide.IsCraftingStation(item) ? 1 : 0;
+            if (slot == -1) slot = Configs.BetterGuide.GuideTile && GuideGuideTile.IsCraftingStation(item) ? 1 : 0;
             if (ItemSlot.PickItemMovementAction(items, ContextID.GuideItem, 1 - slot, item) != -1) {
                 bool clearOtherSlot = item.tooltipContext != ContextID.GuideItem;
                 if (PlaceholderHelper.AreSame(items[slot], item)) {
@@ -150,8 +150,8 @@ public sealed class RecipeList : ModEntityCatalogue {
             (Item item, Main.guideItem) = (Main.guideItem, new(Main.guideItem.type));
             Main.LocalPlayer.GetDropItem(ref item);
         }
-        if (Bestiary.Instance.Enabled && (Guide.guideTile.stack > 1 || Guide.guideTile.prefix != 0)) {
-            (Item item, Guide.guideTile) = (Guide.guideTile, new(Guide.guideTile.type));
+        if (Bestiary.Instance.Enabled && (GuideGuideTile.guideTile.stack > 1 || GuideGuideTile.guideTile.prefix != 0)) {
+            (Item item, GuideGuideTile.guideTile) = (GuideGuideTile.guideTile, new(GuideGuideTile.guideTile.type));
             Main.LocalPlayer.GetDropItem(ref item);
         }
     }
@@ -179,19 +179,19 @@ public sealed class RecipeList : ModEntityCatalogue {
         if (!Main.mouseRightRelease) return;
         SearchPrevious(inv, slot);
         inv[0] = Main.guideItem;
-        if (inv.Length > 1) inv[1] = Guide.guideTile;
+        if (inv.Length > 1) inv[1] = GuideGuideTile.guideTile;
     }
 
     private static void HookDropItems(On_Player.orig_dropItemCheck orig, Player self) {
         if (!Instance.Enabled) {
             orig(self);
-            Guide.dropGuideTileCheck(self);
+            GuideGuideTile.dropGuideTileCheck(self);
             return;
         }
         bool old = Main.InGuideCraftMenu;
         Main.InGuideCraftMenu = true;
         orig(self);
-        Guide.dropGuideTileCheck(self);
+        GuideGuideTile.dropGuideTileCheck(self);
         Main.InGuideCraftMenu = old;
     }
 

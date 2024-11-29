@@ -118,18 +118,7 @@ public sealed class VisibilityFiltersSerializer : TagSerializer<VisibilityFilter
             }
         }
 
-        if (tag.TryGet(RecipesTag, out IList<RawRecipe> recipes)) {
-            IList<byte> favorites = tag.Get<IList<byte>>(FavoritesTag);
-            for (int r = 0; r < recipes.Count; r++) {
-                bool fav = favorites[r] == (byte)FavoriteState.Favorited;
-                Recipe? recipe = recipes[r].GetRecipe();
-                if (recipe is null) value.UnloadedRecipes.Add((recipes[r], fav));
-                else if (fav) value.FavoritedRecipes.Add(recipe.RecipeIndex);
-                else value.BlacklistedRecipes.Add(recipe.RecipeIndex);
-            }
-        }
-
-        if (tag.TryGet(OwnedTag, out IList<ItemDefinition> owned) || tag.TryGet(ItemsTag, out owned)) {
+        if (tag.TryGet(OwnedTag, out IList<ItemDefinition> owned)) {
             for (int i = 0; i < owned.Count; i+=2) {
                 if (owned[i].IsUnloaded) {
                     value.UnloadedItems.Add(owned[i]);
@@ -147,10 +136,6 @@ public sealed class VisibilityFiltersSerializer : TagSerializer<VisibilityFilter
     public const string FavoritedTag = "favorited";
     public const string BlacklistedTag = "blacklisted";
     public const string OwnedTag = "owned";
-
-    public const string RecipesTag = "recipes";
-    public const string FavoritesTag = "favorites";
-    public const string ItemsTag = "items";
 }
 
 

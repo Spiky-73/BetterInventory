@@ -1199,6 +1199,11 @@ UnloadedItemSearch: {
 		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ Recipe Filtering"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
+
+	guideAvailableRecipes: {
+		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ Available Recipes"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
 }
 
 Version: {

@@ -63,7 +63,7 @@ public sealed class GuideCraftInMenu : ILoadable {
         cursor.EmitLdloc(inventoryX).EmitLdloc(inventoryY);
         cursor.EmitDelegate((int x, int y) => {
             // TODO GuideTile dependency
-            if (Configs.BetterGuide.GuideTile) Guide.DrawGuideTile(x, y);
+            if (Configs.BetterGuide.GuideTile) GuideGuideTile.DrawGuideTile(x, y);
             if (Configs.BetterGuide.CraftInMenu) DrawVisibility();
         });
     }
@@ -102,7 +102,7 @@ public sealed class GuideCraftInMenu : ILoadable {
         // if (Main.focusRecipe == recipeIndex && ++[Main.guideItem.IsAir || <craftInMenu>]) {
         cursor.GotoNext(i => i.MatchLdsfld(Reflection.Main.guideItem));
         cursor.GotoNext(MoveType.After, i => i.MatchCallvirt(Reflection.Item.IsAir.GetMethod!));
-        cursor.EmitDelegate((bool isAir) => (isAir && (!Configs.BetterGuide.GuideTile || Guide.guideTile.IsAir)) || Configs.BetterGuide.CraftInMenu);
+        cursor.EmitDelegate((bool isAir) => (isAir && (!Configs.BetterGuide.GuideTile || GuideGuideTile.guideTile.IsAir)) || Configs.BetterGuide.CraftInMenu);
 
         //     <craft>
         // }
@@ -111,8 +111,8 @@ public sealed class GuideCraftInMenu : ILoadable {
     public static Item? GetGuideMaterials() => Configs.BetterGuide.CraftInMenu && !RecipeList.Instance.Enabled ? Main.guideItem : null;
     private static void HookGuideTileAdj(On_Player.orig_AdjTiles orig, Player self) {
         orig(self);
-        if (!Configs.BetterGuide.CraftInMenu || !Configs.BetterGuide.GuideTile || RecipeList.Instance.Enabled || Guide.guideTile.createTile < TileID.Dirt) return;
-        self.adjTile[Guide.guideTile.createTile] = true;
+        if (!Configs.BetterGuide.CraftInMenu || !Configs.BetterGuide.GuideTile || RecipeList.Instance.Enabled || GuideGuideTile.guideTile.createTile < TileID.Dirt) return;
+        self.adjTile[GuideGuideTile.guideTile.createTile] = true;
         Recipe.FindRecipes();
     }
 
