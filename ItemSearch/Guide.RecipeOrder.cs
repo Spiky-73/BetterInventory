@@ -180,8 +180,6 @@ public sealed partial class Guide : ModSystem {
 
     private static IEnumerator<int>? s_ilOrderedRecipes;
     private static readonly RangeSet s_unknownRecipes = [];
-
-    public static LocalizedText? forcedTooltip;
 }
 
 public enum FavoriteState : byte { Default, Blacklisted, Favorited }
