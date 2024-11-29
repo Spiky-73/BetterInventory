@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using BetterInventory.ItemActions;
@@ -15,6 +16,9 @@ namespace BetterInventory.Crafting;
 public sealed class Crafting : ILoadable {
 
     public void Load(Mod mod) {
+
+        On_Recipe.ClearAvailableRecipes += HookClearAvailableRecipes;
+        On_Recipe.CollectItemsToCraftWithFrom += HookCollectItems;
         IL_Main.DrawInventory += static il => {
             if (!il.ApplyTo(ILCraftOnList, Configs.CraftOnList.Enabled)) Configs.UnloadedCrafting.Value.craftOnList = true;
         };
@@ -22,8 +26,18 @@ public sealed class Crafting : ILoadable {
             if (!il.ApplyTo(ILAvailableMaterial, Configs.AvailableMaterials.Enabled)) Configs.UnloadedCrafting.Value.availableMaterialsItemSlot = true;
         };
     }
-
     public void Unload() { }
+
+    private static void HookClearAvailableRecipes(On_Recipe.orig_ClearAvailableRecipes orig) {
+        orig();
+        _collectedRecipes = false;
+    }
+
+    private static void HookCollectItems(On_Recipe.orig_CollectItemsToCraftWithFrom orig, Player player) {
+        orig(player);
+        if(player.whoAmI == Main.myPlayer) _collectedRecipes = true;
+    }
+
 
     private static void ILCraftOnList(ILContext il) {
 
@@ -101,7 +115,7 @@ public sealed class Crafting : ILoadable {
     private static bool ShouldDisplayStack(Item item, int context, [MaybeNullWhen(false)] out Recipe recipe) {
         recipe = null;
         if (!(context == ItemSlot.Context.CraftingMaterial || (Configs.RecipeTooltip.Enabled && context == ItemSlot.Context.ChatItem))) return false;
-        if ((!Main.guideItem.IsAir || Configs.BetterGuide.GuideTile && !Guide.guideTile.IsAir) && !Configs.BetterGuide.CraftInMenu) return false;
+        if (!_collectedRecipes) return false;
         
         recipe = context == ItemSlot.Context.CraftingMaterial ? Main.recipe[Main.availableRecipe[Main.focusRecipe]] : RequiredTooltipItem.HoveredRecipe;
         if (recipe is null) return false;
@@ -109,4 +123,6 @@ public sealed class Crafting : ILoadable {
         if (!recipe.requiredItem.Exists(i => i.UniqueId() == guid)) return false;
         return true;
     }
+
+    private static bool _collectedRecipes;
 }

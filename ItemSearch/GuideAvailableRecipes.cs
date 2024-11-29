@@ -65,6 +65,8 @@ public sealed class GuideAvailableRecipes : ILoadable {
         // Recipe.TryRefocusingRecipe(oldRecipe);
         // Recipe.VisuallyRepositionRecipes(focusY);
         cursor.GotoNext(MoveType.AfterLabel, i => i.MatchCall(Reflection.Recipe.TryRefocusingRecipe));
+
+        // TODO optimize performances
         cursor.EmitDelegate(() => {
             if (Configs.BetterGuide.AvailableRecipes) Reflection.Recipe.CollectGuideRecipes.Invoke();
         });
@@ -98,9 +100,9 @@ public sealed class GuideAvailableRecipes : ILoadable {
         var focusRecipe = Main.recipe[Main.availableRecipe[Main.focusRecipe]];
         if(focusRecipe.requiredItem.Contains(inv[slot])) { // Material
             available = s_availableCreateItems.Contains(focusRecipe.createItem) || focusRecipe.GetMaterialCount(inv[slot]) >= inv[slot].stack;
-        } else if(inv == Guide._displayedRecipeTiles) { // Required Tile
+        } else if(inv == GuideRequiredObjectsDisplay._displayedRecipeTiles) { // Required Tile
             available = slot >= focusRecipe.requiredTile.Count || Main.LocalPlayer.adjTile[focusRecipe.requiredTile[slot]];
-        } else if(inv == Guide._displayedRecipeConditions) { // Required Condition
+        } else if(inv == GuideRequiredObjectsDisplay._displayedRecipeConditions) { // Required Condition
             available = focusRecipe.Conditions[slot].Predicate();
         } else { // Created item
             available = s_availableCreateItems.Contains(inv[slot]);

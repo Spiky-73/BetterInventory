@@ -24,9 +24,9 @@ public sealed partial class Guide : ModSystem {
     }
 
     internal static void DrawGuideTile(int inventoryX, int inventoryY) {
-        float x = inventoryX + TextureAssets.InventoryBack.Width() * Main.inventoryScale * (1 + TileSpacingRatio);
+        float x = inventoryX + TextureAssets.InventoryBack.Width() * Main.inventoryScale * (1 + GuideRequiredObjectsDisplay.TileSpacingRatio);
         float y = inventoryY;
-        Main.inventoryScale *= TileScale;
+        Main.inventoryScale *= GuideRequiredObjectsDisplay.TileScale;
         Item[] items = GuideItems;
 
         // Handle Mouse hover
@@ -43,7 +43,7 @@ public sealed partial class Guide : ModSystem {
             GuideItems = items; // Update items if changed
         }
         ItemSlot.Draw(Main.spriteBatch, items, ContextID.GuideItem, 1, hitbox.TopLeft());
-        Main.inventoryScale /= TileScale;
+        Main.inventoryScale /= GuideRequiredObjectsDisplay.TileScale;
     }
 
     private static bool CheckGuideTileFilter(Recipe recipe) {

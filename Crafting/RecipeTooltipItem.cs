@@ -31,12 +31,12 @@ public class RequiredTooltipItem : GlobalItem {
     }
 
     private void DrawInventory(On_Main.orig_DrawInventory orig, Main self) {
-        _displayedGuideText = false;
+        _displayedGuideUI = false;
         orig(self);
     }
 
     internal static void OnDrawGuideCraftText() {
-        _displayedGuideText = true;
+        _displayedGuideUI = true;
     }
 
     public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
@@ -66,7 +66,7 @@ public class RequiredTooltipItem : GlobalItem {
         string materials = string.Join(string.Empty, recipe.requiredItem.Select(ItemTagHandler.GenerateTag));
 
         _requiredItemsTooltips = [new(BetterInventory.Instance, "RequiredItems", materials)];
-        if(_displayedGuideText) {
+        if(_displayedGuideUI) {
             List<string> objects = [];
             objects.AddRange(recipe.requiredTile.TakeWhile(t => t != -1).Select(t => {
                 int requiredTileStyle = Recipe.GetRequiredTileStyle(t);
@@ -82,7 +82,7 @@ public class RequiredTooltipItem : GlobalItem {
 
     public static Recipe? HoveredRecipe;
 
-    private static bool _displayedGuideText;
+    private static bool _displayedGuideUI;
     private static List<TooltipLine> _requiredItemsTooltips = [];
     private static Guid _lineItemGuid;
 }

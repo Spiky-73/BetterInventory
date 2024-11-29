@@ -35,14 +35,12 @@ public sealed partial class Guide : ModSystem {
     }
 
     public override void Load() {
-        On_Main.DrawGuideCraftText += HookGuideCraftText;
         On_Recipe.CollectGuideRecipes += HookCollectGuideRecipes;
 
         On_ItemSlot.PickItemMovementAction += HookAllowGuideItem;
         On_ItemSlot.OverrideLeftClick += HookOverrideLeftClick;
 
         On_Recipe.CollectItemsToCraftWithFrom += HookUpdatedOwnedItems;
-        On_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += HookRequiredObjectBackground;
         On_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += HookFavoritedBackground;
 
         IL_Main.CraftItem += static il => {
@@ -97,13 +95,6 @@ public sealed partial class Guide : ModSystem {
             Item item = new(type);
             if (CraftingStationsItems.TryGetValue(item.createTile, out int value) && value == ItemID.None) CraftingStationsItems[item.createTile] = item.type;
         }
-    }
-
-    private static void HookGuideCraftText(On_Main.orig_DrawGuideCraftText orig, int adjY, Color craftingTipColor, out int inventoryX, out int inventoryY) {
-        if (Configs.RecipeTooltip.Enabled) RequiredTooltipItem.OnDrawGuideCraftText();
-
-        if (Configs.BetterGuide.ConditionsDisplay) DrawRequiredTiles(adjY, out inventoryX, out inventoryY);
-        else orig(adjY, craftingTipColor, out inventoryX, out inventoryY);
     }
 
     public static bool OverrideHover(Item[] inv, int context, int slot) {

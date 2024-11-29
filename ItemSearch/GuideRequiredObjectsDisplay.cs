@@ -7,33 +7,35 @@ using ContextID = Terraria.UI.ItemSlot.Context;
 using System.Linq;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
+using BetterInventory.ItemActions;
 
 namespace BetterInventory.ItemSearch;
 
 // BUG ??? DrawGuideCraftText when disabled
-public sealed partial class Guide : ModSystem {
-    private void HookRequiredObjectBackground(On_ItemSlot.orig_Draw_SpriteBatch_ItemArray_int_int_Vector2_Color orig, SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, Color lightColor) {
-        Asset<Texture2D> texture;
-        if (inv == _displayedRecipeTiles) texture = TextureAssets.InventoryBack3;
-        else if (inv == _displayedRecipeConditions) texture = TextureAssets.InventoryBack12;
-        else {
-            orig(spriteBatch, inv, context, slot, position, lightColor);
-            return;
-        }
-        (Asset<Texture2D> back, TextureAssets.InventoryBack4) = (TextureAssets.InventoryBack4, texture);
-        orig(spriteBatch, inv, context, slot, position, lightColor);
-        TextureAssets.InventoryBack4 = back;
+public sealed class GuideRequiredObjectsDisplay : ILoadable {
+
+    public void Load(Mod mod) {
+        On_Main.DrawGuideCraftText += HookGuideCraftText;
+        On_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += HookRequiredObjectBackground;
     }
 
-    private static void DrawRequiredTiles(int adjY, out int inventoryX, out int inventoryY) {
+    public void Unload() { }
+
+    private static void HookGuideCraftText(On_Main.orig_DrawGuideCraftText orig, int adjY, Color craftingTipColor, out int inventoryX, out int inventoryY) {
+        if (Configs.RecipeTooltip.Enabled) RequiredTooltipItem.OnDrawGuideCraftText();
+
+        if (!Configs.BetterGuide.ConditionsDisplay) {
+            orig(adjY, craftingTipColor, out inventoryX, out inventoryY);
+            return;
+        }
         // Main.guideItem's positions
         inventoryX = 73;
         inventoryY = 331 + adjY;
-
         Recipe recipe = Main.recipe[Main.availableRecipe[Main.focusRecipe]];
 
         // Update if needed
-        if (s_displayedRecipe != (Main.numAvailableRecipes == 0 ? -1 : recipe.RecipeIndex)) UpdateRequiredTiles(recipe);
+        if (Main.numAvailableRecipes == 0 || Guide.IsUnknown(recipe.RecipeIndex)) return;
+        if (s_displayedRecipe != recipe.RecipeIndex) UpdateRequiredTiles(recipe);
 
         // Handles the position of the condition to displays
         float minX = inventoryX + TextureAssets.InventoryBack.Width() * Main.inventoryScale * (1 + TileSpacingRatio);
@@ -77,16 +79,24 @@ public sealed partial class Guide : ModSystem {
         Main.inventoryScale /= TileScale;
     }
     private static void UpdateRequiredTiles(Recipe recipe) {
-        // Skip if there is no recipe to display
-        if (Main.numAvailableRecipes == 0 || IsUnknown(Main.availableRecipe[Main.focusRecipe])) {
-            s_displayedRecipe = -1;
-            return;
-        }
         s_displayedRecipe = recipe.RecipeIndex;
 
         if (recipe.requiredTile.Count == 0) _displayedRecipeTiles = [PlaceholderItem.FromTile(PlaceholderItem.ByHandTile)];
         else _displayedRecipeTiles = recipe.requiredTile.TakeWhile(t => t != -1).Select(PlaceholderItem.FromTile).ToArray();
         _displayedRecipeConditions = recipe.Conditions.Select(PlaceholderItem.FromCondition).ToArray();
+    }
+
+    private void HookRequiredObjectBackground(On_ItemSlot.orig_Draw_SpriteBatch_ItemArray_int_int_Vector2_Color orig, SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, Color lightColor) {
+        Asset<Texture2D> texture;
+        if (inv == _displayedRecipeTiles) texture = TextureAssets.InventoryBack3;
+        else if (inv == _displayedRecipeConditions) texture = TextureAssets.InventoryBack12;
+        else {
+            orig(spriteBatch, inv, context, slot, position, lightColor);
+            return;
+        }
+        (Asset<Texture2D> back, TextureAssets.InventoryBack4) = (TextureAssets.InventoryBack4, texture);
+        orig(spriteBatch, inv, context, slot, position, lightColor);
+        TextureAssets.InventoryBack4 = back;
     }
 
     private static int s_displayedRecipe = -1;
