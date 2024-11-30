@@ -21,7 +21,11 @@ public sealed class GuideCraftInMenuPlayer : ModPlayer {
     public static GuideCraftInMenuPlayer LocalPlayer => Main.LocalPlayer.GetModPlayer<GuideCraftInMenuPlayer>();
 
     public override void Load() {
-        On_Player.AdjTiles += HookGuideTileAdj;
+
+        IL_Player.AdjTiles += static il => {
+            if (!il.ApplyTo(ILGuideTileAdj, Configs.BetterGuide.CraftInMenu)) Configs.UnloadedItemSearch.Value.guideCraftInMenu = true;
+        };
+
         IL_Main.DrawInventory += static il => {
             if (!il.ApplyTo(ILVisibility, Configs.BetterGuide.CraftInMenu)) Configs.UnloadedItemSearch.Value.guideCraftInMenu = true;
         };
@@ -31,7 +35,6 @@ public sealed class GuideCraftInMenuPlayer : ModPlayer {
 
         s_inventoryTickBorder = Mod.Assets.Request<Texture2D>($"Assets/Inventory_Tick_Border");
     }
-
 
     private static void ILVisibility(ILContext il) {
         ILCursor cursor = new(il);
@@ -110,20 +113,26 @@ public sealed class GuideCraftInMenuPlayer : ModPlayer {
         itemConsumedCallback = null!;
         return Configs.BetterGuide.CraftInMenu && !RecipeList.Instance.Enabled ? [Main.guideItem] : [];
     }
-    private static void HookGuideTileAdj(On_Player.orig_AdjTiles orig, Player self) {
-        orig(self);
-        if (!Configs.BetterGuide.CraftInMenu || !Configs.BetterGuide.GuideTile || RecipeList.Instance.Enabled || GuideGuideTile.guideTile.createTile < TileID.Dirt) return;
-        self.adjTile[GuideGuideTile.guideTile.createTile] = true;
-        Recipe.FindRecipes();
+    private static void ILGuideTileAdj(ILContext il) {
+        ILCursor cursor = new(il);
+
+        // <resetAdjTile>
+        cursor.GotoNext(MoveType.Before, i => i.MatchLdfld(Reflection.Player.adjWater));
+
+        // ++ <guideTileAdj>
+        cursor.EmitLdarg0();
+        cursor.EmitDelegate((Player self) => {
+            if (!Configs.BetterGuide.CraftInMenu || !Configs.BetterGuide.GuideTile || RecipeList.Instance.Enabled || GuideGuideTile.guideTile.createTile < TileID.Dirt) return;
+            self.adjTile[GuideGuideTile.guideTile.createTile] = true;
+        });
     }
 
     // TODO make independent
-    public static bool ShowAllRecipes() => Configs.BetterGuide.CraftInMenu ? LocalPlayer.visibility.HasFlag(CurrentVisibilityFlag) : GuideAvailableRecipes.s_guideRecipes;
+    public static bool ShowAllRecipes() => ((Main.InGuideCraftMenu || RecipeList.Instance.Enabled) && Configs.BetterGuide.CraftInMenu ? LocalPlayer.visibility : RecipeVisibility.Default).HasFlag(CurrentVisibilityFlag);
 
     private static Asset<Texture2D> s_inventoryTickBorder = null!;
 
     private static Item s_dispGuide = new(), s_dispTile = new();
-
 
     private static bool s_visibilityHover;
     private static Rectangle s_hitBox;

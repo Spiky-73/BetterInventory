@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using BetterInventory.ItemActions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;

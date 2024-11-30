@@ -1,5 +1,4 @@
 using BetterInventory.Default.Catalogues;
-using BetterInventory.InventoryManagement;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using SpikysLib;
@@ -20,16 +19,12 @@ public sealed partial class Guide : ModSystem {
 
     public override void Load() {
         On_Recipe.CollectGuideRecipes += HookCollectGuideRecipes;
-
+        
         On_ItemSlot.OverrideLeftClick += HookOverrideLeftClick;
-
+        
         IL_Recipe.CollectGuideRecipes += static il => {
             if (!il.ApplyTo(ILGuideRecipeOrder, Configs.BetterGuide.RecipeOrdering)) Configs.UnloadedItemSearch.Value.GuideRecipeOrdering = true;
         };
-    }
-
-    public override void ClearWorld() {
-        SmartPickup.ClearMarks();
     }
 
     public override void PostAddRecipes() {

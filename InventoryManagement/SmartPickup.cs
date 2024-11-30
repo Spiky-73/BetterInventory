@@ -18,13 +18,15 @@ using SpikysLib.IL;
 
 namespace BetterInventory.InventoryManagement;
 
-public sealed class SmartPickup : ILoadable {
+public sealed class SmartPickup : ModSystem {
 
-    public void Load(Mod mod) {
+    public override void Load() {
         IL_Player.GetItem += static il => {
+            // TODO regroup into 1 IL with events / hooks to add pickupers
             if(!il.ApplyTo(ILPreviousSlot, Configs.PreviousSlot.Enabled)) Configs.UnloadedInventoryManagement.Value.previousSlot = true;
             if(!il.ApplyTo(ILAutoEquip, Configs.SmartPickup.AutoEquip)) Configs.UnloadedInventoryManagement.Value.autoEquip = true;
             if(!il.ApplyTo(ILUpradeItems, Configs.UpgradeItems.Enabled)) Configs.UnloadedInventoryManagement.Value.upgradeItems = true;
+           
             if(!il.ApplyTo(ILHotbarLast, Configs.SmartPickup.HotbarLast)) Configs.UnloadedInventoryManagement.Value.hotbarLast = true;
             if(!il.ApplyTo(ILFixNewItem, Configs.SmartPickup.FixSlot)) Configs.UnloadedInventoryManagement.Value.fixSlot = true;
         };
@@ -36,9 +38,14 @@ public sealed class SmartPickup : ILoadable {
         On_ItemSlot.RightClick_ItemArray_int_int += HookRightSaveType;
         On_Player.DropItems += HookMarkItemsOnDeath;
     }
-    public void Unload() {
+    public override void Unload() {
         foreach (ModPickupUpgrader up in s_upgraders) ConfigHelper.SetInstance(up, true);
         s_upgraders.Clear();
+    }
+
+    public override void ClearWorld() {
+        s_marksData.Clear();
+        s_marks.Clear();
     }
 
     private static void HookLeftSaveType(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) => UpdateMark((inv, context, slot) => orig(inv, context, slot), inv, context, slot, Main.mouseLeft && Main.mouseLeftRelease);
@@ -341,11 +348,6 @@ public sealed class SmartPickup : ILoadable {
         foreach (Slot slot in s_marks[oldType]) s_marksData[slot] = new(newType) { favorited = favorited ?? s_marksData[slot].favorited };
         s_marks[newType] = s_marks[oldType];
         s_marks.Remove(oldType);
-    }
-
-    public static void ClearMarks() {
-        s_marksData.Clear();
-        s_marks.Clear();
     }
 
     public static bool VanillaGetItem { get; private set; }

@@ -7,7 +7,6 @@ using ContextID = Terraria.UI.ItemSlot.Context;
 using System.Linq;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
-using BetterInventory.ItemActions;
 
 namespace BetterInventory.ItemSearch;
 
@@ -22,8 +21,6 @@ public sealed class GuideRequiredObjectsDisplay : ILoadable {
     public void Unload() { }
 
     private static void HookGuideCraftText(On_Main.orig_DrawGuideCraftText orig, int adjY, Color craftingTipColor, out int inventoryX, out int inventoryY) {
-        if (Configs.RecipeTooltip.Enabled) RequiredTooltipItem.OnDrawGuideCraftText();
-
         if (!Configs.BetterGuide.ConditionsDisplay) {
             orig(adjY, craftingTipColor, out inventoryX, out inventoryY);
             return;

@@ -1,8 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using BetterInventory.ItemActions;
-using BetterInventory.ItemSearch;
 using MonoMod.Cil;
 using SpikysLib;
 using SpikysLib.IL;

@@ -8,7 +8,6 @@ using SpikysLib;
 using SpikysLib.Constants;
 using SpikysLib.IL;
 using Terraria;
-using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace BetterInventory;
@@ -112,20 +111,6 @@ public static class Utility {
     public static long GetMaterialCount(this Recipe recipe, Item item) {
         int group = recipe.acceptedGroups.FindIndex(g => RecipeGroup.recipeGroups[g].IconicItemId == item.type);
         return PlayerHelper.OwnedItems.GetValueOrDefault(group == -1 ? item.type : RecipeGroup.recipeGroups[recipe.acceptedGroups[group]].GetGroupFakeItemId());
-    }
-
-    public static void MouseTextNoOverride(string text) {
-        Item item = new(PlaceholderItem.FakeType);
-        item.SetDefaults(0, true, null);
-        item.SetNameOverride(text);
-        item.type = ItemID.IronPickaxe;
-        item.type = ItemID.IronPickaxe;
-        item.scale = 0f;
-        item.rare = ItemRarityID.White;
-        item.value = -1;
-        Main.HoverItem = item;
-        Main.instance.MouseText("", 0, 0, -1, -1, -1, -1, 0);
-        Main.mouseText = true;
     }
 
     public static string ToMetricString(this double number, int digits = 4) {

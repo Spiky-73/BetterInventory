@@ -20,7 +20,7 @@ public sealed class GuideGuideTile : ModPlayer {
         IL_Recipe.FindRecipes += static il => {
             if (!il.ApplyTo(ILGuideTileRecipes, Configs.BetterGuide.GuideTile)) Configs.UnloadedItemSearch.Value.guideTile = true;
         };
-        _guideTileFilters = new(() => Configs.BetterGuide.GuideTile && !guideTile.IsAir, r => CheckGuideTileFilter(r));
+        _guideTileFilters = new(() => Configs.BetterGuide.GuideTile && !guideTile.IsAir, CheckGuideTileFilter);
         GuideRecipeFiltering.AddFilter(_guideTileFilters);
     }
 

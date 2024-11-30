@@ -6,7 +6,6 @@ using Terraria.ModLoader;
 using Terraria.UI;
 using ContextID = Terraria.UI.ItemSlot.Context;
 
-// BUG items not counted when manually placing items into guide slots
 namespace BetterInventory.ItemSearch;
 
 

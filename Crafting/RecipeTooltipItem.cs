@@ -15,8 +15,20 @@ namespace BetterInventory.ItemActions;
 public class RequiredTooltipItem : GlobalItem {
 
     public override void Load() {
-        On_Main.DrawInventory += DrawInventory;
         On_ItemTagHandler.ItemSnippet.ctor += HookItemGroupName;
+
+        On_Recipe.FindRecipes += HookFindRecipes;
+        On_Recipe.CollectGuideRecipes += HookCollectGuideRecipes;
+    }
+
+    private void HookCollectGuideRecipes(On_Recipe.orig_CollectGuideRecipes orig) {
+        _guideRecipes = true;
+        orig();
+    }
+
+    private void HookFindRecipes(On_Recipe.orig_FindRecipes orig, bool canDelayCheck) {
+        if (!canDelayCheck) _guideRecipes = false;
+        orig(canDelayCheck);
     }
 
     private void HookItemGroupName(On_ItemTagHandler.ItemSnippet.orig_ctor orig, TextSnippet self, Item item) {
@@ -28,15 +40,6 @@ public class RequiredTooltipItem : GlobalItem {
             }
         }
         orig(self, item);
-    }
-
-    private void DrawInventory(On_Main.orig_DrawInventory orig, Main self) {
-        _displayedGuideUI = false;
-        orig(self);
-    }
-
-    internal static void OnDrawGuideCraftText() {
-        _displayedGuideUI = true;
     }
 
     public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
@@ -66,7 +69,7 @@ public class RequiredTooltipItem : GlobalItem {
         string materials = string.Join(string.Empty, recipe.requiredItem.Select(ItemTagHandler.GenerateTag));
 
         _requiredItemsTooltips = [new(BetterInventory.Instance, "RequiredItems", materials)];
-        if(_displayedGuideUI) {
+        if(_guideRecipes) {
             List<string> objects = [];
             objects.AddRange(recipe.requiredTile.TakeWhile(t => t != -1).Select(t => {
                 int requiredTileStyle = Recipe.GetRequiredTileStyle(t);
@@ -82,7 +85,8 @@ public class RequiredTooltipItem : GlobalItem {
 
     public static Recipe? HoveredRecipe;
 
-    private static bool _displayedGuideUI;
     private static List<TooltipLine> _requiredItemsTooltips = [];
     private static Guid _lineItemGuid;
+
+    private static bool _guideRecipes;
 }
