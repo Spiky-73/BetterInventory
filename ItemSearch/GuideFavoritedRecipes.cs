@@ -1,10 +1,7 @@
-using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using MonoMod.Cil;
 using ReLogic.Content;
 using SpikysLib.Collections;
-using SpikysLib.IL;
 using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;

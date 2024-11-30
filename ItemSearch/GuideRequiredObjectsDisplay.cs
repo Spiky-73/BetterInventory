@@ -42,13 +42,6 @@ public sealed class GuideRequiredObjectsDisplay : ILoadable {
         Vector2 delta = new Vector2(TextureAssets.InventoryBack.Width() * (TileScale + TileSpacingRatio), -TextureAssets.InventoryBack.Height() * (TileScale + TileSpacingRatio)) * Main.inventoryScale;
         Vector2 position = new(minX, inventoryY - delta.Y);
         int number = 0;
-        void MovePosition() {
-            if (Configs.FixedUI.Wrapping && ++number % TilesPerLine == 0) {
-                position.X = minX;
-                position.Y += delta.Y;
-                if (Configs.BetterGuide.GuideTile && number == TilesPerLine) MovePosition(); // Skip the position of guideTile if it is enabled
-            } else position.X += delta.X;
-        }
 
         Main.inventoryScale *= TileScale;
 
@@ -80,7 +73,6 @@ public sealed class GuideRequiredObjectsDisplay : ILoadable {
     }
     private static void UpdateRequiredTiles(Recipe recipe) {
         s_displayedRecipe = recipe.RecipeIndex;
-
         if (recipe.requiredTile.Count == 0) _displayedRecipeTiles = [PlaceholderItem.FromTile(PlaceholderItem.ByHandTile)];
         else _displayedRecipeTiles = recipe.requiredTile.TakeWhile(t => t != -1).Select(PlaceholderItem.FromTile).ToArray();
         _displayedRecipeConditions = recipe.Conditions.Select(PlaceholderItem.FromCondition).ToArray();

@@ -20,7 +20,7 @@ public sealed class GuideUnknownDisplay : ILoadable {
         };
 
         On_ItemSlot.Draw_SpriteBatch_refItem_int_Vector2_Color += HookHideItem;
-        On_ItemSlot.DrawItemIcon += HookHideItem;
+        On_ItemSlot.DrawItemIcon += HookHideItemIcon;
 
         _unknownFilters = new(() => Configs.BetterGuide.UnknownDisplay && Configs.BetterGuide.Value.unknownDisplay != Configs.UnknownDisplay.Known, r => {
             if(!GuideCraftInMenu.LocalFilters.IsRecipeKnown(r)) {
@@ -58,7 +58,7 @@ public sealed class GuideUnknownDisplay : ILoadable {
         orig(spriteBatch, ref item, context, position, lightColor);
         _hideItem = false;
     }
-    private static float HookHideItem(On_ItemSlot.orig_DrawItemIcon orig, Item item, int context, SpriteBatch spriteBatch, Vector2 screenPositionForItemCenter, float scale, float sizeLimit, Color environmentColor) {
+    private static float HookHideItemIcon(On_ItemSlot.orig_DrawItemIcon orig, Item item, int context, SpriteBatch spriteBatch, Vector2 screenPositionForItemCenter, float scale, float sizeLimit, Color environmentColor) {
         if (_hideItem) {
             return spriteBatch.DrawTexture(s_unknownTexture.Value, Color.White, screenPositionForItemCenter, ref scale, sizeLimit);
         }
