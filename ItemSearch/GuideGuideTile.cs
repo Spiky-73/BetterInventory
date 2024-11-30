@@ -52,7 +52,7 @@ public sealed class GuideGuideTile : ModPlayer {
         if (_tempGuideTile is not null) guideTile = _tempGuideTile;
     }
 
-    public const string GuideTileTag = "guideTile";
+    internal const string GuideTileTag = "guideTile";
 
 
 
@@ -115,5 +115,5 @@ public sealed class GuideGuideTile : ModPlayer {
     public static bool IsCraftingStation(Item item) => CraftingStationsItems.ContainsKey(item.createTile) || item.IsAPlaceholder();
 
     public static readonly Dictionary<int, int> CraftingStationsItems = []; // tile -> item
-    private Item? _tempGuideTile;
+    internal Item? _tempGuideTile;
 }

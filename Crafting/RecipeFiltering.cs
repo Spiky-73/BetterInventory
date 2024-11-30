@@ -1,4 +1,5 @@
-using BetterInventory.ItemSearch;
+using BetterInventory.Crafting.UI;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using ReLogic.Content;
@@ -6,15 +7,25 @@ using SpikysLib.IL;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
+using Terraria.UI;
 
 namespace BetterInventory.Crafting;
 
 // TODO re add filtering and sorting
-public sealed class RecipeFiltering : ILoadable {
+public sealed class RecipeFiltering : ModSystem {
+
+    private static GameTime _lastUpdateUiGameTime = null!;
+    private static UserInterface _recipeInterface = null!;
+    public static RecipeUI recipeUI = null!;
+
+    public override void UpdateUI(GameTime gameTime) {
+        _lastUpdateUiGameTime = gameTime;
+        _recipeInterface.Update(gameTime);
+    }
 
     public static RecipeFilters LocalFilters => ItemActions.BetterPlayer.LocalPlayer.RecipeFilters;
 
-    public void Load(Mod mod) {
+    public override void Load() {
         On_Recipe.AddToAvailableRecipes += HookFilterAddedRecipe;
         IL_Main.DrawInventory += static il => {
             if (!il.ApplyTo(ILDrawUI, Configs.Crafting.RecipeUI)) Configs.UnloadedCrafting.Value.RecipeUI = true;
@@ -23,11 +34,14 @@ public sealed class RecipeFiltering : ILoadable {
             if (!il.ApplyTo(ILForceAddToAvailable, Configs.Crafting.RecipeUI)) Configs.UnloadedCrafting.Value.RecipeUI = true;
         };
 
-        recipeFilters = mod.Assets.Request<Texture2D>($"Assets/Recipe_Filters");
-        recipeFiltersGray = mod.Assets.Request<Texture2D>($"Assets/Recipe_Filters_Gray");
-    }
+        recipeFilters = Mod.Assets.Request<Texture2D>($"Assets/Recipe_Filters");
+        recipeFiltersGray = Mod.Assets.Request<Texture2D>($"Assets/Recipe_Filters_Gray");
 
-    public void Unload() {}
+        recipeUI = new();
+        recipeUI.Activate();
+        _recipeInterface = new();
+        _recipeInterface.SetState(recipeUI);
+    }
 
     private static void ILDrawUI(ILContext il) {
         ILCursor cursor = new(il);
@@ -63,14 +77,14 @@ public sealed class RecipeFiltering : ILoadable {
     }
 
     public static void DrawRecipeUI(int hammerX, int hammerY){
-        Guide.recipeUI.container.Top.Pixels = hammerY + TextureAssets.CraftToggle[0].Height() - TextureAssets.InfoIcon[0].Width() / 2;
-        Guide.recipeUI.container.Left.Pixels = hammerX - TextureAssets.InfoIcon[0].Width() - 1;
+        recipeUI.container.Top.Pixels = hammerY + TextureAssets.CraftToggle[0].Height() - TextureAssets.InfoIcon[0].Width() / 2;
+        recipeUI.container.Left.Pixels = hammerX - TextureAssets.InfoIcon[0].Width() - 1;
 
         if (_needsFilterRefresh) {
-            Guide.recipeUI.RebuildRecipeGrid();
+            recipeUI.RebuildRecipeGrid();
             _needsFilterRefresh = false;
         }
-        Guide.recipeInterface.Draw(Main.spriteBatch, Guide._lastUpdateUiGameTime);
+        _recipeInterface.Draw(Main.spriteBatch, _lastUpdateUiGameTime);
     }
 
     public static void ClearFilters() {

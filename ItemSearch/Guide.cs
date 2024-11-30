@@ -1,7 +1,5 @@
-using BetterInventory.Crafting.UI;
 using BetterInventory.Default.Catalogues;
 using BetterInventory.InventoryManagement;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using SpikysLib;
@@ -20,15 +18,6 @@ public sealed partial class Guide : ModSystem {
     // TODO redo
     public static void FindGuideRecipes() => Recipe.FindRecipes();
 
-    internal static GameTime _lastUpdateUiGameTime = null!;
-    internal static UserInterface recipeInterface = null!;
-    internal static RecipeUI recipeUI = null!;
-
-    public override void UpdateUI(GameTime gameTime) {
-        _lastUpdateUiGameTime = gameTime;
-        recipeInterface.Update(gameTime);
-    }
-
     public override void Load() {
         On_Recipe.CollectGuideRecipes += HookCollectGuideRecipes;
 
@@ -37,11 +26,6 @@ public sealed partial class Guide : ModSystem {
         IL_Recipe.CollectGuideRecipes += static il => {
             if (!il.ApplyTo(ILGuideRecipeOrder, Configs.BetterGuide.RecipeOrdering)) Configs.UnloadedItemSearch.Value.GuideRecipeOrdering = true;
         };
-
-        recipeUI = new();
-        recipeUI.Activate();
-        recipeInterface = new();
-        recipeInterface.SetState(recipeUI);
     }
 
     public override void ClearWorld() {

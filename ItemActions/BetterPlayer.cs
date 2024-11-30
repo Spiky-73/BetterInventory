@@ -15,6 +15,7 @@ using BetterInventory.CrossMod;
 using SpikysLib.Constants;
 using SpikysLib.Configs;
 using SpikysLib;
+using MonoMod.Utils;
 
 namespace BetterInventory.ItemActions;
 
@@ -56,7 +57,6 @@ public sealed class BetterPlayer : ModPlayer {
 
     public override void OnEnterWorld() {
         RecipeFilters ??= new();
-        VisibilityFilters ??= new();
         if (Configs.BetterGuide.AvailableRecipes) Guide.FindGuideRecipes();
 
         DisplayUpdate();
@@ -134,7 +134,6 @@ public sealed class BetterPlayer : ModPlayer {
     public override IEnumerable<Item> AddMaterialsForCrafting(out ItemConsumedCallback itemConsumedCallback) {
         List<Item> items = [];
         Item? mat;
-        if(Main.myPlayer == Player.whoAmI && (mat = GuideCraftInMenu.GetGuideMaterials()) != null) items.Add(mat);
         if(Main.myPlayer == Player.whoAmI && (mat = Crafting.Crafting.GetMouseMaterial()) != null) items.Add(mat);
         itemConsumedCallback = (item, index) => {
             if (item == Main.mouseItem) item.stack -= Reflection.RecipeLoader.ConsumedItems.GetValue()[^1].stack; // FIXME seems hacky
@@ -176,19 +175,28 @@ public sealed class BetterPlayer : ModPlayer {
         }
     }
     public override void SaveData(TagCompound tag) {
-        tag[VisibilityTag] = VisibilityFilters;
         tag[RecipesTag] = RecipeFilters;
         tag[FavoritedInBanksTag] = new FavoritedInBanks(Player);
     }
 
     public override void LoadData(TagCompound tag) {
-        if (tag.TryGet(VisibilityTag, out VisibilityFilters visibility)) VisibilityFilters = visibility;
+        if (tag.TryGet(VisibilityTag, out VisibilityFilters visibility)) { // Compatibility version < v0.7.1
+            Player.GetModPlayer<GuideCraftInMenuPlayer>().visibility = (RecipeVisibility)visibility.Visibility;
+            Player.GetModPlayer<GuideFavoritedRecipesPlayer>().favoritedRecipes.AddRange(visibility.FavoritedRecipes);
+            Player.GetModPlayer<GuideFavoritedRecipesPlayer>().blacklistedRecipes.AddRange(visibility.BlacklistedRecipes);
+            Player.GetModPlayer<GuideFavoritedRecipesPlayer>().unloadedRecipes.AddRange(visibility.UnloadedRecipes);
+            Player.GetModPlayer<GuideUnknownDisplayPlayer>().ownedItems.AddRange(visibility.OwnedItems);
+            Player.GetModPlayer<GuideUnknownDisplayPlayer>().unloadedItems.AddRange(visibility.UnloadedItems);
+        }
+        if (tag.TryGet(GuideGuideTile.GuideTileTag, out Item tile)) { // Compatibility version < v0.7.1
+            Player.GetModPlayer<GuideGuideTile>()._tempGuideTile = tile;
+        }
+        
         if (tag.TryGet(RecipesTag, out RecipeFilters recipe)) RecipeFilters = recipe;
         if (Configs.InventoryManagement.FavoriteInBanks && tag.TryGet(FavoritedInBanksTag, out FavoritedInBanks favorited)) favorited.Apply(Player);
     }
 
     public RecipeFilters RecipeFilters { get; set; } = null!;
-    public VisibilityFilters VisibilityFilters { get; set; } = new();
 
     private static bool s_noMousePickup;
 

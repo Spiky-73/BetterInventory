@@ -10,18 +10,17 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
-using BetterInventory.ItemActions;
 using SpikysLib.IL;
 using BetterInventory.Default.Catalogues;
+using System.Collections.Generic;
+using Terraria.ModLoader.IO;
 
 namespace BetterInventory.ItemSearch;
 
-public sealed class GuideCraftInMenu : ILoadable {
+public sealed class GuideCraftInMenuPlayer : ModPlayer {
+    public static GuideCraftInMenuPlayer LocalPlayer => Main.LocalPlayer.GetModPlayer<GuideCraftInMenuPlayer>();
 
-    // TODO split
-    public static VisibilityFilters LocalFilters => BetterPlayer.LocalPlayer.VisibilityFilters;
-
-    public void Load(Mod mod) {
+    public override void Load() {
         On_Player.AdjTiles += HookGuideTileAdj;
         IL_Main.DrawInventory += static il => {
             if (!il.ApplyTo(ILVisibility, Configs.BetterGuide.CraftInMenu)) Configs.UnloadedItemSearch.Value.guideCraftInMenu = true;
@@ -30,10 +29,8 @@ public sealed class GuideCraftInMenu : ILoadable {
             if (!il.ApplyTo(ILCraftInGuideMenu, Configs.BetterGuide.CraftInMenu)) Configs.UnloadedItemSearch.Value.guideCraftInMenu = true;
         };
 
-        s_inventoryTickBorder = mod.Assets.Request<Texture2D>($"Assets/Inventory_Tick_Border");
+        s_inventoryTickBorder = Mod.Assets.Request<Texture2D>($"Assets/Inventory_Tick_Border");
     }
-
-    public void Unload() { }
 
 
     private static void ILVisibility(ILContext il) {
@@ -77,19 +74,20 @@ public sealed class GuideCraftInMenu : ILoadable {
         if (PlayerInput.IgnoreMouseInterface || !s_hitBox.Contains(Main.mouseX, Main.mouseY)) return false;
 
         if (Main.mouseLeft && Main.mouseLeftRelease) {
-            LocalFilters.ShowAllRecipes = !LocalFilters.ShowAllRecipes;
+            var localPlayer = LocalPlayer;
+            localPlayer.ToggleFlag(CurrentVisibilityFlag);
             SoundEngine.PlaySound(SoundID.MenuTick);
             Recipe.FindRecipes();
         }
         return Main.player[Main.myPlayer].mouseInterface = s_visibilityHover = true;
     }
     public static void DrawVisibility() {
-        VisibilityFilters filters = LocalFilters;
-        Asset<Texture2D> tick = filters.ShowAllRecipes ? TextureAssets.InventoryTickOn : TextureAssets.InventoryTickOff;
+        bool showAll = LocalPlayer.visibility.HasFlag(CurrentVisibilityFlag);
+        Asset<Texture2D> tick = showAll ? TextureAssets.InventoryTickOn : TextureAssets.InventoryTickOff;
         Color color = Color.White * 0.7f;
         Main.spriteBatch.Draw(tick.Value, s_hitBox.Center(), null, color, 0f, tick.Value.Size() / 2, 1, 0, 0f);
         if (s_visibilityHover) {
-            string key = filters.ShowAllRecipes ? $"{Localization.Keys.UI}.ShowAll" : $"{Localization.Keys.UI}.ShowAvailable";
+            string key = showAll ? $"{Localization.Keys.UI}.ShowAll" : $"{Localization.Keys.UI}.ShowAvailable";
             Main.instance.MouseText(Language.GetTextValue($"{Localization.Keys.UI}.Filter", Language.GetTextValue(key), Main.numAvailableRecipes));
             Main.spriteBatch.Draw(s_inventoryTickBorder.Value, s_hitBox.Center(), null, color, 0f, s_inventoryTickBorder.Value.Size() / 2, 1, 0, 0f);
         }
@@ -108,7 +106,10 @@ public sealed class GuideCraftInMenu : ILoadable {
         // }
     }
 
-    public static Item? GetGuideMaterials() => Configs.BetterGuide.CraftInMenu && !RecipeList.Instance.Enabled ? Main.guideItem : null;
+    public override IEnumerable<Item> AddMaterialsForCrafting(out ItemConsumedCallback itemConsumedCallback) {
+        itemConsumedCallback = null!;
+        return Configs.BetterGuide.CraftInMenu && !RecipeList.Instance.Enabled ? [Main.guideItem] : [];
+    }
     private static void HookGuideTileAdj(On_Player.orig_AdjTiles orig, Player self) {
         orig(self);
         if (!Configs.BetterGuide.CraftInMenu || !Configs.BetterGuide.GuideTile || RecipeList.Instance.Enabled || GuideGuideTile.guideTile.createTile < TileID.Dirt) return;
@@ -117,7 +118,7 @@ public sealed class GuideCraftInMenu : ILoadable {
     }
 
     // TODO make independent
-    public static bool ShowAllRecipes() => Configs.BetterGuide.CraftInMenu ? LocalFilters.ShowAllRecipes : GuideAvailableRecipes.s_guideRecipes;
+    public static bool ShowAllRecipes() => Configs.BetterGuide.CraftInMenu ? LocalPlayer.visibility.HasFlag(CurrentVisibilityFlag) : GuideAvailableRecipes.s_guideRecipes;
 
     private static Asset<Texture2D> s_inventoryTickBorder = null!;
 
@@ -126,4 +127,29 @@ public sealed class GuideCraftInMenu : ILoadable {
 
     private static bool s_visibilityHover;
     private static Rectangle s_hitBox;
+
+    public override void SaveData(TagCompound tag) {
+        if (visibility != RecipeVisibility.Default) tag[VisibilityTag] = (byte)visibility;
+    }
+    public override void LoadData(TagCompound tag) {
+        if (tag.TryGet(VisibilityTag, out byte raw)) visibility = (RecipeVisibility)raw;
+    }
+    public const string VisibilityTag = "visibility";
+
+    public static RecipeVisibility CurrentVisibilityFlag => GuideAvailableRecipes.s_guideRecipes ? RecipeVisibility.ShowAllGuide : RecipeVisibility.ShowAllAir;
+
+    private void ToggleFlag(RecipeVisibility flag) => SetFlag(flag, !visibility.HasFlag(flag));
+    private void SetFlag(RecipeVisibility flag, bool set) {
+        if (set) visibility |= flag;
+        else visibility &= ~flag;
+    }
+    public RecipeVisibility visibility = RecipeVisibility.Default;
+
+}
+
+[System.Flags]
+public enum RecipeVisibility {
+    Default = ShowAllGuide,
+    ShowAllAir = 1 << 0,
+    ShowAllGuide = 1 << 1,
 }

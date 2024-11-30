@@ -1,5 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
+using BetterInventory.DataStructures;
 using SpikysLib.DataStructures;
 using Terraria;
 using Terraria.ModLoader.Config;
@@ -136,78 +136,4 @@ public sealed class VisibilityFiltersSerializer : TagSerializer<VisibilityFilter
     public const string FavoritedTag = "favorited";
     public const string BlacklistedTag = "blacklisted";
     public const string OwnedTag = "owned";
-}
-
-
-public sealed class RawRecipe {
-    public RawRecipe(string mod, List<ItemDefinition> items, List<TileDefinition> tiles) {
-        this.mod = mod;
-        this.items = items;
-        this.tiles = tiles;
-    }
-
-    public RawRecipe(Recipe recipe) {
-        mod = recipe.Mod?.Name ?? "Terraria";
-        items = new();
-        tiles = new();
-        AddItem(recipe.createItem);
-        foreach (Item item in recipe.requiredItem) AddItem(item);
-        foreach (int tile in recipe.requiredTile) AddTile(tile);
-    }
-
-    public Recipe? GetRecipe() {
-        int type = items[0].Type;
-        HashSet<int> requiredItem = new();
-        for (int i = 1; i < items.Count; i++) requiredItem.Add(items[i].Type);
-
-        HashSet<int> requiredTile = new();
-        foreach (TileDefinition tile in tiles) requiredTile.Add(tile.Type);
-
-        for (int r = 0; r < Recipe.numRecipes; r++) {
-            Recipe recipe = Main.recipe[r];
-            if ((recipe.Mod?.Name ?? "Terraria") != mod) continue;
-            if (recipe.createItem.type != type) continue;
-            foreach (Item material in recipe.requiredItem) {
-                if (!requiredItem.Contains(material.type)) goto next;
-            }
-            foreach (int tile in recipe.requiredTile) {
-                if (!requiredTile.Contains(tile)) goto next;
-            }
-            return recipe;
-        next:;
-        }
-        return null;
-    }
-
-    public string mod;
-    public List<ItemDefinition> items;
-    public List<TileDefinition> tiles;
-
-    private void AddItem(Item item) => items.Add(new(item.type));
-    private void AddTile(int tile) => tiles.Add(new(tile));
-
-}
-public sealed class RawRecipeSerializer : TagSerializer<RawRecipe, TagCompound> {
-    public override TagCompound Serialize(RawRecipe value) => new() { [ModTag] = value.mod, [ItemsTag] = value.items, [TilesTag] = value.tiles };
-
-    public override RawRecipe Deserialize(TagCompound tag){
-        List<ItemDefinition> items;
-        if (tag.Get<IList>(ItemsTag) is not List<string> i) items = tag.Get<List<ItemDefinition>>(ItemsTag);
-        else {
-            items = new();
-            foreach (string s in i) items.Add(new(s));
-        }
-        List<TileDefinition> tiles;
-        if (tag.Get<IList>(TilesTag) is not List<string> t) tiles = tag.Get<List<TileDefinition>>(TilesTag);
-        else {
-            tiles = new();
-            foreach (string s in t) tiles.Add(new(s));
-        }
-        return new(tag.GetString(ModTag), items, tiles);
-    }
-
-
-    public const string ModTag = "mod";
-    public const string ItemsTag = "items";
-    public const string TilesTag = "tiles";
 }

@@ -108,7 +108,7 @@ public sealed class QuickSearch : ILoadable {
     }
 
     public static bool CanQuickSearch(Configs.SearchAction actions, Item item, out bool canSearch, out bool canToggle) {
-        canSearch = actions.HasFlag(Configs.SearchAction.Search) && !item.IsAir && !GuideUnknownDisplay.IsUnknown(item);
+        canSearch = actions.HasFlag(Configs.SearchAction.Search) && !item.IsAir && !GuideUnknownDisplayPlayer.IsUnknown(item);
         canToggle = actions.HasFlag(Configs.SearchAction.Toggle);
         return canSearch || canToggle;
     }

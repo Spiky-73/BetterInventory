@@ -88,7 +88,7 @@ public class TooltipHoverSystem : ModSystem {
 
     private static void ILTooltipHover(ILContext il) {
         ILCursor cursor = new(il);
-        cursor.FindNextLoc(out _, out int opaqueBoxBehindTooltips, i => i.Previous.MatchLdsfld(Reflection.Main.SettingsEnabled_OpaqueBoxBehindTooltips), 1);
+        cursor.FindNextLoc(out _, out int opaqueBoxBehindTooltips, i => i.Previous.MatchLdsfld(Reflection.Main.SettingsEnabled_OpaqueBoxBehindTooltips), 0);
 
         cursor.GotoNext(i => i.MatchCall(Reflection.ItemLoader.ModifyTooltips));
         cursor.FindPrevLoc(out _, out int zero, i => i.Previous.MatchCall(Reflection.Vector2.Zero.GetMethod!), 17);

@@ -36,26 +36,26 @@ public sealed partial class Guide : ModSystem {
     private static IEnumerable<int> GetDisplayedRecipes() {
         static bool Skip(int r) {
             // // Skip unknown recipes
-            // if (Configs.BetterGuide.UnknownDisplay && Configs.BetterGuide.Value.unknownDisplay != Configs.UnknownDisplay.Known && !GuideCraftInMenu.LocalFilters.IsKnownRecipe(Main.recipe[r])) {
+            // if (Configs.BetterGuide.UnknownDisplay && Configs.BetterGuide.Value.unknownDisplay != Configs.UnknownDisplay.Known && !GuideUnknownDisplayPlayer.LocalPlayer.IsKnownRecipe(Main.recipe[r])) {
             //     s_unknownRecipes.Add(r);
             //     return true;
             // }
             // Skip Favorited recipes
-            if (Configs.BetterGuide.FavoritedRecipes) {
-                if (GuideCraftInMenu.LocalFilters.FavoritedRecipes.Contains(r)) return true;
-                if (GuideCraftInMenu.LocalFilters.BlacklistedRecipes.Contains(r)) return true;
-            }
+            // if (Configs.BetterGuide.FavoritedRecipes) {
+            //     if (GuideFavoritedRecipesPlayer.LocalPlayer.IsFavorited(r)) return true;
+            //     if (GuideFavoritedRecipesPlayer.LocalPlayer.IsBlacklisted(r)) return true;
+            // }
             return false;
         }
 
         // Add favorited recipes
-        if (Configs.BetterGuide.FavoritedRecipes) foreach (int r in GuideCraftInMenu.LocalFilters.FavoritedRecipes) yield return r;
+        // if (Configs.BetterGuide.FavoritedRecipes) foreach (int r in GuideFavoritedRecipesPlayer.LocalPlayer.FavoritedRecipes) yield return r;
         
         // Add "normal" recipes
         for (int r = 0; r < Recipe.numRecipes; r++) if (!Skip(r)) yield return r;
 
         // Add blacklisted recipes
-        if (Configs.BetterGuide.FavoritedRecipes) foreach (int r in GuideCraftInMenu.LocalFilters.BlacklistedRecipes) yield return r;
+        // if (Configs.BetterGuide.FavoritedRecipes) foreach (int r in GuideFavoritedRecipesPlayer.LocalPlayer.BlacklistedRecipes) yield return r;
         
         // // Add "???" recipes
         // if (Configs.BetterGuide.UnknownDisplay && Configs.BetterGuide.Value.unknownDisplay == Configs.UnknownDisplay.Unknown) foreach (int r in s_unknownRecipes) yield return r;

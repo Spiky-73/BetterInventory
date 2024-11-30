@@ -6,6 +6,7 @@ using Terraria.ModLoader.IO;
 
 namespace BetterInventory.Crafting;
 
+// TODO save searchFilter
 public sealed class RecipeFilters {
 
     public EntryFilterer<Item, IRecipeFilter> Filterer { get; } = new();
