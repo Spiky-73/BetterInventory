@@ -6,7 +6,6 @@ using MonoMod.Cil;
 using ReLogic.Content;
 using SpikysLib;
 using Terraria;
-using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
 namespace BetterInventory.ItemSearch;
@@ -21,7 +20,6 @@ public sealed class GuideUnknownDisplay : ILoadable {
         };
 
         On_ItemSlot.Draw_SpriteBatch_refItem_int_Vector2_Color += HookHideItem;
-        On_ItemSlot.MouseHover_int += HookHideTooltip;
         On_ItemSlot.DrawItemIcon += HookHideItem;
 
         _unknownFilters = new(() => Configs.BetterGuide.UnknownDisplay && Configs.BetterGuide.Value.unknownDisplay != Configs.UnknownDisplay.Known, r => {
@@ -50,11 +48,6 @@ public sealed class GuideUnknownDisplay : ILoadable {
         orig();
     }
 
-    private void HookHideTooltip(On_ItemSlot.orig_MouseHover_int orig, int context) {
-        orig(context);
-        if (Configs.BetterGuide.UnknownDisplay && IsUnknown(Main.HoverItem)) Utility.MouseTextNoOverride(Language.GetTextValue($"{Localization.Keys.UI}.Unknown"));
-    }
-
     private static void HookHideItem(On_ItemSlot.orig_Draw_SpriteBatch_refItem_int_Vector2_Color orig, SpriteBatch spriteBatch, ref Item inv, int context, Vector2 position, Color lightColor) {
         if(context != ItemSlot.Context.CraftingMaterial || !Configs.BetterGuide.UnknownDisplay || !IsUnknown(inv)) {
             orig(spriteBatch, ref inv, context, position, lightColor);
@@ -81,7 +74,7 @@ public sealed class GuideUnknownDisplay : ILoadable {
         cursor.EmitDelegate((int num) => num == 0 || Configs.BetterGuide.UnknownDisplay && IsUnknown(Main.recipe[Main.availableRecipe[Main.focusRecipe]].createItem) ? 0 : num);
     }
 
-    public static bool IsUnknown(Item createItem) => s_unknownCreateItems.Contains(createItem.UniqueId());
+    public static bool IsUnknown(Item createItem) => !createItem.IsAir && s_unknownCreateItems.Contains(createItem.UniqueId());
 
     private static GuideRecipeFilterGroup _unknownFilters = null!;
     private static readonly HashSet<Guid> s_unknownCreateItems = [];

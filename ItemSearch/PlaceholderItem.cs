@@ -69,8 +69,9 @@ public sealed class PlaceholderItem : GlobalItem {
 
     private static List<TooltipLine> HookPlaceholderTooltip(Reflection.ItemLoader.ModifyTooltipsFn orig, Item item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out Color?[] overrideColor, int prefixlineIndex) {
         string? name = null;
+        if(GuideUnknownDisplay.IsUnknown(item)) name = Language.GetTextValue($"{Localization.Keys.UI}.Unknown");
         if (!item.IsAir && name is null && item.TryGetGlobalItem(out PlaceholderItem placeholder)) {
-            if(placeholder.tile == ByHandTile) name = Language.GetTextValue($"{Localization.Keys.UI}.ByHand");
+            if (placeholder.tile == ByHandTile) name = Language.GetTextValue($"{Localization.Keys.UI}.ByHand");
             else if (placeholder.tile >= 0) name = Lang.GetMapObjectName(MapHelper.TileToLookup(placeholder.tile, 0));
             else if (placeholder.condition is not null) name = Language.GetTextValue(placeholder.condition);
         }
