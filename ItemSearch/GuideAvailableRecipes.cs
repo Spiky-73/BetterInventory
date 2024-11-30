@@ -114,6 +114,7 @@ public sealed class GuideAvailableRecipes : ILoadable {
     }
 
     public static bool IsAvailable(int recipe) => s_availableRecipes.Contains(recipe);
+    public static bool IsAvailable(Item createItem) => s_availableCreateItems.Contains(createItem);
 
     internal static bool s_guideRecipes;
     private static bool s_collectingGuide;

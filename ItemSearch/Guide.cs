@@ -34,8 +34,6 @@ public sealed partial class Guide : ModSystem {
 
         On_ItemSlot.OverrideLeftClick += HookOverrideLeftClick;
 
-        On_Recipe.CollectItemsToCraftWithFrom += HookUpdatedOwnedItems;
-
         IL_Recipe.CollectGuideRecipes += static il => {
             if (!il.ApplyTo(ILGuideRecipeOrder, Configs.BetterGuide.RecipeOrdering)) Configs.UnloadedItemSearch.Value.GuideRecipeOrdering = true;
         };

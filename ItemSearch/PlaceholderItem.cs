@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using BetterInventory.Default.Catalogues;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Content;
 using SpikysLib;
 using Terraria;
 using Terraria.Audio;
@@ -25,7 +24,6 @@ public sealed class PlaceholderItem : GlobalItem {
     public override void Load() {
         On_ItemSlot.DrawItemIcon += HookDrawPlaceholder;
         MonoModHooks.Add(typeof(ItemLoader).GetMethod(nameof(ItemLoader.ModifyTooltips)), HookPlaceholderTooltip);
-        On_ItemSlot.Draw_SpriteBatch_refItem_int_Vector2_Color += HookHideItem;
         On_ItemSlot.OverrideLeftClick += HookFakeItemLeftClick;
 
         ConditionItems["Conditions.NearWater"] = ItemID.WaterBucket;
@@ -33,9 +31,6 @@ public sealed class PlaceholderItem : GlobalItem {
         ConditionItems["Conditions.NearHoney"] = ItemID.HoneyBucket;
         ConditionItems["Conditions.InGraveyard"] = ItemID.Gravestone;
         ConditionItems["Conditions.InSnow"] = ItemID.SnowBlock;
-
-        s_unknownTexture = Mod.Assets.Request<Texture2D>($"Assets/Unknown_Item");
-
     }
     public override void Unload() {
         ConditionItems.Clear();
@@ -59,20 +54,7 @@ public sealed class PlaceholderItem : GlobalItem {
     public const string TileTag = "tile";
     public const string ConditionTag = "condition";
 
-    private static void HookHideItem(On_ItemSlot.orig_Draw_SpriteBatch_refItem_int_Vector2_Color orig, SpriteBatch spriteBatch, ref Item inv, int context, Vector2 position, Color lightColor) {
-        if (hideNextItem) {
-            Item item = new(FakeType);
-            orig(spriteBatch, ref item, context, position, lightColor);
-            hideNextItem = false;
-        } else {
-            orig(spriteBatch, ref inv, context, position, lightColor);
-        }
-    }
-
     private static float HookDrawPlaceholder(On_ItemSlot.orig_DrawItemIcon orig, Item item, int context, SpriteBatch spriteBatch, Vector2 screenPositionForItemCenter, float scale, float sizeLimit, Color environmentColor) {
-        if (hideNextItem) {
-            return spriteBatch.DrawTexture(s_unknownTexture.Value, Color.White, screenPositionForItemCenter, ref scale, sizeLimit);
-        }
         if(!item.IsAir && item.TryGetGlobalItem(out PlaceholderItem placeholder)) {
             if(placeholder.tile == ByHandTile) {
                 Main.instance.LoadItem(ItemID.BoneGlove);
@@ -87,8 +69,6 @@ public sealed class PlaceholderItem : GlobalItem {
 
     private static List<TooltipLine> HookPlaceholderTooltip(Reflection.ItemLoader.ModifyTooltipsFn orig, Item item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out Color?[] overrideColor, int prefixlineIndex) {
         string? name = null;
-        if (hideTooltip) name = Language.GetTextValue($"{Localization.Keys.UI}.Unknown");
-
         if (!item.IsAir && name is null && item.TryGetGlobalItem(out PlaceholderItem placeholder)) {
             if(placeholder.tile == ByHandTile) name = Language.GetTextValue($"{Localization.Keys.UI}.ByHand");
             else if (placeholder.tile >= 0) name = Lang.GetMapObjectName(MapHelper.TileToLookup(placeholder.tile, 0));
@@ -123,13 +103,9 @@ public sealed class PlaceholderItem : GlobalItem {
         return placeholder;
     }
 
-    public const int FakeType = ItemID.Lens;
+    public const int FakeType = ItemID.IronPickaxe;
     public const int ByHandTile = -2;
     public static readonly Dictionary<string, int> ConditionItems = []; // description -> id
-
-    public static bool hideNextItem;
-    public static bool hideTooltip;
-    private static Asset<Texture2D> s_unknownTexture = null!;
 
     public static bool IsFakeItem(Item[] inv, int context, int slot) => context == ItemSlot.Context.GuideItem && !inv[slot].IsAir && (RecipeList.Instance.Enabled || inv[slot].IsAPlaceholder());
     public static bool OverrideHover(Item[] inv, int context, int slot) {

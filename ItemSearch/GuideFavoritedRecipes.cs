@@ -24,8 +24,7 @@ public sealed class GuideFavoritedRecipes : ILoadable {
         On_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += HookFavoritedBackground;
     }
 
-    public void Unload() {
-    }
+    public void Unload() { }
 
     private void HookFavoritedBackground(On_ItemSlot.orig_Draw_SpriteBatch_ItemArray_int_int_Vector2_Color orig, SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, Color lightColor) {
         TextureHighlight? texture = null;
@@ -43,10 +42,8 @@ public sealed class GuideFavoritedRecipes : ILoadable {
         TextureAssets.InventoryBack4 = back;
     }
 
-    private void HookFavoriteRecipe(On_Main.orig_HoverOverCraftingItemButton orig, int recipeIndex) {
-        if (Configs.BetterGuide.UnknownDisplay && Guide.IsUnknown(Main.availableRecipe[recipeIndex])) PlaceholderItem.hideTooltip = true;
-        
-        if (!Configs.BetterGuide.FavoritedRecipes || PlaceholderItem.hideTooltip) {
+    private void HookFavoriteRecipe(On_Main.orig_HoverOverCraftingItemButton orig, int recipeIndex) {   
+        if (!Configs.BetterGuide.FavoritedRecipes || GuideUnknownDisplay.IsUnknown(Main.recipe[Main.availableRecipe[recipeIndex]].createItem)) {
             orig(recipeIndex);
             return;
         }

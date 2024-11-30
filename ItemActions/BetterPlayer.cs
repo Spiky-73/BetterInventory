@@ -64,10 +64,6 @@ public sealed class BetterPlayer : ModPlayer {
         DisplaySpicWarning();
     }
 
-    public override void ResetEffects() {
-        PlaceholderItem.hideTooltip = false;
-    }
-
     public void DisplayUpdate() {
         LocalizedLine line;
         if (Configs.Version.Instance.lastPlayedVersion.Length == 0) line = new(Language.GetText($"{Localization.Keys.Chat}.Download"));

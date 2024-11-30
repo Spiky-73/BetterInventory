@@ -68,12 +68,8 @@ public sealed class QuickSearch : ILoadable {
             if(catalogue.Enabled && catalogue.Keybind.JustPressed) {
                 if (Configs.QuickSearch.Value.individualKeybinds.Key.HasFlag(Configs.SearchAction.Search) && !Main.HoverItem.IsAir) {
                     catalogue.Toggle(true);
-                    if (!PlaceholderItem.hideTooltip) {
-                        catalogue.Search(Main.HoverItem);
-                        SoundEngine.PlaySound(SoundID.Grab); 
-                    } else {
-                        SoundEngine.PlaySound(SoundID.MenuTick); 
-                    }
+                    catalogue.Search(Main.HoverItem);
+                    SoundEngine.PlaySound(SoundID.Grab); 
                 } else if (Configs.QuickSearch.Value.individualKeybinds.Key.HasFlag(Configs.SearchAction.Toggle)) {
                     catalogue.Toggle();
                     SoundEngine.PlaySound(SoundID.MenuTick);
@@ -102,7 +98,7 @@ public sealed class QuickSearch : ILoadable {
                 if (Configs.QuickSearch.Value.sharedKeybind.Key.HasFlag(Configs.SearchAction.Search) && !s_sharedItem.IsAir) {
                     if (!first) s_enabledProviders[last].Toggle(false);
                     s_enabledProviders[s_taps].Toggle(true);
-                    if (!PlaceholderItem.hideTooltip) s_enabledProviders[s_taps].Search(s_sharedItem);
+                    if (!GuideUnknownDisplay.IsUnknown(s_sharedItem)) s_enabledProviders[s_taps].Search(s_sharedItem);
                     SoundEngine.PlaySound(SoundID.Grab);
                 } else if (Configs.QuickSearch.Value.sharedKeybind.Key.HasFlag(Configs.SearchAction.Toggle)) {
                     if (first) s_enabledProviders[s_taps].Toggle();

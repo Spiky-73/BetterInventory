@@ -15,7 +15,7 @@ public sealed class VisibilityFilters {
         set => SetFlag(CurrentVisibility, value);
     }
 
-    public bool IsKnownRecipe(Recipe recipe) {
+    public bool IsRecipeKnown(Recipe recipe) {
         if (HasOwnedItem(recipe.createItem) || recipe.requiredItem.Exists(i => HasOwnedItem(i))) return true;
         foreach (int group in recipe.acceptedGroups) {
             foreach (int type in RecipeGroup.recipeGroups[group].ValidItems) {
