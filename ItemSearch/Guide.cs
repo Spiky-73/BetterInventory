@@ -20,7 +20,7 @@ public sealed partial class Guide : ModSystem {
     public override void Load() {
         On_Recipe.CollectGuideRecipes += HookCollectGuideRecipes;
         
-        On_ItemSlot.OverrideLeftClick += HookOverrideLeftClick;
+        // On_ItemSlot.OverrideLeftClick += HookOverrideLeftClick;
         
         IL_Recipe.CollectGuideRecipes += static il => {
             if (!il.ApplyTo(ILGuideRecipeOrder, Configs.BetterGuide.RecipeOrdering)) Configs.UnloadedItemSearch.Value.GuideRecipeOrdering = true;
@@ -54,10 +54,11 @@ public sealed partial class Guide : ModSystem {
         if (context != ContextID.GuideItem || !Configs.BetterGuide.Enabled) return orig(inv, context, slot);
 
         // Auto open recipe list
+        // TODO config and feature
         if (!Main.mouseItem.IsAir && ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) == 0) Main.recBigList = true;
 
         bool res = orig(inv, context, slot);
-        if (res || !Configs.BetterGuide.GuideTile || slot != 1 || !inv[slot].IsAir || GuideGuideTile.FitsCraftingTile(Main.mouseItem)) return res;
+        if (res || !Configs.BetterGuide.GuideTile || slot != 1 || !inv[slot].IsAir || GuideGuideTile.FitsGuideTile(Main.mouseItem)) return res;
 
         // Allow by hand when clicking on guideTile
         inv[slot] = PlaceholderItem.FromTile(PlaceholderItem.ByHandTile);

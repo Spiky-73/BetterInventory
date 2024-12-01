@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using BetterInventory.Crafting.UI;
 using BetterInventory.ItemSearch;
 using MonoMod.Cil;
@@ -14,6 +15,21 @@ using ContextID = Terraria.UI.ItemSlot.Context;
 
 namespace BetterInventory.Default.Catalogues;
 
+
+public sealed class RecipeListFakeItemContext : IFakeItemContext {
+    public bool IsFake(Item item) => true;
+
+    public bool IsHovered(Item[] inv, int context, int slot) => RecipeList.Instance.Enabled && context == ContextID.GuideItem;
+
+    public bool WouldMoveToContext(Item[] inv, int context, int slot, [MaybeNullWhen(false)] out Item destination) {
+        destination = null;
+        if (!RecipeList.Instance.Enabled || !Main.InGuideCraftMenu || Main.cursorOverride != CursorOverrideID.InventoryToChest) return false;
+        destination = GuideGuideTile.GetGuideContextDestination(inv[slot], out _);
+        return true;
+    }
+}
+
+
 public sealed class RecipeList : ModEntityCatalogue {
 
     public static RecipeList Instance = null!;
@@ -23,13 +39,15 @@ public sealed class RecipeList : ModEntityCatalogue {
     public override void Load() {
         Keybind = KeybindLoader.RegisterKeybind(Mod, Name, "Mouse1");
 
-        On_ItemSlot.RightClick_ItemArray_int_int += HookRightClickHistory;
         On_ItemSlot.LeftClick_ItemArray_int_int += HookLeftClick;
+        // On_ItemSlot.RightClick_ItemArray_int_int += HookRightClickHistory;
 
         On_Player.dropItemCheck += HookDropItems;
         IL_Main.DrawInventory += il => {
             if (!il.ApplyTo(ILForceGuideDisplay, Enabled)) Configs.UnloadedItemSearch.Value.recipeList = true;
         };
+
+        PlaceholderItem.AddFakeItemContext(new RecipeListFakeItemContext());
     }
 
     public override void Unload() {
@@ -95,7 +113,15 @@ public sealed class RecipeList : ModEntityCatalogue {
         }
     }
 
-    public override void Search(Item item) => Search(item, -1);
+    public override void Search(Item item) {
+        (bool inGuide, Main.InGuideCraftMenu) = (Main.InGuideCraftMenu, true);
+        (int cursor, Main.cursorOverride) = (Main.cursorOverride, CursorOverrideID.InventoryToChest);
+        (bool left, Main.mouseLeft, bool rel, Main.mouseLeftRelease) = (Main.mouseLeft, true, Main.mouseLeftRelease, true);
+        ItemSlot.LeftClick([item], 0);
+        Main.InGuideCraftMenu = inGuide;
+        Main.cursorOverride = cursor;
+        (Main.mouseLeft, Main.mouseLeftRelease) = (left, rel);
+    }
     public static void Search(Item item, int slot = -1) {
         (Item mouse, Main.mouseItem) = (Main.mouseItem, item);
         (int cursor, Main.cursorOverride) = (Main.cursorOverride, 0);
@@ -145,6 +171,7 @@ public sealed class RecipeList : ModEntityCatalogue {
         }
     }
 
+    // TODO call
     public static void UpdateGuide() {
         if (Bestiary.Instance.Enabled && (Main.guideItem.stack > 1 || Main.guideItem.prefix != 0)) {
             (Item item, Main.guideItem) = (Main.guideItem, new(Main.guideItem.type));
@@ -157,18 +184,29 @@ public sealed class RecipeList : ModEntityCatalogue {
     }
 
     private static void HookLeftClick(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
-        if (!Instance.Enabled || context != ContextID.GuideItem || !(Main.mouseLeft && Main.mouseLeftRelease)) {
+        if (!Instance.Enabled || !(Main.mouseLeft && Main.mouseLeftRelease)) {
             orig(inv, context, slot);
             return;
         }
 
-        if (Configs.QuickSearch.RightClick && Configs.QuickSearch.Value.rightClick == Configs.RightClickAction.SearchPrevious && !PlaceholderHelper.AreSame(Main.mouseItem, inv[slot])) _guideHistory[slot].Add(inv[slot].Clone());
+        if(Main.InGuideCraftMenu && Main.cursorOverride == CursorOverrideID.InventoryToChest) {
+            Item item = inv[slot].Clone();
+            item.stack = 1;
+            orig([item], context, 0);
+            return;
+        }
 
-        // Moves a fake item instead of the real one
-        (Item mouse, Main.mouseItem) = (Main.mouseItem, Main.mouseItem.Clone());
-        Main.mouseItem.stack = 1;
+        // TODO auto open recipe list
+        if(context == ContextID.GuideItem && Main.cursorOverride <= CursorOverrideID.DefaultCursor && !Main.mouseItem.IsAir && ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) == 0) {
+            inv[slot] = Main.mouseItem.Clone();
+            inv[slot].stack = 1;
+            SoundEngine.PlaySound(SoundID.Grab);
+            return;
+        }
+
+        // if (Configs.QuickSearch.RightClick && Configs.QuickSearch.Value.rightClick == Configs.RightClickAction.SearchPrevious && !PlaceholderHelper.AreSame(Main.mouseItem, inv[slot])) _guideHistory[slot].Add(inv[slot].Clone());
+        
         orig(inv, context, slot);
-        Main.mouseItem = mouse;
     }
 
     private static void HookRightClickHistory(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {

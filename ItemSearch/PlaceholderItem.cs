@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using BetterInventory.Default.Catalogues;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SpikysLib;
@@ -24,7 +24,7 @@ public sealed class PlaceholderItem : GlobalItem {
     public override void Load() {
         On_ItemSlot.DrawItemIcon += HookDrawPlaceholder;
         MonoModHooks.Add(typeof(ItemLoader).GetMethod(nameof(ItemLoader.ModifyTooltips)), HookPlaceholderTooltip);
-        On_ItemSlot.OverrideLeftClick += HookFakeItemLeftClick;
+        On_ItemSlot.LeftClick_ItemArray_int_int += HookFakeItemClick;
 
         ConditionItems["Conditions.NearWater"] = ItemID.WaterBucket;
         ConditionItems["Conditions.NearLava"] = ItemID.LavaBucket;
@@ -34,6 +34,7 @@ public sealed class PlaceholderItem : GlobalItem {
     }
     public override void Unload() {
         ConditionItems.Clear();
+        _fakeContexts.Clear();
     }
 
     public sealed override bool CanStack(Item destination, Item source) => CanPlaceholderStack(source);
@@ -108,21 +109,38 @@ public sealed class PlaceholderItem : GlobalItem {
     public const int ByHandTile = -2;
     public static readonly Dictionary<string, int> ConditionItems = []; // description -> id
 
-    public static bool IsFakeItem(Item[] inv, int context, int slot) => context == ItemSlot.Context.GuideItem && !inv[slot].IsAir && (RecipeList.Instance.Enabled || inv[slot].IsAPlaceholder());
     public static bool OverrideHover(Item[] inv, int context, int slot) {
-        if(!IsFakeItem(inv, context, slot)) return false;
+        if(inv[slot].IsAir) return false;
+        if(!_fakeContexts.Exists(f => f.IsHovered(inv, context, slot) && f.IsFake(inv[slot]))) return false;
         if (Main.mouseItem.IsAir || ItemSlot.ShiftInUse || ItemSlot.ControlInUse) Main.cursorOverride = CursorOverrideID.TrashCan;
         if (ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) == -1) Main.cursorOverride = CursorOverrideID.TrashCan;
         return true;
     }
 
-    private static bool HookFakeItemLeftClick(On_ItemSlot.orig_OverrideLeftClick orig, Item[] inv, int context, int slot) {
-        if (!IsFakeItem(inv, context, slot)) return orig(inv, context, slot);
-        inv[slot].TurnToAir();
-        Recipe.FindRecipes();
-        SoundEngine.PlaySound(SoundID.Grab);
-        return Main.cursorOverride > CursorOverrideID.DefaultCursor;
+    private void HookFakeItemClick(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
+        if (inv[slot].IsAir || !(Main.mouseLeftRelease && Main.mouseLeft) && !Main.mouseRight) {
+            orig(inv, context, slot);
+            return;
+        }
+        if (_fakeContexts.Exists(f => f.IsHovered(inv, context, slot) && f.IsFake(inv[slot]))) {
+            inv[slot].TurnToAir();
+            if(Main.cursorOverride > CursorOverrideID.DefaultCursor) {
+                SoundEngine.PlaySound(SoundID.Grab);
+                Recipe.FindRecipes();
+                return;
+            }
+        } else {
+            foreach (var fakeContext in _fakeContexts) {
+                if (!fakeContext.WouldMoveToContext(inv, context, slot, out Item? destination) || destination.IsAir || !fakeContext.IsFake(destination)) continue;
+                destination.TurnToAir();
+                break;
+            }
+        }
+        orig(inv, context, slot);
     }
+
+    public static void AddFakeItemContext(IFakeItemContext context) => _fakeContexts.Add(context);
+    private readonly static List<IFakeItemContext> _fakeContexts = [];
 }
 
 public static class PlaceholderHelper {
@@ -136,4 +154,10 @@ public static class PlaceholderHelper {
         if (a.condition is not null) return a.condition == b.condition;
         return true;
     }
+}
+
+public interface IFakeItemContext {
+    bool IsHovered(Item[] inv, int context, int slot);
+    bool WouldMoveToContext(Item[] inv, int context, int slot, [MaybeNullWhen(false)] out Item destination);
+    bool IsFake(Item item);
 }

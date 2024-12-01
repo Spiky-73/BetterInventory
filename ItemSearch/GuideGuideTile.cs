@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Xna.Framework;
 using MonoMod.Cil;
 using SpikysLib;
 using Terraria;
+using Terraria.Audio;
 using Terraria.GameContent;
 using Terraria.GameInput;
 using Terraria.ID;
@@ -11,10 +13,32 @@ using Terraria.ModLoader.IO;
 using Terraria.UI;
 using ContextID = Terraria.UI.ItemSlot.Context;
 
-// BUG items not counted when manually placing items into guide slots
 namespace BetterInventory.ItemSearch;
 
+public sealed class GuideTileFakeItemContext : IFakeItemContext {
+    public bool IsFake(Item item) => item.IsAPlaceholder();
+
+    public bool IsHovered(Item[] inv, int context, int slot) => Configs.BetterGuide.GuideTile && context == ContextID.GuideItem && slot == 1;
+
+    public bool WouldMoveToContext(Item[] inv, int context, int slot, [MaybeNullWhen(false)] out Item destination) {
+        destination = null;
+        if(!Configs.BetterGuide.GuideTile || !Main.InGuideCraftMenu || Main.cursorOverride != CursorOverrideID.InventoryToChest) return false;
+        destination = GuideGuideTile.GetGuideContextDestination(inv[slot], out var guideSlot);
+        return guideSlot == 1;
+    }
+}
+
 public sealed class GuideGuideTile : ModPlayer {
+
+    public static ref Item GetGuideContextDestination(Item item, out int guideSlot) {
+        guideSlot = IsCraftingStation(item) || (!Configs.BetterGuide.MoreRecipes && PlaceholderItem.ConditionItems.ContainsValue(item.type)) ? 1 : 0;
+        // if(FitsGuideTile(item)) {
+        //     if(guideSlot == 0 && PlaceholderHelper.AreSame(item, Main.guideItem)) guideSlot = 1;
+        //     else if(guideSlot == 1 && PlaceholderHelper.AreSame(item, guideTile)) guideSlot = 0;
+        // }
+        if (guideSlot == 0) return ref Main.guideItem;
+        return ref guideTile;
+    }
 
     public override void Load() {
         IL_Recipe.FindRecipes += static il => {
@@ -22,6 +46,11 @@ public sealed class GuideGuideTile : ModPlayer {
         };
         _guideTileFilters = new(() => Configs.BetterGuide.GuideTile && !guideTile.IsAir, CheckGuideTileFilter);
         GuideRecipeFiltering.AddFilter(_guideTileFilters);
+
+        On_ItemSlot.OverrideLeftClick += HookOverrideTileClick;
+        On_ItemSlot.PickItemMovementAction += HookPickItemMovementAction;
+
+        PlaceholderItem.AddFakeItemContext(new GuideTileFakeItemContext());
     }
 
     public override void Unload() {
@@ -50,6 +79,38 @@ public sealed class GuideGuideTile : ModPlayer {
     }
     public override void OnEnterWorld() {
         if (_tempGuideTile is not null) guideTile = _tempGuideTile;
+    }
+
+    private int HookPickItemMovementAction(On_ItemSlot.orig_PickItemMovementAction orig, Item[] inv, int context, int slot, Item checkItem) {
+        if(!Configs.BetterGuide.GuideTile || context != ContextID.GuideItem || slot != 1) return orig(inv, context, slot, checkItem);
+        return checkItem.IsAir || FitsGuideTile(checkItem) ? 0 : -1;
+    }
+
+    public override bool HoverSlot(Item[] inventory, int context, int slot) {
+        if(!Configs.BetterGuide.GuideTile || !ItemSlot.ShiftInUse) return false;
+        if(context == 0 && Main.InGuideCraftMenu && FitsGuideTile(inventory[slot])) {
+            Main.cursorOverride = CursorOverrideID.InventoryToChest;
+            return true;
+        }
+        return false;
+    }
+
+    private static bool HookOverrideTileClick(On_ItemSlot.orig_OverrideLeftClick orig, Item[] inv, int context, int slot) {
+        if(!Configs.BetterGuide.GuideTile) return orig(inv, context, slot);
+        if(context == ContextID.GuideItem && slot == 1 && guideTile.IsAir && (Main.mouseItem.IsAir || ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) == -1)) {
+            inv[slot] = PlaceholderItem.FromTile(PlaceholderItem.ByHandTile);
+            SoundEngine.PlaySound(SoundID.Grab);
+            return true;
+        }
+        if (Main.InGuideCraftMenu && Main.cursorOverride == CursorOverrideID.InventoryToChest) {
+            ref Item destination = ref GetGuideContextDestination(inv[slot], out var guideSlot);
+            if (guideSlot == 1) {
+                (inv[slot], destination) = (destination, inv[slot]);
+                SoundEngine.PlaySound(SoundID.Grab);
+                return true;
+            }
+        }
+        return orig(inv, context, slot);
     }
 
     internal const string GuideTileTag = "guideTile";
@@ -111,7 +172,7 @@ public sealed class GuideGuideTile : ModPlayer {
     private static GuideRecipeFilterGroup _guideTileFilters = null!;
 
 
-    public static bool FitsCraftingTile(Item item) => IsCraftingStation(item) || PlaceholderItem.ConditionItems.ContainsValue(item.type);
+    public static bool FitsGuideTile(Item item) => IsCraftingStation(item) || PlaceholderItem.ConditionItems.ContainsValue(item.type);
     public static bool IsCraftingStation(Item item) => CraftingStationsItems.ContainsKey(item.createTile) || item.IsAPlaceholder();
 
     public static readonly Dictionary<int, int> CraftingStationsItems = []; // tile -> item
