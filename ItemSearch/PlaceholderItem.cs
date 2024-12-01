@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using BetterInventory.Default.Catalogues;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SpikysLib;
@@ -118,7 +119,7 @@ public sealed class PlaceholderItem : GlobalItem {
     }
 
     private void HookFakeItemClick(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
-        if (inv[slot].IsAir || !(Main.mouseLeftRelease && Main.mouseLeft) && !Main.mouseRight) {
+        if (inv[slot].IsAir || !(Main.mouseLeftRelease && Main.mouseLeft || (Main.mouseRight && !(RecipeList.Instance.Enabled && Configs.QuickSearch.RightClick)))) {
             orig(inv, context, slot);
             return;
         }
