@@ -196,14 +196,13 @@ public sealed class RecipeList : ModEntityCatalogue {
             return;
         }
 
-        // TODO auto open recipe list
         if(context == ContextID.GuideItem && Main.cursorOverride <= CursorOverrideID.DefaultCursor && !Main.mouseItem.IsAir && ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) == 0) {
-            inv[slot] = Main.mouseItem.Clone();
-            inv[slot].stack = 1;
-            SoundEngine.PlaySound(SoundID.Grab);
+            (Item mouse, Main.mouseItem) = (Main.mouseItem, Main.mouseItem.Clone());
+            Main.mouseItem.stack = 1;
+            orig(inv, context, slot);
+            Main.mouseItem = mouse;
             return;
         }
-
         // if (Configs.QuickSearch.RightClick && Configs.QuickSearch.Value.rightClick == Configs.RightClickAction.SearchPrevious && !PlaceholderHelper.AreSame(Main.mouseItem, inv[slot])) _guideHistory[slot].Add(inv[slot].Clone());
         
         orig(inv, context, slot);
