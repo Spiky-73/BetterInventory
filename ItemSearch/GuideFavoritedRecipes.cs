@@ -133,3 +133,5 @@ public sealed class UnfavoriteOnCraft : GlobalItem {
             localPlayer.ResetRecipeState(recipe);
     }
 }
+
+public record class TextureHighlight(Asset<Texture2D> Default, Asset<Texture2D> Highlight);

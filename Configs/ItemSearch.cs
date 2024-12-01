@@ -47,6 +47,7 @@ public sealed class BetterGuide {
     [DefaultValue(true)] public bool moreRecipes = true;
     [DefaultValue(true)] public bool craftingStation = true;
     [DefaultValue(true)] public bool conditionsDisplay = true;
+    [DefaultValue(true)] public bool autoOpenList = true;
     [DefaultValue(Configs.UnknownDisplay.Unknown)] public UnknownDisplay unknownDisplay = Configs.UnknownDisplay.Unknown;
 
     public static bool Enabled => ItemSearch.Instance.betterGuide;
@@ -55,6 +56,7 @@ public sealed class BetterGuide {
     public static bool FavoritedRecipes => Enabled && Value.favoritedRecipes && !UnloadedItemSearch.Value.guideFavorited && !UnloadedItemSearch.Value.guideRecipeFiltering && !UnloadedItemSearch.Value.guideAvailableRecipes;
     public static bool CraftInMenu => Enabled && Value.craftInMenu && !UnloadedItemSearch.Value.guideCraftInMenu && !UnloadedItemSearch.Value.guideRecipeFiltering && !UnloadedItemSearch.Value.guideAvailableRecipes;
     public static bool GuideTile => Enabled && Value.craftingStation && !UnloadedItemSearch.Value.guideTile && !UnloadedItemSearch.Value.guideRecipeFiltering;
+    public static bool AutoOpenList => Enabled && Value.autoOpenList;
     public static bool UnknownDisplay => Enabled && Value.unknownDisplay > Configs.UnknownDisplay.Vanilla && !UnloadedItemSearch.Value.guideUnknown && !UnloadedItemSearch.Value.guideRecipeFiltering;
 
     public static bool AvailableRecipes => FavoritedRecipes || CraftInMenu;

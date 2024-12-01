@@ -130,7 +130,7 @@ public sealed class GuideGuideTile : ModPlayer {
         float x = inventoryX + TextureAssets.InventoryBack.Width() * Main.inventoryScale * (1 + GuideRequiredObjectsDisplay.TileSpacingRatio);
         float y = inventoryY;
         Main.inventoryScale *= GuideRequiredObjectsDisplay.TileScale;
-        Item[] items = Guide.GuideItems;
+        Item[] items = GuideItems;
 
         // Handle Mouse hover
         Rectangle hitbox = new((int)x, (int)y, (int)(TextureAssets.InventoryBack.Width() * Main.inventoryScale), (int)(TextureAssets.InventoryBack.Height() * Main.inventoryScale));
@@ -139,11 +139,11 @@ public sealed class GuideGuideTile : ModPlayer {
             Main.craftingHide = true;
             ItemSlot.OverrideHover(items, ContextID.GuideItem, 1);
             ItemSlot.LeftClick(items, ContextID.GuideItem, 1);
-            Guide.GuideItems = items; // Update items if changed
+            GuideItems = items; // Update items if changed
             if (Main.mouseLeftRelease && Main.mouseLeft) Recipe.FindRecipes();
             ItemSlot.RightClick(items, ContextID.GuideItem, 1);
             ItemSlot.MouseHover(items, ContextID.GuideItem, 1);
-            Guide.GuideItems = items; // Update items if changed
+            GuideItems = items; // Update items if changed
         }
         ItemSlot.Draw(Main.spriteBatch, items, ContextID.GuideItem, 1, hitbox.TopLeft());
         Main.inventoryScale /= GuideRequiredObjectsDisplay.TileScale;
@@ -177,4 +177,13 @@ public sealed class GuideGuideTile : ModPlayer {
 
     public static readonly Dictionary<int, int> CraftingStationsItems = []; // tile -> item
     internal Item? _tempGuideTile;
+
+    public static Item[] GuideItems {
+        get {
+            (s_guideItems[0], s_guideItems[1]) = (Main.guideItem, guideTile);
+            return s_guideItems;
+        }
+        set => (Main.guideItem, guideTile) = (value[0], value[1]);
+    }
+    private static readonly Item[] s_guideItems = new Item[2];
 }

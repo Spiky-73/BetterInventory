@@ -763,6 +763,11 @@ BetterGuide: {
 			{$Mods.BetterInventory.Configs.UnknownDisplay.Known.Label}: Displayed as discovered.
 			'''
 	}
+
+	AutoOpenList: {
+		Label: Auto Open Recipe List
+		Tooltip: Automatically opens the recipe list when talking to the guide or searching an item
+	}
 }
 
 FavoritedRecipes: {
