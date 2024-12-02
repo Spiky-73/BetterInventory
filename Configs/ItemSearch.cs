@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.Serialization;
+using BetterInventory.Default.Catalogues;
 using BetterInventory.ItemSearch;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -35,7 +36,11 @@ public sealed class ItemSearch : ModConfig {
     public override ConfigScope Mode => ConfigScope.ClientSide;
 
     public override void OnChanged() {
-        if (!Main.gameMenu) Utility.FindDisplayedRecipes();
+        if (!Main.gameMenu) {
+            Utility.FindDisplayedRecipes();
+            RecipeList.UpdateGuide();
+        }
+
     }
 }
 

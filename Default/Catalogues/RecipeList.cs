@@ -41,7 +41,6 @@ public sealed class RecipeList : ModEntityCatalogue {
         On_ItemSlot.LeftClick_ItemArray_int_int += HookLeftClick;
         On_ItemSlot.RightClick_ItemArray_int_int += HookRightClickHistory;
 
-        On_Player.dropItemCheck += HookDropItems;
         IL_Main.DrawInventory += il => {
             if (!il.ApplyTo(ILForceGuideDisplay, Enabled)) Configs.UnloadedItemSearch.Value.recipeList = true;
         };
@@ -154,7 +153,6 @@ public sealed class RecipeList : ModEntityCatalogue {
         Recipe.FindRecipes();
     }
 
-    // TODO call
     public static void UpdateGuide() {
         if (Bestiary.Instance.Enabled && (Main.guideItem.stack > 1 || Main.guideItem.prefix != 0)) {
             (Item item, Main.guideItem) = (Main.guideItem, new(Main.guideItem.type));
@@ -200,19 +198,6 @@ public sealed class RecipeList : ModEntityCatalogue {
         }
         if (!Main.mouseRightRelease) return;
         SearchPrevious(inv, context, slot);
-    }
-
-    private static void HookDropItems(On_Player.orig_dropItemCheck orig, Player self) {
-        if (!Instance.Enabled) {
-            orig(self);
-            GuideGuideTile.dropGuideTileCheck(self);
-            return;
-        }
-        bool old = Main.InGuideCraftMenu;
-        Main.InGuideCraftMenu = true;
-        orig(self);
-        GuideGuideTile.dropGuideTileCheck(self);
-        Main.InGuideCraftMenu = old;
     }
 
     internal static void OnRecipeUIInit(RecipeUI element) {

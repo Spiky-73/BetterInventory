@@ -127,7 +127,6 @@ public sealed class GuideCraftInMenuPlayer : ModPlayer {
         });
     }
 
-    // TODO make independent
     public static bool ShowAllRecipes() => ((Main.InGuideCraftMenu || RecipeList.Instance.Enabled) && Configs.BetterGuide.CraftInMenu ? LocalPlayer.visibility : RecipeVisibility.Default).HasFlag(CurrentVisibilityFlag);
 
     private static Asset<Texture2D> s_inventoryTickBorder = null!;

@@ -23,7 +23,6 @@ public sealed class GuideAvailableRecipes : ILoadable {
         On_Main.HoverOverCraftingItemButton += HookDisableCraftWhenNonAvailable;
         On_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += HookDarkenNotAvailable;
 
-        // TODO make independent
         _availableRecipesFilters = new(() => Configs.BetterGuide.AvailableRecipes && !GuideCraftInMenuPlayer.ShowAllRecipes(), r => IsAvailable(r.RecipeIndex), r => GuideFavoritedRecipesPlayer.LocalPlayer.IsFavorited(r.RecipeIndex));
         GuideRecipeFiltering.AddFilter(_availableRecipesFilters);
     }

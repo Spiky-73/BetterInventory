@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using BetterInventory.Default.Catalogues;
 using Microsoft.Xna.Framework;
 using MonoMod.Cil;
 using SpikysLib;
@@ -49,6 +50,7 @@ public sealed class GuideGuideTile : ModPlayer {
 
         On_ItemSlot.OverrideLeftClick += HookOverrideTileClick;
         On_ItemSlot.PickItemMovementAction += HookPickItemMovementAction;
+        On_Player.dropItemCheck += HookDropItems;
 
         PlaceholderItem.AddFakeItemContext(new GuideTileFakeItemContext());
     }
@@ -162,6 +164,13 @@ public sealed class GuideGuideTile : ModPlayer {
             recipe.Conditions.Exists(c => PlaceholderItem.ConditionItems.TryGetValue(c.Description.Key, out int type) && type == guideTile.type);
     }
 
+    private static void HookDropItems(On_Player.orig_dropItemCheck orig, Player self) {
+        bool old = Main.InGuideCraftMenu;
+        if (RecipeList.Instance.Enabled) Main.InGuideCraftMenu = true;
+        orig(self);
+        dropGuideTileCheck(self);
+        Main.InGuideCraftMenu = old;
+    }
     public static void dropGuideTileCheck(Player self) {
         if (Main.InGuideCraftMenu || guideTile.IsAir) return;
         if (guideTile.IsAPlaceholder()) guideTile.TurnToAir();
