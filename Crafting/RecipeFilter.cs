@@ -1,8 +1,6 @@
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Content;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.UI;
 
 namespace BetterInventory.Crafting;
 
@@ -18,9 +16,7 @@ public class RecipeListEntry {
 }
 
 public interface IRecipeFilter : IEntryFilter<RecipeListEntry> {
-    Asset<Texture2D> GetSource();
-    Asset<Texture2D> GetSourceGray();
-    Rectangle GetSourceFrame();
+    UIElement GetImageGray();
 }
 
 public interface IRecipeSortStep : IEntrySortStep<RecipeListEntry> {
