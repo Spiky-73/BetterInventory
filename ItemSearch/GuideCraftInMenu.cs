@@ -63,7 +63,7 @@ public sealed class GuideCraftInMenuPlayer : ModPlayer {
         cursor.EmitLdloc(inventoryX).EmitLdloc(inventoryY);
         cursor.EmitDelegate((int x, int y) => {
             // TODO GuideTile dependency
-            if (Configs.BetterGuide.GuideTile) GuideGuideTile.DrawGuideTile(x, y);
+            if (Configs.BetterGuide.GuideTile) GuideGuideTilePlayer.DrawGuideTile(x, y);
             if (Configs.BetterGuide.CraftInMenu) DrawVisibility();
         });
     }
@@ -103,7 +103,7 @@ public sealed class GuideCraftInMenuPlayer : ModPlayer {
         // if (Main.focusRecipe == recipeIndex && ++[Main.guideItem.IsAir || <craftInMenu>]) {
         cursor.GotoNext(i => i.MatchLdsfld(Reflection.Main.guideItem));
         cursor.GotoNext(MoveType.After, i => i.MatchCallvirt(Reflection.Item.IsAir.GetMethod!));
-        cursor.EmitDelegate((bool isAir) => (isAir && (!Configs.BetterGuide.GuideTile || GuideGuideTile.guideTile.IsAir)) || Configs.BetterGuide.CraftInMenu);
+        cursor.EmitDelegate((bool isAir) => (isAir && (!Configs.BetterGuide.GuideTile || GuideGuideTilePlayer.guideTile.IsAir)) || Configs.BetterGuide.CraftInMenu);
 
         //     <craft>
         // }
@@ -122,8 +122,8 @@ public sealed class GuideCraftInMenuPlayer : ModPlayer {
         // ++ <guideTileAdj>
         cursor.EmitLdarg0();
         cursor.EmitDelegate((Player self) => {
-            if (!Configs.BetterGuide.CraftInMenu || !Configs.BetterGuide.GuideTile || RecipeList.Instance.Enabled || GuideGuideTile.guideTile.createTile < TileID.Dirt) return;
-            self.adjTile[GuideGuideTile.guideTile.createTile] = true;
+            if (!Configs.BetterGuide.CraftInMenu || !Configs.BetterGuide.GuideTile || RecipeList.Instance.Enabled || GuideGuideTilePlayer.guideTile.createTile < TileID.Dirt) return;
+            self.adjTile[GuideGuideTilePlayer.guideTile.createTile] = true;
         });
     }
 

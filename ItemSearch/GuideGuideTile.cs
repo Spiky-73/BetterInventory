@@ -24,12 +24,12 @@ public sealed class GuideTileFakeItemContext : IFakeItemContext {
     public bool WouldMoveToContext(Item[] inv, int context, int slot, [MaybeNullWhen(false)] out Item destination) {
         destination = null;
         if(!Configs.BetterGuide.GuideTile || !Main.InGuideCraftMenu || Main.cursorOverride != CursorOverrideID.InventoryToChest) return false;
-        destination = GuideGuideTile.GetGuideContextDestination(inv[slot], out var guideSlot);
+        destination = GuideGuideTilePlayer.GetGuideContextDestination(inv[slot], out var guideSlot);
         return guideSlot == 1;
     }
 }
 
-public sealed class GuideGuideTile : ModPlayer {
+public sealed class GuideGuideTilePlayer : ModPlayer {
 
     public static ref Item GetGuideContextDestination(Item item, out int guideSlot) {
         guideSlot = IsCraftingStation(item) || (!Configs.BetterGuide.MoreRecipes && PlaceholderItem.ConditionItems.ContainsValue(item.type)) ? 1 : 0;

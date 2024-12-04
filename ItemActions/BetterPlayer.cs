@@ -56,7 +56,6 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public override void OnEnterWorld() {
-        RecipeFilters ??= new();
         if (Configs.BetterGuide.AvailableRecipes) Guide.FindGuideRecipes();
 
         DisplayUpdate();
@@ -175,12 +174,11 @@ public sealed class BetterPlayer : ModPlayer {
         }
     }
     public override void SaveData(TagCompound tag) {
-        tag[RecipesTag] = RecipeFilters;
         tag[FavoritedInBanksTag] = new FavoritedInBanks(Player);
     }
 
     public override void LoadData(TagCompound tag) {
-        if (tag.TryGet(VisibilityTag, out VisibilityFilters visibility)) { // Compatibility version < v0.7.1
+        if (tag.TryGet(GuideCraftInMenuPlayer.VisibilityTag, out VisibilityFilters visibility)) { // Compatibility version < v0.7.1
             Player.GetModPlayer<GuideCraftInMenuPlayer>().visibility = (RecipeVisibility)visibility.Visibility;
             Player.GetModPlayer<GuideFavoritedRecipesPlayer>().favoritedRecipes.AddRange(visibility.FavoritedRecipes);
             Player.GetModPlayer<GuideFavoritedRecipesPlayer>().blacklistedRecipes.AddRange(visibility.BlacklistedRecipes);
@@ -188,15 +186,15 @@ public sealed class BetterPlayer : ModPlayer {
             Player.GetModPlayer<GuideUnknownDisplayPlayer>().ownedItems.AddRange(visibility.OwnedItems);
             Player.GetModPlayer<GuideUnknownDisplayPlayer>().unloadedItems.AddRange(visibility.UnloadedItems);
         }
-        if (tag.TryGet(GuideGuideTile.GuideTileTag, out Item tile)) { // Compatibility version < v0.7.1
-            Player.GetModPlayer<GuideGuideTile>()._tempGuideTile = tile;
+        if (tag.TryGet(GuideGuideTilePlayer.GuideTileTag, out Item tile)) { // Compatibility version < v0.7.1
+            Player.GetModPlayer<GuideGuideTilePlayer>()._tempGuideTile = tile;
         }
         
-        if (tag.TryGet(RecipesTag, out RecipeFilters recipe)) RecipeFilters = recipe;
+        if (tag.TryGet("recipes", out RecipeFilters recipe)) {
+            Player.GetModPlayer<RecipeFiltersPlayer>().filters = recipe.GetEnabledFilters();
+        }
         if (Configs.InventoryManagement.FavoriteInBanks && tag.TryGet(FavoritedInBanksTag, out FavoritedInBanks favorited)) favorited.Apply(Player);
     }
-
-    public RecipeFilters RecipeFilters { get; set; } = null!;
 
     private static bool s_noMousePickup;
 
@@ -212,7 +210,5 @@ public sealed class BetterPlayer : ModPlayer {
         return swapped;
     }
 
-    public const string VisibilityTag = "visibility";
-    public const string RecipesTag = "recipes";
     public const string FavoritedInBanksTag = "favorited";
 }

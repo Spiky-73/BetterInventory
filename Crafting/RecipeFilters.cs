@@ -6,7 +6,6 @@ using Terraria.ModLoader.IO;
 
 namespace BetterInventory.Crafting;
 
-// TODO save searchFilter
 public sealed class RecipeFilters {
 
     public EntryFilterer<Item, IRecipeFilter> Filterer { get; } = new();
@@ -36,15 +35,18 @@ public sealed class RecipeFilters {
         Filterer.SetSearchFilterObject(new ItemSearchFilterWrapper());
     }
 
+    public int GetEnabledFilters() {
+        int raw = 0;
+        for (int i = 0; i < Filterer.AvailableFilters.Count; i++) if (Filterer.IsFilterActive(i)) raw |= 1 << i;
+        return raw;
+    }
 }
 
 
 public sealed class RecipeFiltersSerializer : TagSerializer<RecipeFilters, int> {
 
     public override int Serialize(RecipeFilters value) {
-        int raw = 0;
-        for (int i = 0; i < value.Filterer.AvailableFilters.Count; i++) if (value.Filterer.IsFilterActive(i)) raw |= 1 << i;
-        return raw;
+        return value.GetEnabledFilters();
     }
 
     public override RecipeFilters Deserialize(int tag) {

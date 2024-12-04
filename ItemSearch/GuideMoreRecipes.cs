@@ -9,7 +9,7 @@ using ContextID = Terraria.UI.ItemSlot.Context;
 namespace BetterInventory.ItemSearch;
 
 
-public sealed class GuideMoreRecipes : ModPlayer {
+public sealed class GuideMoreRecipesPlayer : ModPlayer {
 
     public override void Load() {
         On_ItemSlot.PickItemMovementAction += HookAllowGuideItem;

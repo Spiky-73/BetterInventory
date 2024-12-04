@@ -1,37 +1,74 @@
-using BetterInventory.Crafting.UI;
+using System.Collections.Generic;
+using BetterInventory.UI.States;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using ReLogic.Content;
 using SpikysLib.IL;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.GameContent;
+using Terraria.GameContent.Creative;
 using Terraria.ModLoader;
+using Terraria.ModLoader.IO;
 using Terraria.UI;
 
 namespace BetterInventory.Crafting;
 
-// TODO re add filtering and sorting
-public sealed class RecipeFiltering : ModSystem {
-
-    private static GameTime _lastUpdateUiGameTime = null!;
-    private static UserInterface _recipeInterface = null!;
-    public static RecipeUI recipeUI = null!;
-
-    public override void UpdateUI(GameTime gameTime) {
-        _lastUpdateUiGameTime = gameTime;
-        _recipeInterface.Update(gameTime);
-    }
-
-    public static RecipeFilters LocalFilters => ItemActions.BetterPlayer.LocalPlayer.RecipeFilters;
+public sealed class RecipeFiltersPlayer : ModPlayer {
+    public static RecipeFiltersPlayer LocalPlayer => Main.LocalPlayer.GetModPlayer<RecipeFiltersPlayer>();
 
     public override void Load() {
-        On_Recipe.AddToAvailableRecipes += HookFilterAddedRecipe;
+        List<(IItemEntryFilter, int)> filters = [
+            (new ItemFilters.Weapon(), 0),
+            (new ItemFilters.Armor(), 2),
+            (new ItemFilters.Vanity(), 8),
+            (new ItemFilters.BuildingBlock(), 4),
+            (new ItemFilters.Furniture(), 7),
+            (new ItemFilters.Accessories(), 1),
+            (new ItemFilters.MiscAccessories(), 9),
+            (new ItemFilters.Consumables(), 3),
+            (new ItemFilters.Tools(), 6),
+            (new ItemFilters.Materials(), 10)
+        ];
+        List<IRecipeFilter> allFilters = [];
+        foreach (var (f, i) in filters) allFilters.Add(new ItemFilterWrapper(f, i));
+        RecipeFiltering.Filterer.AddFilters(allFilters);
+    }
+
+    public override void SaveData(TagCompound tag) {
+        filters = 0;
+        for (int i = 0; i < RecipeFiltering.Filterer.AvailableFilters.Count; i++) if (RecipeFiltering.Filterer.IsFilterActive(i)) filters |= 1 << i;
+        if (filters != 0) tag[FiltersTag] = filters;
+        var searchFilter = Reflection.EntryFilterer<Item, IRecipeFilter>._searchFilter.GetValue(RecipeFiltering.Filterer);
+        string? search = searchFilter is ItemSearchFilterWrapper wrapper ? Reflection.ItemFilters.BySearch._search.GetValue(wrapper.Filter) : null;
+        if (search is not null) tag[SearchTag] = search;
+    }
+    public override void LoadData(TagCompound tag) {
+        if (tag.TryGet(FiltersTag, out int filters)) this.filters = filters;
+        if (tag.TryGet(SearchTag, out string search)) this.search = search;
+    }
+
+    public override void OnEnterWorld() {
+        RecipeFiltering.Filterer.ActiveFilters.Clear();
+        for (int i = 0; i < RecipeFiltering.Filterer.AvailableFilters.Count; i++) if ((filters & (1 << i)) != 0) RecipeFiltering.Filterer.ToggleFilter(i);
+        RecipeFiltering.Filterer.SetSearchFilter(search);
+    }
+
+    public int filters;
+    public string? search;
+
+    public const string FiltersTag = "filters";
+    public const string SearchTag = "search";
+    public const string SortTag = "sort";
+}
+
+// TODO sorting
+public sealed class RecipeFiltering : ModSystem {
+
+    public override void Load() {
         IL_Main.DrawInventory += static il => {
             if (!il.ApplyTo(ILDrawUI, Configs.Crafting.RecipeUI)) Configs.UnloadedCrafting.Value.RecipeUI = true;
-        };
-        IL_Recipe.CollectGuideRecipes += static il => {
-            if (!il.ApplyTo(ILForceAddToAvailable, Configs.Crafting.RecipeUI)) Configs.UnloadedCrafting.Value.RecipeUI = true;
         };
 
         recipeFilters = Mod.Assets.Request<Texture2D>($"Assets/Recipe_Filters");
@@ -41,6 +78,15 @@ public sealed class RecipeFiltering : ModSystem {
         recipeUI.Activate();
         _recipeInterface = new();
         _recipeInterface.SetState(recipeUI);
+        
+        On_Recipe.FindRecipes += HookFilterRecipes;
+        On_Recipe.ClearAvailableRecipes += HookClearAvailableRecipes;
+
+        Filterer.SetSearchFilterObject(new ItemSearchFilterWrapper());
+    }
+
+    public override void PostSetupRecipes() {
+        Filterer.AvailableFilters.Add(new ItemMiscFallbackWrapper(Filterer.AvailableFilters));
     }
 
     private static void ILDrawUI(ILContext il) {
@@ -48,7 +94,7 @@ public sealed class RecipeFiltering : ModSystem {
 
         // BetterGameUI Compatibility
         int screenY = 13;
-        if(cursor.TryGotoNext(i => i.SaferMatchCallvirt(Reflection.AccessorySlotLoader.DrawAccSlots))) {
+        if (cursor.TryGotoNext(i => i.SaferMatchCallvirt(Reflection.AccessorySlotLoader.DrawAccSlots))) {
             cursor.GotoNext(i => i.MatchLdsfld(Reflection.Main.screenHeight));
             cursor.GotoNextLoc(out screenY, i => true, 13);
         }
@@ -60,7 +106,7 @@ public sealed class RecipeFiltering : ModSystem {
         //     ++<drawFilters>
         cursor.EmitLdloc(screenY); // int num54
         cursor.EmitDelegate((int y) => {
-            if (Configs.Crafting.RecipeUI && LocalFilters.AllRecipes != 0) DrawRecipeUI(94, 450 + y);
+            if (Configs.Crafting.RecipeUI && UnfilteredCount != 0) DrawRecipeUI(94, 450 + y);
         });
 
         //     ...
@@ -76,67 +122,64 @@ public sealed class RecipeFiltering : ModSystem {
         //     }
     }
 
-    public static void DrawRecipeUI(int hammerX, int hammerY){
+    public static void DrawRecipeUI(int hammerX, int hammerY) {
         recipeUI.container.Top.Pixels = hammerY + TextureAssets.CraftToggle[0].Height() - TextureAssets.InfoIcon[0].Width() / 2;
         recipeUI.container.Left.Pixels = hammerX - TextureAssets.InfoIcon[0].Width() - 1;
-
-        if (_needsFilterRefresh) {
-            recipeUI.RebuildRecipeGrid();
-            _needsFilterRefresh = false;
-        }
         _recipeInterface.Draw(Main.spriteBatch, _lastUpdateUiGameTime);
     }
 
-    public static void ClearFilters() {
-        LocalFilters.AllRecipes = 0;
-        LocalFilters.RecipeInFilter.Clear();
-        for (int i = 0; i < LocalFilters.Filterer.AvailableFilters.Count; i++) LocalFilters.RecipeInFilter.Add(0);
+
+    public override void UpdateUI(GameTime gameTime) {
+        _lastUpdateUiGameTime = gameTime;
+        _recipeInterface.Update(gameTime);
     }
 
-    private static void ILForceAddToAvailable(ILContext il) {
-        ILCursor cursor = new(il);
-
-        Utility.GotoRecipeDisabled(cursor, out ILLabel endLoop, out int index, out _);
-
-        //     for(<material>) {
-        cursor.GotoNext(MoveType.AfterLabel, i => i.MatchLdsfld(Reflection.Main.availableRecipe));
-
-        //         if(<recipeOk> ++[&& !custom]) {
-        cursor.EmitLdloc(index);
-        cursor.EmitDelegate((int r) => {
-            if (!Configs.RecipeFilters.Enabled) return false;
-            Reflection.Recipe.AddToAvailableRecipes.Invoke(r);
-            return true;
-        });
-        cursor.EmitBrtrue(endLoop!);
-
-        //             Main.availableRecipe[Main.numAvailableRecipes] = i;
-        //             Main.numAvailableRecipes++;
-        //             break;
-        //         }
-        //     }
-        // }
+    private void HookClearAvailableRecipes(On_Recipe.orig_ClearAvailableRecipes orig) {
+        orig();
+        UnfilteredCount = 0;
+        RecipesPerFilter = new int[Filterer.AvailableFilters.Count];
+        _clearedDisplayed = true;
     }
+    private void HookFilterRecipes(On_Recipe.orig_FindRecipes orig, bool canDelayCheck) {
+        orig(canDelayCheck);
+        if (canDelayCheck || !_clearedDisplayed) return;
+        _clearedDisplayed = false;
+        UnfilteredCount = Main.numAvailableRecipes;
+        var recipes = FilterRecipes();
+        // SortRecipes(recipes);
+        for (int i = 0; i < Recipe.maxRecipes; i++) Main.availableRecipe[i] = 0;
+        for (int i = 0; i < recipes.Count; i++) Main.availableRecipe[i] = recipes[i].RecipeIndex;
+        Main.numAvailableRecipes = recipes.Count;
 
-    private static void HookFilterAddedRecipe(On_Recipe.orig_AddToAvailableRecipes orig, int recipeIndex) {
-        if (Configs.RecipeFilters.Enabled && !FitsFilters(recipeIndex)) return;
-        orig(recipeIndex);
+        recipeUI.RebuildRecipeGrid();
     }
-    public static bool FitsFilters(int recipe) {
-        Item item = Main.recipe[recipe].createItem;
-        var filterer = LocalFilters.Filterer;
+    private static List<Recipe> FilterRecipes() {
+        List<Recipe> recipes = [];
+        for (int r = 0; r < Main.numAvailableRecipes; r++) {
+            var recipe = Main.recipe[Main.availableRecipe[r]];
 
-        LocalFilters.AllRecipes++;
-        for (int i = 0; i < filterer.AvailableFilters.Count; i++) {
-            if (filterer.AvailableFilters[i].FitsFilter(item)) LocalFilters.RecipeInFilter[i]++;
+            for (int f = 0; f < Filterer.AvailableFilters.Count; f++) {
+                if (Filterer.AvailableFilters[f].FitsFilter(recipe.createItem)) RecipesPerFilter[f]++;
+            }
+            if (Filterer.FitsFilter(recipe.createItem)) recipes.Add(recipe);
         }
-        _needsFilterRefresh = true;
-        
-        return filterer.FitsFilter(item);
+        return recipes;
     }
+    // private static void SortRecipes(List<Recipe> recipes) {
+    //     recipes.Sort(_sorter);
+    // }
 
-    private static bool _needsFilterRefresh;
 
     internal static Asset<Texture2D> recipeFilters = null!;
     internal static Asset<Texture2D> recipeFiltersGray = null!;
+    private static GameTime _lastUpdateUiGameTime = null!;
+    private static UserInterface _recipeInterface = null!;
+    public static UI.States.RecipeFilters recipeUI = null!;
+
+
+    private static bool _clearedDisplayed;
+
+    public static int UnfilteredCount;
+    public readonly static EntryFilterer<Item, IRecipeFilter> Filterer = new();
+    public static int[] RecipesPerFilter = [];
 }

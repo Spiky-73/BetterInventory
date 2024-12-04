@@ -764,7 +764,7 @@ BetterGuide: {
 			'''
 	}
 
-	AutoOpenList: {
+	autoOpenList: {
 		Label: Auto Open Recipe List
 		Tooltip: Automatically opens the recipe list when talking to the guide or searching an item
 	}

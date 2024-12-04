@@ -1,4 +1,5 @@
 using System;
+using BetterInventory.Crafting;
 using BetterInventory.Default.Catalogues;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -11,9 +12,9 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.UI;
 
-namespace BetterInventory.Crafting.UI;
+namespace BetterInventory.UI.States;
 
-public sealed class RecipeUI : UIState {
+public sealed class RecipeFilters : UIState {
     public UIFlexList container = null!;
     public UIPanel searchPanel = null!;
     public UISearchBar searchBar = null!;
@@ -69,11 +70,11 @@ public sealed class RecipeUI : UIState {
         }
         this.filters.Clear();
 
-        EntryFilterer<Item, IRecipeFilter> filters = RecipeFiltering.LocalFilters.Filterer;
+        EntryFilterer<Item, IRecipeFilter> filters = RecipeFiltering.Filterer;
         for (int i = 0; i < filters.AvailableFilters.Count; i++) {
             IRecipeFilter filter = filters.AvailableFilters[i];
             bool active = filters.IsFilterActive(i);
-            int recipeCount = RecipeFiltering.LocalFilters.RecipeInFilter[i];
+            int recipeCount = RecipeFiltering.RecipesPerFilter[i];
             bool available = recipeCount > 0;
 
             string text = Language.GetTextValue(filter.GetDisplayNameKey());
@@ -143,7 +144,7 @@ public sealed class RecipeUI : UIState {
 
     private void OnSearchContentChange(string? content) {
         if (Main.gameMenu) return;
-        RecipeFiltering.LocalFilters.Filterer.SetSearchFilter(content);
+        RecipeFiltering.Filterer.SetSearchFilter(content);
         Utility.FindDisplayedRecipes();
     }
 }

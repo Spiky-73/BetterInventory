@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using BetterInventory.Crafting.UI;
 using BetterInventory.ItemSearch;
+using BetterInventory.UI.States;
 using MonoMod.Cil;
 using SpikysLib;
 using SpikysLib.IL;
@@ -23,7 +23,7 @@ public sealed class RecipeListFakeItemContext : IFakeItemContext {
     public bool WouldMoveToContext(Item[] inv, int context, int slot, [MaybeNullWhen(false)] out Item destination) {
         destination = null;
         if (!RecipeList.Instance.Enabled || !Main.InGuideCraftMenu || Main.cursorOverride != CursorOverrideID.InventoryToChest) return false;
-        destination = GuideGuideTile.GetGuideContextDestination(inv[slot], out _);
+        destination = GuideGuideTilePlayer.GetGuideContextDestination(inv[slot], out _);
         return true;
     }
 }
@@ -158,8 +158,8 @@ public sealed class RecipeList : ModEntityCatalogue {
             (Item item, Main.guideItem) = (Main.guideItem, new(Main.guideItem.type));
             Main.LocalPlayer.GetDropItem(ref item);
         }
-        if (Bestiary.Instance.Enabled && (GuideGuideTile.guideTile.stack > 1 || GuideGuideTile.guideTile.prefix != 0)) {
-            (Item item, GuideGuideTile.guideTile) = (GuideGuideTile.guideTile, new(GuideGuideTile.guideTile.type));
+        if (Bestiary.Instance.Enabled && (GuideGuideTilePlayer.guideTile.stack > 1 || GuideGuideTilePlayer.guideTile.prefix != 0)) {
+            (Item item, GuideGuideTilePlayer.guideTile) = (GuideGuideTilePlayer.guideTile, new(GuideGuideTilePlayer.guideTile.type));
             Main.LocalPlayer.GetDropItem(ref item);
         }
     }
@@ -173,7 +173,7 @@ public sealed class RecipeList : ModEntityCatalogue {
         if(Main.InGuideCraftMenu && Main.cursorOverride == CursorOverrideID.InventoryToChest) {
             Item item = inv[slot].Clone();
             item.stack = 1;
-            GuideGuideTile.GetGuideContextDestination(item, out var guideSlot);
+            GuideGuideTilePlayer.GetGuideContextDestination(item, out var guideSlot);
             orig([item], context, 0);
             OnGuideSlotChange(item, guideSlot);
             return;
@@ -200,7 +200,7 @@ public sealed class RecipeList : ModEntityCatalogue {
         SearchPrevious(inv, context, slot);
     }
 
-    internal static void OnRecipeUIInit(RecipeUI element) {
+    internal static void OnRecipeUIInit(RecipeFilters element) {
         var searchBar = element.searchBar;
         searchBar.Parent.OnRightClick += (_, _) => {
             if (!Instance.Enabled || !Configs.QuickSearch.RightClick) return;

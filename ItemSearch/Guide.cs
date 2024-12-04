@@ -19,6 +19,6 @@ public sealed partial class Guide : ModSystem {
 
     public override void PostAddRecipes() {
         Default.Catalogues.Bestiary.HooksBestiaryUI();
-        GuideGuideTile.FindCraftingStations();
+        GuideGuideTilePlayer.FindCraftingStations();
     }
 }
