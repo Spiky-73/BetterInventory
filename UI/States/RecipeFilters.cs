@@ -68,7 +68,7 @@ public sealed class RecipeFilters : UIState {
         }
         this.filters.Clear();
 
-        EntryFilterer<Item, IRecipeFilter> filters = RecipeFiltering.Filterer;
+        var filters = RecipeFiltering.Filterer;
         for (int i = 0; i < filters.AvailableFilters.Count; i++) {
             IRecipeFilter filter = filters.AvailableFilters[i];
             bool active = filters.IsFilterActive(i);

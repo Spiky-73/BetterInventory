@@ -39,7 +39,7 @@ public sealed class RecipeFiltersPlayer : ModPlayer {
         filters = 0;
         for (int i = 0; i < RecipeFiltering.Filterer.AvailableFilters.Count; i++) if (RecipeFiltering.Filterer.IsFilterActive(i)) filters |= 1 << i;
         if (filters != 0) tag[FiltersTag] = filters;
-        var searchFilter = Reflection.EntryFilterer<Item, IRecipeFilter>._searchFilter.GetValue(RecipeFiltering.Filterer);
+        var searchFilter = Reflection.EntryFilterer<RecipeListEntry, IRecipeFilter>._searchFilter.GetValue(RecipeFiltering.Filterer);
         string? search = searchFilter is ItemSearchFilterWrapper wrapper ? Reflection.ItemFilters.BySearch._search.GetValue(wrapper.Filter) : null;
         if (search is not null) tag[SearchTag] = search;
     }
@@ -52,6 +52,7 @@ public sealed class RecipeFiltersPlayer : ModPlayer {
         RecipeFiltering.Filterer.ActiveFilters.Clear();
         for (int i = 0; i < RecipeFiltering.Filterer.AvailableFilters.Count; i++) if ((filters & (1 << i)) != 0) RecipeFiltering.Filterer.ToggleFilter(i);
         RecipeFiltering.Filterer.SetSearchFilter(search);
+        RecipeFiltering.Sorter.SetPrioritizedStepIndex(-1);
     }
 
     public int filters;
@@ -90,7 +91,7 @@ public sealed class RecipeFiltering : ModSystem {
     }
 
     public override void PostSetupRecipes() {
-        Filterer.AvailableFilters.Add(new ItemMiscFallbackWrapper(Filterer.AvailableFilters));
+        Filterer.AvailableFilters.Add(new RecipeMiscFallback(Filterer.AvailableFilters));
     }
 
     private static void ILDrawUI(ILContext il) {
@@ -147,30 +148,38 @@ public sealed class RecipeFiltering : ModSystem {
         orig(canDelayCheck);
         if (canDelayCheck || !_clearedDisplayed) return;
         _clearedDisplayed = false;
+
         UnfilteredCount = Main.numAvailableRecipes;
+        int oldRecipe = Main.availableRecipe[Main.focusRecipe];
+        float focusY = Main.availableRecipeY[Main.focusRecipe];
+
         var recipes = FilterRecipes();
         SortRecipes(recipes);
         for (int i = 0; i < Recipe.maxRecipes; i++) Main.availableRecipe[i] = 0;
-        for (int i = 0; i < recipes.Count; i++) Main.availableRecipe[i] = recipes[i].RecipeIndex;
+        for (int i = 0; i < recipes.Count; i++) Main.availableRecipe[i] = recipes[i].Index;
         Main.numAvailableRecipes = recipes.Count;
 
+        Reflection.Recipe.TryRefocusingRecipe.Invoke(oldRecipe);
+        Reflection.Recipe.VisuallyRepositionRecipes.Invoke(focusY);
         _recipeState.RebuildRecipeGrid();
     }
-    private static List<Recipe> FilterRecipes() {
-        List<Recipe> recipes = [];
+    private static List<RecipeListEntry> FilterRecipes() {
+        List<RecipeListEntry> recipes = [];
         for (int r = 0; r < Main.numAvailableRecipes; r++) {
-            var recipe = Main.recipe[Main.availableRecipe[r]];
-
+            RecipeListEntry entry = new(Main.recipe[Main.availableRecipe[r]]);
             for (int f = 0; f < Filterer.AvailableFilters.Count; f++) {
-                if (Filterer.AvailableFilters[f].FitsFilter(recipe.createItem)) RecipesPerFilter[f]++;
+                if (Filterer.AvailableFilters[f].FitsFilter(entry)) RecipesPerFilter[f]++;
             }
-            if (Filterer.FitsFilter(recipe.createItem)) recipes.Add(recipe);
+            if (Filterer.FitsFilter(entry)) recipes.Add(entry);
         }
         return recipes;
     }
-    private static void SortRecipes(List<Recipe> recipes) {
-        //recipes.Sort(_sorter);
+    private static void SortRecipes(List<RecipeListEntry> recipes) {
+        recipes.Sort(Sorter);
     }
+
+    public static void AddFilter(IRecipeFilter filter) => Filterer.AvailableFilters.Add(filter);
+    public static void AddSortStep(IRecipeSortStep step) => Sorter.Steps.Add(step);
 
     internal static Asset<Texture2D> recipeFilters = null!;
     internal static Asset<Texture2D> recipeFiltersGray = null!;
@@ -182,6 +191,7 @@ public sealed class RecipeFiltering : ModSystem {
     private static bool _clearedDisplayed;
 
     public static int UnfilteredCount;
-    public readonly static EntryFilterer<Item, IRecipeFilter> Filterer = new();
+    public readonly static EntryFilterer<RecipeListEntry, IRecipeFilter> Filterer = new();
     public static int[] RecipesPerFilter = [];
+    public readonly static EntrySorter<RecipeListEntry, IRecipeSortStep> Sorter = new();
 }

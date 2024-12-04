@@ -191,7 +191,7 @@ public sealed class BetterPlayer : ModPlayer {
         }
         
         if (tag.TryGet("recipes", out RecipeFilters recipe)) {
-            Player.GetModPlayer<RecipeFiltersPlayer>().filters = recipe.GetEnabledFilters();
+            Player.GetModPlayer<RecipeFiltersPlayer>().filters = recipe.filters;
         }
         if (Configs.InventoryManagement.FavoriteInBanks && tag.TryGet(FavoritedInBanksTag, out FavoritedInBanks favorited)) favorited.Apply(Player);
     }
