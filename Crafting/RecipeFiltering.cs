@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using BetterInventory.UI.States;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
@@ -74,15 +73,20 @@ public sealed class RecipeFiltering : ModSystem {
         recipeFilters = Mod.Assets.Request<Texture2D>($"Assets/Recipe_Filters");
         recipeFiltersGray = Mod.Assets.Request<Texture2D>($"Assets/Recipe_Filters_Gray");
 
-        recipeUI = new();
-        recipeUI.Activate();
+        _recipeState = new();
+        _recipeState.Activate();
         _recipeInterface = new();
-        _recipeInterface.SetState(recipeUI);
+        _recipeInterface.SetState(_recipeState);
         
         On_Recipe.FindRecipes += HookFilterRecipes;
         On_Recipe.ClearAvailableRecipes += HookClearAvailableRecipes;
 
         Filterer.SetSearchFilterObject(new ItemSearchFilterWrapper());
+    }
+
+    public static void OnConfigChanged() {
+        if (_recipeState?.filters is not null) _recipeState.filters.ItemsPerLine = Configs.RecipeFilters.Value.filtersPerLine;
+        if (!Main.gameMenu && _recipeState is not null) _recipeState.RebuildList();
     }
 
     public override void PostSetupRecipes() {
@@ -123,11 +127,10 @@ public sealed class RecipeFiltering : ModSystem {
     }
 
     public static void DrawRecipeUI(int hammerX, int hammerY) {
-        recipeUI.container.Top.Pixels = hammerY + TextureAssets.CraftToggle[0].Height() - TextureAssets.InfoIcon[0].Width() / 2;
-        recipeUI.container.Left.Pixels = hammerX - TextureAssets.InfoIcon[0].Width() - 1;
+        _recipeState.container.Top.Pixels = hammerY + TextureAssets.CraftToggle[0].Height() - TextureAssets.InfoIcon[0].Width() / 2;
+        _recipeState.container.Left.Pixels = hammerX - TextureAssets.InfoIcon[0].Width() - 1;
         _recipeInterface.Draw(Main.spriteBatch, _lastUpdateUiGameTime);
     }
-
 
     public override void UpdateUI(GameTime gameTime) {
         _lastUpdateUiGameTime = gameTime;
@@ -146,12 +149,12 @@ public sealed class RecipeFiltering : ModSystem {
         _clearedDisplayed = false;
         UnfilteredCount = Main.numAvailableRecipes;
         var recipes = FilterRecipes();
-        // SortRecipes(recipes);
+        SortRecipes(recipes);
         for (int i = 0; i < Recipe.maxRecipes; i++) Main.availableRecipe[i] = 0;
         for (int i = 0; i < recipes.Count; i++) Main.availableRecipe[i] = recipes[i].RecipeIndex;
         Main.numAvailableRecipes = recipes.Count;
 
-        recipeUI.RebuildRecipeGrid();
+        _recipeState.RebuildRecipeGrid();
     }
     private static List<Recipe> FilterRecipes() {
         List<Recipe> recipes = [];
@@ -165,17 +168,16 @@ public sealed class RecipeFiltering : ModSystem {
         }
         return recipes;
     }
-    // private static void SortRecipes(List<Recipe> recipes) {
-    //     recipes.Sort(_sorter);
-    // }
-
+    private static void SortRecipes(List<Recipe> recipes) {
+        //recipes.Sort(_sorter);
+    }
 
     internal static Asset<Texture2D> recipeFilters = null!;
     internal static Asset<Texture2D> recipeFiltersGray = null!;
-    private static GameTime _lastUpdateUiGameTime = null!;
-    private static UserInterface _recipeInterface = null!;
-    public static UI.States.RecipeFilters recipeUI = null!;
 
+    private static GameTime _lastUpdateUiGameTime = null!;
+    private static UI.States.RecipeFilters _recipeState = null!;
+    private static UserInterface _recipeInterface = null!;
 
     private static bool _clearedDisplayed;
 

@@ -28,8 +28,6 @@ public sealed class RecipeFilters : UIState {
 
         RebuildList();
         Append(container);
-
-        RecipeList.OnRecipeUIInit(this);
     }
 
     public void RebuildList () {
@@ -140,6 +138,7 @@ public sealed class RecipeFilters : UIState {
             SoundEngine.PlaySound(SoundID.MenuTick);
         };
         searchPanel.Append(searchCancel);
+        RecipeList.OnSearchBarInit(searchBar);
     }
 
     private void OnSearchContentChange(string? content) {

@@ -200,8 +200,7 @@ public sealed class RecipeList : ModEntityCatalogue {
         SearchPrevious(inv, context, slot);
     }
 
-    internal static void OnRecipeUIInit(RecipeFilters element) {
-        var searchBar = element.searchBar;
+    internal static void OnSearchBarInit(UISearchBar searchBar) {
         searchBar.Parent.OnRightClick += (_, _) => {
             if (!Instance.Enabled || !Configs.QuickSearch.RightClick) return;
             int count = 0;

@@ -2,7 +2,6 @@ using System.ComponentModel;
 using Terraria.ModLoader.Config;
 using SpikysLib.Configs;
 using Newtonsoft.Json;
-using Terraria;
 using BetterInventory.Crafting;
 
 namespace BetterInventory.Configs;
@@ -20,10 +19,7 @@ public sealed class Crafting : ModConfig {
     public static bool RecipeUI => Instance.recipeSearchBar || Instance.recipeFilters;
     public static Crafting Instance = null!;
 
-    public override void OnChanged() {
-        if (RecipeFiltering.recipeUI?.filters is not null) RecipeFiltering.recipeUI.filters.ItemsPerLine = RecipeFilters.Value.filtersPerLine;
-        if (!Main.gameMenu && RecipeFiltering.recipeUI is not null) RecipeFiltering.recipeUI.RebuildList();
-    }
+    public override void OnChanged() => RecipeFiltering.OnConfigChanged();
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
 }
