@@ -129,19 +129,6 @@ public sealed class BetterPlayer : ModPlayer {
         if (!Configs.ItemRightClick.Enabled || !s_noMousePickup) orig(inv, context, slot, player);
     }
 
-
-    // TODO split
-    public override IEnumerable<Item> AddMaterialsForCrafting(out ItemConsumedCallback itemConsumedCallback) {
-        List<Item> items = [];
-        Item? mat;
-        if(Main.myPlayer == Player.whoAmI && (mat = Crafting.Crafting.GetMouseMaterial()) != null) items.Add(mat);
-        itemConsumedCallback = (item, index) => {
-            if (item == Main.mouseItem) item.stack -= Reflection.RecipeLoader.ConsumedItems.GetValue()[^1].stack; // FIXME seems hacky
-            return;
-        };
-        return items;
-    }
-
     private static void HookTryOpenContainer(On_ItemSlot.orig_TryOpenContainer orig, Item item, Player player) {
         if (!Configs.ItemActions.FastContainerOpening) {
             orig(item,player);

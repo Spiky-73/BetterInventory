@@ -11,9 +11,9 @@ using Terraria.UI.Chat;
 
 namespace BetterInventory.Crafting;
 
-public sealed class Crafting : ILoadable {
+public sealed class Crafting : ModPlayer {
 
-    public void Load(Mod mod) {
+    public override void Load() {
 
         On_Recipe.ClearAvailableRecipes += HookClearAvailableRecipes;
         On_Recipe.CollectItemsToCraftWithFrom += HookCollectItems;
@@ -24,7 +24,6 @@ public sealed class Crafting : ILoadable {
             if (!il.ApplyTo(ILAvailableMaterial, Configs.AvailableMaterials.Enabled)) Configs.UnloadedCrafting.Value.availableMaterialsItemSlot = true;
         };
     }
-    public void Unload() { }
 
     private static void HookClearAvailableRecipes(On_Recipe.orig_ClearAvailableRecipes orig) {
         orig();
@@ -83,7 +82,15 @@ public sealed class Crafting : ILoadable {
         // }
     }
 
-    public static Item? GetMouseMaterial() => Configs.Crafting.MouseMaterial ? Main.mouseItem : null;
+    public override IEnumerable<Item> AddMaterialsForCrafting(out ItemConsumedCallback? itemConsumedCallback) {
+        itemConsumedCallback = null;
+        if(!Configs.Crafting.MouseMaterial || Main.myPlayer != Player.whoAmI) return [];
+        itemConsumedCallback = (item, index) => {
+            if (item == Main.mouseItem) item.stack -= Reflection.RecipeLoader.ConsumedItems.GetValue()[^1].stack; // FIXME seems hacky
+            return;
+        };
+        return [Main.mouseItem]; ;
+    }
 
     public static void AddAvailableMaterials(Item item, List<TooltipLine> tooltips) {
         if (!Configs.AvailableMaterials.Tooltip || !ShouldDisplayStack(item, item.tooltipContext, out Recipe? recipe)) return;
