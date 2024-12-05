@@ -57,7 +57,7 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public override void OnEnterWorld() {
-        if (Configs.BetterGuide.AvailableRecipes) Utility.FindDisplayedRecipes();
+        if (Configs.BetterGuide.AvailableRecipes) Recipe.FindRecipes();
 
         DisplayUpdate();
         DisplayCompatibility();
@@ -179,7 +179,7 @@ public sealed class BetterPlayer : ModPlayer {
         }
         
         if (tag.TryGet("recipes", out RecipeFilters recipe)) {
-            Player.GetModPlayer<RecipeFiltersPlayer>().filters = recipe.filters;
+            Player.GetModPlayer<RecipeUIPlayer>().filters = recipe.filters;
         }
         if (Configs.InventoryManagement.FavoriteInBanks && tag.TryGet(FavoritedInBanksTag, out FavoritedInBanks favorited)) favorited.Apply(Player);
     }

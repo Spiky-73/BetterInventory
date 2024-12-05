@@ -52,7 +52,7 @@ public sealed class FavoritedRecipesPlayer : ModPlayer {
         On_Main.HoverOverCraftingItemButton += HookFavoriteRecipe;
         On_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += HookFavoritedBackground;
 
-        Crafting.RecipeFiltering.AddSortStep(new GuideSortStep());
+        RecipeUI.AddSortStep(new GuideSortStep());
     }
 
     private static void HookFavoritedBackground(On_ItemSlot.orig_Draw_SpriteBatch_ItemArray_int_int_Vector2_Color orig, SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, Color lightColor) {
@@ -99,7 +99,7 @@ public sealed class FavoritedRecipesPlayer : ModPlayer {
         }
         orig(recipeIndex);
         if (clicked) {
-            Utility.FindDisplayedRecipes();
+            Recipe.FindRecipes();
             SoundEngine.PlaySound(SoundID.MenuTick);
             Main.mouseLeftRelease = false;
         }

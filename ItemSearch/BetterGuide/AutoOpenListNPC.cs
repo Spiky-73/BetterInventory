@@ -24,6 +24,6 @@ public sealed class AutoOpenListNPC : GlobalNPC {
         if (!Configs.BetterGuide.AutoOpenList || npc.type != NPCID.Guide) return;
         Main.InGuideCraftMenu = true;
         Main.recBigList = true;
-        Utility.FindDisplayedRecipes();
+        Recipe.FindRecipes();
     }
 }

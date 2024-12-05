@@ -103,10 +103,6 @@ public static class Utility {
         return cursor;
     }
 
-    public static void FindDisplayedRecipes() {
-        Recipe.FindRecipes();
-    }
-
     public static long GetMaterialCount(this Recipe recipe, Item item) {
         int group = recipe.acceptedGroups.FindIndex(g => RecipeGroup.recipeGroups[g].IconicItemId == item.type);
         return PlayerHelper.OwnedItems.GetValueOrDefault(group == -1 ? item.type : RecipeGroup.recipeGroups[recipe.acceptedGroups[group]].GetGroupFakeItemId());

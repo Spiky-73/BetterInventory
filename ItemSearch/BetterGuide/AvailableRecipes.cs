@@ -11,9 +11,9 @@ using Microsoft.Xna.Framework;
 
 namespace BetterInventory.ItemSearch.BetterGuide;
 
-public sealed class AvailableRecipes : ILoadable {
+public sealed class AvailableRecipes : ModSystem {
 
-    public void Load(Mod mod) {
+    public override void Load() {
         On_Recipe.FindRecipes += HookFindRecipes;
         IL_Recipe.FindRecipes += static il => {
             if (!il.ApplyTo(ILFindRecipes, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.guideAvailableRecipes = true;
@@ -26,8 +26,6 @@ public sealed class AvailableRecipes : ILoadable {
         _availableRecipesFilters = new(() => Configs.BetterGuide.AvailableRecipes && !CraftInMenuPlayer.ShowAllRecipes(), r => IsAvailable(r.RecipeIndex), r => FavoritedRecipesPlayer.LocalPlayer.IsFavorited(r.RecipeIndex));
         RecipeFiltering.AddFilter(_availableRecipesFilters);
     }
-    public void Unload() { }
-
 
     private static void HookFindRecipes(On_Recipe.orig_FindRecipes orig, bool canDelayCheck) {
         s_guideRecipes = false;
@@ -36,6 +34,17 @@ public sealed class AvailableRecipes : ILoadable {
 
     private static void ILFindRecipes(ILContext il) {
         ILCursor cursor = new(il);
+
+        // ++ goto noCLear
+        // Recipe.ClearAvailableRecipes();
+        // ++ noCLear:
+        cursor.GotoNext(MoveType.AfterLabel, i => i.MatchCall(Reflection.Recipe.ClearAvailableRecipes));
+        var skipClear = cursor.DefineLabel();
+        cursor.EmitDelegate(() => Configs.BetterGuide.AvailableRecipes);
+        cursor.EmitBrtrue(skipClear);
+        cursor.MarkLabel(skipClear); // Here in case of exception
+        cursor.GotoNext(MoveType.After, i => i.MatchCall(Reflection.Recipe.ClearAvailableRecipes));
+        cursor.MarkLabel(skipClear);
 
         // if (<displayGuideRecipes>) {
         //     ++ goto <skip>
@@ -49,7 +58,7 @@ public sealed class AvailableRecipes : ILoadable {
         cursor.GotoNext(MoveType.Before, i => i.SaferMatchCall(Reflection.Recipe.CollectGuideRecipes));
         ILLabel skipGuide = cursor.DefineLabel();
         cursor.EmitDelegate(() => {
-            if(!Configs.BetterGuide.AvailableRecipes) return false;
+            if (!Configs.BetterGuide.AvailableRecipes) return false;
             s_guideRecipes = true;
             return true;
         });
@@ -59,17 +68,6 @@ public sealed class AvailableRecipes : ILoadable {
         cursor.EmitDelegate(() => { s_availableRecipes.Clear(); s_availableCreateItems.Clear(); });
         cursor.GotoPrev(MoveType.After, i => i.MatchRet());
         cursor.MarkLabel(skipGuide);
-
-        // <availableRecipes>
-        // ++ <collectGuideRecipes>
-        // Recipe.TryRefocusingRecipe(oldRecipe);
-        // Recipe.VisuallyRepositionRecipes(focusY);
-        cursor.GotoNext(MoveType.AfterLabel, i => i.MatchCall(Reflection.Recipe.TryRefocusingRecipe));
-
-        // TODO optimize performances
-        cursor.EmitDelegate(() => {
-            if (Configs.BetterGuide.AvailableRecipes) Reflection.Recipe.CollectGuideRecipes.Invoke();
-        });
     }
 
     private static void HookCollectGuideRecipes(On_Recipe.orig_CollectGuideRecipes orig) {
@@ -92,29 +90,34 @@ public sealed class AvailableRecipes : ILoadable {
     }
 
     private void HookDarkenNotAvailable(On_ItemSlot.orig_Draw_SpriteBatch_ItemArray_int_int_Vector2_Color orig, SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, Color lightColor) {
-        if(!Configs.BetterGuide.AvailableRecipes || context != ItemSlot.Context.CraftingMaterial) {
+        if (!Configs.BetterGuide.AvailableRecipes || context != ItemSlot.Context.CraftingMaterial) {
             orig(spriteBatch, inv, context, slot, position, lightColor);
             return;
         }
         bool available;
         var focusRecipe = Main.recipe[Main.availableRecipe[Main.focusRecipe]];
-        if(focusRecipe.requiredItem.Contains(inv[slot])) { // Material
+        if (focusRecipe.requiredItem.Contains(inv[slot])) { // Material
             available = s_availableCreateItems.Contains(focusRecipe.createItem) || focusRecipe.GetMaterialCount(inv[slot]) >= inv[slot].stack;
-        } else if(inv == RequiredObjectsDisplay._displayedRecipeTiles) { // Required Tile
+        } else if (inv == RequiredObjectsDisplay._displayedRecipeTiles) { // Required Tile
             available = slot >= focusRecipe.requiredTile.Count || Main.LocalPlayer.adjTile[focusRecipe.requiredTile[slot]];
-        } else if(inv == RequiredObjectsDisplay._displayedRecipeConditions) { // Required Condition
+        } else if (inv == RequiredObjectsDisplay._displayedRecipeConditions) { // Required Condition
             available = focusRecipe.Conditions[slot].Predicate();
         } else { // Created item
             available = s_availableCreateItems.Contains(inv[slot]);
         }
         Color back = Main.inventoryBack;
-        if(!available) Main.inventoryBack.ApplyRGB(0.5f);
+        if (!available) Main.inventoryBack.ApplyRGB(0.5f);
         orig(spriteBatch, inv, context, slot, position, lightColor);
         Main.inventoryBack = back;
     }
 
     public static bool IsAvailable(int recipe) => s_availableRecipes.Contains(recipe);
     public static bool IsAvailable(Item createItem) => s_availableCreateItems.Contains(createItem);
+
+    public static void FindDisplayedRecipes() {
+        Recipe.ClearAvailableRecipes();
+        Reflection.Recipe.CollectGuideRecipes.Invoke();
+    }
 
     internal static bool s_guideRecipes;
     private static bool s_collectingGuide;

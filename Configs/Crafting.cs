@@ -2,7 +2,6 @@ using System.ComponentModel;
 using Terraria.ModLoader.Config;
 using SpikysLib.Configs;
 using Newtonsoft.Json;
-using BetterInventory.Crafting;
 
 namespace BetterInventory.Configs;
 
@@ -19,7 +18,7 @@ public sealed class Crafting : ModConfig {
     public static bool RecipeUI => Instance.recipeSearchBar || Instance.recipeFilters;
     public static Crafting Instance = null!;
 
-    public override void OnChanged() => RecipeFiltering.OnConfigChanged();
+    public override void OnChanged() => global::BetterInventory.Crafting.RecipeUI.OnConfigChanged();
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
 }

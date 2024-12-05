@@ -37,7 +37,7 @@ public sealed class ItemSearch : ModConfig {
 
     public override void OnChanged() {
         if (!Main.gameMenu) {
-            Utility.FindDisplayedRecipes();
+            Recipe.FindRecipes();
             RecipeList.UpdateGuide();
         }
 

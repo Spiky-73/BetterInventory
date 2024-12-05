@@ -14,8 +14,8 @@ using Terraria.UI;
 
 namespace BetterInventory.Crafting;
 
-public sealed class RecipeFiltersPlayer : ModPlayer {
-    public static RecipeFiltersPlayer LocalPlayer => Main.LocalPlayer.GetModPlayer<RecipeFiltersPlayer>();
+public sealed class RecipeUIPlayer : ModPlayer {
+    public static RecipeUIPlayer LocalPlayer => Main.LocalPlayer.GetModPlayer<RecipeUIPlayer>();
 
     public override void Load() {
         List<(IItemEntryFilter, int)> filters = [
@@ -32,14 +32,14 @@ public sealed class RecipeFiltersPlayer : ModPlayer {
         ];
         List<IRecipeFilter> allFilters = [];
         foreach (var (f, i) in filters) allFilters.Add(new ItemFilterWrapper(f, i));
-        RecipeFiltering.Filterer.AddFilters(allFilters);
+        RecipeUI.Filterer.AddFilters(allFilters);
     }
 
     public override void SaveData(TagCompound tag) {
         filters = 0;
-        for (int i = 0; i < RecipeFiltering.Filterer.AvailableFilters.Count; i++) if (RecipeFiltering.Filterer.IsFilterActive(i)) filters |= 1 << i;
+        for (int i = 0; i < RecipeUI.Filterer.AvailableFilters.Count; i++) if (RecipeUI.Filterer.IsFilterActive(i)) filters |= 1 << i;
         if (filters != 0) tag[FiltersTag] = filters;
-        var searchFilter = Reflection.EntryFilterer<RecipeListEntry, IRecipeFilter>._searchFilter.GetValue(RecipeFiltering.Filterer);
+        var searchFilter = Reflection.EntryFilterer<RecipeListEntry, IRecipeFilter>._searchFilter.GetValue(RecipeUI.Filterer);
         string? search = searchFilter is ItemSearchFilterWrapper wrapper ? Reflection.ItemFilters.BySearch._search.GetValue(wrapper.Filter) : null;
         if (search is not null) tag[SearchTag] = search;
     }
@@ -49,10 +49,10 @@ public sealed class RecipeFiltersPlayer : ModPlayer {
     }
 
     public override void OnEnterWorld() {
-        RecipeFiltering.Filterer.ActiveFilters.Clear();
-        for (int i = 0; i < RecipeFiltering.Filterer.AvailableFilters.Count; i++) if ((filters & (1 << i)) != 0) RecipeFiltering.Filterer.ToggleFilter(i);
-        RecipeFiltering.Filterer.SetSearchFilter(search);
-        RecipeFiltering.Sorter.SetPrioritizedStepIndex(-1);
+        RecipeUI.Filterer.ActiveFilters.Clear();
+        for (int i = 0; i < RecipeUI.Filterer.AvailableFilters.Count; i++) if ((filters & (1 << i)) != 0) RecipeUI.Filterer.ToggleFilter(i);
+        RecipeUI.Filterer.SetSearchFilter(search);
+        RecipeUI.Sorter.SetPrioritizedStepIndex(-1);
     }
 
     public int filters;
@@ -63,7 +63,7 @@ public sealed class RecipeFiltersPlayer : ModPlayer {
     public const string SortTag = "sort";
 }
 
-public sealed class RecipeFiltering : ModSystem {
+public sealed class RecipeUI : ModSystem {
 
     public override void Load() {
         IL_Main.DrawInventory += static il => {
@@ -78,7 +78,6 @@ public sealed class RecipeFiltering : ModSystem {
         _recipeInterface = new();
         _recipeInterface.SetState(_recipeState);
 
-        On_Recipe.FindRecipes += HookFilterRecipes;
         On_Recipe.ClearAvailableRecipes += HookClearAvailableRecipes;
 
         Filterer.SetSearchFilterObject(new ItemSearchFilterWrapper());
@@ -121,7 +120,7 @@ public sealed class RecipeFiltering : ModSystem {
         //         if (++false && Main.InGuideCraftMenu) num74 -= 150;
         cursor.GotoNext(i => i.MatchLdsfld(Reflection.TextureAssets.CraftToggle));
         cursor.GotoPrev(MoveType.After, i => i.MatchLdsfld(Reflection.Main.InGuideCraftMenu));
-        cursor.EmitDelegate((bool inGuide) => !Configs.RecipeFilters.Enabled && inGuide);
+        cursor.EmitDelegate((bool inGuide) => !Configs.Crafting.RecipeUI && inGuide);
         //         ...
         //     }
     }
@@ -133,6 +132,7 @@ public sealed class RecipeFiltering : ModSystem {
     }
 
     public override void UpdateUI(GameTime gameTime) {
+        if (!Configs.Crafting.RecipeUI) return;
         _lastUpdateUiGameTime = gameTime;
         _recipeInterface.Update(gameTime);
     }
@@ -141,27 +141,19 @@ public sealed class RecipeFiltering : ModSystem {
         orig();
         UnfilteredCount = 0;
         RecipesPerFilter = new int[Filterer.AvailableFilters.Count];
-        _clearedDisplayed = true;
     }
-    private void HookFilterRecipes(On_Recipe.orig_FindRecipes orig, bool canDelayCheck) {
-        orig(canDelayCheck);
-        if (canDelayCheck || !_clearedDisplayed) return;
-        _clearedDisplayed = false;
 
+    public static void FilterAndSortRecipes() {
         UnfilteredCount = Main.numAvailableRecipes;
-        int oldRecipe = Main.availableRecipe[Main.focusRecipe];
-        float focusY = Main.availableRecipeY[Main.focusRecipe];
-
         var recipes = FilterRecipes();
         SortRecipes(recipes);
-        for (int i = 0; i < Recipe.maxRecipes; i++) Main.availableRecipe[i] = 0;
-        for (int i = 0; i < recipes.Count; i++) Main.availableRecipe[i] = recipes[i].Index;
-        Main.numAvailableRecipes = recipes.Count;
-
-        Reflection.Recipe.TryRefocusingRecipe.Invoke(oldRecipe);
-        Reflection.Recipe.VisuallyRepositionRecipes.Invoke(focusY);
         _recipeState.RebuildRecipeGrid();
+
+        for (int i = 0; i < recipes.Count; i++) Main.availableRecipe[i] = recipes[i].Index;
+        for (int i = recipes.Count; i < UnfilteredCount; i++) Main.availableRecipe[i] = 0;
+        Main.numAvailableRecipes = recipes.Count;
     }
+
     private static List<RecipeListEntry> FilterRecipes() {
         List<RecipeListEntry> recipes = [];
         for (int r = 0; r < Main.numAvailableRecipes; r++) {
@@ -183,17 +175,15 @@ public sealed class RecipeFiltering : ModSystem {
         if (step.HiddenFromSortOptions) Sorter.SetPrioritizedStepIndex(Sorter.Steps.Count - 1);
     }
 
-internal static Asset<Texture2D> recipeFilters = null!;
+    internal static Asset<Texture2D> recipeFilters = null!;
     internal static Asset<Texture2D> recipeFiltersGray = null!;
 
     private static GameTime _lastUpdateUiGameTime = null!;
     private static UI.States.RecipeFilters _recipeState = null!;
     private static UserInterface _recipeInterface = null!;
 
-    private static bool _clearedDisplayed;
-
     public static int UnfilteredCount;
-    public readonly static EntryFilterer<RecipeListEntry, IRecipeFilter> Filterer = new();
     public static int[] RecipesPerFilter = [];
+    public readonly static EntryFilterer<RecipeListEntry, IRecipeFilter> Filterer = new();
     public readonly static EntrySorter<RecipeListEntry, IRecipeSortStep> Sorter = new();
 }
