@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using BetterInventory.Default.Catalogues;
+using BetterInventory.ItemSearch.BetterGuide;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SpikysLib;
@@ -71,7 +72,7 @@ public sealed class PlaceholderItem : GlobalItem {
 
     private static List<TooltipLine> HookPlaceholderTooltip(Reflection.ItemLoader.ModifyTooltipsFn orig, Item item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out Color?[] overrideColor, int prefixlineIndex) {
         string? name = null;
-        if(GuideUnknownDisplayPlayer.IsUnknown(item)) name = Language.GetTextValue($"{Localization.Keys.UI}.Unknown");
+        if(UnknownDisplayPlayer.IsUnknown(item)) name = Language.GetTextValue($"{Localization.Keys.UI}.Unknown");
         if (!item.IsAir && name is null && item.TryGetGlobalItem(out PlaceholderItem placeholder)) {
             if (placeholder.tile == ByHandTile) name = Language.GetTextValue($"{Localization.Keys.UI}.ByHand");
             else if (placeholder.tile >= 0) name = Lang.GetMapObjectName(MapHelper.TileToLookup(placeholder.tile, 0));
@@ -90,7 +91,7 @@ public sealed class PlaceholderItem : GlobalItem {
     }
 
     public static Item FromTile(int tile) {
-        if (GuideGuideTilePlayer.CraftingStationsItems.TryGetValue(tile, out int type) && type != ItemID.None) return new(type);
+        if (GuideTile.CraftingStationsItems.TryGetValue(tile, out int type) && type != ItemID.None) return new(type);
         Item item = new(FakeType);
         item.GetGlobalItem<PlaceholderItem>().tile = tile;
         return item;

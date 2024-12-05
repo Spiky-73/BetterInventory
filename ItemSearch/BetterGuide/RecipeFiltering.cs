@@ -4,9 +4,9 @@ using MonoMod.Cil;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace BetterInventory.ItemSearch;
+namespace BetterInventory.ItemSearch.BetterGuide;
 
-public class GuideRecipeFiltering : ILoadable {
+public class RecipeFiltering : ILoadable {
 
     public void Load(Mod mod) {
         IL_Recipe.CollectGuideRecipes += static il => {

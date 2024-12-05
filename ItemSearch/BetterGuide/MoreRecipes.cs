@@ -6,7 +6,7 @@ using Terraria.ModLoader;
 using Terraria.UI;
 using ContextID = Terraria.UI.ItemSlot.Context;
 
-namespace BetterInventory.ItemSearch;
+namespace BetterInventory.ItemSearch.BetterGuide;
 
 
 public sealed class GuideMoreRecipesPlayer : ModPlayer {
@@ -14,7 +14,7 @@ public sealed class GuideMoreRecipesPlayer : ModPlayer {
     public override void Load() {
         On_ItemSlot.PickItemMovementAction += HookAllowGuideItem;
         On_ItemSlot.OverrideLeftClick += HookValidateShiftClick;
-        GuideRecipeFiltering.AddGuideItemFilter(r => Configs.BetterGuide.MoreRecipes && r.HasResult(Main.guideItem.type));
+        RecipeFiltering.AddGuideItemFilter(r => Configs.BetterGuide.MoreRecipes && r.HasResult(Main.guideItem.type));
     }
 
     private static int HookAllowGuideItem(On_ItemSlot.orig_PickItemMovementAction orig, Item[] inv, int context, int slot, Item checkItem) {

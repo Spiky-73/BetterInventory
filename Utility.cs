@@ -104,8 +104,7 @@ public static class Utility {
     }
 
     public static void FindDisplayedRecipes() {
-        if (Configs.BetterGuide.AvailableRecipes) Guide.FindGuideRecipes();
-        else Recipe.FindRecipes();
+        Recipe.FindRecipes();
     }
 
     public static long GetMaterialCount(this Recipe recipe, Item item) {

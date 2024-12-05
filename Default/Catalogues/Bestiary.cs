@@ -108,3 +108,9 @@ public sealed class Bestiary : ModEntityCatalogue {
     private static string? s_bestiaryDelayed;
     private static readonly List<string> _npcHistory = new();
 }
+
+public class BestiarySystem : ModSystem {
+    public override void PostAddRecipes() {
+        Bestiary.HooksBestiaryUI();
+    }
+}

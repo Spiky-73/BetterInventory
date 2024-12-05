@@ -11,10 +11,11 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
-namespace BetterInventory.ItemSearch;
 
-public sealed class GuideUnknownDisplayPlayer : ModPlayer {
-    public static GuideUnknownDisplayPlayer LocalPlayer => Main.LocalPlayer.GetModPlayer<GuideUnknownDisplayPlayer>();
+namespace BetterInventory.ItemSearch.BetterGuide;
+
+public sealed class UnknownDisplayPlayer : ModPlayer {
+    public static UnknownDisplayPlayer LocalPlayer => Main.LocalPlayer.GetModPlayer<UnknownDisplayPlayer>();
 
     public override void Load() {
         On_Recipe.CollectItemsToCraftWithFrom += HookUpdatedOwnedItems;
@@ -34,7 +35,7 @@ public sealed class GuideUnknownDisplayPlayer : ModPlayer {
             }
             return true;
         });
-        GuideRecipeFiltering.AddFilter(_unknownFilters);
+        RecipeFiltering.AddFilter(_unknownFilters);
 
         s_unknownTexture = Mod.Assets.Request<Texture2D>($"Assets/Unknown_Item");
     }

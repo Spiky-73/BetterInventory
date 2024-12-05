@@ -15,10 +15,10 @@ using BetterInventory.Default.Catalogues;
 using System.Collections.Generic;
 using Terraria.ModLoader.IO;
 
-namespace BetterInventory.ItemSearch;
+namespace BetterInventory.ItemSearch.BetterGuide;
 
-public sealed class GuideCraftInMenuPlayer : ModPlayer {
-    public static GuideCraftInMenuPlayer LocalPlayer => Main.LocalPlayer.GetModPlayer<GuideCraftInMenuPlayer>();
+public sealed class CraftInMenuPlayer : ModPlayer {
+    public static CraftInMenuPlayer LocalPlayer => Main.LocalPlayer.GetModPlayer<CraftInMenuPlayer>();
 
     public override void Load() {
 
@@ -63,7 +63,7 @@ public sealed class GuideCraftInMenuPlayer : ModPlayer {
         cursor.EmitLdloc(inventoryX).EmitLdloc(inventoryY);
         cursor.EmitDelegate((int x, int y) => {
             // TODO GuideTile dependency
-            if (Configs.BetterGuide.GuideTile) GuideGuideTilePlayer.DrawGuideTile(x, y);
+            if (Configs.BetterGuide.GuideTile) GuideTilePlayer.DrawGuideTile(x, y);
             if (Configs.BetterGuide.CraftInMenu) DrawVisibility();
         });
     }
@@ -103,7 +103,7 @@ public sealed class GuideCraftInMenuPlayer : ModPlayer {
         // if (Main.focusRecipe == recipeIndex && ++[Main.guideItem.IsAir || <craftInMenu>]) {
         cursor.GotoNext(i => i.MatchLdsfld(Reflection.Main.guideItem));
         cursor.GotoNext(MoveType.After, i => i.MatchCallvirt(Reflection.Item.IsAir.GetMethod!));
-        cursor.EmitDelegate((bool isAir) => (isAir && (!Configs.BetterGuide.GuideTile || GuideGuideTilePlayer.guideTile.IsAir)) || Configs.BetterGuide.CraftInMenu);
+        cursor.EmitDelegate((bool isAir) => (isAir && (!Configs.BetterGuide.GuideTile || GuideTile.guideTile.IsAir)) || Configs.BetterGuide.CraftInMenu);
 
         //     <craft>
         // }
@@ -122,8 +122,8 @@ public sealed class GuideCraftInMenuPlayer : ModPlayer {
         // ++ <guideTileAdj>
         cursor.EmitLdarg0();
         cursor.EmitDelegate((Player self) => {
-            if (!Configs.BetterGuide.CraftInMenu || !Configs.BetterGuide.GuideTile || RecipeList.Instance.Enabled || GuideGuideTilePlayer.guideTile.createTile < TileID.Dirt) return;
-            self.adjTile[GuideGuideTilePlayer.guideTile.createTile] = true;
+            if (!Configs.BetterGuide.CraftInMenu || !Configs.BetterGuide.GuideTile || RecipeList.Instance.Enabled || GuideTile.guideTile.createTile < TileID.Dirt) return;
+            self.adjTile[GuideTile.guideTile.createTile] = true;
         });
     }
 
@@ -144,7 +144,7 @@ public sealed class GuideCraftInMenuPlayer : ModPlayer {
     }
     public const string VisibilityTag = "visibility";
 
-    public static RecipeVisibility CurrentVisibilityFlag => GuideAvailableRecipes.s_guideRecipes ? RecipeVisibility.ShowAllGuide : RecipeVisibility.ShowAllAir;
+    public static RecipeVisibility CurrentVisibilityFlag => AvailableRecipes.s_guideRecipes ? RecipeVisibility.ShowAllGuide : RecipeVisibility.ShowAllAir;
 
     private void ToggleFlag(RecipeVisibility flag) => SetFlag(flag, !visibility.HasFlag(flag));
     private void SetFlag(RecipeVisibility flag, bool set) {

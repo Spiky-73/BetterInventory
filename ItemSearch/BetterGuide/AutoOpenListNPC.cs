@@ -3,9 +3,9 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI;
 
-namespace BetterInventory.ItemSearch;
+namespace BetterInventory.ItemSearch.BetterGuide;
 
-public sealed class GuideAutoOpenListNPC : GlobalNPC {
+public sealed class AutoOpenListNPC : GlobalNPC {
     public override void Load() {
         On_ItemSlot.LeftClick_ItemArray_int_int += HookOpenOnClick;
     }
@@ -24,6 +24,6 @@ public sealed class GuideAutoOpenListNPC : GlobalNPC {
         if (!Configs.BetterGuide.AutoOpenList || npc.type != NPCID.Guide) return;
         Main.InGuideCraftMenu = true;
         Main.recBigList = true;
-        Guide.FindGuideRecipes();
+        Utility.FindDisplayedRecipes();
     }
 }

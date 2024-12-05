@@ -9,9 +9,9 @@ using SpikysLib.DataStructures;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 
-namespace BetterInventory.ItemSearch;
+namespace BetterInventory.ItemSearch.BetterGuide;
 
-public sealed class GuideAvailableRecipes : ILoadable {
+public sealed class AvailableRecipes : ILoadable {
 
     public void Load(Mod mod) {
         On_Recipe.FindRecipes += HookFindRecipes;
@@ -23,8 +23,8 @@ public sealed class GuideAvailableRecipes : ILoadable {
         On_Main.HoverOverCraftingItemButton += HookDisableCraftWhenNonAvailable;
         On_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += HookDarkenNotAvailable;
 
-        _availableRecipesFilters = new(() => Configs.BetterGuide.AvailableRecipes && !GuideCraftInMenuPlayer.ShowAllRecipes(), r => IsAvailable(r.RecipeIndex), r => GuideFavoritedRecipesPlayer.LocalPlayer.IsFavorited(r.RecipeIndex));
-        GuideRecipeFiltering.AddFilter(_availableRecipesFilters);
+        _availableRecipesFilters = new(() => Configs.BetterGuide.AvailableRecipes && !CraftInMenuPlayer.ShowAllRecipes(), r => IsAvailable(r.RecipeIndex), r => FavoritedRecipesPlayer.LocalPlayer.IsFavorited(r.RecipeIndex));
+        RecipeFiltering.AddFilter(_availableRecipesFilters);
     }
     public void Unload() { }
 
@@ -100,9 +100,9 @@ public sealed class GuideAvailableRecipes : ILoadable {
         var focusRecipe = Main.recipe[Main.availableRecipe[Main.focusRecipe]];
         if(focusRecipe.requiredItem.Contains(inv[slot])) { // Material
             available = s_availableCreateItems.Contains(focusRecipe.createItem) || focusRecipe.GetMaterialCount(inv[slot]) >= inv[slot].stack;
-        } else if(inv == GuideRequiredObjectsDisplay._displayedRecipeTiles) { // Required Tile
+        } else if(inv == RequiredObjectsDisplay._displayedRecipeTiles) { // Required Tile
             available = slot >= focusRecipe.requiredTile.Count || Main.LocalPlayer.adjTile[focusRecipe.requiredTile[slot]];
-        } else if(inv == GuideRequiredObjectsDisplay._displayedRecipeConditions) { // Required Condition
+        } else if(inv == RequiredObjectsDisplay._displayedRecipeConditions) { // Required Condition
             available = focusRecipe.Conditions[slot].Predicate();
         } else { // Created item
             available = s_availableCreateItems.Contains(inv[slot]);

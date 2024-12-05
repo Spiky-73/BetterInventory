@@ -78,7 +78,7 @@ public sealed class RecipeFiltering : ModSystem {
         _recipeState.Activate();
         _recipeInterface = new();
         _recipeInterface.SetState(_recipeState);
-        
+
         On_Recipe.FindRecipes += HookFilterRecipes;
         On_Recipe.ClearAvailableRecipes += HookClearAvailableRecipes;
 
@@ -179,9 +179,12 @@ public sealed class RecipeFiltering : ModSystem {
     }
 
     public static void AddFilter(IRecipeFilter filter) => Filterer.AvailableFilters.Add(filter);
-    public static void AddSortStep(IRecipeSortStep step) => Sorter.Steps.Add(step);
+    public static void AddSortStep(IRecipeSortStep step) {
+        Sorter.Steps.Add(step);
+        if (step.HiddenFromSortOptions) Sorter.SetPrioritizedStepIndex(Sorter.Steps.Count - 1);
+    }
 
-    internal static Asset<Texture2D> recipeFilters = null!;
+internal static Asset<Texture2D> recipeFilters = null!;
     internal static Asset<Texture2D> recipeFiltersGray = null!;
 
     private static GameTime _lastUpdateUiGameTime = null!;

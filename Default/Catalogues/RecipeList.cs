@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using BetterInventory.ItemSearch;
+using BetterInventory.ItemSearch.BetterGuide;
 using BetterInventory.UI.States;
 using MonoMod.Cil;
 using SpikysLib;
@@ -23,7 +24,7 @@ public sealed class RecipeListFakeItemContext : IFakeItemContext {
     public bool WouldMoveToContext(Item[] inv, int context, int slot, [MaybeNullWhen(false)] out Item destination) {
         destination = null;
         if (!RecipeList.Instance.Enabled || !Main.InGuideCraftMenu || Main.cursorOverride != CursorOverrideID.InventoryToChest) return false;
-        destination = GuideGuideTilePlayer.GetGuideContextDestination(inv[slot], out _);
+        destination = GuideTilePlayer.GetGuideContextDestination(inv[slot], out _);
         return true;
     }
 }
@@ -158,8 +159,8 @@ public sealed class RecipeList : ModEntityCatalogue {
             (Item item, Main.guideItem) = (Main.guideItem, new(Main.guideItem.type));
             Main.LocalPlayer.GetDropItem(ref item);
         }
-        if (Bestiary.Instance.Enabled && (GuideGuideTilePlayer.guideTile.stack > 1 || GuideGuideTilePlayer.guideTile.prefix != 0)) {
-            (Item item, GuideGuideTilePlayer.guideTile) = (GuideGuideTilePlayer.guideTile, new(GuideGuideTilePlayer.guideTile.type));
+        if (Bestiary.Instance.Enabled && (GuideTile.guideTile.stack > 1 || GuideTile.guideTile.prefix != 0)) {
+            (Item item, GuideTile.guideTile) = (GuideTile.guideTile, new(GuideTile.guideTile.type));
             Main.LocalPlayer.GetDropItem(ref item);
         }
     }
@@ -173,7 +174,7 @@ public sealed class RecipeList : ModEntityCatalogue {
         if(Main.InGuideCraftMenu && Main.cursorOverride == CursorOverrideID.InventoryToChest) {
             Item item = inv[slot].Clone();
             item.stack = 1;
-            GuideGuideTilePlayer.GetGuideContextDestination(item, out var guideSlot);
+            GuideTilePlayer.GetGuideContextDestination(item, out var guideSlot);
             orig([item], context, 0);
             OnGuideSlotChange(item, guideSlot);
             return;

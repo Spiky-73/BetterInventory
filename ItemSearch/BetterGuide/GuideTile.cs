@@ -14,7 +14,7 @@ using Terraria.ModLoader.IO;
 using Terraria.UI;
 using ContextID = Terraria.UI.ItemSlot.Context;
 
-namespace BetterInventory.ItemSearch;
+namespace BetterInventory.ItemSearch.BetterGuide;
 
 public sealed class GuideTileFakeItemContext : IFakeItemContext {
     public bool IsFake(Item item) => item.IsAPlaceholder();
@@ -24,30 +24,24 @@ public sealed class GuideTileFakeItemContext : IFakeItemContext {
     public bool WouldMoveToContext(Item[] inv, int context, int slot, [MaybeNullWhen(false)] out Item destination) {
         destination = null;
         if(!Configs.BetterGuide.GuideTile || !Main.InGuideCraftMenu || Main.cursorOverride != CursorOverrideID.InventoryToChest) return false;
-        destination = GuideGuideTilePlayer.GetGuideContextDestination(inv[slot], out var guideSlot);
+        destination = GuideTilePlayer.GetGuideContextDestination(inv[slot], out var guideSlot);
         return guideSlot == 1;
     }
 }
 
-public sealed class GuideGuideTilePlayer : ModPlayer {
+public sealed class GuideTilePlayer : ModPlayer {
 
     public static ref Item GetGuideContextDestination(Item item, out int guideSlot) {
-        guideSlot = IsCraftingStation(item) || (!Configs.BetterGuide.MoreRecipes && PlaceholderItem.ConditionItems.ContainsValue(item.type)) ? 1 : 0;
+        guideSlot = GuideTile.IsCraftingStation(item) || (!Configs.BetterGuide.MoreRecipes && PlaceholderItem.ConditionItems.ContainsValue(item.type)) ? 1 : 0;
         // if(FitsGuideTile(item)) {
         //     if(guideSlot == 0 && PlaceholderHelper.AreSame(item, Main.guideItem)) guideSlot = 1;
         //     else if(guideSlot == 1 && PlaceholderHelper.AreSame(item, guideTile)) guideSlot = 0;
         // }
         if (guideSlot == 0) return ref Main.guideItem;
-        return ref guideTile;
+        return ref GuideTile.guideTile;
     }
 
     public override void Load() {
-        IL_Recipe.FindRecipes += static il => {
-            if (!il.ApplyTo(ILGuideTileRecipes, Configs.BetterGuide.GuideTile)) Configs.UnloadedItemSearch.Value.guideTile = true;
-        };
-        _guideTileFilters = new(() => Configs.BetterGuide.GuideTile && !guideTile.IsAir, CheckGuideTileFilter);
-        GuideRecipeFiltering.AddFilter(_guideTileFilters);
-
         On_ItemSlot.OverrideLeftClick += HookOverrideTileClick;
         On_ItemSlot.PickItemMovementAction += HookPickItemMovementAction;
         On_Player.dropItemCheck += HookDropItems;
@@ -55,32 +49,15 @@ public sealed class GuideGuideTilePlayer : ModPlayer {
         PlaceholderItem.AddFakeItemContext(new GuideTileFakeItemContext());
     }
 
-    public override void Unload() {
-        guideTile = new();
-        CraftingStationsItems.Clear();
-    }
-    public static void FindCraftingStations() {
-        // Gather all used crafting stations
-        for (int r = 0; r < Recipe.numRecipes; r++) {
-            foreach (int tile in Main.recipe[r].requiredTile) CraftingStationsItems[tile] = 0;
-        }
-
-        // Try to map an item to each crafting station
-        for (int type = 0; type < ItemLoader.ItemCount; type++) {
-            Item item = new(type);
-            if (CraftingStationsItems.TryGetValue(item.createTile, out int value) && value == ItemID.None) CraftingStationsItems[item.createTile] = item.type;
-        }
-    }
-
     public override void SaveData(TagCompound tag) {
-        if (!guideTile.IsAir) tag[GuideTileTag] = guideTile;
+        if (!GuideTile.guideTile.IsAir) tag[GuideTileTag] = GuideTile.guideTile;
     }
     public override void LoadData(TagCompound tag) {
         if (tag.TryGet(GuideTileTag, out Item guide)) _tempGuideTile = guide;
         else _tempGuideTile = new();
     }
     public override void OnEnterWorld() {
-        if (_tempGuideTile is not null) guideTile = _tempGuideTile;
+        if (_tempGuideTile is not null) GuideTile.guideTile = _tempGuideTile;
     }
 
     private int HookPickItemMovementAction(On_ItemSlot.orig_PickItemMovementAction orig, Item[] inv, int context, int slot, Item checkItem) {
@@ -99,7 +76,7 @@ public sealed class GuideGuideTilePlayer : ModPlayer {
 
     private static bool HookOverrideTileClick(On_ItemSlot.orig_OverrideLeftClick orig, Item[] inv, int context, int slot) {
         if(!Configs.BetterGuide.GuideTile) return orig(inv, context, slot);
-        if(context == ContextID.GuideItem && slot == 1 && guideTile.IsAir && (Main.mouseItem.IsAir || ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) == -1)) {
+        if(context == ContextID.GuideItem && slot == 1 && GuideTile.guideTile.IsAir && (Main.mouseItem.IsAir || ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) == -1)) {
             inv[slot] = PlaceholderItem.FromTile(PlaceholderItem.ByHandTile);
             SoundEngine.PlaySound(SoundID.Grab);
             return true;
@@ -117,22 +94,11 @@ public sealed class GuideGuideTilePlayer : ModPlayer {
 
     internal const string GuideTileTag = "guideTile";
 
-
-
-    private static void ILGuideTileRecipes(ILContext il){
-        ILCursor cursor = new(il);
-        cursor.GotoNext(i => i.MatchCall(Reflection.Recipe.CollectGuideRecipes));
-        cursor.GotoPrev(MoveType.After, i => i.MatchCallvirt(Reflection.Item.IsAir.GetMethod!));
-        cursor.EmitDelegate((bool isAir) => isAir && (!Configs.BetterGuide.GuideTile || guideTile.IsAir));
-        cursor.GotoNext(MoveType.After, i => i.MatchCallvirt(Reflection.Item.Name.GetMethod!));
-        cursor.EmitDelegate((string name) => Configs.BetterGuide.GuideTile && guideTile.Name != "" ? guideTile.Name : name);
-    }
-
     internal static void DrawGuideTile(int inventoryX, int inventoryY) {
-        float x = inventoryX + TextureAssets.InventoryBack.Width() * Main.inventoryScale * (1 + GuideRequiredObjectsDisplay.TileSpacingRatio);
+        float x = inventoryX + TextureAssets.InventoryBack.Width() * Main.inventoryScale * (1 + RequiredObjectsDisplay.TileSpacingRatio);
         float y = inventoryY;
-        Main.inventoryScale *= GuideRequiredObjectsDisplay.TileScale;
-        Item[] items = GuideItems;
+        Main.inventoryScale *= RequiredObjectsDisplay.TileScale;
+        Item[] items = GuideTile.GuideItems;
 
         // Handle Mouse hover
         Rectangle hitbox = new((int)x, (int)y, (int)(TextureAssets.InventoryBack.Width() * Main.inventoryScale), (int)(TextureAssets.InventoryBack.Height() * Main.inventoryScale));
@@ -141,27 +107,14 @@ public sealed class GuideGuideTilePlayer : ModPlayer {
             Main.craftingHide = true;
             ItemSlot.OverrideHover(items, ContextID.GuideItem, 1);
             ItemSlot.LeftClick(items, ContextID.GuideItem, 1);
-            GuideItems = items; // Update items if changed
+            GuideTile.GuideItems = items; // Update items if changed
             if (Main.mouseLeftRelease && Main.mouseLeft) Recipe.FindRecipes();
             ItemSlot.RightClick(items, ContextID.GuideItem, 1);
             ItemSlot.MouseHover(items, ContextID.GuideItem, 1);
-            GuideItems = items; // Update items if changed
+            GuideTile.GuideItems = items; // Update items if changed
         }
         ItemSlot.Draw(Main.spriteBatch, items, ContextID.GuideItem, 1, hitbox.TopLeft());
-        Main.inventoryScale /= GuideRequiredObjectsDisplay.TileScale;
-    }
-
-    private static bool CheckGuideTileFilter(Recipe recipe) {
-        if (guideTile.IsAir) return true;
-        if (guideTile.TryGetGlobalItem(out PlaceholderItem placeholder)) {
-            if (placeholder.tile == PlaceholderItem.ByHandTile) return recipe.requiredTile.Count == 0;
-            if (placeholder.tile >= 0) return recipe.requiredTile.Contains(placeholder.tile);
-            if (placeholder.condition is not null) return recipe.Conditions.Exists(c => c.Description.Key == placeholder.condition);
-        }
-        
-        return CraftingStationsItems.ContainsKey(guideTile.createTile) ?
-            recipe.requiredTile.Contains(guideTile.createTile) :
-            recipe.Conditions.Exists(c => PlaceholderItem.ConditionItems.TryGetValue(c.Description.Key, out int type) && type == guideTile.type);
+        Main.inventoryScale /= RequiredObjectsDisplay.TileScale;
     }
 
     private static void HookDropItems(On_Player.orig_dropItemCheck orig, Player self) {
@@ -172,20 +125,67 @@ public sealed class GuideGuideTilePlayer : ModPlayer {
         Main.InGuideCraftMenu = old;
     }
     public static void dropGuideTileCheck(Player self) {
-        if (Main.InGuideCraftMenu || guideTile.IsAir) return;
-        if (guideTile.IsAPlaceholder()) guideTile.TurnToAir();
-        else self.GetDropItem(ref guideTile);
+        if (Main.InGuideCraftMenu || GuideTile.guideTile.IsAir) return;
+        if (GuideTile.guideTile.IsAPlaceholder()) GuideTile.guideTile.TurnToAir();
+        else self.GetDropItem(ref GuideTile.guideTile);
     }
 
-    public static Item guideTile = new();
-    private static GuideRecipeFilterGroup _guideTileFilters = null!;
+    public static bool FitsGuideTile(Item item) => GuideTile.IsCraftingStation(item) || PlaceholderItem.ConditionItems.ContainsValue(item.type);
 
+    internal Item? _tempGuideTile;
+}
 
-    public static bool FitsGuideTile(Item item) => IsCraftingStation(item) || PlaceholderItem.ConditionItems.ContainsValue(item.type);
+public sealed class GuideTile : ModSystem {
+
+    public override void Load() {
+        IL_Recipe.FindRecipes += static il => {
+            if (!il.ApplyTo(ILGuideTileRecipes, Configs.BetterGuide.GuideTile)) Configs.UnloadedItemSearch.Value.guideTile = true;
+        };
+
+        _guideTileFilters = new(() => Configs.BetterGuide.GuideTile && !guideTile.IsAir, CheckGuideTileFilter);
+        RecipeFiltering.AddFilter(_guideTileFilters);
+    }
+    public override void PostAddRecipes() {
+        // Gather all used crafting stations
+        for (int r = 0; r < Recipe.numRecipes; r++) {
+            foreach (int tile in Main.recipe[r].requiredTile) CraftingStationsItems[tile] = 0;
+        }
+
+        // Try to map an item to each crafting station
+        for (int type = 0; type < ItemLoader.ItemCount; type++) {
+            Item item = new(type);
+            if (CraftingStationsItems.TryGetValue(item.createTile, out int value) && value == ItemID.None) CraftingStationsItems[item.createTile] = item.type;
+        }
+    }
+
+    public override void Unload() {
+        guideTile = new();
+        CraftingStationsItems.Clear();
+    }
+
     public static bool IsCraftingStation(Item item) => CraftingStationsItems.ContainsKey(item.createTile) || item.IsAPlaceholder();
 
-    public static readonly Dictionary<int, int> CraftingStationsItems = []; // tile -> item
-    internal Item? _tempGuideTile;
+    private static void ILGuideTileRecipes(ILContext il) {
+        ILCursor cursor = new(il);
+        cursor.GotoNext(i => i.MatchCall(Reflection.Recipe.CollectGuideRecipes));
+        cursor.GotoPrev(MoveType.After, i => i.MatchCallvirt(Reflection.Item.IsAir.GetMethod!));
+        cursor.EmitDelegate((bool isAir) => isAir && (!Configs.BetterGuide.GuideTile || guideTile.IsAir));
+        cursor.GotoNext(MoveType.After, i => i.MatchCallvirt(Reflection.Item.Name.GetMethod!));
+        cursor.EmitDelegate((string name) => Configs.BetterGuide.GuideTile && guideTile.Name != "" ? guideTile.Name : name);
+    }
+
+    private static bool CheckGuideTileFilter(Recipe recipe) {
+        if (guideTile.IsAir) return true;
+        if (guideTile.TryGetGlobalItem(out PlaceholderItem placeholder)) {
+            if (placeholder.tile == PlaceholderItem.ByHandTile) return recipe.requiredTile.Count == 0;
+            if (placeholder.tile >= 0) return recipe.requiredTile.Contains(placeholder.tile);
+            if (placeholder.condition is not null) return recipe.Conditions.Exists(c => c.Description.Key == placeholder.condition);
+        }
+
+        return CraftingStationsItems.ContainsKey(guideTile.createTile) ?
+            recipe.requiredTile.Contains(guideTile.createTile) :
+            recipe.Conditions.Exists(c => PlaceholderItem.ConditionItems.TryGetValue(c.Description.Key, out int type) && type == guideTile.type);
+    }
 
     public static Item[] GuideItems {
         get {
@@ -195,4 +195,9 @@ public sealed class GuideGuideTilePlayer : ModPlayer {
         set => (Main.guideItem, guideTile) = (value[0], value[1]);
     }
     private static readonly Item[] s_guideItems = new Item[2];
+    public static Item guideTile = new();
+
+    public static readonly Dictionary<int, int> CraftingStationsItems = []; // tile -> item
+
+    private static GuideRecipeFilterGroup _guideTileFilters = null!;
 }

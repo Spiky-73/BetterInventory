@@ -12,7 +12,7 @@ using Terraria.UI.Chat;
 
 namespace BetterInventory.ItemActions;
 
-public class TooltipHoverSystem : ModSystem {
+public class TooltipHover : ModSystem {
 
     public override void Load() {
         HoverTooltipKb = KeybindLoader.RegisterKeybind(Mod, "HoverTooltip", Microsoft.Xna.Framework.Input.Keys.N);

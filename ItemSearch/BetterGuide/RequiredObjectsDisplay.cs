@@ -8,10 +8,10 @@ using System.Linq;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 
-namespace BetterInventory.ItemSearch;
+namespace BetterInventory.ItemSearch.BetterGuide;
 
 // BUG ??? DrawGuideCraftText when disabled
-public sealed class GuideRequiredObjectsDisplay : ILoadable {
+public sealed class RequiredObjectsDisplay : ILoadable {
 
     public void Load(Mod mod) {
         On_Main.DrawGuideCraftText += HookGuideCraftText;
@@ -31,7 +31,7 @@ public sealed class GuideRequiredObjectsDisplay : ILoadable {
         Recipe recipe = Main.recipe[Main.availableRecipe[Main.focusRecipe]];
 
         // Update if needed
-        if (Main.numAvailableRecipes == 0 || GuideUnknownDisplayPlayer.IsUnknown(recipe.createItem)) return;
+        if (Main.numAvailableRecipes == 0 || UnknownDisplayPlayer.IsUnknown(recipe.createItem)) return;
         if (s_displayedRecipe != recipe.RecipeIndex) UpdateRequiredTiles(recipe);
 
         // Handles the position of the condition to displays
