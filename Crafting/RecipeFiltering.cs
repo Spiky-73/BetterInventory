@@ -63,7 +63,6 @@ public sealed class RecipeFiltersPlayer : ModPlayer {
     public const string SortTag = "sort";
 }
 
-// TODO sorting
 public sealed class RecipeFiltering : ModSystem {
 
     public override void Load() {

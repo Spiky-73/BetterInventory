@@ -27,10 +27,10 @@ public sealed class CraftInMenuPlayer : ModPlayer {
         };
 
         IL_Main.DrawInventory += static il => {
-            if (!il.ApplyTo(ILVisibility, Configs.BetterGuide.CraftInMenu)) Configs.UnloadedItemSearch.Value.guideCraftInMenu = true;
+            if (!il.ApplyTo(ILVisibility, Configs.BetterGuide.CraftInMenu || Configs.BetterGuide.GuideTile)) Configs.UnloadedItemSearch.Value.guideCraftInMenu = Configs.UnloadedItemSearch.Value.guideTile = true;
         };
         IL_Main.HoverOverCraftingItemButton += static il => {
-            if (!il.ApplyTo(ILCraftInGuideMenu, Configs.BetterGuide.CraftInMenu)) Configs.UnloadedItemSearch.Value.guideCraftInMenu = true;
+            if (!il.ApplyTo(ILCraftInGuideMenu, Configs.BetterGuide.CraftInMenu || Configs.BetterGuide.GuideTile)) Configs.UnloadedItemSearch.Value.guideCraftInMenu = Configs.UnloadedItemSearch.Value.guideTile = true;
         };
 
         s_inventoryTickBorder = Mod.Assets.Request<Texture2D>($"Assets/Inventory_Tick_Border");
@@ -62,7 +62,6 @@ public sealed class CraftInMenuPlayer : ModPlayer {
         //         ++ <drawVisibility>
         cursor.EmitLdloc(inventoryX).EmitLdloc(inventoryY);
         cursor.EmitDelegate((int x, int y) => {
-            // TODO GuideTile dependency
             if (Configs.BetterGuide.GuideTile) GuideTilePlayer.DrawGuideTile(x, y);
             if (Configs.BetterGuide.CraftInMenu) DrawVisibility();
         });
@@ -96,7 +95,6 @@ public sealed class CraftInMenuPlayer : ModPlayer {
         }
     }
 
-    // TODO GuideTile dependency
     private static void ILCraftInGuideMenu(ILContext il) {
         ILCursor cursor = new(il);
 
