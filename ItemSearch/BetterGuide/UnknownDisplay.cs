@@ -79,6 +79,7 @@ public sealed class UnknownDisplayPlayer : ModPlayer {
         cursor.EmitDelegate((int num) => num == 0 || Configs.BetterGuide.UnknownDisplay && IsUnknown(Main.recipe[Main.availableRecipe[Main.focusRecipe]].createItem) ? 0 : num);
     }
 
+    public static bool IsUnknown(int recipe) => IsUnknown(Main.recipe[recipe].createItem);
     public static bool IsUnknown(Item createItem) => !createItem.IsAir && s_unknownCreateItems.Contains(createItem.UniqueId());
 
     public bool IsRecipeKnown(Recipe recipe) {

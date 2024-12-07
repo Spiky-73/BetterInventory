@@ -78,8 +78,6 @@ public sealed class RecipeUI : ModSystem {
         _recipeInterface = new();
         _recipeInterface.SetState(_recipeState);
 
-        On_Recipe.ClearAvailableRecipes += HookClearAvailableRecipes;
-
         Filterer.SetSearchFilterObject(new ItemSearchFilterWrapper());
     }
 
@@ -137,14 +135,9 @@ public sealed class RecipeUI : ModSystem {
         _recipeInterface.Update(gameTime);
     }
 
-    private void HookClearAvailableRecipes(On_Recipe.orig_ClearAvailableRecipes orig) {
-        orig();
-        UnfilteredCount = 0;
-        RecipesPerFilter = new int[Filterer.AvailableFilters.Count];
-    }
-
     public static void FilterAndSortRecipes() {
         UnfilteredCount = Main.numAvailableRecipes;
+        RecipesPerFilter = new int[Filterer.AvailableFilters.Count];
         var recipes = FilterRecipes();
         SortRecipes(recipes);
         _recipeState.RebuildRecipeGrid();

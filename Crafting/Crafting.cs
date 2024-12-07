@@ -15,7 +15,7 @@ public sealed class Crafting : ModPlayer {
 
     public override void Load() {
 
-        On_Recipe.ClearAvailableRecipes += HookClearAvailableRecipes;
+        On_Recipe.FindRecipes += HookFindRecipes;
         On_Recipe.CollectItemsToCraftWithFrom += HookCollectItems;
         IL_Main.DrawInventory += static il => {
             if (!il.ApplyTo(ILCraftOnList, Configs.CraftOnList.Enabled)) Configs.UnloadedCrafting.Value.craftOnList = true;
@@ -25,9 +25,9 @@ public sealed class Crafting : ModPlayer {
         };
     }
 
-    private static void HookClearAvailableRecipes(On_Recipe.orig_ClearAvailableRecipes orig) {
-        orig();
-        _collectedRecipes = false;
+    private static void HookFindRecipes(On_Recipe.orig_FindRecipes orig, bool canDelayCheck) {
+        if (!canDelayCheck) _collectedRecipes = false;
+        orig(canDelayCheck);
     }
 
     private static void HookCollectItems(On_Recipe.orig_CollectItemsToCraftWithFrom orig, Player player) {

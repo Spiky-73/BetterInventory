@@ -14,7 +14,6 @@ namespace BetterInventory.ItemSearch.BetterGuide;
 public sealed class AvailableRecipes : ModSystem {
 
     public override void Load() {
-        On_Recipe.FindRecipes += HookFindRecipes;
         IL_Recipe.FindRecipes += static il => {
             if (!il.ApplyTo(ILFindRecipes, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.guideAvailableRecipes = true;
         };
@@ -27,11 +26,6 @@ public sealed class AvailableRecipes : ModSystem {
         RecipeFiltering.AddFilter(_availableRecipesFilters);
     }
 
-    private static void HookFindRecipes(On_Recipe.orig_FindRecipes orig, bool canDelayCheck) {
-        s_guideRecipes = false;
-        orig(canDelayCheck);
-    }
-
     private static void ILFindRecipes(ILContext il) {
         ILCursor cursor = new(il);
 
@@ -40,7 +34,10 @@ public sealed class AvailableRecipes : ModSystem {
         // ++ noCLear:
         cursor.GotoNext(MoveType.AfterLabel, i => i.MatchCall(Reflection.Recipe.ClearAvailableRecipes));
         var skipClear = cursor.DefineLabel();
-        cursor.EmitDelegate(() => Configs.BetterGuide.AvailableRecipes);
+        cursor.EmitDelegate(() => {
+            s_guideRecipes = false;
+            return Configs.BetterGuide.AvailableRecipes;
+        });
         cursor.EmitBrtrue(skipClear);
         cursor.MarkLabel(skipClear); // Here in case of exception
         cursor.GotoNext(MoveType.After, i => i.MatchCall(Reflection.Recipe.ClearAvailableRecipes));

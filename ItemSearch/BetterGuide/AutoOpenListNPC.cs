@@ -15,7 +15,7 @@ public sealed class AutoOpenListNPC : GlobalNPC {
             orig(inv, context, slot);
             return;
         }
-        if(ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) == 0) Main.recBigList = true;
+        if(context == ItemSlot.Context.GuideItem && ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) == 0) Main.recBigList = true;
         if(Main.InGuideCraftMenu && Main.cursorOverride == CursorOverrideID.InventoryToChest) Main.recBigList = true;
         orig(inv, context, slot);
     }

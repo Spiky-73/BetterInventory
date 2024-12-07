@@ -17,18 +17,18 @@ public class RequiredTooltipItem : GlobalItem {
     public override void Load() {
         On_ItemTagHandler.ItemSnippet.ctor += HookItemGroupName;
 
-        On_Recipe.FindRecipes += HookFindRecipes;
+        On_Recipe.ClearAvailableRecipes += HookClearAvailableRecipes;
         On_Recipe.CollectGuideRecipes += HookCollectGuideRecipes;
+    }
+
+    private void HookClearAvailableRecipes(On_Recipe.orig_ClearAvailableRecipes orig) {
+        _guideRecipes = false;
+        orig();
     }
 
     private void HookCollectGuideRecipes(On_Recipe.orig_CollectGuideRecipes orig) {
         _guideRecipes = true;
         orig();
-    }
-
-    private void HookFindRecipes(On_Recipe.orig_FindRecipes orig, bool canDelayCheck) {
-        if (!canDelayCheck) _guideRecipes = false;
-        orig(canDelayCheck);
     }
 
     private void HookItemGroupName(On_ItemTagHandler.ItemSnippet.orig_ctor orig, TextSnippet self, Item item) {

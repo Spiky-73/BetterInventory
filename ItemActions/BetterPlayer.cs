@@ -57,8 +57,6 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public override void OnEnterWorld() {
-        if (Configs.BetterGuide.AvailableRecipes) Recipe.FindRecipes();
-
         DisplayUpdate();
         DisplayCompatibility();
         DisplaySpicWarning();

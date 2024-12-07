@@ -57,7 +57,7 @@ public sealed class GuideTilePlayer : ModPlayer {
         else _tempGuideTile = new();
     }
     public override void OnEnterWorld() {
-        if (_tempGuideTile is not null) GuideTile.guideTile = _tempGuideTile;
+        GuideTile.guideTile = _tempGuideTile ?? new();
     }
 
     private int HookPickItemMovementAction(On_ItemSlot.orig_PickItemMovementAction orig, Item[] inv, int context, int slot, Item checkItem) {
