@@ -1,3 +1,4 @@
+using System;
 using MonoMod.Cil;
 using Terraria;
 using Terraria.UI;
@@ -23,6 +24,12 @@ public sealed class AvailableRecipes : ModSystem {
 
     private static void ILSkipGuide(ILContext il) {
         ILCursor cursor = new(il);
+
+        // ++ goto noCLear
+        // Recipe.ClearAvailableRecipes();
+        // ++ noCLear:
+        cursor.GotoNext(MoveType.AfterLabel, i => i.MatchCall(Reflection.Recipe.ClearAvailableRecipes));
+        cursor.EmitDelegate<Action>(() => s_guideRecipes = false);
 
         // if (<displayGuideRecipes>) {
         //     ++ goto <skip>
