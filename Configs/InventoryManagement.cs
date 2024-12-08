@@ -61,7 +61,7 @@ public sealed class SmartPickup {
     [DefaultValue(true)] public bool fixSlot = true;
 
     public static bool Enabled => InventoryManagement.Instance.smartPickup.Key;
-    public static bool AutoEquip => !UnloadedInventoryManagement.Value.autoEquip && Enabled && Value.autoEquip > AutoEquipLevel.None;
+    public static bool AutoEquip => !UnloadedInventoryManagement.Value.smartEquip && Enabled && Value.autoEquip > AutoEquipLevel.None;
     public static bool HotbarLast => !UnloadedInventoryManagement.Value.hotbarLast && Enabled && Value.hotbarLast;
     public static bool FixSlot => !UnloadedInventoryManagement.Value.fixSlot && Enabled && Value.fixSlot;
     public static SmartPickup Value => InventoryManagement.Instance.smartPickup.Value;
@@ -120,7 +120,7 @@ public sealed class UpgradeItems {
     [CustomModConfigItem(typeof(DictionaryValuesElement))] public Dictionary<PickupUpgraderDefinition, bool> upgraders = [];
     [DefaultValue(true)] public bool importantOnly = true;
 
-    public static bool Enabled => SmartPickup.Enabled && !UnloadedInventoryManagement.Value.upgradeItems && SmartPickup.Value.upgradeItems;
+    public static bool Enabled => SmartPickup.Enabled && !UnloadedInventoryManagement.Value.smartEquip && SmartPickup.Value.upgradeItems;
     public static UpgradeItems Value => SmartPickup.Value.upgradeItems.Value;
     
     [OnDeserialized]

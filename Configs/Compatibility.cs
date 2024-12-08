@@ -99,8 +99,7 @@ public sealed class UnloadedInventoryManagement {
     public bool materials = false;
     public bool baits = false;
     public bool previousSlot = false;
-    public bool autoEquip = false;
-    public bool upgradeItems = false;
+    public bool smartEquip = false;
     public bool hotbarLast = false;
     public bool fixSlot = false;
     public bool displayFakeItem = false;

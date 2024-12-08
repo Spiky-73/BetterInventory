@@ -22,11 +22,8 @@ public sealed class SmartPickup : ModSystem {
 
     public override void Load() {
         IL_Player.GetItem += static il => {
-            // TODO regroup into 1 IL with events / hooks to add pickupers
             if(!il.ApplyTo(ILPreviousSlot, Configs.PreviousSlot.Enabled)) Configs.UnloadedInventoryManagement.Value.previousSlot = true;
-            if(!il.ApplyTo(ILAutoEquip, Configs.SmartPickup.AutoEquip)) Configs.UnloadedInventoryManagement.Value.autoEquip = true;
-            if(!il.ApplyTo(ILUpradeItems, Configs.UpgradeItems.Enabled)) Configs.UnloadedInventoryManagement.Value.upgradeItems = true;
-           
+            if(!il.ApplyTo(ILSmartEquip, Configs.UpgradeItems.Enabled)) Configs.UnloadedInventoryManagement.Value.smartEquip = true;
             if(!il.ApplyTo(ILHotbarLast, Configs.SmartPickup.HotbarLast)) Configs.UnloadedInventoryManagement.Value.hotbarLast = true;
             if(!il.ApplyTo(ILFixNewItem, Configs.SmartPickup.FixSlot)) Configs.UnloadedInventoryManagement.Value.fixSlot = true;
         };
@@ -169,25 +166,8 @@ public sealed class SmartPickup : ModSystem {
         return true;
     }
 
-    private static void ILAutoEquip(ILContext il) {
-        ILCursor cursor = new(il);
 
-        cursor.GotoNextLoc(out int coin, i => i.Previous.MatchCallvirt(Reflection.Item.IsACoin.GetMethod!), 0);
-        cursor.GotoNextLoc(out int newitem, i => i.Previous.MatchLdarg2(), 1);
-
-        // if (isACoin) ...
-        // if (item.FitsAmmoSlot()) ...
-        // for(...) ...
-        cursor.GotoNext(i => i.SaferMatchCall(Reflection.Player.GetItem_FillEmptyInventorySlot));
-        cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdloc(coin));
-
-        // ++<autoEquip>
-        EmitSmartPickup(cursor, newitem, (Player self, Item item, GetItemSettings settings) => {
-            if (VanillaGetItem || settings.NoText || !Configs.SmartPickup.AutoEquip) return item;
-            return item = AutoEquip(self, item, settings);
-        });
-    }
-    private static void ILUpradeItems(ILContext il) {
+    private static void ILSmartEquip(ILContext il) {
         ILCursor cursor = new(il);
 
         cursor.GotoNextLoc(out int coin, i => i.Previous.MatchCallvirt(Reflection.Item.IsACoin.GetMethod!), 0);
@@ -201,8 +181,10 @@ public sealed class SmartPickup : ModSystem {
 
         // ++<upgradeItems>
         EmitSmartPickup(cursor, newitem, (Player self, Item item, GetItemSettings settings) => {
-            if (VanillaGetItem || settings.NoText || !Configs.UpgradeItems.Enabled) return item;
-            return UpgradeItems(self, item, settings);
+            if(VanillaGetItem || settings.NoText) return item;
+            if (Configs.UpgradeItems.Enabled && !item.IsAir) item = UpgradeItems(self, item, settings);
+            if (Configs.SmartPickup.AutoEquip && !item.IsAir) item = AutoEquip(self, item, settings);
+            return item;
         });
     }
     private static void ILFixNewItem(ILContext il) {

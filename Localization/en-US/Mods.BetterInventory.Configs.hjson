@@ -1072,13 +1072,8 @@ UnloadedInventoryManagement: {
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
-	autoEquip: {
-		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ {$Mods.BetterInventory.Configs.SmartPickup.autoEquip.Label}"
-		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
-	}
-
-	upgradeItems: {
-		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ {$Mods.BetterInventory.Configs.SmartPickup.upgradeItems.Label}"
+	smartEquip: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ Smart Equip"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
