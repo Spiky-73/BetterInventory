@@ -126,6 +126,7 @@ public sealed class PlaceholderItem : GlobalItem {
         }
         if (_fakeContexts.Exists(f => f.IsHovered(inv, context, slot) && f.IsFake(inv[slot]))) {
             inv[slot].TurnToAir();
+            if (RecipeList.Instance.Enabled && context == ItemSlot.Context.GuideItem) RecipeList.OnGuideSlotChange(inv[slot], slot);
             if(Main.cursorOverride > CursorOverrideID.DefaultCursor) {
                 SoundEngine.PlaySound(SoundID.Grab);
                 Recipe.FindRecipes();

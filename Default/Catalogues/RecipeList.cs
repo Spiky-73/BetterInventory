@@ -1,8 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using BetterInventory.ItemSearch;
 using BetterInventory.ItemSearch.BetterGuide;
-using BetterInventory.UI.States;
 using MonoMod.Cil;
 using SpikysLib;
 using SpikysLib.IL;
@@ -29,7 +29,6 @@ public sealed class RecipeListFakeItemContext : IFakeItemContext {
     }
 }
 
-// TODO items go to the other slot if they are already in their default slot
 public sealed class RecipeList : ModEntityCatalogue {
 
     public static RecipeList Instance = null!;
@@ -113,6 +112,7 @@ public sealed class RecipeList : ModEntityCatalogue {
     }
 
     public override void Search(Item item) {
+        searchedFromGuide = item.UniqueId() == Main.guideItem.UniqueId() || item.UniqueId() == GuideTile.guideTile.UniqueId();
         (bool inGuide, Main.InGuideCraftMenu) = (Main.InGuideCraftMenu, true);
         (int cursor, Main.cursorOverride) = (Main.cursorOverride, CursorOverrideID.InventoryToChest);
         (bool left, Main.mouseLeft, bool rel, Main.mouseLeftRelease) = (Main.mouseLeft, true, Main.mouseLeftRelease, true);
@@ -121,12 +121,13 @@ public sealed class RecipeList : ModEntityCatalogue {
         Main.cursorOverride = cursor;
         (Main.mouseLeft, Main.mouseLeftRelease) = (left, rel);
     }
+    internal static bool searchedFromGuide;
 
-    private static void OnGuideSlotChange(Item item, int slot) {
+    public static void OnGuideSlotChange(Item item, int slot) {
         if (Configs.QuickSearch.Value.rightClick != Configs.RightClickAction.SearchPrevious) return;
         if(_guideHistory[slot].Count == 0 || !PlaceholderHelper.AreSame(item, _guideHistory[slot][^1])) _guideHistory[slot].Add(item.Clone());
     }
-    private static void SearchPrevious(Item[] inv, int context, int slot, bool allowAir = false) {
+    public static void SearchPrevious(Item[] inv, int context, int slot, bool allowAir = false) {
         Item? item = null;
         if(Configs.QuickSearch.Value.rightClick == Configs.RightClickAction.SearchPrevious && _guideHistory[slot].Count > 0) {
             do {
@@ -139,7 +140,7 @@ public sealed class RecipeList : ModEntityCatalogue {
             } while (!allowAir && item.IsAir || PlaceholderHelper.AreSame(item, inv[slot]));
         }
 
-        if (item is null) {
+        if (item is null || item.IsAir) {
             inv[slot].TurnToAir();
             SoundEngine.PlaySound(SoundID.Grab);
         } else {
@@ -173,6 +174,7 @@ public sealed class RecipeList : ModEntityCatalogue {
 
         if(Main.InGuideCraftMenu && Main.cursorOverride == CursorOverrideID.InventoryToChest) {
             Item item = inv[slot].Clone();
+            item.GetGlobalItem<ItemGuid>().UniqueId = Guid.NewGuid();
             item.stack = 1;
             GuideTilePlayer.GetGuideContextDestination(item, out var guideSlot);
             orig([item], context, 0);
@@ -182,6 +184,7 @@ public sealed class RecipeList : ModEntityCatalogue {
 
         if(context == ContextID.GuideItem && Main.cursorOverride <= CursorOverrideID.DefaultCursor && !Main.mouseItem.IsAir && ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) == 0) {
             (Item mouse, Main.mouseItem) = (Main.mouseItem, Main.mouseItem.Clone());
+            Main.mouseItem.GetGlobalItem<ItemGuid>().UniqueId = Guid.NewGuid();
             Main.mouseItem.stack = 1;
             orig(inv, context, slot);
             OnGuideSlotChange(inv[slot], slot);

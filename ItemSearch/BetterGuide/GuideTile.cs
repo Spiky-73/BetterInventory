@@ -33,10 +33,10 @@ public sealed class GuideTilePlayer : ModPlayer {
 
     public static ref Item GetGuideContextDestination(Item item, out int guideSlot) {
         guideSlot = GuideTile.IsCraftingStation(item) || (!Configs.BetterGuide.MoreRecipes && PlaceholderItem.ConditionItems.ContainsValue(item.type)) ? 1 : 0;
-        // if(FitsGuideTile(item)) {
-        //     if(guideSlot == 0 && PlaceholderHelper.AreSame(item, Main.guideItem)) guideSlot = 1;
-        //     else if(guideSlot == 1 && PlaceholderHelper.AreSame(item, guideTile)) guideSlot = 0;
-        // }
+        if(FitsGuideTile(item)) {
+            if(guideSlot == 0 && PlaceholderHelper.AreSame(item, Main.guideItem)) guideSlot = 1;
+            else if(guideSlot == 1 && PlaceholderHelper.AreSame(item, GuideTile.guideTile)) guideSlot = 0;
+        }
         if (guideSlot == 0) return ref Main.guideItem;
         return ref GuideTile.guideTile;
     }
@@ -83,6 +83,15 @@ public sealed class GuideTilePlayer : ModPlayer {
         }
         if (Main.InGuideCraftMenu && Main.cursorOverride == CursorOverrideID.InventoryToChest) {
             ref Item destination = ref GetGuideContextDestination(inv[slot], out var guideSlot);
+            if (RecipeList.Instance.Enabled && FitsGuideTile(inv[slot])) {
+                var items = GuideTile.GuideItems;
+                void HandleDouble(int checkSlot) {
+                    if (!RecipeList.searchedFromGuide && PlaceholderHelper.AreSame(inv[slot], items[checkSlot])) RecipeList.SearchPrevious(items, ContextID.GuideItem, checkSlot, true);
+                }
+                if (guideSlot == 1) HandleDouble(0);
+                else if (guideSlot == 0) HandleDouble(1);
+                GuideTile.GuideItems = items; // Update items if changed
+            }
             if (guideSlot == 1) {
                 (inv[slot], destination) = (destination, inv[slot]);
                 SoundEngine.PlaySound(SoundID.Grab);
