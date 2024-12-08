@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using BetterInventory.Crafting;
 using BetterInventory.DataStructures;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -17,32 +16,6 @@ using Terraria.UI;
 
 namespace BetterInventory.ItemSearch.BetterGuide;
 
-public class GuideSortStep : IRecipeSortStep {
-    public bool HiddenFromSortOptions => true;
-
-    public int Compare(RecipeListEntry? x, RecipeListEntry? y) {
-        if (Configs.BetterGuide.UnknownDisplay && Configs.BetterGuide.Value.unknownDisplay == Configs.UnknownDisplay.Unknown) {
-            var player = UnknownDisplayPlayer.LocalPlayer;
-            var res = player.IsRecipeKnown(y!).CompareTo(player.IsRecipeKnown(x!));
-            if (res != 0) return res;
-        }
-        if(Configs.BetterGuide.FavoritedRecipes) {
-            var player = FavoritedRecipesPlayer.LocalPlayer;
-            var res = GetPriority(player, y!).CompareTo(GetPriority(player, x!));
-            if (res != 0) return res;
-        }
-        return 0;
-    }
-
-    public int GetPriority(FavoritedRecipesPlayer player, RecipeListEntry recipe) {
-        if (player.IsFavorited(recipe.Index)) return 1;
-        if (player.IsBlacklisted(recipe.Index)) return -1;
-        return 0;
-    }
-
-    public string GetDisplayNameKey() => throw new System.NotImplementedException();
-}
-
 public sealed class FavoritedRecipesPlayer : ModPlayer {
     public static FavoritedRecipesPlayer LocalPlayer => Main.LocalPlayer.GetModPlayer<FavoritedRecipesPlayer>();
 
@@ -51,14 +24,12 @@ public sealed class FavoritedRecipesPlayer : ModPlayer {
         s_blacklistedTextures = new(TextureAssets.InventoryBack5, TextureAssets.InventoryBack11);
         On_Main.HoverOverCraftingItemButton += HookFavoriteRecipe;
         On_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += HookFavoritedBackground;
-
-        RecipeUI.AddSortStep(new GuideSortStep());
     }
 
     private static void HookFavoritedBackground(On_ItemSlot.orig_Draw_SpriteBatch_ItemArray_int_int_Vector2_Color orig, SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, Color lightColor) {
         TextureHighlight? texture = null;
-        var localPlayer = LocalPlayer;
         if (Configs.BetterGuide.FavoritedRecipes && context == ItemSlot.Context.CraftingMaterial) {
+            var localPlayer = LocalPlayer;
             if (localPlayer.favoritedRecipes.Exist(r => Main.recipe[r].createItem == inv[slot])) texture = s_favoriteTextures;
             else if (localPlayer.blacklistedRecipes.Exist(r => Main.recipe[r].createItem == inv[slot])) texture = s_blacklistedTextures;
         }
@@ -145,6 +116,27 @@ public sealed class FavoritedRecipesPlayer : ModPlayer {
     }
     public bool ResetRecipeState(int recipe) => favoritedRecipes.Remove(recipe) | blacklistedRecipes.Remove(recipe);
 
+    public static void SortRecipes() {
+        List<int> favorited = [];
+        List<int> others = [];
+        List<int> blacklisted = [];
+        List<int> unknown = [];
+
+        var player = LocalPlayer;
+        for (int i = 0; i < Main.numAvailableRecipes; i++) {
+            int recipe = Main.availableRecipe[i];
+            if (player.IsFavorited(recipe)) favorited.Add(recipe);
+            else if (player.IsBlacklisted(recipe)) blacklisted.Add(recipe);
+            else if (UnknownDisplayPlayer.IsUnknown(recipe)) unknown.Add(recipe);
+            else others.Add(recipe);
+        }
+
+        int index = 0;
+        foreach (var recipe in favorited) Main.availableRecipe[index++] = recipe;
+        foreach (var recipe in others) Main.availableRecipe[index++] = recipe;
+        foreach (var recipe in blacklisted) Main.availableRecipe[index++] = recipe;
+        foreach (var recipe in unknown) Main.availableRecipe[index++] = recipe;
+    }
 
     public readonly RangeSet favoritedRecipes = [];
     public readonly RangeSet blacklistedRecipes = [];

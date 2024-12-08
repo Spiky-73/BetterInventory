@@ -86,6 +86,7 @@ public sealed class GuideTilePlayer : ModPlayer {
             if (guideSlot == 1) {
                 (inv[slot], destination) = (destination, inv[slot]);
                 SoundEngine.PlaySound(SoundID.Grab);
+                Recipe.FindRecipes();
                 return true;
             }
         }
