@@ -20,6 +20,7 @@ public sealed class FavoritedRecipesPlayer : ModPlayer {
     public static FavoritedRecipesPlayer LocalPlayer => Main.LocalPlayer.GetModPlayer<FavoritedRecipesPlayer>();
 
     public override void Load() {
+        s_defaultTextures = new(TextureAssets.InventoryBack4, TextureAssets.InventoryBack14);
         s_favoriteTextures = new(TextureAssets.InventoryBack10, TextureAssets.InventoryBack17);
         s_blacklistedTextures = new(TextureAssets.InventoryBack5, TextureAssets.InventoryBack11);
         On_Main.HoverOverCraftingItemButton += HookFavoriteRecipe;
@@ -33,6 +34,7 @@ public sealed class FavoritedRecipesPlayer : ModPlayer {
             if (localPlayer.favoritedRecipes.Exist(r => Main.recipe[r].createItem == inv[slot])) texture = s_favoriteTextures;
             else if (localPlayer.blacklistedRecipes.Exist(r => Main.recipe[r].createItem == inv[slot])) texture = s_blacklistedTextures;
         }
+        if (texture is null && Configs.BetterGuide.AvailableRecipes && ItemSlot.DrawGoldBGForCraftingMaterial) texture = s_defaultTextures;
         if (texture is null) {
             orig(spriteBatch, inv, context, slot, position, lightColor);
             return;
@@ -75,6 +77,7 @@ public sealed class FavoritedRecipesPlayer : ModPlayer {
             Main.mouseLeftRelease = false;
         }
     }
+    private static TextureHighlight s_defaultTextures = null!;
     private static TextureHighlight s_favoriteTextures = null!;
     private static TextureHighlight s_blacklistedTextures = null!;
 
