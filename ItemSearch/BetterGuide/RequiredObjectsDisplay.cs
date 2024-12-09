@@ -21,7 +21,7 @@ public sealed class RequiredObjectsDisplay : ILoadable {
     public void Unload() { }
 
     private static void HookGuideCraftText(On_Main.orig_DrawGuideCraftText orig, int adjY, Color craftingTipColor, out int inventoryX, out int inventoryY) {
-        if (!Configs.BetterGuide.ConditionsDisplay) {
+        if (!Configs.BetterGuide.RequiredObjectsDisplay) {
             orig(adjY, craftingTipColor, out inventoryX, out inventoryY);
             return;
         }

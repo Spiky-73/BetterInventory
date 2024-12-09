@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using BetterInventory.ItemSearch;
 using SpikysLib;
 using Terraria;
 using Terraria.GameContent.UI.Chat;
@@ -60,7 +61,6 @@ public class RequiredTooltipItem : GlobalItem {
         return false;
     }
 
-    // TODO guide Condition display
     // TODO guide availableRecipes (enough or not)
     private static List<TooltipLine> GetRecipeLines(Recipe recipe) {
         Guid guid = recipe.createItem.UniqueId();
@@ -70,13 +70,18 @@ public class RequiredTooltipItem : GlobalItem {
 
         _requiredItemsTooltips = [new(BetterInventory.Instance, "RequiredItems", materials)];
         if(_guideRecipes) {
+            bool fancy = Configs.BetterGuide.RequiredObjectsDisplay;
             List<string> objects = [];
             objects.AddRange(recipe.requiredTile.TakeWhile(t => t != -1).Select(t => {
-                int requiredTileStyle = Recipe.GetRequiredTileStyle(t);
-                return Lang.GetMapObjectName(MapHelper.TileToLookup(t, requiredTileStyle));
+                return fancy ? ItemTagHandler.GenerateTag(PlaceholderItem.FromTile(t)) : Lang.GetMapObjectName(MapHelper.TileToLookup(t, Recipe.GetRequiredTileStyle(t)));
             }));
-            objects.AddRange(recipe.Conditions.Select(c => c.Description.Value));
-            string str = objects.Count == 0 ? Lang.inter[23].Value : string.Join(", ", objects);
+            objects.AddRange(recipe.Conditions.Select(c => {
+                return fancy ? ItemTagHandler.GenerateTag(PlaceholderItem.FromCondition(c)) : c.Description.Value;
+            }));
+            string str = fancy ? 
+                (objects.Count == 0 ? ItemTagHandler.GenerateTag(PlaceholderItem.FromTile(PlaceholderItem.ByHandTile)) : string.Join(string.Empty, objects)):
+                (objects.Count == 0 ? Lang.inter[23].Value : string.Join(", ", objects));
+
             if (!Configs.RecipeTooltip.Value.objectsLine) _requiredItemsTooltips[0].Text += $" @ {str}";
             else _requiredItemsTooltips.Add(new(BetterInventory.Instance, "RequiredObjects", $"@ {str}"));
         }

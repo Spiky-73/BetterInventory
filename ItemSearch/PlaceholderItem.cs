@@ -44,7 +44,7 @@ public sealed class PlaceholderItem : GlobalItem {
     public bool CanPlaceholderStack(Item source) => !IsAPlaceholder && !source.IsAPlaceholder();
 
     public sealed override bool InstancePerEntity => true;
-    public sealed override bool AppliesToEntity(Item entity, bool lateInstantiation) => entity.type == FakeType;
+    public sealed override bool AppliesToEntity(Item entity, bool lateInstantiation) => entity.type == FakeType || ConditionItems.ContainsValue(entity.type);
 
     public override void SaveData(Item item, TagCompound tag) {
         if (tile != -1) tag[TileTag] = tile;
@@ -70,13 +70,20 @@ public sealed class PlaceholderItem : GlobalItem {
         return orig(item, context, spriteBatch, screenPositionForItemCenter, scale, sizeLimit, environmentColor);
     }
 
+    public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
+        if(condition is null) return;
+        var line = tooltips.FindLine(TooltipLineID.ItemName);
+        if (line is null) return;
+        line.Text = Language.GetTextValue(condition);
+    }
+
     private static List<TooltipLine> HookPlaceholderTooltip(Reflection.ItemLoader.ModifyTooltipsFn orig, Item item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out Color?[] overrideColor, int prefixlineIndex) {
         string? name = null;
         if(UnknownDisplayPlayer.IsUnknown(item)) name = Language.GetTextValue($"{Localization.Keys.UI}.Unknown");
-        if (!item.IsAir && name is null && item.TryGetGlobalItem(out PlaceholderItem placeholder)) {
+        if (!item.IsAir && name is null && item.type == FakeType && item.TryGetGlobalItem(out PlaceholderItem placeholder)) {
             if (placeholder.tile == ByHandTile) name = Language.GetTextValue($"{Localization.Keys.UI}.ByHand");
             else if (placeholder.tile >= 0) name = Lang.GetMapObjectName(MapHelper.TileToLookup(placeholder.tile, 0));
-            else if (placeholder.condition is not null) name = Language.GetTextValue(placeholder.condition);
+            else if ( placeholder.condition is not null) name = Language.GetTextValue(placeholder.condition);
         }
         if (name is null) return orig.Invoke(item, ref numTooltips, names, ref text, ref modifier, ref badModifier, ref oneDropLogo, out overrideColor, prefixlineIndex);
 
@@ -96,13 +103,8 @@ public sealed class PlaceholderItem : GlobalItem {
         item.GetGlobalItem<PlaceholderItem>().tile = tile;
         return item;
     }
-    public static Item FromCondition(Condition condition) {
-        if (ConditionItems.TryGetValue(condition.Description.Key, out int type)) {
-            Item item = new(type);
-            item.SetNameOverride(condition.Description.Value);
-            return item;
-        }
-        Item placeholder = new(FakeType);
+    public static Item FromCondition(Condition condition) {       
+        Item placeholder = ConditionItems.TryGetValue(condition.Description.Key, out int type) ? new(type) : new(FakeType);
         placeholder.GetGlobalItem<PlaceholderItem>().condition = condition.Description.Key;
         return placeholder;
     }
