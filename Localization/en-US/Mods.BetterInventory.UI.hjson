@@ -13,3 +13,4 @@ FeatureUnloaded: This feature was not loaded and will have no effect even when E
 FramesToSec: 60 = 1s
 BagContent: Contains the following items:
 ScrollTooltip: Lines {0}-{1} ({2}), scroll to view the rest
+Unmet: unmet

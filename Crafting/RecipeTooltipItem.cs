@@ -61,7 +61,6 @@ public class RequiredTooltipItem : GlobalItem {
         return false;
     }
 
-    // TODO guide availableRecipes (enough or not)
     private static List<TooltipLine> GetRecipeLines(Recipe recipe) {
         Guid guid = recipe.createItem.UniqueId();
         if (_lineItemGuid == guid) return _requiredItemsTooltips;
@@ -70,20 +69,21 @@ public class RequiredTooltipItem : GlobalItem {
 
         _requiredItemsTooltips = [new(BetterInventory.Instance, "RequiredItems", materials)];
         if(_guideRecipes) {
-            bool fancy = Configs.BetterGuide.RequiredObjectsDisplay;
-            List<string> objects = [];
-            objects.AddRange(recipe.requiredTile.TakeWhile(t => t != -1).Select(t => {
-                return fancy ? ItemTagHandler.GenerateTag(PlaceholderItem.FromTile(t)) : Lang.GetMapObjectName(MapHelper.TileToLookup(t, Recipe.GetRequiredTileStyle(t)));
-            }));
-            objects.AddRange(recipe.Conditions.Select(c => {
-                return fancy ? ItemTagHandler.GenerateTag(PlaceholderItem.FromCondition(c)) : c.Description.Value;
-            }));
-            string str = fancy ? 
-                (objects.Count == 0 ? ItemTagHandler.GenerateTag(PlaceholderItem.FromTile(PlaceholderItem.ByHandTile)) : string.Join(string.Empty, objects)):
-                (objects.Count == 0 ? Lang.inter[23].Value : string.Join(", ", objects));
+            string objectsText;
+            if (Configs.BetterGuide.RequiredObjectsDisplay) {
+                if (recipe.requiredTile.Count == 0) _displayedTiles = [PlaceholderItem.FromTile(PlaceholderItem.ByHandTile)];
+                else _displayedTiles = recipe.requiredTile.TakeWhile(t => t != -1).Select(PlaceholderItem.FromTile).ToArray();
+                _displayedConditions = recipe.Conditions.Select(PlaceholderItem.FromCondition).ToArray();
+                objectsText = string.Join(string.Empty, _displayedTiles.Select(ItemTagHandler.GenerateTag)) + string.Join(string.Empty, _displayedConditions.Select(ItemTagHandler.GenerateTag));
+            } else {
+                List<string> objects = [];
+                objects.AddRange(recipe.requiredTile.TakeWhile(t => t != -1).Select(t => Lang.GetMapObjectName(MapHelper.TileToLookup(t, Recipe.GetRequiredTileStyle(t)))));
+                objects.AddRange(recipe.Conditions.Select(c => c.Description.Value));
+                objectsText = objects.Count == 0 ? Lang.inter[23].Value : string.Join(", ", objects);
+            }
 
-            if (!Configs.RecipeTooltip.Value.objectsLine) _requiredItemsTooltips[0].Text += $" @ {str}";
-            else _requiredItemsTooltips.Add(new(BetterInventory.Instance, "RequiredObjects", $"@ {str}"));
+            if (!Configs.RecipeTooltip.Value.objectsLine) _requiredItemsTooltips[0].Text += $" @ {objectsText}";
+            else _requiredItemsTooltips.Add(new(BetterInventory.Instance, "RequiredObjects", $"@ {objectsText}"));
         }
         return _requiredItemsTooltips;
     }
@@ -91,6 +91,9 @@ public class RequiredTooltipItem : GlobalItem {
     public static Recipe? HoveredRecipe;
 
     private static List<TooltipLine> _requiredItemsTooltips = [];
+    internal static Item[] _displayedTiles = [];
+    internal static Item[] _displayedConditions = [];
+
     private static Guid _lineItemGuid;
 
     private static bool _guideRecipes;

@@ -74,7 +74,7 @@ public sealed class PlaceholderItem : GlobalItem {
         if(condition is null) return;
         var line = tooltips.FindLine(TooltipLineID.ItemName);
         if (line is null) return;
-        line.Text = Language.GetTextValue(condition);
+        line.Text = line.Text.Replace(item.Name, Language.GetTextValue(condition));
     }
 
     private static List<TooltipLine> HookPlaceholderTooltip(Reflection.ItemLoader.ModifyTooltipsFn orig, Item item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out Color?[] overrideColor, int prefixlineIndex) {
@@ -83,17 +83,18 @@ public sealed class PlaceholderItem : GlobalItem {
         if (!item.IsAir && name is null && item.type == FakeType && item.TryGetGlobalItem(out PlaceholderItem placeholder)) {
             if (placeholder.tile == ByHandTile) name = Language.GetTextValue($"{Localization.Keys.UI}.ByHand");
             else if (placeholder.tile >= 0) name = Lang.GetMapObjectName(MapHelper.TileToLookup(placeholder.tile, 0));
-            else if ( placeholder.condition is not null) name = Language.GetTextValue(placeholder.condition);
+            else if (placeholder.condition is not null) name = Language.GetTextValue(placeholder.condition);
         }
-        if (name is null) return orig.Invoke(item, ref numTooltips, names, ref text, ref modifier, ref badModifier, ref oneDropLogo, out overrideColor, prefixlineIndex);
-
-        List<TooltipLine> tooltips = [new(BetterInventory.Instance, names[0], name)];
-        numTooltips = 1;
-        text = [tooltips[0].Text];
-        modifier = [tooltips[0].IsModifier];
-        badModifier = [tooltips[0].IsModifierBad];
-        oneDropLogo = -1;
-        overrideColor = [null];
+        if(name is not null) text[0] = name;
+        var tooltips = orig.Invoke(item, ref numTooltips, names, ref text, ref modifier, ref badModifier, ref oneDropLogo, out overrideColor, prefixlineIndex);
+        if (name is not null) {
+            numTooltips = 1;
+            text = [tooltips[0].Text];
+            modifier = [tooltips[0].IsModifier];
+            badModifier = [tooltips[0].IsModifierBad];
+            oneDropLogo = -1;
+            overrideColor = [null];
+        }
         return tooltips;
     }
 
