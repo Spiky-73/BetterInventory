@@ -14,6 +14,8 @@ public sealed class DisplayedRecipes : ModSystem {
     public override void Load() {
         On_Recipe.FindRecipes += HookFindAvailableRecipes;
         On_Main.HoverOverCraftingItemButton += HookDisableCraftWhenNonAvailable;
+        On_Recipe.TryRefocusingRecipe += HookNoRefocus;
+        On_Recipe.VisuallyRepositionRecipes += HookNoReposition;
     }
 
     public override void PostAddRecipes() {
@@ -57,6 +59,14 @@ public sealed class DisplayedRecipes : ModSystem {
         Main.numAvailableRecipes = numDisplayed;
 
         FindDisplayedRecipes(true);
+    }
+
+    private void HookNoRefocus(On_Recipe.orig_TryRefocusingRecipe orig, int oldRecipe) {
+        if (!Enabled || Main.availableRecipe != availableRecipes) orig(oldRecipe);
+    }
+
+    private void HookNoReposition(On_Recipe.orig_VisuallyRepositionRecipes orig, float focusY) {
+        if (!Enabled || Main.availableRecipe != availableRecipes) orig(focusY);
     }
 
     public static void FindDisplayedRecipes(bool canDelayCheck = false) {

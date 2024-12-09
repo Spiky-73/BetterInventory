@@ -25,6 +25,7 @@ public sealed class FixedUI : ILoadable {
             if (!il.ApplyTo(ILRecipeCount, Configs.FixedUI.RecipeCount)) Configs.UnloadedCrafting.Value.recipeCount = true;
             if (!il.ApplyTo(ILNoRecStartOffset, Configs.FixedUI.NoRecStartOffset)) Configs.UnloadedCrafting.Value.noRecStartOffset = true;
             if (!il.ApplyTo(ILNoRecListClose, Configs.FixedUI.NoRecListClose)) Configs.UnloadedCrafting.Value.noRecListClose = true;
+            if (!il.ApplyTo(ILKeepFocusedVisible, Configs.FixedUI.KeepFocusedVisible)) Configs.UnloadedCrafting.Value.keepFocusedVisible = true;
         };
 
     }
@@ -70,6 +71,7 @@ public sealed class FixedUI : ILoadable {
         //     ...
         // }
     }
+
     private static void ILMaterialWrapping(ILContext il) {
         ILCursor cursor = new(il);
 
@@ -114,6 +116,7 @@ public sealed class FixedUI : ILoadable {
         //     ...
         // }
     }
+
     private static void ILScrollButtonsFix(ILContext il) {
         ILCursor cursor = new(il);
         // Main.hidePlayerCraftingMenu = false;
@@ -165,7 +168,9 @@ public sealed class FixedUI : ILoadable {
 
         //     ++ <drawRecipeCount>
         cursor.EmitLdloc(x).EmitLdloc(y);
-        cursor.EmitDelegate(DrawRecipeCount);
+        cursor.EmitDelegate((int x, int y) => {
+            if (Configs.FixedUI.RecipeCount) DrawRecipeCount(x, y);
+        });
 
         //     while (...) <recipeList>
         // }
@@ -198,7 +203,6 @@ public sealed class FixedUI : ILoadable {
             if (emptySlots > UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow) Main.recStart -= SpikysLib.MathHelper.Snap(emptySlots,UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow, SpikysLib.MathHelper.SnapMode.Floor);
             return Main.recStart;
         } );
-
     }
 
     private static void ILNoRecListClose(ILContext il) {
@@ -218,6 +222,23 @@ public sealed class FixedUI : ILoadable {
         cursor.EmitDelegate((int numAvailableRecipes) => Configs.FixedUI.NoRecListClose && numAvailableRecipes == 0 ? 1 : numAvailableRecipes);
         //         ...
         //     }
+    }
+
+    private static void ILKeepFocusedVisible(ILContext il) {
+        ILCursor cursor = new(il);
+        // ...
+        // if(<showRecipes>){
+        //     ...
+        cursor.GotoNext(i => i.MatchStsfld(Reflection.UILinkPointNavigator.CRAFT_IconsPerColumn));
+        cursor.EmitDelegate(() => {
+            if (!Configs.FixedUI.KeepFocusedVisible) return;
+            int perLine = UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow;
+            int before = Main.recStart - Main.focusRecipe;
+            if (before > 0) Main.recStart -= SpikysLib.MathHelper.Snap(before, perLine, SpikysLib.MathHelper.SnapMode.Ceiling);
+            int after = Main.focusRecipe - (Main.recStart-1 + perLine * UILinkPointNavigator.Shortcuts.CRAFT_IconsPerColumn);
+            if (after > 0) Main.recStart += SpikysLib.MathHelper.Snap(after, perLine, SpikysLib.MathHelper.SnapMode.Ceiling);
+
+        });
     }
 
     private static bool HookTryAllowingToCraftRecipe(On_Main.orig_TryAllowingToCraftRecipe orig, Recipe currentRecipe, bool tryFittingItemInInventoryToAllowCrafting, out bool movedAnItemToAllowCrafting)
