@@ -90,6 +90,11 @@ FixedUI: {
 			Keep the selected recipe a the same position when the lists of recipes changes if it is visible
 			'''
 	}
+
+	focusButton: {
+		Label: Focus Selected Recipe Button
+		Tooltip: Add a button the focus the recipe list on the selected recipe
+	}
 }
 
 FastScroll: {
@@ -1050,8 +1055,8 @@ UnloadedCrafting: {
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
-	recipeCount: {
-		Label: "{$Mods.BetterInventory.Configs.Crafting.fixedUI.Label} @ {$Mods.BetterInventory.Configs.FixedUI.recipeCount.Label}"
+	recipeListUI: {
+		Label: "{$Mods.BetterInventory.Configs.Crafting.fixedUI.Label} @ Recipe List UI"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
