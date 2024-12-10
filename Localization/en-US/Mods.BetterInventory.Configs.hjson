@@ -26,9 +26,9 @@ Crafting: {
 		Tooltip: Craft items directly from the recipe list
 	}
 
-	mouseMaterial: {
-		Label: "[i:9] Held Material"
-		Tooltip: Adds the held item to the available materials
+	moreMaterials: {
+		Label: "[i:9] More Materials"
+		Tooltip: Adds various items to the available materials such as the mouse item and the equipped items
 	}
 
 	availableMaterials: {
@@ -84,7 +84,7 @@ FixedUI: {
 
 	keepFocusedVisible: {
 		Label: keep Focused Recipe Visible
-		Tooltip: Ensures that the selected is always visible on the recipe list 
+		Tooltip: Ensures that the selected is always visible on the recipe list
 	}
 }
 
@@ -131,6 +131,29 @@ CraftOnList: {
 	focusHovered: {
 		Label: Focus Hovered Recipe
 		Tooltip: Automatically selects the hovered recipe
+	}
+}
+
+MoreMaterials: {
+	Tooltip: ""
+
+	mouse: {
+		Label: Mouse item
+		Tooltip: Adds the mouse item to the available materials
+	}
+
+	equipment: {
+		Label: Equipment
+		Tooltip: Adds equipped items to the available materials
+	}
+}
+
+EquipementMaterials: {
+	Tooltip: ""
+
+	allLoadouts: {
+		Label: All loadouts
+		Tooltip: Add equipment from all loadouts and not the current one only 
 	}
 }
 

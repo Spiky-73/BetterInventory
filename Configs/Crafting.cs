@@ -10,11 +10,12 @@ public sealed class Crafting : ModConfig {
     public Toggle<RecipeSearchBar> recipeSearchBar = new(true);
     public Toggle<RecipeFilters> recipeFilters = new(true);
     public Toggle<CraftOnList> craftOnList = new(true);
-    [DefaultValue(true)] public bool mouseMaterial;
+    public Toggle<MoreMaterials> moreMaterials = new(true);
     public Toggle<AvailableMaterials> availableMaterials = new(true);
     public Toggle<RecipeTooltip> recipeTooltip = new(true);
 
-    public static bool MouseMaterial => Instance.mouseMaterial;
+    [JsonProperty, DefaultValue(true)] private bool mouseMaterial { set => ConfigHelper.MoveMember(!value, _ => moreMaterials.Key = value); }
+
     public static bool RecipeUI => Instance.recipeSearchBar || Instance.recipeFilters;
     public static Crafting Instance = null!;
 
@@ -81,6 +82,19 @@ public sealed class CraftOnList {
 
     // Compatibility version < v0.6
     [JsonProperty, DefaultValue(false)] private bool focusRecipe { set => ConfigHelper.MoveMember(value, _ => focusHovered = value); }
+}
+
+public sealed class MoreMaterials {
+    [DefaultValue(true)] public bool mouse = true;
+    public Toggle<EquipementMaterials> equipment = new(true);
+
+    public static bool Enabled => Crafting.Instance.moreMaterials;
+    public static MoreMaterials Value => Crafting.Instance.moreMaterials.Value;
+    public static bool Mouse => Enabled && Value.mouse;
+    public static bool Equipment => Enabled && Value.equipment;
+}
+public sealed class EquipementMaterials {
+    [DefaultValue(false)] public bool allLoadouts = false;
 }
 
 public sealed class AvailableMaterials {

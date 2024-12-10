@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using BetterInventory.Default.Inventories;
 using MonoMod.Cil;
 using SpikysLib.IL;
 using Terraria;
@@ -10,6 +11,7 @@ namespace BetterInventory.Crafting;
 public sealed class Crafting : ModPlayer {
 
     public override void Load() {
+        On_ItemSlot.RecordLoadoutChange += HookSwapLoadout;
         IL_Main.DrawInventory += static il => {
             if (!il.ApplyTo(ILCraftOnList, Configs.CraftOnList.Enabled)) Configs.UnloadedCrafting.Value.craftOnList = true;
         };
@@ -61,13 +63,31 @@ public sealed class Crafting : ModPlayer {
         // }
     }
 
+    private void HookSwapLoadout(On_ItemSlot.orig_RecordLoadoutChange orig) {
+        orig();
+        if (Configs.MoreMaterials.Equipment) Recipe.FindRecipes();
+    }
     public override IEnumerable<Item> AddMaterialsForCrafting(out ItemConsumedCallback? itemConsumedCallback) {
-        itemConsumedCallback = null;
-        if(!Configs.Crafting.MouseMaterial || Main.myPlayer != Player.whoAmI) return [];
         itemConsumedCallback = (item, index) => {
             if (item == Main.mouseItem) item.stack -= Reflection.RecipeLoader.ConsumedItems.GetValue()[^1].stack; // FIXME seems hacky
             return;
         };
-        return [Main.mouseItem]; ;
+        List<Item> materials = [];
+        if (Configs.MoreMaterials.Mouse && Main.myPlayer == Player.whoAmI) materials.Add(Main.mouseItem);
+        if (Configs.MoreMaterials.Equipment) {
+            materials.AddRange(Player.armor);
+            materials.AddRange(Player.dye);
+            if(Configs.MoreMaterials.Value.equipment.Value.allLoadouts) {
+                for (int i = 0; i < Player.Loadouts.Length; i++) {
+                    if (i == Player.CurrentLoadoutIndex) continue;
+                    materials.AddRange(Player.Loadouts[i].Armor);
+                    materials.AddRange(Player.Loadouts[i].Dye);
+                }
+            }
+            materials.AddRange(AAccessories.ModdedAccessories(Player));
+            materials.AddRange(Player.miscEquips);
+            materials.AddRange(Player.miscDyes);
+        }
+        return materials;
     }
 }
