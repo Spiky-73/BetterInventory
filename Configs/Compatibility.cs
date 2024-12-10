@@ -35,7 +35,6 @@ public sealed class Compatibility : ModConfig {
         FixedUI.Value.recipeCount = false;
         FixedUI.Value.noRecStartOffset = false;
         FixedUI.Value.noRecListClose = false;
-        FixedUI.Value.keepFocusedVisible = false;
         Crafting.Instance.recipeFilters.Key = false;
         Crafting.Instance.recipeSearchBar.Key = false;
         Crafting.Instance.craftOnList.Key = false;
@@ -86,7 +85,6 @@ public sealed class UnloadedCrafting {
     public bool recipeCount = false;
     public bool noRecStartOffset = false;
     public bool noRecListClose = false;
-    public bool keepFocusedVisible = false;
     public bool recipeFilters = false;
     public bool recipeSearchBar = false;
     public bool craftOnList = false;

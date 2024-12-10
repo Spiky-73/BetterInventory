@@ -25,9 +25,9 @@ public sealed class FixedUI : ILoadable {
             if (!il.ApplyTo(ILRecipeCount, Configs.FixedUI.RecipeCount)) Configs.UnloadedCrafting.Value.recipeCount = true;
             if (!il.ApplyTo(ILNoRecStartOffset, Configs.FixedUI.NoRecStartOffset)) Configs.UnloadedCrafting.Value.noRecStartOffset = true;
             if (!il.ApplyTo(ILNoRecListClose, Configs.FixedUI.NoRecListClose)) Configs.UnloadedCrafting.Value.noRecListClose = true;
-            if (!il.ApplyTo(ILKeepFocusedVisible, Configs.FixedUI.KeepFocusedVisible)) Configs.UnloadedCrafting.Value.keepFocusedVisible = true;
         };
-
+        On_Main.DrawInterface_Resources_ClearBuffs += HookRememberListPosition;
+        On_Recipe.ClearAvailableRecipes += HookClearAvailableRecipes;
     }
     public void Unload(){}
 
@@ -224,30 +224,37 @@ public sealed class FixedUI : ILoadable {
         //     }
     }
 
-    private static void ILKeepFocusedVisible(ILContext il) {
-        ILCursor cursor = new(il);
-        // ...
-        // if(<showRecipes>){
-        //     ...
-        cursor.GotoNext(i => i.MatchStsfld(Reflection.UILinkPointNavigator.CRAFT_IconsPerColumn));
-        cursor.EmitDelegate(() => {
-            if (!Configs.FixedUI.KeepFocusedVisible) return;
-            int perLine = UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow;
-            int before = Main.recStart - Main.focusRecipe;
-            if (before > 0) Main.recStart -= SpikysLib.MathHelper.Snap(before, perLine, SpikysLib.MathHelper.SnapMode.Ceiling);
-            int after = Main.focusRecipe - (Main.recStart-1 + perLine * UILinkPointNavigator.Shortcuts.CRAFT_IconsPerColumn);
-            if (after > 0) Main.recStart += SpikysLib.MathHelper.Snap(after, perLine, SpikysLib.MathHelper.SnapMode.Ceiling);
-
-        });
-    }
-
     private static bool HookTryAllowingToCraftRecipe(On_Main.orig_TryAllowingToCraftRecipe orig, Recipe currentRecipe, bool tryFittingItemInInventoryToAllowCrafting, out bool movedAnItemToAllowCrafting)
         => orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting || Configs.FixedUI.CraftWhenHolding, out movedAnItemToAllowCrafting);
+
+    private static void HookRememberListPosition(On_Main.orig_DrawInterface_Resources_ClearBuffs orig) {
+        var start = Main.recStart;
+        orig();
+        if (Configs.FixedUI.RememberListPosition) Main.recStart = start;
+    }
+
+    public static int GetRecipeLine(int availableRecipeIndex) => (availableRecipeIndex - Main.recStart) / UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow;
+
+    private void HookClearAvailableRecipes(On_Recipe.orig_ClearAvailableRecipes orig) {
+        _focusedRecipeLine = GetRecipeLine(Main.focusRecipe);
+        _focusedVisible = 0 <= _focusedRecipeLine && _focusedRecipeLine < UILinkPointNavigator.Shortcuts.CRAFT_IconsPerColumn;
+        orig();
+    }
+
+    // Called in DisplayedRecipes
+    internal static void HookTryRefocusingList(On_Recipe.orig_TryRefocusingRecipe orig, int oldRecipe) {
+        orig(oldRecipe);
+        if (!Configs.FixedUI.RememberListPosition || !_focusedVisible) return;
+        Main.recStart = Math.Max(0, SpikysLib.MathHelper.Snap(Main.focusRecipe, UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow, SpikysLib.MathHelper.SnapMode.Floor)
+            - _focusedRecipeLine * UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow);
+    }
+
+    private static bool _focusedVisible;
+    private static int _focusedRecipeLine;
 
     private static int _recDelay = 0;
     public static readonly int[] MaterialsPerLine = [6, 4];
 
     public const int VanillaMaterialSpacing = 40;
     public const int VanillaCorrection = -2;
-
 }

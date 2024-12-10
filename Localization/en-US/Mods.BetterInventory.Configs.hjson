@@ -82,9 +82,13 @@ FixedUI: {
 		Tooltip: Prevents the recipe list from closing when they are no available recipes
 	}
 
-	keepFocusedVisible: {
-		Label: keep Focused Recipe Visible
-		Tooltip: Ensures that the selected is always visible on the recipe list
+	rememberListPosition: {
+		Label: Remember Recipe List position
+		Tooltip:
+			'''
+			Reopens the recipe list in the same position as when it was closed
+			Keep the selected recipe a the same position when the lists of recipes changes if it is visible
+			'''
 	}
 }
 
@@ -153,7 +157,7 @@ EquipementMaterials: {
 
 	allLoadouts: {
 		Label: All loadouts
-		Tooltip: Add equipment from all loadouts and not the current one only 
+		Tooltip: Add equipment from all loadouts and not the current one only
 	}
 }
 
@@ -1058,11 +1062,6 @@ UnloadedCrafting: {
 
 	noRecListClose: {
 		Label: "{$Mods.BetterInventory.Configs.Crafting.fixedUI.Label} @ {$Mods.BetterInventory.Configs.FixedUI.noRecListClose.Label}"
-		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
-	}
-
-	keepFocusedVisible: {
-		Label: "{$Mods.BetterInventory.Configs.Crafting.fixedUI.Label} @ {$Mods.BetterInventory.Configs.FixedUI.keepFocusedVisible.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 

@@ -32,7 +32,7 @@ public sealed class FixedUI {
     [DefaultValue(true)] public bool recipeCount = true;
     [DefaultValue(true)] public bool noRecStartOffset = true;
     [DefaultValue(true)] public bool noRecListClose = true;
-    [DefaultValue(true)] public bool keepFocusedVisible = true;
+    [DefaultValue(true)] public bool rememberListPosition = true;
 
     public static bool Enabled => Crafting.Instance.fixedUI;
     public static bool FastScroll => Enabled && Value.fastScroll && !UnloadedCrafting.Value.fastScroll;
@@ -42,7 +42,7 @@ public sealed class FixedUI {
     public static bool RecipeCount => Enabled && Value.recipeCount && !UnloadedCrafting.Value.recipeCount;
     public static bool NoRecStartOffset => Enabled && Value.noRecStartOffset && !UnloadedCrafting.Value.noRecStartOffset;
     public static bool NoRecListClose => Enabled && Value.noRecListClose && !UnloadedCrafting.Value.noRecListClose;
-    public static bool KeepFocusedVisible => Enabled && Value.keepFocusedVisible && !UnloadedCrafting.Value.keepFocusedVisible;
+    public static bool RememberListPosition => Enabled && Value.rememberListPosition;
     public static FixedUI Value => Crafting.Instance.fixedUI.Value;
     
     // Compatibility version < v0.6
