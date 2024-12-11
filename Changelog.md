@@ -1,5 +1,16 @@
 # Better Inventory changelog
 
+## 0.8
+- Added Equipped items to available materials
+- Added Recipe in Tooltip
+- Added Remember Recipe List position
+- Added Focus Selected Recipe Button
+- Added Pickup to Void Bag First
+- Added Auto Open Recipe List
+- Reworked Better Guide
+- Reworked Recipes Filters and Available Recipes
+- Updated Spiky's Lib dependency to v1.3.1
+
 ## 0.7
 - Added an options to keep swapped items favorited
 - Added the number of visible recipes to the recipe list
@@ -17,7 +28,7 @@
 - Updated Spiky's Lib dependency to v1.3
 - Fixed available materials and CraftStack line displayed on incorrect items
 
-### v0.6.1.3
+## v0.6.1.3
 - Fixed guideTile saving as lens when empty
 
 ## v0.6.1.2

@@ -39,7 +39,7 @@ Crafting: {
 	Tooltip: ""
 
 	recipeTooltip: {
-		Label: "[i:398] Recipe Tooltip"
+		Label: "[i:398] Recipe in Tooltip"
 		Tooltip: Shows recipes' materials and required tiles in their tooltip
 	}
 }
@@ -147,12 +147,12 @@ MoreMaterials: {
 	Tooltip: ""
 
 	mouse: {
-		Label: Mouse item
-		Tooltip: Adds the mouse item to the available materials
+		Label: Held item
+		Tooltip: Adds the held item to the available materials
 	}
 
 	equipment: {
-		Label: Equipment
+		Label: Equipped items
 		Tooltip: Adds equipped items to the available materials
 	}
 }
@@ -300,7 +300,7 @@ SmartPickup: {
 		Label: Pickup to Void Bag First
 		Tooltip:
 			'''
-			Picked up items will fill void bag before the inventory
+			Picked up items will fill the void bag before the inventory
 			{$Mods.BetterInventory.Configs.VoidBagLevel.IfInside.Label}: Only for items already in the void bag
 			{$Mods.BetterInventory.Configs.VoidBagLevel.Always.Label}: Applies to all items
 			'''
