@@ -282,7 +282,7 @@ SmartPickup: {
 			'''
 			Items go their previous slot in your inventory when picked up
 			{$Mods.BetterInventory.Configs.ItemPickupLevel.ImportantItems.Label}: Applies to Favorited and Equiped items
-			{$Mods.BetterInventory.Configs.ItemPickupLevel.AllItems.Label}: Applies to All items
+			{$Mods.BetterInventory.Configs.ItemPickupLevel.AllItems.Label}: Applies to all items
 			'''
 	}
 
@@ -293,6 +293,16 @@ SmartPickup: {
 			Automatically equips items such as Armors, Accessories or Equipment
 			{$Mods.BetterInventory.Configs.AutoEquipLevel.PrimarySlots.Label}: Equipment go to their default slots if available
 			{$Mods.BetterInventory.Configs.AutoEquipLevel.AnySlot.Label}: Equipment go to any slot they can go in (includes Dyes). Armors and Accessories can go to social slots.
+			'''
+	}
+
+	voidBag: {
+		Label: Pickup to Void Bag First
+		Tooltip:
+			'''
+			Picked up items will fill void bag before the inventory
+			{$Mods.BetterInventory.Configs.VoidBagLevel.IfInside.Label}: Only for items already in the void bag
+			{$Mods.BetterInventory.Configs.VoidBagLevel.Always.Label}: Applies to all items
 			'''
 	}
 
@@ -324,6 +334,13 @@ AutoEquipLevel: {
 	None.Label: Off
 	PrimarySlots.Label: Primary Slots
 	AnySlot.Label: Any Slot
+}
+
+VoidBagLevel: {
+	Tooltip: ""
+	None.Label: Off
+	IfInside.Label: If Inside
+	Always.Label: Always
 }
 
 PreviousSlot: {

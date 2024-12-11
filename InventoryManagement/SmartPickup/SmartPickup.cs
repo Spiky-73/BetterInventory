@@ -52,8 +52,9 @@ public sealed class SmartPickup : ModSystem {
         // ++<upgradeItems>
         EmitSmartPickup(cursor, newitem, (Player self, Item item, GetItemSettings settings) => {
             if (vanillaGetItem || settings.NoText) return item;
-            if (Configs.UpgradeItems.Enabled && !item.IsAir) item = SmartEquip.UpgradeItems(self, item, settings);
-            if (Configs.SmartPickup.AutoEquip && !item.IsAir) item = SmartEquip.AutoEquip(self, item, settings);
+            if (!item.IsAir && Configs.UpgradeItems.Enabled) item = SmartEquip.UpgradeItems(self, item, settings);
+            if (!item.IsAir && Configs.SmartPickup.AutoEquip) item = SmartEquip.AutoEquip(self, item, settings);
+            if (!item.IsAir && Configs.SmartPickup.VoidBag) item = SmartEquip.VoidBag(self, item, settings);
             return item;
         });
     }
