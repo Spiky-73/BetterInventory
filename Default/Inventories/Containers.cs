@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using SpikysLib.DataStructures;
-using BetterInventory.InventoryManagement;
 using Terraria;
 using Terraria.ID;
 using Terraria.UI;
@@ -20,7 +19,7 @@ public sealed class Hotbar : ModSubInventory {
 public sealed class Inventory : ModSubInventory {
     public override int Context => ContextID.InventoryItem;
     public override ListIndices<Item> Items(Player player) => new(player.inventory, new SpikysLib.DataStructures.Range(InventorySlots.Hotbar.End, InventorySlots.Coins.Start));
-    public override Item GetItem(Player player, Item item, GetItemSettings settings) => SmartPickup.GetItem_Inner(player, player.whoAmI, item, settings);
+    public override Item GetItem(Player player, Item item, GetItemSettings settings) => Utility.GetItem_Inner(player, player.whoAmI, item, settings);
 }
 public sealed class Coins : ModSubInventory {
     public override int Context => ContextID.InventoryCoin;

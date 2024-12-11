@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using BetterInventory.ItemSearch;
+using BetterInventory.InventoryManagement.SmartPickup;
 using MonoMod.Cil;
 using SpikysLib;
 using SpikysLib.Constants;
@@ -15,6 +15,13 @@ namespace BetterInventory;
 [Flags] public enum AllowedItems : byte { None = 0b00, Self = 0b01, Mouse = 0b10}
 
 public static class Utility {
+
+    public static Item GetItem_Inner(Player self, int plr, Item newItem, GetItemSettings settings) {
+        SmartPickup.vanillaGetItem = true;
+        Item i = self.GetItem(plr, newItem, settings);
+        SmartPickup.vanillaGetItem = false;
+        return i;
+    }
 
     public static int FailedILs { get; private set; }
 

@@ -99,8 +99,8 @@ public sealed class UnloadedCrafting {
 public sealed class UnloadedInventoryManagement {
     public bool materials;
     public bool baits;
-    public bool previousSlot;
-    public bool smartEquip;
+    public bool pickupOverrideSlot;
+    public bool pickupDedicatedSlot;
     public bool hotbarLast;
     public bool fixSlot;
     public bool displayFakeItem;

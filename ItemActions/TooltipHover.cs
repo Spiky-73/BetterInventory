@@ -12,6 +12,7 @@ using Terraria.UI.Chat;
 
 namespace BetterInventory.ItemActions;
 
+// BUG Searching tooltip tags after releasing key toggle instead of search 
 public class TooltipHover : ModSystem {
 
     public override void Load() {
