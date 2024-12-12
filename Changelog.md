@@ -7,6 +7,7 @@
 - Added Focus Selected Recipe Button
 - Added Pickup to Void Bag First
 - Added Auto Open Recipe List
+- Improved Tooltip Hover
 - Reworked Better Guide
 - Reworked Recipes Filters and Available Recipes
 - Updated Spiky's Lib dependency to v1.3.1

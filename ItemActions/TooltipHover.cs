@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using ReLogic.Graphics;
+using SpikysLib;
 using SpikysLib.IL;
 using Terraria;
 using Terraria.ModLoader;
@@ -23,7 +24,7 @@ public class TooltipHover : ModSystem {
             if (!il.ApplyTo(ILTooltipHover, Configs.TooltipHover.Enabled)) Configs.UnloadedItemActions.Value.tooltipHover = true;
         };
     }
-    
+
     public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers) {
         int mouseTextIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Cursor"));
         if (mouseTextIndex != -1) layers.Insert(mouseTextIndex, frozenTooltipInterface);
@@ -39,9 +40,8 @@ public class TooltipHover : ModSystem {
         if (_forcedFreezeTime > 0) _forcedFreezeTime--;
 
         if (!Configs.TooltipHover.Enabled || !Main.playerInventory || _frozenTooltips.Count <= 0) return;
-        
-        Reflection.Main._mouseTextCache.SetValue(Main.instance, Activator.CreateInstance(Reflection.Main.MouseTextCache));
-        Main.HoverItem = new();
+
+        HashSet<Guid> drawUniqueIds = [];
 
         DrawingFrozenTooltips = true;
         List<(bool hovered, TextSnippet? snippet)> hoverInfo = [];
@@ -51,25 +51,26 @@ public class TooltipHover : ModSystem {
             Reflection.Main.MouseText_DrawItemTooltip.Invoke(Main.instance, Activator.CreateInstance(Reflection.Main.MouseTextCache), 0, tooltip.Diff, tooltip.X, tooltip.Y);
             Main.HoverItem = hover;
             hoverInfo.Add((_hovered, _hoveredSnippet));
+            drawUniqueIds.Add(tooltip.HoverItem.UniqueId());
         }
         DrawingFrozenTooltips = false;
 
-        for (int i = _frozenTooltips.Count - 1; i >= 0 ; i--) {
+        for (int i = _frozenTooltips.Count - 1; i >= 0; i--) {
             var (hovered, hoveredSnippet) = hoverInfo[i];
             if (!hovered) {
-                if (_forcedFreezeTime <= 0 && !HoverTooltipKb.Current) {
-                    _frozenTooltips.RemoveAt(i);
-                    continue;
-                }
+                if (_forcedFreezeTime <= 0 && !HoverTooltipKb.Current) _frozenTooltips.RemoveAt(i);
             } else {
-                _forcedFreezeTime = Configs.TooltipHover.Value.graceTime;
+                Utility.ClearMouseText();
+                if (i == _frozenTooltips.Count - 1) _forcedFreezeTime = Configs.TooltipHover.Value.graceTime;
                 if (hoveredSnippet is not null) {
                     hoveredSnippet.OnHover();
                     if (Main.mouseLeft && Main.mouseLeftRelease) hoveredSnippet.OnClick();
                 }
+                break;
             }
-            break;
         }
+
+        if (drawUniqueIds.Contains(Main.HoverItem.UniqueId())) Utility.ClearMouseText();
     }
     private static bool _hovered;
     private static TextSnippet? _hoveredSnippet;

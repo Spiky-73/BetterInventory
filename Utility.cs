@@ -16,6 +16,11 @@ namespace BetterInventory;
 
 public static class Utility {
 
+    public static void ClearMouseText() {
+        Main.HoverItem = new();
+        Reflection.Main._mouseTextCache.SetValue(Main.instance, Activator.CreateInstance(Reflection.Main.MouseTextCache));
+    }
+
     public static Item GetItem_Inner(Player self, int plr, Item newItem, GetItemSettings settings) {
         SmartPickup.vanillaGetItem = true;
         Item i = self.GetItem(plr, newItem, settings);
