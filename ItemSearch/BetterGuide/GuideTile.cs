@@ -33,7 +33,7 @@ public sealed class GuideTilePlayer : ModPlayer {
 
     public static ref Item GetGuideContextDestination(Item item, out int guideSlot) {
         guideSlot = GuideTile.IsCraftingStation(item) || (!Configs.BetterGuide.MoreRecipes && PlaceholderItem.ConditionItems.ContainsValue(item.type)) ? 1 : 0;
-        if(FitsGuideTile(item)) {
+        if(!item.IsAPlaceholder() && FitsGuideTile(item)) {
             if(guideSlot == 0 && PlaceholderHelper.AreSame(item, Main.guideItem)) guideSlot = 1;
             else if(guideSlot == 1 && PlaceholderHelper.AreSame(item, GuideTile.guideTile)) guideSlot = 0;
         }

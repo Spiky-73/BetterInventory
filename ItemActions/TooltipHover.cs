@@ -12,7 +12,6 @@ using Terraria.UI.Chat;
 
 namespace BetterInventory.ItemActions;
 
-// BUG Searching tooltip tags after releasing key toggle instead of search 
 public class TooltipHover : ModSystem {
 
     public override void Load() {
@@ -42,6 +41,7 @@ public class TooltipHover : ModSystem {
         if (!Configs.TooltipHover.Enabled || !Main.playerInventory || _frozenTooltips.Count <= 0) return;
         
         Reflection.Main._mouseTextCache.SetValue(Main.instance, Activator.CreateInstance(Reflection.Main.MouseTextCache));
+        Main.HoverItem = new();
 
         DrawingFrozenTooltips = true;
         List<(bool hovered, TextSnippet? snippet)> hoverInfo = [];
