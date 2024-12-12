@@ -32,8 +32,13 @@ public sealed class GuideTileFakeItemContext : IFakeItemContext {
 public sealed class GuideTilePlayer : ModPlayer {
 
     public static ref Item GetGuideContextDestination(Item item, out int guideSlot) {
+        if (item.IsAir) {
+            guideSlot = 0;
+            return ref Main.guideItem;
+        }
         guideSlot = GuideTile.IsCraftingStation(item) || (!Configs.BetterGuide.MoreRecipes && PlaceholderItem.ConditionItems.ContainsValue(item.type)) ? 1 : 0;
-        if(!item.IsAPlaceholder() && FitsGuideTile(item)) {
+        Item[] guideItems = GuideTile.GuideItems;
+        if (ItemSlot.PickItemMovementAction(guideItems, ContextID.GuideItem, 0, item) != -1 && ItemSlot.PickItemMovementAction(guideItems, ContextID.GuideItem, 1, item) != -1) {
             if(guideSlot == 0 && PlaceholderHelper.AreSame(item, Main.guideItem)) guideSlot = 1;
             else if(guideSlot == 1 && PlaceholderHelper.AreSame(item, GuideTile.guideTile)) guideSlot = 0;
         }

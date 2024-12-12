@@ -62,7 +62,7 @@ public sealed class AvailableRecipes : ModSystem {
         bool available;
         var focusRecipe = Main.recipe[Main.availableRecipe[Main.focusRecipe]];
         if (focusRecipe.requiredItem.Contains(inv[slot])) { // Material
-            available = DisplayedRecipes.IsAvailable(Main.focusRecipe) || focusRecipe.GetMaterialCount(inv[slot]) >= inv[slot].stack;
+            available = DisplayedRecipes.IsAvailable(focusRecipe.RecipeIndex) || focusRecipe.GetMaterialCount(inv[slot]) >= inv[slot].stack;
         } else if (inv == RequiredObjectsDisplay._displayedRecipeTiles) { // Required Tile
             available = slot >= focusRecipe.requiredTile.Count || Main.LocalPlayer.adjTile[focusRecipe.requiredTile[slot]];
         } else if (inv == RequiredObjectsDisplay._displayedRecipeConditions) { // Required Condition

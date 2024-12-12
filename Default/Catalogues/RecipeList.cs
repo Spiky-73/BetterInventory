@@ -143,6 +143,7 @@ public sealed class RecipeList : ModEntityCatalogue {
         if (item is null || item.IsAir) {
             inv[slot].TurnToAir();
             SoundEngine.PlaySound(SoundID.Grab);
+            OnGuideSlotChange(item ?? new(), slot);
         } else {
             (int cursor, Main.cursorOverride) = (Main.cursorOverride, CursorOverrideID.DefaultCursor);
             (bool left, Main.mouseLeft, bool rel, Main.mouseLeftRelease) = (Main.mouseLeft, true, Main.mouseLeftRelease, true);

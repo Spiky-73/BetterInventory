@@ -93,7 +93,7 @@ public sealed class PlaceholderItem : GlobalItem {
             modifier = [tooltips[0].IsModifier];
             badModifier = [tooltips[0].IsModifierBad];
             oneDropLogo = -1;
-            overrideColor = [null];
+            overrideColor = [Colors.RarityNormal];
         }
         return tooltips;
     }
