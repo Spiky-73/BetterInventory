@@ -42,35 +42,31 @@ public class TooltipHover : ModSystem {
         if (!Configs.TooltipHover.Enabled || !Main.playerInventory || _frozenTooltips.Count <= 0) return;
 
         HashSet<Guid> drawUniqueIds = [];
+        int lastHovered = -1;
 
         DrawingFrozenTooltips = true;
-        List<(bool hovered, TextSnippet? snippet)> hoverInfo = [];
-        foreach (var tooltip in _frozenTooltips) {
+        for (int i = 0; i < _frozenTooltips.Count; i++) {
+            FrozenTooltip tooltip = _frozenTooltips[i];
             (_hovered, _hoveredSnippet) = (false, null);
             (var hover, Main.HoverItem) = (Main.HoverItem, tooltip.HoverItem);
             Reflection.Main.MouseText_DrawItemTooltip.Invoke(Main.instance, Activator.CreateInstance(Reflection.Main.MouseTextCache), 0, tooltip.Diff, tooltip.X, tooltip.Y);
             Main.HoverItem = hover;
-            hoverInfo.Add((_hovered, _hoveredSnippet));
             drawUniqueIds.Add(tooltip.HoverItem.UniqueId());
+
+            if (!_hovered) continue;
+            lastHovered = i;
+            Reflection.Main._mouseTextCache.SetValue(Main.instance, Activator.CreateInstance(Reflection.Main.MouseTextCache));
+            if (_hoveredSnippet is not null) {
+                _hoveredSnippet.OnHover();
+                if (Main.mouseLeft && Main.mouseLeftRelease) _hoveredSnippet.OnClick();
+            }
         }
         DrawingFrozenTooltips = false;
 
-        for (int i = _frozenTooltips.Count - 1; i >= 0; i--) {
-            var (hovered, hoveredSnippet) = hoverInfo[i];
-            if (!hovered) {
-                if (_forcedFreezeTime <= 0 && !HoverTooltipKb.Current) _frozenTooltips.RemoveAt(i);
-            } else {
-                Utility.ClearMouseText();
-                if (i == _frozenTooltips.Count - 1) _forcedFreezeTime = Configs.TooltipHover.Value.graceTime;
-                if (hoveredSnippet is not null) {
-                    hoveredSnippet.OnHover();
-                    if (Main.mouseLeft && Main.mouseLeftRelease) hoveredSnippet.OnClick();
-                }
-                break;
-            }
-        }
+        if (lastHovered == _frozenTooltips.Count - 1) _forcedFreezeTime = Configs.TooltipHover.Value.graceTime;
+        else if (_forcedFreezeTime <= 0 && !HoverTooltipKb.Current) _frozenTooltips.RemoveRange(lastHovered + 1, _frozenTooltips.Count - lastHovered-1);
 
-        if (drawUniqueIds.Contains(Main.HoverItem.UniqueId())) Utility.ClearMouseText();
+        if (drawUniqueIds.Contains(Main.HoverItem.UniqueId())) Reflection.Main._mouseTextCache.SetValue(Main.instance, Activator.CreateInstance(Reflection.Main.MouseTextCache));
     }
     private static bool _hovered;
     private static TextSnippet? _hoveredSnippet;
