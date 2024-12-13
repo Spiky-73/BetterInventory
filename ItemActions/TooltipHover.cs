@@ -41,7 +41,7 @@ public class TooltipHover : ModSystem {
 
         if (!Configs.TooltipHover.Enabled || !Main.playerInventory || _frozenTooltips.Count <= 0) return;
 
-        HashSet<Guid> drawUniqueIds = [];
+        HashSet<Guid> drawnItems = [];
         int lastHovered = -1;
 
         DrawingFrozenTooltips = true;
@@ -51,7 +51,7 @@ public class TooltipHover : ModSystem {
             (var hover, Main.HoverItem) = (Main.HoverItem, tooltip.HoverItem);
             Reflection.Main.MouseText_DrawItemTooltip.Invoke(Main.instance, Activator.CreateInstance(Reflection.Main.MouseTextCache), 0, tooltip.Diff, tooltip.X, tooltip.Y);
             Main.HoverItem = hover;
-            drawUniqueIds.Add(tooltip.HoverItem.UniqueId());
+            drawnItems.Add(tooltip.HoverItem.UniqueId());
 
             if (!_hovered) continue;
             lastHovered = i;
@@ -66,7 +66,7 @@ public class TooltipHover : ModSystem {
         if (lastHovered == _frozenTooltips.Count - 1) _forcedFreezeTime = Configs.TooltipHover.Value.graceTime;
         else if (_forcedFreezeTime <= 0 && !HoverTooltipKb.Current) _frozenTooltips.RemoveRange(lastHovered + 1, _frozenTooltips.Count - lastHovered-1);
 
-        if (drawUniqueIds.Contains(Main.HoverItem.UniqueId())) Reflection.Main._mouseTextCache.SetValue(Main.instance, Activator.CreateInstance(Reflection.Main.MouseTextCache));
+        if (drawnItems.Contains(Main.HoverItem.UniqueId())) Reflection.Main._mouseTextCache.SetValue(Main.instance, Activator.CreateInstance(Reflection.Main.MouseTextCache));
     }
     private static bool _hovered;
     private static TextSnippet? _hoveredSnippet;

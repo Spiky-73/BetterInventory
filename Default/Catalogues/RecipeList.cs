@@ -112,7 +112,8 @@ public sealed class RecipeList : ModEntityCatalogue {
     }
 
     public override void Search(Item item) {
-        searchedFromGuide = item.UniqueId() == Main.guideItem.UniqueId() || item.UniqueId() == GuideTile.guideTile.UniqueId();
+        Guid guid = item.UniqueId();
+        searchedFromGuide = guid == Main.guideItem.UniqueId() || guid == GuideTile.guideTile.UniqueId();
         (bool inGuide, Main.InGuideCraftMenu) = (Main.InGuideCraftMenu, true);
         (int cursor, Main.cursorOverride) = (Main.cursorOverride, CursorOverrideID.InventoryToChest);
         (bool left, Main.mouseLeft, bool rel, Main.mouseLeftRelease) = (Main.mouseLeft, true, Main.mouseLeftRelease, true);

@@ -31,7 +31,7 @@ public sealed class RequiredObjectsDisplay : ILoadable {
         Recipe recipe = Main.recipe[Main.availableRecipe[Main.focusRecipe]];
 
         // Update if needed
-        if (Main.numAvailableRecipes == 0 || UnknownDisplayPlayer.IsUnknown(recipe.createItem)) return;
+        if (Main.numAvailableRecipes == 0 || UnknownDisplayPlayer.IsUnknown(recipe.RecipeIndex)) return;
         if (s_displayedRecipe != recipe.RecipeIndex) UpdateRequiredTiles(recipe);
 
         // Handles the position of the condition to displays

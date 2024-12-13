@@ -62,9 +62,8 @@ public class RequiredTooltipItem : GlobalItem {
     }
 
     private static List<TooltipLine> GetRecipeLines(Recipe recipe) {
-        Guid guid = recipe.createItem.UniqueId();
-        if (_lineItemGuid == guid) return _requiredItemsTooltips;
-        _lineItemGuid = guid;
+        if (_lineRecipeIndex == recipe.RecipeIndex) return _requiredItemsTooltips;
+        _lineRecipeIndex = recipe.RecipeIndex;
         string materials = string.Join(string.Empty, recipe.requiredItem.Select(ItemTagHandler.GenerateTag));
 
         _requiredItemsTooltips = [new(BetterInventory.Instance, "RequiredItems", materials)];
@@ -94,7 +93,7 @@ public class RequiredTooltipItem : GlobalItem {
     internal static Item[] _displayedTiles = [];
     internal static Item[] _displayedConditions = [];
 
-    private static Guid _lineItemGuid;
+    private static int _lineRecipeIndex;
 
     private static bool _guideRecipes;
 }

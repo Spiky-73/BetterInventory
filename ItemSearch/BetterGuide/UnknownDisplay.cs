@@ -76,7 +76,7 @@ public sealed class UnknownDisplayPlayer : ModPlayer {
         //     if (++<known> && Main.numAvailableRecipes > 0) {
         cursor.GotoNext(i => i.MatchStsfld(Reflection.UILinkPointNavigator.CRAFT_CurrentIngredientsCount));
         cursor.GotoPrev(MoveType.After, i => i.MatchLdsfld(Reflection.Main.numAvailableRecipes));
-        cursor.EmitDelegate((int num) => num == 0 || Configs.BetterGuide.UnknownDisplay && IsUnknown(Main.recipe[Main.availableRecipe[Main.focusRecipe]].createItem) ? 0 : num);
+        cursor.EmitDelegate((int num) => num == 0 || Configs.BetterGuide.UnknownDisplay && IsUnknown(Main.availableRecipe[Main.focusRecipe]) ? 0 : num);
     }
 
     public static bool IsUnknown(int recipe) => IsUnknown(Main.recipe[recipe].createItem);
