@@ -169,8 +169,8 @@ public sealed class BetterPlayer : ModPlayer {
             Player.GetModPlayer<FavoritedRecipesPlayer>().favoritedRecipes.AddRange(visibility.FavoritedRecipes);
             Player.GetModPlayer<FavoritedRecipesPlayer>().blacklistedRecipes.AddRange(visibility.BlacklistedRecipes);
             Player.GetModPlayer<FavoritedRecipesPlayer>().unloadedRecipes.AddRange(visibility.UnloadedRecipes);
-            Player.GetModPlayer<UnknownDisplayPlayer>().ownedItems.AddRange(visibility.OwnedItems);
-            Player.GetModPlayer<UnknownDisplayPlayer>().unloadedItems.AddRange(visibility.UnloadedItems);
+            Player.GetModPlayer<UnknownRecipesPlayer>().ownedItems.AddRange(visibility.OwnedItems);
+            Player.GetModPlayer<UnknownRecipesPlayer>().unloadedItems.AddRange(visibility.UnloadedItems);
         }
         if (tag.TryGet(GuideTilePlayer.GuideTileTag, out Item tile)) { // Compatibility version < v0.7.1
             Player.GetModPlayer<GuideTilePlayer>()._tempGuideTile = tile;

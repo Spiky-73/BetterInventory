@@ -9,6 +9,7 @@ using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
 using BetterInventory.ItemSearch.BetterGuide;
+using Terraria.UI;
 
 namespace BetterInventory.ItemSearch;
 
@@ -109,7 +110,7 @@ public sealed class QuickSearch : ILoadable {
     }
 
     public static bool CanQuickSearch(Configs.SearchAction actions, Item item, out bool canSearch, out bool canToggle) {
-        canSearch = actions.HasFlag(Configs.SearchAction.Search) && !item.IsAir && !UnknownDisplayPlayer.IsUnknown(item);
+        canSearch = actions.HasFlag(Configs.SearchAction.Search) && !item.IsAir && (item.tooltipContext != ItemSlot.Context.CraftingMaterial || !UnknownRecipesPlayer.IsUnknown(item));
         canToggle = actions.HasFlag(Configs.SearchAction.Toggle);
         return canSearch || canToggle;
     }

@@ -46,7 +46,7 @@ public sealed class FavoritedRecipesPlayer : ModPlayer {
     }
 
     private void HookFavoriteRecipe(On_Main.orig_HoverOverCraftingItemButton orig, int recipeIndex) {   
-        if (!Configs.BetterGuide.FavoritedRecipes || UnknownDisplayPlayer.IsUnknown(Main.availableRecipe[recipeIndex])) {
+        if (!Configs.BetterGuide.FavoritedRecipes || UnknownRecipesPlayer.IsUnknown(Main.availableRecipe[recipeIndex])) {
             orig(recipeIndex);
             return;
         }
@@ -130,7 +130,7 @@ public sealed class FavoritedRecipesPlayer : ModPlayer {
             int recipe = Main.availableRecipe[i];
             if (player.IsFavorited(recipe)) favorited.Add(recipe);
             else if (player.IsBlacklisted(recipe)) blacklisted.Add(recipe);
-            else if (UnknownDisplayPlayer.IsUnknown(recipe)) unknown.Add(recipe);
+            else if (UnknownRecipesPlayer.IsUnknown(recipe)) unknown.Add(recipe);
             else others.Add(recipe);
         }
 

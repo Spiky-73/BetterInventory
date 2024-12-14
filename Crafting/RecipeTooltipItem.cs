@@ -34,7 +34,7 @@ public class RequiredTooltipItem : GlobalItem {
 
     private void HookItemGroupName(On_ItemTagHandler.ItemSnippet.orig_ctor orig, TextSnippet self, Item item) {
         if(Configs.RecipeTooltip.Enabled && HoveredRecipe is not null) {
-            item.tooltipContext = ItemSlot.Context.ChatItem;
+            item.tooltipContext = ItemSlot.Context.CraftingMaterial;
             Guid guid = item.UniqueId();
             if (HoveredRecipe.requiredItem.Exists(i => i.UniqueId() == guid) && HoveredRecipe.ProcessGroupsForText(item.type, out var text)) {
                 item.SetNameOverride(text);
@@ -44,10 +44,10 @@ public class RequiredTooltipItem : GlobalItem {
     }
 
     public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
-        if (!Configs.RecipeTooltip.Enabled || !ShouldDisplayRequiredItems(item, out Recipe? recipe)) return;
-        HoveredRecipe = recipe;
+        HoveredRecipe = null;
+        if (!Configs.RecipeTooltip.Enabled || !ShouldDisplayRequiredItems(item, out HoveredRecipe)) return;
         int index = tooltips.FindIndex(l => l.Name == nameof(TooltipLineID.ItemName)) + 1;
-        tooltips.InsertRange(index, GetRecipeLines(recipe));
+        tooltips.InsertRange(index, GetRecipeLines(HoveredRecipe));
     }
 
     private static bool ShouldDisplayRequiredItems(Item item, [MaybeNullWhen(false)] out Recipe recipe) {

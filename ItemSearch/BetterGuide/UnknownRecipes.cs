@@ -14,8 +14,8 @@ using Terraria.UI;
 
 namespace BetterInventory.ItemSearch.BetterGuide;
 
-public sealed class UnknownDisplayPlayer : ModPlayer {
-    public static UnknownDisplayPlayer LocalPlayer => Main.LocalPlayer.GetModPlayer<UnknownDisplayPlayer>();
+public sealed class UnknownRecipesPlayer : ModPlayer {
+    public static UnknownRecipesPlayer LocalPlayer => Main.LocalPlayer.GetModPlayer<UnknownRecipesPlayer>();
 
     public override void Load() {
         On_Recipe.CollectItemsToCraftWithFrom += HookUpdatedOwnedItems;
