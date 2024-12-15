@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
-using BetterInventory.Crafting.UI;
+using System.Diagnostics.CodeAnalysis;
 using BetterInventory.ItemSearch;
+using BetterInventory.ItemSearch.BetterGuide;
 using MonoMod.Cil;
 using SpikysLib;
 using SpikysLib.IL;
@@ -14,6 +16,19 @@ using ContextID = Terraria.UI.ItemSlot.Context;
 
 namespace BetterInventory.Default.Catalogues;
 
+public sealed class RecipeListFakeItemContext : IFakeItemContext {
+    public bool IsFake(Item item) => true;
+
+    public bool IsHovered(Item[] inv, int context, int slot) => RecipeList.Instance.Enabled && context == ContextID.GuideItem;
+
+    public bool WouldMoveToContext(Item[] inv, int context, int slot, [MaybeNullWhen(false)] out Item destination) {
+        destination = null;
+        if (!RecipeList.Instance.Enabled || !Main.InGuideCraftMenu || Main.cursorOverride != CursorOverrideID.InventoryToChest) return false;
+        destination = GuideTilePlayer.GetGuideContextDestination(inv[slot], out _);
+        return true;
+    }
+}
+
 public sealed class RecipeList : ModEntityCatalogue {
 
     public static RecipeList Instance = null!;
@@ -23,13 +38,14 @@ public sealed class RecipeList : ModEntityCatalogue {
     public override void Load() {
         Keybind = KeybindLoader.RegisterKeybind(Mod, Name, "Mouse1");
 
-        On_ItemSlot.RightClick_ItemArray_int_int += HookRightClickHistory;
         On_ItemSlot.LeftClick_ItemArray_int_int += HookLeftClick;
+        On_ItemSlot.RightClick_ItemArray_int_int += HookRightClickHistory;
 
-        On_Player.dropItemCheck += HookDropItems;
         IL_Main.DrawInventory += il => {
             if (!il.ApplyTo(ILForceGuideDisplay, Enabled)) Configs.UnloadedItemSearch.Value.recipeList = true;
         };
+
+        PlaceholderItem.AddFakeItemContext(new RecipeListFakeItemContext());
     }
 
     public override void Unload() {
@@ -95,61 +111,50 @@ public sealed class RecipeList : ModEntityCatalogue {
         }
     }
 
-    public override void Search(Item item) => Search(item, -1);
-    public static void Search(Item item, int slot = -1) {
-        (Item mouse, Main.mouseItem) = (Main.mouseItem, item);
-        (int cursor, Main.cursorOverride) = (Main.cursorOverride, 0);
+    public override void Search(Item item) {
+        Guid guid = item.UniqueId();
+        searchedFromGuide = guid == Main.guideItem.UniqueId() || guid == GuideTile.guideTile.UniqueId();
+        (bool inGuide, Main.InGuideCraftMenu) = (Main.InGuideCraftMenu, true);
+        (int cursor, Main.cursorOverride) = (Main.cursorOverride, CursorOverrideID.InventoryToChest);
         (bool left, Main.mouseLeft, bool rel, Main.mouseLeftRelease) = (Main.mouseLeft, true, Main.mouseLeftRelease, true);
-        Item[] items = Guide.GuideItems;
-
-        if (item.IsAir) {
-            if (slot == -1 || slot == 0) ItemSlot.LeftClick(items, ContextID.GuideItem, 0);
-            if (slot == -1 || slot == 1) ItemSlot.LeftClick(items, ContextID.GuideItem, 1);
-        } else {
-            if (slot == -1) slot = Configs.BetterGuide.GuideTile && Guide.IsCraftingStation(item) ? 1 : 0;
-            if (ItemSlot.PickItemMovementAction(items, ContextID.GuideItem, 1 - slot, item) != -1) {
-                bool clearOtherSlot = item.tooltipContext != ContextID.GuideItem;
-                if (Guide.AreSame(items[slot], item)) {
-                    if (clearOtherSlot) SearchPrevious(items, slot, true);
-                    slot = 1 - slot;
-                } else if (Guide.AreSame(items[1 - slot], item) && clearOtherSlot) SearchPrevious(items, 1 - slot, true);
-                items = Guide.GuideItems;
-            }
-            ItemSlot.LeftClick(items, ContextID.GuideItem, slot);
-        }
-        Guide.GuideItems = items;
-
-        Main.mouseItem = mouse;
+        ItemSlot.LeftClick([item], 0);
+        Main.InGuideCraftMenu = inGuide;
         Main.cursorOverride = cursor;
         (Main.mouseLeft, Main.mouseLeftRelease) = (left, rel);
-        Recipe.FindRecipes();
     }
-    private static void SearchPrevious(Item[] inv, int slot, bool allowAir = false) {
-        void MoveItem(Item item) {
-            Search(item, slot);
-            SoundEngine.PlaySound(SoundID.Grab);
-        }
+    internal static bool searchedFromGuide;
 
-        if (Configs.QuickSearch.Value.rightClick == Configs.RightClickAction.SearchPrevious && _guideHistory[slot].Count > 0) {
-            Item item;
+    public static void OnGuideSlotChange(Item item, int slot) {
+        if (Configs.QuickSearch.Value.rightClick != Configs.RightClickAction.SearchPrevious) return;
+        if(_guideHistory[slot].Count == 0 || !PlaceholderHelper.AreSame(item, _guideHistory[slot][^1])) _guideHistory[slot].Add(item.Clone());
+    }
+    public static void SearchPrevious(Item[] inv, int context, int slot, bool allowAir = false) {
+        Item? item = null;
+        if(Configs.QuickSearch.Value.rightClick == Configs.RightClickAction.SearchPrevious && _guideHistory[slot].Count > 0) {
             do {
+                if(_guideHistory[slot].Count == 0) {
+                    item = null;
+                    break;
+                }
                 item = _guideHistory[slot][^1];
                 _guideHistory[slot].RemoveAt(_guideHistory[slot].Count - 1);
-            } while (_guideHistory[slot].Count > 0 && (!allowAir && item.IsAir || Guide.AreSame(item, inv[slot])));
-            int count = _guideHistory[slot].Count;
-            MoveItem(item);
-            if (_guideHistory[slot].Count > count) _guideHistory[slot].RemoveAt(_guideHistory[slot].Count - 1);
-        } else if (!inv[slot].IsAir) {
-            MoveItem(new());
-            if (_guideHistory[slot].Count > 0) _guideHistory[slot].RemoveAt(_guideHistory[slot].Count - 1);
+            } while (!allowAir && item.IsAir || PlaceholderHelper.AreSame(item, inv[slot]));
         }
-    }
 
-    public static bool OverrideHover(Item[] inv, int context, int slot) {
-        if (!Instance.Enabled || context != ContextID.GuideItem || inv[slot].IsAir) return false;
-        if (Main.mouseItem.IsAir || ItemSlot.ShiftInUse || ItemSlot.ControlInUse) Main.cursorOverride = CursorOverrideID.TrashCan;
-        if (ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) == -1) Main.cursorOverride = CursorOverrideID.TrashCan;
-        return true;
+        if (item is null || item.IsAir) {
+            inv[slot].TurnToAir();
+            SoundEngine.PlaySound(SoundID.Grab);
+            OnGuideSlotChange(item ?? new(), slot);
+        } else {
+            (int cursor, Main.cursorOverride) = (Main.cursorOverride, CursorOverrideID.DefaultCursor);
+            (bool left, Main.mouseLeft, bool rel, Main.mouseLeftRelease) = (Main.mouseLeft, true, Main.mouseLeftRelease, true);
+            (Item mouse, Main.mouseItem) = (Main.mouseItem, item);
+            ItemSlot.LeftClick(inv, context, slot);
+            Main.cursorOverride = cursor;
+            (Main.mouseLeft, Main.mouseLeftRelease) = (left, rel);
+            Main.mouseItem = mouse;
+        }
+        Recipe.FindRecipes();
     }
 
     public static void UpdateGuide() {
@@ -157,28 +162,39 @@ public sealed class RecipeList : ModEntityCatalogue {
             (Item item, Main.guideItem) = (Main.guideItem, new(Main.guideItem.type));
             Main.LocalPlayer.GetDropItem(ref item);
         }
-        if (Bestiary.Instance.Enabled && (Guide.guideTile.stack > 1 || Guide.guideTile.prefix != 0)) {
-            (Item item, Guide.guideTile) = (Guide.guideTile, new(Guide.guideTile.type));
+        if (Bestiary.Instance.Enabled && (GuideTile.guideTile.stack > 1 || GuideTile.guideTile.prefix != 0)) {
+            (Item item, GuideTile.guideTile) = (GuideTile.guideTile, new(GuideTile.guideTile.type));
             Main.LocalPlayer.GetDropItem(ref item);
         }
     }
 
     private static void HookLeftClick(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
-        if (!Instance.Enabled || context != ContextID.GuideItem || !(Main.mouseLeft && Main.mouseLeftRelease)) {
+        if (!Instance.Enabled || !(Main.mouseLeft && Main.mouseLeftRelease)) {
             orig(inv, context, slot);
             return;
         }
 
-        if (Configs.QuickSearch.RightClick && Configs.QuickSearch.Value.rightClick == Configs.RightClickAction.SearchPrevious && !Guide.AreSame(Main.mouseItem, inv[slot])) _guideHistory[slot].Add(inv[slot].Clone());
-
-        Item mouse = Main.mouseItem;
-        if (Main.cursorOverride <= CursorOverrideID.DefaultCursor) {
-            if (!mouse.IsAir) inv[slot].TurnToAir();
-            Main.mouseItem = mouse.Clone();
-            Main.mouseItem.stack = 1;
+        if(Main.InGuideCraftMenu && Main.cursorOverride == CursorOverrideID.InventoryToChest) {
+            Item item = inv[slot].Clone();
+            item.GetGlobalItem<ItemGuid>().UniqueId = Guid.NewGuid();
+            item.stack = 1;
+            GuideTilePlayer.GetGuideContextDestination(item, out var guideSlot);
+            orig([item], context, 0);
+            OnGuideSlotChange(item, guideSlot);
+            return;
         }
+
+        if(context == ContextID.GuideItem && Main.cursorOverride <= CursorOverrideID.DefaultCursor && !Main.mouseItem.IsAir && ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) == 0) {
+            (Item mouse, Main.mouseItem) = (Main.mouseItem, Main.mouseItem.Clone());
+            Main.mouseItem.GetGlobalItem<ItemGuid>().UniqueId = Guid.NewGuid();
+            Main.mouseItem.stack = 1;
+            orig(inv, context, slot);
+            OnGuideSlotChange(inv[slot], slot);
+            Main.mouseItem = mouse;
+            return;
+        }
+        
         orig(inv, context, slot);
-        Main.mouseItem = mouse;
     }
 
     private static void HookRightClickHistory(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
@@ -187,26 +203,10 @@ public sealed class RecipeList : ModEntityCatalogue {
             return;
         }
         if (!Main.mouseRightRelease) return;
-        SearchPrevious(inv, slot);
-        inv[0] = Main.guideItem;
-        if (inv.Length > 1) inv[1] = Guide.guideTile;
+        SearchPrevious(inv, context, slot);
     }
 
-    private static void HookDropItems(On_Player.orig_dropItemCheck orig, Player self) {
-        if (!Instance.Enabled) {
-            orig(self);
-            Guide.dropGuideTileCheck(self);
-            return;
-        }
-        bool old = Main.InGuideCraftMenu;
-        Main.InGuideCraftMenu = true;
-        orig(self);
-        Guide.dropGuideTileCheck(self);
-        Main.InGuideCraftMenu = old;
-    }
-
-    internal static void OnRecipeUIInit(RecipeUI element) {
-        var searchBar = element.searchBar;
+    internal static void OnSearchBarInit(UISearchBar searchBar) {
         searchBar.Parent.OnRightClick += (_, _) => {
             if (!Instance.Enabled || !Configs.QuickSearch.RightClick) return;
             int count = 0;

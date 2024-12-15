@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader.IO;
 
-namespace BetterInventory.ItemSearch;
+namespace BetterInventory.InventoryManagement;
 
 public sealed class FavoritedInBanks {
 

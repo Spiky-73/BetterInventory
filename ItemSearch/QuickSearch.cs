@@ -8,6 +8,8 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
+using BetterInventory.ItemSearch.BetterGuide;
+using Terraria.UI;
 
 namespace BetterInventory.ItemSearch;
 
@@ -34,7 +36,7 @@ public sealed class QuickSearch : ILoadable {
     private static Vector2 HookRedirectThickCursor(On_Main.orig_DrawThickCursor orig, bool smart) => !Configs.QuickSearch.IndividualKeybinds || !Configs.IndividualKeybinds.Value.composite || !s_redirect ? orig(smart) : Vector2.Zero;
     private static void HookDrawInterfaceCursor(On_Main.orig_DrawInterface_36_Cursor orig) {
         s_redirect = false;
-        if(!s_individualCanClick) {
+        if(!s_customCursor) {
             orig();
             return;
         }
@@ -44,7 +46,7 @@ public sealed class QuickSearch : ILoadable {
         Main.cursorOverride = -1;
     }
     private static void HookClickOverrideInterface(On_Main.orig_DrawInterface orig, Main self, GameTime time) {
-        if (!s_individualCanClick) {
+        if (!s_customCursor) {
             orig(self, time);
         } else {
             (bool left, Main.mouseLeft, bool right, Main.mouseRight) = (Main.mouseLeft, false, Main.mouseRight, false);
@@ -60,64 +62,68 @@ public sealed class QuickSearch : ILoadable {
     }
 
     private static void ProcessIndividualKeybinds() {
-        s_individualCanClick = (QuickSearchKb.Current || !Configs.IndividualKeybinds.Value.composite) && (Configs.QuickSearch.Value.individualKeybinds.Key.HasFlag(Configs.SearchAction.Toggle) || !Main.HoverItem.IsAir);
-        if (!s_individualCanClick) return;
+        s_customCursor = false;
+        if(Configs.IndividualKeybinds.Value.composite && !QuickSearchKb.Current) return;
+        if(!CanQuickSearch(Configs.QuickSearch.Value.individualKeybinds, Main.HoverItem, out var canSearch, out var _)) return;
 
-        Main.LocalPlayer.mouseInterface = true;
+        if (Configs.IndividualKeybinds.Value.composite) {
+            s_customCursor = true;
+            Main.LocalPlayer.mouseInterface = true;
+        }
+
+        // if (canSearch && !CanSearch(Main.HoverItem)) return;
+
         foreach(ModEntityCatalogue catalogue in EntityCatalogues) {
-            if(catalogue.Enabled && catalogue.Keybind.JustPressed) {
-                if (Configs.QuickSearch.Value.individualKeybinds.Key.HasFlag(Configs.SearchAction.Search) && !Main.HoverItem.IsAir) {
-                    catalogue.Toggle(true);
-                    if (Guide.forcedTooltip?.Key != $"{Localization.Keys.UI}.Unknown") {
-                        catalogue.Search(Main.HoverItem);
-                        SoundEngine.PlaySound(SoundID.Grab); 
-                    } else {
-                        SoundEngine.PlaySound(SoundID.MenuTick); 
-                    }
-                } else if (Configs.QuickSearch.Value.individualKeybinds.Key.HasFlag(Configs.SearchAction.Toggle)) {
-                    catalogue.Toggle();
-                    SoundEngine.PlaySound(SoundID.MenuTick);
-                }
-            }
+            if (!catalogue.Enabled || !catalogue.Keybind.JustPressed) continue;
+            if (canSearch) QuickItemSearch(catalogue, Main.HoverItem);
+            else QuickToggle(catalogue);
         }
     }
     private static void ProcessSharedKeybind() {
         if (QuickSearchKb.JustPressed) {
-            if (s_timer >= Configs.SharedKeybind.Value.delay) s_taps = -1;
+            if (s_timer >= Configs.SharedKeybind.Value.delay) s_provider = -1;
             s_timer = 0;
         }
         else if (QuickSearchKb.JustReleased) {
-            if (s_timer < Configs.SharedKeybind.Value.tap) {
-                bool first = s_taps == -1;
+            if (s_timer >= Configs.SharedKeybind.Value.tap) s_provider = -1;
+            else {
+                bool first = s_provider == -1;
                 if (first) {
+                    if(!CanQuickSearch(Configs.QuickSearch.Value.sharedKeybind, Main.HoverItem, out s_sharedSearch, out _)) return;
+                    // if (s_sharedSearch && !CanSearch(Main.HoverItem)) return;
                     s_sharedItem = Main.HoverItem.Clone();
                     s_enabledProviders = EntityCatalogues.Where(p => p.Enabled).ToList();
-                    s_taps = Math.Max(s_enabledProviders.FindIndex(p => p.Visible), 0);
+                    s_provider = Math.Max(s_enabledProviders.FindIndex(p => p.Visible), 0);
                 }
-                if (s_enabledProviders.Count == 0) return;
+                if (s_provider == -1 || s_enabledProviders.Count == 0) return;
 
-                int last = s_taps;
-                if (!first) s_taps = (s_taps + 1) % s_enabledProviders.Count;
-
-                if (Configs.QuickSearch.Value.sharedKeybind.Key.HasFlag(Configs.SearchAction.Search) && !s_sharedItem.IsAir) {
-                    if (!first) s_enabledProviders[last].Toggle(false);
-                    s_enabledProviders[s_taps].Toggle(true);
-                    if (Guide.forcedTooltip?.Key != $"{Localization.Keys.UI}.Unknown") s_enabledProviders[s_taps].Search(s_sharedItem);
-                    SoundEngine.PlaySound(SoundID.Grab);
-                } else if (Configs.QuickSearch.Value.sharedKeybind.Key.HasFlag(Configs.SearchAction.Toggle)) {
-                    if (first) s_enabledProviders[s_taps].Toggle();
-                    else {
-                        s_enabledProviders[last].Toggle(false);
-                        s_enabledProviders[s_taps].Toggle(true);
-                    }
-                    SoundEngine.PlaySound(SoundID.MenuTick);
-                } else {
-                    s_taps = -1;
+                if (!first) {
+                    s_enabledProviders[s_provider].Toggle(false);
+                    s_provider = (s_provider + 1) % s_enabledProviders.Count;
                 }
-            } else s_taps = -1;
+                if (s_sharedSearch) QuickItemSearch(s_enabledProviders[s_provider], s_sharedItem);
+                else QuickToggle(s_enabledProviders[s_provider]);
+            }
             s_timer = 0;
         }
         s_timer++;
+    }
+
+    public static bool CanQuickSearch(Configs.SearchAction actions, Item item, out bool canSearch, out bool canToggle) {
+        canSearch = actions.HasFlag(Configs.SearchAction.Search) && !item.IsAir && (item.tooltipContext != ItemSlot.Context.CraftingMaterial || !UnknownRecipesPlayer.IsUnknown(item));
+        canToggle = actions.HasFlag(Configs.SearchAction.Toggle);
+        return canSearch || canToggle;
+    }
+    // public static bool CanSearch(Item item) => !GuideUnknownDisplay.IsUnknown(item);
+
+    public static void QuickItemSearch(ModEntityCatalogue catalogue, Item item) {
+        catalogue.Toggle(true);
+        catalogue.Search(item);
+        SoundEngine.PlaySound(SoundID.Grab);
+    }
+    public static void QuickToggle(ModEntityCatalogue catalogue) {
+        catalogue.Toggle();
+        SoundEngine.PlaySound(SoundID.MenuTick);
     }
 
     internal static void Register(ModEntityCatalogue catalogue) {
@@ -136,9 +142,10 @@ public sealed class QuickSearch : ILoadable {
     private static readonly List<ModEntityCatalogue> s_catalogues = [];
     private static bool s_redirect = false;
 
-    private static bool s_individualCanClick = false;
+    private static bool s_customCursor = false;
 
-    private static int s_timer = 0, s_taps = 0;
+    private static bool s_sharedSearch;
+    private static int s_timer = 0, s_provider = 0;
     private static Item s_sharedItem = new();
-    private static List<ModEntityCatalogue> s_enabledProviders = new();
+    private static List<ModEntityCatalogue> s_enabledProviders = [];
 }

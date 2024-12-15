@@ -15,6 +15,9 @@ using BetterInventory.CrossMod;
 using SpikysLib.Constants;
 using SpikysLib.Configs;
 using SpikysLib;
+using MonoMod.Utils;
+using BetterInventory.ItemSearch.BetterGuide;
+using SpikysLib.CrossMod;
 
 namespace BetterInventory.ItemActions;
 
@@ -55,19 +58,10 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public override void OnEnterWorld() {
-        RecipeFilters ??= new();
-        VisibilityFilters ??= new();
-        if (Configs.BetterGuide.AvailableRecipes) Guide.FindGuideRecipes();
-
         DisplayUpdate();
         DisplayCompatibility();
         DisplaySpicWarning();
-
-        Guide.SetGuideItem(this);
-    }
-
-    public override void ResetEffects() {
-        Guide.forcedTooltip = null;
+        DisplayMagicStorageStackWarning();
     }
 
     public void DisplayUpdate() {
@@ -95,8 +89,13 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public void DisplaySpicWarning() {
-        if (!Configs.CraftStack.Enabled || Configs.CraftStack.Value.maxItems.Key.Choice != nameof(Configs.MaxCraftAmount.spicRequirement) || SpysInfiniteConsumables.Enabled) return;
+        if (!Configs.CraftStack.Enabled || Configs.CraftStack.Value.maxItems.Key.Choice != nameof(Configs.MaxCraftAmount.spicRequirement) || SpysInfiniteConsumablesIntegration.Enabled) return;
         InGameNotificationsTracker.AddNotification(new InGameNotification(Mod, new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.SPICWarning"), Colors.RarityAmber)));
+    }
+
+    public void DisplayMagicStorageStackWarning() {
+        if (!Configs.RecipeTooltip.Enabled || !Configs.AvailableMaterials.Enabled || !MagicStorageIntegration.StackingFix) return;
+        InGameNotificationsTracker.AddNotification(new InGameNotification(Mod, new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.MagicStorageStackWarning"), Colors.RarityAmber)));
     }
 
     public override void SetControls() {
@@ -112,8 +111,7 @@ public sealed class BetterPlayer : ModPlayer {
 
     public override bool HoverSlot(Item[] inventory, int context, int slot) {
         QuickMove.HoverItem(inventory, context, slot);
-        if (Default.Catalogues.RecipeList.OverrideHover(inventory, context, slot)) return true;
-        if (Guide.OverrideHover(inventory, context, slot)) return true;
+        if (PlaceholderItem.OverrideHover(inventory, context, slot)) return true;
         if (ClickOverrides.OverrideHover(inventory, context, slot)) return true;
         return false;
     }
@@ -134,19 +132,6 @@ public sealed class BetterPlayer : ModPlayer {
     }
     private static void HookNoPickupMouse(On_ItemSlot.orig_PickupItemIntoMouse orig, Item[] inv, int context, int slot, Player player) {
         if (!Configs.ItemRightClick.Enabled || !s_noMousePickup) orig(inv, context, slot, player);
-    }
-
-
-    public override IEnumerable<Item> AddMaterialsForCrafting(out ItemConsumedCallback itemConsumedCallback) {
-        List<Item> items = [];
-        Item? mat;
-        if(Main.myPlayer == Player.whoAmI && (mat = Guide.GetGuideMaterials()) != null) items.Add(mat);
-        if(Main.myPlayer == Player.whoAmI && (mat = Crafting.Crafting.GetMouseMaterial()) != null) items.Add(mat);
-        itemConsumedCallback = (item, index) => {
-            if (item == Main.mouseItem) item.stack -= Reflection.RecipeLoader.ConsumedItems.GetValue()[^1].stack; // FIXME seems hacky
-            return;
-        };
-        return items;
     }
 
     private static void HookTryOpenContainer(On_ItemSlot.orig_TryOpenContainer orig, Item item, Player player) {
@@ -182,21 +167,27 @@ public sealed class BetterPlayer : ModPlayer {
         }
     }
     public override void SaveData(TagCompound tag) {
-        Guide.SaveData(this, tag);
-        tag[VisibilityTag] = VisibilityFilters;
-        tag[RecipesTag] = RecipeFilters;
         tag[FavoritedInBanksTag] = new FavoritedInBanks(Player);
     }
 
     public override void LoadData(TagCompound tag) {
-        Guide.LoadData(this, tag);
-        if (tag.TryGet(VisibilityTag, out VisibilityFilters visibility)) VisibilityFilters = visibility;
-        if (tag.TryGet(RecipesTag, out RecipeFilters recipe)) RecipeFilters = recipe;
+        if (tag.TryGet(CraftInMenuPlayer.VisibilityTag, out VisibilityFilters visibility)) { // Compatibility version < v0.7.1
+            Player.GetModPlayer<CraftInMenuPlayer>().visibility = (RecipeVisibility)visibility.Visibility;
+            Player.GetModPlayer<FavoritedRecipesPlayer>().favoritedRecipes.AddRange(visibility.FavoritedRecipes);
+            Player.GetModPlayer<FavoritedRecipesPlayer>().blacklistedRecipes.AddRange(visibility.BlacklistedRecipes);
+            Player.GetModPlayer<FavoritedRecipesPlayer>().unloadedRecipes.AddRange(visibility.UnloadedRecipes);
+            Player.GetModPlayer<UnknownRecipesPlayer>().ownedItems.AddRange(visibility.OwnedItems);
+            Player.GetModPlayer<UnknownRecipesPlayer>().unloadedItems.AddRange(visibility.UnloadedItems);
+        }
+        if (tag.TryGet(GuideTilePlayer.GuideTileTag, out Item tile)) { // Compatibility version < v0.7.1
+            Player.GetModPlayer<GuideTilePlayer>()._tempGuideTile = tile;
+        }
+        
+        if (tag.TryGet("recipes", out RecipeFilters recipe)) {
+            Player.GetModPlayer<RecipeUIPlayer>().filters = recipe.filters;
+        }
         if (Configs.InventoryManagement.FavoriteInBanks && tag.TryGet(FavoritedInBanksTag, out FavoritedInBanks favorited)) favorited.Apply(Player);
     }
-
-    public RecipeFilters RecipeFilters { get; set; } = null!;
-    public VisibilityFilters VisibilityFilters { get; set; } = new();
 
     private static bool s_noMousePickup;
 
@@ -212,9 +203,5 @@ public sealed class BetterPlayer : ModPlayer {
         return swapped;
     }
 
-    public const string VisibilityTag = "visibility";
-    public const string RecipesTag = "recipes";
     public const string FavoritedInBanksTag = "favorited";
-
-    internal Item? _tempGuideTile;
 }

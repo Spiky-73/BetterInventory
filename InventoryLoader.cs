@@ -21,7 +21,14 @@ public sealed class InventoryLoader : ILoadable {
     public static ReadOnlyCollection<ModSubInventory> Special => _special.AsReadOnly();
     public static ReadOnlyCollection<ModSubInventory> Classic => _classic.AsReadOnly();
 
-    public void Load(Mod mod) { }
+    public void Load(Mod mod) {
+        On_Recipe.FindRecipes += HookClearCache;
+    }
+
+    private static void HookClearCache(On_Recipe.orig_FindRecipes orig, bool canDelayCheck) {
+        orig(canDelayCheck);
+        ClearCache();
+    }
 
     public void Unload() {
         ClearCache();

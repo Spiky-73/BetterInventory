@@ -35,6 +35,7 @@ public sealed class Compatibility : ModConfig {
         FixedUI.Value.recipeCount = false;
         FixedUI.Value.noRecStartOffset = false;
         FixedUI.Value.noRecListClose = false;
+        FixedUI.Value.focusButton = false;
         Crafting.Instance.recipeFilters.Key = false;
         Crafting.Instance.recipeSearchBar.Key = false;
         Crafting.Instance.craftOnList.Key = false;
@@ -79,15 +80,15 @@ public sealed class Compatibility : ModConfig {
 }
 
 public sealed class UnloadedCrafting {
-    public bool fastScroll = false;
-    public bool scrollButtons = false;
-    public bool wrapping = false;
-    public bool recipeCount = false;
-    public bool noRecStartOffset = false;
-    public bool noRecListClose = false;
-    public bool recipeFilters = false;
-    public bool recipeSearchBar = false;
-    public bool craftOnList = false;
+    public bool fastScroll;
+    public bool scrollButtons;
+    public bool wrapping;
+    public bool recipeListUI;
+    public bool noRecStartOffset;
+    public bool noRecListClose;
+    public bool recipeFilters;
+    public bool recipeSearchBar;
+    public bool craftOnList;
     public bool availableMaterialsItemSlot;
 
     [JsonIgnore] public bool RecipeUI { set { recipeFilters = value; recipeSearchBar = value; } }
@@ -96,22 +97,21 @@ public sealed class UnloadedCrafting {
 }
 
 public sealed class UnloadedInventoryManagement {
-    public bool materials = false;
-    public bool baits = false;
-    public bool previousSlot = false;
-    public bool autoEquip = false;
-    public bool upgradeItems = false;
-    public bool hotbarLast = false;
-    public bool fixSlot = false;
-    public bool displayFakeItem = false;
-    public bool displayIcon = false;
-    public bool quickMoveHotkeys = false;
-    public bool quickMoveHighlight = false;
-    public bool favoriteInBanks = false;
-    public bool shiftRight = false;
-    public bool universalShift = false;
-    public bool stackTrash = false;
-    public bool craftStack = false;
+    public bool materials;
+    public bool baits;
+    public bool pickupOverrideSlot;
+    public bool pickupDedicatedSlot;
+    public bool hotbarLast;
+    public bool fixSlot;
+    public bool displayFakeItem;
+    public bool displayIcon;
+    public bool quickMoveHotkeys;
+    public bool quickMoveHighlight;
+    public bool favoriteInBanks;
+    public bool shiftRight;
+    public bool universalShift;
+    public bool stackTrash;
+    public bool craftStack;
     
     public static UnloadedInventoryManagement Value => Compatibility.Instance.unloadedInventoryManagement;
 }
@@ -123,18 +123,18 @@ public sealed class UnloadedItemActions {
 }
 
 public sealed class UnloadedItemSearch {
-    public bool guideMoreRecipes = false;
-    public bool guideCraftingStation = false;
-    public bool guideFavorited = false;
-    public bool guideCraftInMenu = false;
-    public bool guideUnknown = false;
-    public bool guideUnfavoriteOnCraft = false;
-    public bool bestiaryDisplayedInfo = false;
-    public bool bestiaryUnknown = false;
-    public bool recipeList = false;
+    public bool guideTile;
+    public bool guideFavorited;
+    public bool guideCraftInMenu;
+    public bool guideUnknown;
+    public bool guideUnfavoriteOnCraft;
+    public bool bestiaryDisplayedInfo;
+    public bool bestiaryUnknown;
+    public bool recipeList;
+    public bool guideRecipeFiltering;
+    public bool guideAvailableRecipes;
 
     [JsonIgnore] public bool BestiaryUnlock { set { bestiaryUnknown = value; bestiaryDisplayedInfo = value; } }
-    [JsonIgnore] public bool GuideAvailableRecipes { set { guideFavorited = value; guideCraftInMenu = value; } }
     [JsonIgnore] public bool GuideRecipeOrdering { set { guideUnknown = value; guideFavorited = value; } }
     
     public static UnloadedItemSearch Value => Compatibility.Instance.unloadedItemSearch;

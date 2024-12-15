@@ -26,17 +26,28 @@ Crafting: {
 		Tooltip: Craft items directly from the recipe list
 	}
 
-	mouseMaterial: {
-		Label: "[i:9] Held Material"
-		Tooltip: Adds the held item to the available materials
+	moreMaterials: {
+		Label: "[i:9] More Materials"
+		Tooltip: Adds various items to the available materials such as the mouse item and the equipped items
 	}
 
 	availableMaterials: {
-		Label: "[i:4131] Display Available Materials"
-		Tooltip: Display how much of each of the selected's recipe materials you have
+		Name: Display Available Materials
+		Label: "[i:4131] {$Mods.BetterInventory.Configs.Crafting.availableMaterials.Name}"
+		Tooltip:
+			'''
+			Display how much of each of the selected's recipe materials you have
+			Does not integrates with "{$Mods.BetterInventory.Configs.Crafting.recipeTooltip.Name}" when Magic Storage is Enabled. This will be fixed when Magic storage updates to v0.7
+			'''
 	}
 
 	Tooltip: ""
+
+	recipeTooltip: {
+		Name: Recipe in Tooltip
+		Label: "[i:398] {$Mods.BetterInventory.Configs.Crafting.recipeTooltip.Name}"
+		Tooltip: Shows recipes' materials and required tiles in their tooltip
+	}
 }
 
 FixedUI: {
@@ -75,6 +86,20 @@ FixedUI: {
 	noRecListClose: {
 		Label: Disable Recipe List Auto Close
 		Tooltip: Prevents the recipe list from closing when they are no available recipes
+	}
+
+	rememberListPosition: {
+		Label: Remember Recipe List position
+		Tooltip:
+			'''
+			Reopens the recipe list in the same position as when it was closed
+			Keep the selected recipe a the same position when the lists of recipes changes if it is visible
+			'''
+	}
+
+	focusButton: {
+		Label: Focus Selected Recipe Button
+		Tooltip: Add a button the focus the recipe list on the selected recipe
 	}
 }
 
@@ -124,6 +149,29 @@ CraftOnList: {
 	}
 }
 
+MoreMaterials: {
+	Tooltip: ""
+
+	mouse: {
+		Label: Held item
+		Tooltip: Adds the held item to the available materials
+	}
+
+	equipment: {
+		Label: Equipped items
+		Tooltip: Adds equipped items to the available materials
+	}
+}
+
+EquipementMaterials: {
+	Tooltip: ""
+
+	allLoadouts: {
+		Label: All loadouts
+		Tooltip: Add equipment from all loadouts and not the current one only
+	}
+}
+
 AvailableMaterials: {
 	Tooltip: ""
 
@@ -135,6 +183,15 @@ AvailableMaterials: {
 	itemSlot: {
 		Label: Item slot
 		Tooltip: Display how much material you have on the item slot
+	}
+}
+
+RecipeTooltip: {
+	Tooltip: ""
+
+	objectsLine: {
+		Label: Dedicated Required Objects Line
+		Tooltip: Shows the required tiles and conditions on a different line
 	}
 }
 
@@ -231,7 +288,7 @@ SmartPickup: {
 			'''
 			Items go their previous slot in your inventory when picked up
 			{$Mods.BetterInventory.Configs.ItemPickupLevel.ImportantItems.Label}: Applies to Favorited and Equiped items
-			{$Mods.BetterInventory.Configs.ItemPickupLevel.AllItems.Label}: Applies to All items
+			{$Mods.BetterInventory.Configs.ItemPickupLevel.AllItems.Label}: Applies to all items
 			'''
 	}
 
@@ -242,6 +299,16 @@ SmartPickup: {
 			Automatically equips items such as Armors, Accessories or Equipment
 			{$Mods.BetterInventory.Configs.AutoEquipLevel.PrimarySlots.Label}: Equipment go to their default slots if available
 			{$Mods.BetterInventory.Configs.AutoEquipLevel.AnySlot.Label}: Equipment go to any slot they can go in (includes Dyes). Armors and Accessories can go to social slots.
+			'''
+	}
+
+	voidBag: {
+		Label: Pickup to Void Bag First
+		Tooltip:
+			'''
+			Picked up items will fill the void bag before the inventory
+			{$Mods.BetterInventory.Configs.VoidBagLevel.IfInside.Label}: Only for items already in the void bag
+			{$Mods.BetterInventory.Configs.VoidBagLevel.Always.Label}: Applies to all items
 			'''
 	}
 
@@ -273,6 +340,13 @@ AutoEquipLevel: {
 	None.Label: Off
 	PrimarySlots.Label: Primary Slots
 	AnySlot.Label: Any Slot
+}
+
+VoidBagLevel: {
+	Tooltip: ""
+	None.Label: Off
+	IfInside.Label: If Inside
+	Always.Label: Always
 }
 
 PreviousSlot: {
@@ -749,6 +823,11 @@ BetterGuide: {
 			{$Mods.BetterInventory.Configs.UnknownDisplay.Known.Label}: Displayed as discovered.
 			'''
 	}
+
+	autoOpenList: {
+		Label: Auto Open Recipe List
+		Tooltip: Automatically opens the recipe list when talking to the guide or searching an item
+	}
 }
 
 FavoritedRecipes: {
@@ -999,8 +1078,8 @@ UnloadedCrafting: {
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
-	recipeCount: {
-		Label: "{$Mods.BetterInventory.Configs.Crafting.fixedUI.Label} @ {$Mods.BetterInventory.Configs.FixedUI.recipeCount.Label}"
+	recipeListUI: {
+		Label: "{$Mods.BetterInventory.Configs.Crafting.fixedUI.Label} @ Recipe List UI"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
@@ -1048,18 +1127,13 @@ UnloadedInventoryManagement: {
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
-	previousSlot: {
-		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ {$Mods.BetterInventory.Configs.SmartPickup.previousSlot.Label}"
+	pickupOverrideSlot: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ Override Slot"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
-	autoEquip: {
-		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ {$Mods.BetterInventory.Configs.SmartPickup.autoEquip.Label}"
-		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
-	}
-
-	upgradeItems: {
-		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ {$Mods.BetterInventory.Configs.SmartPickup.upgradeItems.Label}"
+	pickupDedicatedSlot: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ Dedicated Slot"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
@@ -1151,7 +1225,7 @@ UnloadedItemSearch: {
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
-	guideCraftingStation: {
+	guideTile: {
 		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.craftingStation.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
@@ -1178,6 +1252,16 @@ UnloadedItemSearch: {
 
 	recipeList: {
 		Label: "{$Mods.BetterInventory.Configs.ItemSearch.quickSearch.Label} @ {$Mods.BetterInventory.Configs.ItemSearch.recipeList.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	guideRecipeFiltering: {
+		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ Recipe Filtering"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	guideAvailableRecipes: {
+		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ Available Recipes"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 }

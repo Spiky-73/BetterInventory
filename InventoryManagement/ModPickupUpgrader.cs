@@ -8,7 +8,7 @@ namespace BetterInventory.InventoryManagement;
 public abstract class ModPickupUpgrader : ModType, ILocalizedModType {
     protected sealed override void Register() {
         ModTypeLookup<ModPickupUpgrader>.Register(this);
-        SmartPickup.Register(this);
+        PickupUpgraderLoader.Add(this);
         Language.GetOrRegister(this.GetLocalizationKey("DisplayName"), PrettyPrintName);
         Language.GetOrRegister(this.GetLocalizationKey("Tooltip"), () => string.Empty);
     }

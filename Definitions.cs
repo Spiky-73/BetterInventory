@@ -25,7 +25,7 @@ public sealed class PickupUpgraderDefinition : EntityDefinition<PickupUpgraderDe
     public PickupUpgraderDefinition(string mod, string name) : base(mod, name) { }
     public PickupUpgraderDefinition(ModPickupUpgrader catalogue) : base(catalogue) { }
 
-    public override ModPickupUpgrader? Entity => SmartPickup.GetPickupUpgrader(Mod, Name);
+    public override ModPickupUpgrader? Entity => PickupUpgraderLoader.GetUpgrader(Mod, Name);
     
-    public override PickupUpgraderDefinition[] GetValues() => SmartPickup.Upgraders.Select(up => new PickupUpgraderDefinition(up)).ToArray();
+    public override PickupUpgraderDefinition[] GetValues() => PickupUpgraderLoader.Upgraders.Select(up => new PickupUpgraderDefinition(up)).ToArray();
 }

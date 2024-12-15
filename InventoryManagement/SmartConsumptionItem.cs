@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using BetterInventory.ItemActions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
@@ -69,7 +68,6 @@ public sealed class SmartConsumptionItem : GlobalItem {
 
     public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
         AddWeaponConsumeLine(item, tooltips);
-        Crafting.Crafting.AddAvailableMaterials(item, tooltips);
         QuickMove.AddMoveChainLine(item, tooltips);
         ClickOverrides.AddCraftStackLine(item, tooltips);
     }

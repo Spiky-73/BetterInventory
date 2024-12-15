@@ -2,12 +2,14 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
+using ReLogic.Content;
 using ReLogic.Graphics;
 using SpikysLib;
 using SpikysLib.IL;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
+using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI.Gamepad;
@@ -22,11 +24,14 @@ public sealed class FixedUI : ILoadable {
             if (!il.ApplyTo(ILFastScroll, Configs.FixedUI.FastScroll)) Configs.UnloadedCrafting.Value.fastScroll = true;
             if (!il.ApplyTo(ILMaterialWrapping, Configs.FixedUI.Wrapping)) Configs.UnloadedCrafting.Value.wrapping = true;
             if (!il.ApplyTo(ILScrollButtonsFix, Configs.FixedUI.ScrollButtons)) Configs.UnloadedCrafting.Value.scrollButtons = true;
-            if (!il.ApplyTo(ILRecipeCount, Configs.FixedUI.RecipeCount)) Configs.UnloadedCrafting.Value.recipeCount = true;
+            if (!il.ApplyTo(ILRecipeCount, Configs.FixedUI.RecipeCount || Configs.FixedUI.NoRecListClose)) Configs.UnloadedCrafting.Value.recipeListUI = true;
             if (!il.ApplyTo(ILNoRecStartOffset, Configs.FixedUI.NoRecStartOffset)) Configs.UnloadedCrafting.Value.noRecStartOffset = true;
             if (!il.ApplyTo(ILNoRecListClose, Configs.FixedUI.NoRecListClose)) Configs.UnloadedCrafting.Value.noRecListClose = true;
         };
+        On_Main.DrawInterface_Resources_ClearBuffs += HookRememberListPosition;
+        On_Recipe.ClearAvailableRecipes += HookClearAvailableRecipes;
 
+        _craftCenterButton = mod.Assets.Request<Texture2D>($"Assets/RecCenter");
     }
     public void Unload(){}
 
@@ -70,6 +75,7 @@ public sealed class FixedUI : ILoadable {
         //     ...
         // }
     }
+
     private static void ILMaterialWrapping(ILContext il) {
         ILCursor cursor = new(il);
 
@@ -114,6 +120,7 @@ public sealed class FixedUI : ILoadable {
         //     ...
         // }
     }
+
     private static void ILScrollButtonsFix(ILContext il) {
         ILCursor cursor = new(il);
         // Main.hidePlayerCraftingMenu = false;
@@ -161,17 +168,20 @@ public sealed class FixedUI : ILoadable {
         cursor.FindPrevLoc(out _, out int x, i => i.Previous.MatchLdcI4(310), 144);
 
         //     <up/down buttons>
-        cursor.GotoNextLoc(MoveType.After, out int recipeListIndex, i => i.Previous.MatchLdsfld(Reflection.Main.recStart), 153);
+        cursor.GotoNextLoc(out _, i => i.Previous.MatchLdsfld(Reflection.Main.recStart), 153);
+        cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdsfld(Reflection.Main.recStart));
 
         //     ++ <drawRecipeCount>
         cursor.EmitLdloc(x).EmitLdloc(y);
-        cursor.EmitDelegate(DrawRecipeCount);
+        cursor.EmitDelegate((int x, int y) => {
+            if (Configs.FixedUI.RecipeCount) DrawRecipeCount(x, y);
+            if (Configs.FixedUI.FocusButton) DrawFocusButton(x, y);
+        });
 
         //     while (...) <recipeList>
         // }
     }
     private static void DrawRecipeCount(int x, int y) {
-        if (!Configs.FixedUI.RecipeCount) return;
         int padding = 20 - TextureAssets.CraftUpButton.Width();
         x -= 20 + padding;
         y += 2 + TextureAssets.CraftUpButton.Width() + padding / 2;
@@ -182,6 +192,24 @@ public sealed class FixedUI : ILoadable {
         origin.Y *= 0.5f;
 
         Main.spriteBatch.DrawStringWithShadow(font, text, new(x, y), Color.White, 0, origin, Vector2.One);
+    }
+    private static void DrawFocusButton(int x, int y) {
+        int line = GetRecipeLine(Main.focusRecipe);
+        if (0 <= line && line < UILinkPointNavigator.Shortcuts.CRAFT_IconsPerColumn) return;
+        const int size = 20;
+        y += 2 + 2 * size;
+        x -= size;
+        Rectangle hitbox = new(x, y, _craftCenterButton.Width(), _craftCenterButton.Height());
+        if (hitbox.Contains(Main.mouseX, Main.mouseY) && !PlayerInput.IgnoreMouseInterface) {
+            Main.player[Main.myPlayer].mouseInterface = true;
+            if (Main.mouseLeftRelease && Main.mouseLeft) {
+                Main.recStart = Math.Max(0, SpikysLib.MathHelper.Snap(Main.focusRecipe, UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow, SpikysLib.MathHelper.SnapMode.Floor)
+                    - UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow * (UILinkPointNavigator.Shortcuts.CRAFT_IconsPerColumn / 2 - 1));
+                SoundEngine.PlaySound(SoundID.MenuTick);
+                Main.mouseLeftRelease = false;
+            }
+        }
+        Main.spriteBatch.Draw(_craftCenterButton.Value, new Vector2(x, y), new(200, 200, 200, 200));
     }
 
     private static void ILNoRecStartOffset(ILContext il) {
@@ -198,7 +226,6 @@ public sealed class FixedUI : ILoadable {
             if (emptySlots > UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow) Main.recStart -= SpikysLib.MathHelper.Snap(emptySlots,UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow, SpikysLib.MathHelper.SnapMode.Floor);
             return Main.recStart;
         } );
-
     }
 
     private static void ILNoRecListClose(ILContext il) {
@@ -223,10 +250,41 @@ public sealed class FixedUI : ILoadable {
     private static bool HookTryAllowingToCraftRecipe(On_Main.orig_TryAllowingToCraftRecipe orig, Recipe currentRecipe, bool tryFittingItemInInventoryToAllowCrafting, out bool movedAnItemToAllowCrafting)
         => orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting || Configs.FixedUI.CraftWhenHolding, out movedAnItemToAllowCrafting);
 
+    private static void HookRememberListPosition(On_Main.orig_DrawInterface_Resources_ClearBuffs orig) {
+        var start = Main.recStart;
+        orig();
+        if (Configs.FixedUI.RememberListPosition) Main.recStart = start;
+    }
+
+    public static int GetRecipeLine(int availableRecipeIndex) {
+        int delta = availableRecipeIndex - Main.recStart;
+        int line = delta / UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow;
+        if (delta < 0) line--;
+        return line;
+    }
+
+    private void HookClearAvailableRecipes(On_Recipe.orig_ClearAvailableRecipes orig) {
+        _focusedRecipeLine = GetRecipeLine(Main.focusRecipe);
+        _focusedVisible = 0 <= _focusedRecipeLine && _focusedRecipeLine < UILinkPointNavigator.Shortcuts.CRAFT_IconsPerColumn;
+        orig();
+    }
+
+    // Called in DisplayedRecipes
+    internal static void HookTryRefocusingList(On_Recipe.orig_TryRefocusingRecipe orig, int oldRecipe) {
+        orig(oldRecipe);
+        if (!Configs.FixedUI.RememberListPosition || !_focusedVisible) return;
+        Main.recStart = Math.Max(0, SpikysLib.MathHelper.Snap(Main.focusRecipe, UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow, SpikysLib.MathHelper.SnapMode.Floor)
+            - _focusedRecipeLine * UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow);
+    }
+
+    private static bool _focusedVisible;
+    private static int _focusedRecipeLine;
+
     private static int _recDelay = 0;
     public static readonly int[] MaterialsPerLine = [6, 4];
 
     public const int VanillaMaterialSpacing = 40;
     public const int VanillaCorrection = -2;
 
+    private static Asset<Texture2D> _craftCenterButton = null!;
 }

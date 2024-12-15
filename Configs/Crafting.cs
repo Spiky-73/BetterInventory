@@ -2,8 +2,6 @@ using System.ComponentModel;
 using Terraria.ModLoader.Config;
 using SpikysLib.Configs;
 using Newtonsoft.Json;
-using BetterInventory.ItemSearch;
-using Terraria;
 
 namespace BetterInventory.Configs;
 
@@ -12,17 +10,16 @@ public sealed class Crafting : ModConfig {
     public Toggle<RecipeSearchBar> recipeSearchBar = new(true);
     public Toggle<RecipeFilters> recipeFilters = new(true);
     public Toggle<CraftOnList> craftOnList = new(true);
-    [DefaultValue(true)] public bool mouseMaterial;
+    public Toggle<MoreMaterials> moreMaterials = new(true);
     public Toggle<AvailableMaterials> availableMaterials = new(true);
+    public Toggle<RecipeTooltip> recipeTooltip = new(true);
 
-    public static bool MouseMaterial => Instance.mouseMaterial;
+    [JsonProperty, DefaultValue(true)] private bool mouseMaterial { set => ConfigHelper.MoveMember(!value, _ => moreMaterials.Key = value); }
+
     public static bool RecipeUI => Instance.recipeSearchBar || Instance.recipeFilters;
     public static Crafting Instance = null!;
 
-    public override void OnChanged() {
-        if (Guide.recipeUI?.filters is not null) Guide.recipeUI.filters.ItemsPerLine = RecipeFilters.Value.filtersPerLine;
-        if (!Main.gameMenu && Guide.recipeUI is not null) Guide.recipeUI.RebuildList();
-    }
+    public override void OnChanged() => global::BetterInventory.Crafting.RecipeUI.OnConfigChanged();
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
 }
@@ -35,15 +32,19 @@ public sealed class FixedUI {
     [DefaultValue(true)] public bool recipeCount = true;
     [DefaultValue(true)] public bool noRecStartOffset = true;
     [DefaultValue(true)] public bool noRecListClose = true;
+    [DefaultValue(true)] public bool rememberListPosition = true;
+    [DefaultValue(true)] public bool focusButton = true;
 
     public static bool Enabled => Crafting.Instance.fixedUI;
     public static bool FastScroll => Enabled && Value.fastScroll && !UnloadedCrafting.Value.fastScroll;
     public static bool ScrollButtons => Enabled && Value.scrollButtons && !UnloadedCrafting.Value.scrollButtons;
     public static bool Wrapping => Enabled && Value.wrapping && !UnloadedCrafting.Value.wrapping;
     public static bool CraftWhenHolding => Enabled && Value.craftWhenHolding;
-    public static bool RecipeCount => Enabled && Value.recipeCount && !UnloadedCrafting.Value.recipeCount;
+    public static bool RecipeCount => Enabled && Value.recipeCount && !UnloadedCrafting.Value.recipeListUI;
     public static bool NoRecStartOffset => Enabled && Value.noRecStartOffset && !UnloadedCrafting.Value.noRecStartOffset;
     public static bool NoRecListClose => Enabled && Value.noRecListClose && !UnloadedCrafting.Value.noRecListClose;
+    public static bool RememberListPosition => Enabled && Value.rememberListPosition;
+    public static bool FocusButton => Enabled && Value.focusButton && !UnloadedCrafting.Value.recipeListUI;
     public static FixedUI Value => Crafting.Instance.fixedUI.Value;
     
     // Compatibility version < v0.6
@@ -85,7 +86,20 @@ public sealed class CraftOnList {
     [JsonProperty, DefaultValue(false)] private bool focusRecipe { set => ConfigHelper.MoveMember(value, _ => focusHovered = value); }
 }
 
-public class AvailableMaterials {
+public sealed class MoreMaterials {
+    [DefaultValue(true)] public bool mouse = true;
+    public Toggle<EquipementMaterials> equipment = new(true);
+
+    public static bool Enabled => Crafting.Instance.moreMaterials;
+    public static MoreMaterials Value => Crafting.Instance.moreMaterials.Value;
+    public static bool Mouse => Enabled && Value.mouse;
+    public static bool Equipment => Enabled && Value.equipment;
+}
+public sealed class EquipementMaterials {
+    [DefaultValue(false)] public bool allLoadouts = false;
+}
+
+public sealed class AvailableMaterials {
     [DefaultValue(true)] public bool tooltip = true;
     [DefaultValue(true)] public bool itemSlot = true;
 
@@ -93,4 +107,12 @@ public class AvailableMaterials {
     public static AvailableMaterials Value => Crafting.Instance.availableMaterials.Value;
     public static bool Tooltip => Enabled && Value.tooltip;
     public static bool ItemSlot => Enabled && Value.itemSlot && !UnloadedCrafting.Value.availableMaterialsItemSlot;
+}
+
+public sealed class RecipeTooltip {
+    [DefaultValue(false)] public bool objectsLine = false;
+
+    public static bool Enabled => Crafting.Instance.recipeTooltip;
+    public static RecipeTooltip Value => Crafting.Instance.recipeTooltip.Value;
+
 }

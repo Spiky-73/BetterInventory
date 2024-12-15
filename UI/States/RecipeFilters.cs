@@ -1,19 +1,20 @@
 using System;
+using BetterInventory.Crafting;
 using BetterInventory.Default.Catalogues;
+using BetterInventory.UI.Elements;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SpikysLib.UI.Elements;
 using Terraria;
 using Terraria.Audio;
-using Terraria.DataStructures;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.UI;
 
-namespace BetterInventory.Crafting.UI;
+namespace BetterInventory.UI.States;
 
-public sealed class RecipeUI : UIState {
+public sealed class RecipeFilters : UIState {
     public UIFlexList container = null!;
     public UIPanel searchPanel = null!;
     public UISearchBar searchBar = null!;
@@ -27,8 +28,6 @@ public sealed class RecipeUI : UIState {
 
         RebuildList();
         Append(container);
-
-        RecipeList.OnRecipeUIInit(this);
     }
 
     public void RebuildList () {
@@ -59,43 +58,36 @@ public sealed class RecipeUI : UIState {
     }
 
     private void InitFilters() {
-        filters = new() { ListPadding = 6 };
+        filters = new() { ListPadding = 0.1f }; // Cannot be set to 0 for some reason
     }
 
     public void RebuildRecipeGrid() {
         static void OnFilterChanges() {
-            Utility.FindDisplayedRecipes();
+            Recipe.FindRecipes();
             SoundEngine.PlaySound(SoundID.MenuTick);
         }
         this.filters.Clear();
 
-        EntryFilterer<Item, IRecipeFilter> filters = RecipeFiltering.LocalFilters.Filterer;
+        var filters = RecipeUI.Filterer;
         for (int i = 0; i < filters.AvailableFilters.Count; i++) {
             IRecipeFilter filter = filters.AvailableFilters[i];
+            int recipeCount = RecipeUI.RecipesPerFilter[i];
             bool active = filters.IsFilterActive(i);
-            int recipeCount = RecipeFiltering.LocalFilters.RecipeInFilter[i];
             bool available = recipeCount > 0;
-
-            string text = Language.GetTextValue(filter.GetDisplayNameKey());
-            if (available || active) {
-                text = Language.GetTextValue($"{Localization.Keys.UI}.Filter", text, recipeCount);
-            } else if (Configs.RecipeFilters.Value.hideUnavailable) continue;
-            if (!available) text = $"[c/{Colors.RarityTrash.Hex3()}:{text}]";
-
-            HoverImageFramed item = new(available ? filter.GetSource() : filter.GetSourceGray(), filter.GetSourceFrame(), text);
-            if (!active) item.Color = item.Color.MultiplyRGBA(new(80, 80, 80, 70));
-            item.OnLeftClick += (_, _) => {
+            if (!active && !available && Configs.RecipeFilters.Value.hideUnavailable) continue;
+            
+            UIRecipeFilterIcon icon = new(filter, recipeCount, active);
+            icon.OnLeftClick += (_, _) => {
                 bool keepOn = !active || filters.ActiveFilters.Count > 1;
                 filters.ActiveFilters.Clear();
                 if (keepOn) filters.ActiveFilters.Add(filter);
                 OnFilterChanges();
             };
-            int number = i;
-            item.OnRightClick += (_, _) => {
-                filters.ToggleFilter(number);
+            icon.OnRightClick += (_, _) => {
+                if (!filters.ActiveFilters.Remove(filter)) filters.ActiveFilters.Add(filter);
                 OnFilterChanges();
             };
-            this.filters.Add(item);
+            this.filters.Add(icon);
         }
         Recalculate();
     }
@@ -139,11 +131,12 @@ public sealed class RecipeUI : UIState {
             SoundEngine.PlaySound(SoundID.MenuTick);
         };
         searchPanel.Append(searchCancel);
+        RecipeList.OnSearchBarInit(searchBar);
     }
 
     private void OnSearchContentChange(string? content) {
         if (Main.gameMenu) return;
-        RecipeFiltering.LocalFilters.Filterer.SetSearchFilter(content);
-        Utility.FindDisplayedRecipes();
+        RecipeUI.Filterer.SetSearchFilter(content);
+        Recipe.FindRecipes();
     }
 }

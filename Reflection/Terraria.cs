@@ -6,6 +6,7 @@ using TNPC = Terraria.NPC;
 using TRecipe = Terraria.Recipe;
 using SpikysLib.Reflection;
 using Terraria;
+using TColor = Microsoft.Xna.Framework.Color;
 using TVector2 = Microsoft.Xna.Framework.Vector2;
 using System;
 
@@ -31,6 +32,7 @@ public static class Main {
     public static readonly StaticMethod<object?> HoverOverCraftingItemButton = new(typeof(TMain), nameof(HoverOverCraftingItemButton), typeof(int));
     public static readonly StaticMethod<object?> LockCraftingForThisCraftClickDuration = new(typeof(TMain), nameof(TMain.LockCraftingForThisCraftClickDuration));
     public static readonly StaticMethod<object?> SetRecipeMaterialDisplayName = new(typeof(TMain), nameof(SetRecipeMaterialDisplayName), typeof(int));
+    public static readonly StaticMethod<object?> DrawGuideCraftText = new(typeof(TMain), nameof(DrawGuideCraftText), typeof(int), typeof(TColor), typeof(int).MakeByRefType(), typeof(int).MakeByRefType());
     
     public static readonly Type MouseTextCache = typeof(TMain).GetNestedType(nameof(MouseTextCache), BindingFlags.NonPublic)!;
     public static readonly Method<TMain, object?> MouseText_DrawItemTooltip = new(nameof(MouseText_DrawItemTooltip), MouseTextCache, typeof(int), typeof(byte), typeof(int), typeof(int));
@@ -41,7 +43,9 @@ public static class Main {
 public static class Player {
     public static readonly Field<TPlayer, TItem> trashItem = new(nameof(TPlayer.trashItem));
     public static readonly Field<TPlayer, bool> mouseInterface = new(nameof(TPlayer.mouseInterface));
+    public static readonly Field<TPlayer, bool> adjWater = new(nameof(TPlayer.adjWater));
     public static readonly Method<TPlayer, bool> GetItem_FillEmptyInventorySlot = new(nameof(GetItem_FillEmptyInventorySlot), typeof(int), typeof(TItem), typeof(GetItemSettings), typeof(TItem), typeof(int));
+    public static readonly Method<TPlayer, bool> GetItem_VoidVault = new(nameof(GetItem_VoidVault), typeof(int), typeof(TItem[]), typeof(TItem), typeof(GetItemSettings), typeof(TItem));
     public static readonly Method<TPlayer, bool> HasItem = new(nameof(TPlayer.HasItem), typeof(int));
 }
 
@@ -49,6 +53,7 @@ public static class Item {
     public static readonly Field<TItem, int> stack = new(nameof(TItem.stack));
     public static readonly Field<TItem, int> useStyle = new(nameof(TItem.useStyle));
     public static readonly Field<TItem, bool> favorited = new(nameof(TItem.favorited));
+    public static readonly Property<TItem, string> Name = new(nameof(TItem.Name));
     public static readonly Property<TItem, bool> IsAir = new(nameof(TItem.IsAir));
     public static readonly Property<TItem, bool> IsACoin = new(nameof(TItem.IsACoin));
     public static readonly Method<TItem, bool> FitsAmmoSlot = new(nameof(TItem.FitsAmmoSlot));

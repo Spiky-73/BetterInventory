@@ -14,6 +14,7 @@ using TPage = Terraria.GameContent.UI.Elements.UIBestiaryEntryInfoPage;
 using TFilterGrid = Terraria.GameContent.UI.Elements.UIBestiaryFilteringOptionsGrid;
 using TItemDropE = Terraria.GameContent.Bestiary.ItemDropBestiaryInfoElement;
 using TColor = Microsoft.Xna.Framework.Color;
+using TBySearch = Terraria.GameContent.Creative.ItemFilters.BySearch;
 using Terraria.GameContent.ItemDropRules;
 using Terraria.UI;
 
@@ -51,6 +52,14 @@ public static class UIBestiaryFilteringOptionsGrid {
 
 public static class EntryFilterer<T, U> where T : new () where U : IEntryFilter<T> {
     public static readonly Field<Terraria.DataStructures.EntryFilterer<T, U>, List<U>> AvailableFilters = new(nameof(Terraria.DataStructures.EntryFilterer<T, U>.AvailableFilters));
+    public static readonly Field<Terraria.DataStructures.EntryFilterer<T, U>, ISearchFilter<T>> _searchFilter = new(nameof(_searchFilter));
+}
+
+public static class ItemFilters {
+    public static class BySearch {
+        public static readonly Field<TBySearch, string?> _search = new(nameof(_search));
+
+    }
 }
 
 public static class GroupOptionButton<T> {

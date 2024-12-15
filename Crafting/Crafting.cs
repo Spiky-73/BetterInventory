@@ -1,27 +1,21 @@
 using System.Collections.Generic;
-using BetterInventory.ItemSearch;
+using BetterInventory.Default.Inventories;
 using MonoMod.Cil;
-using SpikysLib;
 using SpikysLib.IL;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.UI;
-using Terraria.UI.Chat;
 
 namespace BetterInventory.Crafting;
 
-public sealed class Crafting : ILoadable {
+public sealed class Crafting : ModPlayer {
 
-    public void Load(Mod mod) {
+    public override void Load() {
+        On_ItemSlot.RecordLoadoutChange += HookSwapLoadout;
         IL_Main.DrawInventory += static il => {
             if (!il.ApplyTo(ILCraftOnList, Configs.CraftOnList.Enabled)) Configs.UnloadedCrafting.Value.craftOnList = true;
         };
-        IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += static il => {
-            if (!il.ApplyTo(ILAvailableMaterial, Configs.AvailableMaterials.Enabled)) Configs.UnloadedCrafting.Value.availableMaterialsItemSlot = true;
-        };
     }
-
-    public void Unload() { }
 
     private static void ILCraftOnList(ILContext il) {
 
@@ -69,46 +63,31 @@ public sealed class Crafting : ILoadable {
         // }
     }
 
-    public static Item? GetMouseMaterial() => Configs.Crafting.MouseMaterial ? Main.mouseItem : null;
-
-    public static void AddAvailableMaterials(Item item, List<TooltipLine> tooltips) {
-        if (!Configs.AvailableMaterials.Tooltip || !ShouldDisplayStack(item, item.tooltipContext)) return;
-        if (item.stack != 1) tooltips[0].Text = tooltips[0].Text[0..^(2 + item.stack.ToString().Length)];
-        tooltips[0].Text += $" ({GetMaterialCount(item)}/{item.stack})";
+    private void HookSwapLoadout(On_ItemSlot.orig_RecordLoadoutChange orig) {
+        orig();
+        if (Configs.MoreMaterials.Equipment) Recipe.FindRecipes();
     }
-    private static void ILAvailableMaterial(ILContext il) {
-        ILCursor cursor = new(il);
-        // if (++[true] || item.stack > 1) {
-        //     ChatManager.DrawColorCodedStringWithShadow(spriteBatch, FontAssets.ItemStack.Value, ++[customStack], position + new Vector2(10f, 26f) * inventoryScale, color, 0f, Vector2.Zero, new Vector2(inventoryScale), -1f, inventoryScale);
-        // }
-        cursor.GotoNext(i => i.MatchLdfld(Reflection.Item.DD2Summon));
-        cursor.GotoPrev(i => i.SaferMatchCall(typeof(ChatManager), nameof(ChatManager.DrawColorCodedStringWithShadow)));
-        cursor.GotoPrev(MoveType.After, i => i.MatchCall(Reflection.Int32.ToString) && i.Previous.MatchLdflda(Reflection.Item.stack));
-        cursor.EmitLdarg1().EmitLdarg2().EmitLdarg3();
-        cursor.EmitDelegate((string stack, Item[] inv, int context, int slot) => {
-            Item item = inv[slot];
-            if (!Configs.AvailableMaterials.ItemSlot || !ShouldDisplayStack(item, context)) return stack;
-            long count = GetMaterialCount(item);
-            return count > 9999 ? $"{count}\n/{item.stack}" : $"{count}/{item.stack}";
-        });
-        cursor.GotoPrev(i => i.MatchLdflda(Reflection.Item.stack));
-        cursor.GotoPrev(MoveType.After, i => i.MatchLdfld(Reflection.Item.stack));
-        cursor.EmitLdarg1().EmitLdarg2().EmitLdarg3();
-        cursor.EmitDelegate((int stack, Item[] inv, int context, int slot) => Configs.AvailableMaterials.ItemSlot && ShouldDisplayStack(inv[slot], context) ? 2 : stack);
-    }
-
-    private static long GetMaterialCount(Item item) {
-        Recipe selectedRecipe = Main.recipe[Main.availableRecipe[Main.focusRecipe]];
-        int group = selectedRecipe.acceptedGroups.FindIndex(g => RecipeGroup.recipeGroups[g].IconicItemId == item.type);
-        return PlayerHelper.OwnedItems.GetValueOrDefault(group == -1 ? item.type : RecipeGroup.recipeGroups[selectedRecipe.acceptedGroups[group]].GetGroupFakeItemId());
-    }
-
-    private static bool ShouldDisplayStack(Item item, int context) {
-        if (context != ItemSlot.Context.CraftingMaterial) return false;
-        if ((!Main.guideItem.IsAir || Configs.BetterGuide.GuideTile && !Guide.guideTile.IsAir) && !Configs.BetterGuide.CraftInMenu) return false;
-        Recipe selectedRecipe = Main.recipe[Main.availableRecipe[Main.focusRecipe]];
-        var guid = item.UniqueId();
-        if (!selectedRecipe.requiredItem.Exists(i => i.UniqueId() == guid)) return false;
-        return true;
+    public override IEnumerable<Item> AddMaterialsForCrafting(out ItemConsumedCallback? itemConsumedCallback) {
+        itemConsumedCallback = (item, index) => {
+            if (item == Main.mouseItem) item.stack -= Reflection.RecipeLoader.ConsumedItems.GetValue()[^1].stack; // FIXME seems hacky
+            return;
+        };
+        List<Item> materials = [];
+        if (Configs.MoreMaterials.Mouse && Main.myPlayer == Player.whoAmI) materials.Add(Main.mouseItem);
+        if (Configs.MoreMaterials.Equipment) {
+            materials.AddRange(Player.armor);
+            materials.AddRange(Player.dye);
+            if(Configs.MoreMaterials.Value.equipment.Value.allLoadouts) {
+                for (int i = 0; i < Player.Loadouts.Length; i++) {
+                    if (i == Player.CurrentLoadoutIndex) continue;
+                    materials.AddRange(Player.Loadouts[i].Armor);
+                    materials.AddRange(Player.Loadouts[i].Dye);
+                }
+            }
+            materials.AddRange(AAccessories.ModdedAccessories(Player));
+            materials.AddRange(Player.miscEquips);
+            materials.AddRange(Player.miscDyes);
+        }
+        return materials;
     }
 }

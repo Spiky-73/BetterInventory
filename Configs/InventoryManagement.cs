@@ -56,14 +56,19 @@ public sealed class SmartConsumption {
 public sealed class SmartPickup {
     public NestedValue<ItemPickupLevel, PreviousSlot> previousSlot = new(ItemPickupLevel.AllItems);
     [DefaultValue(AutoEquipLevel.PrimarySlots)] public AutoEquipLevel autoEquip = AutoEquipLevel.PrimarySlots;
+    [DefaultValue(VoidBagLevel.IfInside)] public VoidBagLevel voidBag = VoidBagLevel.IfInside;
     public Toggle<UpgradeItems> upgradeItems = new(true);
     [DefaultValue(true)] public bool hotbarLast = true;
     [DefaultValue(true)] public bool fixSlot = true;
 
     public static bool Enabled => InventoryManagement.Instance.smartPickup.Key;
-    public static bool AutoEquip => !UnloadedInventoryManagement.Value.autoEquip && Enabled && Value.autoEquip > AutoEquipLevel.None;
+    public static bool AutoEquip => !UnloadedInventoryManagement.Value.pickupDedicatedSlot && Enabled && Value.autoEquip > AutoEquipLevel.None;
+    public static bool VoidBag => !UnloadedInventoryManagement.Value.pickupDedicatedSlot && Enabled && Value.voidBag > VoidBagLevel.None;
     public static bool HotbarLast => !UnloadedInventoryManagement.Value.hotbarLast && Enabled && Value.hotbarLast;
     public static bool FixSlot => !UnloadedInventoryManagement.Value.fixSlot && Enabled && Value.fixSlot;
+
+    public static bool OverrideSlot => PreviousSlot.Enabled;
+    public static bool DedicatedSlot => AutoEquip || UpgradeItems.Enabled;
     public static SmartPickup Value => InventoryManagement.Instance.smartPickup.Value;
 
     // Compatibility version < v0.6
@@ -75,6 +80,7 @@ public sealed class SmartPickup {
 }
 public enum ItemPickupLevel { None, ImportantItems, AllItems }
 public enum AutoEquipLevel { None, PrimarySlots, AnySlot }
+public enum VoidBagLevel { None, IfInside, Always }
 
 public sealed class PreviousSlot {
     [DefaultValue(true)] public bool mouse = true;
@@ -83,7 +89,7 @@ public sealed class PreviousSlot {
     public Toggle<Materials> materials = new(true);
     public Toggle<PreviousDisplay> displayPrevious = new(true);
 
-    public static bool Enabled => SmartPickup.Enabled && !UnloadedInventoryManagement.Value.previousSlot && SmartPickup.Value.previousSlot.Key > ItemPickupLevel.None;
+    public static bool Enabled => SmartPickup.Enabled && !UnloadedInventoryManagement.Value.pickupOverrideSlot && SmartPickup.Value.previousSlot.Key > ItemPickupLevel.None;
     public static bool Mouse => Enabled && Value.mouse;
     public static bool MediumCore => Enabled && Value.mediumCore;
     public static PreviousSlot Value => SmartPickup.Value.previousSlot.Value;
@@ -120,12 +126,12 @@ public sealed class UpgradeItems {
     [CustomModConfigItem(typeof(DictionaryValuesElement))] public Dictionary<PickupUpgraderDefinition, bool> upgraders = [];
     [DefaultValue(true)] public bool importantOnly = true;
 
-    public static bool Enabled => SmartPickup.Enabled && !UnloadedInventoryManagement.Value.upgradeItems && SmartPickup.Value.upgradeItems;
+    public static bool Enabled => SmartPickup.Enabled && !UnloadedInventoryManagement.Value.pickupDedicatedSlot && SmartPickup.Value.upgradeItems;
     public static UpgradeItems Value => SmartPickup.Value.upgradeItems.Value;
     
     [OnDeserialized]
     private void OnDeserialized(StreamingContext context) {
-        foreach (ModPickupUpgrader upgrader in global::BetterInventory.InventoryManagement.SmartPickup.Upgraders) upgraders.TryAdd(new(upgrader), true);
+        foreach (ModPickupUpgrader upgrader in PickupUpgraderLoader.Upgraders) upgraders.TryAdd(new(upgrader), true);
     }
 }
 

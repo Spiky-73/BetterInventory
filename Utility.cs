@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using BetterInventory.ItemSearch;
+using BetterInventory.InventoryManagement.SmartPickup;
 using MonoMod.Cil;
 using SpikysLib;
 using SpikysLib.Constants;
@@ -15,6 +15,18 @@ namespace BetterInventory;
 [Flags] public enum AllowedItems : byte { None = 0b00, Self = 0b01, Mouse = 0b10}
 
 public static class Utility {
+
+    public static void ClearMouseText() {
+        Main.HoverItem = new();
+        Reflection.Main._mouseTextCache.SetValue(Main.instance, Activator.CreateInstance(Reflection.Main.MouseTextCache));
+    }
+
+    public static Item GetItem_Inner(Player self, int plr, Item newItem, GetItemSettings settings) {
+        SmartPickup.vanillaGetItem = true;
+        Item i = self.GetItem(plr, newItem, settings);
+        SmartPickup.vanillaGetItem = false;
+        return i;
+    }
 
     public static int FailedILs { get; private set; }
 
@@ -103,8 +115,28 @@ public static class Utility {
         return cursor;
     }
 
-    public static void FindDisplayedRecipes() {
-        if (Configs.BetterGuide.AvailableRecipes) Guide.FindGuideRecipes();
-        else Recipe.FindRecipes();
+    public static long GetMaterialCount(this Recipe recipe, Item item) {
+        int group = recipe.acceptedGroups.FindIndex(g => RecipeGroup.recipeGroups[g].IconicItemId == item.type);
+        return PlayerHelper.OwnedItems.GetValueOrDefault(group == -1 ? item.type : RecipeGroup.recipeGroups[recipe.acceptedGroups[group]].GetGroupFakeItemId());
     }
+
+    public static string ToMetricString(this double number, int digits = 4) {
+        int power = number == 0 ? 0 : (int)Math.Log10(number);
+        if (power < digits) return number.ToString();
+        string prefix;
+        if (power <= MetricPrefixes.Length * 3 - 1) {
+            prefix = MetricPrefixes[power / 3];
+            power = power / 3 * 3;
+        } else {
+            prefix = $"e{power}";
+        }
+        if (power > 0) number /= Math.Pow(10, power);
+
+        string str = number.ToString();
+        str = str[0..Math.Min(str.Length, Math.Max(1, digits-prefix.Length))];
+        if (str[^1] == '.') str = str[0..^1];
+        return $"{str}{prefix}";
+    }
+
+    public static readonly string[] MetricPrefixes = [string.Empty, "k", "M", "G", "T", "P"];
 }

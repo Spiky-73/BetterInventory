@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.Serialization;
+using BetterInventory.Default.Catalogues;
 using BetterInventory.ItemSearch;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -35,7 +36,11 @@ public sealed class ItemSearch : ModConfig {
     public override ConfigScope Mode => ConfigScope.ClientSide;
 
     public override void OnChanged() {
-        if (!Main.gameMenu) Utility.FindDisplayedRecipes();
+        if (!Main.gameMenu) {
+            RecipeList.UpdateGuide();
+            Recipe.FindRecipes();
+        }
+
     }
 }
 
@@ -47,18 +52,21 @@ public sealed class BetterGuide {
     [DefaultValue(true)] public bool moreRecipes = true;
     [DefaultValue(true)] public bool craftingStation = true;
     [DefaultValue(true)] public bool conditionsDisplay = true;
+    [DefaultValue(true)] public bool autoOpenList = true;
     [DefaultValue(Configs.UnknownDisplay.Unknown)] public UnknownDisplay unknownDisplay = Configs.UnknownDisplay.Unknown;
 
     public static bool Enabled => ItemSearch.Instance.betterGuide;
-    public static bool MoreRecipes => Enabled && Value.moreRecipes && !UnloadedItemSearch.Value.guideMoreRecipes;
-    public static bool ConditionsDisplay => Enabled && Value.conditionsDisplay;
-    public static bool FavoritedRecipes => Enabled && Value.favoritedRecipes && !UnloadedItemSearch.Value.guideFavorited;
-    public static bool CraftInMenu => Enabled && Value.craftInMenu && !UnloadedItemSearch.Value.guideCraftInMenu;
-    public static bool GuideTile => Enabled && Value.craftingStation && !UnloadedItemSearch.Value.guideCraftingStation;
-    public static bool UnknownDisplay => Enabled && Value.unknownDisplay > Configs.UnknownDisplay.Vanilla && !UnloadedItemSearch.Value.guideUnknown;
+    public static bool MoreRecipes => Enabled && Value.moreRecipes && !UnloadedItemSearch.Value.guideRecipeFiltering;
+    public static bool RequiredObjectsDisplay => Enabled && Value.conditionsDisplay;
+    public static bool FavoritedRecipes => Enabled && Value.favoritedRecipes && !UnloadedItemSearch.Value.guideFavorited && !UnloadedItemSearch.Value.guideRecipeFiltering && !UnloadedItemSearch.Value.guideAvailableRecipes;
+    public static bool CraftInMenu => Enabled && Value.craftInMenu && !UnloadedItemSearch.Value.guideCraftInMenu && !UnloadedItemSearch.Value.guideRecipeFiltering && !UnloadedItemSearch.Value.guideAvailableRecipes;
+    public static bool GuideTile => Enabled && Value.craftingStation && !UnloadedItemSearch.Value.guideTile && !UnloadedItemSearch.Value.guideRecipeFiltering;
+    public static bool AutoOpenList => Enabled && Value.autoOpenList;
+    public static bool UnknownDisplay => Enabled && Value.unknownDisplay > Configs.UnknownDisplay.Vanilla && !UnloadedItemSearch.Value.guideUnknown && !UnloadedItemSearch.Value.guideRecipeFiltering;
 
     public static bool AvailableRecipes => FavoritedRecipes || CraftInMenu;
     public static bool RecipeOrdering => FavoritedRecipes || UnknownDisplay;
+    public static bool RecipeFiltering => !UnloadedItemSearch.Value.guideRecipeFiltering && (CraftInMenu || FavoritedRecipes || GuideTile || MoreRecipes || UnknownDisplay);
     public static BetterGuide Value => ItemSearch.Instance.betterGuide.Value;
     
     // Compatibility version < v0.6
