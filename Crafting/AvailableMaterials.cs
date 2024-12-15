@@ -65,7 +65,7 @@ public sealed class AvailableMaterialsItem : GlobalItem {
 
         (Recipe? recipe, Item[] tiles, Item[] conditions) = context == ItemSlot.Context.CraftingMaterial ?
             (Main.recipe[Main.availableRecipe[Main.focusRecipe]], RequiredObjectsDisplay._displayedRecipeTiles, RequiredObjectsDisplay._displayedRecipeConditions) :
-            (RequiredTooltipItem.HoveredRecipe, RequiredTooltipItem._displayedTiles, RequiredTooltipItem._displayedConditions);
+            (RecipeTooltipItem.HoveredRecipe, RecipeTooltipItem._displayedTiles, RecipeTooltipItem._displayedConditions);
         if (recipe is null) return false;
         var guid = item.UniqueId();
         if (recipe.requiredItem.Exists(i => i.UniqueId() == guid)) {

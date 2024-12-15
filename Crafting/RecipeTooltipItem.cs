@@ -13,7 +13,7 @@ using Terraria.UI.Chat;
 
 namespace BetterInventory.ItemActions;
 
-public class RequiredTooltipItem : GlobalItem {
+public class RecipeTooltipItem : GlobalItem {
 
     public override void Load() {
         On_ItemTagHandler.ItemSnippet.ctor += HookItemGroupName;
