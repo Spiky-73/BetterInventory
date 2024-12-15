@@ -32,14 +32,20 @@ Crafting: {
 	}
 
 	availableMaterials: {
-		Label: "[i:4131] Display Available Materials"
-		Tooltip: Display how much of each of the selected's recipe materials you have
+		Name: Display Available Materials
+		Label: "[i:4131] {$Mods.BetterInventory.Configs.Crafting.availableMaterials.Name}"
+		Tooltip:
+			'''
+			Display how much of each of the selected's recipe materials you have
+			Does not integrates with "{$Mods.BetterInventory.Configs.Crafting.recipeTooltip.Name}" when Magic Storage is Enabled. This will be fixed when Magic storage updates to v0.7
+			'''
 	}
 
 	Tooltip: ""
 
 	recipeTooltip: {
-		Label: "[i:398] Recipe in Tooltip"
+		Name: Recipe in Tooltip
+		Label: "[i:398] {$Mods.BetterInventory.Configs.Crafting.recipeTooltip.Name}"
 		Tooltip: Shows recipes' materials and required tiles in their tooltip
 	}
 }

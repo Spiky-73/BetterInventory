@@ -17,6 +17,7 @@ using SpikysLib.Configs;
 using SpikysLib;
 using MonoMod.Utils;
 using BetterInventory.ItemSearch.BetterGuide;
+using SpikysLib.CrossMod;
 
 namespace BetterInventory.ItemActions;
 
@@ -60,6 +61,7 @@ public sealed class BetterPlayer : ModPlayer {
         DisplayUpdate();
         DisplayCompatibility();
         DisplaySpicWarning();
+        DisplayMagicStorageStackWarning();
     }
 
     public void DisplayUpdate() {
@@ -87,8 +89,13 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public void DisplaySpicWarning() {
-        if (!Configs.CraftStack.Enabled || Configs.CraftStack.Value.maxItems.Key.Choice != nameof(Configs.MaxCraftAmount.spicRequirement) || SpysInfiniteConsumables.Enabled) return;
+        if (!Configs.CraftStack.Enabled || Configs.CraftStack.Value.maxItems.Key.Choice != nameof(Configs.MaxCraftAmount.spicRequirement) || SpysInfiniteConsumablesIntegration.Enabled) return;
         InGameNotificationsTracker.AddNotification(new InGameNotification(Mod, new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.SPICWarning"), Colors.RarityAmber)));
+    }
+
+    public void DisplayMagicStorageStackWarning() {
+        if (!Configs.RecipeTooltip.Enabled || !Configs.AvailableMaterials.Enabled || !MagicStorageIntegration.StackingFix) return;
+        InGameNotificationsTracker.AddNotification(new InGameNotification(Mod, new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.MagicStorageStackWarning"), Colors.RarityAmber)));
     }
 
     public override void SetControls() {

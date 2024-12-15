@@ -6,6 +6,7 @@ UnloadedLess: Some previously unloaded features were successfully loaded. {$Mods
 UnloadedNone: All previously unloaded features were successfully loaded
 Compatibility: View the [c/05c8ff:{$Mods.BetterInventory.Configs.Compatibility.DisplayName}] config to see the list of unloaded features
 SPICWarning: "{$Mods.BetterInventory.Configs.MaxCraftAmount.spicRequirement.Label} is selected but SPIC is not loaded"
+MagicStorageStackWarning: "{$Mods.BetterInventory.Configs.Crafting.availableMaterials.Name} does not integrates with {$Mods.BetterInventory.Configs.Crafting.recipeTooltip.Name} when Magic Storage is Enabled. This will be fixed when Magic storage updates to v0.7"
 ModName: Better Inventory
 SPIC.ModName: Spy's Infinite Consumables
 Homepage: homepage

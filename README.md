@@ -18,6 +18,7 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 - `Auto Equip Items`:  Automatically equip items such as Armors, Accessories or Equipment
 - `Pickup to Hotbar Last`: Picked up items will fill the hotbar slots last
 - `Upgrade Items on Pickup`: Picked up items go to the slot of items of the same kind if they are better
+- `Pickup to Void Bag First`: Picked up items will fill the void bag before the inventory
 - `Quick Move`: Quickly move items between special slots in the inventory
 - `Craft Stack`: Left Click to craft or buy items in stacks
 - `Favorite Items in Personal Storages`: Favorite items in the Piggy Bank, Safe, ...
@@ -43,8 +44,9 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 - `Recipe Search Bar`: Filter recipes by their name
 - `Recipe Filters`: Filter recipes by their created item
 - `Craft on Recipe List`: Craft items directly from the recipe list
-- `Held Material`: Adds the held item to the available materials
+- `More Material`: Adds various items to the available materials such as the mouse item and the equipped items
 - `Display Available Materials`: Display how much of each of the selected's recipe materials you have
+-  `Recipe in Tooltip`: Shows recipes' materials and required tiles in their tooltip
 
 ### Item Search
 - `Favorite Recipes`: Allows you to favorite or blacklist recipes
