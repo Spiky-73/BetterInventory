@@ -6,7 +6,7 @@ using Terraria.ModLoader;
 namespace BetterInventory.CrossMod;
 
 [JITWhenModsEnabled(ModName)]
-public static class SpysInfiniteConsumables {
+public static class SpysInfiniteConsumablesIntegration {
     public const string ModName = "SPIC";
 
     public static bool Enabled => ModLoader.HasMod(ModName);
