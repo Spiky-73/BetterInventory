@@ -11,10 +11,7 @@ ModName: Better Inventory
 SPIC.ModName: Spy's Infinite Consumables
 Homepage: homepage
 Workshop: Steam Workshop page
-Version: "0.8.0.1"
-Summary: Fixed bug with recipe filters
+Version: 0.8.0.1
+Summary: Some bugs related to Recipe Filters and Multiplayer were fixed
 Details: ""
-Changelog:
-	'''
-	- Fixed Recipe filters not directly visible when loading a world
-	'''
+Changelog: - Fixed Recipe filters not directly visible when loading a world
