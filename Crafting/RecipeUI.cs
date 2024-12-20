@@ -53,6 +53,7 @@ public sealed class RecipeUIPlayer : ModPlayer {
         for (int i = 0; i < RecipeUI.Filterer.AvailableFilters.Count; i++) if ((filters & (1 << i)) != 0) RecipeUI.Filterer.ToggleFilter(i);
         RecipeUI.Filterer.SetSearchFilter(search);
         RecipeUI.Sorter.SetPrioritizedStepIndex(-1);
+        RecipeUI.RebuildUI();
     }
 
     public int filters;
@@ -81,9 +82,12 @@ public sealed class RecipeUI : ModSystem {
         Filterer.SetSearchFilterObject(new ItemSearchFilterWrapper());
     }
 
-    public static void OnConfigChanged() {
-        if (_recipeState?.filters is not null) _recipeState.filters.ItemsPerLine = Configs.RecipeFilters.Value.filtersPerLine;
-        if (!Main.gameMenu && _recipeState is not null) _recipeState.RebuildList();
+    public static void RebuildUI() {
+        if (!Main.gameMenu && _recipeState is not null) {
+            RecipesPerFilter = new int[Filterer.AvailableFilters.Count];
+            _recipeState.RebuildFilterGrid();
+            _recipeState.RebuildList();
+        }
     }
 
     public override void PostSetupRecipes() {
@@ -140,7 +144,7 @@ public sealed class RecipeUI : ModSystem {
         RecipesPerFilter = new int[Filterer.AvailableFilters.Count];
         var recipes = FilterRecipes();
         SortRecipes(recipes);
-        _recipeState.RebuildRecipeGrid();
+        _recipeState.RebuildFilterGrid();
 
         for (int i = 0; i < recipes.Count; i++) Main.availableRecipe[i] = recipes[i].Index;
         for (int i = recipes.Count; i < UnfilteredCount; i++) Main.availableRecipe[i] = 0;

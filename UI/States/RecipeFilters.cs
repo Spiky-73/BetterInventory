@@ -58,36 +58,37 @@ public sealed class RecipeFilters : UIState {
     }
 
     private void InitFilters() {
-        filters = new() { ListPadding = 0.1f }; // Cannot be set to 0 for some reason
+        filters = new(Configs.RecipeFilters.Value.filtersPerLine) { ListPadding = 0.1f }; // Cannot be set to 0 for some reason
     }
 
-    public void RebuildRecipeGrid() {
+    public void RebuildFilterGrid() {
         static void OnFilterChanges() {
             Recipe.FindRecipes();
             SoundEngine.PlaySound(SoundID.MenuTick);
         }
-        this.filters.Clear();
+        filters.Clear();
+        filters.ItemsPerLine = Configs.RecipeFilters.Value.filtersPerLine;
 
-        var filters = RecipeUI.Filterer;
-        for (int i = 0; i < filters.AvailableFilters.Count; i++) {
-            IRecipeFilter filter = filters.AvailableFilters[i];
+        var filterer = RecipeUI.Filterer;
+        for (int i = 0; i < filterer.AvailableFilters.Count; i++) {
+            IRecipeFilter filter = filterer.AvailableFilters[i];
             int recipeCount = RecipeUI.RecipesPerFilter[i];
-            bool active = filters.IsFilterActive(i);
+            bool active = filterer.IsFilterActive(i);
             bool available = recipeCount > 0;
             if (!active && !available && Configs.RecipeFilters.Value.hideUnavailable) continue;
             
             UIRecipeFilterIcon icon = new(filter, recipeCount, active);
             icon.OnLeftClick += (_, _) => {
-                bool keepOn = !active || filters.ActiveFilters.Count > 1;
-                filters.ActiveFilters.Clear();
-                if (keepOn) filters.ActiveFilters.Add(filter);
+                bool keepOn = !active || filterer.ActiveFilters.Count > 1;
+                filterer.ActiveFilters.Clear();
+                if (keepOn) filterer.ActiveFilters.Add(filter);
                 OnFilterChanges();
             };
             icon.OnRightClick += (_, _) => {
-                if (!filters.ActiveFilters.Remove(filter)) filters.ActiveFilters.Add(filter);
+                if (!filterer.ActiveFilters.Remove(filter)) filterer.ActiveFilters.Add(filter);
                 OnFilterChanges();
             };
-            this.filters.Add(icon);
+            filters.Add(icon);
         }
         Recalculate();
     }
