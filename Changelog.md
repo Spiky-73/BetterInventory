@@ -2,6 +2,7 @@
 
 ## 0.8.0.1
 - Fixed Recipe filters not directly visible when loading a world
+- Updated Spiky's Lib dependency to v1.3.1.1
 
 ## 0.8
 - Added Equipped items to available materials

@@ -58,7 +58,7 @@ public sealed class RecipeFilters : UIState {
     }
 
     private void InitFilters() {
-        filters = new() { ListPadding = 0.1f }; // Cannot be set to 0 for some reason
+        filters = new(Configs.RecipeFilters.Value.filtersPerLine) { ListPadding = 0.1f }; // Cannot be set to 0 for some reason
     }
 
     public void RebuildFilterGrid() {
