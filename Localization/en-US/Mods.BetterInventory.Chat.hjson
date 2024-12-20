@@ -11,19 +11,10 @@ ModName: Better Inventory
 SPIC.ModName: Spy's Infinite Consumables
 Homepage: homepage
 Workshop: Steam Workshop page
-Version: "0.8"
-Summary: Equipped items can new be used as materials and some systems received new features
+Version: "0.8.0.1"
+Summary: Fixed bug with recipe filters
 Details: ""
 Changelog:
 	'''
-	- Added Equipped items to available materials
-	- Added Recipe in Tooltip
-	- Added Remember Recipe List position
-	- Added Focus Selected Recipe Button
-	- Added Pickup to Void Bag First
-	- Added Auto Open Recipe List
-	- Improved Tooltip Hover
-	- Reworked how Better Guide works internally
-	- Reworked how Recipes Filters and Available Recipes works internally
-	- Updated Spiky's Lib dependency to v1.3.1
+	- Fixed Recipe filters not directly visible when loading a world
 	'''

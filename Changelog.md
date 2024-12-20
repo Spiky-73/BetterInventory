@@ -1,5 +1,8 @@
 # Better Inventory changelog
 
+## 0.8.0.1
+- Fixed Recipe filters not directly visible when loading a world
+
 ## 0.8
 - Added Equipped items to available materials
 - Added Recipe in Tooltip

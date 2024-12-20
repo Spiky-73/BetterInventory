@@ -19,7 +19,7 @@ public sealed class Crafting : ModConfig {
     public static bool RecipeUI => Instance.recipeSearchBar || Instance.recipeFilters;
     public static Crafting Instance = null!;
 
-    public override void OnChanged() => global::BetterInventory.Crafting.RecipeUI.OnConfigChanged();
+    public override void OnChanged() => global::BetterInventory.Crafting.RecipeUI.RebuildUI();
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
 }
