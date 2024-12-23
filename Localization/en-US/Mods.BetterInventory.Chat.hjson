@@ -11,11 +11,7 @@ ModName: Better Inventory
 SPIC.ModName: Spy's Infinite Consumables
 Homepage: homepage
 Workshop: Steam Workshop page
-Version: 0.8.0.1
-Summary: Some bugs related to Recipe Filters and Multiplayer were fixed
+Version: 0.8.0.2
+Summary: Craft Stack now works as excepted with the Alchemy Station
 Details: ""
-Changelog:
-	'''
-	- Fixed Recipe filters not directly visible when loading a world
-	- Updated Spiky's Lib dependency to v1.3.1.1
-	'''
+Changelog: - Fixed Craft Stack not properly applying material reductions

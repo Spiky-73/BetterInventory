@@ -1,6 +1,6 @@
 displayName = Better Inventory
 author = Spiky
-version = 0.8.0.1
+version = 0.8.0.2
 homepage = https://github.com/Spiky-73/BetterInventory/blob/master/README.md
 side = Client
 modReferences = SpikysLib@1.3.1

@@ -1,5 +1,8 @@
 # Better Inventory changelog
 
+## 0.8.0.2
+- Fixed Craft Stack not properly applying material reductions
+
 ## 0.8.0.1
 - Fixed Recipe filters not directly visible when loading a world
 - Updated Spiky's Lib dependency to v1.3.1.1

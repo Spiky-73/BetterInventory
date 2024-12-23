@@ -6,3 +6,9 @@ namespace BetterInventory.Reflection;
 public static class Int32 {
     new public static readonly Method<TInt32, string> ToString = new(nameof(ToString));
 }
+
+public static class List<T> {
+    public static class Enumerator {
+        public static Property<System.Collections.Generic.List<T>.Enumerator, T> Current = new(nameof(System.Collections.Generic.List<T>.Enumerator.Current));
+    }
+}

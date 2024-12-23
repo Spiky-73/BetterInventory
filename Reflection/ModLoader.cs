@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using SpikysLib.Reflection;
 using Terraria.ModLoader;
 using TItem = Terraria.Item;
@@ -27,16 +26,16 @@ public static class AccessorySlotLoader {
 }
 
 public static class BuilderToggleLoader {
-    public static readonly StaticField<List<BuilderToggle>> BuilderToggles = new(typeof(TBuilderLoader), nameof(BuilderToggles));
+    public static readonly StaticField<System.Collections.Generic.List<BuilderToggle>> BuilderToggles = new(typeof(TBuilderLoader), nameof(BuilderToggles));
 }
 
 public static class RecipeLoader {
-    public static readonly StaticMethod<object?> OnCraft = new(typeof(TLoader), nameof(TLoader.OnCraft), typeof(TItem), typeof(TRecipe), typeof(List<TItem>), typeof(TItem));
-    public static readonly StaticField<List<TItem>> ConsumedItems = new(typeof(TLoader), nameof(ConsumedItems));
+    public static readonly StaticMethod<object?> OnCraft = new(typeof(TLoader), nameof(TLoader.OnCraft), typeof(TItem), typeof(TRecipe), typeof(System.Collections.Generic.List<TItem>), typeof(TItem));
+    public static readonly StaticField<System.Collections.Generic.List<TItem>> ConsumedItems = new(typeof(TLoader), nameof(ConsumedItems));
 }
 
 public static class ItemLoader {
     public static readonly StaticMethod<bool> PreDrawTooltip = new(typeof(TItemLoader), nameof(TItemLoader.PreDrawTooltip), typeof(TItem), typeof(ReadOnlyCollection<TooltipLine>), typeof(int).MakeByRefType(), typeof(int).MakeByRefType());
-    public static readonly StaticMethod<List<TooltipLine>> ModifyTooltips = new(typeof(TItemLoader), nameof(TItemLoader.ModifyTooltips), typeof(TItem), typeof(int).MakeByRefType(), typeof(string[]), typeof(string[]).MakeByRefType(), typeof(bool[]).MakeByRefType(), typeof(bool[]).MakeByRefType(), typeof(int).MakeByRefType(), typeof(TColor?[]).MakeByRefType(), typeof(int));
-    public delegate List<TooltipLine> ModifyTooltipsFn(TItem item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out TColor?[] overrideColor, int prefixlineIndex);
+    public static readonly StaticMethod<System.Collections.Generic.List<TooltipLine>> ModifyTooltips = new(typeof(TItemLoader), nameof(TItemLoader.ModifyTooltips), typeof(TItem), typeof(int).MakeByRefType(), typeof(string[]), typeof(string[]).MakeByRefType(), typeof(bool[]).MakeByRefType(), typeof(bool[]).MakeByRefType(), typeof(int).MakeByRefType(), typeof(TColor?[]).MakeByRefType(), typeof(int));
+    public delegate System.Collections.Generic.List<TooltipLine> ModifyTooltipsFn(TItem item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out TColor?[] overrideColor, int prefixlineIndex);
 }
