@@ -279,20 +279,37 @@ public sealed class ClickOverrides : ILoadable {
         ILCursor cursor = new(il);
 
         // foreach (<requiredItem>) {
-        //     ...
-        //     RecipeLoader.ConsumeItem(this, item2.type, ref num);
-        cursor.GotoNext(MoveType.After, i => i.SaferMatchCall(typeof(RecipeLoader), nameof(RecipeLoader.ConsumeItem)));
+        //     ++ do for(int i = 0; i < s_ilCraftMultiplier; i++) {
+        //         int num = item2.stack;
+        //         <alchemy station>
+        //         RecipeLoader.ConsumeItem(this, item2.type, ref num);
+        //     ++ }
+        //     ++ num = total
+        cursor.GotoNextLoc(MoveType.After, out _, i => i.Previous.MatchCall(Reflection.List<Item>.Enumerator.Current.GetMethod!), 3);
+        cursor.EmitDelegate(() => {
+            _ilNumConsumed = 0;
+            _ilI = 0;
+        });
+        ILLabel loopStart = cursor.DefineLabel();
+        cursor.MarkLabel(loopStart);
+
+
+        cursor.GotoNext(MoveType.After, i => i.MatchCall(typeof(RecipeLoader), nameof(RecipeLoader.ConsumeItem)));
         int consumed = 4;
         cursor.FindPrev(out _, i => i.MatchLdloca(out consumed));
 
-        //     ++ <bulkCraftCost>
         cursor.EmitLdloc(consumed);
-        cursor.EmitDelegate((int consumed) => Configs.CraftStack.Enabled ? (consumed * s_ilCraftMultiplier) : consumed);
+        cursor.EmitDelegate((int consumed) => {
+            _ilI++;
+            _ilNumConsumed += consumed;
+            return _ilI < s_ilCraftMultiplier;
+        });
+        cursor.EmitBrtrue(loopStart);
+        cursor.EmitDelegate(() => _ilNumConsumed);
         cursor.EmitStloc(consumed);
-        //     <consumeItems>
-        // }
-        // ...
     }
+    private static int _ilI;
+    private static int _ilNumConsumed;
     private static void ILCraftStackAndPickup(ILContext il) {
         ILCursor cursor = new(il);
 

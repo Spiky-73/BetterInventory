@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Terraria.DataStructures;
 using Terraria.GameContent.Bestiary;
 using Terraria.GameContent.UI.Elements;
@@ -21,7 +20,7 @@ using Terraria.UI;
 namespace BetterInventory.Reflection;
 
 public static class UIBestiaryTest {
-    public static readonly Field<TBestiary, List<BestiaryEntry>> _workingSetEntries = new(nameof(_workingSetEntries));
+    public static readonly Field<TBestiary, System.Collections.Generic.List<BestiaryEntry>> _workingSetEntries = new(nameof(_workingSetEntries));
     public static readonly Field<TBestiary, TSearchBar> _searchBar = new(nameof(_searchBar));
     public static readonly Field<TBestiary, TButton> _selectedEntryButton = new(nameof(_selectedEntryButton));
     public static readonly Field<TBestiary, UIBestiaryEntryGrid> _entryGrid = new(nameof(_entryGrid));
@@ -45,13 +44,13 @@ public static class UIBestiaryEntryInfoPage {
 public static class UIBestiaryFilteringOptionsGrid {
     public static readonly Field<TFilterGrid, UIElement> _container = new(nameof(_container));
     public static readonly Field<TFilterGrid, Terraria.DataStructures.EntryFilterer<BestiaryEntry, IBestiaryEntryFilter>> _filterer = new(nameof(_filterer));
-    public static readonly Field<TFilterGrid, List<Terraria.GameContent.UI.Elements.GroupOptionButton<int>>> _filterButtons = new(nameof(_filterButtons));
-    public static readonly Field<TFilterGrid, List<List<BestiaryEntry>>> _filterAvailabilityTests = new(nameof(_filterAvailabilityTests));
-    public static readonly Method<TFilterGrid, bool> GetIsFilterAvailableForEntries = new(nameof(GetIsFilterAvailableForEntries), typeof(IBestiaryEntryFilter), typeof(List<BestiaryEntry>));
+    public static readonly Field<TFilterGrid, System.Collections.Generic.List<Terraria.GameContent.UI.Elements.GroupOptionButton<int>>> _filterButtons = new(nameof(_filterButtons));
+    public static readonly Field<TFilterGrid, System.Collections.Generic.List<System.Collections.Generic.List<BestiaryEntry>>> _filterAvailabilityTests = new(nameof(_filterAvailabilityTests));
+    public static readonly Method<TFilterGrid, bool> GetIsFilterAvailableForEntries = new(nameof(GetIsFilterAvailableForEntries), typeof(IBestiaryEntryFilter), typeof(System.Collections.Generic.List<BestiaryEntry>));
 }
 
 public static class EntryFilterer<T, U> where T : new () where U : IEntryFilter<T> {
-    public static readonly Field<Terraria.DataStructures.EntryFilterer<T, U>, List<U>> AvailableFilters = new(nameof(Terraria.DataStructures.EntryFilterer<T, U>.AvailableFilters));
+    public static readonly Field<Terraria.DataStructures.EntryFilterer<T, U>, System.Collections.Generic.List<U>> AvailableFilters = new(nameof(Terraria.DataStructures.EntryFilterer<T, U>.AvailableFilters));
     public static readonly Field<Terraria.DataStructures.EntryFilterer<T, U>, ISearchFilter<T>> _searchFilter = new(nameof(_searchFilter));
 }
 
