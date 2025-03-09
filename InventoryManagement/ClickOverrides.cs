@@ -293,8 +293,7 @@ public sealed class ClickOverrides : ILoadable {
         ILLabel loopStart = cursor.DefineLabel();
         cursor.MarkLabel(loopStart);
 
-
-        cursor.GotoNext(MoveType.After, i => i.MatchCall(typeof(RecipeLoader), nameof(RecipeLoader.ConsumeItem)));
+        cursor.GotoNext(MoveType.After, i => i.MatchCall(typeof(RecipeLoader), nameof(RecipeLoader.ConsumeIngredient)));
         int consumed = 4;
         cursor.FindPrev(out _, i => i.MatchLdloca(out consumed));
 

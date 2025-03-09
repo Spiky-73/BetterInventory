@@ -11,7 +11,11 @@ ModName: Better Inventory
 SPIC.ModName: Spy's Infinite Consumables
 Homepage: homepage
 Workshop: Steam Workshop page
-Version: 0.8.0.2
-Summary: Craft Stack now works as excepted with the Alchemy Station
-Details: ""
-Changelog: - Fixed Craft Stack not properly applying material reductions
+Version: 0.8.0.3
+Summary: ""
+Details: Ported to tML v2025.01
+Changelog:
+	'''
+	- Ported to tML v2025.01
+	- Fixed Craft Stack not able to load
+	'''
