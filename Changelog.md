@@ -1,5 +1,9 @@
 # Better Inventory changelog
 
+## 0.8.0.3
+- Ported to tML v2025.01
+- Fixed Craft Stack not able to load
+
 ## 0.8.0.2
 - Fixed Craft Stack not properly applying material reductions
 
