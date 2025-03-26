@@ -19,7 +19,7 @@ public sealed class DisplayedRecipes : ModSystem {
         On_Recipe.VisuallyRepositionRecipes += HookNoReposition;
     }
 
-    public override void PostAddRecipes() {
+    public override void PostSetupRecipes() {
         numAvailableRecipes = 0;
         availableRecipes = new int[Main.availableRecipe.Length];
     }

@@ -5,7 +5,7 @@ using TRecipe = Terraria.Recipe;
 using TAccPlayer = Terraria.ModLoader.Default.ModAccessorySlotPlayer;
 using TAccLoader = Terraria.ModLoader.AccessorySlotLoader;
 using TBuilderLoader = Terraria.ModLoader.BuilderToggleLoader;
-using TLoader = Terraria.ModLoader.RecipeLoader;
+using TRecipeLoader = Terraria.ModLoader.RecipeLoader;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using TColor = Microsoft.Xna.Framework.Color;
@@ -30,8 +30,8 @@ public static class BuilderToggleLoader {
 }
 
 public static class RecipeLoader {
-    public static readonly StaticMethod<object?> OnCraft = new(typeof(TLoader), nameof(TLoader.OnCraft), typeof(TItem), typeof(TRecipe), typeof(System.Collections.Generic.List<TItem>), typeof(TItem));
-    public static readonly StaticField<System.Collections.Generic.List<TItem>> ConsumedItems = new(typeof(TLoader), nameof(ConsumedItems));
+    public static readonly StaticMethod<object?> OnCraft = new(typeof(TRecipeLoader), nameof(TRecipeLoader.OnCraft), typeof(TItem), typeof(TRecipe), typeof(System.Collections.Generic.List<TItem>), typeof(TItem));
+    public static readonly StaticField<System.Collections.Generic.List<TItem>> ConsumedItems = new(typeof(TRecipeLoader), nameof(ConsumedItems));
 }
 
 public static class ItemLoader {

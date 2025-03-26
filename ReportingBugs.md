@@ -5,10 +5,11 @@ If you encounter a bug with Better Inventory, please report it [here](https://gi
 Add as many details as possible about the bug, such as:
 - What happens
 - Does it happen in single player or multiplayer
-- Your `client.log` files (located in the `tModLoader-Logs` folder in your tModLoader install directory)
+- Your `client.log` file (located in the `tModLoader-Logs` folder in your tModLoader install directory)
+- Your mod list and configs. To do so Create a mod pack of your enabled mod (`Workshop` > `Mod Packs` > `Save Enabled as new Mod Pack`), export it (`Export Pack Instance`) and provide the file `SaveData/Mods/enabled.json` and a zip of the folder `SaveData/ModConfigs`
 - Any details that could be important
 
-### 2. How to reproduce the it ?
+### 2. How to reproduce it ?
 List the steps to execute to cause the bug.
 
 ### 3. Which feature(s) causes it ?
@@ -26,12 +27,10 @@ The process is quite simple:
 4. Keep this feature disabled and re-enable the rest. If the bug still happens, go back to step 1.
 
 #### Mod Loading Bugs
-1) Disadle all mods except `Better Inventory`
+1) Disable all mods except `Better Inventory`
 2) In the `Reporting Bugs` config,
    - **Enable `Compatibility Mode`**
    - Initialize `DisableAll`
 3) Reload with all your mods enabled
 4) Re-enable a feature and Reload. If the loading fails, keep it disabled
 5) Repeat step 4 with every features you want to enable
-
-**Include the list of unloaded features and your mod list in your report**
