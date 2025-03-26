@@ -11,11 +11,11 @@ ModName: Better Inventory
 SPIC.ModName: Spy's Infinite Consumables
 Homepage: homepage
 Workshop: Steam Workshop page
-Version: 0.8.0.3
-Summary: ""
-Details: Ported to tML v2025.01
+Version: 0.8.0.4
+Summary: Fixed a game crash when joining worlds
+Details: ""
 Changelog:
 	'''
-	- Ported to tML v2025.01
-	- Fixed Craft Stack not able to load
+	- Fixed PostAddRecipes used instead of PostSetupRecipes
+	- Fixed Typos in ReportingBugs
 	'''

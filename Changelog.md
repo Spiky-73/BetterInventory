@@ -1,5 +1,9 @@
 # Better Inventory changelog
 
+## 0.8.0.4
+- Fixed PostAddRecipes used instead of PostSetupRecipes
+- Fixed Typos in ReportingBugs
+
 ## 0.8.0.3
 - Ported to tML v2025.01
 - Fixed Craft Stack not able to load
