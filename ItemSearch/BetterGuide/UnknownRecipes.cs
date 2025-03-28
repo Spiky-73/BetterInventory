@@ -22,7 +22,7 @@ public sealed class UnknownRecipesPlayer : ModPlayer {
         On_Recipe.CollectGuideRecipes += HookRefreshUnknownRecipes;
 
         IL_Main.DrawInventory += static il => {
-            if (!il.ApplyTo(ILHideMaterials, Configs.BetterGuide.UnknownDisplay)) Configs.UnloadedItemSearch.Value.guideUnknown = true;
+            if (!il.ApplyTo(ILHideMaterials, Configs.BetterGuide.UnknownDisplay)) Configs.UnloadedItemSearch.Value.guideUnknownDisplay = true;
         };
 
         On_ItemSlot.Draw_SpriteBatch_refItem_int_Vector2_Color += HookHideItem;

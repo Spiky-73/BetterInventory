@@ -64,12 +64,12 @@ public sealed class Compatibility : ModConfig {
         ItemActions.Instance.tooltipHover.Key = false;
         ItemActions.Instance.Save();
 
-        BetterGuide.Value.moreRecipes = false;
-        BetterGuide.Value.craftingStation = false;
         BetterGuide.Value.favoritedRecipes.Key = false;
         BetterGuide.Value.craftInMenu = false;
+        BetterGuide.Value.moreRecipes = false;
+        BetterGuide.Value.craftingStation = false;
+        BetterGuide.Value.conditionsDisplay = false;
         BetterGuide.Value.unknownDisplay = UnknownDisplay.Vanilla;
-        FavoritedRecipes.Value.unfavoriteOnCraft = UnfavoriteOnCraft.None;
         BetterBestiary.Value.displayedInfo = UnlockLevel.Vanilla;
         BetterBestiary.Value.unknownDisplay = UnknownDisplay.Vanilla;
         QuickSearch.Value.catalogues[new(RecipeList.Instance)] = false;
@@ -83,7 +83,8 @@ public sealed class UnloadedCrafting {
     public bool fastScroll;
     public bool scrollButtons;
     public bool wrapping;
-    public bool recipeListUI;
+    public bool recipeCount;
+    public bool focusButton;
     public bool noRecStartOffset;
     public bool noRecListClose;
     public bool recipeFilters;
@@ -91,7 +92,8 @@ public sealed class UnloadedCrafting {
     public bool craftOnList;
     public bool availableMaterialsItemSlot;
 
-    [JsonIgnore] public bool RecipeUI { set { recipeFilters = value; recipeSearchBar = value; } }
+    [JsonIgnore] public bool RecipeListUI { set { recipeCount = focusButton = value; } }
+    [JsonIgnore] public bool RecipeUI { set { recipeFilters = recipeSearchBar = value; } }
 
     public static UnloadedCrafting Value => Compatibility.Instance.unloadedCrafting;
 }
@@ -123,19 +125,19 @@ public sealed class UnloadedItemActions {
 }
 
 public sealed class UnloadedItemSearch {
-    public bool guideTile;
-    public bool guideFavorited;
+    public bool guideFavoritedRecipes;
     public bool guideCraftInMenu;
-    public bool guideUnknown;
-    public bool guideUnfavoriteOnCraft;
+    public bool guideMoreRecipes;
+    public bool guideCraftingStation;
+    public bool guideRequiredObjectsDisplay;
+    public bool guideUnknownDisplay;
     public bool bestiaryDisplayedInfo;
     public bool bestiaryUnknown;
     public bool recipeList;
-    public bool guideRecipeFiltering;
-    public bool guideAvailableRecipes;
 
-    [JsonIgnore] public bool BestiaryUnlock { set { bestiaryUnknown = value; bestiaryDisplayedInfo = value; } }
-    [JsonIgnore] public bool GuideRecipeOrdering { set { guideUnknown = value; guideFavorited = value; } }
+    [JsonIgnore] public bool GuideAvailableRecipes { set { guideFavoritedRecipes = guideCraftInMenu = value; } }
+    [JsonIgnore] public bool GuideRecipeFiltering { set { guideCraftInMenu = guideFavoritedRecipes = guideCraftingStation = guideMoreRecipes = guideUnknownDisplay = value; } }
+    [JsonIgnore] public bool BestiaryUnlock { set { bestiaryUnknown = bestiaryDisplayedInfo = value; } }
     
     public static UnloadedItemSearch Value => Compatibility.Instance.unloadedItemSearch;
 }

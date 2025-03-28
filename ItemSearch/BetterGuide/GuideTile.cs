@@ -19,11 +19,11 @@ namespace BetterInventory.ItemSearch.BetterGuide;
 public sealed class GuideTileFakeItemContext : IFakeItemContext {
     public bool IsFake(Item item) => item.IsAPlaceholder();
 
-    public bool IsHovered(Item[] inv, int context, int slot) => Configs.BetterGuide.GuideTile && context == ContextID.GuideItem && slot == 1;
+    public bool IsHovered(Item[] inv, int context, int slot) => Configs.BetterGuide.CraftingStation && context == ContextID.GuideItem && slot == 1;
 
     public bool WouldMoveToContext(Item[] inv, int context, int slot, [MaybeNullWhen(false)] out Item destination) {
         destination = null;
-        if(!Configs.BetterGuide.GuideTile || !Main.InGuideCraftMenu || Main.cursorOverride != CursorOverrideID.InventoryToChest) return false;
+        if(!Configs.BetterGuide.CraftingStation || !Main.InGuideCraftMenu || Main.cursorOverride != CursorOverrideID.InventoryToChest) return false;
         destination = GuideTilePlayer.GetGuideContextDestination(inv[slot], out var guideSlot);
         return guideSlot == 1;
     }
@@ -66,12 +66,12 @@ public sealed class GuideTilePlayer : ModPlayer {
     }
 
     private int HookPickItemMovementAction(On_ItemSlot.orig_PickItemMovementAction orig, Item[] inv, int context, int slot, Item checkItem) {
-        if(!Configs.BetterGuide.GuideTile || context != ContextID.GuideItem || slot != 1) return orig(inv, context, slot, checkItem);
+        if(!Configs.BetterGuide.CraftingStation || context != ContextID.GuideItem || slot != 1) return orig(inv, context, slot, checkItem);
         return checkItem.IsAir || FitsGuideTile(checkItem) ? 0 : -1;
     }
 
     public override bool HoverSlot(Item[] inventory, int context, int slot) {
-        if(!Configs.BetterGuide.GuideTile || !ItemSlot.ShiftInUse) return false;
+        if(!Configs.BetterGuide.CraftingStation || !ItemSlot.ShiftInUse) return false;
         if(context == 0 && Main.InGuideCraftMenu && FitsGuideTile(inventory[slot])) {
             Main.cursorOverride = CursorOverrideID.InventoryToChest;
             return true;
@@ -80,7 +80,7 @@ public sealed class GuideTilePlayer : ModPlayer {
     }
 
     private static bool HookOverrideTileClick(On_ItemSlot.orig_OverrideLeftClick orig, Item[] inv, int context, int slot) {
-        if(!Configs.BetterGuide.GuideTile) return orig(inv, context, slot);
+        if(!Configs.BetterGuide.CraftingStation) return orig(inv, context, slot);
         if(context == ContextID.GuideItem && slot == 1 && GuideTile.guideTile.IsAir && (Main.mouseItem.IsAir || ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) == -1)) {
             inv[slot] = PlaceholderItem.FromTile(PlaceholderItem.ByHandTile);
             SoundEngine.PlaySound(SoundID.Grab);
@@ -154,10 +154,10 @@ public sealed class GuideTile : ModSystem {
 
     public override void Load() {
         IL_Recipe.FindRecipes += static il => {
-            if (!il.ApplyTo(ILGuideTileRecipes, Configs.BetterGuide.GuideTile)) Configs.UnloadedItemSearch.Value.guideTile = true;
+            if (!il.ApplyTo(ILGuideTileRecipes, Configs.BetterGuide.CraftingStation)) Configs.UnloadedItemSearch.Value.guideCraftingStation = true;
         };
 
-        _guideTileFilters = new(() => Configs.BetterGuide.GuideTile && !guideTile.IsAir, CheckGuideTileFilter);
+        _guideTileFilters = new(() => Configs.BetterGuide.CraftingStation && !guideTile.IsAir, CheckGuideTileFilter);
         RecipeFiltering.AddFilter(_guideTileFilters);
     }
     public override void PostAddRecipes() {
@@ -184,9 +184,9 @@ public sealed class GuideTile : ModSystem {
         ILCursor cursor = new(il);
         cursor.GotoNext(i => i.MatchCall(Reflection.Recipe.CollectGuideRecipes));
         cursor.GotoPrev(MoveType.After, i => i.MatchCallvirt(Reflection.Item.IsAir.GetMethod!));
-        cursor.EmitDelegate((bool isAir) => isAir && (!Configs.BetterGuide.GuideTile || guideTile.IsAir));
+        cursor.EmitDelegate((bool isAir) => isAir && (!Configs.BetterGuide.CraftingStation || guideTile.IsAir));
         cursor.GotoNext(MoveType.After, i => i.MatchCallvirt(Reflection.Item.Name.GetMethod!));
-        cursor.EmitDelegate((string name) => Configs.BetterGuide.GuideTile && guideTile.Name != "" ? guideTile.Name : name);
+        cursor.EmitDelegate((string name) => Configs.BetterGuide.CraftingStation && guideTile.Name != "" ? guideTile.Name : name);
     }
 
     private static bool CheckGuideTileFilter(Recipe recipe) {

@@ -11,11 +11,12 @@ ModName: Better Inventory
 SPIC.ModName: Spy's Infinite Consumables
 Homepage: homepage
 Workshop: Steam Workshop page
-Version: 0.8.0.4
-Summary: Fixed a game crash when joining worlds
+Version: 0.8.1
+Summary: You can now hide blacklisted recipes
 Details: ""
 Changelog:
 	'''
-	- Fixed PostAddRecipes used instead of PostSetupRecipes
-	- Fixed Typos in ReportingBugs
+	- Added Hide Blacklisted Recipes to Favorited Recipes
+	- Fixed some features not been Unloaded in the right conditions
+	- Fixed labels in the Reporting Bugs config
 	'''

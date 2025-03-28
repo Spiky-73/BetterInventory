@@ -1,5 +1,10 @@
 # Better Inventory changelog
 
+## 0.8.1
+- Added Hide Blacklisted Recipe to Favorited Recipes
+- Fixed some features not been Unloaded in the right conditions
+- Fixed labels in the Reporting Bugs config
+
 ## 0.8.0.4
 - Fixed PostAddRecipes used instead of PostSetupRecipes
 - Fixed Typos in ReportingBugs

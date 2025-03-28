@@ -89,8 +89,8 @@ public sealed class DisplayedRecipes : ModSystem {
             Reflection.Recipe.CollectGuideRecipes.Invoke();
         }
 
-        if (Configs.Crafting.RecipeUI) Crafting.RecipeUI.FilterAndSortRecipes();
-        if (Configs.BetterGuide.RecipeOrdering) FavoritedRecipesPlayer.SortRecipes();
+        if (Configs.Crafting.RecipeUI) RecipeUI.FilterAndSortRecipes();
+        if (Configs.BetterGuide.RecipeOrdering) FavoritedRecipesPlayer.FilterAndSortRecipes();
 
         Reflection.Recipe.TryRefocusingRecipe.Invoke(oldRecipe);
         Reflection.Recipe.VisuallyRepositionRecipes.Invoke(focusY);

@@ -56,17 +56,17 @@ public sealed class BetterGuide {
     [DefaultValue(Configs.UnknownDisplay.Unknown)] public UnknownDisplay unknownDisplay = Configs.UnknownDisplay.Unknown;
 
     public static bool Enabled => ItemSearch.Instance.betterGuide;
-    public static bool MoreRecipes => Enabled && Value.moreRecipes && !UnloadedItemSearch.Value.guideRecipeFiltering;
+    public static bool FavoritedRecipes => Enabled && Value.favoritedRecipes && !UnloadedItemSearch.Value.guideFavoritedRecipes;
+    public static bool CraftInMenu => Enabled && Value.craftInMenu && !UnloadedItemSearch.Value.guideCraftInMenu ;
+    public static bool MoreRecipes => Enabled && Value.moreRecipes && !UnloadedItemSearch.Value.guideMoreRecipes;
+    public static bool CraftingStation => Enabled && Value.craftingStation && !UnloadedItemSearch.Value.guideCraftingStation;
     public static bool RequiredObjectsDisplay => Enabled && Value.conditionsDisplay;
-    public static bool FavoritedRecipes => Enabled && Value.favoritedRecipes && !UnloadedItemSearch.Value.guideFavorited && !UnloadedItemSearch.Value.guideRecipeFiltering && !UnloadedItemSearch.Value.guideAvailableRecipes;
-    public static bool CraftInMenu => Enabled && Value.craftInMenu && !UnloadedItemSearch.Value.guideCraftInMenu && !UnloadedItemSearch.Value.guideRecipeFiltering && !UnloadedItemSearch.Value.guideAvailableRecipes;
-    public static bool GuideTile => Enabled && Value.craftingStation && !UnloadedItemSearch.Value.guideTile && !UnloadedItemSearch.Value.guideRecipeFiltering;
     public static bool AutoOpenList => Enabled && Value.autoOpenList;
-    public static bool UnknownDisplay => Enabled && Value.unknownDisplay > Configs.UnknownDisplay.Vanilla && !UnloadedItemSearch.Value.guideUnknown && !UnloadedItemSearch.Value.guideRecipeFiltering;
+    public static bool UnknownDisplay => Enabled && Value.unknownDisplay > Configs.UnknownDisplay.Vanilla && !UnloadedItemSearch.Value.guideUnknownDisplay;
 
     public static bool AvailableRecipes => FavoritedRecipes || CraftInMenu;
     public static bool RecipeOrdering => FavoritedRecipes || UnknownDisplay;
-    public static bool RecipeFiltering => !UnloadedItemSearch.Value.guideRecipeFiltering && (CraftInMenu || FavoritedRecipes || GuideTile || MoreRecipes || UnknownDisplay);
+    public static bool RecipeFiltering => CraftInMenu || FavoritedRecipes || CraftingStation || MoreRecipes || UnknownDisplay;
     public static BetterGuide Value => ItemSearch.Instance.betterGuide.Value;
     
     // Compatibility version < v0.6
@@ -77,8 +77,10 @@ public sealed class BetterGuide {
 
 public sealed class FavoritedRecipes {
     [DefaultValue(Configs.UnfavoriteOnCraft.Favorited)] public UnfavoriteOnCraft unfavoriteOnCraft = Configs.UnfavoriteOnCraft.Favorited;
+    [DefaultValue(false)] public bool hideBlacklisted = false;
 
-    public static bool UnfavoriteOnCraft => BetterGuide.FavoritedRecipes && Value.unfavoriteOnCraft != Configs.UnfavoriteOnCraft.None && !UnloadedItemSearch.Value.guideUnfavoriteOnCraft;
+    public static bool UnfavoriteOnCraft => BetterGuide.FavoritedRecipes && Value.unfavoriteOnCraft != Configs.UnfavoriteOnCraft.None;
+    public static bool HideBlacklisted => BetterGuide.FavoritedRecipes && Value.hideBlacklisted;
     public static FavoritedRecipes Value => BetterGuide.Value.favoritedRecipes.Value;
 }
 [Flags] public enum UnfavoriteOnCraft { None = 0b00, Favorited = 0b01, Blacklisted = 0b10, Both = Favorited | Blacklisted }
