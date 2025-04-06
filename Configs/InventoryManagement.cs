@@ -164,7 +164,7 @@ public sealed class CraftStack {
     public NestedValue<MaxCraftAmount, MaxRounding> maxItems = new(999);
     [DefaultValue(true)] public bool repeat = true;
     [DefaultValue(false)] public bool invertClicks = false;
-    [DefaultValue(false)] public bool tooltip = false;
+    [DefaultValue(true)] public bool tooltip = true;
 
     public static bool Enabled => !UnloadedInventoryManagement.Value.craftStack && InventoryManagement.Instance.craftStack;
     public static bool Tooltip => Enabled && Value.tooltip;

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using BetterInventory.Crafting;
 using BetterInventory.DataStructures;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -72,6 +73,7 @@ public sealed class FavoritedRecipesPlayer : ModPlayer {
         }
         orig(recipeIndex);
         if (clicked) {
+            if (!Configs.FavoritedRecipes.Value.followOnFavorite) FixedUI.DontFollowOnNextRefocus();
             Recipe.FindRecipes();
             SoundEngine.PlaySound(SoundID.MenuTick);
             Main.mouseLeftRelease = false;
@@ -119,7 +121,7 @@ public sealed class FavoritedRecipesPlayer : ModPlayer {
     }
     public bool ResetRecipeState(int recipe) => favoritedRecipes.Remove(recipe) | blacklistedRecipes.Remove(recipe);
 
-    public static void SortRecipes() {
+    public static void FilterAndSortRecipes() {
         List<int> favorited = [];
         List<int> others = [];
         List<int> blacklisted = [];
@@ -137,8 +139,10 @@ public sealed class FavoritedRecipesPlayer : ModPlayer {
         int index = 0;
         foreach (var recipe in favorited) Main.availableRecipe[index++] = recipe;
         foreach (var recipe in others) Main.availableRecipe[index++] = recipe;
-        foreach (var recipe in blacklisted) Main.availableRecipe[index++] = recipe;
+        if (!Configs.FavoritedRecipes.HideBlacklisted) foreach (var recipe in blacklisted) Main.availableRecipe[index++] = recipe;
         foreach (var recipe in unknown) Main.availableRecipe[index++] = recipe;
+        for (int i = index; i < Main.numAvailableRecipes; i++) Main.availableRecipe[i] = 0;
+        Main.numAvailableRecipes = index;
     }
 
     public readonly RangeSet favoritedRecipes = [];

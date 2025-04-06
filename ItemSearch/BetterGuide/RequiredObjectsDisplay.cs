@@ -58,7 +58,7 @@ public sealed class RequiredObjectsDisplay : ILoadable {
             if (Configs.FixedUI.Wrapping && ++number % TilesPerLine == 0) {
                 position.X = minX;
                 position.Y += delta.Y;
-                if (Configs.BetterGuide.GuideTile && number == TilesPerLine) position.X += delta.X; // Skip the position of guideTile if it is enabled
+                if (Configs.BetterGuide.CraftingStation && number == TilesPerLine) position.X += delta.X; // Skip the position of guideTile if it is enabled
             } else position.X += delta.X;
         }
 

@@ -14,7 +14,7 @@ public sealed class AvailableRecipes : ModSystem {
 
     public override void Load() {
         IL_Recipe.FindRecipes += static il => {
-            if (!il.ApplyTo(ILSkipGuide, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.guideAvailableRecipes = true;
+            if (!il.ApplyTo(ILSkipGuide, Configs.BetterGuide.AvailableRecipes)) Configs.UnloadedItemSearch.Value.GuideAvailableRecipes = true;
         };
         On_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += HookDarkenNotAvailable;
 

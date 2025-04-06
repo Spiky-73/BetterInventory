@@ -93,7 +93,7 @@ FixedUI: {
 		Tooltip:
 			'''
 			Reopens the recipe list in the same position as when it was closed
-			Keep the selected recipe a the same position when the lists of recipes changes if it is visible
+			Keeps the selected recipe at the same position when the lists of recipes changes if it is visible
 			'''
 	}
 
@@ -766,7 +766,7 @@ ItemSearch: {
 
 UnknownDisplay: {
 	Tooltip: ""
-	Vanilla.Label: Vanilla (Off)
+	Vanilla.Label: Off
 	Hidden.Label: Hidden
 	Unknown.Label: "{$Mods.BetterInventory.UI.Unknown}"
 	Known.Label: Known
@@ -837,6 +837,20 @@ FavoritedRecipes: {
 		Label: Unfavorite Recipes on Craft
 		Tooltip: Resets the state of recipes when they are crafted
 	}
+
+	hideBlacklisted: {
+		Label: Hide Blacklisted Recipes
+		Tooltip: Remove blacklisted recipes from the recipe list
+	}
+
+	followOnFavorite: {
+		Label: Follow Recipe on Favorite
+		Tooltip:
+			'''
+			Refocus the recipe list around the new position of the recipe when it is favorited
+			Requires "{$Mods.BetterInventory.Configs.FixedUI.rememberListPosition.Label}"
+			'''
+	}
 }
 
 UnfavoriteOnCraft: {
@@ -884,7 +898,7 @@ BetterBestiary: {
 
 UnlockLevel: {
 	Tooltip: ""
-	Vanilla.Label: Vanilla (Off)
+	Vanilla.Label: Off
 	Name.Label: Name
 	Stats.Label: Detailed Stats
 	Drops.Label: Drops
@@ -1077,8 +1091,13 @@ UnloadedCrafting: {
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
-	recipeListUI: {
-		Label: "{$Mods.BetterInventory.Configs.Crafting.fixedUI.Label} @ Recipe List UI"
+	recipeCount: {
+		Label: "{$Mods.BetterInventory.Configs.Crafting.fixedUI.Label} @ {$Mods.BetterInventory.Configs.FixedUI.recipeCount.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	focusButton: {
+		Label: "{$Mods.BetterInventory.Configs.Crafting.fixedUI.Label} @ {$Mods.BetterInventory.Configs.FixedUI.focusButton.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
@@ -1147,22 +1166,22 @@ UnloadedInventoryManagement: {
 	}
 
 	displayFakeItem: {
-		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ {$Mods.BetterInventory.Configs.SmartPickup.previousSlot.Label} @ {$Mods.BetterInventory.Configs.PreviousDisplay.displayDisplay.fakeItem.Label}"
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ {$Mods.BetterInventory.Configs.SmartPickup.previousSlot.Label} @ {$Mods.BetterInventory.Configs.PreviousDisplay.fakeItem.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
 	displayIcon: {
-		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ {$Mods.BetterInventory.Configs.SmartPickup.previousSlot.Label} @ {$Mods.BetterInventory.Configs.PreviousDisplay.displayDisplay.icon.Label}"
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ {$Mods.BetterInventory.Configs.SmartPickup.previousSlot.Label} @ {$Mods.BetterInventory.Configs.PreviousDisplay.icon.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
 	quickMoveHotkeys: {
-		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.quickMove.Label} @ {$Mods.BetterInventory.Configs.QuickMove.displayHotkeys.Label}"
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.quickMove.Label} @ {$Mods.BetterInventory.Configs.QuickMove.displayedHotkeys.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
 	quickMoveHighlight: {
-		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.quickMove.Label} @ {$Mods.BetterInventory.Configs.QuickMove.displayHotkeys.Label} @ {$Mods.BetterInventory.Configs.DisplayedHotkeys.highlightIntensity.Label}"
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.quickMove.Label} @ {$Mods.BetterInventory.Configs.QuickMove.displayedHotkeys.Label} @ {$Mods.BetterInventory.Configs.DisplayedHotkeys.highlightIntensity.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
@@ -1209,7 +1228,7 @@ UnloadedItemActions: {
 UnloadedItemSearch: {
 	Tooltip: ""
 
-	guideFavorited: {
+	guideFavoritedRecipes: {
 		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.favoritedRecipes.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
@@ -1224,23 +1243,23 @@ UnloadedItemSearch: {
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
-	guideTile: {
+	guideCraftingStation: {
 		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.craftingStation.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
-	guideUnknown: {
+	guideRequiredObjectsDisplay: {
+		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.conditionsDisplay.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	guideUnknownDisplay: {
 		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.unknownDisplay.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
-	guideUnfavoriteOnCraft: {
-		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ {$Mods.BetterInventory.Configs.BetterGuide.favoritedRecipes.Label} @ {$Mods.BetterInventory.Configs.FavoriteRecipes.unfavoriteOnCraft.Label}"
-		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
-	}
-
 	bestiaryDisplayedInfo: {
-		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterBestiary.Label} @ {$Mods.BetterInventory.Configs.BetterBestiary.displayedUnlock.Label}"
+		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterBestiary.Label} @ {$Mods.BetterInventory.Configs.BetterBestiary.displayedInfo.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
@@ -1250,17 +1269,7 @@ UnloadedItemSearch: {
 	}
 
 	recipeList: {
-		Label: "{$Mods.BetterInventory.Configs.ItemSearch.quickSearch.Label} @ {$Mods.BetterInventory.Configs.ItemSearch.recipeList.Label}"
-		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
-	}
-
-	guideRecipeFiltering: {
-		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ Recipe Filtering"
-		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
-	}
-
-	guideAvailableRecipes: {
-		Label: "{$Mods.BetterInventory.Configs.ItemSearch.betterGuide.Label} @ Available Recipes"
+		Label: "{$Mods.BetterInventory.Configs.ItemSearch.quickSearch.Label} @ {$Mods.BetterInventory.EntityCatalogues.RecipeList.DisplayName}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 }

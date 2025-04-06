@@ -40,13 +40,15 @@ public sealed class FixedUI {
     public static bool ScrollButtons => Enabled && Value.scrollButtons && !UnloadedCrafting.Value.scrollButtons;
     public static bool Wrapping => Enabled && Value.wrapping && !UnloadedCrafting.Value.wrapping;
     public static bool CraftWhenHolding => Enabled && Value.craftWhenHolding;
-    public static bool RecipeCount => Enabled && Value.recipeCount && !UnloadedCrafting.Value.recipeListUI;
+    public static bool RecipeCount => Enabled && Value.recipeCount && !UnloadedCrafting.Value.recipeCount;
     public static bool NoRecStartOffset => Enabled && Value.noRecStartOffset && !UnloadedCrafting.Value.noRecStartOffset;
     public static bool NoRecListClose => Enabled && Value.noRecListClose && !UnloadedCrafting.Value.noRecListClose;
     public static bool RememberListPosition => Enabled && Value.rememberListPosition;
-    public static bool FocusButton => Enabled && Value.focusButton && !UnloadedCrafting.Value.recipeListUI;
+    public static bool FocusButton => Enabled && Value.focusButton && !UnloadedCrafting.Value.focusButton;
     public static FixedUI Value => Crafting.Instance.fixedUI.Value;
-    
+
+    public static bool RecipeListUI => RecipeCount || FocusButton;
+
     // Compatibility version < v0.6
     [JsonProperty, DefaultValue(true)] private bool listScroll { set => ConfigHelper.MoveMember(!value, _ => scrollButtons = value); }
 }

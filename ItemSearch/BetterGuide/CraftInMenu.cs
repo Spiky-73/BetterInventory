@@ -27,10 +27,10 @@ public sealed class CraftInMenuPlayer : ModPlayer {
         };
 
         IL_Main.DrawInventory += static il => {
-            if (!il.ApplyTo(ILVisibility, Configs.BetterGuide.CraftInMenu || Configs.BetterGuide.GuideTile)) Configs.UnloadedItemSearch.Value.guideCraftInMenu = Configs.UnloadedItemSearch.Value.guideTile = true;
+            if (!il.ApplyTo(ILVisibility, Configs.BetterGuide.CraftInMenu || Configs.BetterGuide.CraftingStation)) Configs.UnloadedItemSearch.Value.guideCraftInMenu = Configs.UnloadedItemSearch.Value.guideCraftingStation = true;
         };
         IL_Main.HoverOverCraftingItemButton += static il => {
-            if (!il.ApplyTo(ILCraftInGuideMenu, Configs.BetterGuide.CraftInMenu || Configs.BetterGuide.GuideTile)) Configs.UnloadedItemSearch.Value.guideCraftInMenu = Configs.UnloadedItemSearch.Value.guideTile = true;
+            if (!il.ApplyTo(ILCraftInGuideMenu, Configs.BetterGuide.CraftInMenu || Configs.BetterGuide.CraftingStation)) Configs.UnloadedItemSearch.Value.guideCraftInMenu = Configs.UnloadedItemSearch.Value.guideCraftingStation = true;
         };
 
         s_inventoryTickBorder = Mod.Assets.Request<Texture2D>($"Assets/Inventory_Tick_Border");
@@ -62,7 +62,7 @@ public sealed class CraftInMenuPlayer : ModPlayer {
         //         ++ <drawVisibility>
         cursor.EmitLdloc(inventoryX).EmitLdloc(inventoryY);
         cursor.EmitDelegate((int x, int y) => {
-            if (Configs.BetterGuide.GuideTile) GuideTilePlayer.DrawGuideTile(x, y);
+            if (Configs.BetterGuide.CraftingStation) GuideTilePlayer.DrawGuideTile(x, y);
             if (Configs.BetterGuide.CraftInMenu) DrawVisibility();
         });
     }
@@ -101,7 +101,7 @@ public sealed class CraftInMenuPlayer : ModPlayer {
         // if (Main.focusRecipe == recipeIndex && ++[Main.guideItem.IsAir || <craftInMenu>]) {
         cursor.GotoNext(i => i.MatchLdsfld(Reflection.Main.guideItem));
         cursor.GotoNext(MoveType.After, i => i.MatchCallvirt(Reflection.Item.IsAir.GetMethod!));
-        cursor.EmitDelegate((bool isAir) => (isAir && (!Configs.BetterGuide.GuideTile || GuideTile.guideTile.IsAir)) || Configs.BetterGuide.CraftInMenu);
+        cursor.EmitDelegate((bool isAir) => (isAir && (!Configs.BetterGuide.CraftingStation || GuideTile.guideTile.IsAir)) || Configs.BetterGuide.CraftInMenu);
 
         //     <craft>
         // }
@@ -120,7 +120,7 @@ public sealed class CraftInMenuPlayer : ModPlayer {
         // ++ <guideTileAdj>
         cursor.EmitLdarg0();
         cursor.EmitDelegate((Player self) => {
-            if (!Configs.BetterGuide.CraftInMenu || !Configs.BetterGuide.GuideTile || RecipeList.Instance.Enabled || GuideTile.guideTile.createTile < TileID.Dirt) return;
+            if (!Configs.BetterGuide.CraftInMenu || !Configs.BetterGuide.CraftingStation || RecipeList.Instance.Enabled || GuideTile.guideTile.createTile < TileID.Dirt) return;
             self.adjTile[GuideTile.guideTile.createTile] = true;
         });
     }

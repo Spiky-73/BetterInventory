@@ -10,7 +10,7 @@ public class RecipeFiltering : ILoadable {
 
     public void Load(Mod mod) {
         IL_Recipe.CollectGuideRecipes += static il => {
-            if (!il.ApplyTo(ILGuideRecipesFiltering, Configs.BetterGuide.RecipeFiltering)) Configs.UnloadedItemSearch.Value.guideRecipeFiltering = true;
+            if (!il.ApplyTo(ILGuideRecipesFiltering, Configs.BetterGuide.RecipeFiltering)) Configs.UnloadedItemSearch.Value.GuideRecipeFiltering = true;
         };
     }
 
