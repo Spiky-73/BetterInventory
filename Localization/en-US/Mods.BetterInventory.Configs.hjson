@@ -93,7 +93,7 @@ FixedUI: {
 		Tooltip:
 			'''
 			Reopens the recipe list in the same position as when it was closed
-			Keep the selected recipe a the same position when the lists of recipes changes if it is visible
+			Keeps the selected recipe at the same position when the lists of recipes changes if it is visible
 			'''
 	}
 
@@ -841,6 +841,15 @@ FavoritedRecipes: {
 	hideBlacklisted: {
 		Label: Hide Blacklisted Recipes
 		Tooltip: Remove blacklisted recipes from the recipe list
+	}
+
+	followOnFavorite: {
+		Label: Follow Recipe on Favorite
+		Tooltip:
+			'''
+			Refocus the recipe list around the new position of the recipe when it is favorited
+			Requires "{$Mods.BetterInventory.Configs.FixedUI.rememberListPosition.Label}"
+			'''
 	}
 }
 

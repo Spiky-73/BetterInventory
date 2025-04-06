@@ -78,6 +78,7 @@ public sealed class BetterGuide {
 public sealed class FavoritedRecipes {
     [DefaultValue(Configs.UnfavoriteOnCraft.Favorited)] public UnfavoriteOnCraft unfavoriteOnCraft = Configs.UnfavoriteOnCraft.Favorited;
     [DefaultValue(false)] public bool hideBlacklisted = false;
+    [DefaultValue(false)] public bool followOnFavorite = false;
 
     public static bool UnfavoriteOnCraft => BetterGuide.FavoritedRecipes && Value.unfavoriteOnCraft != Configs.UnfavoriteOnCraft.None;
     public static bool HideBlacklisted => BetterGuide.FavoritedRecipes && Value.hideBlacklisted;

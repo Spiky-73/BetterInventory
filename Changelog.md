@@ -2,7 +2,8 @@
 
 ## 0.8.1
 - Added Hide Blacklisted Recipe to Favorited Recipes
-- Change Craft Stack's tooltip to default state on
+- Added Follow Recipe on Favorite to Favorited Recipes
+- Change Craft Stack's tooltip default state to on
 - Fixed some features not been Unloaded in the right conditions
 - Fixed labels in the Reporting Bugs config
 

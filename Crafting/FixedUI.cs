@@ -265,18 +265,24 @@ public sealed class FixedUI : ILoadable {
 
     private void HookClearAvailableRecipes(On_Recipe.orig_ClearAvailableRecipes orig) {
         _focusedRecipeLine = GetRecipeLine(Main.focusRecipe);
-        _focusedVisible = 0 <= _focusedRecipeLine && _focusedRecipeLine < UILinkPointNavigator.Shortcuts.CRAFT_IconsPerColumn;
+        _focusedVisible = !_skipFollow && 0 <= _focusedRecipeLine && _focusedRecipeLine < UILinkPointNavigator.Shortcuts.CRAFT_IconsPerColumn;
         orig();
+    }
+
+    public static void DontFollowOnNextRefocus() {
+        _skipFollow = true;
     }
 
     // Called in DisplayedRecipes
     internal static void HookTryRefocusingList(On_Recipe.orig_TryRefocusingRecipe orig, int oldRecipe) {
         orig(oldRecipe);
+        _skipFollow = false;
         if (!Configs.FixedUI.RememberListPosition || !_focusedVisible) return;
         Main.recStart = Math.Max(0, SpikysLib.MathHelper.Snap(Main.focusRecipe, UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow, SpikysLib.MathHelper.SnapMode.Floor)
             - _focusedRecipeLine * UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow);
     }
 
+    private static bool _skipFollow;
     private static bool _focusedVisible;
     private static int _focusedRecipeLine;
 
