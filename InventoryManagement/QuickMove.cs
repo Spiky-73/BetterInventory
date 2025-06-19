@@ -31,7 +31,7 @@ public sealed class QuickMove : ILoadable {
             if (!il.ApplyTo(ILDisplayHotkey, Configs.QuickMove.DisplayHotkeys)) Configs.UnloadedInventoryManagement.Value.quickMoveHotkeys = true;
         };
     }
-    public void Unload() {}
+    public void Unload() { }
 
     public static readonly string[] MoveKeys = [
         "Hotbar1",
@@ -56,7 +56,7 @@ public sealed class QuickMove : ILoadable {
         if (s_moveTime == 0) s_oldSelectedItem = Main.LocalPlayer.selectedItem;
     }
 
-    public static void AddMoveChainLine(Item _, List<TooltipLine> tooltips){
+    public static void AddMoveChainLine(Item _, List<TooltipLine> tooltips) {
         if (!Configs.QuickMove.Enabled) return;
         if (!s_frameHover || !Configs.QuickMove.Value.tooltip || s_displayedChain.Count == 0) return;
         tooltips.Add(new(
@@ -97,7 +97,7 @@ public sealed class QuickMove : ILoadable {
         if (targetKey == -1) return;
 
         if (s_moveTime == 0 || s_moveKey != targetKey) SetupChain(source, targetKey);
-        if(s_moveChain.Count != 0) ContinueChain();
+        if (s_moveChain.Count != 0) ContinueChain();
     }
     private static void SetupChain(Slot source, int targetKey) {
         s_moveKey = targetKey;
@@ -114,7 +114,7 @@ public sealed class QuickMove : ILoadable {
         player.selectedItem = s_oldSelectedItem;
         s_ignoreHotbar = s_moveKey;
         UndoMove(player, s_movedItems);
-        
+
         s_moveIndex = (s_moveIndex + 1) % s_moveChain.Count;
         if (!Configs.QuickMove.Value.returnToSlot && s_moveIndex == 0) s_moveIndex = 1;
         if (s_moveIndex == 0) s_moveTime = 0;
@@ -146,7 +146,7 @@ public sealed class QuickMove : ILoadable {
         IList<Item> items = target.Inventory.Items(player);
         List<Item> freeItems = [];
         List<MovedItem> movedItems = [new(source, target.Inventory, item.type, item.prefix, item.favorited)];
-        
+
         void FreeTargetItem(Slot slot) {
             Item item = slot.Item(player);
             freeItems.Add(item);
@@ -213,7 +213,7 @@ public sealed class QuickMove : ILoadable {
         // }
 
     }
-    private static void ILDisplayHotkey(ILContext il){
+    private static void ILDisplayHotkey(ILContext il) {
         ILCursor cursor = new(il);
 
         cursor.GotoNextLoc(out int scale, i => i.Previous.MatchLdsfld(Reflection.Main.inventoryScale), 2);
@@ -260,27 +260,29 @@ public sealed class QuickMove : ILoadable {
         (numberInChain, key) = (-1, -1);
         if (s_moveTime == 0 && (!s_hover || s_displayedChain.Count == 0)) return false;
         if (!InventoryLoader.IsInventorySlot(Main.LocalPlayer, inv, context, slot, out Slot itemSlot)) return false;
-        if (s_slotMoveInfo.TryGetValue(itemSlot, out var cached)) (numberInChain, key) = cached;
-        else {
-            if (s_moveTime > 0) {
-                int index = s_moveChain.IndexOf(itemSlot);
-                if (index > -1) {
-                    numberInChain = (index - s_moveIndex + s_moveChain.Count) % s_moveChain.Count;
-                    if (!Configs.QuickMove.Value.returnToSlot && index < s_moveIndex) numberInChain--;
-                    key = s_moveKey;
-                }
-            } else if (s_hover && s_displayedChain.Count > 0) {
-                int index = s_displayedChain.IndexOf(itemSlot.Inventory);
-                if (index > -1) {
-                    numberInChain = index+1;
-                    key = SlotToHotkey(itemSlot.Index, itemSlot.Inventory.Items(Main.LocalPlayer).Count);
-                }
-            }
-            s_slotMoveInfo[itemSlot] = (numberInChain, key);
-        }
+        (numberInChain, key) = GetSlotMoveInfo(itemSlot);
         return 0 <= key && key < MoveKeys.Length;
     }
-    private static readonly Dictionary<Slot, (int number, int key)> s_slotMoveInfo = new();
+
+    public static (int number, int key) GetSlotMoveInfo(Slot slot) => s_slotMoveInfo.GetOrAdd(slot, () => {
+        (int numberInChain, int key) = (-1, -1);
+        if (s_moveTime > 0) {
+            int index = s_moveChain.IndexOf(slot);
+            if (index > -1) {
+                numberInChain = (index - s_moveIndex + s_moveChain.Count) % s_moveChain.Count;
+                if (!Configs.QuickMove.Value.returnToSlot && index < s_moveIndex) numberInChain--;
+                key = s_moveKey;
+            }
+        } else if (s_hover && s_displayedChain.Count > 0) {
+            int index = s_displayedChain.IndexOf(slot.Inventory);
+            if (index > -1) {
+                numberInChain = index + 1;
+                key = SlotToHotkey(slot.Index, slot.Inventory.Items(Main.LocalPlayer).Count);
+            }
+        }
+        return (numberInChain, key);
+    });
+    private static readonly Dictionary<Slot, (int number, int key)> s_slotMoveInfo = [];
 
     public static void UpdateDisplayedMoveChain(ModSubInventory slots, Item item) {
         if (item.IsAir) ClearDisplayedChain();
