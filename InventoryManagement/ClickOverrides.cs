@@ -16,10 +16,10 @@ using Terraria.UI;
 
 namespace BetterInventory.InventoryManagement;
 
-public sealed class ClickOverrides : ILoadable {
+public sealed class ClickOverrides : ModPlayer {
 
-    public void Load(Mod mod) {
-        CraftCursor = CursorLoader.RegisterCursor(mod, mod.Assets.Request<Texture2D>($"Assets/Cursor_Craft"));
+    public override void Load() {
+        CraftCursor = CursorLoader.RegisterCursor(Mod, Mod.Assets.Request<Texture2D>($"Assets/Cursor_Craft"));
 
         On_Main.TryAllowingToCraftRecipe += HookTryAllowingToCraftRecipe;
 
@@ -64,8 +64,6 @@ public sealed class ClickOverrides : ILoadable {
             if (!il.ApplyTo(ILFavoritedBankBackground, Configs.InventoryManagement.FavoriteInBanks)) Configs.UnloadedInventoryManagement.Value.favoriteInBanks = true;
         };
     }
-
-    public void Unload() { }
 
     private static void HookFindRecipes(On_Recipe.orig_FindRecipes orig, bool canDelayCheck) {
         s_craftMultipliers.Clear();
@@ -164,8 +162,8 @@ public sealed class ClickOverrides : ILoadable {
         });
         cursor.EmitStloc(calcForBuying);
     }
-    private static void ILBuyStack(ILContext il) {
-        ILCursor cursor = new(il);
+        private static void ILBuyStack(ILContext il) {
+            ILCursor cursor = new(il);
 
         cursor.GotoNext(MoveType.Before, i => i.MatchStfld(typeof(Item), nameof(Item.stack)));
         cursor.EmitLdarg0();
@@ -445,6 +443,12 @@ public sealed class ClickOverrides : ILoadable {
             if (amount == 0 || a < amount) amount = a;
         }
         return amount;
+    }
+
+    public override void PostBuyItem(NPC vendor, Item[] shopInventory, Item item) {
+        // Clear the recipes to make sure `s_ilShopMultiplier` is cleared if the players rebuys the same item
+        // Otherwise it will cause a freeze if the player tries to buy a stack of items when trying to consume coins (https://steamcommunity.com/sharedfiles/filedetails/comments/3074374647)
+        if (Configs.CraftStack.Enabled) Recipe.FindRecipes();
     }
 
     public static Multipliers GetCraftMultipliers(Recipe recipe) => s_craftMultipliers.GetOrAdd(recipe.RecipeIndex, () => {

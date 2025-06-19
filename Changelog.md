@@ -1,5 +1,8 @@
 # Better Inventory changelog
 
+## 0.8.1.1
+- Fixed a infinite loop when buying a stack of items right after having bought it once
+
 ## 0.8.1
 - Added Hide Blacklisted Recipe to Favorited Recipes
 - Added Follow Recipe on Favorite to Favorited Recipes
