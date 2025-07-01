@@ -1,25 +1,29 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using SpikysLib.Collections;
 using SpikysLib.Configs;
 using SpikysLib.DataStructures;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Core;
+using System.Linq;
 
 namespace BetterInventory;
 
 public sealed class InventoryLoader : ILoadable {
 
-    public static IEnumerable<ModSubInventory> SubInventories {
+    public static IEnumerable<ModSubInventory> GetInventories(Player player) 
+        => SubInventoriesTemplates.SelectMany(subInventory => subInventory.GetInventories(player));
+
+    public static IEnumerable<ModSubInventory> GetPreferredInventories(Player player) 
+        => _preferredTemplates.SelectMany(subInventory => subInventory.GetInventories(player));
+    
+    public static IEnumerable<ModSubInventory> SubInventoriesTemplates {
         get {
-            foreach (var inventory in _special) yield return inventory;
-            foreach (var inventory in _classic) yield return inventory;
+            foreach (var inventory in _preferredTemplates) yield return inventory;
+            foreach (var inventory in _allPurposeTemplates) yield return inventory;
         }
     }
-    public static ReadOnlyCollection<ModSubInventory> Special => _special.AsReadOnly();
-    public static ReadOnlyCollection<ModSubInventory> Classic => _classic.AsReadOnly();
 
     public void Load(Mod mod) {
         On_Recipe.FindRecipes += HookClearCache;
@@ -36,37 +40,37 @@ public sealed class InventoryLoader : ILoadable {
             foreach (var inventory in list) ConfigHelper.SetInstance(inventory, true);
             list.Clear();
         }
-        Clear(_classic);
-        Clear(_special);
+        Clear(_allPurposeTemplates);
+        Clear(_preferredTemplates);
     }
 
     internal static void Register(ModSubInventory inventory) {
         ConfigHelper.SetInstance(inventory);
-        inventory.CanBePrimary = LoaderUtils.HasOverride(inventory, i => i.IsPrimaryFor);
-        List<ModSubInventory> list = inventory.CanBePrimary ? _special : _classic;
+        inventory.CanBePreferredInventory = LoaderUtils.HasOverride(inventory, i => i.IsPreferredInventory);
+        List<ModSubInventory> list = inventory.CanBePreferredInventory ? _preferredTemplates : _allPurposeTemplates;
 
         int before = list.FindIndex(i => inventory.ComparePositionTo(i) < 0 || i.ComparePositionTo(inventory) > 0);
         if (before != -1) list.Insert(before, inventory);
         else list.Add(inventory);
     }
 
-    public static Slot? FindItem(Player player, Predicate<Item> predicate) {
-        foreach (ModSubInventory slots in SubInventories) {
-            int slot = slots.Items(player).FindIndex(predicate);
-            if (slot != -1) return new(slots, slot);
+    public static InventorySlot? FindItem(Player player, Predicate<Item> predicate) {
+        foreach (ModSubInventory subInventory in GetInventories(player)) {
+            int slot = subInventory.Items.FindIndex(predicate);
+            if (slot != -1) return new(subInventory, slot);
         }
         return null;
     }
 
-    public static bool IsInventorySlot(Player player, Item[] inv, int context, int slot, out Slot itemSlot) {
-        Slot? s = GetInventorySlot(player, inv, context, slot);
+    public static bool IsInventorySlot(Player player, Item[] inv, int context, int slot, out InventorySlot itemSlot) {
+        var s = GetInventorySlot(player, inv, context, slot);
         itemSlot = s ?? default;
         return s.HasValue;
     }
-    public static Slot? GetInventorySlot(Player player, Item[] inventory, int context, int slot) => s_slotToInv.GetOrAdd(new(player.whoAmI, inventory, context, slot), () => {
-        foreach (ModSubInventory slots in SubInventories) {
-            int i = GetSlotIndex(slots.Items(player), inventory, context, slot);
-            if (i != -1) return new(slots, i);
+    public static InventorySlot? GetInventorySlot(Player player, Item[] inventory, int context, int slot) => s_slotToInv.GetOrAdd(new(player.whoAmI, inventory, context, slot), () => {
+        foreach (ModSubInventory subInventory in GetInventories(player)) {
+        int i = GetSlotIndex(subInventory.Items, inventory, context, slot);
+            if (i != -1) return new(subInventory, i);
         }
         return null;
     });
@@ -88,10 +92,10 @@ public sealed class InventoryLoader : ILoadable {
 
     public static void ClearCache() => s_slotToInv.Clear();
 
-    private static readonly List<ModSubInventory> _classic = [];
-    private static readonly List<ModSubInventory> _special = [];
+    private static readonly List<ModSubInventory> _preferredTemplates = [];
+    private static readonly List<ModSubInventory> _allPurposeTemplates = [];
 
-    private static readonly Dictionary<VanillaSlot, Slot?> s_slotToInv = [];
+    private static readonly Dictionary<VanillaSlot, InventorySlot?> s_slotToInv = [];
 }
 
 public readonly record struct VanillaSlot(int Player, Item[] Inventory, int Context, int Slot);

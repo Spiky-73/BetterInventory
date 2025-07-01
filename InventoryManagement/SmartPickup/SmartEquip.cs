@@ -7,9 +7,9 @@ namespace BetterInventory.InventoryManagement.SmartPickup;
 public static class SmartEquip {
 
     public static Item AutoEquip(Player player, Item item, GetItemSettings settings) {
-        foreach (ModSubInventory inv in InventoryLoader.Special.Where(i => i is not Hotbar && i.Accepts(item))) {
-            if (Configs.SmartPickup.Value.autoEquip < Configs.AutoEquipLevel.AnySlot && !inv.IsPrimaryFor(item)) continue;
-            item = inv.GetItem(player, item, settings);
+        foreach (ModSubInventory inv in InventoryLoader.GetPreferredInventories(player).Where(i => i is not Hotbar && i.Accepts(item))) {
+            if (Configs.SmartPickup.Value.autoEquip < Configs.AutoEquipLevel.AnySlot && !inv.IsPreferredInventory(item)) continue;
+            item = inv.GetItem(item, settings);
             if (item.IsAir) return item;
         }
         return item;

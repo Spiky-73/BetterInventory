@@ -25,7 +25,7 @@ public sealed class InventoryManagement : ModConfig {
     public static bool StackTrash => !UnloadedInventoryManagement.Value.stackTrash && Instance.stackTrash;
 
     // Compatibility version < v0.6
-    [JsonProperty, DefaultValue(AutoEquipLevel.PrimarySlots)] private AutoEquipLevel autoEquip { set => ConfigHelper.MoveMember(value != AutoEquipLevel.PrimarySlots, _ => smartPickup.Value.autoEquip = value); }
+    [JsonProperty, DefaultValue(AutoEquipLevel.PreferredSlots)] private AutoEquipLevel autoEquip { set => ConfigHelper.MoveMember(value != AutoEquipLevel.PreferredSlots, _ => smartPickup.Value.autoEquip = value); }
     [JsonProperty, DefaultValue(true)] private bool shiftRight { set => ConfigHelper.MoveMember<InventoryManagement>(!value, c => c.betterShiftClick.Key = value); }
 
     public override void OnChanged() {
@@ -55,7 +55,7 @@ public sealed class SmartConsumption {
 
 public sealed class SmartPickup {
     public NestedValue<ItemPickupLevel, PreviousSlot> previousSlot = new(ItemPickupLevel.AllItems);
-    [DefaultValue(AutoEquipLevel.PrimarySlots)] public AutoEquipLevel autoEquip = AutoEquipLevel.PrimarySlots;
+    [DefaultValue(AutoEquipLevel.PreferredSlots)] public AutoEquipLevel autoEquip = AutoEquipLevel.PreferredSlots;
     [DefaultValue(VoidBagLevel.IfInside)] public VoidBagLevel voidBag = VoidBagLevel.IfInside;
     public Toggle<UpgradeItems> upgradeItems = new(true);
     [DefaultValue(true)] public bool hotbarLast = true;
@@ -79,7 +79,7 @@ public sealed class SmartPickup {
     }); }
 }
 public enum ItemPickupLevel { None, ImportantItems, AllItems }
-public enum AutoEquipLevel { None, PrimarySlots, AnySlot }
+public enum AutoEquipLevel { None, PreferredSlots, AnySlot }
 public enum VoidBagLevel { None, IfInside, Always }
 
 public sealed class PreviousSlot {
@@ -135,6 +135,9 @@ public sealed class UpgradeItems {
     }
 }
 
+// TODO add option to focus/not focus
+// TODO add option to only include current loadout / inv page / ...
+// TODO reset loadout/equip page/... when chain is cleared
 public sealed class QuickMove {
     [DefaultValue(HotkeyMode.Hotbar)] public HotkeyMode hotkeyMode = HotkeyMode.Hotbar;
     [Range(0, 3600), DefaultValue(60*3)] public int resetTime = 60*3;

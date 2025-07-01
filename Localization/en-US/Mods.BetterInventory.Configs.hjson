@@ -297,7 +297,7 @@ SmartPickup: {
 		Tooltip:
 			'''
 			Automatically equips items such as Armors, Accessories or Equipment
-			{$Mods.BetterInventory.Configs.AutoEquipLevel.PrimarySlots.Label}: Equipment go to their default slots if available
+			{$Mods.BetterInventory.Configs.AutoEquipLevel.Preferred.Label}: Equipment go to their default slots if available
 			{$Mods.BetterInventory.Configs.AutoEquipLevel.AnySlot.Label}: Equipment go to any slot they can go in (includes Dyes). Armors and Accessories can go to social slots.
 			'''
 	}
@@ -338,8 +338,9 @@ ItemPickupLevel: {
 AutoEquipLevel: {
 	Tooltip: ""
 	None.Label: Off
-	PrimarySlots.Label: Primary Slots
+	Preferred.Label: Preferred Slots
 	AnySlot.Label: Any Slot
+	PreferredSlots.Label: Preferred Slots
 }
 
 VoidBagLevel: {

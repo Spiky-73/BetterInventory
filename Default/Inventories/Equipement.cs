@@ -8,9 +8,9 @@ namespace BetterInventory.Default.Inventories;
 
 public abstract class Equipment : ModSubInventory {
     public abstract int Index { get; }
-    public sealed override ListIndices<Item> Items(Player player) => new(player.miscEquips, Index);
-    public sealed override bool IsPrimaryFor(Item item) => true;
-    public sealed override void Focus(Player player, int slot) => Main.EquipPageSelected = 2;
+    public sealed override ListIndices<Item> Items => new(Entity.miscEquips, Index);
+    public sealed override bool IsPreferredInventory(Item item) => true;
+    public sealed override void Focus(int slot) => Main.EquipPageSelected = 2;
 }
 public sealed class Pet : Equipment {
     public sealed override int Index => EquipmentSlots.Pet;

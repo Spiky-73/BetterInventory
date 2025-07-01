@@ -61,14 +61,14 @@ public sealed class QuickMove : ILoadable {
         if (!s_frameHover || !Configs.QuickMove.Value.tooltip || s_displayedChain.Count == 0) return;
         tooltips.Add(new(
             BetterInventory.Instance, "QuickMove",
-            Language.GetTextValue($"{Localization.Keys.UI}.QuickMoveTooltip") + ": " + string.Join(" > ", from slots in s_displayedChain where slots is not null select slots.DisplayName)
+            Language.GetTextValue($"{Localization.Keys.UI}.QuickMoveTooltip") + ": " + string.Join(" > ", s_displayedChain.Where(inv => inv is not null).Select(inv => inv.DisplayName))
         ));
     }
 
     public static void HoverItem(Item[] inventory, int context, int slot) {
         if (!Configs.QuickMove.Enabled) return;
         s_frameHover = true;
-        if (!InventoryLoader.IsInventorySlot(Main.LocalPlayer, inventory, context, slot, out Slot itemSlot)) {
+        if (!InventoryLoader.IsInventorySlot(Main.LocalPlayer, inventory, context, slot, out InventorySlot itemSlot)) {
             ClearDisplayedChain();
             s_moveTime = 0;
         } else {
@@ -86,7 +86,7 @@ public sealed class QuickMove : ILoadable {
         orig();
     }
 
-    public static void UpdateChain(Slot source) {
+    public static void UpdateChain(InventorySlot source) {
         if (s_moveTime > 0) {
             s_moveTime--;
             if (s_moveTime == Configs.QuickMove.Value.resetTime - 1) s_validSlots.Add(source);
@@ -99,12 +99,12 @@ public sealed class QuickMove : ILoadable {
         if (s_moveTime == 0 || s_moveKey != targetKey) SetupChain(source, targetKey);
         if (s_moveChain.Count != 0) ContinueChain();
     }
-    private static void SetupChain(Slot source, int targetKey) {
+    private static void SetupChain(InventorySlot source, int targetKey) {
         s_moveKey = targetKey;
         s_moveIndex = 0;
         s_moveChain = [
             source,
-            .. from i in s_displayedChain select new Slot(i, HotkeyToSlot(targetKey, i.Items(Main.LocalPlayer).Count)),
+            .. s_displayedChain.Select(i => new InventorySlot(i, HotkeyToSlot(targetKey, i.Items.Count)))
         ];
         s_movedItems = [];
         s_validSlots = [source];
@@ -124,7 +124,7 @@ public sealed class QuickMove : ILoadable {
         }
 
         SoundEngine.PlaySound(SoundID.Grab);
-        s_moveChain[s_moveIndex].Focus(player);
+        s_moveChain[s_moveIndex].Focus();
         ClearDisplayCache();
         Recipe.FindRecipes();
     }
@@ -139,38 +139,38 @@ public sealed class QuickMove : ILoadable {
         _ => SlotToHotkey(hotkey, slotCount)
     }, 0, slotCount - 1);
 
-    private static List<MovedItem> Move(Player player, Slot source, Slot target) {
-        Item item = source.Item(player);
-        if (!target.Inventory.FitsSlot(player, item, target.Index, out var itemsToMove)) return [];
+    private static List<MovedItem> Move(Player player, InventorySlot source, InventorySlot target) {
+        Item item = source.Item;
+        if (!target.Fits(item, out var itemsToMove)) return [];
 
-        IList<Item> items = target.Inventory.Items(player);
+        IList<Item> items = target.Inventory.Items;
         List<Item> freeItems = [];
         List<MovedItem> movedItems = [new(source, target.Inventory, item.type, item.prefix, item.favorited)];
 
-        void FreeTargetItem(Slot slot) {
-            Item item = slot.Item(player);
+        void FreeTargetItem(InventorySlot slot) {
+            Item item = slot.Item;
             freeItems.Add(item);
             movedItems.Add(new(slot, source.Inventory, item.type, item.prefix, item.favorited));
-            slot.Inventory.Items(player)[slot.Index] = new();
-            target.Inventory.OnSlotChange(player, slot.Index);
+            slot.Item = new();
+            slot.OnChange();
         }
 
         FreeTargetItem(target);
-        foreach (Slot slot in itemsToMove) FreeTargetItem(slot);
+        foreach (InventorySlot slot in itemsToMove) FreeTargetItem(slot);
 
         bool canFavorite = Reflection.ItemSlot.canFavoriteAt.GetValue()[Math.Abs(target.Inventory.Context)];
         bool keepFavorited = !canFavorite && item.favorited; // Only apply when the items would be unfavorited, to avoid "generating" favorited items 
         items[target.Index] = ItemHelper.MoveInto(items[target.Index], item, out _, target.Inventory.MaxStack, canFavorite);
         items[target.Index] = ItemHelper.MoveInto(items[target.Index], freeItems[0], out _, target.Inventory.MaxStack, canFavorite);
-        source.Inventory.OnSlotChange(player, source.Index);
-        target.Inventory.OnSlotChange(player, target.Index);
+        source.OnChange();
+        target.OnChange();
 
         for (int i = 0; i < freeItems.Count; i++) {
             Item free = freeItems[i];
             if (free.IsAir) continue;
             bool f = free.favorited;
             if (Configs.ItemActions.KeepSwappedFavorited && keepFavorited) free.favorited = true;
-            free = source.GetItem(player, free, GetItemSettings.GetItemInDropItemCheck);
+            free = source.GetItem(free, GetItemSettings.GetItemInDropItemCheck);
             free.favorited = f;
             player.GetDropItem(ref free);
         }
@@ -180,10 +180,10 @@ public sealed class QuickMove : ILoadable {
     private static void UndoMove(Player player, List<MovedItem> movedItems) {
         foreach (MovedItem moved in movedItems) {
             bool Predicate(Item i) => i.type == moved.Type && i.prefix == moved.Prefix;
-            int index = moved.To.Items(player).FindIndex(Predicate);
-            Slot? slot = index != -1 ? new(moved.To, index) : InventoryLoader.FindItem(player, Predicate);
+            int index = moved.To.Items.FindIndex(Predicate);
+            InventorySlot? slot = index != -1 ? new(moved.To, index) : InventoryLoader.FindItem(player, Predicate);
             if (slot is null) continue;
-            Item item = slot.Value.Item(player);
+            Item item = slot.Value.Item;
             bool fav = item.favorited;
             item.favorited = moved.Favorited;
             Move(player, slot.Value, moved.From);
@@ -239,12 +239,12 @@ public sealed class QuickMove : ILoadable {
             if (!Configs.QuickMove.DisplayHotkeys) return;
             if (!IsTargetableSlot(inv, context, slot, out int number, out int key) || (Configs.QuickMove.Value.displayedHotkeys == Configs.HotkeyDisplayMode.Next ? number != 1 : number == 0)) return;
             key = (key + 1) % MoveKeys.Length;
-            StringBuilder text = new();
-            text.Append(key);
-            for (int i = 1; i < number; i++) {
-                text.Append(key);
-                scale *= 0.9f;
-            }
+            string text = number switch {
+                1 => $"{key}",
+                2 => $"{key}{key}",
+                3 => $"{key}{key}{key}",
+                _ => $"{key}x{number}",
+            };
             Color baseColor = Main.inventoryBack;
             ChatManager.DrawColorCodedStringWithShadow(spriteBatch, FontAssets.ItemStack.Value, text.ToString(), position + new Vector2(6f, 4) * scale, baseColor, 0f, Vector2.Zero, new Vector2(scale), -1f, scale);
         });
@@ -259,12 +259,12 @@ public sealed class QuickMove : ILoadable {
     public static bool IsTargetableSlot(Item[] inv, int context, int slot, out int numberInChain, out int key) {
         (numberInChain, key) = (-1, -1);
         if (s_moveTime == 0 && (!s_hover || s_displayedChain.Count == 0)) return false;
-        if (!InventoryLoader.IsInventorySlot(Main.LocalPlayer, inv, context, slot, out Slot itemSlot)) return false;
+        if (!InventoryLoader.IsInventorySlot(Main.LocalPlayer, inv, context, slot, out InventorySlot itemSlot)) return false;
         (numberInChain, key) = GetSlotMoveInfo(itemSlot);
         return 0 <= key && key < MoveKeys.Length;
     }
 
-    public static (int number, int key) GetSlotMoveInfo(Slot slot) => s_slotMoveInfo.GetOrAdd(slot, () => {
+    public static (int number, int key) GetSlotMoveInfo(InventorySlot slot) => s_slotMoveInfo.GetOrAdd(slot, () => {
         (int numberInChain, int key) = (-1, -1);
         if (s_moveTime > 0) {
             int index = s_moveChain.IndexOf(slot);
@@ -277,12 +277,12 @@ public sealed class QuickMove : ILoadable {
             int index = s_displayedChain.IndexOf(slot.Inventory);
             if (index > -1) {
                 numberInChain = index + 1;
-                key = SlotToHotkey(slot.Index, slot.Inventory.Items(Main.LocalPlayer).Count);
+                key = SlotToHotkey(slot.Index, slot.Inventory.Items.Count);
             }
         }
         return (numberInChain, key);
     });
-    private static readonly Dictionary<Slot, (int number, int key)> s_slotMoveInfo = [];
+    private static readonly Dictionary<InventorySlot, (int number, int key)> s_slotMoveInfo = [];
 
     public static void UpdateDisplayedMoveChain(ModSubInventory slots, Item item) {
         if (item.IsAir) ClearDisplayedChain();
@@ -302,9 +302,9 @@ public sealed class QuickMove : ILoadable {
     }
 
     private static List<ModSubInventory> GetDisplayedChain(Player player, Item item, ModSubInventory source) {
-        List<ModSubInventory> targetSlots = InventoryLoader.Special.Where(i => i.Accepts(item)).ToList();
-        if (targetSlots.Remove(source) && source.Items(player).Count > 1) targetSlots.Insert(0, source);
-        return targetSlots;
+        List<ModSubInventory> targets = InventoryLoader.GetPreferredInventories(player).Where(i => i.Accepts(item) && i.Items.Count > 0).ToList();
+        if (targets.Remove(source) && source.Items.Count > 1) targets.Insert(0, source);
+        return targets;
     }
 
     private static int s_displayedItem = ItemID.None;
@@ -312,13 +312,13 @@ public sealed class QuickMove : ILoadable {
 
     private static int s_moveKey;
     private static int s_moveTime;
-    private static List<Slot> s_moveChain = [];
+    private static List<InventorySlot> s_moveChain = [];
     private static int s_moveIndex = -1;
-    private static HashSet<Slot> s_validSlots = [];
+    private static HashSet<InventorySlot> s_validSlots = [];
     private static List<MovedItem> s_movedItems = [];
 
     private static bool s_hover, s_frameHover;
     private static int s_ignoreHotbar = -1, s_oldSelectedItem;
-
 }
-public readonly record struct MovedItem(Slot From, ModSubInventory To, int Type, int Prefix, bool Favorited);
+
+public readonly record struct MovedItem(InventorySlot From, ModSubInventory To, int Type, int Prefix, bool Favorited);
