@@ -343,6 +343,15 @@ AutoEquipLevel: {
 	PreferredSlots.Label: Preferred Slots
 }
 
+AutoEquip: {
+	Tooltip: ""
+
+	inactiveInventories: {
+		Label: Equip to Inactive Inventories
+		Tooltip: Auto equip items to other loadouts
+	}
+}
+
 VoidBagLevel: {
 	Tooltip: ""
 	None.Label: Off
@@ -499,6 +508,16 @@ QuickMove: {
 			{$Mods.BetterInventory.Configs.HotkeyDisplayMode.Next.Label}: Next slot in the chain
 			{$Mods.BetterInventory.Configs.HotkeyDisplayMode.All.Label}: All slots in the chain
 			'''
+	}
+
+	followItem: {
+		Label: Follow Item
+		Tooltip: Change the menus of the inventory to keep the moved item visible
+	}
+
+	inactiveInventories: {
+		Label: Move to Inactive Inventories
+		Tooltip: Includes slots from others loadouts when moving times
 	}
 
 	tooltip: {

@@ -8,12 +8,9 @@ using ContextID = Terraria.UI.ItemSlot.Context;
 
 namespace BetterInventory.Default.Inventories;
 
-public abstract class DyesInventory : ModLoadoutSubInventory {
+public abstract class DyesInventory : ModSubLoadoutInventory {
     public override int Context => ContextID.EquipDye;
-    public override void Focus(int slot) {
-        Main.EquipPageSelected = 0;
-        base.Focus(slot);
-    }
+
     public sealed override int? MaxStack => 1;
     public sealed override bool Accepts(Item item) => item.dye != 0;
     public sealed override bool IsPreferredInventory(Item item) => false;
@@ -42,8 +39,10 @@ public sealed class SharedAccessoryDyes : DyesInventory {
     public sealed override IList<ModSubInventory> GetInventories(Player player) => [NewInstance(player)];
 }
 public sealed class EquipmentDyes : DyesInventory {
+    private int _previousPage;
     public sealed override int Context => ContextID.EquipMiscDye;
-    public sealed override void Focus(int slot) => Main.EquipPageSelected = 2;
+    public sealed override void Focus(int slot) => (_previousPage, Main.EquipPageSelected) = (Main.EquipPageSelected, 2);
+    public override void Unfocus(int slot) => Main.EquipPageSelected = _previousPage;
     public sealed override Item[] Items => Entity.miscDyes;
     public sealed override int ComparePositionTo(ModSubInventory other) => other is SharedAccessoryDyes ? 1 : 0;
     public sealed override IList<ModSubInventory> GetInventories(Player player) => [NewInstance(player)];

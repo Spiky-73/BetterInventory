@@ -10,7 +10,7 @@ using ContextID = Terraria.UI.ItemSlot.Context;
 
 namespace BetterInventory.Default.Inventories;
 
-public abstract class AccessoryInventory : ModLoadoutSubInventory {
+public abstract class AccessoryInventory : ModSubLoadoutInventory {
     public sealed override bool FitsSlot(Item item, int slot, out IList<InventorySlot> itemsToMove) {
         List<int> vanillaSlots = UnlockedVanillaSlots(Entity);
         List<int> moddedSlots = UnlockedModdedSlots(Entity, false);
@@ -25,27 +25,24 @@ public abstract class AccessoryInventory : ModLoadoutSubInventory {
         return canAllMove;
     }
 
-    public sealed override void Focus(int slot) {
-        Main.EquipPageSelected = 0;
-        base.Focus(slot);
-    }
-
     public IList<InventorySlot> GetIncompatibleItems(Item item, bool vanity, out bool canAllMove) {
         canAllMove = true;
         List<InventorySlot> incompatibles = [];
-        void CheckAccessories(ModSubInventory inv, bool vanity, ref bool canAllMove) {
-            IList<Item> items = inv.Items;
-            for (int i = 0; i < items.Count; i++) {
-                if (item == items[i]) continue;
-                if (item.type != items[i].type && (vanity || (item.wingSlot <= 0 || items[i].wingSlot <= 0) && ItemLoader.CanAccessoryBeEquippedWith(items[i], item))) continue;
-                incompatibles.Add(new(inv, i));
-                if (ItemSlot.isEquipLocked(i)) canAllMove = false;
+        void CheckAccessories(ModSubInventory template, bool vanity, ref bool canAllMove) {
+            foreach(var inv in template.GetActiveInventories(Entity)) {
+                IList<Item> items = inv.Items;
+                for (int i = 0; i < items.Count; i++) {
+                    if (item == items[i]) continue;
+                    if (item.type != items[i].type && (vanity || (item.wingSlot <= 0 || items[i].wingSlot <= 0) && ItemLoader.CanAccessoryBeEquippedWith(items[i], item))) continue;
+                    incompatibles.Add(new(inv, i));
+                    if (ItemSlot.isEquipLocked(i)) canAllMove = false;
+                }
             }
         }
-        CheckAccessories(ModContent.GetInstance<Accessories>().GetCurrentInventory(Entity), vanity, ref canAllMove);
-        CheckAccessories(ModContent.GetInstance<VanityAccessories>().GetCurrentInventory(Entity), true, ref canAllMove);
-        CheckAccessories(ModContent.GetInstance<SharedAccessories>().NewInstance(Entity), vanity, ref canAllMove);
-        CheckAccessories(ModContent.GetInstance<SharedVanityAccessories>().NewInstance(Entity), true, ref canAllMove);
+        CheckAccessories(ModContent.GetInstance<Accessories>(), vanity, ref canAllMove);
+        CheckAccessories(ModContent.GetInstance<VanityAccessories>(), true, ref canAllMove);
+        CheckAccessories(ModContent.GetInstance<SharedAccessories>(), vanity, ref canAllMove);
+        CheckAccessories(ModContent.GetInstance<SharedVanityAccessories>(), true, ref canAllMove);
         return incompatibles;
     }
 
@@ -95,14 +92,12 @@ public sealed class VanityAccessories : AccessoryInventory {
     );
 }
 
-// TODO test
 public sealed class SharedAccessories : AccessoryInventory {
     public override bool Accepts(Item item) => item.accessory && !item.vanity;
     public override bool IsPreferredInventory(Item item) => true;
     public override int Context => ContextID.EquipAccessory;
     public override ListIndices<Item> Items => new(ModdedAccessories, UnlockedModdedSlots(Entity, true));
     public override IList<ModSubInventory> GetInventories(Player player) => [NewInstance(player)];
-
 }
 public sealed class SharedVanityAccessories : AccessoryInventory {
     public override bool Accepts(Item item) => item.accessory;
@@ -110,5 +105,4 @@ public sealed class SharedVanityAccessories : AccessoryInventory {
     public override int Context => ContextID.EquipAccessoryVanity;
     public override ListIndices<Item> Items => new(ModdedAccessories, UnlockedModdedSlots(Entity, true, true));
     public override IList<ModSubInventory> GetInventories(Player player) => [NewInstance(player)];
-
 }

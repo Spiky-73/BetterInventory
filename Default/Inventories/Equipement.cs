@@ -7,10 +7,12 @@ using ContextID = Terraria.UI.ItemSlot.Context;
 namespace BetterInventory.Default.Inventories;
 
 public abstract class Equipment : ModSubInventory {
+    private int _previousPage;
     public abstract int Index { get; }
     public sealed override ListIndices<Item> Items => new(Entity.miscEquips, Index);
     public sealed override bool IsPreferredInventory(Item item) => true;
-    public sealed override void Focus(int slot) => Main.EquipPageSelected = 2;
+    public sealed override void Focus(int slot) => (_previousPage, Main.EquipPageSelected) = (Main.EquipPageSelected, 2);
+    public override void Unfocus(int slot) => Main.EquipPageSelected = _previousPage;
 }
 public sealed class Pet : Equipment {
     public sealed override int Index => EquipmentSlots.Pet;

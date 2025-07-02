@@ -45,7 +45,7 @@ public sealed class Compatibility : ModConfig {
         SmartConsumption.Value.materials = false;
         SmartConsumption.Value.baits = false;
         SmartPickup.Value.previousSlot.Key = ItemPickupLevel.None;
-        SmartPickup.Value.autoEquip = AutoEquipLevel.None;
+        SmartPickup.Value.autoEquip.Key = AutoEquipLevel.None;
         SmartPickup.Value.upgradeItems.Key = false;
         SmartPickup.Value.hotbarLast = false;
         SmartPickup.Value.fixSlot = false;

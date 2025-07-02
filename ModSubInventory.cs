@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.Localization;
@@ -6,6 +5,7 @@ using Terraria.ModLoader;
 using Terraria.Audio;
 using Terraria.ID;
 using SpikysLib;
+using Terraria.ModLoader.Core;
 
 namespace BetterInventory;
 
@@ -16,6 +16,7 @@ public readonly record struct InventorySlot(ModSubInventory Inventory, int Index
     }
     public Item GetItem(Item item, GetItemSettings settings) => Inventory.GetItem(item, Index, settings);
     public void Focus() => Inventory.Focus(Index);
+    public void Unfocus() => Inventory.Unfocus(Index);
     public void OnChange() => Inventory.OnSlotChange(Index);
     public bool Fits(Item item, out IList<InventorySlot> itemsToMove) => Inventory.FitsSlot(item, Index, out itemsToMove);
 }
@@ -35,7 +36,13 @@ public abstract class ModSubInventory : ModType<Player, ModSubInventory>, ILocal
         return true;
     }
 
+    protected override void ValidateType() {
+        base.ValidateType();
+        LoaderUtils.MustOverrideTogether(this, i => i.Focus, i => i.Unfocus);
+    }
+
     public virtual void Focus(int slot) { }
+    public virtual void Unfocus(int slot) { }
     public virtual void OnSlotChange(int slot) { }
 
     public virtual Item GetItem(Item item, GetItemSettings settings) {
@@ -65,6 +72,7 @@ public abstract class ModSubInventory : ModType<Player, ModSubInventory>, ILocal
     }
 
     public virtual IList<ModSubInventory> GetInventories(Player player) => [NewInstance(player)];
+    public virtual IList<ModSubInventory> GetActiveInventories(Player player) => GetInventories(player);
 
     public virtual int ComparePositionTo(ModSubInventory other) => 0;
 

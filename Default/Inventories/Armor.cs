@@ -7,13 +7,8 @@ using ContextID = Terraria.UI.ItemSlot.Context;
 
 namespace BetterInventory.Default.Inventories;
 
-public abstract class ArmorInventory : ModLoadoutSubInventory {
+public abstract class ArmorInventory : ModSubLoadoutInventory {
     public abstract bool IsArmor(Item item);
-
-    public sealed override void Focus(int slot) {
-        Main.EquipPageSelected = 0;
-        base.Focus(slot);
-    }
 
     public IList<Item> Armor => Entity.CurrentLoadoutIndex == LoadoutIndex ?
         Entity.armor :

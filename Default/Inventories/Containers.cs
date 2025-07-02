@@ -10,9 +10,11 @@ using SpikysLib.Constants;
 namespace BetterInventory.Default.Inventories;
 
 public sealed class Hotbar : ModSubInventory {
+    private int _previousSlot;
     public override int Context => ContextID.InventoryItem;
     public override bool IsPreferredInventory(Item item) => item.favorited;
-    public override void Focus(int slot) => Entity.selectedItem = slot;
+    public override void Focus(int slot) => (_previousSlot, Entity.selectedItem) = (Entity.selectedItem, slot);
+    public override void Unfocus(int slot) => Entity.selectedItem = _previousSlot;
     public override ListIndices<Item> Items => new(Entity.inventory, InventorySlots.Hotbar);
     public override int ComparePositionTo(ModSubInventory other) => 1;
 }
@@ -45,11 +47,23 @@ public abstract class Container : ModSubInventory {
     }
 }
 
-// TODO use new instances to save the chest
 public sealed class Chest : Container {
+    public int Index { get; private set; } = -1;
     public override int Context => ContextID.ChestItem;
-    public override void OnSlotChange(int slot) => NetMessage.SendData(MessageID.SyncChestItem, number: Entity.chest, number2: slot);
-    public override Item[] Items => Entity.chest >= 0 ? Main.chest[Entity.chest].item : [];
+    public override void OnSlotChange(int slot) => NetMessage.SendData(MessageID.SyncChestItem, number: Index, number2: slot);
+    public override Item[] Items => Index >= 0 ? Main.chest[Index].item : [];
+
+    public override bool Accepts(Item item) => Entity.chest == Index;
+
+    public override IList<ModSubInventory> GetInventories(Player player) {
+        var inventory = (Chest)NewInstance(player);
+        inventory.Index = player.chest;
+        return [inventory];
+    }
+
+    public override bool Equals(object? obj) => base.Equals(obj) && Index == ((Chest)obj).Index;
+    public override int GetHashCode() => (Index, base.GetHashCode()).GetHashCode();
+
 }
 public sealed class PiggyBank : Container {
     public override int Context => ContextID.BankItem;

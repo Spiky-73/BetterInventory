@@ -75,12 +75,11 @@ public sealed class Crafting : ModPlayer {
         List<Item> materials = [];
         if (Configs.MoreMaterials.Mouse && Main.myPlayer == Player.whoAmI) materials.Add(Main.mouseItem);
         if (Configs.MoreMaterials.Equipment) {
-            void AddSubInventory(ModSubInventory inventory) {
-                foreach (var subInventory in inventory.GetInventories(Player)) materials.AddRange(subInventory.Items);
+            void AddSubInventory(ModSubInventory template) {
+                var inventories = Configs.MoreMaterials.Value.equipment.Value.allLoadouts ? template.GetInventories(Player) : template.GetActiveInventories(Player);
+                foreach (var subInventory in inventories) materials.AddRange(subInventory.Items);
             }
 
-            // TODO test
-            // TODO handle Configs.MoreMaterials.Value.equipment.Value.allLoadouts
             AddSubInventory(ModContent.GetInstance<HeadArmor>());
             AddSubInventory(ModContent.GetInstance<BodyArmor>());
             AddSubInventory(ModContent.GetInstance<LegArmor>());

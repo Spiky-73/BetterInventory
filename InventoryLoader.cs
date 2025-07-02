@@ -15,9 +15,17 @@ public sealed class InventoryLoader : ILoadable {
     public static IEnumerable<ModSubInventory> GetInventories(Player player) 
         => SubInventoriesTemplates.SelectMany(subInventory => subInventory.GetInventories(player));
 
+    public static IEnumerable<ModSubInventory> GetActiveInventories(Player player) 
+        => SubInventoriesTemplates.SelectMany(subInventory => subInventory.GetActiveInventories(player));
+
     public static IEnumerable<ModSubInventory> GetPreferredInventories(Player player) 
         => _preferredTemplates.SelectMany(subInventory => subInventory.GetInventories(player));
-    
+
+    public static IEnumerable<ModSubInventory> GetPreferredActiveInventories(Player player) 
+        => _preferredTemplates.SelectMany(subInventory => subInventory.GetActiveInventories(player));
+
+    public static IEnumerable<ModSubInventory> PreferredInventoriesTemplates => _preferredTemplates;
+    public static IEnumerable<ModSubInventory> AllPurposeInventoriesTemplates => _allPurposeTemplates;
     public static IEnumerable<ModSubInventory> SubInventoriesTemplates {
         get {
             foreach (var inventory in _preferredTemplates) yield return inventory;

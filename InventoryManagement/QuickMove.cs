@@ -113,6 +113,8 @@ public sealed class QuickMove : ILoadable {
         Player player = Main.LocalPlayer;
         player.selectedItem = s_oldSelectedItem;
         s_ignoreHotbar = s_moveKey;
+
+        if (s_moveTime != 0 && Configs.QuickMove.FollowItem) s_moveChain[s_moveIndex].Unfocus();
         UndoMove(player, s_movedItems);
 
         s_moveIndex = (s_moveIndex + 1) % s_moveChain.Count;
@@ -124,7 +126,7 @@ public sealed class QuickMove : ILoadable {
         }
 
         SoundEngine.PlaySound(SoundID.Grab);
-        s_moveChain[s_moveIndex].Focus();
+        if (Configs.QuickMove.FollowItem) s_moveChain[s_moveIndex].Focus();
         ClearDisplayCache();
         Recipe.FindRecipes();
     }
@@ -302,7 +304,8 @@ public sealed class QuickMove : ILoadable {
     }
 
     private static List<ModSubInventory> GetDisplayedChain(Player player, Item item, ModSubInventory source) {
-        List<ModSubInventory> targets = InventoryLoader.GetPreferredInventories(player).Where(i => i.Accepts(item) && i.Items.Count > 0).ToList();
+        var inventories = Configs.QuickMove.InactiveInventories ? InventoryLoader.GetPreferredInventories(player) : InventoryLoader.GetPreferredActiveInventories(player);
+        List<ModSubInventory> targets = inventories.Where(i => i.Accepts(item) && i.Items.Count > 0).ToList();
         if (targets.Remove(source) && source.Items.Count > 1) targets.Insert(0, source);
         return targets;
     }
