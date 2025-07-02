@@ -63,9 +63,8 @@ public abstract class AccessoryInventory : ModSubLoadoutInventory {
     public static List<int> UnlockedModdedSlots(Player player, bool shared, bool vanity = false) {
         List<int> unlocked = [];
         var accPlayer = player.GetModPlayer<ModAccessorySlotPlayer>();
-        int length = accPlayer.SlotCount / 2;
-        int offset = vanity ? (length / 2) : 0;
-        for (int i = 0; i < length; i++){
+        int offset = vanity ? accPlayer.SlotCount : 0;
+        for (int i = 0; i < accPlayer.SlotCount; i++){
             if (!LoaderManager.Get<AccessorySlotLoader>().ModdedIsItemSlotUnlockedAndUsable(i, player)) continue;
             if (shared != Reflection.ModAccessorySlotPlayer.IsSharedSlot.Invoke(accPlayer, i)) continue;
             unlocked.Add(i + offset);
@@ -73,6 +72,7 @@ public abstract class AccessoryInventory : ModSubLoadoutInventory {
         return unlocked;
     }
 }
+
 public sealed class Accessories : AccessoryInventory {
     public override bool Accepts(Item item) => item.accessory && !item.vanity;
     public override bool IsPreferredInventory(Item item) => true;
@@ -82,6 +82,16 @@ public sealed class Accessories : AccessoryInventory {
         new ListIndices<Item>(ModdedAccessories, UnlockedModdedSlots(Entity, false))
     );
 }
+
+public sealed class SharedAccessories : AccessoryInventory {
+    public override bool Accepts(Item item) => item.accessory && !item.vanity;
+    public override bool IsPreferredInventory(Item item) => true;
+    public override int Context => ContextID.EquipAccessory;
+    public override ListIndices<Item> Items => new(ModdedAccessories, UnlockedModdedSlots(Entity, true));
+    public override IList<ModSubInventory> GetInventories(Player player) => [NewInstance(player)];
+    public sealed override int ComparePositionTo(ModSubInventory other) => other is Accessories ? 1 : 0;
+}
+
 public sealed class VanityAccessories : AccessoryInventory {
     public override bool Accepts(Item item) => item.accessory;
     public override bool IsPreferredInventory(Item item) => item.vanity && item.FitsAccessoryVanitySlot;
@@ -90,19 +100,14 @@ public sealed class VanityAccessories : AccessoryInventory {
         new ListIndices<Item>(VanillaAccessories, UnlockedVanillaSlots(Entity, true)),
         new ListIndices<Item>(ModdedAccessories, UnlockedModdedSlots(Entity, false, true))
     );
+    public sealed override int ComparePositionTo(ModSubInventory other) => other is SharedAccessories ? 1 : 0;
 }
 
-public sealed class SharedAccessories : AccessoryInventory {
-    public override bool Accepts(Item item) => item.accessory && !item.vanity;
-    public override bool IsPreferredInventory(Item item) => true;
-    public override int Context => ContextID.EquipAccessory;
-    public override ListIndices<Item> Items => new(ModdedAccessories, UnlockedModdedSlots(Entity, true));
-    public override IList<ModSubInventory> GetInventories(Player player) => [NewInstance(player)];
-}
 public sealed class SharedVanityAccessories : AccessoryInventory {
     public override bool Accepts(Item item) => item.accessory;
     public override bool IsPreferredInventory(Item item) => item.vanity && item.FitsAccessoryVanitySlot;
     public override int Context => ContextID.EquipAccessoryVanity;
     public override ListIndices<Item> Items => new(ModdedAccessories, UnlockedModdedSlots(Entity, true, true));
     public override IList<ModSubInventory> GetInventories(Player player) => [NewInstance(player)];
+    public sealed override int ComparePositionTo(ModSubInventory other) => other is VanityAccessories ? 1 : 0;
 }
