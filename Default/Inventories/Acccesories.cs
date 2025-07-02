@@ -28,21 +28,26 @@ public abstract class AccessoryInventory : ModSubLoadoutInventory {
     public IList<InventorySlot> GetIncompatibleItems(Item item, bool vanity, out bool canAllMove) {
         canAllMove = true;
         List<InventorySlot> incompatibles = [];
-        void CheckAccessories(ModSubInventory template, bool vanity, ref bool canAllMove) {
-            foreach(var inv in template.GetActiveInventories(Entity)) {
-                IList<Item> items = inv.Items;
-                for (int i = 0; i < items.Count; i++) {
-                    if (item == items[i]) continue;
-                    if (item.type != items[i].type && (vanity || (item.wingSlot <= 0 || items[i].wingSlot <= 0) && ItemLoader.CanAccessoryBeEquippedWith(items[i], item))) continue;
-                    incompatibles.Add(new(inv, i));
-                    if (ItemSlot.isEquipLocked(i)) canAllMove = false;
-                }
+        void CheckAccessories(ModSubLoadoutInventory inventory, bool vanity, ref bool canAllMove) {
+            IList<Item> items = inventory.Items;
+            for (int i = 0; i < items.Count; i++) {
+                if (item == items[i]) continue;
+                if (item.type != items[i].type && (vanity || (item.wingSlot <= 0 || items[i].wingSlot <= 0) && ItemLoader.CanAccessoryBeEquippedWith(items[i], item))) continue;
+                incompatibles.Add(new(inventory, i));
+                if (ItemSlot.isEquipLocked(i)) canAllMove = false;
             }
         }
-        CheckAccessories(ModContent.GetInstance<Accessories>(), vanity, ref canAllMove);
-        CheckAccessories(ModContent.GetInstance<VanityAccessories>(), true, ref canAllMove);
-        CheckAccessories(ModContent.GetInstance<SharedAccessories>(), vanity, ref canAllMove);
-        CheckAccessories(ModContent.GetInstance<SharedVanityAccessories>(), true, ref canAllMove);
+
+        var accessories = (Accessories)ModContent.GetInstance<Accessories>().NewInstance(Entity);
+        accessories.LoadoutIndex = LoadoutIndex;
+        CheckAccessories(accessories, vanity, ref canAllMove);
+        var social = (VanityAccessories)ModContent.GetInstance<VanityAccessories>().NewInstance(Entity);
+        social.LoadoutIndex = LoadoutIndex;
+        CheckAccessories(social, true, ref canAllMove);
+        var sharedAccessories = (SharedAccessories)ModContent.GetInstance<SharedAccessories>().NewInstance(Entity);
+        CheckAccessories(sharedAccessories, vanity, ref canAllMove);
+        var sharedSocial = (SharedVanityAccessories)ModContent.GetInstance<SharedVanityAccessories>().NewInstance(Entity);
+        CheckAccessories(sharedSocial, true, ref canAllMove);
         return incompatibles;
     }
 
