@@ -7,21 +7,22 @@ PiggyBank.DisplayName: Piggy Bank
 Safe.DisplayName: Safe
 DefenderForge.DisplayName: Defender's Forge
 VoidBag.DisplayName: Void Bag
-HeadArmor.DisplayName: Armor
-BodyArmor.DisplayName: Armor
-LegArmor.DisplayName: Armor
-HeadVanity.DisplayName: Vanity
-BodyVanity.DisplayName: Vanity
-LegVanity.DisplayName: Vanity
-Accessories.DisplayName: Accessory
-VanityAccessories.DisplayName: Social
-Loadout1.DisplayName: Loadout1
-Loadout2.DisplayName: Loadout2
+HeadArmor.DisplayName: Armor (Loadout {0})
+BodyArmor.DisplayName: Armor (Loadout {0})
+LegArmor.DisplayName: Armor (Loadout {0})
+HeadVanity.DisplayName: Vanity (Loadout {0})
+BodyVanity.DisplayName: Vanity (Loadout {0})
+LegVanity.DisplayName: Vanity (Loadout {0})
+Accessories.DisplayName: Accessory (Loadout {0})
+VanityAccessories.DisplayName: Social (Loadout {0})
+SharedAccessories.DisplayName: Shared Accessory
+SharedVanityAccessories.DisplayName: Shared Social
 Pet.DisplayName: Equipment
 LightPet.DisplayName: Equipment
 Minecart.DisplayName: Equipment
 Mount.DisplayName: Equipment
 Grapple.DisplayName: Equipment
-ArmorDyes.DisplayName: Armor Dye
-AccessoryDyes.DisplayName: Accessory Dye
+ArmorDyes.DisplayName: Armor Dye (Loadout {0})
+AccessoryDyes.DisplayName: Accessory Dye (Loadout {0})
+SharedAccessoryDyes.DisplayName: Shared Accessory Dye
 EquipmentDyes.DisplayName: Equipment Dye

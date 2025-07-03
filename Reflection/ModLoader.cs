@@ -12,12 +12,23 @@ using TColor = Microsoft.Xna.Framework.Color;
 using TItemLoader = Terraria.ModLoader.ItemLoader;
 using TVector2 = Microsoft.Xna.Framework.Vector2;
 using System.Collections.ObjectModel;
+using System.Reflection;
+using System;
 
 namespace BetterInventory.Reflection;
 
 public static class ModAccessorySlotPlayer {
     public static readonly Field<TAccPlayer, TItem[]> exAccessorySlot = new(nameof(exAccessorySlot));
     public static readonly Field<TAccPlayer, TItem[]> exDyesAccessory = new(nameof(exDyesAccessory));
+    public static readonly Field<TAccPlayer, bool[]> sharedLoadoutSlotTypes = new(nameof(sharedLoadoutSlotTypes));
+    public static readonly FieldInfo exLoadouts = typeof(TAccPlayer).GetField(nameof(exLoadouts), Member<FieldInfo>.InstanceFlags)!;
+    public static readonly Method<TAccPlayer, bool> IsSharedSlot = new(nameof(IsSharedSlot), typeof(int));
+
+    public static class ExEquipmentLoadout {
+        public static readonly Type Type = typeof(TAccPlayer).GetNestedType(nameof(ExEquipmentLoadout), BindingFlags.NonPublic)!;
+        public static readonly Property<object, TItem[]> ExAccessorySlot = new(Type.GetProperty(nameof(ExAccessorySlot))!);
+        public static readonly Property<object, TItem[]> ExDyesAccessory = new(Type.GetProperty(nameof(ExDyesAccessory))!);
+    }
 }
 
 public static class AccessorySlotLoader {

@@ -1,5 +1,12 @@
 # Better Inventory changelog
 
+## 0.8.2
+- Added support for loadouts to Pickup to Previous Slot, Quick Move, Extra Materials and Auto Equip
+- Added options to include loadouts or not to Auto Equip and Quick Move
+- Change Quick Move hotkey display to show a count instead of a repeating number for large values
+- Added Follow Item option to Quick Move
+- Quick moving will now remember the original menu pages
+
 ## 0.8.1.1
 - Fixed a infinite loop when buying a stack of items right after having bought it once
 

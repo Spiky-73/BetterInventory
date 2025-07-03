@@ -1,4 +1,3 @@
-using System.Linq;
 using BetterInventory.Default.Inventories;
 using Terraria;
 
@@ -7,9 +6,11 @@ namespace BetterInventory.InventoryManagement.SmartPickup;
 public static class SmartEquip {
 
     public static Item AutoEquip(Player player, Item item, GetItemSettings settings) {
-        foreach (ModSubInventory inv in InventoryLoader.Special.Where(i => i is not Hotbar && i.Accepts(item))) {
-            if (Configs.SmartPickup.Value.autoEquip < Configs.AutoEquipLevel.AnySlot && !inv.IsPrimaryFor(item)) continue;
-            item = inv.GetItem(player, item, settings);
+        var inventories = Configs.SmartPickup.Value.autoEquip.Value.inactiveInventories ? InventoryLoader.GetPreferredInventories(player) : InventoryLoader.GetPreferredActiveInventories(player);
+        foreach (var inv in inventories) {
+            if (inv is Hotbar || !inv.Accepts(item)) continue;
+            if (Configs.SmartPickup.Value.autoEquip < Configs.AutoEquipLevel.AnySlot && !inv.IsPreferredInventory(item)) continue;
+            item = inv.GetItem(item, settings);
             if (item.IsAir) return item;
         }
         return item;
@@ -25,7 +26,7 @@ public static class SmartEquip {
     public static Item VoidBag(Player player, Item item, GetItemSettings settings) {
         if (!settings.CanGoIntoVoidVault || !player.IsVoidVaultEnabled) return item;
         if (Configs.SmartPickup.Value.voidBag == Configs.VoidBagLevel.IfInside && !player.HasItem(item.type, player.bank4.item)) return item;
-        if(Reflection.Player.GetItem_VoidVault.Invoke(player, player.whoAmI, player.bank4.item, item, settings, item)) return new();
+        if (Reflection.Player.GetItem_VoidVault.Invoke(player, player.whoAmI, player.bank4.item, item, settings, item)) return new();
         return item;
     }
 }

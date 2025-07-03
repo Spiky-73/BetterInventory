@@ -11,18 +11,18 @@ public sealed class SmartPickup : ModSystem {
 
     public override void Load() {
         IL_Player.GetItem += static il => {
-            if(!il.ApplyTo(ILOverrideSlot, Configs.SmartPickup.OverrideSlot)) Configs.UnloadedInventoryManagement.Value.pickupOverrideSlot = true;
-            if(!il.ApplyTo(ILDedicatedSlots, Configs.SmartPickup.DedicatedSlot)) Configs.UnloadedInventoryManagement.Value.pickupDedicatedSlot = true;
-            if(!il.ApplyTo(ILHotbarLast, Configs.SmartPickup.HotbarLast)) Configs.UnloadedInventoryManagement.Value.hotbarLast = true;
-            if(!il.ApplyTo(ILFixNewItem, Configs.SmartPickup.FixSlot)) Configs.UnloadedInventoryManagement.Value.fixSlot = true;
+            if (!il.ApplyTo(IlPreviousSlot, Configs.SmartPickup.OverrideSlot)) Configs.UnloadedInventoryManagement.Value.pickupOverrideSlot = true;
+            if (!il.ApplyTo(ILDedicatedSlots, Configs.SmartPickup.DedicatedSlot)) Configs.UnloadedInventoryManagement.Value.pickupDedicatedSlot = true;
+            if (!il.ApplyTo(ILHotbarLast, Configs.SmartPickup.HotbarLast)) Configs.UnloadedInventoryManagement.Value.hotbarLast = true;
+            if (!il.ApplyTo(ILFixNewItem, Configs.SmartPickup.FixSlot)) Configs.UnloadedInventoryManagement.Value.fixSlot = true;
         };
     }
 
-    private static void ILOverrideSlot(ILContext il) {
+    private static void IlPreviousSlot(ILContext il) {
         ILCursor cursor = new(il);
 
         cursor.GotoNextLoc(out int coin, i => i.Previous.MatchCallvirt(Reflection.Item.IsACoin.GetMethod!), 0);
-        cursor.GotoNextLoc(out int newitem, i => i.Previous.MatchLdarg2(), 1);
+        cursor.GotoNextLoc(out int newItem, i => i.Previous.MatchLdarg2(), 1);
 
         // ...
         // if (newItem.uniqueStack && this.HasItem(newItem.type)) return item;
@@ -30,8 +30,8 @@ public sealed class SmartPickup : ModSystem {
         cursor.GotoNext(MoveType.AfterLabel, i => i.MatchLdloc(coin));
 
         // ++ item = <previousSlot>
-        EmitSmartPickup(cursor, newitem, (Player self, Item item, GetItemSettings settings) => {
-            if( vanillaGetItem) return item;
+        EmitSmartPickup(cursor, newItem, (Player self, Item item, GetItemSettings settings) => {
+            if (vanillaGetItem) return item;
             if (Configs.PreviousSlot.Enabled) item = PreviousSlot.PickupItemToPreviousSlot(self, item, settings);
             return item;
         });
@@ -41,7 +41,7 @@ public sealed class SmartPickup : ModSystem {
         ILCursor cursor = new(il);
 
         cursor.GotoNextLoc(out int coin, i => i.Previous.MatchCallvirt(Reflection.Item.IsACoin.GetMethod!), 0);
-        cursor.GotoNextLoc(out int newitem, i => i.Previous.MatchLdarg2(), 1);
+        cursor.GotoNextLoc(out int newItem, i => i.Previous.MatchLdarg2(), 1);
 
         // if (isACoin) ...
         // if (item.FitsAmmoSlot()) ...
@@ -50,7 +50,7 @@ public sealed class SmartPickup : ModSystem {
         cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdloc(coin));
 
         // ++<upgradeItems>
-        EmitSmartPickup(cursor, newitem, (Player self, Item item, GetItemSettings settings) => {
+        EmitSmartPickup(cursor, newItem, (Player self, Item item, GetItemSettings settings) => {
             if (vanillaGetItem || settings.NoText) return item;
             if (!item.IsAir && Configs.UpgradeItems.Enabled) item = SmartEquip.UpgradeItems(self, item, settings);
             if (!item.IsAir && Configs.SmartPickup.AutoEquip) item = SmartEquip.AutoEquip(self, item, settings);
@@ -61,23 +61,23 @@ public sealed class SmartPickup : ModSystem {
     private static void ILFixNewItem(ILContext il) {
         ILCursor cursor = new(il);
 
-        cursor.GotoNextLoc(out int newitem, i => i.Previous.MatchLdarg2(), 1);
+        cursor.GotoNextLoc(out int newItem, i => i.Previous.MatchLdarg2(), 1);
 
-        cursor.GotoNext(MoveType.After, i => i.MatchStloc(newitem));
+        cursor.GotoNext(MoveType.After, i => i.MatchStloc(newItem));
         while (cursor.TryGotoNext(MoveType.After, i => i.MatchLdarg2() && i.Next.MatchLdfld(out _))) {
-            cursor.EmitLdloc(newitem);
+            cursor.EmitLdloc(newItem);
             cursor.EmitDelegate((Item newItem, Item item) => Configs.SmartPickup.FixSlot ? item : newItem);
             cursor.GotoNext(MoveType.After, i => i.Next.MatchLdfld(out _));
         }
     }
 
-    private static void EmitSmartPickup(ILCursor cursor, int newitem, Func<Player, Item, GetItemSettings, Item> cb) {
+    private static void EmitSmartPickup(ILCursor cursor, int newItem, Func<Player, Item, GetItemSettings, Item> cb) {
         cursor.EmitLdarg0();
-        cursor.EmitLdloc(newitem);
+        cursor.EmitLdloc(newItem);
         cursor.EmitLdarg3();
         cursor.EmitDelegate(cb);
         cursor.EmitDup();
-        cursor.EmitStloc(newitem);
+        cursor.EmitStloc(newItem);
 
         // ++if (newItem.IsAir) return new()
         cursor.EmitDelegate((Item item) => item.IsAir);

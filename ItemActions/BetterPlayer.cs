@@ -102,6 +102,10 @@ public sealed class BetterPlayer : ModPlayer {
         if (Configs.ItemActions.FastContainerOpening && Main.mouseRight && Main.stackSplit == 1) Main.mouseRightRelease = true;
     }
 
+    public override void OnEquipmentLoadoutSwitched(int oldLoadoutIndex, int loadoutIndex) {
+        QuickMove.ClearDisplayedChain();
+    }
+
     public override void ProcessTriggers(TriggersSet triggersSet) {
         QuickMove.ProcessTriggers();
         QuickSearch.ProcessTriggers();

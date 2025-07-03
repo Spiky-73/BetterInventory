@@ -12,7 +12,7 @@ using Terraria.ModLoader;
 
 namespace BetterInventory;
 
-[Flags] public enum AllowedItems : byte { None = 0b00, Self = 0b01, Mouse = 0b10}
+[Flags] public enum AllowedItems : byte { None = 0b00, Self = 0b01, Mouse = 0b10 }
 
 public static class Utility {
 
@@ -34,12 +34,12 @@ public static class Utility {
         bool Check(Item i) => item.type == i.type && (allowedItems.HasFlag(AllowedItems.Self) || i != item);
 
         for (int i = InventorySlots.Items.End - 1; i >= InventorySlots.Items.Start; i--) if (Check(player.inventory[i])) return player.inventory[i];
-        for (int i = InventorySlots.Ammo.End-1; i >= InventorySlots.Coins.Start; i--) if (Check(player.inventory[i])) return player.inventory[i];
+        for (int i = InventorySlots.Ammo.End - 1; i >= InventorySlots.Coins.Start; i--) if (Check(player.inventory[i])) return player.inventory[i];
         if (allowedItems.HasFlag(AllowedItems.Mouse) && Check(player.inventory[InventorySlots.Mouse])) return player.inventory[InventorySlots.Mouse];
         return null;
     }
 
-   public static Item? SmallestStack(this Player player, Item item, AllowedItems allowedItems = AllowedItems.None) {
+    public static Item? SmallestStack(this Player player, Item item, AllowedItems allowedItems = AllowedItems.None) {
         Item? min = null;
         void Check(Item i) {
             if (item.type == i.type && (min is null || i.stack < min.stack) && (allowedItems.HasFlag(AllowedItems.Self) || i != item)) min = i;
@@ -69,20 +69,13 @@ public static class Utility {
     }
 
     public static int GetMouseFreeSpace(Item item) => GetFreeSpace(Main.mouseItem, item);
-    public static int GetInventoryFreeSpace(Player player, Item item) {
-        int free = 0;
-        foreach(ModSubInventory inv in InventoryLoader.SubInventories) {
-            if (PlayerHelper.InventoryContexts.Contains(inv.Context)) free += GetFreeSpace(inv.Items(player), item);
-        }
-        return free;
-    }
-    public static int GetFreeSpace(IList<Item> inv, Item item, params int[] ignored) {
-        int free = 0;
-        for (int i = 0; i < inv.Count; i++) {
-            if (Array.IndexOf(ignored, i) == -1) free += GetFreeSpace(inv[i], item);
-        }
-        return free;
-    }
+    public static int GetInventoryFreeSpace(Player player, Item item)
+        => InventoryLoader.GetInventories(player)
+            .Where(si => PlayerHelper.InventoryContexts.Contains(si.Context))
+            .Select(si => GetFreeSpace(si.Items, item))
+            .Sum();
+
+    public static int GetFreeSpace(IList<Item> inv, Item item) => inv.Select(i => GetFreeSpace(i, item)).Sum();
     public static int GetFreeSpace(Item test, Item item) {
         if (test.IsAir) return item.maxStack;
         if (test.type == item.type) return item.maxStack - test.stack;
@@ -133,7 +126,7 @@ public static class Utility {
         if (power > 0) number /= Math.Pow(10, power);
 
         string str = number.ToString();
-        str = str[0..Math.Min(str.Length, Math.Max(1, digits-prefix.Length))];
+        str = str[0..Math.Min(str.Length, Math.Max(1, digits - prefix.Length))];
         if (str[^1] == '.') str = str[0..^1];
         return $"{str}{prefix}";
     }

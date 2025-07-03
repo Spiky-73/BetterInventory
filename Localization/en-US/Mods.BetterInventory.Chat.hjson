@@ -11,7 +11,14 @@ ModName: Better Inventory
 SPIC.ModName: Spy's Infinite Consumables
 Homepage: homepage
 Workshop: Steam Workshop page
-Version: 0.8.1.1
-Summary: The game should no longer freeze when buying a stack of item
+Version: 0.8.2
+Summary: Various features now support loadouts
 Details: ""
-Changelog: - Fixed a infinite loop when buying a stack of items right after having bought it once
+Changelog:
+	'''
+	- Added support for loadouts to Pickup to Previous Slot, Quick Move, Extra Materials and Auto Equip
+	- Added options to include loadouts or not to Auto Equip and Quick Move
+	- Change Quick Move hotkey display to show a count instead of a repeating number for large values
+	- Added Follow Item option to Quick Move
+	- Quick moving will now remember the original menu pages
+	'''

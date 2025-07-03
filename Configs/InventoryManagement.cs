@@ -25,7 +25,7 @@ public sealed class InventoryManagement : ModConfig {
     public static bool StackTrash => !UnloadedInventoryManagement.Value.stackTrash && Instance.stackTrash;
 
     // Compatibility version < v0.6
-    [JsonProperty, DefaultValue(AutoEquipLevel.PrimarySlots)] private AutoEquipLevel autoEquip { set => ConfigHelper.MoveMember(value != AutoEquipLevel.PrimarySlots, _ => smartPickup.Value.autoEquip = value); }
+    [JsonProperty, DefaultValue(AutoEquipLevel.PreferredSlots)] private AutoEquipLevel autoEquip { set => ConfigHelper.MoveMember(value != AutoEquipLevel.PreferredSlots, _ => smartPickup.Value.autoEquip.Key = value); }
     [JsonProperty, DefaultValue(true)] private bool shiftRight { set => ConfigHelper.MoveMember<InventoryManagement>(!value, c => c.betterShiftClick.Key = value); }
 
     public override void OnChanged() {
@@ -55,7 +55,7 @@ public sealed class SmartConsumption {
 
 public sealed class SmartPickup {
     public NestedValue<ItemPickupLevel, PreviousSlot> previousSlot = new(ItemPickupLevel.AllItems);
-    [DefaultValue(AutoEquipLevel.PrimarySlots)] public AutoEquipLevel autoEquip = AutoEquipLevel.PrimarySlots;
+    [DefaultValue(AutoEquipLevel.PreferredSlots)] public NestedValue<AutoEquipLevel, AutoEquip> autoEquip = new(AutoEquipLevel.PreferredSlots);
     [DefaultValue(VoidBagLevel.IfInside)] public VoidBagLevel voidBag = VoidBagLevel.IfInside;
     public Toggle<UpgradeItems> upgradeItems = new(true);
     [DefaultValue(true)] public bool hotbarLast = true;
@@ -79,7 +79,7 @@ public sealed class SmartPickup {
     }); }
 }
 public enum ItemPickupLevel { None, ImportantItems, AllItems }
-public enum AutoEquipLevel { None, PrimarySlots, AnySlot }
+public enum AutoEquipLevel { None, PreferredSlots, AnySlot }
 public enum VoidBagLevel { None, IfInside, Always }
 
 public sealed class PreviousSlot {
@@ -122,6 +122,10 @@ public sealed class IconDisplay : IPreviousDisplay {
     [DefaultValue(0.8f)] public float intensity { get; set; } = 0.8f;
 }
 
+public sealed class AutoEquip {
+    [DefaultValue(false)] public bool inactiveInventories = false;
+}
+
 public sealed class UpgradeItems {
     [CustomModConfigItem(typeof(DictionaryValuesElement))] public Dictionary<PickupUpgraderDefinition, bool> upgraders = [];
     [DefaultValue(true)] public bool importantOnly = true;
@@ -140,9 +144,13 @@ public sealed class QuickMove {
     [Range(0, 3600), DefaultValue(60*3)] public int resetTime = 60*3;
     [DefaultValue(true)] public bool returnToSlot = true;
     public NestedValue<HotkeyDisplayMode, DisplayedHotkeys> displayedHotkeys = new(HotkeyDisplayMode.All);
+    [DefaultValue(true)] public bool followItem = true;
+    [DefaultValue(false)] public bool inactiveInventories = false;
     [DefaultValue(false)] public bool tooltip = false;
 
     public static bool Enabled => InventoryManagement.Instance.quickMove;
+    public static bool InactiveInventories => Value.inactiveInventories;
+    public static bool FollowItem => Value.followItem;
     public static bool DisplayHotkeys => Value.displayedHotkeys != HotkeyDisplayMode.None && !UnloadedInventoryManagement.Value.quickMoveHotkeys;
     public static bool Highlight => DisplayHotkeys && Value.displayedHotkeys.Value.highlightIntensity != 0 && !UnloadedInventoryManagement.Value.quickMoveHighlight;
     public static QuickMove Value => InventoryManagement.Instance.quickMove.Value;

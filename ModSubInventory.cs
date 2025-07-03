@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.Localization;
@@ -6,59 +5,74 @@ using Terraria.ModLoader;
 using Terraria.Audio;
 using Terraria.ID;
 using SpikysLib;
+using Terraria.ModLoader.Core;
 
 namespace BetterInventory;
 
-public readonly record struct Slot(ModSubInventory Inventory, int Index) {
-    public Item Item(Player player) => Inventory.Items(player)[Index];
-    public Item GetItem(Player player, Item item, GetItemSettings settings) => Inventory.GetItem(player, item, Index, settings);
-    public void Focus(Player player) => Inventory.Focus(player, Index);
-    public void OnSlotChange(Player player) => Inventory.OnSlotChange(player, Index);
+public readonly record struct InventorySlot(ModSubInventory Inventory, int Index) {
+    public Item Item {
+        get => Inventory.Items[Index];
+        set => Inventory.Items[Index] = value;
+    }
+    public Item GetItem(Item item, GetItemSettings settings) => Inventory.GetItem(item, Index, settings);
+    public void Focus() => Inventory.Focus(Index);
+    public void Unfocus() => Inventory.Unfocus(Index);
+    public void OnChange() => Inventory.OnSlotChange(Index);
+    public bool Fits(Item item, out IList<InventorySlot> itemsToMove) => Inventory.FitsSlot(item, Index, out itemsToMove);
 }
 
-public abstract class ModSubInventory : ModType, ILocalizedModType {
-    public bool CanBePrimary { get; internal set; }
+public abstract class ModSubInventory : ModType<Player, ModSubInventory>, ILocalizedModType {
+    public bool CanBePreferredInventory { get; internal set; }
 
     public abstract int Context { get; }
     public virtual int? MaxStack => null;
 
     public virtual bool Accepts(Item item) => true;
-    public virtual bool IsPrimaryFor(Item item) => false;
+    public virtual bool IsPreferredInventory(Item item) => false;
 
-    public abstract IList<Item> Items(Player player);
-    public virtual bool FitsSlot(Player player, Item item, int slot, out IList<Slot> itemsToMove) {
-        itemsToMove = Array.Empty<Slot>();
+    public abstract IList<Item> Items { get; }
+    public virtual bool FitsSlot(Item item, int slot, out IList<InventorySlot> itemsToMove) {
+        itemsToMove = [];
         return true;
     }
 
-    public virtual void Focus(Player player, int slot) { }
-    public virtual void OnSlotChange(Player player, int slot) { }
+    protected override void ValidateType() {
+        base.ValidateType();
+        LoaderUtils.MustOverrideTogether(this, i => i.Focus, i => i.Unfocus);
+    }
 
-    public virtual Item GetItem(Player player, Item item, GetItemSettings settings) {
+    public virtual void Focus(int slot) { }
+    public virtual void Unfocus(int slot) { }
+    public virtual void OnSlotChange(int slot) { }
+
+    public virtual Item GetItem(Item item, GetItemSettings settings) {
         if (!Accepts(item)) return item;
-        IList<Item> items = Items(player);
-        for (int i = 0; i < items.Count && !item.IsAir; i++) TryStackItem(player, item, i, settings, items);
+        IList<Item> items = Items;
+        for (int i = 0; i < items.Count && !item.IsAir; i++) TryStackItem(item, i, settings, items);
         Recipe.FindRecipes();
         return item;
     }
 
-    public Item GetItem(Player player, Item item, int slot, GetItemSettings settings) {
+    public Item GetItem(Item item, int slot, GetItemSettings settings) {
         if (!Accepts(item)) return item;
-        TryStackItem(player, item, slot, settings, Items(player));
+        TryStackItem(item, slot, settings, Items);
         Recipe.FindRecipes();
         return item;
     }
 
-    private void TryStackItem(Player player, Item item, int slot, GetItemSettings settings, IList<Item> items) {
-        if (!FitsSlot(player, item, slot, out var itemsToMove) || itemsToMove.Count != 0) return;
+    private void TryStackItem(Item item, int slot, GetItemSettings settings, IList<Item> items) {
+        if (!FitsSlot(item, slot, out var itemsToMove) || itemsToMove.Count != 0) return;
         items[slot] = ItemHelper.MoveInto(items[slot], item, out int transferred, MaxStack);
         if (transferred == 0) return;
         SoundEngine.PlaySound(SoundID.Grab);
-        items[slot].position = player.position;
+        items[slot].position = Entity.position;
         if (!settings.NoText) PopupText.NewText(PopupTextContext.ItemPickupToVoidContainer, items[slot], transferred, false, settings.LongText);
-        OnSlotChange(player, slot);
+        OnSlotChange(slot);
         return;
     }
+
+    public virtual IList<ModSubInventory> GetInventories(Player player) => [NewInstance(player)];
+    public virtual IList<ModSubInventory> GetActiveInventories(Player player) => GetInventories(player);
 
     public virtual int ComparePositionTo(ModSubInventory other) => 0;
 
@@ -71,4 +85,9 @@ public abstract class ModSubInventory : ModType, ILocalizedModType {
 
     public string LocalizationCategory => "SubInventories";
     public virtual LocalizedText DisplayName => this.GetLocalization("DisplayName");
+
+    protected sealed override Player CreateTemplateEntity() => new();
+
+    public override bool Equals(object? obj) => obj is ModSubInventory subInventory && FullName == subInventory.FullName;
+    public override int GetHashCode() => FullName.GetHashCode();
 }

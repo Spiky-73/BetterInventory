@@ -75,18 +75,25 @@ public sealed class Crafting : ModPlayer {
         List<Item> materials = [];
         if (Configs.MoreMaterials.Mouse && Main.myPlayer == Player.whoAmI) materials.Add(Main.mouseItem);
         if (Configs.MoreMaterials.Equipment) {
-            materials.AddRange(Player.armor);
-            materials.AddRange(Player.dye);
-            if(Configs.MoreMaterials.Value.equipment.Value.allLoadouts) {
-                for (int i = 0; i < Player.Loadouts.Length; i++) {
-                    if (i == Player.CurrentLoadoutIndex) continue;
-                    materials.AddRange(Player.Loadouts[i].Armor);
-                    materials.AddRange(Player.Loadouts[i].Dye);
-                }
+            void AddSubInventory(ModSubInventory template) {
+                var inventories = Configs.MoreMaterials.Value.equipment.Value.allLoadouts ? template.GetInventories(Player) : template.GetActiveInventories(Player);
+                foreach (var subInventory in inventories) materials.AddRange(subInventory.Items);
             }
-            materials.AddRange(AAccessories.ModdedAccessories(Player));
-            materials.AddRange(Player.miscEquips);
-            materials.AddRange(Player.miscDyes);
+
+            AddSubInventory(ModContent.GetInstance<HeadArmor>());
+            AddSubInventory(ModContent.GetInstance<BodyArmor>());
+            AddSubInventory(ModContent.GetInstance<LegArmor>());
+            AddSubInventory(ModContent.GetInstance<HeadVanity>());
+            AddSubInventory(ModContent.GetInstance<BodyVanity>());
+            AddSubInventory(ModContent.GetInstance<LegVanity>());
+            AddSubInventory(ModContent.GetInstance<Accessories>());
+            AddSubInventory(ModContent.GetInstance<VanityAccessories>());
+            AddSubInventory(ModContent.GetInstance<SharedAccessories>());
+            AddSubInventory(ModContent.GetInstance<SharedVanityAccessories>());
+            AddSubInventory(ModContent.GetInstance<ArmorDyes>());
+            AddSubInventory(ModContent.GetInstance<AccessoryDyes>());
+            AddSubInventory(ModContent.GetInstance<SharedAccessoryDyes>());
+            AddSubInventory(ModContent.GetInstance<EquipmentDyes>());
         }
         return materials;
     }

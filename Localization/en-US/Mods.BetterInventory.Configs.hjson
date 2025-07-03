@@ -297,7 +297,7 @@ SmartPickup: {
 		Tooltip:
 			'''
 			Automatically equips items such as Armors, Accessories or Equipment
-			{$Mods.BetterInventory.Configs.AutoEquipLevel.PrimarySlots.Label}: Equipment go to their default slots if available
+			{$Mods.BetterInventory.Configs.AutoEquipLevel.Preferred.Label}: Equipment go to their default slots if available
 			{$Mods.BetterInventory.Configs.AutoEquipLevel.AnySlot.Label}: Equipment go to any slot they can go in (includes Dyes). Armors and Accessories can go to social slots.
 			'''
 	}
@@ -338,8 +338,18 @@ ItemPickupLevel: {
 AutoEquipLevel: {
 	Tooltip: ""
 	None.Label: Off
-	PrimarySlots.Label: Primary Slots
+	Preferred.Label: Preferred Slots
 	AnySlot.Label: Any Slot
+	PreferredSlots.Label: Preferred Slots
+}
+
+AutoEquip: {
+	Tooltip: ""
+
+	inactiveInventories: {
+		Label: Equip to Inactive Inventories
+		Tooltip: Auto equip items to other loadouts
+	}
 }
 
 VoidBagLevel: {
@@ -498,6 +508,16 @@ QuickMove: {
 			{$Mods.BetterInventory.Configs.HotkeyDisplayMode.Next.Label}: Next slot in the chain
 			{$Mods.BetterInventory.Configs.HotkeyDisplayMode.All.Label}: All slots in the chain
 			'''
+	}
+
+	followItem: {
+		Label: Follow Item
+		Tooltip: Change the menus of the inventory to keep the moved item visible
+	}
+
+	inactiveInventories: {
+		Label: Move to Inactive Inventories
+		Tooltip: Includes slots from others loadouts when moving times
 	}
 
 	tooltip: {
