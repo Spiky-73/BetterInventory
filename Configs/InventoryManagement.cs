@@ -144,7 +144,7 @@ public sealed class QuickMove {
     [Range(0, 3600), DefaultValue(60*3)] public int resetTime = 60*3;
     [DefaultValue(true)] public bool returnToSlot = true;
     public NestedValue<HotkeyDisplayMode, DisplayedHotkeys> displayedHotkeys = new(HotkeyDisplayMode.All);
-    [DefaultValue(false)] public bool followItem = true;
+    [DefaultValue(true)] public bool followItem = true;
     [DefaultValue(false)] public bool inactiveInventories = false;
     [DefaultValue(false)] public bool tooltip = false;
 

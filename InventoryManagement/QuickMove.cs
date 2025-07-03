@@ -100,6 +100,10 @@ public sealed class QuickMove : ILoadable {
         if (s_moveChain.Count != 0) ContinueChain();
     }
     private static void SetupChain(InventorySlot source, int targetKey) {
+        if (source.Item.IsAir) {
+            s_moveChain = [];
+            return;
+        }
         s_moveKey = targetKey;
         s_moveIndex = 0;
         s_moveChain = [
