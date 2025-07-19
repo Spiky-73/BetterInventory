@@ -14,3 +14,10 @@ FramesToSec: 60 = 1s
 BagContent: Contains the following items:
 ScrollTooltip: Lines {0}-{1} ({2}), scroll to view the rest
 Unmet: unmet
+
+RecipeSort: {
+	ByRecipeId: No Sorting
+	ByCreateItemName: Sort by Name
+	ByCreateItemValue: Sort by Value
+	ByCreateItemCreativeId: Journey Catalogue Sort
+}

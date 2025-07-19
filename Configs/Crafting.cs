@@ -9,6 +9,7 @@ public sealed class Crafting : ModConfig {
     public Toggle<FixedUI> fixedUI = new(true);
     public Toggle<RecipeSearchBar> recipeSearchBar = new(true);
     public Toggle<RecipeFilters> recipeFilters = new(true);
+    public bool recipeSort = true;
     public Toggle<CraftOnList> craftOnList = new(true);
     public Toggle<MoreMaterials> moreMaterials = new(true);
     public Toggle<AvailableMaterials> availableMaterials = new(true);
@@ -16,7 +17,9 @@ public sealed class Crafting : ModConfig {
 
     [JsonProperty, DefaultValue(true)] private bool mouseMaterial { set => ConfigHelper.MoveMember(!value, _ => moreMaterials.Key = value); }
 
-    public static bool RecipeUI => Instance.recipeSearchBar || Instance.recipeFilters;
+
+    public static bool RecipeSort => Instance.recipeSort && !UnloadedCrafting.Value.recipeSort;
+    public static bool RecipeUI => Instance.recipeSearchBar || Instance.recipeFilters || Instance.recipeSort;
     public static Crafting Instance = null!;
 
     public override void OnChanged() => global::BetterInventory.Crafting.RecipeUI.RebuildUI();

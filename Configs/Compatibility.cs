@@ -38,6 +38,7 @@ public sealed class Compatibility : ModConfig {
         FixedUI.Value.focusButton = false;
         Crafting.Instance.recipeFilters.Key = false;
         Crafting.Instance.recipeSearchBar.Key = false;
+        Crafting.Instance.recipeSort = false;
         Crafting.Instance.craftOnList.Key = false;
         AvailableMaterials.Value.itemSlot = false;
         Crafting.Instance.Save();
@@ -89,11 +90,12 @@ public sealed class UnloadedCrafting {
     public bool noRecListClose;
     public bool recipeFilters;
     public bool recipeSearchBar;
+    public bool recipeSort;
     public bool craftOnList;
     public bool availableMaterialsItemSlot;
 
     [JsonIgnore] public bool RecipeListUI { set { recipeCount = focusButton = value; } }
-    [JsonIgnore] public bool RecipeUI { set { recipeFilters = recipeSearchBar = value; } }
+    [JsonIgnore] public bool RecipeUI { set { recipeFilters = recipeSearchBar = recipeSort = value; } }
 
     public static UnloadedCrafting Value => Compatibility.Instance.unloadedCrafting;
 }

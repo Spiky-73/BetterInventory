@@ -175,7 +175,7 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public override void LoadData(TagCompound tag) {
-        if (tag.TryGet(CraftInMenuPlayer.VisibilityTag, out VisibilityFilters visibility)) { // Compatibility version < v0.7.1
+        if (tag.TryGet(CraftInMenuPlayer.VisibilityTag, out VisibilityFilters visibility)) { // Compatibility version < v0.8
             Player.GetModPlayer<CraftInMenuPlayer>().visibility = (RecipeVisibility)visibility.Visibility;
             Player.GetModPlayer<FavoritedRecipesPlayer>().favoritedRecipes.AddRange(visibility.FavoritedRecipes);
             Player.GetModPlayer<FavoritedRecipesPlayer>().blacklistedRecipes.AddRange(visibility.BlacklistedRecipes);
@@ -183,11 +183,11 @@ public sealed class BetterPlayer : ModPlayer {
             Player.GetModPlayer<UnknownRecipesPlayer>().ownedItems.AddRange(visibility.OwnedItems);
             Player.GetModPlayer<UnknownRecipesPlayer>().unloadedItems.AddRange(visibility.UnloadedItems);
         }
-        if (tag.TryGet(GuideTilePlayer.GuideTileTag, out Item tile)) { // Compatibility version < v0.7.1
+        if (tag.TryGet(GuideTilePlayer.GuideTileTag, out Item tile)) { // Compatibility version < v0.8
             Player.GetModPlayer<GuideTilePlayer>()._tempGuideTile = tile;
         }
         
-        if (tag.TryGet("recipes", out RecipeFilters recipe)) {
+        if (tag.TryGet("recipes", out RecipeFilters recipe)) { // Compatibility version < v0.8
             Player.GetModPlayer<RecipeUIPlayer>().filters = recipe.filters;
         }
         if (Configs.InventoryManagement.FavoriteInBanks && tag.TryGet(FavoritedInBanksTag, out FavoritedInBanks favorited)) favorited.Apply(Player);

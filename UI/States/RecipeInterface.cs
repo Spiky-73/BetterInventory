@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 using SpikysLib.UI.Elements;
 using Terraria;
 using Terraria.Audio;
+using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.Localization;
@@ -14,8 +15,12 @@ using Terraria.UI;
 
 namespace BetterInventory.UI.States;
 
-public sealed class RecipeFilters : UIState {
+public sealed class RecipeInterface : UIState {
     public UIFlexList container = null!;
+    public UIFlexGrid toggleIcons = null!;
+    public UIImage craftingToggle = null!;
+
+    public UIRecipeSortIcon sortToggle = null!;
     public UIPanel searchPanel = null!;
     public UISearchBar searchBar = null!;
     public UIImageButton searchCancel = null!;
@@ -23,18 +28,34 @@ public sealed class RecipeFilters : UIState {
 
     public sealed override void OnInitialize() {
         container = new() { ListPadding = 6 };
+        toggleIcons = new(2) { ListPadding = 4, FlexHeight = false, Height = new(30, 0) };  
+        craftingToggle = new(TextureAssets.CraftToggle[0]) { Color=Color.Transparent }; // Take to space of the Crafting toggle button
+
+        InitSortToggle();
         InitSearchBar();
         InitFilters();
 
-        RebuildList();
         Append(container);
+        Rebuild();
     }
 
-    public void RebuildList () {
+    public void Rebuild () {
         container.Clear();
+        container.Add(toggleIcons);
 
+
+        toggleIcons.Clear();
+        toggleIcons.Add(craftingToggle);
+        if (Configs.Crafting.RecipeSort) {
+            RebuildSortToggle();
+            toggleIcons.Add(sortToggle);
+        }
         if (Configs.RecipeSearchBar.Enabled) container.Add(searchPanel);
-        if (Configs.RecipeFilters.Enabled) container.Add(filters);
+        if (Configs.RecipeFilters.Enabled) {
+            RebuildFilterGrid();
+            container.Add(filters);
+        }
+        Recalculate();
     }
 
     public override void Update(GameTime gameTime) {
@@ -44,8 +65,7 @@ public sealed class RecipeFilters : UIState {
 
     protected override void DrawSelf(SpriteBatch spriteBatch) {
         base.DrawSelf(spriteBatch);
-        if (searchPanel.IsMouseHovering) Main.LocalPlayer.mouseInterface = true;
-        if (filters.IsMouseHovering) Main.LocalPlayer.mouseInterface = true;
+        if (searchPanel.IsMouseHovering || filters.IsMouseHovering || toggleIcons.IsMouseHovering) Main.LocalPlayer.mouseInterface = true;
     }
 
     public override void RecalculateChildren() {
@@ -55,6 +75,30 @@ public sealed class RecipeFilters : UIState {
             if (Configs.RecipeSearchBar.Value.expand && Main.recBigList) searchPanel.Width.Pixels = 220;
             else searchPanel.Width.Pixels = Math.Max(filters.Width.Pixels, Configs.RecipeSearchBar.Value.minWidth);
         }
+    }
+
+    private static void InitSortToggle() {
+    }
+
+    private void RebuildSortToggle() {
+        void OnSortChanged() {
+            sortToggle.SortStep = RecipeUI.Sorter.Steps[RecipeUI.Sorter.GetPrioritizedStepIndex()];
+            Recipe.FindRecipes();
+            SoundEngine.PlaySound(SoundID.MenuTick);
+        }
+        sortToggle = new();
+        sortToggle.OnLeftClick += (_, _) => {
+            int prioritizedStep = RecipeUI.Sorter.GetPrioritizedStepIndex();
+            RecipeUI.Sorter.SetPrioritizedStepIndex((prioritizedStep + 1) % RecipeUI.Sorter.Steps.Count);
+            OnSortChanged();
+        };
+        sortToggle.OnRightClick += (_, _) => {
+            RecipeUI.Sorter.SetPrioritizedStepIndex(0);
+            OnSortChanged();
+        };
+
+        if (RecipeUI.Sorter.Steps.Count == 0) return;
+        sortToggle.SortStep = RecipeUI.Sorter.Steps[RecipeUI.Sorter.GetPrioritizedStepIndex()];
     }
 
     private void InitFilters() {
@@ -90,10 +134,14 @@ public sealed class RecipeFilters : UIState {
             };
             filters.Add(icon);
         }
-        Recalculate();
     }
 
     private void InitSearchBar() {
+        static void OnSearchContentChange(string? content) {
+            if (Main.gameMenu) return;
+            RecipeUI.SearchFilter.SetSearch(content);
+            Recipe.FindRecipes();
+        }
         searchPanel = new() {
             Height = new StyleDimension(24f, 0),
             BackgroundColor = new Color(35, 40, 83),
@@ -133,11 +181,5 @@ public sealed class RecipeFilters : UIState {
         };
         searchPanel.Append(searchCancel);
         RecipeList.OnSearchBarInit(searchBar);
-    }
-
-    private void OnSearchContentChange(string? content) {
-        if (Main.gameMenu) return;
-        RecipeUI.Filterer.SetSearchFilter(content);
-        Recipe.FindRecipes();
     }
 }

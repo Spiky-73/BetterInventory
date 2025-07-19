@@ -16,7 +16,7 @@ public sealed class ItemFilterWrapper : IRecipeFilter {
         Filter = filter;
         Index = index;
     }
-    public bool FitsFilter(RecipeListEntry entry) => Filter.FitsFilter(entry.CreateItem);
+    public bool FitsFilter(RecipeListEntry entry) => Filter.FitsFilter(entry.createItem);
     public string GetDisplayNameKey() => Filter.GetDisplayNameKey();
     public UIElement GetImage() => new UIImageFramed(RecipeUI.recipeFilters, GetSourceFrame());
     public UIElement GetImageGray() => new UIImageFramed(RecipeUI.recipeFiltersGray, GetSourceFrame());
@@ -27,7 +27,7 @@ public sealed class ItemSearchFilterWrapper : IRecipeFilter, ISearchFilter<Recip
     public ItemFilters.BySearch Filter { get; } = new ItemFilters.BySearch();
 
     public void SetSearch(string searchText) => Filter.SetSearch(searchText);
-    public bool FitsFilter(RecipeListEntry entry) => Filter.FitsFilter(entry.CreateItem);
+    public bool FitsFilter(RecipeListEntry entry) => Filter.FitsFilter(entry.createItem);
     public string GetDisplayNameKey() => Filter.GetDisplayNameKey();
 
     public UIElement GetImage() => new UIImageFramed(RecipeUI.recipeFilters, GetSourceFrame());
@@ -45,7 +45,7 @@ public sealed class RecipeMiscFallback : IRecipeFilter {
         }
     }
 
-    public bool FitsFilter(RecipeListEntry entry) => _fitsFilterByRecipeIndex.IndexInRange(entry.Index) && _fitsFilterByRecipeIndex[entry.Index];
+    public bool FitsFilter(RecipeListEntry entry) => _fitsFilterByRecipeIndex.IndexInRange(entry.RecipeIndex) && _fitsFilterByRecipeIndex[entry.RecipeIndex];
 
     public string GetDisplayNameKey() => "CreativePowers.TabMisc";
 

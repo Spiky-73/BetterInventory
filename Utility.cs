@@ -8,6 +8,7 @@ using SpikysLib;
 using SpikysLib.Constants;
 using SpikysLib.IL;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ModLoader;
 
 namespace BetterInventory;
@@ -15,6 +16,13 @@ namespace BetterInventory;
 [Flags] public enum AllowedItems : byte { None = 0b00, Self = 0b01, Mouse = 0b10 }
 
 public static class Utility {
+
+    public static int? CompareHandleNullable<T>(T? x, T? y) {
+        if (x is null && y is null) return 0;
+        if (x is not null && y is null) return 1;
+        if (x is null && y is not null) return -1;
+        return null;
+    }
 
     public static void ClearMouseText() {
         Main.HoverItem = new();
@@ -129,6 +137,10 @@ public static class Utility {
         str = str[0..Math.Min(str.Length, Math.Max(1, digits - prefix.Length))];
         if (str[^1] == '.') str = str[0..^1];
         return $"{str}{prefix}";
+    }
+
+    public static int GetPrioritizedStepIndex<TEntryType, TStepType>(this EntrySorter<TEntryType, TStepType> sorter) where TEntryType : new() where TStepType : IEntrySortStep<TEntryType> {
+        return Reflection.EntrySorter<TEntryType, TStepType>._prioritizedStep.GetValue(sorter);
     }
 
     public static readonly string[] MetricPrefixes = [string.Empty, "k", "M", "G", "T", "P"];

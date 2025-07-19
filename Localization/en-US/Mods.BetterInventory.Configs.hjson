@@ -48,6 +48,11 @@ Crafting: {
 		Label: "[i:398] {$Mods.BetterInventory.Configs.Crafting.recipeTooltip.Name}"
 		Tooltip: Shows recipes' materials and required tiles in their tooltip
 	}
+
+	recipeSort: {
+		Label: "[i:4319] Recipe Sorting"
+		Tooltip: Adds a button to sort recipes
+	}
 }
 
 FixedUI: {
@@ -1149,6 +1154,11 @@ UnloadedCrafting: {
 	availableMaterialsItemSlot: {
 		Label: "{$Mods.BetterInventory.Configs.Crafting.availableMaterials.Label} @ {$Mods.BetterInventory.Configs.AvailableMaterials.itemSlot.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	recipeSort: {
+		Label: recipe Sort
+		Tooltip: ""
 	}
 }
 
