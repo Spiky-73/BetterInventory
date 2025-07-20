@@ -36,6 +36,9 @@ public sealed class Compatibility : ModConfig {
         FixedUI.Value.noRecStartOffset = false;
         FixedUI.Value.noRecListClose = false;
         FixedUI.Value.focusButton = false;
+        ScrollDirection.Value.recipesUnpaused = false;
+        ScrollDirection.Value.recipesPaused = false;
+        ScrollDirection.Value.accessories = false;
         Crafting.Instance.recipeFilters.Key = false;
         Crafting.Instance.recipeSearchBar.Key = false;
         Crafting.Instance.recipeSort = false;
@@ -93,6 +96,9 @@ public sealed class UnloadedCrafting {
     public bool recipeSort;
     public bool craftOnList;
     public bool availableMaterialsItemSlot;
+    public bool scrollDirectionRecipesUnpaused;
+    public bool scrollDirectionRecipesPaused;
+    public bool scrollDirectionAccessories;
 
     [JsonIgnore] public bool RecipeListUI { set { recipeCount = focusButton = value; } }
     [JsonIgnore] public bool RecipeUI { set { recipeFilters = recipeSearchBar = recipeSort = value; } }

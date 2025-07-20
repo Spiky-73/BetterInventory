@@ -34,6 +34,7 @@ public static class ModAccessorySlotPlayer {
 public static class AccessorySlotLoader {
     public static readonly Method<TAccLoader, object?> DrawAccSlots = new(nameof(TAccLoader.DrawAccSlots), typeof(int));
     public static readonly Method<TAccLoader, object?> DrawSlotTexture = new(nameof(DrawSlotTexture), typeof(Texture2D), typeof(TVector2), typeof(Rectangle), typeof(TColor), typeof(float), typeof(TVector2), typeof(float), typeof(SpriteEffects), typeof(float), typeof(int), typeof(int));
+    public static readonly Method<TAccLoader, object?> DrawScrollbar = new(nameof(DrawScrollbar), typeof(int), typeof(int), typeof(int));
 }
 
 public static class BuilderToggleLoader {

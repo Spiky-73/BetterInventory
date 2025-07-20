@@ -106,6 +106,11 @@ FixedUI: {
 		Label: Focus Selected Recipe Button
 		Tooltip: Add a button the focus the recipe list on the selected recipe
 	}
+
+	scrollDirection: {
+		Label: Fix Scroll Direction
+		Tooltip: Fixes the scroll of some elements of the interface so that scrolling down always goes down
+	}
 }
 
 FastScroll: {
@@ -114,6 +119,25 @@ FastScroll: {
 	listScroll: {
 		Label: Scroll in Recipe List
 		Tooltip: Replaces the instant scroll with an extremely fast one when the recipe list is open
+	}
+}
+
+ScrollDirection: {
+	Tooltip: ""
+
+	recipesUnpaused: {
+		Label: Recipes list
+		Tooltip: Fixes the scroll direction of the recipe list
+	}
+
+	recipesPaused: {
+		Label: Recipe List while Paused
+		Tooltip: Did you know that the recipe list did not scroll the same way with Autopause On ?
+	}
+
+	accessories: {
+		Label: accessories
+		Tooltip: Fixes the scroll direction of accessories
 	}
 }
 
@@ -1157,8 +1181,23 @@ UnloadedCrafting: {
 	}
 
 	recipeSort: {
-		Label: recipe Sort
-		Tooltip: ""
+		Label: "{$Mods.BetterInventory.Configs.Crafting.recipeSort.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	scrollDirectionRecipesUnpaused: {
+		Label: "{$Mods.BetterInventory.Configs.Crafting.fixedUI.Label} @ {$Mods.BetterInventory.Configs.FixedUI.scrollDirection.Label} @ {$Mods.BetterInventory.Configs.ScrollDirection.recipesUnpaused.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	scrollDirectionRecipesPaused: {
+		Label: "{$Mods.BetterInventory.Configs.Crafting.fixedUI.Label} @ {$Mods.BetterInventory.Configs.FixedUI.scrollDirection.Label} @ {$Mods.BetterInventory.Configs.ScrollDirection.recipesPaused.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	scrollDirectionAccessories: {
+		Label: "{$Mods.BetterInventory.Configs.Crafting.fixedUI.Label} @ {$Mods.BetterInventory.Configs.FixedUI.scrollDirection.Label} @ {$Mods.BetterInventory.Configs.ScrollDirection.accessories.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 }
 

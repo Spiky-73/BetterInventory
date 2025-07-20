@@ -30,6 +30,15 @@ public sealed class FixedUI : ILoadable {
         };
         On_Main.DrawInterface_Resources_ClearBuffs += HookRememberListPosition;
         On_Recipe.ClearAvailableRecipes += HookClearAvailableRecipes;
+        IL_Player.Update += static il => {
+            if (!il.ApplyTo(ILFixRecipeScrollUpdate, Configs.ScrollDirection.RecipesUnpaused)) Configs.UnloadedCrafting.Value.scrollDirectionRecipesUnpaused = true;
+        };
+        IL_Main.DoUpdate_WhilePaused += static il => {
+            if (!il.ApplyTo(ILFixRecipeScrollWhilePaused, Configs.ScrollDirection.RecipesPaused)) Configs.UnloadedCrafting.Value.scrollDirectionRecipesPaused = true;
+        };
+        MonoModHooks.Modify(Reflection.AccessorySlotLoader.DrawScrollbar, static il => {
+            if (!il.ApplyTo(ILFixAccessoryScroll, Configs.ScrollDirection.Accessories)) Configs.UnloadedCrafting.Value.scrollDirectionAccessories = true;
+        });
 
         _craftCenterButton = mod.Assets.Request<Texture2D>($"Assets/RecCenter");
     }
@@ -239,7 +248,7 @@ public sealed class FixedUI : ILoadable {
         //     else {
         //         int num73 = 94;
         //         int num74 = 450 + num51;
-        //         if (++false && Main.InGuideCraftMenu) num74 -= 150;
+        //         if (++[false] && Main.InGuideCraftMenu) num74 -= 150;
         cursor.GotoNext(i => i.MatchLdsfld(Reflection.TextureAssets.CraftToggle));
         cursor.GotoPrev(MoveType.After, i => i.MatchLdsfld(Reflection.Main.numAvailableRecipes));
         cursor.EmitDelegate((int numAvailableRecipes) => Configs.FixedUI.NoRecListClose && numAvailableRecipes == 0 ? 1 : numAvailableRecipes);
@@ -280,6 +289,33 @@ public sealed class FixedUI : ILoadable {
         if (!Configs.FixedUI.RememberListPosition || !_focusedVisible) return;
         Main.recStart = Math.Max(0, SpikysLib.MathHelper.Snap(Main.focusRecipe, UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow, SpikysLib.MathHelper.SnapMode.Floor)
             - _focusedRecipeLine * UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow);
+    }
+
+    private static void ILFixRecipeScrollUpdate(ILContext il) {
+        ILCursor cursor = new(il);
+
+        // int num8 = Player.GetMouseScrollDelta();
+        cursor.GotoNextLoc(out var offset, i => i.Previous.MatchCall(Reflection.Player.GetMouseScrollDelta), 41);
+        // if (Main.recBigList) ...
+        // else {
+        //     Main.focusRecipe += ++[-1 *] num8;
+        cursor.GotoNext(i => i.MatchStsfld(Reflection.Main.focusRecipe));
+        cursor.GotoPrev(MoveType.After, i => i.MatchLdloc(offset));
+        cursor.EmitDelegate((int offset) => Configs.ScrollDirection.RecipesUnpaused  ? -offset : offset);
+        // }
+    }
+    private static void ILFixRecipeScrollWhilePaused(ILContext il) {
+        ILCursor cursor = new(il);
+
+        // int num = ++[-1 *] PlayerInput.ScrollWheelDelta / 120;
+        cursor.GotoNext(MoveType.After, i => i.MatchLdsfld(Reflection.PlayerInput.ScrollWheelDelta));
+        cursor.EmitDelegate((int ScrollWheelDelta) => Configs.ScrollDirection.RecipesUnpaused ? -ScrollWheelDelta : ScrollWheelDelta);
+    }
+    private static void ILFixAccessoryScroll(ILContext il) {
+        ILCursor cursor = new(il);
+        // int scrollDelta = AccessorySlotLoader.ModSlotPlayer(AccessorySlotLoader.Player).scrollbarSlotPosition + ++[-1 *] PlayerInput.ScrollWheelDelta / 120;
+        cursor.GotoNext(MoveType.After, i => i.MatchLdsfld(Reflection.PlayerInput.ScrollWheelDelta));
+        cursor.EmitDelegate((int ScrollWheelDelta) => Configs.ScrollDirection.Accessories ? -ScrollWheelDelta : ScrollWheelDelta);
     }
 
     private static bool _skipFollow;

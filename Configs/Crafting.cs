@@ -37,6 +37,7 @@ public sealed class FixedUI {
     [DefaultValue(true)] public bool noRecListClose = true;
     [DefaultValue(true)] public bool rememberListPosition = true;
     [DefaultValue(true)] public bool focusButton = true;
+    [DefaultValue(true)] public Toggle<ScrollDirection> scrollDirection = new(true);
 
     public static bool Enabled => Crafting.Instance.fixedUI;
     public static bool FastScroll => Enabled && Value.fastScroll && !UnloadedCrafting.Value.fastScroll;
@@ -48,6 +49,7 @@ public sealed class FixedUI {
     public static bool NoRecListClose => Enabled && Value.noRecListClose && !UnloadedCrafting.Value.noRecListClose;
     public static bool RememberListPosition => Enabled && Value.rememberListPosition;
     public static bool FocusButton => Enabled && Value.focusButton && !UnloadedCrafting.Value.focusButton;
+    public static bool ScrollDirection => Enabled && Value.scrollDirection;
     public static FixedUI Value => Crafting.Instance.fixedUI.Value;
 
     public static bool RecipeListUI => RecipeCount || FocusButton;
@@ -60,6 +62,16 @@ public sealed class FastScroll {
     [DefaultValue(true)] public bool listScroll = true;
     
     public static FastScroll Value => Crafting.Instance.fixedUI.Value.fastScroll.Value;
+}
+public sealed class ScrollDirection {
+    [DefaultValue(true)] public bool recipesUnpaused = true;
+    [DefaultValue(true)] public bool recipesPaused = true;
+    [DefaultValue(true)] public bool accessories = true;
+
+    public static bool RecipesUnpaused => FixedUI.ScrollDirection && Value.recipesUnpaused && !UnloadedCrafting.Value.scrollDirectionRecipesUnpaused;
+    public static bool RecipesPaused => FixedUI.ScrollDirection && Value.recipesPaused && !UnloadedCrafting.Value.scrollDirectionRecipesPaused;
+    public static bool Accessories => FixedUI.ScrollDirection && Value.accessories && !UnloadedCrafting.Value.scrollDirectionAccessories;
+    public static ScrollDirection Value => Crafting.Instance.fixedUI.Value.scrollDirection.Value;
 }
 
 public sealed class RecipeFilters {

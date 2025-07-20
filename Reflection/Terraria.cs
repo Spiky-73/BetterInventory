@@ -47,6 +47,7 @@ public static class Player {
     public static readonly Method<TPlayer, bool> GetItem_FillEmptyInventorySlot = new(nameof(GetItem_FillEmptyInventorySlot), typeof(int), typeof(TItem), typeof(GetItemSettings), typeof(TItem), typeof(int));
     public static readonly Method<TPlayer, bool> GetItem_VoidVault = new(nameof(GetItem_VoidVault), typeof(int), typeof(TItem[]), typeof(TItem), typeof(GetItemSettings), typeof(TItem));
     public static readonly Method<TPlayer, bool> HasItem = new(nameof(TPlayer.HasItem), typeof(int));
+    public static readonly StaticMethod<int> GetMouseScrollDelta = new(typeof(TPlayer), nameof(TPlayer.GetMouseScrollDelta));
 }
 
 public static class Item {
