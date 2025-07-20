@@ -1,38 +1,38 @@
 # Better Inventory changelog
 
-## 0.8.2
+## v0.8.2
 - Added support for loadouts to Pickup to Previous Slot, Quick Move, Extra Materials and Auto Equip
 - Added options to include loadouts or not to Auto Equip and Quick Move
 - Change Quick Move hotkey display to show a count instead of a repeating number for large values
 - Added Follow Item option to Quick Move
 - Quick moving will now remember the original menu pages
 
-## 0.8.1.1
+## v0.8.1.1
 - Fixed a infinite loop when buying a stack of items right after having bought it once
 
-## 0.8.1
+## v0.8.1
 - Added Hide Blacklisted Recipe to Favorited Recipes
 - Added Follow Recipe on Favorite to Favorited Recipes
 - Change Craft Stack's tooltip default state to on
 - Fixed some features not been Unloaded in the right conditions
 - Fixed labels in the Reporting Bugs config
 
-## 0.8.0.4
+## v0.8.0.4
 - Fixed PostAddRecipes used instead of PostSetupRecipes
 - Fixed Typos in ReportingBugs
 
-## 0.8.0.3
+## v0.8.0.3
 - Ported to tML v2025.01
 - Fixed Craft Stack not able to load
 
-## 0.8.0.2
+## v0.8.0.2
 - Fixed Craft Stack not properly applying material reductions
 
-## 0.8.0.1
+## v0.8.0.1
 - Fixed Recipe filters not directly visible when loading a world
 - Updated Spiky's Lib dependency to v1.3.1.1
 
-## 0.8
+## v0.8
 - Added Equipped items to available materials
 - Added Recipe in Tooltip
 - Added Remember Recipe List position
@@ -44,7 +44,7 @@
 - Reworked Recipes Filters and Available Recipes
 - Updated Spiky's Lib dependency to v1.3.1
 
-## 0.7
+## v0.7
 - Added an options to keep swapped items favorited
 - Added the number of visible recipes to the recipe list
 - Added a recipe search bar
