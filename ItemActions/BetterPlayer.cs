@@ -102,19 +102,13 @@ public sealed class BetterPlayer : ModPlayer {
         if (Configs.ItemActions.FastContainerOpening && Main.mouseRight && Main.stackSplit == 1) Main.mouseRightRelease = true;
     }
 
-    public override void OnEquipmentLoadoutSwitched(int oldLoadoutIndex, int loadoutIndex) {
-        QuickMove.ClearDisplayedChain();
-    }
-
     public override void ProcessTriggers(TriggersSet triggersSet) {
-        QuickMove.ProcessTriggers();
         QuickSearch.ProcessTriggers();
         if (Configs.ItemActions.FavoritedBuff && FavoritedBuffKb.JustPressed) FavoritedBuff(Player);
         if (Configs.ItemActions.BuilderAccs) BuilderKeys();
     }
 
     public override bool HoverSlot(Item[] inventory, int context, int slot) {
-        QuickMove.HoverItem(inventory, context, slot);
         if (PlaceholderItem.OverrideHover(inventory, context, slot)) return true;
         if (ClickOverrides.OverrideHover(inventory, context, slot)) return true;
         return false;

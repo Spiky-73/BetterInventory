@@ -68,7 +68,6 @@ public sealed class SmartConsumptionItem : GlobalItem {
 
     public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
         AddWeaponConsumeLine(item, tooltips);
-        QuickMove.AddMoveChainLine(item, tooltips);
         ClickOverrides.AddCraftStackLine(item, tooltips);
     }
 
