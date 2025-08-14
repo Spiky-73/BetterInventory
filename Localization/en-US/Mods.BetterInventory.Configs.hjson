@@ -312,7 +312,7 @@ SmartPickup: {
 	Tooltip: ""
 
 	refillMouse: {
-		Label: Refill Mouse 	Item
+		Label: Refill Mouse Item
 		Tooltip:
 			'''
 			Pickup up items will refill the mouse item if possible
