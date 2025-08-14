@@ -54,6 +54,7 @@ public sealed class SmartConsumption {
 }
 
 public sealed class SmartPickup {
+    public bool refillMouse = true;
     public NestedValue<ItemPickupLevel, PreviousSlot> previousSlot = new(ItemPickupLevel.AllItems);
     [DefaultValue(AutoEquipLevel.PreferredSlots)] public NestedValue<AutoEquipLevel, AutoEquip> autoEquip = new(AutoEquipLevel.PreferredSlots);
     [DefaultValue(VoidBagLevel.IfInside)] public VoidBagLevel voidBag = VoidBagLevel.IfInside;
@@ -62,12 +63,13 @@ public sealed class SmartPickup {
     [DefaultValue(true)] public bool fixSlot = true;
 
     public static bool Enabled => InventoryManagement.Instance.smartPickup.Key;
+    public static bool RefillMouse => !UnloadedInventoryManagement.Value.pickupOverrideSlot && Enabled && Value.refillMouse;
     public static bool AutoEquip => !UnloadedInventoryManagement.Value.pickupDedicatedSlot && Enabled && Value.autoEquip > AutoEquipLevel.None;
     public static bool VoidBag => !UnloadedInventoryManagement.Value.pickupDedicatedSlot && Enabled && Value.voidBag > VoidBagLevel.None;
     public static bool HotbarLast => !UnloadedInventoryManagement.Value.hotbarLast && Enabled && Value.hotbarLast;
     public static bool FixSlot => !UnloadedInventoryManagement.Value.fixSlot && Enabled && Value.fixSlot;
 
-    public static bool OverrideSlot => PreviousSlot.Enabled;
+    public static bool OverrideSlot => PreviousSlot.Enabled || RefillMouse;
     public static bool DedicatedSlot => AutoEquip || UpgradeItems.Enabled;
     public static SmartPickup Value => InventoryManagement.Instance.smartPickup.Value;
 

@@ -1,9 +1,22 @@
 using BetterInventory.Default.Inventories;
+using SpikysLib;
 using Terraria;
+using Terraria.Audio;
+using Terraria.ID;
 
 namespace BetterInventory.InventoryManagement.SmartPickup;
 
 public static class SmartEquip {
+
+    public static Item RefillMouse(Player player, Item item, GetItemSettings settings) {
+        if (Main.mouseItem.IsAir || Main.mouseItem.type != item.type) return item;
+        Main.mouseItem = ItemHelper.MoveInto(Main.mouseItem, item, out int transferred, item.maxStack);
+        if (transferred == 0) return item;
+        SoundEngine.PlaySound(SoundID.Grab);
+        Main.mouseItem.position = player.position;
+        if (!settings.NoText) PopupText.NewText(PopupTextContext.ItemPickupToVoidContainer, Main.mouseItem, transferred, false, settings.LongText);
+        return item;
+    }
 
     public static Item AutoEquip(Player player, Item item, GetItemSettings settings) {
         var inventories = Configs.SmartPickup.Value.autoEquip.Value.inactiveInventories ? InventoryLoader.GetPreferredInventories(player) : InventoryLoader.GetPreferredActiveInventories(player);

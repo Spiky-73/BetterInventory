@@ -2,6 +2,7 @@
 
 ## v0.9
 - Added Recipe Sorting
+- Added Refill Mouse Item to Smart Pickup
 - Added Fix Scroll direction to Fixed UI
 - Fixed Quick with Frame Skip Off
 ## v0.8.2

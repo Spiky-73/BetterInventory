@@ -11,14 +11,14 @@ public sealed class SmartPickup : ModSystem {
 
     public override void Load() {
         IL_Player.GetItem += static il => {
-            if (!il.ApplyTo(IlPreviousSlot, Configs.SmartPickup.OverrideSlot)) Configs.UnloadedInventoryManagement.Value.pickupOverrideSlot = true;
+            if (!il.ApplyTo(ILOverrideSlot, Configs.SmartPickup.OverrideSlot)) Configs.UnloadedInventoryManagement.Value.pickupOverrideSlot = true;
             if (!il.ApplyTo(ILDedicatedSlots, Configs.SmartPickup.DedicatedSlot)) Configs.UnloadedInventoryManagement.Value.pickupDedicatedSlot = true;
             if (!il.ApplyTo(ILHotbarLast, Configs.SmartPickup.HotbarLast)) Configs.UnloadedInventoryManagement.Value.hotbarLast = true;
             if (!il.ApplyTo(ILFixNewItem, Configs.SmartPickup.FixSlot)) Configs.UnloadedInventoryManagement.Value.fixSlot = true;
         };
     }
 
-    private static void IlPreviousSlot(ILContext il) {
+    private static void ILOverrideSlot(ILContext il) {
         ILCursor cursor = new(il);
 
         cursor.GotoNextLoc(out int coin, i => i.Previous.MatchCallvirt(Reflection.Item.IsACoin.GetMethod!), 0);
@@ -32,6 +32,7 @@ public sealed class SmartPickup : ModSystem {
         // ++ item = <previousSlot>
         EmitSmartPickup(cursor, newItem, (Player self, Item item, GetItemSettings settings) => {
             if (vanillaGetItem) return item;
+            if (Configs.SmartPickup.RefillMouse) item = SmartEquip.RefillMouse(self, item, settings);
             if (Configs.PreviousSlot.Enabled) item = PreviousSlot.PickupItemToPreviousSlot(self, item, settings);
             return item;
         });
