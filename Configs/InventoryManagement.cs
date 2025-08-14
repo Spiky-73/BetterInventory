@@ -18,15 +18,17 @@ public sealed class InventoryManagement : ModConfig {
     public Toggle<CraftStack> craftStack = new(true);
     [DefaultValue(true)] public bool favoriteInBanks;
     public Toggle<BetterShiftClick> betterShiftClick = new(true);
-    [DefaultValue(true)] public bool stackTrash;
+    public Toggle<BetterTrash> betterTrash = new(true);
 
     public static InventoryManagement Instance = null!;
     public static bool FavoriteInBanks => !UnloadedInventoryManagement.Value.favoriteInBanks && Instance.favoriteInBanks;
-    public static bool StackTrash => !UnloadedInventoryManagement.Value.stackTrash && Instance.stackTrash;
 
     // Compatibility version < v0.6
     [JsonProperty, DefaultValue(AutoEquipLevel.PreferredSlots)] private AutoEquipLevel autoEquip { set => ConfigHelper.MoveMember(value != AutoEquipLevel.PreferredSlots, _ => smartPickup.Value.autoEquip.Key = value); }
     [JsonProperty, DefaultValue(true)] private bool shiftRight { set => ConfigHelper.MoveMember<InventoryManagement>(!value, c => c.betterShiftClick.Key = value); }
+
+    // Compatibility version < v0.9
+    [JsonProperty, DefaultValue(true)] private bool stackTrash { set => ConfigHelper.MoveMember<InventoryManagement>(!value, c => c.betterTrash.Key = value); }
 
     public override void OnChanged() {
         Reflection.ItemSlot.canFavoriteAt.GetValue()[ItemSlot.Context.BankItem] = FavoriteInBanks;
@@ -219,4 +221,14 @@ public sealed class BetterShiftClick {
     public static bool ShiftRight => !UnloadedInventoryManagement.Value.shiftRight && Value.shiftRight && Enabled;
     public static bool UniversalShift => !UnloadedInventoryManagement.Value.universalShift && Value.universalShift && Enabled;
     public static BetterShiftClick Value => InventoryManagement.Instance.betterShiftClick.Value;
+}
+
+public sealed class BetterTrash {
+    [DefaultValue(true)] public bool stackTrash = true;
+    [DefaultValue(true)] public bool trashTrash = true;
+
+    public static bool Enabled => InventoryManagement.Instance.betterTrash;
+    public static bool StackTrash => !UnloadedInventoryManagement.Value.stackTrash && Enabled && Value.stackTrash;
+    public static bool TrashTrash => Enabled && Value.trashTrash;
+    public static BetterTrash Value => InventoryManagement.Instance.betterTrash.Value;
 }

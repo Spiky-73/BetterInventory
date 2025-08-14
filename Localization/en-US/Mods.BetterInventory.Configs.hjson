@@ -263,14 +263,9 @@ InventoryManagement: {
 		Tooltip: Improves Shift click
 	}
 
-	stackTrash: {
-		Label: "[i:348] Stack Trashed and Sold Items"
-		Tooltip:
-			'''
-			Items sold or multiple times will stack in a single slot
-			Items trashed multiple times in a row will stack instead of replacing the old one
-			Highly recommended with "{$Mods.BetterInventory.Configs.BetterShiftClick.shiftRight.Label}"
-			'''
+	betterTrash: {
+		Label: "[i:348] Better Trash slot"
+		Tooltip: Improves the trash slot
 	}
 }
 
@@ -653,6 +648,25 @@ BetterShiftClick: {
 	universalShift: {
 		Label: Universal Shift
 		Tooltip: Shift click when crafting or buying items
+	}
+}
+
+BetterTrash: {
+	Tooltip: ""
+
+	stackTrash: {
+		Label: Stack Trashed and Sold Items
+		Tooltip:
+			'''
+			Items sold or multiple times will stack in a single slot
+			Items trashed multiple times in a row will stack instead of replacing the old one
+			Highly recommended with "{$Mods.BetterInventory.Configs.BetterShiftClick.shiftRight.Label}"
+			'''
+	}
+
+	trashTrash: {
+		Label: Trash the Trash
+		Tooltip: Trash the trash slot to clear it
 	}
 }
 

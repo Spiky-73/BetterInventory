@@ -29,8 +29,6 @@ public sealed class ClickOverrides : ModPlayer {
         On_ItemSlot.LeftClick_ItemArray_int_int += HookShiftLeftCustom;
         On_ItemSlot.RightClick_ItemArray_int_int += HookShiftRight;
 
-        On_Chest.AddItemToShop += HookStackSold;
-
         On_Recipe.FindRecipes += HookFindRecipes;
 
         IL_Player.PayCurrency += static il => {
@@ -47,9 +45,6 @@ public sealed class ClickOverrides : ModPlayer {
             if (!il.ApplyTo(ILBuyMultiplier, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
             if (!il.ApplyTo(ILBuyStack, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
             if (!il.ApplyTo(ILRestoreShopItem, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
-        };
-        IL_ItemSlot.SellOrTrash += static il => {
-            if (!il.ApplyTo(ILStackTrash, Configs.InventoryManagement.StackTrash)) Configs.UnloadedInventoryManagement.Value.stackTrash = true;
         };
         IL_Main.HoverOverCraftingItemButton += static il => {
             if (!il.ApplyTo(ILShiftRightCursorOverride, Configs.BetterShiftClick.UniversalShift)) Configs.UnloadedInventoryManagement.Value.universalShift = true;
@@ -347,43 +342,6 @@ public sealed class ClickOverrides : ModPlayer {
         // PopupText.NewText(...);
         // ...
     }
-
-    private static void ILStackTrash(ILContext il) {
-        ILCursor cursor = new(il);
-        // if (<shop>){
-        //     ...
-        // }
-
-        // else if (!inv[slot].favorited) {
-        //     SoundEngine.PlaySound(7, -1, -1, 1, 1f, 0f);
-        cursor.GotoNext(MoveType.Before, i => i.MatchStfld(Reflection.Player.trashItem));
-
-        //     ++<stackTrash>
-        cursor.EmitDelegate((Item trash) => {
-            if (Configs.InventoryManagement.StackTrash && trash.type == Main.LocalPlayer.trashItem.type) {
-                if (ItemLoader.TryStackItems(Main.LocalPlayer.trashItem, trash, out int transfered)) return Main.LocalPlayer.trashItem;
-            }
-            return trash;
-        });
-
-        //     player.trashItem = inv[slot].Clone();
-        //     ...
-        // }
-        // ...
-    }
-    private static int HookStackSold(On_Chest.orig_AddItemToShop orig, Chest self, Item newItem) {
-        int bought = Main.shopSellbackHelper.GetAmount(newItem);
-        if (!Configs.InventoryManagement.StackTrash || bought >= newItem.stack) return orig(self, newItem);
-        newItem.stack -= Main.shopSellbackHelper.Remove(newItem);
-        for (int i = 0; i < self.item.Length; i++) {
-            if (self.item[i].IsAir || self.item[i].type != newItem.type || !self.item[i].buyOnce) continue;
-            if (!ItemLoader.TryStackItems(self.item[i], newItem, out int transferred)) continue;
-            if (newItem.IsAir) return i;
-        }
-
-        return orig(self, newItem);
-    }
-
 
     private static void ILKeepFavoriteInBanks(ILContext il) {
         ILCursor cursor = new(il);

@@ -61,7 +61,7 @@ public sealed class Compatibility : ModConfig {
         InventoryManagement.Instance.betterShiftClick.Value.shiftRight = false;
         InventoryManagement.Instance.betterShiftClick.Value.universalShift = false;
         InventoryManagement.Instance.favoriteInBanks = false;
-        InventoryManagement.Instance.stackTrash = false;
+        BetterTrash.Value.stackTrash = false;
         InventoryManagement.Instance.craftStack.Key = false;
         InventoryManagement.Instance.Save();
 
