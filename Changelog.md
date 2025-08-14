@@ -3,7 +3,7 @@
 ## v0.9
 - Added Recipe Sorting
 - Added Fix Scroll direction to Fixed UI
-
+- Fixed Quick with Frame Skip Off
 ## v0.8.2
 - Added support for loadouts to Pickup to Previous Slot, Quick Move, Extra Materials and Auto Equip
 - Added options to include loadouts or not to Auto Equip and Quick Move

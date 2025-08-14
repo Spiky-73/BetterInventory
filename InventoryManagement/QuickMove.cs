@@ -120,6 +120,7 @@ public sealed class QuickMove : ModPlayer {
         Player player = Main.LocalPlayer;
         player.selectedItem = s_oldSelectedItem;
         s_ignoreHotbar = s_moveKey;
+        PlayerInput.Triggers.JustPressed.KeyStatus[MoveKeys[s_moveKey]] = false;
 
         if (s_moveTime != 0 && Configs.QuickMove.FollowItem) s_moveChain[s_moveIndex].Unfocus();
         UndoMove(player, s_movedItems);
