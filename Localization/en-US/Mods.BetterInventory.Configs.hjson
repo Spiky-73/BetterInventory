@@ -277,6 +277,11 @@ InventoryManagement: {
 			If you are not holding an item, picks up all but one item
 			'''
 	}
+
+	completeQuickStack: {
+		Label: "[i:306] Complete Quick Stack"
+		Tooltip: Includes the Hotbar and the ammo slots in Quick Stack and Deposit All
+	}
 }
 
 SmartConsumption: {
@@ -1309,6 +1314,11 @@ UnloadedInventoryManagement: {
 
 	stackTrash: {
 		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.stackTrash.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	completeQuickStack: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.completeQuickStack.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 }

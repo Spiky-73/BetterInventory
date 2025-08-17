@@ -20,10 +20,12 @@ public sealed class InventoryManagement : ModConfig {
     public Toggle<BetterShiftClick> betterShiftClick = new(true);
     public Toggle<BetterTrash> betterTrash = new(true);
     [DefaultValue(true)] public bool depositClick;
+    [DefaultValue(true)] public bool completeQuickStack = true;
 
     public static InventoryManagement Instance = null!;
     public static bool FavoriteInBanks => !UnloadedInventoryManagement.Value.favoriteInBanks && Instance.favoriteInBanks;
     public static bool DepositClick => Instance.depositClick;
+    public static bool CompleteQuickStack => !UnloadedInventoryManagement.Value.completeQuickStack && Instance.completeQuickStack;
 
     // Compatibility version < v0.6
     [JsonProperty, DefaultValue(AutoEquipLevel.PreferredSlots)] private AutoEquipLevel autoEquip { set => ConfigHelper.MoveMember(value != AutoEquipLevel.PreferredSlots, _ => smartPickup.Value.autoEquip.Key = value); }

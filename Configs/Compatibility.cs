@@ -123,6 +123,7 @@ public sealed class UnloadedInventoryManagement {
     public bool universalShift;
     public bool stackTrash;
     public bool craftStack;
+    public bool completeQuickStack;
     
     public static UnloadedInventoryManagement Value => Compatibility.Instance.unloadedInventoryManagement;
 }
