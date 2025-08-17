@@ -1,6 +1,7 @@
 using SpikysLib.Reflection;
 using Terraria.ModLoader;
 using TItem = Terraria.Item;
+using TPlayer = Terraria.Player;
 using TRecipe = Terraria.Recipe;
 using TAccPlayer = Terraria.ModLoader.Default.ModAccessorySlotPlayer;
 using TAccLoader = Terraria.ModLoader.AccessorySlotLoader;
@@ -50,4 +51,6 @@ public static class ItemLoader {
     public static readonly StaticMethod<bool> PreDrawTooltip = new(typeof(TItemLoader), nameof(TItemLoader.PreDrawTooltip), typeof(TItem), typeof(ReadOnlyCollection<TooltipLine>), typeof(int).MakeByRefType(), typeof(int).MakeByRefType());
     public static readonly StaticMethod<System.Collections.Generic.List<TooltipLine>> ModifyTooltips = new(typeof(TItemLoader), nameof(TItemLoader.ModifyTooltips), typeof(TItem), typeof(int).MakeByRefType(), typeof(string[]), typeof(string[]).MakeByRefType(), typeof(bool[]).MakeByRefType(), typeof(bool[]).MakeByRefType(), typeof(int).MakeByRefType(), typeof(TColor?[]).MakeByRefType(), typeof(int));
     public delegate System.Collections.Generic.List<TooltipLine> ModifyTooltipsFn(TItem item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out TColor?[] overrideColor, int prefixlineIndex);
+    public static readonly StaticMethod<object?> OnConsumeItem = new(typeof(TItemLoader), nameof(TItemLoader.OnConsumeItem), typeof(TItem), typeof(TPlayer));
+    public delegate void OnConsumeItemFn(TItem item, TPlayer player);
 }

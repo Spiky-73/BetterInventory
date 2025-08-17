@@ -147,7 +147,6 @@ public sealed class BetterPlayer : ModPlayer {
         if (!Configs.ItemActions.FastExtractinator || self.ItemTimeIsZero) return;
         ItemSlot.RefreshStackSplitCooldown();
         self.itemTime = self.itemTimeMax = Main.stackSplit - 1;
-        Main.preventStackSplitReset = true;
     }
 
     public static void CycleBuilderState(Player player, BuilderToggle toggle, int? state = null) => player.builderAccStatus[toggle.Type] = (state ?? (player.builderAccStatus[toggle.Type] + 1)) % toggle.NumberOfStates;

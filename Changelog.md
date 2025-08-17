@@ -6,6 +6,7 @@
 - Added Fix Scroll direction to Fixed UI
 - Move Stack Trashed into Better Trash
 - Added Trash the Trash to Better Trash Slot
+- Added Deposit Middle Click
 - Fixed Quick with Frame Skip Off
 
 ## v0.8.2

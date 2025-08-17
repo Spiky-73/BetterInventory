@@ -19,9 +19,11 @@ public sealed class InventoryManagement : ModConfig {
     [DefaultValue(true)] public bool favoriteInBanks;
     public Toggle<BetterShiftClick> betterShiftClick = new(true);
     public Toggle<BetterTrash> betterTrash = new(true);
+    [DefaultValue(true)] public bool depositClick;
 
     public static InventoryManagement Instance = null!;
     public static bool FavoriteInBanks => !UnloadedInventoryManagement.Value.favoriteInBanks && Instance.favoriteInBanks;
+    public static bool DepositClick => Instance.depositClick;
 
     // Compatibility version < v0.6
     [JsonProperty, DefaultValue(AutoEquipLevel.PreferredSlots)] private AutoEquipLevel autoEquip { set => ConfigHelper.MoveMember(value != AutoEquipLevel.PreferredSlots, _ => smartPickup.Value.autoEquip.Key = value); }

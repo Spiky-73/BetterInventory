@@ -267,6 +267,16 @@ InventoryManagement: {
 		Label: "[i:348] Better Trash slot"
 		Tooltip: Improves the trash slot
 	}
+
+	depositClick: {
+		Label: "[i:3245] Deposit Middle Click"
+		Tooltip:
+			'''
+			Works like right-click, but deposit items instead of picking them up 
+			Middle-click to deposit an item from the mouse to the hovered stack 
+			If you are not holding an item, picks up all but one item
+			'''
+	}
 }
 
 SmartConsumption: {
