@@ -64,6 +64,8 @@ public sealed class Compatibility : ModConfig {
         BetterTrash.Value.stackTrash = false;
         InventoryManagement.Instance.craftStack.Key = false;
         InventoryManagement.Instance.Save();
+        InventoryManagement.Instance.completeQuickStack = false;
+        InventoryManagement.Instance.inventorySlotsBackground = false;
 
         ItemActions.Instance.fixedTooltipPosition = false;
         ItemActions.Instance.tooltipHover.Key = false;
@@ -124,6 +126,7 @@ public sealed class UnloadedInventoryManagement {
     public bool stackTrash;
     public bool craftStack;
     public bool completeQuickStack;
+    public bool inventorySlotsBackground;
     
     public static UnloadedInventoryManagement Value => Compatibility.Instance.unloadedInventoryManagement;
 }
