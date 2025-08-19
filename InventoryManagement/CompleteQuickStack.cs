@@ -50,7 +50,7 @@ public sealed class CompleteQuickStack : ILoadable {
     private static void ILCompleteDepositAll(ILContext il) {
         ILCursor cursor = new(il);
 
-        // for (int num = [++57]; num >= [++0]; num--)
+        // for (int num = ++[57]; num >= ++[0]; num--)
         cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(49));
         cursor.EmitDelegate((int upper) => !Configs.InventoryManagement.CompleteQuickStack ? upper : InventorySlots.Ammo.End - 1);
         cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(10));

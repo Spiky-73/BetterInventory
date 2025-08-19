@@ -282,6 +282,11 @@ InventoryManagement: {
 		Label: "[i:306] Complete Quick Stack"
 		Tooltip: Includes the Hotbar and the ammo slots in Quick Stack and Deposit All
 	}
+
+	inventorySlotsTexture: {
+		Label: "[i:420] Inventory Slots Texture"
+		Tooltip: Removes the texts "Coin", "Ammo" and adds background textures to various item slots
+	}
 }
 
 SmartConsumption: {
@@ -1319,6 +1324,11 @@ UnloadedInventoryManagement: {
 
 	completeQuickStack: {
 		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.completeQuickStack.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	inventorySlotsTexture: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.inventorySlotsTexture.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 }
