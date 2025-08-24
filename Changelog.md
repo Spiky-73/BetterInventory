@@ -9,6 +9,8 @@
 - Added Deposit Middle Click
 - Added Complete Quick Stack to Better Quick Stack
 - Added Limited Personal Quick Stack to Better Quick Stack
+- Clarified Smart Consumption tooltips
+- Clarified Can Consume Itself to Smart Consumption
 - Fixed Quick with Frame Skip Off
 
 ## v0.8.2

@@ -29,14 +29,14 @@ public sealed class SmartConsumptionItem : GlobalItem {
 
     public override void OnConsumeItem(Item item, Player player) {
         if (item.PaintOrCoating) {
-            if (Configs.SmartConsumption.Paints) SmartConsume(player, item, () => player.LastStack(item, Configs.SmartConsumption.Mouse));
+            if (Configs.SmartConsumption.Paints) SmartConsume(player, item, () => player.LastStack(item, Configs.SmartConsumption.AllowedItems));
         } else {
-            if (Configs.SmartConsumption.Consumables) SmartConsume(player, item, () => player.SmallestStack(item, Configs.SmartConsumption.Mouse));
+            if (Configs.SmartConsumption.Consumables) SmartConsume(player, item, () => player.SmallestStack(item, Configs.SmartConsumption.AllowedItems));
         }
     }
 
     public override void OnConsumedAsAmmo(Item ammo, Item weapon, Player player) {
-        if (Configs.SmartConsumption.Ammo) SmartConsume(player, ammo, () => player.LastStack(ammo, Configs.SmartConsumption.Mouse));
+        if (Configs.SmartConsumption.Ammo) SmartConsume(player, ammo, () => player.LastStack(ammo, Configs.SmartConsumption.AllowedItems));
     }
 
     private static void ILOnConsumedMaterial(ILContext il) {
@@ -48,7 +48,7 @@ public sealed class SmartConsumptionItem : GlobalItem {
         cursor.EmitLdarg1();
         cursor.EmitLdloc(consumed);
         cursor.EmitDelegate((Item item, Item consumed) => {
-            if (Configs.SmartConsumption.Materials) SmartConsume(Main.LocalPlayer, item, () => Main.LocalPlayer.SmallestStack(item, AllowedItems.Self | Configs.SmartConsumption.Mouse), consumed.stack);
+            if (Configs.SmartConsumption.Materials) SmartConsume(Main.LocalPlayer, item, () => Main.LocalPlayer.SmallestStack(item, AllowedItems.Self | Configs.SmartConsumption.AllowedItems), consumed.stack);
         });
     }
 
@@ -62,7 +62,7 @@ public sealed class SmartConsumptionItem : GlobalItem {
         cursor.EmitLdarg0();
         cursor.EmitLdloc(i);
         cursor.EmitDelegate((Player self, int i) => {
-            if (Configs.SmartConsumption.Baits) SmartConsume(self, self.inventory[i], () => self.LastStack(self.inventory[i], Configs.SmartConsumption.Mouse));
+            if (Configs.SmartConsumption.Baits) SmartConsume(self, self.inventory[i], () => self.LastStack(self.inventory[i], Configs.SmartConsumption.AllowedItems));
         });
     }
 

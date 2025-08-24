@@ -299,7 +299,11 @@ SmartConsumption: {
 
 	ammo: {
 		Label: Ammunition
-		Tooltip: Consumes ammo from the last selected stack in the inventory. Doesn't affect the selected ammo
+		Tooltip:
+			'''
+			Consumes ammo from the last selected stack in the inventory
+			Doesn't affect the selected ammo
+			'''
 	}
 
 	materials: {
@@ -309,17 +313,34 @@ SmartConsumption: {
 
 	baits: {
 		Label: Baits
-		Tooltip: Consumes baits from the last selected stack in the inventory. Doesn't affect the selected bait
+		Tooltip:
+			'''
+			Consumes baits from the last selected stack in the inventory
+			Doesn't affect the selected bait
+			'''
 	}
 
 	paints: {
 		Label: Paints
-		Tooltip: Consumes paints from the last selected stack in the inventory. Doesn't affect the selected paint
+		Tooltip:
+			'''
+			Consumes paints from the last selected stack in the inventory
+			Doesn't affect the selected paint
+			'''
 	}
 
 	mouse: {
-		Label: Consume Mouse Item
+		Label: Include Mouse Item
 		Tooltip: Includes the mouse item when searching for the item to consume
+	}
+
+	self: {
+		Label: Can Consume Itself
+		Tooltip:
+			'''
+			Allow the item stack that is placed/consumed/etc to be consumed
+			When disabled, another item will always be selected if possible
+			'''
 	}
 }
 

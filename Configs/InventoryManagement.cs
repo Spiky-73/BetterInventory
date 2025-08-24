@@ -49,6 +49,7 @@ public sealed class SmartConsumption {
     [DefaultValue(true)] public bool paints = true;
     [DefaultValue(true)] public bool materials = true;
     [DefaultValue(false)] public bool mouse = false;
+    [DefaultValue(false)] public bool self = false;
 
     public static bool Enabled => InventoryManagement.Instance.smartConsumption;
     public static bool Consumables => Enabled && Value.consumables;
@@ -56,7 +57,7 @@ public sealed class SmartConsumption {
     public static bool Baits => Enabled && Value.baits && !UnloadedInventoryManagement.Value.baits;
     public static bool Paints => Enabled && Value.paints;
     public static bool Materials => Enabled && Value.materials && !UnloadedInventoryManagement.Value.materials;
-    public static AllowedItems Mouse => Value.mouse ? AllowedItems.Mouse : AllowedItems.None;
+    public static AllowedItems AllowedItems => (Value.mouse ? AllowedItems.Mouse : AllowedItems.None) | (Value.self ? AllowedItems.Self : AllowedItems.None);
     public static SmartConsumption Value => InventoryManagement.Instance.smartConsumption.Value;
 }
 
@@ -107,7 +108,7 @@ public sealed class PreviousSlot {
 public sealed class PreviousDisplay {
     public Toggle<FakeItemDisplay> fakeItem = new(true);
     public Toggle<IconDisplay> icon = new(true, new());
-    
+
     public static bool Enabled => SmartPickup.Enabled && PreviousSlot.Value.displayPrevious;
     public static bool FakeItem => Enabled && Value.icon && !UnloadedInventoryManagement.Value.displayFakeItem;
     public static bool Icon => Enabled && Value.icon && !UnloadedInventoryManagement.Value.displayIcon;
@@ -141,7 +142,7 @@ public sealed class UpgradeItems {
 
     public static bool Enabled => SmartPickup.Enabled && !UnloadedInventoryManagement.Value.pickupDedicatedSlot && SmartPickup.Value.upgradeItems;
     public static UpgradeItems Value => SmartPickup.Value.upgradeItems.Value;
-    
+
     [OnDeserialized]
     private void OnDeserialized(StreamingContext context) {
         foreach (ModPickupUpgrader upgrader in PickupUpgraderLoader.Upgraders) upgraders.TryAdd(new(upgrader), true);
@@ -150,7 +151,7 @@ public sealed class UpgradeItems {
 
 public sealed class QuickMove {
     [DefaultValue(HotkeyMode.Hotbar)] public HotkeyMode hotkeyMode = HotkeyMode.Hotbar;
-    [Range(0, 3600), DefaultValue(60*3)] public int resetTime = 60*3;
+    [Range(0, 3600), DefaultValue(60 * 3)] public int resetTime = 60 * 3;
     [DefaultValue(true)] public bool returnToSlot = true;
     public NestedValue<HotkeyDisplayMode, DisplayedHotkeys> displayedHotkeys = new(HotkeyDisplayMode.All);
     [DefaultValue(true)] public bool followItem = true;
@@ -165,7 +166,7 @@ public sealed class QuickMove {
     public static QuickMove Value => InventoryManagement.Instance.quickMove.Value;
 
     // Compatibility version < v0.6
-    [JsonProperty, DefaultValue(60 * 3)] private int chainTime { set => ConfigHelper.MoveMember(value != 60*3, _ => resetTime = value); }
+    [JsonProperty, DefaultValue(60 * 3)] private int chainTime { set => ConfigHelper.MoveMember(value != 60 * 3, _ => resetTime = value); }
     [JsonProperty, DefaultValue(false)] private bool showTooltip { set => ConfigHelper.MoveMember(value, _ => tooltip = value); }
     [JsonProperty] private NestedValue<HotkeyDisplayMode, DisplayedHotkeys> displayHotkeys { set => ConfigHelper.MoveMember(value is not null, _ => displayedHotkeys = value!); }
 }
