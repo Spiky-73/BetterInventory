@@ -20,13 +20,12 @@ public sealed class InventoryManagement : ModConfig {
     public Toggle<BetterShiftClick> betterShiftClick = new(true);
     public Toggle<BetterTrash> betterTrash = new(true);
     [DefaultValue(true)] public bool depositClick;
-    [DefaultValue(true)] public bool completeQuickStack = true;
+    public Toggle<BetterQuickStack> betterQuickStack = new(true);
     [DefaultValue(true)] public bool inventorySlotsTexture = true;
 
     public static InventoryManagement Instance = null!;
     public static bool FavoriteInBanks => !UnloadedInventoryManagement.Value.favoriteInBanks && Instance.favoriteInBanks;
     public static bool DepositClick => Instance.depositClick;
-    public static bool CompleteQuickStack => !UnloadedInventoryManagement.Value.completeQuickStack && Instance.completeQuickStack;
     public static bool InventorySlotsTexture => !UnloadedInventoryManagement.Value.inventorySlotsTexture && Instance.inventorySlotsTexture;
 
     // Compatibility version < v0.6
@@ -237,4 +236,14 @@ public sealed class BetterTrash {
     public static bool StackTrash => !UnloadedInventoryManagement.Value.stackTrash && Enabled && Value.stackTrash;
     public static bool TrashTrash => Enabled && Value.trashTrash;
     public static BetterTrash Value => InventoryManagement.Instance.betterTrash.Value;
+}
+
+public sealed class BetterQuickStack {
+    [DefaultValue(true)] public bool completeQuickStack = true;
+    [DefaultValue(true)] public bool limitedPersonalQuickStack = true;
+
+    public static bool Enabled => InventoryManagement.Instance.betterQuickStack;
+    public static bool CompleteQuickStack => !UnloadedInventoryManagement.Value.quickStackComplete && Enabled && Value.completeQuickStack;
+    public static bool LimitedPersonalQuickStack => !UnloadedInventoryManagement.Value.quickStackLimitedPersonal && Enabled && Value.limitedPersonalQuickStack;
+    public static BetterQuickStack Value => InventoryManagement.Instance.betterQuickStack.Value;
 }

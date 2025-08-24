@@ -8,6 +8,7 @@ public static class Int32 {
 }
 
 public static class List<T> {
+    public static readonly Property<System.Collections.Generic.List<T>, int> Count = new(nameof(System.Collections.Generic.List<T>.Count));
     public static class Enumerator {
         public static Property<System.Collections.Generic.List<T>.Enumerator, T> Current = new(nameof(System.Collections.Generic.List<T>.Enumerator.Current));
     }

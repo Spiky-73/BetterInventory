@@ -278,9 +278,9 @@ InventoryManagement: {
 			'''
 	}
 
-	completeQuickStack: {
-		Label: "[i:306] Complete Quick Stack"
-		Tooltip: Includes the Hotbar and the ammo slots in Quick Stack and Deposit All
+	betterQuickStack: {
+		Label: "[i:306] Better Quick Stack"
+		Tooltip: Quick stack more items and avoid creating new stack in personnal storages
 	}
 
 	inventorySlotsTexture: {
@@ -687,6 +687,20 @@ BetterTrash: {
 	trashTrash: {
 		Label: Trash the Trash
 		Tooltip: Trash the trash slot to clear it
+	}
+}
+
+BetterQuickStack: {
+	Tooltip: ""
+
+	completeQuickStack: {
+		Label: Complete Quick Stack
+		Tooltip: Includes the Hotbar and the ammo slots in Quick Stack and Deposit All
+	}
+
+	limitedPersonalQuickStack: {
+		Label: Limited Personal Quick Stack
+		Tooltip: Do not fill empty slots when quick stacking to a personal container
 	}
 }
 
@@ -1318,12 +1332,22 @@ UnloadedInventoryManagement: {
 	}
 
 	stackTrash: {
-		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.stackTrash.Label}"
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.betterTrash.Label} @ {$Mods.BetterInventory.Configs.BetterTrash.stackTrash.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
 	completeQuickStack: {
 		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.completeQuickStack.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	quickStackComplete: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.betterQuickStack.Label} @ {$Mods.BetterInventory.Configs.BetterQuickStack.completeQuickStack.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	quickStackLimitedPersonal: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.betterQuickStack.Label} @ {$Mods.BetterInventory.Configs.BetterQuickStack.limitedPersonalQuickStack.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
