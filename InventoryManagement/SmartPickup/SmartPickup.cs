@@ -33,7 +33,7 @@ public sealed class SmartPickup : ModSystem {
         EmitSmartPickup(cursor, newItem, (Player self, Item item, GetItemSettings settings) => {
             if (vanillaGetItem) return item;
             if (Configs.SmartPickup.RefillMouse) item = SmartEquip.RefillMouse(self, item, settings);
-            if (Configs.SmartPickup.PreviousSlot) item = PreviousSlot.PickupItemToPreviousSlot(self, item, settings);
+            if (Configs.SmartPickup.PreviousSlot) item = self.GetModPlayer<PreviousSlotPlayer>().PickupItemToPreviousSlot(self, item, settings);
             return item;
         });
     }

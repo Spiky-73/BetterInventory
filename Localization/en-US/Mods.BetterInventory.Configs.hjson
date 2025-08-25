@@ -441,6 +441,15 @@ PreviousSlot: {
 		Tooltip: Applies to items moved with the mouse
 	}
 
+	consumption: {
+		Label: Consumption
+		Tooltip:
+			'''
+			Applies to items that were consumed, placed, etc
+			When {$Mods.BetterInventory.Configs.InventoryManagement.smartConsumption.Label} is on, the item that is market is the "original" consumed item
+			'''
+	}
+
 	mediumCore: {
 		Label: Items Dropped on Death
 		Tooltip: Applies to items dropped on death
@@ -545,7 +554,7 @@ QuickStackPickup: {
 	}
 
 	chests: {
-		Label: chests
+		Label: Chests
 		Tooltip: Quick stack items to nearby chests
 	}
 }

@@ -97,19 +97,20 @@ public enum AutoEquipLevel { None, PreferredSlots, AnySlot }
 
 public sealed class PreviousSlot {
     [DefaultValue(true)] public bool mouse = true;
+    [DefaultValue(true)] public bool consumption = true;
     [DefaultValue(true)] public bool mediumCore = true;
     [DefaultValue(false)] public bool overridePrevious = false;
     public Toggle<Materials> materials = new(true);
     public Toggle<PreviousDisplay> displayPrevious = new(true);
 
     public static bool Mouse => SmartPickup.PreviousSlot && Value.mouse;
+    public static bool Consumption => SmartPickup.PreviousSlot && Value.consumption;
     public static bool MediumCore => SmartPickup.PreviousSlot && Value.mediumCore;
     public static PreviousSlot Value => SmartPickup.Value.previousSlot.Value;
 }
 
 public sealed class QuickStackPickup {
     [DefaultValue(true)] public bool voidBag = true;
-    [DefaultValue(true)] public bool banks = true;
     [DefaultValue(true)] public bool chests = true;
     
     public static QuickStackPickup Value => SmartPickup.Value.quickStack.Value;
