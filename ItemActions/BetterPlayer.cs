@@ -118,11 +118,20 @@ public sealed class BetterPlayer : ModPlayer {
         if (Main.myPlayer == Player.whoAmI && Configs.ItemRightClick.Enabled && Player.controlUseTile && Player.releaseUseItem && !Player.controlUseItem && !Player.tileInteractionHappened
                 && !Player.mouseInterface && !Terraria.Graphics.Capture.CaptureManager.Instance.Active && !Main.HoveringOverAnNPC && !Main.SmartInteractShowingGenuine
                 && Main.HoverItem.IsAir && Player.altFunctionUse == 0 && Player.selectedItem < InventorySlots.Hotbar.End) {
+            Item item = Player.inventory[Player.selectedItem];
+            (int type, int stack, int prefix) = (item.type, item.stack, item.prefix);
+            int animation = Player.itemAnimation;
             Player.itemAnimation--;
             if(Main.stackSplit == 1) Player.itemAnimation = 0;
+
             if (!Configs.ItemRightClick.Value.stackableItems) s_noMousePickup = true;
             ItemSlot.RightClick(Player.inventory, ItemSlot.Context.InventoryItem, Player.selectedItem);
             s_noMousePickup = false;
+            
+            if (type == item.type && stack == item.stack && prefix == item.prefix) {
+                Player.itemAnimation = animation;
+                return true;
+            }
             if (!Main.mouseItem.IsAir) Player.DropSelectedItem();
             return false;
         }

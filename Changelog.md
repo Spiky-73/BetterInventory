@@ -12,6 +12,7 @@
 - Clarified Smart Consumption tooltips
 - Clarified Can Consume Itself to Smart Consumption
 - Fixed Quick with Frame Skip Off
+- Fixed Extra Item Right Click conflicting with Terraria Overhaul 
 
 ## v0.8.2
 - Added support for loadouts to Pickup to Previous Slot, Quick Move, Extra Materials and Auto Equip
