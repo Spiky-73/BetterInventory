@@ -18,6 +18,21 @@ public static class SmartEquip {
         return item;
     }
 
+    public static Item QuickStack(Player player, Item item, GetItemSettings settings) {
+        if (Configs.QuickStackPickup.Value.voidBag && player.HasItem(item.type, player.bank4.item)) item = VoidBagFirst(player, item, settings);
+        if (Configs.QuickStackPickup.Value.chests) {
+            Item[] fakeInventory = new Item[player.inventory.Length];
+            for (int i = 0; i < fakeInventory.Length; i++) fakeInventory[i] = new();
+            fakeInventory[0] = item;
+            (var inventory, player.inventory) = (player.inventory, fakeInventory);
+            player.QuickStackAllChests();
+            player.inventory = inventory;
+            item = fakeInventory[0];
+        }
+
+        return item;
+    }
+
     public static Item AutoEquip(Player player, Item item, GetItemSettings settings) {
         var inventories = Configs.SmartPickup.Value.autoEquip.Value.inactiveInventories ? InventoryLoader.GetPreferredInventories(player) : InventoryLoader.GetPreferredActiveInventories(player);
         foreach (var inv in inventories) {
@@ -36,9 +51,8 @@ public static class SmartEquip {
         return item;
     }
 
-    public static Item VoidBag(Player player, Item item, GetItemSettings settings) {
+    public static Item VoidBagFirst(Player player, Item item, GetItemSettings settings) {
         if (!settings.CanGoIntoVoidVault || !player.IsVoidVaultEnabled) return item;
-        if (Configs.SmartPickup.Value.voidBag == Configs.VoidBagLevel.IfInside && !player.HasItem(item.type, player.bank4.item)) return item;
         if (Reflection.Player.GetItem_VoidVault.Invoke(player, player.whoAmI, player.bank4.item, item, settings, item)) return new();
         return item;
     }

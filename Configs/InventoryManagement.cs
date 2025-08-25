@@ -27,6 +27,7 @@ public sealed class InventoryManagement : ModConfig {
     public static bool FavoriteInBanks => !UnloadedInventoryManagement.Value.favoriteInBanks && Instance.favoriteInBanks;
     public static bool DepositClick => Instance.depositClick;
     public static bool InventorySlotsTexture => !UnloadedInventoryManagement.Value.inventorySlotsTexture && Instance.inventorySlotsTexture;
+    public static bool SmartPickup => Instance.smartPickup;
 
     // Compatibility version < v0.6
     [JsonProperty, DefaultValue(AutoEquipLevel.PreferredSlots)] private AutoEquipLevel autoEquip { set => ConfigHelper.MoveMember(value != AutoEquipLevel.PreferredSlots, _ => smartPickup.Value.autoEquip.Key = value); }
@@ -64,21 +65,24 @@ public sealed class SmartConsumption {
 public sealed class SmartPickup {
     public bool refillMouse = true;
     public NestedValue<ItemPickupLevel, PreviousSlot> previousSlot = new(ItemPickupLevel.AllItems);
+    public Toggle<QuickStackPickup> quickStack = new(true);
     [DefaultValue(AutoEquipLevel.PreferredSlots)] public NestedValue<AutoEquipLevel, AutoEquip> autoEquip = new(AutoEquipLevel.PreferredSlots);
-    [DefaultValue(VoidBagLevel.IfInside)] public VoidBagLevel voidBag = VoidBagLevel.IfInside;
     public Toggle<UpgradeItems> upgradeItems = new(true);
+    [DefaultValue(true)] public bool voidBagFirst = true;
     [DefaultValue(true)] public bool hotbarLast = true;
     [DefaultValue(true)] public bool fixSlot = true;
 
-    public static bool Enabled => InventoryManagement.Instance.smartPickup.Key;
-    public static bool RefillMouse => !UnloadedInventoryManagement.Value.pickupOverrideSlot && Enabled && Value.refillMouse;
-    public static bool AutoEquip => !UnloadedInventoryManagement.Value.pickupDedicatedSlot && Enabled && Value.autoEquip > AutoEquipLevel.None;
-    public static bool VoidBag => !UnloadedInventoryManagement.Value.pickupDedicatedSlot && Enabled && Value.voidBag > VoidBagLevel.None;
-    public static bool HotbarLast => !UnloadedInventoryManagement.Value.hotbarLast && Enabled && Value.hotbarLast;
-    public static bool FixSlot => !UnloadedInventoryManagement.Value.fixSlot && Enabled && Value.fixSlot;
+    public static bool RefillMouse => !UnloadedInventoryManagement.Value.pickupOverrideSlot && InventoryManagement.SmartPickup && Value.refillMouse;
+    public static bool PreviousSlot => !UnloadedInventoryManagement.Value.pickupOverrideSlot && InventoryManagement.SmartPickup && Value.previousSlot > ItemPickupLevel.None;
+    public static bool QuickStack => !UnloadedInventoryManagement.Value.pickupDedicatedSlot && InventoryManagement.SmartPickup && Value.quickStack;
+    public static bool AutoEquip => !UnloadedInventoryManagement.Value.pickupDedicatedSlot && InventoryManagement.SmartPickup && Value.autoEquip > AutoEquipLevel.None;
+    public static bool UpgradeItems => !UnloadedInventoryManagement.Value.pickupDedicatedSlot && InventoryManagement.SmartPickup && Value.upgradeItems;
+    public static bool VoidBagFirst => !UnloadedInventoryManagement.Value.pickupDedicatedSlot && InventoryManagement.SmartPickup && Value.voidBagFirst;
+    public static bool HotbarLast => !UnloadedInventoryManagement.Value.hotbarLast && InventoryManagement.SmartPickup && Value.hotbarLast;
+    public static bool FixSlot => !UnloadedInventoryManagement.Value.fixSlot && InventoryManagement.SmartPickup && Value.fixSlot;
 
-    public static bool OverrideSlot => PreviousSlot.Enabled || RefillMouse;
-    public static bool DedicatedSlot => AutoEquip || UpgradeItems.Enabled;
+    public static bool OverrideSlot => RefillMouse || PreviousSlot;
+    public static bool DedicatedSlot => QuickStack || AutoEquip || UpgradeItems || VoidBagFirst;
     public static SmartPickup Value => InventoryManagement.Instance.smartPickup.Value;
 
     // Compatibility version < v0.6
@@ -90,7 +94,6 @@ public sealed class SmartPickup {
 }
 public enum ItemPickupLevel { None, ImportantItems, AllItems }
 public enum AutoEquipLevel { None, PreferredSlots, AnySlot }
-public enum VoidBagLevel { None, IfInside, Always }
 
 public sealed class PreviousSlot {
     [DefaultValue(true)] public bool mouse = true;
@@ -99,17 +102,24 @@ public sealed class PreviousSlot {
     public Toggle<Materials> materials = new(true);
     public Toggle<PreviousDisplay> displayPrevious = new(true);
 
-    public static bool Enabled => SmartPickup.Enabled && !UnloadedInventoryManagement.Value.pickupOverrideSlot && SmartPickup.Value.previousSlot.Key > ItemPickupLevel.None;
-    public static bool Mouse => Enabled && Value.mouse;
-    public static bool MediumCore => Enabled && Value.mediumCore;
+    public static bool Mouse => SmartPickup.PreviousSlot && Value.mouse;
+    public static bool MediumCore => SmartPickup.PreviousSlot && Value.mediumCore;
     public static PreviousSlot Value => SmartPickup.Value.previousSlot.Value;
+}
+
+public sealed class QuickStackPickup {
+    [DefaultValue(true)] public bool voidBag = true;
+    [DefaultValue(true)] public bool banks = true;
+    [DefaultValue(true)] public bool chests = true;
+    
+    public static QuickStackPickup Value => SmartPickup.Value.quickStack.Value;
 }
 
 public sealed class PreviousDisplay {
     public Toggle<FakeItemDisplay> fakeItem = new(true);
     public Toggle<IconDisplay> icon = new(true, new());
 
-    public static bool Enabled => SmartPickup.Enabled && PreviousSlot.Value.displayPrevious;
+    public static bool Enabled => InventoryManagement.SmartPickup && PreviousSlot.Value.displayPrevious;
     public static bool FakeItem => Enabled && Value.icon && !UnloadedInventoryManagement.Value.displayFakeItem;
     public static bool Icon => Enabled && Value.icon && !UnloadedInventoryManagement.Value.displayIcon;
     public static PreviousDisplay Value => PreviousSlot.Value.displayPrevious.Value;
@@ -140,7 +150,6 @@ public sealed class UpgradeItems {
     [CustomModConfigItem(typeof(DictionaryValuesElement))] public Dictionary<PickupUpgraderDefinition, bool> upgraders = [];
     [DefaultValue(true)] public bool importantOnly = true;
 
-    public static bool Enabled => SmartPickup.Enabled && !UnloadedInventoryManagement.Value.pickupDedicatedSlot && SmartPickup.Value.upgradeItems;
     public static UpgradeItems Value => SmartPickup.Value.upgradeItems.Value;
 
     [OnDeserialized]
@@ -241,10 +250,10 @@ public sealed class BetterTrash {
 
 public sealed class BetterQuickStack {
     [DefaultValue(true)] public bool completeQuickStack = true;
-    [DefaultValue(true)] public bool limitedPersonalQuickStack = true;
+    [DefaultValue(true)] public bool limitedBanksQuickStack = true;
 
     public static bool Enabled => InventoryManagement.Instance.betterQuickStack;
     public static bool CompleteQuickStack => !UnloadedInventoryManagement.Value.quickStackComplete && Enabled && Value.completeQuickStack;
-    public static bool LimitedPersonalQuickStack => !UnloadedInventoryManagement.Value.quickStackLimitedPersonal && Enabled && Value.limitedPersonalQuickStack;
+    public static bool LimitedBanksQuickStack => !UnloadedInventoryManagement.Value.quickStackLimitedBanks && Enabled && Value.limitedBanksQuickStack;
     public static BetterQuickStack Value => InventoryManagement.Instance.betterQuickStack.Value;
 }

@@ -11,6 +11,7 @@
 - Added Limited Personal Quick Stack to Better Quick Stack
 - Clarified Smart Consumption tooltips
 - Clarified Can Consume Itself to Smart Consumption
+- Added Quick Stack to Smart Pickup
 - Fixed Quick with Frame Skip Off
 - Fixed Extra Item Right Click conflicting with Terraria Overhaul 
 

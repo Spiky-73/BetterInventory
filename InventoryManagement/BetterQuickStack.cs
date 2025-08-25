@@ -13,7 +13,7 @@ public sealed class BetterQuickStack : ILoadable {
     public void Load(Mod mod) {
         IL_ChestUI.QuickStack += static il => {
             if (!il.ApplyTo(ILCompleteQuickStack, Configs.BetterQuickStack.CompleteQuickStack)) Configs.UnloadedInventoryManagement.Value.quickStackComplete = true;
-            if (!il.ApplyTo(ILNoSkipEmptySlots, Configs.BetterQuickStack.LimitedPersonalQuickStack)) Configs.UnloadedInventoryManagement.Value.quickStackLimitedPersonal = true;
+            if (!il.ApplyTo(ILNoSkipEmptySlots, Configs.BetterQuickStack.LimitedBanksQuickStack)) Configs.UnloadedInventoryManagement.Value.quickStackLimitedBanks = true;
 
         };
         IL_Player.QuickStackAllChests += static il => {
@@ -69,6 +69,6 @@ public sealed class BetterQuickStack : ILoadable {
         cursor.FindPrevLoc(out _, out int emptySlots, i => i.Previous.MatchNewobj<List<int>>(), 8);
 
         cursor.GotoNext(MoveType.After, i => i.MatchCallvirt(Reflection.List<int>.Count.GetMethod) && i.Previous.MatchLdloc(emptySlots));
-        cursor.EmitDelegate((int count) => Configs.BetterQuickStack.LimitedPersonalQuickStack && Main.LocalPlayer.chest < 0 ? 0 : count);
+        cursor.EmitDelegate((int count) => Configs.BetterQuickStack.LimitedBanksQuickStack && Main.LocalPlayer.chest < 0 ? 0 : count);
     }
 }

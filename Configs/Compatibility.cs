@@ -50,8 +50,10 @@ public sealed class Compatibility : ModConfig {
         SmartConsumption.Value.baits = false;
         SmartPickup.Value.refillMouse = false;
         SmartPickup.Value.previousSlot.Key = ItemPickupLevel.None;
+        SmartPickup.Value.quickStack.Key = false;
         SmartPickup.Value.autoEquip.Key = AutoEquipLevel.None;
         SmartPickup.Value.upgradeItems.Key = false;
+        SmartPickup.Value.voidBagFirst = false;
         SmartPickup.Value.hotbarLast = false;
         SmartPickup.Value.fixSlot = false;
         PreviousDisplay.Value.fakeItem.Key = false;
@@ -65,7 +67,7 @@ public sealed class Compatibility : ModConfig {
         InventoryManagement.Instance.craftStack.Key = false;
         InventoryManagement.Instance.Save();
         InventoryManagement.Instance.betterQuickStack.Value.completeQuickStack = false;
-        InventoryManagement.Instance.betterQuickStack.Value.limitedPersonalQuickStack = false;
+        InventoryManagement.Instance.betterQuickStack.Value.limitedBanksQuickStack = false;
         InventoryManagement.Instance.inventorySlotsTexture = false;
 
         ItemActions.Instance.fixedTooltipPosition = false;
@@ -127,7 +129,7 @@ public sealed class UnloadedInventoryManagement {
     public bool stackTrash;
     public bool craftStack;
     public bool quickStackComplete;
-    public bool quickStackLimitedPersonal;
+    public bool quickStackLimitedBanks;
     public bool inventorySlotsTexture;
     
     public static UnloadedInventoryManagement Value => Compatibility.Instance.unloadedInventoryManagement;

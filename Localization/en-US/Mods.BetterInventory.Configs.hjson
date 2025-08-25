@@ -356,6 +356,11 @@ SmartPickup: {
 			'''
 	}
 
+	quickStack: {
+		Label: Quick stack
+		Tooltip: Automatically quick stacks the item to available chests
+	}
+
 	previousSlot: {
 		Label: Return To Previous Slot
 		Tooltip:
@@ -364,6 +369,11 @@ SmartPickup: {
 			{$Mods.BetterInventory.Configs.ItemPickupLevel.ImportantItems.Label}: Applies to Favorited and Equiped items
 			{$Mods.BetterInventory.Configs.ItemPickupLevel.AllItems.Label}: Applies to all items
 			'''
+	}
+
+	upgradeItems: {
+		Label: Upgrade Items
+		Tooltip: Picked up items go to the slot of items of the same kind if they are better
 	}
 
 	autoEquip: {
@@ -376,19 +386,9 @@ SmartPickup: {
 			'''
 	}
 
-	voidBag: {
+	voidBagFirst: {
 		Label: Pickup to Void Bag First
-		Tooltip:
-			'''
-			Picked up items will fill the void bag before the inventory
-			{$Mods.BetterInventory.Configs.VoidBagLevel.IfInside.Label}: Only for items already in the void bag
-			{$Mods.BetterInventory.Configs.VoidBagLevel.Always.Label}: Applies to all items
-			'''
-	}
-
-	upgradeItems: {
-		Label: Upgrade Items
-		Tooltip: Picked up items go to the slot of items of the same kind if they are better
+		Tooltip: Picked up items will fill the void bag before the inventory
 	}
 
 	hotbarLast: {
@@ -533,6 +533,20 @@ IconDisplay: {
 	intensity: {
 		Label: "{$Mods.BetterInventory.Configs.FakeItemDisplay.intensity.Label}"
 		Tooltip: "{$Mods.BetterInventory.Configs.FakeItemDisplay.intensity.Tooltip}"
+	}
+}
+
+QuickStackPickup: {
+	Tooltip: ""
+
+	voidBag: {
+		Label: Void Bag
+		Tooltip: Quick stack items to the Void Vault
+	}
+
+	chests: {
+		Label: chests
+		Tooltip: Quick stack items to nearby chests
 	}
 }
 
@@ -719,7 +733,7 @@ BetterQuickStack: {
 		Tooltip: Includes the Hotbar and the ammo slots in Quick Stack and Deposit All
 	}
 
-	limitedPersonalQuickStack: {
+	limitedBanksQuickStack: {
 		Label: Limited Personal Quick Stack
 		Tooltip: Do not fill empty slots when quick stacking to a personal container
 	}
@@ -1367,8 +1381,8 @@ UnloadedInventoryManagement: {
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
-	quickStackLimitedPersonal: {
-		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.betterQuickStack.Label} @ {$Mods.BetterInventory.Configs.BetterQuickStack.limitedPersonalQuickStack.Label}"
+	quickStackLimitedBanks: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.betterQuickStack.Label} @ {$Mods.BetterInventory.Configs.BetterQuickStack.limitedBanksQuickStack.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 
