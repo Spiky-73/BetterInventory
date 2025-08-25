@@ -9,6 +9,7 @@
 - Added Deposit Middle Click
 - Added Complete Quick Stack to Better Quick Stack
 - Added Limited Personal Quick Stack to Better Quick Stack
+- Added Inventory Slots Texture
 - Clarified Smart Consumption tooltips
 - Clarified Can Consume Itself to Smart Consumption
 - Added Quick Stack to Smart Pickup
