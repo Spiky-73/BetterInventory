@@ -18,7 +18,7 @@ public sealed class PreviousSlotItem : GlobalItem {
     public override void OnConsumeItem(Item item, Player player) {
         if (!Configs.PreviousSlot.Consumption) return;
         var inventorySlot = InventoryLoader.FindItem(player, i => i == item);
-        if (inventorySlot.HasValue) player.GetModPlayer<PreviousSlotPlayer>().Mark(item.type, inventorySlot.Value, item.favorited);
+        if (inventorySlot.HasValue) player.GetModPlayer<PreviousSlotPlayer>().MarkWithConfig(item.type, inventorySlot.Value, item.favorited);
     }
 }
 public sealed class PreviousSlotPlayer : ModPlayer {
@@ -68,19 +68,19 @@ public sealed class PreviousSlotPlayer : ModPlayer {
         if (!Configs.PreviousSlot.Consumption) return;
         if (Main.netMode == NetmodeID.Server) return;
         var inventorySlot = InventoryLoader.FindItem(Player, i => i == ammo);
-        if (inventorySlot.HasValue) Mark(ammo.type, inventorySlot.Value, ammo.favorited);
+        if (inventorySlot.HasValue) MarkWithConfig(ammo.type, inventorySlot.Value, ammo.favorited);
     }
     public override bool? CanConsumeBait(Item bait) {
         if (!Configs.PreviousSlot.Consumption) return null;
         var inventorySlot = InventoryLoader.FindItem(Player, i => i == bait);
-        if (inventorySlot.HasValue) Mark(bait.type, inventorySlot.Value, bait.favorited);
+        if (inventorySlot.HasValue) MarkWithConfig(bait.type, inventorySlot.Value, bait.favorited);
         return null;
     }
 
     private static bool HookMarkConsumeMaterial(On_Recipe.orig_ConsumeForCraft orig, Recipe self, Item item, Item requiredItem, ref int stackRequired) {
         if (!Configs.PreviousSlot.Consumption) return orig(self, item, requiredItem, ref stackRequired);
         var inventorySlot = InventoryLoader.FindItem(Main.LocalPlayer, i => i == item);
-        if (inventorySlot.HasValue) Main.LocalPlayer.GetModPlayer<PreviousSlotPlayer>().Mark(item.type, inventorySlot.Value, item.favorited);
+        if (inventorySlot.HasValue) Main.LocalPlayer.GetModPlayer<PreviousSlotPlayer>().MarkWithConfig(item.type, inventorySlot.Value, item.favorited);
         return orig(self, item, requiredItem, ref stackRequired);
     }
 
@@ -93,7 +93,7 @@ public sealed class PreviousSlotPlayer : ModPlayer {
         foreach (ModSubInventory inventory in InventoryLoader.GetInventories(self)) {
             IList<Item> items = inventory.Items;
             for (int i = 0; i < items.Count; i++) {
-                if (!items[i].IsAir && (Configs.SmartPickup.Value.previousSlot == Configs.ItemPickupLevel.AllItems || inventory.CanBePreferredInventory || items[i].favorited)) modPlayer.Mark(items[i].type, new(inventory, i), items[i].favorited);
+                modPlayer.MarkWithConfig(items[i].type, new(inventory, i), items[i].favorited);
             }
         }
         orig(self);
@@ -232,6 +232,10 @@ public sealed class PreviousSlotPlayer : ModPlayer {
         }
         slot = marks[^1];
         return true;
+    }
+
+    public void MarkWithConfig(int type, InventorySlot slot, bool favorited) {
+        if (Configs.SmartPickup.Value.previousSlot == Configs.ItemPickupLevel.AllItems || slot.Inventory.CanBePreferredInventory || favorited) Mark(type, slot, favorited);
     }
 
     public void Mark(int type, InventorySlot slot, bool favorited) {
