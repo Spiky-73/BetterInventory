@@ -4,6 +4,7 @@ using SpikysLib.Constants;
 using SpikysLib.DataStructures;
 using Terraria;
 using Terraria.ModLoader.Default;
+using Terraria.ModLoader.IO;
 using ContextID = Terraria.UI.ItemSlot.Context;
 
 namespace BetterInventory.Default.Inventories;
@@ -37,6 +38,8 @@ public sealed class SharedAccessoryDyes : DyesInventory {
     public sealed override ListIndices<Item> Items => new(ModdedDyes, AccessoryInventory.UnlockedModdedSlots(Entity, true));
     public sealed override int ComparePositionTo(ModSubInventory other) => other is AccessoryDyes ? 1 : 0;
     public sealed override IList<ModSubInventory> GetInventories(Player player) => [NewInstance(player)];
+    public override void SaveData(TagCompound tag) { }
+    public override void LoadData(TagCompound tag) { }
 }
 public sealed class EquipmentDyes : DyesInventory {
     private int _previousPage;
@@ -46,4 +49,6 @@ public sealed class EquipmentDyes : DyesInventory {
     public sealed override Item[] Items => Entity.miscDyes;
     public sealed override int ComparePositionTo(ModSubInventory other) => other is SharedAccessoryDyes ? 1 : 0;
     public sealed override IList<ModSubInventory> GetInventories(Player player) => [NewInstance(player)];
+    public override void SaveData(TagCompound tag) { }
+    public override void LoadData(TagCompound tag) { }
 }

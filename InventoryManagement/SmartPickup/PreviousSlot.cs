@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
@@ -9,6 +10,8 @@ using SpikysLib.IL;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.ModLoader.Config;
+using Terraria.ModLoader.IO;
 using Terraria.UI;
 using Terraria.UI.Gamepad;
 
@@ -36,9 +39,50 @@ public sealed class PreviousSlotPlayer : ModPlayer {
         };
     }
 
-    public override void OnEnterWorld() {
-        s_marksData.Clear();
-        s_marks.Clear();
+    public override void SaveData(TagCompound tag) {
+        List<TagCompound> marksTag = [];
+        foreach ((int type, List<InventorySlot> slots) in _marksPerType) {
+            TagCompound[] slotTags = slots.Where(s => s.Item.type != type).Select(slot => {
+                TagCompound slotTag = [
+                    new(ModTag,slot.Inventory.Mod.Name),
+                    new(NameTag,slot.Inventory.Name),
+                    new(IndexTag,slot.Index),
+                    new(FavoritedTag, _marksPerSlot[slot].favorited)
+                ];
+                TagCompound dataTag = [];
+                slot.Inventory.SaveData(dataTag);
+                if (dataTag.Count > 0) slotTag[DataTag] = dataTag;
+                return slotTag;
+            }).ToArray();
+            if (slotTags.Length > 0) marksTag.Add([
+                new(ItemTag, new ItemDefinition(type)),
+                new(SlotsTag, slotTags)
+            ]);
+        }
+        if (marksTag.Count > 0) tag[MarksTag] = marksTag;
+    }
+
+    public override void LoadData(TagCompound tag) {
+        if (tag.TryGet(MarksTag, out List<TagCompound> marks)) {
+            _marksPerSlot.Clear();
+            _marksPerType.Clear();
+            foreach (TagCompound markTag in marks) {
+                ItemDefinition item = markTag.Get<ItemDefinition>(ItemTag);
+                TagCompound[] slotsTag = markTag.Get<TagCompound[]>(SlotsTag);
+                foreach (var slotTag in slotsTag) {
+                    string mod = slotTag.GetString(ModTag);
+                    string name = slotTag.GetString(NameTag);
+                    int index = slotTag.GetInt(IndexTag);
+                    bool favorited = slotTag.GetBool(FavoritedTag);
+                    if (ModContent.TryFind(mod, name, out ModSubInventory inventoryTemplate)) {
+                        var inventory = inventoryTemplate.NewInstance(Player);
+                        if (slotTag.TryGet(DataTag, out TagCompound data)) inventory.LoadData(data);
+                        Mark(item.Type, new(inventory, index), favorited); // TODO unloaded items or inventory, worlds
+                    }
+                }
+            }
+        }
+
     }
 
     private static void HookMarkOnLeftClick(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) => UpdateMark((inv, context, slot) => orig(inv, context, slot), inv, context, slot, Main.mouseLeft && Main.mouseLeftRelease);
@@ -222,11 +266,11 @@ public sealed class PreviousSlotPlayer : ModPlayer {
         return false;
     }
 
-    public bool IsMarked(int type) => s_marks.TryGetValue(type, out var marks) && marks.Count > 0;
-    public bool IsMarked(InventorySlot slot) => s_marksData.ContainsKey(slot);
-    public bool TryGetMark(InventorySlot slot, [MaybeNullWhen(false)] out Item mark) => s_marksData.TryGetValue(slot, out mark);
+    public bool IsMarked(int type) => _marksPerType.TryGetValue(type, out var marks) && marks.Count > 0;
+    public bool IsMarked(InventorySlot slot) => _marksPerSlot.ContainsKey(slot);
+    public bool TryGetMark(InventorySlot slot, [MaybeNullWhen(false)] out Item mark) => _marksPerSlot.TryGetValue(slot, out mark);
     public bool TryGetLastMarkedSlot(int type, [MaybeNullWhen(false)] out InventorySlot slot) {
-        if (!s_marks.TryGetValue(type, out var marks) || marks.Count == 0) {
+        if (!_marksPerType.TryGetValue(type, out var marks) || marks.Count == 0) {
             slot = default;
             return false;
         }
@@ -243,28 +287,37 @@ public sealed class PreviousSlotPlayer : ModPlayer {
             if (!Configs.PreviousSlot.Value.overridePrevious) return;
             Unmark(slot);
         }
-        s_marks.TryAdd(type, new());
-        s_marks[type].Add(slot);
-        s_marksData[slot] = new(type) { favorited = favorited };
+        _marksPerType.TryAdd(type, new());
+        _marksPerType[type].Add(slot);
+        _marksPerSlot[slot] = new(type) { favorited = favorited };
     }
     public void Unmark(int type) {
         if (!IsMarked(type)) return;
-        foreach (InventorySlot mark in s_marks[type]) s_marksData.Remove(mark);
-        s_marks.Remove(type);
+        foreach (InventorySlot mark in _marksPerType[type]) _marksPerSlot.Remove(mark);
+        _marksPerType.Remove(type);
     }
     public void Unmark(InventorySlot slot) {
         if (!IsMarked(slot)) return;
-        s_marks[s_marksData[slot].type].Remove(slot);
-        s_marksData.Remove(slot);
+        _marksPerType[_marksPerSlot[slot].type].Remove(slot);
+        _marksPerSlot.Remove(slot);
     }
     public void Remark(int oldType, int newType, bool? favorited = null) {
         Unmark(newType);
         if (!IsMarked(oldType)) return;
-        foreach (InventorySlot slot in s_marks[oldType]) s_marksData[slot] = new(newType) { favorited = favorited ?? s_marksData[slot].favorited };
-        s_marks[newType] = s_marks[oldType];
-        s_marks.Remove(oldType);
+        foreach (InventorySlot slot in _marksPerType[oldType]) _marksPerSlot[slot] = new(newType) { favorited = favorited ?? _marksPerSlot[slot].favorited };
+        _marksPerType[newType] = _marksPerType[oldType];
+        _marksPerType.Remove(oldType);
     }
 
-    private readonly Dictionary<InventorySlot, Item> s_marksData = [];
-    private readonly Dictionary<int, List<InventorySlot>> s_marks = [];
+    private readonly Dictionary<InventorySlot, Item> _marksPerSlot = [];
+    private readonly Dictionary<int, List<InventorySlot>> _marksPerType = [];
+
+    public const string MarksTag = "marks";
+    public const string ItemTag = "item";
+    public const string SlotsTag = "slots";
+    public const string ModTag = "mod";
+    public const string NameTag = "name";
+    public const string DataTag = "data";
+    public const string IndexTag = "index";
+    public const string FavoritedTag = "favorited";
 }

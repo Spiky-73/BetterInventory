@@ -5,6 +5,7 @@ using SpikysLib.DataStructures;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Default;
+using Terraria.ModLoader.IO;
 using Terraria.UI;
 using ContextID = Terraria.UI.ItemSlot.Context;
 
@@ -94,6 +95,8 @@ public sealed class SharedAccessories : AccessoryInventory {
     public override int Context => ContextID.EquipAccessory;
     public override ListIndices<Item> Items => new(ModdedAccessories, UnlockedModdedSlots(Entity, true));
     public override IList<ModSubInventory> GetInventories(Player player) => [NewInstance(player)];
+    public override void SaveData(TagCompound tag) { }
+    public override void LoadData(TagCompound tag) { }
     public sealed override int ComparePositionTo(ModSubInventory other) => other is Accessories ? 1 : 0;
 }
 
@@ -114,5 +117,7 @@ public sealed class SharedVanityAccessories : AccessoryInventory {
     public override int Context => ContextID.EquipAccessoryVanity;
     public override ListIndices<Item> Items => new(ModdedAccessories, UnlockedModdedSlots(Entity, true, true));
     public override IList<ModSubInventory> GetInventories(Player player) => [NewInstance(player)];
+    public override void SaveData(TagCompound tag) { }
+    public override void LoadData(TagCompound tag) { }
     public sealed override int ComparePositionTo(ModSubInventory other) => other is VanityAccessories ? 1 : 0;
 }

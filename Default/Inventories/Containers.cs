@@ -6,6 +6,7 @@ using Terraria.ID;
 using Terraria.UI;
 using ContextID = Terraria.UI.ItemSlot.Context;
 using SpikysLib.Constants;
+using Terraria.ModLoader.IO;
 
 namespace BetterInventory.Default.Inventories;
 
@@ -49,21 +50,34 @@ public abstract class Container : ModSubInventory {
 
 public sealed class Chest : Container {
     public int Index { get; private set; } = -1;
+    public int WorldID { get; private set; } = -1;
     public override int Context => ContextID.ChestItem;
     public override void OnSlotChange(int slot) => NetMessage.SendData(MessageID.SyncChestItem, number: Index, number2: slot);
-    public override Item[] Items => Index >= 0 ? Main.chest[Index].item : [];
+    public override Item[] Items => WorldID == Main.worldID && Index >= 0 ? Main.chest[Index].item : [];
 
-    public override bool Accepts(Item item) => Entity.chest == Index;
+    public override bool Accepts(Item item) => WorldID == Main.worldID && Entity.chest == Index;
 
     public override IList<ModSubInventory> GetInventories(Player player) {
+        if (player.chest < 0) return [];
         var inventory = (Chest)NewInstance(player);
         inventory.Index = player.chest;
+        inventory.WorldID = Main.worldID;
         return [inventory];
     }
 
-    public override bool Equals(object? obj) => base.Equals(obj) && Index == ((Chest)obj).Index;
-    public override int GetHashCode() => (Index, base.GetHashCode()).GetHashCode();
+    public override bool Equals(object? obj) => base.Equals(obj) && Index == ((Chest)obj).Index && WorldID == ((Chest)obj).WorldID;
+    public override int GetHashCode() => (Index, WorldID, base.GetHashCode()).GetHashCode();
 
+    public override void SaveData(TagCompound tag) {
+        tag[IndexTag] = Index;
+        tag[WorldTag] = WorldID;
+    }
+    public override void LoadData(TagCompound tag) {
+        Index = tag.GetInt(IndexTag);
+        WorldID = tag.GetInt(WorldTag);
+    }
+    public const string IndexTag = "index";
+    public const string WorldTag = "world";
 }
 public sealed class PiggyBank : Container {
     public override int Context => ContextID.BankItem;

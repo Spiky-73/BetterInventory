@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Terraria;
 using Terraria.Localization;
+using Terraria.ModLoader.IO;
 
 namespace BetterInventory.Default.Inventories;
 
@@ -34,6 +35,14 @@ public abstract class ModSubLoadoutInventory : ModSubInventory {
         }
         return inventories;
     }
+    public override void SaveData(TagCompound tag) {
+        tag[LoadoutTag] = LoadoutIndex;
+    }
+    public override void LoadData(TagCompound tag) {
+        LoadoutIndex = tag.GetInt(LoadoutTag);
+    }
+    public const string LoadoutTag = "loadout";
+
 
     public override LocalizedText DisplayName => LoadoutIndex != -1 ? base.DisplayName.WithFormatArgs(LoadoutIndex + 1) : base.DisplayName;
     public override bool Equals(object? obj) => base.Equals(obj) && obj is ModSubLoadoutInventory subInventory && LoadoutIndex == subInventory.LoadoutIndex;
