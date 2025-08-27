@@ -26,11 +26,13 @@ public sealed class BetterPlayer : ModPlayer {
     public static BetterPlayer LocalPlayer => Main.LocalPlayer.GetModPlayer<BetterPlayer>();
 
     public static ModKeybind FavoritedBuffKb { get; private set; } = null!;
+    public static ModKeybind QuickStackKb { get; private set; } = null!;
     public static readonly List<(BuilderToggle? toggle, ModKeybind kb)> BuilderTogglesKb = [];
     public static readonly List<BuilderToggle> WireDisplayToggles = [];
 
     public override void Load() {
         FavoritedBuffKb = KeybindLoader.RegisterKeybind(Mod, "FavoritedQuickBuff", Microsoft.Xna.Framework.Input.Keys.B);
+        QuickStackKb = KeybindLoader.RegisterKeybind(Mod, "QuickStack", Microsoft.Xna.Framework.Input.Keys.None);
         On_ItemSlot.TryOpenContainer += HookTryOpenContainer;
         On_Player.DropItemFromExtractinator += HookFastExtractinator;
 
@@ -43,6 +45,7 @@ public sealed class BetterPlayer : ModPlayer {
 
     public override void Unload() {
         FavoritedBuffKb = null!;
+        QuickStackKb = null!;
         BuilderTogglesKb.Clear();
         WireDisplayToggles.Clear();
     }
@@ -105,6 +108,7 @@ public sealed class BetterPlayer : ModPlayer {
     public override void ProcessTriggers(TriggersSet triggersSet) {
         QuickSearch.ProcessTriggers();
         if (Configs.ItemActions.FavoritedBuff && FavoritedBuffKb.JustPressed) FavoritedBuff(Player);
+        if (Configs.ItemActions.QuickStack && QuickStackKb.JustPressed) Player.QuickStackAllChests();
         if (Configs.ItemActions.BuilderAccs) BuilderKeys();
     }
 

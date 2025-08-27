@@ -18,6 +18,7 @@ public sealed class ItemActions : ModConfig {
     public bool fixedTooltipPosition;
     public Toggle<TooltipHover> tooltipHover = new(true);
     public Toggle<ItemAmmo> itemAmmo = new(true);
+    [DefaultValue(true)] public bool quickStack;
 
     public static bool FastContainerOpening => Instance.fastContainerOpening;
     public static bool FastExtractinator => Instance.fastExtractinator;
@@ -25,6 +26,7 @@ public sealed class ItemActions : ModConfig {
     public static bool BuilderAccs => Instance.builderAccs;
     public static bool KeepSwappedFavorited => Instance.keepSwappedFavorited;
     public static bool FixedTooltipPosition => Instance.fixedTooltipPosition && !UnloadedItemActions.Value.fixedTooltipPosition;
+    public static bool QuickStack => Instance.quickStack;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
     public static ItemActions Instance = null!;

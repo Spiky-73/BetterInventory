@@ -814,6 +814,11 @@ ItemActions: {
 		Label: "[i:40] Display Item Ammo"
 		Tooltip: Display the ammo used by various items
 	}
+
+	quickStack: {
+		Label: "[i:48] Quick stack"
+		Tooltip: Press the "{$Mods.BetterInventory.Keybinds.QuickStack.DisplayName}" key to quick stack items
+	}
 }
 
 ItemRightClick: {

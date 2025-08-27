@@ -14,6 +14,7 @@
 - Clarified Can Consume Itself to Smart Consumption
 - Added Quick Stack to Smart Pickup
 - Added Consumption to Return to Previous Slot
+- Added Quick Stack hotkey
 - Fixed Quick with Frame Skip Off
 - Fixed Extra Item Right Click conflicting with Terraria Overhaul 
 
