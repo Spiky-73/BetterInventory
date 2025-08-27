@@ -39,52 +39,6 @@ public sealed class PreviousSlotPlayer : ModPlayer {
         };
     }
 
-    public override void SaveData(TagCompound tag) {
-        List<TagCompound> marksTag = [];
-        foreach ((int type, List<InventorySlot> slots) in _marksPerType) {
-            TagCompound[] slotTags = slots.Where(s => s.Item.type != type).Select(slot => {
-                TagCompound slotTag = [
-                    new(ModTag,slot.Inventory.Mod.Name),
-                    new(NameTag,slot.Inventory.Name),
-                    new(IndexTag,slot.Index),
-                    new(FavoritedTag, _marksPerSlot[slot].favorited)
-                ];
-                TagCompound dataTag = [];
-                slot.Inventory.SaveData(dataTag);
-                if (dataTag.Count > 0) slotTag[DataTag] = dataTag;
-                return slotTag;
-            }).ToArray();
-            if (slotTags.Length > 0) marksTag.Add([
-                new(ItemTag, new ItemDefinition(type)),
-                new(SlotsTag, slotTags)
-            ]);
-        }
-        if (marksTag.Count > 0) tag[MarksTag] = marksTag;
-    }
-
-    public override void LoadData(TagCompound tag) {
-        if (tag.TryGet(MarksTag, out List<TagCompound> marks)) {
-            _marksPerSlot.Clear();
-            _marksPerType.Clear();
-            foreach (TagCompound markTag in marks) {
-                ItemDefinition item = markTag.Get<ItemDefinition>(ItemTag);
-                TagCompound[] slotsTag = markTag.Get<TagCompound[]>(SlotsTag);
-                foreach (var slotTag in slotsTag) {
-                    string mod = slotTag.GetString(ModTag);
-                    string name = slotTag.GetString(NameTag);
-                    int index = slotTag.GetInt(IndexTag);
-                    bool favorited = slotTag.GetBool(FavoritedTag);
-                    if (ModContent.TryFind(mod, name, out ModSubInventory inventoryTemplate)) {
-                        var inventory = inventoryTemplate.NewInstance(Player);
-                        if (slotTag.TryGet(DataTag, out TagCompound data)) inventory.LoadData(data);
-                        Mark(item.Type, new(inventory, index), favorited); // TODO unloaded items or inventory, worlds
-                    }
-                }
-            }
-        }
-
-    }
-
     private static void HookMarkOnLeftClick(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) => UpdateMark((inv, context, slot) => orig(inv, context, slot), inv, context, slot, Main.mouseLeft && Main.mouseLeftRelease);
     private static void HookMarkOnRightClick(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) => UpdateMark((inv, context, slot) => orig(inv, context, slot), inv, context, slot, Main.mouseRight);
     private static void UpdateMark(Action<Item[], int, int> orig, Item[] inv, int context, int slot, bool update) {

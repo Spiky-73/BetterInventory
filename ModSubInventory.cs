@@ -40,8 +40,6 @@ public abstract class ModSubInventory : ModType<Player, ModSubInventory>, ILocal
     protected override void ValidateType() {
         base.ValidateType();
         LoaderUtils.MustOverrideTogether(this, i => i.Focus, i => i.Unfocus);
-        LoaderUtils.MustOverrideTogether(this, i => i.GetInventories, i => i.SaveData, i => i.LoadData);
-
     }
 
     public virtual void Focus(int slot) { }
@@ -93,7 +91,4 @@ public abstract class ModSubInventory : ModType<Player, ModSubInventory>, ILocal
 
     public override bool Equals(object? obj) => obj is ModSubInventory subInventory && FullName == subInventory.FullName;
     public override int GetHashCode() => FullName.GetHashCode();
-
-    public virtual void SaveData(TagCompound tag) { }
-    public virtual void LoadData(TagCompound tag) { }
 }
