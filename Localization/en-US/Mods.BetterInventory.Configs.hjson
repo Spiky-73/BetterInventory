@@ -21,6 +21,11 @@ Crafting: {
 			'''
 	}
 
+	recipeSort: {
+		Label: "[i:4319] Recipe Sorting"
+		Tooltip: Sort recipes by name, value or journey catalogue order
+	}
+
 	craftOnList: {
 		Label: "[i:3617] Craft on Recipe List"
 		Tooltip: Craft items directly from the recipe list
@@ -41,17 +46,10 @@ Crafting: {
 			'''
 	}
 
-	Tooltip: ""
-
 	recipeTooltip: {
 		Name: Recipe in Tooltip
 		Label: "[i:398] {$Mods.BetterInventory.Configs.Crafting.recipeTooltip.Name}"
 		Tooltip: Shows recipes' materials and required tiles in their tooltip
-	}
-
-	recipeSort: {
-		Label: "[i:4319] Recipe Sorting"
-		Tooltip: Adds a button to sort recipes
 	}
 }
 
@@ -260,7 +258,7 @@ InventoryManagement: {
 
 	betterShiftClick: {
 		Label: "[i:48] Better Shift Click"
-		Tooltip: Improves Shift click
+		Tooltip: Shift Click from anywhere and with Right Click
 	}
 
 	betterTrash: {
