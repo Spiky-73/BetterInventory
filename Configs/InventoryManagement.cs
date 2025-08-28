@@ -68,10 +68,17 @@ public sealed class SmartPickup {
     public Toggle<QuickStackPickup> quickStack = new(true);
     [DefaultValue(AutoEquipLevel.PreferredSlots)] public NestedValue<AutoEquipLevel, AutoEquip> autoEquip = new(AutoEquipLevel.PreferredSlots);
     public Toggle<UpgradeItems> upgradeItems = new(true);
-    [DefaultValue(true)] public bool voidBagFirst = true;
+    [DefaultValue(false)] public bool voidBagFirst = false;
     [DefaultValue(true)] public bool hotbarLast = true;
     [DefaultValue(true)] public bool fixSlot = true;
     [DefaultValue(true)] public bool fixAmmo = true;
+
+    // Compatibility version < v0.9
+    [JsonProperty, DefaultValue(VoidBagLevel.IfInside)] private VoidBagLevel voidBag { set => ConfigHelper.MoveMember<InventoryManagement>(value != VoidBagLevel.IfInside, c => {
+        c.smartPickup.Value.voidBagFirst = value == VoidBagLevel.Always;
+        c.smartPickup.Value.quickStack.Key = value != VoidBagLevel.None;
+    }); }
+
 
     public static bool RefillMouse => !UnloadedInventoryManagement.Value.pickupOverrideSlot && InventoryManagement.SmartPickup && Value.refillMouse;
     public static bool PreviousSlot => !UnloadedInventoryManagement.Value.pickupOverrideSlot && InventoryManagement.SmartPickup && Value.previousSlot > ItemPickupLevel.None;
@@ -96,6 +103,7 @@ public sealed class SmartPickup {
 }
 public enum ItemPickupLevel { None, ImportantItems, AllItems }
 public enum AutoEquipLevel { None, PreferredSlots, AnySlot }
+public enum VoidBagLevel { None, IfInside, Always }
 
 public sealed class PreviousSlot {
     [DefaultValue(true)] public bool mouse = true;

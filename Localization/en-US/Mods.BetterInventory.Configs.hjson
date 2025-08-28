@@ -358,7 +358,7 @@ SmartPickup: {
 
 	quickStack: {
 		Label: Quick stack
-		Tooltip: Automatically quick stacks the item to available chests
+		Tooltip: Automatically quick stacks items not in the inventory to available chests
 	}
 
 	previousSlot: {
