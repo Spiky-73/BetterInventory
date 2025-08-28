@@ -626,6 +626,11 @@ QuickMove: {
 		Label: Tooltip
 		Tooltip: Adds a tooltip line to displays the Quick Move chain
 	}
+
+	bringItem: {
+		Label: Bring Item To Hovered Slot
+		Tooltip: Brings the Hotbar item of the targeted slot when not hovering an item
+	}
 }
 
 HotkeyMode: {

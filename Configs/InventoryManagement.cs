@@ -169,6 +169,7 @@ public sealed class QuickMove {
     [DefaultValue(true)] public bool followItem = true;
     [DefaultValue(false)] public bool inactiveInventories = false;
     [DefaultValue(false)] public bool tooltip = false;
+    [DefaultValue(true)] public bool bringItem = true;
 
     public static bool Enabled => InventoryManagement.Instance.quickMove;
     public static bool InactiveInventories => Value.inactiveInventories;

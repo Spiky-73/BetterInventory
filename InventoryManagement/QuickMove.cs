@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using BetterInventory.Default.Inventories;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
@@ -104,7 +105,21 @@ public sealed class QuickMove : ModPlayer {
     }
     private static void SetupChain(InventorySlot source, int targetKey) {
         if (source.Item.IsAir) {
-            s_moveChain = [];
+            ModSubInventory hotbar = ModContent.GetInstance<Hotbar>().NewInstance(Main.LocalPlayer);
+            int slot = HotkeyToSlot(targetKey, hotbar.Items.Count);
+            if (!Configs.QuickMove.Value.bringItem || hotbar.Items[slot].IsAir) {
+                s_moveChain = [];
+                return;
+            }
+            s_moveKey = targetKey;
+            s_moveIndex = 0;
+            InventorySlot from = new(hotbar, slot);
+            s_moveChain = [
+                from, source,
+                ..GetDisplayedChain(Main.LocalPlayer, from.Item, source.Inventory).Select(i => new InventorySlot(i, HotkeyToSlot(targetKey, i.Items.Count)))
+            ];
+            s_movedItems = [];
+            s_validSlots = [from, source];
             return;
         }
         s_moveKey = targetKey;
