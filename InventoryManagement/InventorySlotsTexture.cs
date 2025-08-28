@@ -15,6 +15,9 @@ public sealed class InventorySlotsTexture : ILoadable {
         IL_Main.DrawInventory += static il => {
             if (!il.ApplyTo(ILHideInterfaceText, Configs.InventoryManagement.InventorySlotsTexture)) Configs.UnloadedInventoryManagement.Value.inventorySlotsTexture = true;
         };
+        IL_Main.GUIHotbarDrawInner += static il => {
+            if (!il.ApplyTo(ILHideInterfaceText, Configs.InventoryManagement.InventorySlotsTexture)) Configs.UnloadedInventoryManagement.Value.inventorySlotsTexture = true;
+        };
         IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += static il => {
             if (!il.ApplyTo(ILDrawSlotTexture, Configs.InventoryManagement.InventorySlotsTexture)) Configs.UnloadedInventoryManagement.Value.inventorySlotsTexture = true;
         };
