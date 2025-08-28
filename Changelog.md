@@ -15,6 +15,7 @@
 - Added Quick Stack to Smart Pickup
 - Added Consumption to Return to Previous Slot
 - Added Quick Stack hotkey
+- Added Fix Ammo to Return to Previous Slot
 - Fixed Quick with Frame Skip Off
 - Fixed Extra Item Right Click conflicting with Terraria Overhaul 
 

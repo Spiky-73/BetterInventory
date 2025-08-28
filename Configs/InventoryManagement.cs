@@ -71,6 +71,7 @@ public sealed class SmartPickup {
     [DefaultValue(true)] public bool voidBagFirst = true;
     [DefaultValue(true)] public bool hotbarLast = true;
     [DefaultValue(true)] public bool fixSlot = true;
+    [DefaultValue(true)] public bool fixAmmo = true;
 
     public static bool RefillMouse => !UnloadedInventoryManagement.Value.pickupOverrideSlot && InventoryManagement.SmartPickup && Value.refillMouse;
     public static bool PreviousSlot => !UnloadedInventoryManagement.Value.pickupOverrideSlot && InventoryManagement.SmartPickup && Value.previousSlot > ItemPickupLevel.None;
@@ -80,6 +81,7 @@ public sealed class SmartPickup {
     public static bool VoidBagFirst => !UnloadedInventoryManagement.Value.pickupDedicatedSlot && InventoryManagement.SmartPickup && Value.voidBagFirst;
     public static bool HotbarLast => !UnloadedInventoryManagement.Value.hotbarLast && InventoryManagement.SmartPickup && Value.hotbarLast;
     public static bool FixSlot => !UnloadedInventoryManagement.Value.fixSlot && InventoryManagement.SmartPickup && Value.fixSlot;
+    public static bool FixAmmo => !UnloadedInventoryManagement.Value.pickupDedicatedSlot && InventoryManagement.SmartPickup && Value.fixAmmo;
 
     public static bool OverrideSlot => RefillMouse || PreviousSlot;
     public static bool DedicatedSlot => QuickStack || AutoEquip || UpgradeItems || VoidBagFirst;

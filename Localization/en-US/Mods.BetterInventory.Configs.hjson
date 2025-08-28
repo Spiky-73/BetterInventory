@@ -398,7 +398,12 @@ SmartPickup: {
 
 	fixSlot: {
 		Label: Fix Unexpected Slot
-		Tooltip: Fixes some cases where the item does not go to the expected slot
+		Tooltip: Fixes some cases where items don't go to the expected slot
+	}
+
+	fixAmmo: {
+		Label: Fix Ammo
+		Tooltip: Fixes some cases where ammo items don't go to the expected slot
 	}
 }
 

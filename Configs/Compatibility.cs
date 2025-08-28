@@ -56,6 +56,7 @@ public sealed class Compatibility : ModConfig {
         SmartPickup.Value.voidBagFirst = false;
         SmartPickup.Value.hotbarLast = false;
         SmartPickup.Value.fixSlot = false;
+        SmartPickup.Value.fixAmmo = false;
         PreviousDisplay.Value.fakeItem.Key = false;
         PreviousDisplay.Value.icon.Key = false;
         QuickMove.Value.displayedHotkeys.Key = HotkeyDisplayMode.None;
