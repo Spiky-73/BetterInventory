@@ -165,6 +165,16 @@ RecipeSearchBar: {
 		Label: Min Width
 		Tooltip: The minimum width of the search bar. It will never go bellow the width of the other filters.
 	}
+
+	simpleSearch: {
+		Label: Simple Search
+		Tooltip:
+			'''
+			Simplifies the search algorithm to greatly improve performances
+			Searches the name of the item only and not the entire tooltip
+			Consider enabling this if the game lags when searching recipes
+			'''
+	}
 }
 
 CraftOnList: {

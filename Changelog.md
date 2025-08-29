@@ -17,6 +17,7 @@
 - Added Quick Stack hotkey
 - Added Fix Ammo to Return to Previous Slot
 - Added Bring Item To Hovered Slot to Quick Move
+- Added Simple search to Recipe Search Bar
 - Fixed Quick with Frame Skip Off
 - Fixed Extra Item Right Click conflicting with Terraria Overhaul 
 

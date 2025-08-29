@@ -19,6 +19,7 @@ Details:
 	- Better Quick Stack in Inventory Management
 	- Quick Stack in Smart Pickup
 	It may feel strange to have them enabled at first, but they are definitely worth it.
+	The search algorithm of Recipe Search Bar was also simplified to improve performances. You can revert to the old one by disabling Simple Search.
 	'''
 Changelog:
 	'''
@@ -38,6 +39,7 @@ Changelog:
 	- Added Quick Stack hotkey
 	- Added Fix Ammo to Return to Previous Slot
 	- Added Bring Item To Hovered Slot to Quick Move
+	- Added Simple search to Recipe Search Bar
 	- Fixed Quick with Frame Skip Off
 	- Fixed Extra Item Right Click conflicting with Terraria Overhaul 
 	'''

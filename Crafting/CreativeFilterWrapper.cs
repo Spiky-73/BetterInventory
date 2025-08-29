@@ -25,15 +25,19 @@ public sealed class ItemFilterWrapper : IRecipeFilter {
 
 public sealed class ItemSearchFilterWrapper : IRecipeFilter, ISearchFilter<RecipeListEntry> {
     public ItemFilters.BySearch Filter { get; } = new ItemFilters.BySearch();
+    public bool SimpleSearch { get; set; }
 
-    public void SetSearch(string searchText) => Filter.SetSearch(searchText);
-    public bool FitsFilter(RecipeListEntry entry) => Filter.FitsFilter(entry.createItem);
+    public void SetSearch(string? searchText) => Filter.SetSearch(_search = searchText);
+    public bool FitsFilter(RecipeListEntry entry) => SimpleSearch ?
+        (_search is not null && entry.createItem.HoverName.ToLower().Contains(_search, System.StringComparison.OrdinalIgnoreCase)):
+        Filter.FitsFilter(entry.createItem);
     public string GetDisplayNameKey() => Filter.GetDisplayNameKey();
 
     public UIElement GetImage() => new UIImageFramed(RecipeUI.recipeFilters, GetSourceFrame());
     public UIElement GetImageGray() => new UIImageFramed(RecipeUI.recipeFiltersGray, GetSourceFrame());
     public static Rectangle GetSourceFrame() => RecipeUI.recipeFilters.Frame(horizontalFrames: 11, frameX: 0, sizeOffsetX: -2);
 
+    private static string? _search;
 }
 
 public sealed class RecipeMiscFallback : IRecipeFilter {

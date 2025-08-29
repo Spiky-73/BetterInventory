@@ -172,6 +172,7 @@ public sealed class RecipeUI : ModSystem {
     }
 
     private static IEnumerable<RecipeListEntry> ApplyRecipeSearch(IEnumerable<RecipeListEntry> recipes) {
+        SearchFilter.SimpleSearch = Configs.RecipeSearchBar.Value.simpleSearch;
         return recipes.Where(SearchFilter.FitsFilter);
     }
     private static IEnumerable<RecipeListEntry> ApplyRecipeFilters(IEnumerable<RecipeListEntry> recipes) {
@@ -206,5 +207,5 @@ public sealed class RecipeUI : ModSystem {
     public static int[] RecipesPerFilter = [];
     public readonly static EntryFilterer<RecipeListEntry, IRecipeFilter> Filterer = new();
     public readonly static EntrySorter<RecipeListEntry, IRecipeSortStep> Sorter = new();
-    public static ISearchFilter<RecipeListEntry> SearchFilter = null!;
+    public static ItemSearchFilterWrapper SearchFilter = null!;
 }

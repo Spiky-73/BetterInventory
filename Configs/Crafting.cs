@@ -88,6 +88,7 @@ public sealed class RecipeFilters {
 public sealed class RecipeSearchBar {
     [DefaultValue(true)] public bool expand = true;
     [DefaultValue(14 * 4 + 3 * 6), Range(0, 220)] public int minWidth = 14 * 4 + 3 * 6;
+    [DefaultValue(true)] public bool simpleSearch = true;
 
     public static bool Enabled => Crafting.Instance.recipeSearchBar && !UnloadedCrafting.Value.recipeSearchBar;
     public static RecipeSearchBar Value => Crafting.Instance.recipeSearchBar.Value;
