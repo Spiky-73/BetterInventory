@@ -29,7 +29,7 @@ public sealed class ItemSearchFilterWrapper : IRecipeFilter, ISearchFilter<Recip
 
     public void SetSearch(string? searchText) => Filter.SetSearch(_search = searchText);
     public bool FitsFilter(RecipeListEntry entry) => SimpleSearch ?
-        (_search is not null && entry.createItem.HoverName.ToLower().Contains(_search, System.StringComparison.OrdinalIgnoreCase)):
+        (_search is null || entry.createItem.HoverName.ToLower().Contains(_search, System.StringComparison.OrdinalIgnoreCase)):
         Filter.FitsFilter(entry.createItem);
     public string GetDisplayNameKey() => Filter.GetDisplayNameKey();
 
