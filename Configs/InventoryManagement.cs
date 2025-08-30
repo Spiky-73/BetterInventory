@@ -63,7 +63,7 @@ public sealed class SmartConsumption {
 }
 
 public sealed class SmartPickup {
-    public bool refillMouse = true;
+    [DefaultValue(true)] public bool refillMouse = true;
     public NestedValue<ItemPickupLevel, PreviousSlot> previousSlot = new(ItemPickupLevel.AllItems);
     public Toggle<QuickStackPickup> quickStack = new(true);
     [DefaultValue(AutoEquipLevel.PreferredSlots)] public NestedValue<AutoEquipLevel, AutoEquip> autoEquip = new(AutoEquipLevel.PreferredSlots);
@@ -110,6 +110,7 @@ public sealed class PreviousSlot {
     [DefaultValue(true)] public bool consumption = true;
     [DefaultValue(true)] public bool mediumCore = true;
     [DefaultValue(false)] public bool overridePrevious = false;
+    [DefaultValue(true)] public bool moveItems = true;
     public Toggle<Materials> materials = new(true);
     public Toggle<PreviousDisplay> displayPrevious = new(true);
 

@@ -486,6 +486,11 @@ PreviousSlot: {
 		Label: Materials
 		Tooltip: Materials crafted into another item will go to their previous slot in your inventory
 	}
+
+	moveItems: {
+		Label: Move items
+		Tooltip: If the old slot is not empty, move the items inside it to another inventory slot
+	}
 }
 
 Materials: {
