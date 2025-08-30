@@ -179,12 +179,15 @@ public sealed class PreviousSlotPlayer : ModPlayer {
             if (!(item.favorited || mark.favorited) && items[mark.slot.Index].favorited) continue;
 
             item.favorited |= mark.favorited;
-            (Item moved, items[mark.slot.Index]) = (items[mark.slot.Index], new());
+            Item? moved = null;
+            if (Configs.PreviousSlot.Value.moveItems) (moved, items[mark.slot.Index]) = (items[mark.slot.Index], new());
             Item toMove = item.Clone();
             toMove.stack = 1;
             if (mark.slot.GetItem(toMove, settings).IsAir) item.stack--;
-            moved = mark.slot.GetItem(moved, settings);
-            player.GetDropItem(ref moved);
+            if (moved is not null && !moved.IsAir) {
+                moved = mark.slot.GetItem(moved, settings);
+                player.GetDropItem(ref moved);
+            }
             if (item.IsAir) return item;
             slots.Add(mark.slot);
         }

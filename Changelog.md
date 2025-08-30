@@ -1,5 +1,10 @@
 # Better Inventory changelog
 
+## v0.9.0.1
+- Added Move Items To Return to Previous Slot
+- Fixed Refill Mouse Item not been able to be disabled
+- Fixed Refill Mouse Item making removing the favorited status of items
+
 ## v0.9
 - Added Recipe Sorting
 - Added Refill Mouse Item to Smart Pickup
