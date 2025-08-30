@@ -14,17 +14,15 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 
 ### Inventory Management
 - `Smart Item Consumption`: Consume items from a different stack to reduce changes in the selected item
-- `Pickup to Previous Slot`: Items go their previous slot in your inventory when picked up
-- `Auto Equip Items`:  Automatically equip items such as Armors, Accessories or Equipment
-- `Pickup to Hotbar Last`: Picked up items will fill the hotbar slots last
-- `Upgrade Items on Pickup`: Picked up items go to the slot of items of the same kind if they are better
-- `Pickup to Void Bag First`: Picked up items will fill the void bag before the inventory
+- `Smart Item Pickup`: Modifies where items go in your inventory when picked up
 - `Quick Move`: Quickly move items between special slots in the inventory
 - `Craft Stack`: Left Click to craft or buy items in stacks
 - `Favorite Items in Personal Storages`: Favorite items in the Piggy Bank, Safe, ...
-- `Shift Right Click`: Shift or Control Right Click to transfer one item
-- `Universal Right Click`: Shift click when crafting or buying items
-- `Stack Trashed and Sold Items` Items sold or trashed multiple times will stack
+- `Better Shift Click`: Shift Click from anywhere and with Right Click
+- `Better Trash slot` Improves the trash slot
+- `Deposit Middle Click`: Works like right-click, but deposit items instead of picking them up
+- `Better Quick Stack`: Quick stack more items and avoid creating new stack in personnal storages
+- `Inventory Slots Texture` Removes the texts "Coin", "Ammo" and adds background textures to various item slots
 
 ### Item Actions
 - `Fast Container Opening`: Hold rick click to rapidly open containers
@@ -38,11 +36,13 @@ Visit the [Steam Workshop page](https://steamcommunity.com/sharedfiles/filedetai
 - `Fixed Tooltip position`: Positions the tooltip relative to the hovered item and not relative to the mouse
 - `Tooltip Hover`: Use a keybind to hover tooltips
 - `Display Item Ammo`: Display the ammo used by various items
+- `Quick stack`: Quick buff with a hotkey
 
 ### Crafting
 - `Fixed UI`: Fixes inconsistencies with the crafting UI, such as the scrolling and material display
 - `Recipe Search Bar`: Filter recipes by their name
 - `Recipe Filters`: Filter recipes by their created item
+- `Recipe Sort`: Sort recipes by name, value or journey catalogue order
 - `Craft on Recipe List`: Craft items directly from the recipe list
 - `More Material`: Adds various items to the available materials such as the mouse item and the equipped items
 - `Display Available Materials`: Display how much of each of the selected's recipe materials you have

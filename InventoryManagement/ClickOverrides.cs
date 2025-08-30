@@ -13,6 +13,7 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
+using Terraria.Audio;
 
 namespace BetterInventory.InventoryManagement;
 
@@ -27,9 +28,8 @@ public sealed class ClickOverrides : ModPlayer {
         On_ChestUI.Restock += HookRestock;
 
         On_ItemSlot.LeftClick_ItemArray_int_int += HookShiftLeftCustom;
+        On_ItemSlot.RightClick_ItemArray_int_int += HookDepositClick; // Needs to be added before `HookShiftRight` for Shift+Deposit to work 
         On_ItemSlot.RightClick_ItemArray_int_int += HookShiftRight;
-
-        On_Chest.AddItemToShop += HookStackSold;
 
         On_Recipe.FindRecipes += HookFindRecipes;
 
@@ -47,9 +47,6 @@ public sealed class ClickOverrides : ModPlayer {
             if (!il.ApplyTo(ILBuyMultiplier, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
             if (!il.ApplyTo(ILBuyStack, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
             if (!il.ApplyTo(ILRestoreShopItem, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
-        };
-        IL_ItemSlot.SellOrTrash += static il => {
-            if (!il.ApplyTo(ILStackTrash, Configs.InventoryManagement.StackTrash)) Configs.UnloadedInventoryManagement.Value.stackTrash = true;
         };
         IL_Main.HoverOverCraftingItemButton += static il => {
             if (!il.ApplyTo(ILShiftRightCursorOverride, Configs.BetterShiftClick.UniversalShift)) Configs.UnloadedInventoryManagement.Value.universalShift = true;
@@ -95,8 +92,10 @@ public sealed class ClickOverrides : ModPlayer {
         else TwoStepClick(inv, context, slot, (inv, context, slot) => orig(inv, context, slot));
     }
     private static void HookShiftRight(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
-        if (!Configs.BetterShiftClick.ShiftRight || !Main.mouseRight || Main.cursorOverride <= CursorOverrideID.DefaultCursor) orig(inv, context, slot);
-        else TwoStepClick(inv, context, slot, (inv, context, slot) => orig(inv, context, slot));
+        if (!Configs.BetterShiftClick.ShiftRight || Main.cursorOverride <= CursorOverrideID.DefaultCursor
+        || !(Main.mouseRight || Configs.InventoryManagement.DepositClick && Main.mouseMiddle)) {
+            orig(inv, context, slot);
+        } else TwoStepClick(inv, context, slot, (inv, context, slot) => orig(inv, context, slot));
     }
     private static void TwoStepClick(Item[] inv, int context, int slot, Action<Item[], int, int> click) {
         (Item mouse, Main.mouseItem) = (Main.mouseItem, new());
@@ -110,7 +109,7 @@ public sealed class ClickOverrides : ModPlayer {
         (Main.mouseLeft, Main.mouseLeftRelease) = (left, leftR);
         Main.cursorOverride = cursor;
         if (!inv2[0].IsAir) inv[slot] = ItemHelper.MoveInto(inv[slot], inv2[0], out _);
-        if (Main.mouseRight) Recipe.FindRecipes();
+        if (Main.mouseRight || Main.mouseMiddle) Recipe.FindRecipes();
     }
 
 
@@ -348,43 +347,6 @@ public sealed class ClickOverrides : ModPlayer {
         // ...
     }
 
-    private static void ILStackTrash(ILContext il) {
-        ILCursor cursor = new(il);
-        // if (<shop>){
-        //     ...
-        // }
-
-        // else if (!inv[slot].favorited) {
-        //     SoundEngine.PlaySound(7, -1, -1, 1, 1f, 0f);
-        cursor.GotoNext(MoveType.Before, i => i.MatchStfld(Reflection.Player.trashItem));
-
-        //     ++<stackTrash>
-        cursor.EmitDelegate((Item trash) => {
-            if (Configs.InventoryManagement.StackTrash && trash.type == Main.LocalPlayer.trashItem.type) {
-                if (ItemLoader.TryStackItems(Main.LocalPlayer.trashItem, trash, out int transfered)) return Main.LocalPlayer.trashItem;
-            }
-            return trash;
-        });
-
-        //     player.trashItem = inv[slot].Clone();
-        //     ...
-        // }
-        // ...
-    }
-    private static int HookStackSold(On_Chest.orig_AddItemToShop orig, Chest self, Item newItem) {
-        int bought = Main.shopSellbackHelper.GetAmount(newItem);
-        if (!Configs.InventoryManagement.StackTrash || bought >= newItem.stack) return orig(self, newItem);
-        newItem.stack -= Main.shopSellbackHelper.Remove(newItem);
-        for (int i = 0; i < self.item.Length; i++) {
-            if (self.item[i].IsAir || self.item[i].type != newItem.type || !self.item[i].buyOnce) continue;
-            if (!ItemLoader.TryStackItems(self.item[i], newItem, out int transferred)) continue;
-            if (newItem.IsAir) return i;
-        }
-
-        return orig(self, newItem);
-    }
-
-
     private static void ILKeepFavoriteInBanks(ILContext il) {
         ILCursor cursor = new(il);
         cursor.GotoNext(MoveType.Before, i => i.MatchStfld(Reflection.Item.favorited));
@@ -482,6 +444,76 @@ public sealed class ClickOverrides : ModPlayer {
     public static ModCursor CraftCursor { get; private set; } = null!;
 
     public static readonly int[] TransportCursors = [CursorOverrideID.TrashCan, CursorOverrideID.InventoryToChest, CursorOverrideID.ChestToInventory];
+
+    private static void HookDepositClick(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
+        orig(inv, context, slot);
+        if (!Configs.InventoryManagement.DepositClick) return;
+
+        Player player = Main.player[Main.myPlayer];
+        if (player.itemAnimation > 0) return;
+
+        if (!Main.mouseMiddle) {
+            if (s_allowResetStackSplit) Main.preventStackSplitReset = s_allowResetStackSplit = false;
+            return;
+        }
+        Main.preventStackSplitReset = s_allowResetStackSplit = true;
+        if (Main.stackSplit > 1) return;
+
+        Item testItem = Main.mouseItem.IsAir ? inv[slot] : Main.mouseItem;
+        if (testItem.maxStack <= 1 && testItem.stack == 1
+        && (context == ItemSlot.Context.InventoryItem || context == ItemSlot.Context.ChestItem || context == ItemSlot.Context.BankItem || context == ItemSlot.Context.VoidItem)) {
+            return;
+        }
+
+        // Pickup all items if the mouse is empty
+        if (Main.mouseMiddleRelease && Main.mouseItem.IsAir && context != ItemSlot.Context.CreativeInfinite && context != ItemSlot.Context.ShopItem) {
+            Main.mouseItem = ItemLoader.TransferWithLimit(inv[slot], inv[slot].stack);
+            ItemSlot.AnnounceTransfer(new ItemSlot.ItemTransferInfo(inv[slot], context, 21, 0));
+        }
+
+        int num = Main.superFastStack + 1;
+        if (context == ItemSlot.Context.ShopItem) {
+            Item[] toSell = [ItemLoader.TransferWithLimit(Main.mouseItem, num)];
+            ItemSlot.SellOrTrash(toSell, ItemSlot.Context.MouseItem, 0);
+            ItemSlot.RefreshStackSplitCooldown();
+        } else if (inv[slot].type == ItemID.None || (inv[slot].type == Main.mouseItem.type && inv[slot].stack < inv[slot].maxStack && ItemLoader.CanStack(inv[slot], Main.mouseItem))) {
+            DepositItemFromMouse(inv, context, slot, player, num);
+            SoundEngine.PlaySound(SoundID.MenuTick);
+            ItemSlot.RefreshStackSplitCooldown();
+        }
+    }
+
+    public static void DepositItemFromMouse(Item[] inv, int context, int slot, Player player, int amount) {
+        if (inv[slot].type == ItemID.None) {
+            inv[slot] = ItemLoader.TransferWithLimit(Main.mouseItem, amount);
+            ItemSlot.AnnounceTransfer(new ItemSlot.ItemTransferInfo(Main.mouseItem, ItemSlot.Context.MouseItem, context, 0));
+        } else {
+            if (context == ItemSlot.Context.CreativeInfinite) Main.mouseItem.stack -= amount;
+            else ItemLoader.StackItems(inv[slot], Main.mouseItem, out _, false, amount);
+        }
+        if (Main.mouseItem.stack <= 0) Main.mouseItem = new Item();
+        Recipe.FindRecipes();
+        if (Main.netMode == NetmodeID.MultiplayerClient) {
+            if (context == ItemSlot.Context.ChestItem) {
+                NetMessage.SendData(MessageID.SyncChestItem, -1, -1, null, player.chest, slot, 0f, 0f, 0, 0, 0);
+            }
+            if (context == ItemSlot.Context.DisplayDollArmor || context == ItemSlot.Context.DisplayDollAccessory) {
+                NetMessage.SendData(MessageID.TEDisplayDollItemSync, -1, -1, null, Main.myPlayer, player.tileEntityAnchor.interactEntityID, slot, 0f, 0, 0, 0);
+            }
+            if (context == ItemSlot.Context.DisplayDollDye) {
+                NetMessage.SendData(MessageID.TEDisplayDollItemSync, -1, -1, null, Main.myPlayer, player.tileEntityAnchor.interactEntityID, slot, 1f, 0, 0, 0);
+            }
+            if (context == ItemSlot.Context.HatRackHat) {
+                NetMessage.SendData(MessageID.TEHatRackItemSync, -1, -1, null, Main.myPlayer, player.tileEntityAnchor.interactEntityID, slot, 0f, 0, 0, 0);
+            }
+            if (context == ItemSlot.Context.HatRackDye) {
+                NetMessage.SendData(MessageID.TEHatRackItemSync, -1, -1, null, Main.myPlayer, player.tileEntityAnchor.interactEntityID, slot, 1f, 0, 0, 0);
+            }
+
+        }
+    }
+
+    private static bool s_allowResetStackSplit = false;
 }
 
 public record struct Multipliers(int Mouse, int Inventory);

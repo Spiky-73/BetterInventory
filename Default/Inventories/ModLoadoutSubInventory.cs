@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Terraria;
 using Terraria.Localization;
+using Terraria.ModLoader.IO;
 
 namespace BetterInventory.Default.Inventories;
 

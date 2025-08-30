@@ -11,14 +11,36 @@ ModName: Better Inventory
 SPIC.ModName: Spy's Infinite Consumables
 Homepage: homepage
 Workshop: Steam Workshop page
-Version: 0.8.2
-Summary: Various features now support loadouts
-Details: ""
+Summary: Some bugs were fixed and loads of features were added, [c/cc5555:make sure to read the changelog]
+Details:
+	'''
+	Within all of the new features, some may disrupt your workflow and are enabled by default, namely:
+	- Fix Scroll direction in Fixed UI
+	- Better Quick Stack in Inventory Management
+	- Quick Stack in Smart Pickup
+	It may feel strange to have them enabled at first, but they are definitely worth it.
+	The search algorithm of Recipe Search Bar was also simplified to improve performances. You can revert to the old one by disabling Simple Search.
+	'''
 Changelog:
 	'''
-	- Added support for loadouts to Pickup to Previous Slot, Quick Move, Extra Materials and Auto Equip
-	- Added options to include loadouts or not to Auto Equip and Quick Move
-	- Change Quick Move hotkey display to show a count instead of a repeating number for large values
-	- Added Follow Item option to Quick Move
-	- Quick moving will now remember the original menu pages
+	- Added Recipe Sorting
+	- Added Refill Mouse Item to Smart Pickup
+	- Added Fix Scroll direction to Fixed UI
+	- Move Stack Trashed into Better Trash
+	- Added Trash the Trash to Better Trash Slot
+	- Added Deposit Middle Click
+	- Added Complete Quick Stack to Better Quick Stack
+	- Added Limited Personal Quick Stack to Better Quick Stack
+	- Added Inventory Slots Texture
+	- Clarified Smart Consumption tooltips
+	- Clarified Can Consume Itself to Smart Consumption
+	- Added Quick Stack to Smart Pickup
+	- Added Consumption to Return to Previous Slot
+	- Added Quick Stack hotkey
+	- Added Fix Ammo to Return to Previous Slot
+	- Added Bring Item To Hovered Slot to Quick Move
+	- Added Simple search to Recipe Search Bar
+	- Fixed Quick with Frame Skip Off
+	- Fixed Extra Item Right Click conflicting with Terraria Overhaul 
 	'''
+Version: "0.9"

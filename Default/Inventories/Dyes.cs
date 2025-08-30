@@ -4,6 +4,7 @@ using SpikysLib.Constants;
 using SpikysLib.DataStructures;
 using Terraria;
 using Terraria.ModLoader.Default;
+using Terraria.ModLoader.IO;
 using ContextID = Terraria.UI.ItemSlot.Context;
 
 namespace BetterInventory.Default.Inventories;

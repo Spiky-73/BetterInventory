@@ -6,6 +6,7 @@ using Terraria.ID;
 using Terraria.UI;
 using ContextID = Terraria.UI.ItemSlot.Context;
 using SpikysLib.Constants;
+using Terraria.ModLoader.IO;
 
 namespace BetterInventory.Default.Inventories;
 
@@ -56,6 +57,7 @@ public sealed class Chest : Container {
     public override bool Accepts(Item item) => Entity.chest == Index;
 
     public override IList<ModSubInventory> GetInventories(Player player) {
+        if (player.chest < 0) return [];
         var inventory = (Chest)NewInstance(player);
         inventory.Index = player.chest;
         return [inventory];
@@ -63,7 +65,6 @@ public sealed class Chest : Container {
 
     public override bool Equals(object? obj) => base.Equals(obj) && Index == ((Chest)obj).Index;
     public override int GetHashCode() => (Index, base.GetHashCode()).GetHashCode();
-
 }
 public sealed class PiggyBank : Container {
     public override int Context => ContextID.BankItem;

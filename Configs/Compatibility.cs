@@ -36,19 +36,27 @@ public sealed class Compatibility : ModConfig {
         FixedUI.Value.noRecStartOffset = false;
         FixedUI.Value.noRecListClose = false;
         FixedUI.Value.focusButton = false;
+        ScrollDirection.Value.recipesUnpaused = false;
+        ScrollDirection.Value.recipesPaused = false;
+        ScrollDirection.Value.accessories = false;
         Crafting.Instance.recipeFilters.Key = false;
         Crafting.Instance.recipeSearchBar.Key = false;
+        Crafting.Instance.recipeSort = false;
         Crafting.Instance.craftOnList.Key = false;
         AvailableMaterials.Value.itemSlot = false;
         Crafting.Instance.Save();
 
         SmartConsumption.Value.materials = false;
         SmartConsumption.Value.baits = false;
+        SmartPickup.Value.refillMouse = false;
         SmartPickup.Value.previousSlot.Key = ItemPickupLevel.None;
+        SmartPickup.Value.quickStack.Key = false;
         SmartPickup.Value.autoEquip.Key = AutoEquipLevel.None;
         SmartPickup.Value.upgradeItems.Key = false;
+        SmartPickup.Value.voidBagFirst = false;
         SmartPickup.Value.hotbarLast = false;
         SmartPickup.Value.fixSlot = false;
+        SmartPickup.Value.fixAmmo = false;
         PreviousDisplay.Value.fakeItem.Key = false;
         PreviousDisplay.Value.icon.Key = false;
         QuickMove.Value.displayedHotkeys.Key = HotkeyDisplayMode.None;
@@ -56,9 +64,12 @@ public sealed class Compatibility : ModConfig {
         InventoryManagement.Instance.betterShiftClick.Value.shiftRight = false;
         InventoryManagement.Instance.betterShiftClick.Value.universalShift = false;
         InventoryManagement.Instance.favoriteInBanks = false;
-        InventoryManagement.Instance.stackTrash = false;
+        BetterTrash.Value.stackTrash = false;
         InventoryManagement.Instance.craftStack.Key = false;
         InventoryManagement.Instance.Save();
+        InventoryManagement.Instance.betterQuickStack.Value.completeQuickStack = false;
+        InventoryManagement.Instance.betterQuickStack.Value.limitedBanksQuickStack = false;
+        InventoryManagement.Instance.inventorySlotsTexture = false;
 
         ItemActions.Instance.fixedTooltipPosition = false;
         ItemActions.Instance.tooltipHover.Key = false;
@@ -89,11 +100,15 @@ public sealed class UnloadedCrafting {
     public bool noRecListClose;
     public bool recipeFilters;
     public bool recipeSearchBar;
+    public bool recipeSort;
     public bool craftOnList;
     public bool availableMaterialsItemSlot;
+    public bool scrollDirectionRecipesUnpaused;
+    public bool scrollDirectionRecipesPaused;
+    public bool scrollDirectionAccessories;
 
     [JsonIgnore] public bool RecipeListUI { set { recipeCount = focusButton = value; } }
-    [JsonIgnore] public bool RecipeUI { set { recipeFilters = recipeSearchBar = value; } }
+    [JsonIgnore] public bool RecipeUI { set { recipeFilters = recipeSearchBar = recipeSort = value; } }
 
     public static UnloadedCrafting Value => Compatibility.Instance.unloadedCrafting;
 }
@@ -114,6 +129,9 @@ public sealed class UnloadedInventoryManagement {
     public bool universalShift;
     public bool stackTrash;
     public bool craftStack;
+    public bool quickStackComplete;
+    public bool quickStackLimitedBanks;
+    public bool inventorySlotsTexture;
     
     public static UnloadedInventoryManagement Value => Compatibility.Instance.unloadedInventoryManagement;
 }

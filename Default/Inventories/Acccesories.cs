@@ -5,6 +5,7 @@ using SpikysLib.DataStructures;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Default;
+using Terraria.ModLoader.IO;
 using Terraria.UI;
 using ContextID = Terraria.UI.ItemSlot.Context;
 

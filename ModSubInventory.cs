@@ -6,6 +6,7 @@ using Terraria.Audio;
 using Terraria.ID;
 using SpikysLib;
 using Terraria.ModLoader.Core;
+using Terraria.ModLoader.IO;
 
 namespace BetterInventory;
 

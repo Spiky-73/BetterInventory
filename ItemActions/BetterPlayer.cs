@@ -26,11 +26,13 @@ public sealed class BetterPlayer : ModPlayer {
     public static BetterPlayer LocalPlayer => Main.LocalPlayer.GetModPlayer<BetterPlayer>();
 
     public static ModKeybind FavoritedBuffKb { get; private set; } = null!;
+    public static ModKeybind QuickStackKb { get; private set; } = null!;
     public static readonly List<(BuilderToggle? toggle, ModKeybind kb)> BuilderTogglesKb = [];
     public static readonly List<BuilderToggle> WireDisplayToggles = [];
 
     public override void Load() {
         FavoritedBuffKb = KeybindLoader.RegisterKeybind(Mod, "FavoritedQuickBuff", Microsoft.Xna.Framework.Input.Keys.B);
+        QuickStackKb = KeybindLoader.RegisterKeybind(Mod, "QuickStack", Microsoft.Xna.Framework.Input.Keys.None);
         On_ItemSlot.TryOpenContainer += HookTryOpenContainer;
         On_Player.DropItemFromExtractinator += HookFastExtractinator;
 
@@ -43,6 +45,7 @@ public sealed class BetterPlayer : ModPlayer {
 
     public override void Unload() {
         FavoritedBuffKb = null!;
+        QuickStackKb = null!;
         BuilderTogglesKb.Clear();
         WireDisplayToggles.Clear();
     }
@@ -102,19 +105,14 @@ public sealed class BetterPlayer : ModPlayer {
         if (Configs.ItemActions.FastContainerOpening && Main.mouseRight && Main.stackSplit == 1) Main.mouseRightRelease = true;
     }
 
-    public override void OnEquipmentLoadoutSwitched(int oldLoadoutIndex, int loadoutIndex) {
-        QuickMove.ClearDisplayedChain();
-    }
-
     public override void ProcessTriggers(TriggersSet triggersSet) {
-        QuickMove.ProcessTriggers();
         QuickSearch.ProcessTriggers();
         if (Configs.ItemActions.FavoritedBuff && FavoritedBuffKb.JustPressed) FavoritedBuff(Player);
+        if (Configs.ItemActions.QuickStack && QuickStackKb.JustPressed) Player.QuickStackAllChests();
         if (Configs.ItemActions.BuilderAccs) BuilderKeys();
     }
 
     public override bool HoverSlot(Item[] inventory, int context, int slot) {
-        QuickMove.HoverItem(inventory, context, slot);
         if (PlaceholderItem.OverrideHover(inventory, context, slot)) return true;
         if (ClickOverrides.OverrideHover(inventory, context, slot)) return true;
         return false;
@@ -124,11 +122,20 @@ public sealed class BetterPlayer : ModPlayer {
         if (Main.myPlayer == Player.whoAmI && Configs.ItemRightClick.Enabled && Player.controlUseTile && Player.releaseUseItem && !Player.controlUseItem && !Player.tileInteractionHappened
                 && !Player.mouseInterface && !Terraria.Graphics.Capture.CaptureManager.Instance.Active && !Main.HoveringOverAnNPC && !Main.SmartInteractShowingGenuine
                 && Main.HoverItem.IsAir && Player.altFunctionUse == 0 && Player.selectedItem < InventorySlots.Hotbar.End) {
+            Item item = Player.inventory[Player.selectedItem];
+            (int type, int stack, int prefix) = (item.type, item.stack, item.prefix);
+            int animation = Player.itemAnimation;
             Player.itemAnimation--;
             if(Main.stackSplit == 1) Player.itemAnimation = 0;
+
             if (!Configs.ItemRightClick.Value.stackableItems) s_noMousePickup = true;
             ItemSlot.RightClick(Player.inventory, ItemSlot.Context.InventoryItem, Player.selectedItem);
             s_noMousePickup = false;
+            
+            if (type == item.type && stack == item.stack && prefix == item.prefix) {
+                Player.itemAnimation = animation;
+                return true;
+            }
             if (!Main.mouseItem.IsAir) Player.DropSelectedItem();
             return false;
         }
@@ -153,7 +160,6 @@ public sealed class BetterPlayer : ModPlayer {
         if (!Configs.ItemActions.FastExtractinator || self.ItemTimeIsZero) return;
         ItemSlot.RefreshStackSplitCooldown();
         self.itemTime = self.itemTimeMax = Main.stackSplit - 1;
-        Main.preventStackSplitReset = true;
     }
 
     public static void CycleBuilderState(Player player, BuilderToggle toggle, int? state = null) => player.builderAccStatus[toggle.Type] = (state ?? (player.builderAccStatus[toggle.Type] + 1)) % toggle.NumberOfStates;
@@ -175,7 +181,7 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public override void LoadData(TagCompound tag) {
-        if (tag.TryGet(CraftInMenuPlayer.VisibilityTag, out VisibilityFilters visibility)) { // Compatibility version < v0.7.1
+        if (tag.TryGet(CraftInMenuPlayer.VisibilityTag, out VisibilityFilters visibility)) { // Compatibility version < v0.8
             Player.GetModPlayer<CraftInMenuPlayer>().visibility = (RecipeVisibility)visibility.Visibility;
             Player.GetModPlayer<FavoritedRecipesPlayer>().favoritedRecipes.AddRange(visibility.FavoritedRecipes);
             Player.GetModPlayer<FavoritedRecipesPlayer>().blacklistedRecipes.AddRange(visibility.BlacklistedRecipes);
@@ -183,11 +189,11 @@ public sealed class BetterPlayer : ModPlayer {
             Player.GetModPlayer<UnknownRecipesPlayer>().ownedItems.AddRange(visibility.OwnedItems);
             Player.GetModPlayer<UnknownRecipesPlayer>().unloadedItems.AddRange(visibility.UnloadedItems);
         }
-        if (tag.TryGet(GuideTilePlayer.GuideTileTag, out Item tile)) { // Compatibility version < v0.7.1
+        if (tag.TryGet(GuideTilePlayer.GuideTileTag, out Item tile)) { // Compatibility version < v0.8
             Player.GetModPlayer<GuideTilePlayer>()._tempGuideTile = tile;
         }
         
-        if (tag.TryGet("recipes", out RecipeFilters recipe)) {
+        if (tag.TryGet("recipes", out RecipeFilters recipe)) { // Compatibility version < v0.8
             Player.GetModPlayer<RecipeUIPlayer>().filters = recipe.filters;
         }
         if (Configs.InventoryManagement.FavoriteInBanks && tag.TryGet(FavoritedInBanksTag, out FavoritedInBanks favorited)) favorited.Apply(Player);

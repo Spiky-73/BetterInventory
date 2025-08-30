@@ -11,14 +11,15 @@ public sealed class SmartPickup : ModSystem {
 
     public override void Load() {
         IL_Player.GetItem += static il => {
-            if (!il.ApplyTo(IlPreviousSlot, Configs.SmartPickup.OverrideSlot)) Configs.UnloadedInventoryManagement.Value.pickupOverrideSlot = true;
+            if (!il.ApplyTo(ILOverrideSlot, Configs.SmartPickup.OverrideSlot)) Configs.UnloadedInventoryManagement.Value.pickupOverrideSlot = true;
             if (!il.ApplyTo(ILDedicatedSlots, Configs.SmartPickup.DedicatedSlot)) Configs.UnloadedInventoryManagement.Value.pickupDedicatedSlot = true;
             if (!il.ApplyTo(ILHotbarLast, Configs.SmartPickup.HotbarLast)) Configs.UnloadedInventoryManagement.Value.hotbarLast = true;
             if (!il.ApplyTo(ILFixNewItem, Configs.SmartPickup.FixSlot)) Configs.UnloadedInventoryManagement.Value.fixSlot = true;
         };
+        On_Item.CanFillEmptyAmmoSlot += HookForceSkipEmptySlots;
     }
 
-    private static void IlPreviousSlot(ILContext il) {
+    private static void ILOverrideSlot(ILContext il) {
         ILCursor cursor = new(il);
 
         cursor.GotoNextLoc(out int coin, i => i.Previous.MatchCallvirt(Reflection.Item.IsACoin.GetMethod!), 0);
@@ -30,9 +31,10 @@ public sealed class SmartPickup : ModSystem {
         cursor.GotoNext(MoveType.AfterLabel, i => i.MatchLdloc(coin));
 
         // ++ item = <previousSlot>
-        EmitSmartPickup(cursor, newItem, (Player self, Item item, GetItemSettings settings) => {
+        EmitSmartPickup(cursor, newItem, (Player self, int plr, Item item, GetItemSettings settings) => {
             if (vanillaGetItem) return item;
-            if (Configs.PreviousSlot.Enabled) item = PreviousSlot.PickupItemToPreviousSlot(self, item, settings);
+            if (Configs.SmartPickup.RefillMouse) item = SmartEquip.RefillMouse(self, item, settings);
+            if (Configs.SmartPickup.PreviousSlot) item = self.GetModPlayer<PreviousSlotPlayer>().PickupItemToPreviousSlot(self, item, settings);
             return item;
         });
     }
@@ -44,20 +46,31 @@ public sealed class SmartPickup : ModSystem {
         cursor.GotoNextLoc(out int newItem, i => i.Previous.MatchLdarg2(), 1);
 
         // if (isACoin) ...
-        // if (item.FitsAmmoSlot()) ...
+        // if (item.FitsAmmoSlot() ++[&& false]) ...
+        cursor.GotoNext(MoveType.AfterLabel, i => i.SaferMatchCall(Reflection.Player.FillAmmo));
+        cursor.EmitLdarg3();
+        cursor.EmitDelegate<Action<GetItemSettings>>(settings => _forceSkipEmptyAmmoSlots = !(vanillaGetItem || settings.NoText) && Configs.SmartPickup.FixAmmo);
+        cursor.GotoNext(MoveType.After, i => i.SaferMatchCall(Reflection.Player.FillAmmo));
+        cursor.EmitDelegate<Action>(() => _forceSkipEmptyAmmoSlots = false);
+
         // for(...) ...
         cursor.GotoNext(i => i.SaferMatchCall(Reflection.Player.GetItem_FillEmptyInventorySlot));
         cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdloc(coin));
 
         // ++<upgradeItems>
-        EmitSmartPickup(cursor, newItem, (Player self, Item item, GetItemSettings settings) => {
+        EmitSmartPickup(cursor, newItem, (Player self, int plr, Item item, GetItemSettings settings) => {
             if (vanillaGetItem || settings.NoText) return item;
-            if (!item.IsAir && Configs.UpgradeItems.Enabled) item = SmartEquip.UpgradeItems(self, item, settings);
+            if (!item.IsAir && Configs.SmartPickup.QuickStack) item = SmartEquip.QuickStack(self, item, settings);
+            if (Configs.SmartPickup.FixAmmo && item.FitsAmmoSlot()) item = self.FillAmmo(plr, item, settings);
+            if (!item.IsAir && Configs.SmartPickup.UpgradeItems) item = SmartEquip.UpgradeItems(self, item, settings);
             if (!item.IsAir && Configs.SmartPickup.AutoEquip) item = SmartEquip.AutoEquip(self, item, settings);
-            if (!item.IsAir && Configs.SmartPickup.VoidBag) item = SmartEquip.VoidBag(self, item, settings);
+            if (!item.IsAir && Configs.SmartPickup.VoidBagFirst) item = SmartEquip.VoidBagFirst(self, item, settings);
             return item;
         });
     }
+    private static bool HookForceSkipEmptySlots(On_Item.orig_CanFillEmptyAmmoSlot orig, Item self) => !_forceSkipEmptyAmmoSlots && orig(self);
+    private static bool _forceSkipEmptyAmmoSlots;
+
     private static void ILFixNewItem(ILContext il) {
         ILCursor cursor = new(il);
 
@@ -71,8 +84,9 @@ public sealed class SmartPickup : ModSystem {
         }
     }
 
-    private static void EmitSmartPickup(ILCursor cursor, int newItem, Func<Player, Item, GetItemSettings, Item> cb) {
+    private static void EmitSmartPickup(ILCursor cursor, int newItem, Func<Player, int, Item, GetItemSettings, Item> cb) {
         cursor.EmitLdarg0();
+        cursor.EmitLdarg1();
         cursor.EmitLdloc(newItem);
         cursor.EmitLdarg3();
         cursor.EmitDelegate(cb);

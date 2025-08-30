@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using BetterInventory.Default.Inventories;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
@@ -22,16 +22,19 @@ using Terraria.UI.Gamepad;
 
 namespace BetterInventory.InventoryManagement;
 
-public sealed class QuickMove : ILoadable {
+public sealed class QuickMove : ModPlayer {
 
-    public void Load(Mod mod) {
+    public override void Load() {
         On_Main.DrawInterface_36_Cursor += HookAlternateChain;
         IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += static il => {
             if (!il.ApplyTo(ILHighlightSlot, Configs.QuickMove.Highlight)) Configs.UnloadedInventoryManagement.Value.quickMoveHighlight = true;
             if (!il.ApplyTo(ILDisplayHotkey, Configs.QuickMove.DisplayHotkeys)) Configs.UnloadedInventoryManagement.Value.quickMoveHotkeys = true;
         };
     }
-    public void Unload() { }
+
+    public override void OnEquipmentLoadoutSwitched(int oldLoadoutIndex, int loadoutIndex) {
+        ClearDisplayedChain();
+    }
 
     public static readonly string[] MoveKeys = [
         "Hotbar1",
@@ -46,7 +49,7 @@ public sealed class QuickMove : ILoadable {
         "Hotbar10"
     ];
 
-    public static void ProcessTriggers() {
+    public override void ProcessTriggers(TriggersSet triggersSet) {
         if (!Configs.QuickMove.Enabled) return;
         (s_hover, s_frameHover) = (s_frameHover, false);
         if (s_ignoreHotbar >= 0) {
@@ -65,8 +68,8 @@ public sealed class QuickMove : ILoadable {
         ));
     }
 
-    public static void HoverItem(Item[] inventory, int context, int slot) {
-        if (!Configs.QuickMove.Enabled) return;
+    public override bool HoverSlot(Item[] inventory, int context, int slot) {
+        if (!Configs.QuickMove.Enabled) return false;
         s_frameHover = true;
         if (!InventoryLoader.IsInventorySlot(Main.LocalPlayer, inventory, context, slot, out InventorySlot itemSlot)) {
             ClearDisplayedChain();
@@ -75,6 +78,7 @@ public sealed class QuickMove : ILoadable {
             UpdateDisplayedMoveChain(itemSlot.Inventory, inventory[slot]);
             UpdateChain(itemSlot);
         }
+        return false;
     }
     private static void HookAlternateChain(On_Main.orig_DrawInterface_36_Cursor orig) {
         if (Configs.QuickMove.Enabled && s_moveTime > 0 && !s_frameHover) {
@@ -101,7 +105,21 @@ public sealed class QuickMove : ILoadable {
     }
     private static void SetupChain(InventorySlot source, int targetKey) {
         if (source.Item.IsAir) {
-            s_moveChain = [];
+            ModSubInventory hotbar = ModContent.GetInstance<Hotbar>().NewInstance(Main.LocalPlayer);
+            int slot = HotkeyToSlot(targetKey, hotbar.Items.Count);
+            if (!Configs.QuickMove.Value.bringItem || hotbar.Items[slot].IsAir) {
+                s_moveChain = [];
+                return;
+            }
+            s_moveKey = targetKey;
+            s_moveIndex = 0;
+            InventorySlot from = new(hotbar, slot);
+            s_moveChain = [
+                from, source,
+                ..GetDisplayedChain(Main.LocalPlayer, from.Item, source.Inventory).Select(i => new InventorySlot(i, HotkeyToSlot(targetKey, i.Items.Count)))
+            ];
+            s_movedItems = [];
+            s_validSlots = [from, source];
             return;
         }
         s_moveKey = targetKey;
@@ -117,6 +135,7 @@ public sealed class QuickMove : ILoadable {
         Player player = Main.LocalPlayer;
         player.selectedItem = s_oldSelectedItem;
         s_ignoreHotbar = s_moveKey;
+        PlayerInput.Triggers.JustPressed.KeyStatus[MoveKeys[s_moveKey]] = false;
 
         if (s_moveTime != 0 && Configs.QuickMove.FollowItem) s_moveChain[s_moveIndex].Unfocus();
         UndoMove(player, s_movedItems);
@@ -329,3 +348,9 @@ public sealed class QuickMove : ILoadable {
 }
 
 public readonly record struct MovedItem(InventorySlot From, ModSubInventory To, int Type, int Prefix, bool Favorited);
+
+public sealed class QuickMoveTooltip : GlobalItem {
+    public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
+        QuickMove.AddMoveChainLine(item, tooltips);
+    }
+}
