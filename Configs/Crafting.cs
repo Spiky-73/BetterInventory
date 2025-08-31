@@ -9,7 +9,7 @@ public sealed class Crafting : ModConfig {
     public Toggle<FixedUI> fixedUI = new(true);
     public Toggle<RecipeSearchBar> recipeSearchBar = new(true);
     public Toggle<RecipeFilters> recipeFilters = new(true);
-    public bool recipeSort = true;
+    [DefaultValue(true)] public bool recipeSort = true;
     public Toggle<CraftOnList> craftOnList = new(true);
     public Toggle<MoreMaterials> moreMaterials = new(true);
     public Toggle<AvailableMaterials> availableMaterials = new(true);

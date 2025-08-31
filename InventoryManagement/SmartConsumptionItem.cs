@@ -29,14 +29,14 @@ public sealed class SmartConsumptionItem : GlobalItem {
 
     public override void OnConsumeItem(Item item, Player player) {
         if (item.PaintOrCoating) {
-            if (Configs.SmartConsumption.Paints) SmartConsume(player, item, () => player.LastStack(item, Configs.SmartConsumption.AllowedItems));
+            if (Configs.SmartConsumption.Paints) SmartConsume(player, item, Utility.LastStack);
         } else {
-            if (Configs.SmartConsumption.Consumables) SmartConsume(player, item, () => player.SmallestStack(item, Configs.SmartConsumption.AllowedItems));
+            if (Configs.SmartConsumption.Consumables) SmartConsume(player, item, Utility.SmallestStack);
         }
     }
 
     public override void OnConsumedAsAmmo(Item ammo, Item weapon, Player player) {
-        if (Configs.SmartConsumption.Ammo) SmartConsume(player, ammo, () => player.LastStack(ammo, Configs.SmartConsumption.AllowedItems));
+        if (Configs.SmartConsumption.Ammo) SmartConsume(player, ammo, Utility.LastStack);
     }
 
     private static void ILOnConsumedMaterial(ILContext il) {
@@ -48,7 +48,7 @@ public sealed class SmartConsumptionItem : GlobalItem {
         cursor.EmitLdarg1();
         cursor.EmitLdloc(consumed);
         cursor.EmitDelegate((Item item, Item consumed) => {
-            if (Configs.SmartConsumption.Materials) SmartConsume(Main.LocalPlayer, item, () => Main.LocalPlayer.SmallestStack(item, AllowedItems.Self | Configs.SmartConsumption.AllowedItems), consumed.stack);
+            if (Configs.SmartConsumption.Materials) SmartConsume(Main.LocalPlayer, item, Utility.SmallestStack, consumed.stack, new(true, Configs.SmartConsumption.Value.mouse));
         });
     }
 
@@ -62,7 +62,7 @@ public sealed class SmartConsumptionItem : GlobalItem {
         cursor.EmitLdarg0();
         cursor.EmitLdloc(i);
         cursor.EmitDelegate((Player self, int i) => {
-            if (Configs.SmartConsumption.Baits) SmartConsume(self, self.inventory[i], () => self.LastStack(self.inventory[i], Configs.SmartConsumption.AllowedItems));
+            if (Configs.SmartConsumption.Baits) SmartConsume(self, self.inventory[i], Utility.LastStack);
         });
     }
 
@@ -79,9 +79,12 @@ public sealed class SmartConsumptionItem : GlobalItem {
         }
     }
 
-    public static void SmartConsume(Player player, Item item, Func<Item?> stackPicker, int consumed = 1) {
+    public delegate Item? StackPickerFn(Player player, Item item, StackPickerSettings settings);
+    public static void SmartConsume(Player player, Item item, StackPickerFn stackPicker, int consumed = 1, StackPickerSettings? settings = default) {
+        if (!Configs.SmartConsumption.Value.mouse && (item == Main.mouseItem || item == player.inventory[InventorySlots.Mouse])) return;
+        settings ??= new(Configs.SmartConsumption.Value.self, Configs.SmartConsumption.Value.mouse);
         while (consumed > 0) {
-            Item? i = stackPicker();
+            Item? i = stackPicker(player, item, settings.Value);
             if (i == null) return;
             int amount = Math.Min(consumed, i.stack);
             item.stack += amount;
@@ -135,3 +138,4 @@ public sealed class SmartConsumptionItem : GlobalItem {
 }
 
 public readonly record struct DrawItemIconParams(int Context, float Scale);
+public record struct StackPickerSettings(bool CanPickArg, bool CanPickMouse);

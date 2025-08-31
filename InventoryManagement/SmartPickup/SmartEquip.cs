@@ -1,5 +1,6 @@
 using BetterInventory.Default.Inventories;
 using SpikysLib;
+using SpikysLib.Constants;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
@@ -9,7 +10,7 @@ namespace BetterInventory.InventoryManagement.SmartPickup;
 public static class SmartEquip {
 
     public static Item RefillMouse(Player player, Item item, GetItemSettings settings) {
-        if (item == Main.mouseItem || Main.mouseItem.IsAir || Main.mouseItem.type != item.type) return item;
+        if (item == Main.mouseItem || item == player.inventory[InventorySlots.Mouse] || Main.mouseItem.IsAir || Main.mouseItem.type != item.type) return item;
         Main.mouseItem = ItemHelper.MoveInto(Main.mouseItem, item, out int transferred, item.maxStack);
         if (transferred == 0) return item;
         SoundEngine.PlaySound(SoundID.Grab);
