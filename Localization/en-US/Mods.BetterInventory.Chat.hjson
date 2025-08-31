@@ -11,7 +11,7 @@ ModName: Better Inventory
 SPIC.ModName: Spy's Infinite Consumables
 Homepage: homepage
 Workshop: Steam Workshop page
-Summary: Some more bugs where fixed
+Summary: Some more bugs where fixed including Refill Mouse Item sometime eating items
 Details: ""
 Changelog:
 	'''
@@ -23,4 +23,4 @@ Changelog:
 	- Changed Smart Consumption to not be applied if the mouse item is consumed and Include Mouse is disabled
 	- Fixed Recipe Sort been disabled by default
 	'''
-Version: 0.9.0.1
+Version: 0.9.0.2
