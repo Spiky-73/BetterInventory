@@ -3,6 +3,7 @@
 ## v0.9.0.2
 - Fixed Refill Mouse Items deleting favorited stackable items
 - Fixed Pickup to Void Bag First moving favorited items inside the Void Bag
+- Made Move Items in Return to Previous Slot more granular
 
 ## v0.9.0.1
 - Added Move Items To Return to Previous Slot

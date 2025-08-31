@@ -439,13 +439,6 @@ AutoEquip: {
 	}
 }
 
-VoidBagLevel: {
-	Tooltip: ""
-	None.Label: Off
-	IfInside.Label: If Inside
-	Always.Label: Always
-}
-
 PreviousSlot: {
 	Tooltip: ""
 
@@ -487,10 +480,23 @@ PreviousSlot: {
 		Tooltip: Materials crafted into another item will go to their previous slot in your inventory
 	}
 
-	moveItems: {
-		Label: Move items
-		Tooltip: If the old slot is not empty, move the items inside it to another inventory slot
+	movePolicy: {
+		Label: Move Items
+		Tooltip:
+			'''
+			Whether or not to move items if the previous slot is not empty
+			{$Mods.BetterInventory.Configs.MovePolicy.Never.Label}: Do not move any item
+			{$Mods.BetterInventory.Configs.MovePolicy.NotFavorited.Label}: Do not move favorited items
+			{$Mods.BetterInventory.Configs.MovePolicy.Always.Label}: Always move items unless they are favorited and the previous one is not
+			'''
 	}
+}
+
+MovePolicy: {
+	Tooltip: ""
+	Never.Label: Never
+	NotFavorited.Label: Not If Favorited
+	Always.Label: Always
 }
 
 Materials: {

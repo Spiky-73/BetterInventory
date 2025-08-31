@@ -176,17 +176,20 @@ public sealed class PreviousSlotPlayer : ModPlayer {
         while (ConsumeMark(item.type, out (InventorySlot slot, bool favorited) mark)) {
             IList<Item> items = mark.slot.Inventory.Items;
             if (mark.slot.Index >= items.Count) continue;
-            if (!(item.favorited || mark.favorited) && items[mark.slot.Index].favorited) continue;
-
-            item.favorited |= mark.favorited;
-            Item? moved = null;
-            if (Configs.PreviousSlot.Value.moveItems) (moved, items[mark.slot.Index]) = (items[mark.slot.Index], new());
+            Item oldItem = items[mark.slot.Index];
+            if (!oldItem.IsAir && Configs.PreviousSlot.Value.movePolicy switch {
+                Configs.MovePolicy.Always => oldItem.favorited && !(mark.favorited || item.favorited),
+                Configs.MovePolicy.NotFavorited => oldItem.favorited,
+                Configs.MovePolicy.Never or _ => true,
+            }) continue;
+            items[mark.slot.Index] = new(); // stored in `moved`
             Item toMove = item.Clone();
+            toMove.favorited |= mark.favorited;
             toMove.stack = 1;
             if (mark.slot.GetItem(toMove, settings).IsAir) item.stack--;
-            if (moved is not null && !moved.IsAir) {
-                moved = mark.slot.GetItem(moved, settings);
-                player.GetDropItem(ref moved);
+            if (!oldItem.IsAir) {
+                oldItem = mark.slot.GetItem(oldItem, settings);
+                player.GetDropItem(ref oldItem);
             }
             if (item.IsAir) return item;
             slots.Add(mark.slot);
