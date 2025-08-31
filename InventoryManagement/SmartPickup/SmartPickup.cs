@@ -33,8 +33,8 @@ public sealed class SmartPickup : ModSystem {
         // ++ item = <previousSlot>
         EmitSmartPickup(cursor, newItem, (Player self, int plr, Item item, GetItemSettings settings) => {
             if (vanillaGetItem) return item;
-            if (Configs.SmartPickup.RefillMouse) item = SmartEquip.RefillMouse(self, item, settings);
-            if (Configs.SmartPickup.PreviousSlot) item = self.GetModPlayer<PreviousSlotPlayer>().PickupItemToPreviousSlot(self, item, settings);
+            if (!item.IsAir && Configs.SmartPickup.RefillMouse) item = SmartEquip.RefillMouse(self, item, settings);
+            if (!item.IsAir && Configs.SmartPickup.PreviousSlot) item = self.GetModPlayer<PreviousSlotPlayer>().PickupItemToPreviousSlot(self, item, settings);
             return item;
         });
     }
@@ -61,10 +61,10 @@ public sealed class SmartPickup : ModSystem {
         EmitSmartPickup(cursor, newItem, (Player self, int plr, Item item, GetItemSettings settings) => {
             if (vanillaGetItem || settings.NoText) return item;
             if (!item.IsAir && Configs.SmartPickup.QuickStack) item = SmartEquip.QuickStack(self, item, settings);
-            if (Configs.SmartPickup.FixAmmo && item.FitsAmmoSlot()) item = self.FillAmmo(plr, item, settings);
+            if (!item.IsAir && Configs.SmartPickup.FixAmmo && item.FitsAmmoSlot()) item = self.FillAmmo(plr, item, settings);
             if (!item.IsAir && Configs.SmartPickup.UpgradeItems) item = SmartEquip.UpgradeItems(self, item, settings);
             if (!item.IsAir && Configs.SmartPickup.AutoEquip) item = SmartEquip.AutoEquip(self, item, settings);
-            if (!item.IsAir && Configs.SmartPickup.VoidBagFirst) item = SmartEquip.VoidBagFirst(self, item, settings);
+            if (!item.IsAir && !item.favorited && Configs.SmartPickup.VoidBagFirst) item = SmartEquip.VoidBagFirst(self, item, settings);
             return item;
         });
     }

@@ -11,12 +11,11 @@ ModName: Better Inventory
 SPIC.ModName: Spy's Infinite Consumables
 Homepage: homepage
 Workshop: Steam Workshop page
-Summary: Bugs related to Refill Mouse Item and favorited items should be fixed
+Summary: Some more bugs where fixed
 Details: ""
 Changelog:
 	'''
-	- Added Move Items To Return to Previous Slot
-	- Fixed Refill Mouse Item not been able to be disabled
-	- Fixed Refill Mouse Item making removing the favorited status of items
+	- Fixed Refill Mouse Items deleting favorited stackable items
+	- Fixed Pickup to Void Bag First moving favorited items inside the Void Bag
 	'''
 Version: 0.9.0.1
