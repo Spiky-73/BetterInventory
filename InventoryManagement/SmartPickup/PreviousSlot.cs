@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
@@ -10,8 +9,6 @@ using SpikysLib.IL;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.ModLoader.Config;
-using Terraria.ModLoader.IO;
 using Terraria.UI;
 using Terraria.UI.Gamepad;
 
@@ -21,7 +18,7 @@ public sealed class PreviousSlotItem : GlobalItem {
     public override void OnConsumeItem(Item item, Player player) {
         if (!Configs.PreviousSlot.Consumption) return;
         var inventorySlot = InventoryLoader.FindItem(player, i => i == item);
-        if (inventorySlot.HasValue) player.GetModPlayer<PreviousSlotPlayer>().MarkWithConfig(item.type, inventorySlot.Value, item.favorited);
+        if (inventorySlot.HasValue) player.GetModPlayer<PreviousSlotPlayer>().DelayedMark(item, inventorySlot.Value);
     }
 }
 public sealed class PreviousSlotPlayer : ModPlayer {
@@ -47,8 +44,12 @@ public sealed class PreviousSlotPlayer : ModPlayer {
             return;
         }
         (int oldType, int oldMouse, bool oldFav) = (inv[slot].type, Main.mouseItem.type, inv[slot].favorited);
+        int oldCount = inv[slot].stack + Main.mouseItem.stack;
         orig(inv, context, slot);
-        if (Main.mouseItem.type == oldMouse) return;
+        if (inv[slot].type == oldType) return; // No point if the item did not change
+        if (oldCount != inv[slot].stack + Main.mouseItem.stack) return; // or if an item was consumed
+        if (oldType != ItemID.None && oldType != inv[slot].type && oldType != Main.mouseItem.type) return; // or if an item was moved elsewhere
+        if (oldMouse != ItemID.None && oldMouse != inv[slot].type && oldMouse != Main.mouseItem.type) return;
 
         bool removed = oldType != ItemID.None && (Configs.SmartPickup.Value.previousSlot == Configs.ItemPickupLevel.AllItems || mark.Inventory.CanBePreferredInventory || oldFav);
         bool placed = inv[slot].type != ItemID.None && (Configs.SmartPickup.Value.previousSlot == Configs.ItemPickupLevel.AllItems || mark.Inventory.CanBePreferredInventory || inv[slot].favorited);
@@ -56,7 +57,7 @@ public sealed class PreviousSlotPlayer : ModPlayer {
         var modPlayer = Main.LocalPlayer.GetModPlayer<PreviousSlotPlayer>();
 
         if (placed && removed) modPlayer.Remark(inv[slot].type, oldType, oldFav);
-        else if (removed) modPlayer.Mark(oldType, mark, oldFav);
+        else if (removed) modPlayer.MarkWithConfig(oldType, mark, oldFav);
         else if (placed) modPlayer.Unmark(inv[slot].type);
         if (placed) modPlayer.Unmark(mark);
     }
@@ -66,12 +67,12 @@ public sealed class PreviousSlotPlayer : ModPlayer {
         if (!Configs.PreviousSlot.Consumption) return;
         if (Main.netMode == NetmodeID.Server) return;
         var inventorySlot = InventoryLoader.FindItem(Player, i => i == ammo);
-        if (inventorySlot.HasValue) MarkWithConfig(ammo.type, inventorySlot.Value, ammo.favorited);
+        if (inventorySlot.HasValue) DelayedMark(ammo, inventorySlot.Value);
     }
     public override bool? CanConsumeBait(Item bait) {
         if (!Configs.PreviousSlot.Consumption) return null;
         var inventorySlot = InventoryLoader.FindItem(Player, i => i == bait);
-        if (inventorySlot.HasValue) MarkWithConfig(bait.type, inventorySlot.Value, bait.favorited);
+        if (inventorySlot.HasValue) DelayedMark(bait, inventorySlot.Value);
         return null;
     }
 
@@ -164,7 +165,6 @@ public sealed class PreviousSlotPlayer : ModPlayer {
     private static bool TryDrawMark(SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, float scale, Texture2D texture, Color color, Configs.IPreviousDisplay ui) {
         var modPlayer = Main.LocalPlayer.GetModPlayer<PreviousSlotPlayer>();
         if (!InventoryLoader.IsInventorySlot(Main.LocalPlayer, inv, context, slot, out InventorySlot itemSlot) || !modPlayer.TryGetMark(itemSlot, out Item? mark)) return false;
-        if (inv[slot].type == mark.type) return false;
         ItemSlot.DrawItemIcon(mark, ItemSlot.Context.InWorld, spriteBatch, position + texture.Size() * ui.position * scale, scale * ui.scale, 32f, color * Main.cursorAlpha * ui.intensity);
         return true;
     }
@@ -238,6 +238,15 @@ public sealed class PreviousSlotPlayer : ModPlayer {
         return true;
     }
 
+    public void DelayedMark(Item item, InventorySlot slot) => _delayedMarks.Add((item, slot, item.type, item.favorited));
+
+    public override void PostUpdate() {
+        foreach ((var item, var slot, var type, var favorited) in _delayedMarks) {
+            if (item.IsAir || item.type != type) MarkWithConfig(type, slot, favorited);
+        }
+        _delayedMarks.Clear();
+    }
+
     public void MarkWithConfig(int type, InventorySlot slot, bool favorited) {
         if (Configs.SmartPickup.Value.previousSlot == Configs.ItemPickupLevel.AllItems || slot.Inventory.CanBePreferredInventory || favorited) Mark(type, slot, favorited);
     }
@@ -271,6 +280,7 @@ public sealed class PreviousSlotPlayer : ModPlayer {
 
     private readonly Dictionary<InventorySlot, Item> _marksPerSlot = [];
     private readonly Dictionary<int, List<InventorySlot>> _marksPerType = [];
+    private readonly List<(Item item, InventorySlot slot, int type, bool favorited)> _delayedMarks = [];
 
     public const string MarksTag = "marks";
     public const string ItemTag = "item";

@@ -18,5 +18,7 @@ Changelog:
 	- Fixed Refill Mouse Items deleting favorited stackable items
 	- Fixed Pickup to Void Bag First moving favorited items inside the Void Bag
 	- Made Move Items in Return to Previous Slot more granular
+	- Fixed right-clicking items not marking items or removing marks
+	- Fixed Consumption in Return to Previous Slot marking items when it should not
 	'''
 Version: 0.9.0.1
