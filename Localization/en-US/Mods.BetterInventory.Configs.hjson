@@ -339,7 +339,11 @@ SmartConsumption: {
 
 	mouse: {
 		Label: Include Mouse Item
-		Tooltip: Includes the mouse item when searching for the item to consume
+		Tooltip:
+			'''
+			Applies Smart Consumption when consuming the mouse item
+			Checks if the mouse items is the smallest stack when consuming another item
+			'''
 	}
 
 	self: {

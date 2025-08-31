@@ -6,6 +6,8 @@
 - Made Move Items in Return to Previous Slot more granular
 - Fixed right-clicking items not marking items or removing marks
 - Fixed Return to Previous Slot on Consumption marking items when it should not
+- Changed Smart Consumption to not be applied if the mouse item is consumed and Include Mouse is disabled
+- Fixed Recipe Sort been disabled by default
 
 ## v0.9.0.1
 - Added Move Items To Return to Previous Slot
