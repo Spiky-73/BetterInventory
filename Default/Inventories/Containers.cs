@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using SpikysLib.DataStructures;
 using Terraria;
@@ -21,7 +20,7 @@ public sealed class Hotbar : ModSubInventory {
 }
 public sealed class Inventory : ModSubInventory {
     public override int Context => ContextID.InventoryItem;
-    public override ListIndices<Item> Items => new(Entity.inventory, new SpikysLib.DataStructures.Range(InventorySlots.Hotbar.End, InventorySlots.Coins.Start));
+    public override ListIndices<Item> Items => new(Entity.inventory, new Range(InventorySlots.Hotbar.End, InventorySlots.Coins.Start));
     public override Item GetItem(Item item, GetItemSettings settings) => Utility.GetItem_Inner(Entity, Entity.whoAmI, item, settings);
 }
 public sealed class Coins : ModSubInventory {
@@ -38,10 +37,7 @@ public sealed class Ammo : ModSubInventory {
 
 public abstract class Container : ModSubInventory {
     public override abstract Item[] Items { get; }
-    public sealed override bool FitsSlot(Item item, int slot, out IList<InventorySlot> itemsToMove) {
-        itemsToMove = Array.Empty<InventorySlot>();
-        return !ChestUI.IsBlockedFromTransferIntoChest(item, Items);
-    }
+    public sealed override bool Accepts(Item item) => !ChestUI.IsBlockedFromTransferIntoChest(item, Items) && IsActive();
     public sealed override Item GetItem(Item item, GetItemSettings settings) {
         ChestUI.TryPlacingInChest(item, false, Context);
         return item;
@@ -49,36 +45,61 @@ public abstract class Container : ModSubInventory {
 }
 
 public sealed class Chest : Container {
+    public int WorldId { get; private set; } = -1;
     public int Index { get; private set; } = -1;
-    public override int Context => ContextID.ChestItem;
-    public override void OnSlotChange(int slot) => NetMessage.SendData(MessageID.SyncChestItem, number: Index, number2: slot);
-    public override Item[] Items => Index >= 0 ? Main.chest[Index].item : [];
+    public sealed override Item[] Items => Index > -1 ? Main.chest[Index].item : [];
+    public sealed override int Context => ContextID.ChestItem;
+    
+    public sealed override void OnSlotChange(int slot) => NetMessage.SendData(MessageID.SyncChestItem, number: Index, number2: slot);
 
-    public override bool Accepts(Item item) => Entity.chest == Index;
-
-    public override IList<ModSubInventory> GetInventories(Player player) {
+    // TODO return nearby chests
+    public sealed override IEnumerable<ModSubInventory> GetInventories(Player player) => GetActiveInventories(player);
+    public sealed override IEnumerable<ModSubInventory> GetActiveInventories(Player player) {
         if (player.chest < 0) return [];
         var inventory = (Chest)NewInstance(player);
+        inventory.WorldId = Main.worldID;
         inventory.Index = player.chest;
         return [inventory];
     }
+    public sealed override bool IsActive() => Entity.chest == Index;
 
-    public override bool Equals(object? obj) => base.Equals(obj) && Index == ((Chest)obj).Index;
-    public override int GetHashCode() => (Index, base.GetHashCode()).GetHashCode();
+    public override void SaveData(TagCompound tag) {
+        if (WorldId != -1) tag[WorldTag] = WorldId;
+        if (Index != -1) tag[IndexTag] = Index;
+    }
+    public override void LoadData(TagCompound tag) {
+        if (tag.TryGet(WorldTag, out int id)) WorldId = id;
+        if (tag.TryGet(IndexTag, out int index)) Index = index;
+    }
+    public sealed override bool Equals(object? obj) => base.Equals(obj) && Index == ((Chest)obj).Index && WorldId == ((Chest)obj).WorldId;
+    public sealed override int GetHashCode() => (base.GetHashCode(), Index, WorldId).GetHashCode();
+    public override bool ForceUnloaded => WorldId != Main.worldID;
+    public const string WorldTag = "world";
+    public const string IndexTag = "index";
 }
-public sealed class PiggyBank : Container {
-    public override int Context => ContextID.BankItem;
-    public override Item[] Items => Entity.bank.item;
+
+public abstract class Bank : Container {
+    public abstract int Index { get; }
+    public sealed override bool IsActive() => Entity.chest == Index || (Index == InventorySlots.VoidBag && Entity.IsVoidVaultEnabled);
+    public sealed override IEnumerable<ModSubInventory> GetActiveInventories(Player player) => IsActive() ? GetInventories(player) : [];
 }
-public sealed class Safe : Container {
-    public override int Context => ContextID.BankItem;
-    public override Item[] Items => Entity.bank2.item;
+public sealed class PiggyBank : Bank {
+    public sealed override int Context => ContextID.BankItem;
+    public sealed override int Index => InventorySlots.PiggyBank;
+    public sealed override Item[] Items => Entity.bank.item;
 }
-public sealed class DefenderForge : Container {
-    public override int Context => ContextID.BankItem;
-    public override Item[] Items => Entity.bank3.item;
+public sealed class Safe : Bank {
+    public sealed override int Context => ContextID.BankItem;
+    public sealed override int Index => InventorySlots.Safe;
+    public sealed override Item[] Items => Entity.bank2.item;
 }
-public sealed class VoidBag : Container {
-    public override int Context => ContextID.VoidItem;
-    public override Item[] Items => Entity.bank4.item;
+public sealed class DefenderForge : Bank {
+    public sealed override int Context => ContextID.BankItem;
+    public sealed override int Index => InventorySlots.DefendersForge;
+    public sealed override Item[] Items => Entity.bank3.item;
+}
+public sealed class VoidBag : Bank {
+    public sealed override int Context => ContextID.VoidItem;
+    public sealed override int Index => InventorySlots.VoidBag;
+    public sealed override Item[] Items => Entity.bank4.item;
 }

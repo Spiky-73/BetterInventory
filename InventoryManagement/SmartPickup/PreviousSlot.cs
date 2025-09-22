@@ -1,14 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using SpikysLib;
+using SpikysLib.Collections;
 using SpikysLib.IL;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.ModLoader.Config;
+using Terraria.ModLoader.IO;
 using Terraria.UI;
 using Terraria.UI.Gamepad;
 
@@ -282,9 +286,60 @@ public sealed class PreviousSlotPlayer : ModPlayer {
     private readonly Dictionary<int, List<InventorySlot>> _marksPerType = [];
     private readonly List<(Item item, InventorySlot slot, int type, bool favorited)> _delayedMarks = [];
 
-    public const string MarksTag = "marks";
-    public const string ItemTag = "item";
-    public const string SlotsTag = "slots";
+
+    public override void SaveData(TagCompound tag) {
+        Dictionary<ItemDefinition, List<TagCompound>> marksTag = new(_unloadedMarks);
+        foreach ((int item, List<InventorySlot> slots) in _marksPerType) {
+            marksTag.GetOrAdd(new ItemDefinition(item), []).AddRange(slots.Select(slot => {
+                TagCompound markTag = new() {
+                    { ModTag, slot.Inventory.Mod.Name },
+                    { NameTag, slot.Inventory.Name },
+                    { IndexTag, slot.Index },
+                };
+                if (_marksPerSlot[slot].favorited) tag[FavoritedTag] = true;
+                TagCompound inventoryTag = [];
+                slot.Inventory.SaveData(inventoryTag);
+                if (inventoryTag.Count > 0) markTag[DataTag] = inventoryTag;
+                return markTag;
+            }));
+        }
+
+        foreach ((ItemDefinition item, List<TagCompound> mark) in marksTag) tag[item.ToString()] = mark;
+    }
+
+    public override void LoadData(TagCompound tag) {
+        _unloadedMarks.Clear();
+        foreach((string key, object value) in tag) _unloadedMarks[new(key)] = TagIO.Deserialize<List<TagCompound>>(value);
+    }
+    public override void OnEnterWorld() {
+        Dictionary<ItemDefinition, List<TagCompound>> marksTag = new(_unloadedMarks);
+        _marksPerSlot.Clear();
+        _marksPerType.Clear();
+        _unloadedMarks.Clear();
+        foreach((var definition, var slotTags) in marksTag) {
+            if (definition.IsUnloaded) {
+                _unloadedMarks.GetOrAdd(definition, []).AddRange(slotTags);
+                continue;
+            }
+            foreach(var slotTag in slotTags) {
+                if (!ModContent.TryFind<ModSubInventory>(slotTag.GetString(ModTag), slotTag.GetString(NameTag), out var inventoryTemplate)) {
+                    _unloadedMarks.GetOrAdd(definition, []).Add(slotTag);
+                    continue;
+                }
+                var inventory = inventoryTemplate.NewInstance(Player);
+                if (slotTag.TryGet(DataTag, out TagCompound data)) inventory.LoadData(data);
+                if (inventory.ForceUnloaded) {
+                    _unloadedMarks.GetOrAdd(definition, []).Add(slotTag);
+                    continue;
+                }
+                MarkWithConfig(definition.Type, new(inventory, slotTag.GetInt(IndexTag)), slotTag.ContainsKey(FavoritedTag));
+            }
+        }
+        base.OnEnterWorld();
+    }
+
+    // Dict<ItemDefinition, List<(mod, name, data, favorited)>
+    private Dictionary<ItemDefinition, List<TagCompound>> _unloadedMarks = [];
     public const string ModTag = "mod";
     public const string NameTag = "name";
     public const string DataTag = "data";

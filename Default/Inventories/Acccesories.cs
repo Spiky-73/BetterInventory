@@ -1,35 +1,31 @@
-using System.Collections;
 using System.Collections.Generic;
 using SpikysLib.Constants;
 using SpikysLib.DataStructures;
 using Terraria;
 using Terraria.ModLoader;
-using Terraria.ModLoader.Default;
-using Terraria.ModLoader.IO;
 using Terraria.UI;
 using ContextID = Terraria.UI.ItemSlot.Context;
 
 namespace BetterInventory.Default.Inventories;
 
-public abstract class AccessoryInventory : ModSubLoadoutInventory {
-    public sealed override bool FitsSlot(Item item, int slot, out IList<InventorySlot> itemsToMove) {
-        List<int> vanillaSlots = UnlockedVanillaSlots(Entity);
-        List<int> moddedSlots = UnlockedModdedSlots(Entity, false);
+public class Accessories : ModSubLoadoutInventory {
+    public static bool FitsSlot(Player player, Item item, int context, int slot, int loadout, out IList<InventorySlot> itemsToMove) {
+        List<int> vanillaSlots = player.UnlockedVanillaSlots();
+        List<int> moddedSlots = player.UnlockedModdedSlots(false);
 
         if (!(slot < vanillaSlots.Count ?
                 ItemLoader.CanEquipAccessory(item, slot + ArmorSlots.Count, false) :
-                ItemLoader.CanEquipAccessory(item, moddedSlots[slot - vanillaSlots.Count], true) && LoaderManager.Get<AccessorySlotLoader>().CanAcceptItem(moddedSlots[slot - vanillaSlots.Count], item, -Context))) {
+                ItemLoader.CanEquipAccessory(item, moddedSlots[slot - vanillaSlots.Count], true) && LoaderManager.Get<AccessorySlotLoader>().CanAcceptItem(moddedSlots[slot - vanillaSlots.Count], item, -context))) {
             itemsToMove = [];
             return false;
         }
-        itemsToMove = GetIncompatibleItems(item, Context == ContextID.EquipAccessoryVanity, out bool canAllMove);
+        itemsToMove = GetIncompatibleItems(player, item, context == ContextID.EquipAccessoryVanity, loadout, out bool canAllMove);
         return canAllMove;
     }
-
-    public IList<InventorySlot> GetIncompatibleItems(Item item, bool vanity, out bool canAllMove) {
+    public static IList<InventorySlot> GetIncompatibleItems(Player player, Item item, bool vanity, int loadout, out bool canAllMove) {
         canAllMove = true;
         List<InventorySlot> incompatibles = [];
-        void CheckAccessories(ModSubLoadoutInventory inventory, bool vanity, ref bool canAllMove) {
+        void CheckAccessories(ModSubEquipmentInventory inventory, bool vanity, ref bool canAllMove) {
             IList<Item> items = inventory.Items;
             for (int i = 0; i < items.Count; i++) {
                 if (item == items[i]) continue;
@@ -39,81 +35,49 @@ public abstract class AccessoryInventory : ModSubLoadoutInventory {
             }
         }
 
-        var accessories = (Accessories)ModContent.GetInstance<Accessories>().NewInstance(Entity);
-        accessories.LoadoutIndex = LoadoutIndex;
+        var accessories = (Accessories)ModContent.GetInstance<Accessories>().NewInstance(player);
+        accessories.LoadoutIndex = loadout;
         CheckAccessories(accessories, vanity, ref canAllMove);
-        var social = (VanityAccessories)ModContent.GetInstance<VanityAccessories>().NewInstance(Entity);
-        social.LoadoutIndex = LoadoutIndex;
+        var social = (VanityAccessories)ModContent.GetInstance<VanityAccessories>().NewInstance(player);
+        social.LoadoutIndex = loadout;
         CheckAccessories(social, true, ref canAllMove);
-        var sharedAccessories = (SharedAccessories)ModContent.GetInstance<SharedAccessories>().NewInstance(Entity);
+        var sharedAccessories = (SharedAccessories)ModContent.GetInstance<SharedAccessories>().NewInstance(player);
         CheckAccessories(sharedAccessories, vanity, ref canAllMove);
-        var sharedSocial = (SharedVanityAccessories)ModContent.GetInstance<SharedVanityAccessories>().NewInstance(Entity);
+        var sharedSocial = (SharedVanityAccessories)ModContent.GetInstance<SharedVanityAccessories>().NewInstance(player);
         CheckAccessories(sharedSocial, true, ref canAllMove);
         return incompatibles;
     }
 
-    public Item[] VanillaAccessories => Entity.CurrentLoadoutIndex == LoadoutIndex ?
-        Entity.armor :
-        Entity.Loadouts[LoadoutIndex].Armor;
-    public Item[] ModdedAccessories => Entity.CurrentLoadoutIndex == LoadoutIndex || LoadoutIndex == -1 ?
-        Reflection.ModAccessorySlotPlayer.exAccessorySlot.GetValue(Entity.GetModPlayer<ModAccessorySlotPlayer>()) :
-        Reflection.ModAccessorySlotPlayer.ExEquipmentLoadout.ExAccessorySlot.GetValue(((IList)Reflection.ModAccessorySlotPlayer.exLoadouts.GetValue(Entity.GetModPlayer<ModAccessorySlotPlayer>())!)[LoadoutIndex]!)!;
-    
-    public static List<int> UnlockedVanillaSlots(Player player, bool vanity = false) {
-        List<int> unlocked = [];
-        int offset = vanity ? (ArmorSlots.Count + AccessorySlotLoader.MaxVanillaSlotCount) : 0;
-        for (int i = 0; i < AccessorySlotLoader.MaxVanillaSlotCount; i++) if (player.IsItemSlotUnlockedAndUsable(i + ArmorSlots.Count)) unlocked.Add(i + ArmorSlots.Count + offset);
-        return unlocked;
-    }
+    public virtual bool Vanity => false;
 
-    public static List<int> UnlockedModdedSlots(Player player, bool shared, bool vanity = false) {
-        List<int> unlocked = [];
-        var accPlayer = player.GetModPlayer<ModAccessorySlotPlayer>();
-        int offset = vanity ? accPlayer.SlotCount : 0;
-        for (int i = 0; i < accPlayer.SlotCount; i++){
-            if (!LoaderManager.Get<AccessorySlotLoader>().ModdedIsItemSlotUnlockedAndUsable(i, player)) continue;
-            if (shared != Reflection.ModAccessorySlotPlayer.IsSharedSlot.Invoke(accPlayer, i)) continue;
-            unlocked.Add(i + offset);
-        }
-        return unlocked;
-    }
-}
-
-public sealed class Accessories : AccessoryInventory {
-    public override bool Accepts(Item item) => item.accessory && !item.vanity;
-    public override bool IsPreferredInventory(Item item) => true;
-    public override int Context => ContextID.EquipAccessory;
-    public override JoinedLists<Item> Items => new(
-        new ListIndices<Item>(VanillaAccessories, UnlockedVanillaSlots(Entity)),
-        new ListIndices<Item>(ModdedAccessories, UnlockedModdedSlots(Entity, false))
+    public sealed override int Context => Vanity ? ContextID.EquipAccessoryVanity : ContextID.EquipAccessory;
+    public sealed override int EquipPage => 0;
+    public sealed override bool Accepts(Item item) => item.accessory && (Vanity || !item.vanity);
+    public sealed override bool IsPreferredInventory(Item item) => !Vanity || (item.vanity && item.FitsAccessoryVanitySlot);
+    public sealed override JoinedLists<Item> Items => new(
+        new ListIndices<Item>(Entity.Armor(LoadoutIndex), Entity.UnlockedVanillaSlots(Vanity)),
+        new ListIndices<Item>(Entity.ExAccessories(LoadoutIndex), Entity.UnlockedModdedSlots(false, Vanity))
     );
+    public sealed override bool FitsSlot(Item item, int slot, out IList<InventorySlot> itemsToMove) => FitsSlot(Entity, item, Context, slot, LoadoutIndex, out itemsToMove);
+}
+public sealed class VanityAccessories : Accessories {
+    public sealed override bool Vanity => true;
+    public sealed override int ComparePositionTo(ModSubInventory other) => other.GetType() == typeof(SharedAccessories) ? 1 : 0;
 }
 
-public sealed class SharedAccessories : AccessoryInventory {
-    public override bool Accepts(Item item) => item.accessory && !item.vanity;
-    public override bool IsPreferredInventory(Item item) => true;
-    public override int Context => ContextID.EquipAccessory;
-    public override ListIndices<Item> Items => new(ModdedAccessories, UnlockedModdedSlots(Entity, true));
-    public override IList<ModSubInventory> GetInventories(Player player) => [NewInstance(player)];
-    public sealed override int ComparePositionTo(ModSubInventory other) => other is Accessories ? 1 : 0;
+public class SharedAccessories : ModSubEquipmentInventory {
+    public virtual bool Vanity => false;
+
+    public sealed override int Context => Vanity ? ContextID.EquipAccessoryVanity : ContextID.EquipAccessory;
+    public sealed override int EquipPage => 0;
+    public sealed override bool Accepts(Item item) => item.accessory && (Vanity || !item.vanity);
+    public sealed override bool IsPreferredInventory(Item item) => !Vanity || (item.vanity && item.FitsAccessoryVanitySlot);
+    public sealed override ListIndices<Item> Items => new(Entity.ExAccessories(), Entity.UnlockedModdedSlots(true, Vanity));
+    public sealed override bool FitsSlot(Item item, int slot, out IList<InventorySlot> itemsToMove) => Accessories.FitsSlot(Entity, item, Context, slot, -1, out itemsToMove);
+    public override int ComparePositionTo(ModSubInventory other) => other.GetType() == typeof(Accessories) ? 1 : 0;
 }
 
-public sealed class VanityAccessories : AccessoryInventory {
-    public override bool Accepts(Item item) => item.accessory;
-    public override bool IsPreferredInventory(Item item) => item.vanity && item.FitsAccessoryVanitySlot;
-    public override int Context => ContextID.EquipAccessoryVanity;
-    public override JoinedLists<Item> Items => new(
-        new ListIndices<Item>(VanillaAccessories, UnlockedVanillaSlots(Entity, true)),
-        new ListIndices<Item>(ModdedAccessories, UnlockedModdedSlots(Entity, false, true))
-    );
-    public sealed override int ComparePositionTo(ModSubInventory other) => other is SharedAccessories ? 1 : 0;
-}
-
-public sealed class SharedVanityAccessories : AccessoryInventory {
-    public override bool Accepts(Item item) => item.accessory;
-    public override bool IsPreferredInventory(Item item) => item.vanity && item.FitsAccessoryVanitySlot;
-    public override int Context => ContextID.EquipAccessoryVanity;
-    public override ListIndices<Item> Items => new(ModdedAccessories, UnlockedModdedSlots(Entity, true, true));
-    public override IList<ModSubInventory> GetInventories(Player player) => [NewInstance(player)];
-    public sealed override int ComparePositionTo(ModSubInventory other) => other is VanityAccessories ? 1 : 0;
+public sealed class SharedVanityAccessories : SharedAccessories {
+    public sealed override bool Vanity => true;
+    public sealed override int ComparePositionTo(ModSubInventory other) => other.GetType() == typeof(VanityAccessories) ? 1 : 0;
 }

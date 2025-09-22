@@ -1,5 +1,8 @@
 # Better Inventory changelog
 
+## v0.9.1
+- Save Return to previous slot data between reloads
+
 ## v0.9.0.2
 - Fixed Refill Mouse Items deleting favorited stackable items
 - Fixed Pickup to Void Bag First moving favorited items inside the Void Bag
