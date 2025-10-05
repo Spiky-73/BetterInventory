@@ -12,7 +12,7 @@ public sealed class SmartPickup : ModSystem {
     public override void Load() {
         IL_Player.GetItem += static il => {
             if (!il.ApplyTo(ILOverrideSlot, Configs.SmartPickup.OverrideSlot)) Configs.UnloadedInventoryManagement.Value.pickupOverrideSlot = true;
-            if (!il.ApplyTo(ILDedicatedSlots, Configs.SmartPickup.DedicatedSlot)) Configs.UnloadedInventoryManagement.Value.pickupDedicatedSlot = true;
+            if (!il.ApplyTo(ILGetItemWorld, Configs.SmartPickup.DedicatedSlot)) Configs.UnloadedInventoryManagement.Value.pickupDedicatedSlot = true;
             if (!il.ApplyTo(ILHotbarLast, Configs.SmartPickup.HotbarLast)) Configs.UnloadedInventoryManagement.Value.hotbarLast = true;
             if (!il.ApplyTo(ILFixNewItem, Configs.SmartPickup.FixSlot)) Configs.UnloadedInventoryManagement.Value.fixSlot = true;
         };
@@ -39,7 +39,7 @@ public sealed class SmartPickup : ModSystem {
         });
     }
 
-    private static void ILDedicatedSlots(ILContext il) {
+    private static void ILGetItemWorld(ILContext il) {
         ILCursor cursor = new(il);
 
         cursor.GotoNextLoc(out int coin, i => i.Previous.MatchCallvirt(Reflection.Item.IsACoin.GetMethod!), 0);
