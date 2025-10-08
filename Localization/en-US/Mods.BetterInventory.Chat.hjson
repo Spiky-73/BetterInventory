@@ -16,5 +16,6 @@ Details: ""
 Changelog:
 	'''
 	- Save Return to previous slot data between reloads
+	- Rework Previous Slot separation
 	'''
 Version: 0.9.1

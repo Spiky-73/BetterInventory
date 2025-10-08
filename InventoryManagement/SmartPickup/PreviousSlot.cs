@@ -6,12 +6,10 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using SpikysLib;
-using SpikysLib.Collections;
 using SpikysLib.IL;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.ModLoader.Config;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
 using Terraria.UI.Gamepad;
@@ -22,28 +20,15 @@ public sealed class PreviousSlotItem : GlobalItem {
     public override void OnConsumeItem(Item item, Player player) {
         if (!Configs.PreviousSlot.Consumption) return;
         var inventorySlot = InventoryLoader.FindItem(player, i => i == item);
-        if (inventorySlot.HasValue) player.GetModPlayer<PreviousSlotPlayer>().DelayedMark(item, inventorySlot.Value);
+        if (inventorySlot.HasValue) player.GetModPlayer<PreviousSlotPlayer>().RemoveItem(inventorySlot.Value, item, true);
     }
 }
-public sealed class PreviousSlotPlayer : ModPlayer {
 
-    public override void Load() {
-        On_ItemSlot.LeftClick_ItemArray_int_int += HookMarkOnLeftClick;
-        On_ItemSlot.RightClick_ItemArray_int_int += HookMarkOnRightClick;
-        On_Player.DropItems += HookMarkOnDeath;
-
-        On_Recipe.ConsumeForCraft += HookMarkConsumeMaterial;
-
-        IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += static il => {
-            if (!il.ApplyTo(ILDrawFakeItem, Configs.PreviousDisplay.FakeItem)) Configs.UnloadedInventoryManagement.Value.displayFakeItem = true;
-            if (!il.ApplyTo(ILDrawIcon, Configs.PreviousDisplay.Icon)) Configs.UnloadedInventoryManagement.Value.displayIcon = true;
-        };
-    }
-
-    private static void HookMarkOnLeftClick(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) => UpdateMark((inv, context, slot) => orig(inv, context, slot), inv, context, slot, Main.mouseLeft && Main.mouseLeftRelease);
-    private static void HookMarkOnRightClick(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) => UpdateMark((inv, context, slot) => orig(inv, context, slot), inv, context, slot, Main.mouseRight);
-    private static void UpdateMark(Action<Item[], int, int> orig, Item[] inv, int context, int slot, bool update) {
-        if (!update || !Configs.PreviousSlot.Mouse || !InventoryLoader.IsInventorySlot(Main.LocalPlayer, inv, context, slot, out InventorySlot mark)) {
+public sealed partial class PreviousSlotPlayer : ModPlayer {
+    private static void HookItemSlotLeftClick(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) => HookItemSlotMarkOnClick((inv, context, slot) => orig(inv, context, slot), inv, context, slot, Main.mouseLeft && Main.mouseLeftRelease);
+    private static void HookItemSlotRightClick(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) => HookItemSlotMarkOnClick((inv, context, slot) => orig(inv, context, slot), inv, context, slot, Main.mouseRight);
+    private static void HookItemSlotMarkOnClick(Action<Item[], int, int> orig, Item[] inv, int context, int slot, bool click) {
+        if (!click || !Configs.PreviousSlot.Mouse || !InventoryLoader.IsInventorySlot(Main.LocalPlayer, inv, context, slot, out InventorySlot mark)) {
             orig(inv, context, slot);
             return;
         }
@@ -55,15 +40,9 @@ public sealed class PreviousSlotPlayer : ModPlayer {
         if (oldType != ItemID.None && oldType != inv[slot].type && oldType != Main.mouseItem.type) return; // or if an item was moved elsewhere
         if (oldMouse != ItemID.None && oldMouse != inv[slot].type && oldMouse != Main.mouseItem.type) return;
 
-        bool removed = oldType != ItemID.None && (Configs.SmartPickup.Value.previousSlot == Configs.ItemPickupLevel.AllItems || mark.Inventory.CanBePreferredInventory || oldFav);
-        bool placed = inv[slot].type != ItemID.None && (Configs.SmartPickup.Value.previousSlot == Configs.ItemPickupLevel.AllItems || mark.Inventory.CanBePreferredInventory || inv[slot].favorited);
-
         var modPlayer = Main.LocalPlayer.GetModPlayer<PreviousSlotPlayer>();
-
-        if (placed && removed) modPlayer.Remark(inv[slot].type, oldType, oldFav);
-        else if (removed) modPlayer.MarkWithConfig(oldType, mark, oldFav);
-        else if (placed) modPlayer.Unmark(inv[slot].type);
-        if (placed) modPlayer.Unmark(mark);
+        if (oldType != ItemID.None) modPlayer.RemoveItem(mark, oldType, oldFav);
+        if (inv[slot].type != ItemID.None) modPlayer.PlaceItem(mark, inv[slot]);
     }
 
 
@@ -71,19 +50,19 @@ public sealed class PreviousSlotPlayer : ModPlayer {
         if (!Configs.PreviousSlot.Consumption) return;
         if (Main.netMode == NetmodeID.Server) return;
         var inventorySlot = InventoryLoader.FindItem(Player, i => i == ammo);
-        if (inventorySlot.HasValue) DelayedMark(ammo, inventorySlot.Value);
+        if (inventorySlot.HasValue) RemoveItem(inventorySlot.Value, ammo, true);
     }
     public override bool? CanConsumeBait(Item bait) {
         if (!Configs.PreviousSlot.Consumption) return null;
         var inventorySlot = InventoryLoader.FindItem(Player, i => i == bait);
-        if (inventorySlot.HasValue) DelayedMark(bait, inventorySlot.Value);
+        if (inventorySlot.HasValue) RemoveItem(inventorySlot.Value, bait, true);
         return null;
     }
 
     private static bool HookMarkConsumeMaterial(On_Recipe.orig_ConsumeForCraft orig, Recipe self, Item item, Item requiredItem, ref int stackRequired) {
         if (!Configs.PreviousSlot.Consumption) return orig(self, item, requiredItem, ref stackRequired);
         var inventorySlot = InventoryLoader.FindItem(Main.LocalPlayer, i => i == item);
-        if (inventorySlot.HasValue) Main.LocalPlayer.GetModPlayer<PreviousSlotPlayer>().MarkWithConfig(item.type, inventorySlot.Value, item.favorited);
+        if (inventorySlot.HasValue) Main.LocalPlayer.GetModPlayer<PreviousSlotPlayer>().RemoveItem(inventorySlot.Value, item);
         return orig(self, item, requiredItem, ref stackRequired);
     }
 
@@ -96,11 +75,14 @@ public sealed class PreviousSlotPlayer : ModPlayer {
         foreach (ModSubInventory inventory in InventoryLoader.GetInventories(self)) {
             IList<Item> items = inventory.Items;
             for (int i = 0; i < items.Count; i++) {
-                modPlayer.MarkWithConfig(items[i].type, new(inventory, i), items[i].favorited);
+                modPlayer.RemoveItem(new(inventory, i), items[i]);
             }
         }
         orig(self);
     }
+}
+
+public sealed partial class PreviousSlotPlayer : ModPlayer {
 
     private static void ILDrawFakeItem(ILContext il) {
         ILCursor cursor = new(il);
@@ -116,14 +98,7 @@ public sealed class PreviousSlotPlayer : ModPlayer {
         // int num9 = context switch { ... };
         // if ((item.type <= 0 || item.stack <= 0) && ++[!<drawMark>] && num9 != -1) <drawSlotTexture>
         cursor.GotoNext(MoveType.After, i => i.MatchLdloc(icon));
-        cursor.EmitLdarg0();
-        cursor.EmitLdarg1();
-        cursor.EmitLdarg2();
-        cursor.EmitLdarg3();
-        cursor.EmitLdarg(4);
-        cursor.EmitLdloc(scale);
-        cursor.EmitLdloc(texture);
-        cursor.EmitLdloc(color);
+        cursor.EmitLdarg0().EmitLdarg1().EmitLdarg2().EmitLdarg3().EmitLdarg(4).EmitLdloc(scale).EmitLdloc(texture).EmitLdloc(color);
         cursor.EmitDelegate((int num9, SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, float scale, Texture2D texture, Color color) => {
             if (!Configs.PreviousDisplay.FakeItem || !TryDrawMark(spriteBatch, inv, context, slot, position, scale, texture, color, Configs.PreviousDisplay.Value.fakeItem.Value)) return num9;
             s_ilBackgroundMark = true;
@@ -151,198 +126,148 @@ public sealed class PreviousSlotPlayer : ModPlayer {
         cursor.GotoNext(MoveType.AfterLabel, i => i.MatchLdarg2());
 
         // ++ <drawMark>
-        cursor.EmitLdarg0();
-        cursor.EmitLdarg1();
-        cursor.EmitLdarg2();
-        cursor.EmitLdarg3();
-        cursor.EmitLdarg(4);
-        cursor.EmitLdloc(scale);
-        cursor.EmitLdloc(texture);
-        cursor.EmitLdloc(color);
+        cursor.EmitLdarg0().EmitLdarg1().EmitLdarg2().EmitLdarg3().EmitLdarg(4).EmitLdloc(scale).EmitLdloc(texture).EmitLdloc(color);
         cursor.EmitDelegate((SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, float scale, Texture2D texture, Color color) => {
             if (!Main.gameMenu && !s_ilBackgroundMark && Configs.PreviousDisplay.Icon) TryDrawMark(spriteBatch, inv, context, slot, position, scale, texture, color, Configs.PreviousDisplay.Value.icon.Value);
             s_ilBackgroundMark = false;
         });
     }
-    private static bool s_ilBackgroundMark;
 
     private static bool TryDrawMark(SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, float scale, Texture2D texture, Color color, Configs.IPreviousDisplay ui) {
         var modPlayer = Main.LocalPlayer.GetModPlayer<PreviousSlotPlayer>();
-        if (!InventoryLoader.IsInventorySlot(Main.LocalPlayer, inv, context, slot, out InventorySlot itemSlot) || !modPlayer.TryGetMark(itemSlot, out Item? mark)) return false;
+        if (!InventoryLoader.IsInventorySlot(Main.LocalPlayer, inv, context, slot, out InventorySlot itemSlot) || !modPlayer.TryGetPreviousItem(itemSlot, out Item? mark)) return false;
         ItemSlot.DrawItemIcon(mark, ItemSlot.Context.InWorld, spriteBatch, position + texture.Size() * ui.position * scale, scale * ui.scale, 32f, color * Main.cursorAlpha * ui.intensity);
         return true;
     }
 
-    public Item PickupItemToPreviousSlot(Player player, Item item, GetItemSettings settings) {
-        if (player.whoAmI != Main.myPlayer) return item;
+    private static bool s_ilBackgroundMark;
+}
 
-        List<InventorySlot> slots = new();
-        while (ConsumeMark(item.type, out (InventorySlot slot, bool favorited) mark)) {
-            IList<Item> items = mark.slot.Inventory.Items;
-            if (mark.slot.Index >= items.Count) continue;
-            Item oldItem = items[mark.slot.Index];
+public sealed partial class PreviousSlotPlayer : ModPlayer {
+
+    public override void Load() {
+        On_ItemSlot.LeftClick_ItemArray_int_int += HookItemSlotLeftClick;
+        On_ItemSlot.RightClick_ItemArray_int_int += HookItemSlotRightClick;
+        On_Player.DropItems += HookMarkOnDeath;
+
+        On_Recipe.ConsumeForCraft += HookMarkConsumeMaterial;
+
+        IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += static il => {
+            if (!il.ApplyTo(ILDrawFakeItem, Configs.PreviousDisplay.FakeItem)) Configs.UnloadedInventoryManagement.Value.displayFakeItem = true;
+            if (!il.ApplyTo(ILDrawIcon, Configs.PreviousDisplay.Icon)) Configs.UnloadedInventoryManagement.Value.displayIcon = true;
+        };
+    }
+
+    public Item PickupItemToAnyPreviousSlot(Item item, GetItemSettings settings) => PickupItemToPreviousSlot(item, settings, [.._inventoryPreviousSlots.Keys]);
+    public Item PickupItemToPreviousSlot(Item item, GetItemSettings settings, params ModSubInventory[] inventories) {
+        foreach (var inventory in inventories) {
+            item = PickupItemToPreviousSlot(item, settings, inventory);
+            if (item.IsAir) return item;
+        }
+        return item;
+    }
+    public Item PickupItemToPreviousSlot(Item item, GetItemSettings settings, ModSubInventory inventory) {
+        if (Player.whoAmI != Main.myPlayer) return item;
+        if (!_inventoryPreviousSlots.TryGetValue(inventory, out var previousItemSlots)) return item;
+
+        var slots = previousItemSlots.GetSlots(item);
+        IList<Item> items = inventory.Items;
+
+        foreach (int slot in slots) {
+            Item mark = previousItemSlots.Get(slot);
+            if (slot >= items.Count) continue;
+
+            Item oldItem = items[slot];
+
             if (!oldItem.IsAir && Configs.PreviousSlot.Value.movePolicy switch {
                 Configs.MovePolicy.Always => oldItem.favorited && !(mark.favorited || item.favorited),
                 Configs.MovePolicy.NotFavorited => oldItem.favorited,
                 Configs.MovePolicy.Never or _ => true,
             }) continue;
-            items[mark.slot.Index] = new(); // stored in `moved`
-            Item toMove = item.Clone();
-            toMove.favorited |= mark.favorited;
-            toMove.stack = 1;
-            if (mark.slot.GetItem(toMove, settings).IsAir) item.stack--;
-            if (!oldItem.IsAir) {
-                oldItem = mark.slot.GetItem(oldItem, settings);
-                player.GetDropItem(ref oldItem);
+
+            items[slot] = new(); // stored in `oldItem`
+            item = inventory.GetItem(item, slot, settings);
+            if (items[slot].type == mark.type) {
+                items[slot].favorited |= mark.favorited;
+                previousItemSlots.Unset(slot);
             }
-            if (item.IsAir) return item;
-            slots.Add(mark.slot);
-        }
-        foreach (InventorySlot slot in slots) {
-            item = slot.GetItem(item, settings);
+
+            if (!oldItem.IsAir) oldItem = inventory.GetItem(oldItem, slot, settings);
+            if (!oldItem.IsAir) oldItem = inventory.GetItem(oldItem, settings);
+            if (!oldItem.IsAir) Player.GetDropItem(ref oldItem);
+
             if (item.IsAir) return item;
         }
         return item;
     }
 
-    public bool ConsumeMark(int type, [MaybeNullWhen(false)] out (InventorySlot slot, bool favorited) mark) {
-        Queue<(int type, int depth)> items = [];
-        int checksLeft = Configs.PreviousSlot.Value.materials ? Configs.PreviousSlot.Value.materials.Value.maxChecks : 1;
-        items.Enqueue((type, Configs.PreviousSlot.Value.materials.Value.maxDepth));
-        HashSet<int> added = [type];
-        while (items.TryDequeue(out var item)) {
-            if (TryGetLastMarkedSlot(item.type, out var slot) && TryGetMark(slot, out var markedItem)) {
-                mark = (slot, markedItem.favorited);
-                Unmark(slot);
-                return true;
-            }
-            checksLeft--;
-            if (checksLeft == 0) break;
-            item.depth--;
-            if (item.depth == 0) continue;
-            foreach (int recipeIndex in ItemID.Sets.CraftingRecipeIndices[item.type]) {
-                foreach (Item material in Main.recipe[recipeIndex].requiredItem) {
-                    if (added.Add(material.type)) items.Enqueue((material.type, item.depth));
-                }
-            }
+    public void PlaceItem(InventorySlot slot, Item item) {
+        if (!_inventoryPreviousSlots.TryGetValue(slot.Inventory, out var previousItems)) return;
+        if (previousItems.TryGet(slot.Index, out Item? oldItem)) previousItems.Replace(item, oldItem);
+        foreach((var _, var value) in _inventoryPreviousSlots) value.ClearSlots(item);
+    }
+    public void RemoveItem(InventorySlot slot, int type, bool favorited, bool delayed = false) => RemoveItem(slot, new(type, 1) { favorited = favorited }, delayed);
+    public void RemoveItem(InventorySlot slot, Item item, bool delayed = false) {
+        if (delayed) {
+            _delayedRemovals.Add((slot, item.type, item.favorited));
+            return;
         }
-        mark = default;
-        return false;
+        if (Configs.SmartPickup.Value.previousSlot != Configs.ItemPickupLevel.AllItems && !slot.Inventory.CanBePreferredInventory && !item.favorited) return;
+        if (!_inventoryPreviousSlots.TryGetValue(slot.Inventory, out var previousItems)) _inventoryPreviousSlots[slot.Inventory] = previousItems = new();
+        if (previousItems.TryGet(slot.Index, out _) && !Configs.PreviousSlot.Value.overridePrevious) return;
+        previousItems.Set(slot.Index, item);
     }
 
-    public bool IsMarked(int type) => _marksPerType.TryGetValue(type, out var marks) && marks.Count > 0;
-    public bool IsMarked(InventorySlot slot) => _marksPerSlot.ContainsKey(slot);
-    public bool TryGetMark(InventorySlot slot, [MaybeNullWhen(false)] out Item mark) => _marksPerSlot.TryGetValue(slot, out mark);
-    public bool TryGetLastMarkedSlot(int type, [MaybeNullWhen(false)] out InventorySlot slot) {
-        if (!_marksPerType.TryGetValue(type, out var marks) || marks.Count == 0) {
-            slot = default;
-            return false;
-        }
-        slot = marks[^1];
-        return true;
+    public bool TryGetPreviousItem(InventorySlot slot, [MaybeNullWhen(false)] out Item item) {
+        item = default;
+        return _inventoryPreviousSlots.TryGetValue(slot.Inventory, out var previousSlots) && previousSlots.TryGet(slot.Index, out item);
     }
-
-    public void DelayedMark(Item item, InventorySlot slot) => _delayedMarks.Add((item, slot, item.type, item.favorited));
 
     public override void PostUpdate() {
-        foreach ((var item, var slot, var type, var favorited) in _delayedMarks) {
-            if (item.IsAir || item.type != type) MarkWithConfig(type, slot, favorited);
+        foreach ((var slot, var type, var favorited) in _delayedRemovals) {
+            if (slot.Item.IsAir || slot.Item.type != type) RemoveItem(slot, type, favorited, false);
         }
-        _delayedMarks.Clear();
+        _delayedRemovals.Clear();
     }
-
-    public void MarkWithConfig(int type, InventorySlot slot, bool favorited) {
-        if (Configs.SmartPickup.Value.previousSlot == Configs.ItemPickupLevel.AllItems || slot.Inventory.CanBePreferredInventory || favorited) Mark(type, slot, favorited);
-    }
-
-    public void Mark(int type, InventorySlot slot, bool favorited) {
-        if (IsMarked(slot)) {
-            if (!Configs.PreviousSlot.Value.overridePrevious) return;
-            Unmark(slot);
-        }
-        _marksPerType.TryAdd(type, new());
-        _marksPerType[type].Add(slot);
-        _marksPerSlot[slot] = new(type) { favorited = favorited };
-    }
-    public void Unmark(int type) {
-        if (!IsMarked(type)) return;
-        foreach (InventorySlot mark in _marksPerType[type]) _marksPerSlot.Remove(mark);
-        _marksPerType.Remove(type);
-    }
-    public void Unmark(InventorySlot slot) {
-        if (!IsMarked(slot)) return;
-        _marksPerType[_marksPerSlot[slot].type].Remove(slot);
-        _marksPerSlot.Remove(slot);
-    }
-    public void Remark(int oldType, int newType, bool? favorited = null) {
-        Unmark(newType);
-        if (!IsMarked(oldType)) return;
-        foreach (InventorySlot slot in _marksPerType[oldType]) _marksPerSlot[slot] = new(newType) { favorited = favorited ?? _marksPerSlot[slot].favorited };
-        _marksPerType[newType] = _marksPerType[oldType];
-        _marksPerType.Remove(oldType);
-    }
-
-    private readonly Dictionary<InventorySlot, Item> _marksPerSlot = [];
-    private readonly Dictionary<int, List<InventorySlot>> _marksPerType = [];
-    private readonly List<(Item item, InventorySlot slot, int type, bool favorited)> _delayedMarks = [];
-
 
     public override void SaveData(TagCompound tag) {
-        Dictionary<ItemDefinition, List<TagCompound>> marksTag = new(_unloadedMarks);
-        foreach ((int item, List<InventorySlot> slots) in _marksPerType) {
-            marksTag.GetOrAdd(new ItemDefinition(item), []).AddRange(slots.Select(slot => {
-                TagCompound markTag = new() {
-                    { ModTag, slot.Inventory.Mod.Name },
-                    { NameTag, slot.Inventory.Name },
-                    { IndexTag, slot.Index },
-                };
-                if (_marksPerSlot[slot].favorited) tag[FavoritedTag] = true;
-                TagCompound inventoryTag = [];
-                slot.Inventory.SaveData(inventoryTag);
-                if (inventoryTag.Count > 0) markTag[DataTag] = inventoryTag;
-                return markTag;
-            }));
+        foreach ((ModSubInventory inventory, InventoryPreviousItemSlot previousItemSlots) in _inventoryPreviousSlots) {
+            TagCompound slotsTag = [new(SlotsTag, previousItemSlots)];
+            TagCompound dataTag = [];
+            inventory.SaveData(dataTag);
+            if (dataTag.Count > 0) slotsTag[DataTag] = dataTag;
+            tag[inventory.FullName] = slotsTag;
         }
-
-        foreach ((ItemDefinition item, List<TagCompound> mark) in marksTag) tag[item.ToString()] = mark;
+        foreach ((var key, var value) in _unloadedInventories) tag[key] = value;
     }
 
-    public override void LoadData(TagCompound tag) {
-        _unloadedMarks.Clear();
-        foreach((string key, object value) in tag) _unloadedMarks[new(key)] = TagIO.Deserialize<List<TagCompound>>(value);
-    }
+    public override void LoadData(TagCompound tag) => _loadedData = tag;
     public override void OnEnterWorld() {
-        Dictionary<ItemDefinition, List<TagCompound>> marksTag = new(_unloadedMarks);
-        _marksPerSlot.Clear();
-        _marksPerType.Clear();
-        _unloadedMarks.Clear();
-        foreach((var definition, var slotTags) in marksTag) {
-            if (definition.IsUnloaded) {
-                _unloadedMarks.GetOrAdd(definition, []).AddRange(slotTags);
+        _inventoryPreviousSlots.Clear();
+        _unloadedInventories.Clear();
+        foreach ((var key, var value) in _loadedData) {
+            var definitionParts = key.Split('/', 2);
+            TagCompound slotsTag = (TagCompound)value;
+            if (!ModContent.TryFind<ModSubInventory>(definitionParts[0], definitionParts[1], out var inventoryTemplate)) {
+                _unloadedInventories[key] = value;
                 continue;
             }
-            foreach(var slotTag in slotTags) {
-                if (!ModContent.TryFind<ModSubInventory>(slotTag.GetString(ModTag), slotTag.GetString(NameTag), out var inventoryTemplate)) {
-                    _unloadedMarks.GetOrAdd(definition, []).Add(slotTag);
-                    continue;
-                }
-                var inventory = inventoryTemplate.NewInstance(Player);
-                if (slotTag.TryGet(DataTag, out TagCompound data)) inventory.LoadData(data);
-                if (inventory.ForceUnloaded) {
-                    _unloadedMarks.GetOrAdd(definition, []).Add(slotTag);
-                    continue;
-                }
-                MarkWithConfig(definition.Type, new(inventory, slotTag.GetInt(IndexTag)), slotTag.ContainsKey(FavoritedTag));
+            var inventory = inventoryTemplate.NewInstance(Player);
+            if (slotsTag.TryGet(DataTag, out TagCompound data)) inventory.LoadData(slotsTag);
+            if (inventory.ForceUnloaded) {
+                _unloadedInventories[key] = value;
+                continue;
             }
+            _inventoryPreviousSlots[inventory] = slotsTag.Get<InventoryPreviousItemSlot>(SlotsTag);
         }
-        base.OnEnterWorld();
     }
 
-    // Dict<ItemDefinition, List<(mod, name, data, favorited)>
-    private Dictionary<ItemDefinition, List<TagCompound>> _unloadedMarks = [];
-    public const string ModTag = "mod";
-    public const string NameTag = "name";
+    private readonly Dictionary<ModSubInventory, InventoryPreviousItemSlot> _inventoryPreviousSlots = [];
+    private readonly List<(InventorySlot slot, int type, bool favorited)> _delayedRemovals = [];
+
+    private readonly Dictionary<string, object> _unloadedInventories = [];
+    private TagCompound _loadedData = [];
+
     public const string DataTag = "data";
-    public const string IndexTag = "index";
-    public const string FavoritedTag = "favorited";
+    public const string SlotsTag = "slots";
 }

@@ -54,13 +54,7 @@ public sealed class Chest : Container {
 
     // TODO return nearby chests
     public sealed override IEnumerable<ModSubInventory> GetInventories(Player player) => GetActiveInventories(player);
-    public sealed override IEnumerable<ModSubInventory> GetActiveInventories(Player player) {
-        if (player.chest < 0) return [];
-        var inventory = (Chest)NewInstance(player);
-        inventory.WorldId = Main.worldID;
-        inventory.Index = player.chest;
-        return [inventory];
-    }
+    public sealed override IEnumerable<ModSubInventory> GetActiveInventories(Player player) => player.chest < 0 ? [] : [NewInstance(player, player.chest)];
     public sealed override bool IsActive() => Entity.chest == Index;
 
     public override void SaveData(TagCompound tag) {
@@ -76,6 +70,13 @@ public sealed class Chest : Container {
     public override bool ForceUnloaded => WorldId != Main.worldID;
     public const string WorldTag = "world";
     public const string IndexTag = "index";
+
+    public Chest NewInstance(Player player, int index) {
+        var inventory = (Chest)NewInstance(player);
+        inventory.WorldId = Main.worldID;
+        inventory.Index = index;
+        return inventory;
+    }
 }
 
 public abstract class Bank : Container {

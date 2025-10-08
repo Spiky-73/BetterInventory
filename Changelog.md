@@ -2,6 +2,7 @@
 
 ## v0.9.1
 - Save Return to previous slot data between reloads
+- Reworked Previous Slot separation
 
 ## v0.9.0.2
 - Fixed Refill Mouse Items deleting favorited stackable items

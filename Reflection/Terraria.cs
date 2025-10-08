@@ -5,7 +5,6 @@ using TItem = Terraria.Item;
 using TNPC = Terraria.NPC;
 using TRecipe = Terraria.Recipe;
 using SpikysLib.Reflection;
-using Terraria;
 using TColor = Microsoft.Xna.Framework.Color;
 using TVector2 = Microsoft.Xna.Framework.Vector2;
 using System;
@@ -44,10 +43,10 @@ public static class Player {
     public static readonly Field<TPlayer, TItem> trashItem = new(nameof(TPlayer.trashItem));
     public static readonly Field<TPlayer, bool> mouseInterface = new(nameof(TPlayer.mouseInterface));
     public static readonly Field<TPlayer, bool> adjWater = new(nameof(TPlayer.adjWater));
-    public static readonly Method<TPlayer, bool> GetItem_FillEmptyInventorySlot = new(nameof(GetItem_FillEmptyInventorySlot), typeof(int), typeof(TItem), typeof(GetItemSettings), typeof(TItem), typeof(int));
-    public static readonly Method<TPlayer, bool> GetItem_VoidVault = new(nameof(GetItem_VoidVault), typeof(int), typeof(TItem[]), typeof(TItem), typeof(GetItemSettings), typeof(TItem));
+    public static readonly Method<TPlayer, bool> GetItem_FillEmptyInventorySlot = new(nameof(GetItem_FillEmptyInventorySlot), typeof(int), typeof(TItem), typeof(Terraria.GetItemSettings), typeof(TItem), typeof(int));
+    public static readonly Method<TPlayer, bool> GetItem_VoidVault = new(nameof(GetItem_VoidVault), typeof(int), typeof(TItem[]), typeof(TItem), typeof(Terraria.GetItemSettings), typeof(TItem));
     public static readonly Method<TPlayer, bool> HasItem = new(nameof(TPlayer.HasItem), typeof(int));
-    public static readonly Method<TPlayer, TItem> FillAmmo = new(nameof(TPlayer.FillAmmo), typeof(int), typeof(TItem), typeof(GetItemSettings));
+    public static readonly Method<TPlayer, TItem> FillAmmo = new(nameof(TPlayer.FillAmmo), typeof(int), typeof(TItem), typeof(Terraria.GetItemSettings));
     public static readonly StaticMethod<int> GetMouseScrollDelta = new(typeof(TPlayer), nameof(TPlayer.GetMouseScrollDelta));
 }
 

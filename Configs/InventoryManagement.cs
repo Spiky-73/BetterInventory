@@ -111,7 +111,7 @@ public sealed class PreviousSlot {
     [DefaultValue(true)] public bool mediumCore = true;
     [DefaultValue(false)] public bool overridePrevious = false;
     [DefaultValue(MovePolicy.NotFavorited)] public MovePolicy movePolicy = MovePolicy.NotFavorited;
-    public Toggle<Materials> materials = new(true);
+    public Toggle<Materials> materials = new(true); // TODO rehandle
     public Toggle<PreviousDisplay> displayPrevious = new(true);
 
     public static bool Mouse => SmartPickup.PreviousSlot && Value.mouse;
