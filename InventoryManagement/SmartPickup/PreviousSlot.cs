@@ -283,7 +283,7 @@ public sealed partial class PreviousSlotPlayer : ModPlayer {
                 continue;
             }
             var inventory = inventoryTemplate.NewInstance(Player);
-            if (slotsTag.TryGet(DataTag, out TagCompound data)) inventory.LoadData(slotsTag);
+            if (slotsTag.TryGet(DataTag, out TagCompound data)) inventory.LoadData(data);
             if (inventory.ForceUnloaded) {
                 _unloadedInventories[key] = value;
                 continue;
