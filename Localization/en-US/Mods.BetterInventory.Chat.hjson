@@ -17,6 +17,5 @@ Changelog:
 	'''
 	- Save Return to previous slot data between reloads
 	- Rework Previous Slot separation
-	- Added Extended Pickup to Void Vault
 	'''
 Version: 0.9.1

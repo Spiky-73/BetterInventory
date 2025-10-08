@@ -1,7 +1,6 @@
 # Better Inventory changelog
 
 ## v0.9.1
-- Added Extended Pickup to Void Vault
 - Save Return to previous slot data between reloads
 - Reworked Previous Slot separation
 
