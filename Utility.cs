@@ -78,6 +78,8 @@ public static class Utility {
     }
 
     public static int GetMouseFreeSpace(Item item) => GetFreeSpace(Main.mouseItem, item);
+
+    // TODO remove dependency on InventoryLoader
     public static int GetInventoryFreeSpace(Player player, Item item)
         => InventoryLoader.GetInventories(player)
             .Where(si => PlayerHelper.InventoryContexts.Contains(si.Context))

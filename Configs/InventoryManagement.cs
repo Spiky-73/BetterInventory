@@ -22,12 +22,14 @@ public sealed class InventoryManagement : ModConfig {
     [DefaultValue(true)] public bool depositClick;
     public Toggle<BetterQuickStack> betterQuickStack = new(true);
     [DefaultValue(true)] public bool inventorySlotsTexture = true;
+    [DefaultValue(true)] public bool getItemToVoidVault = true;
 
     public static InventoryManagement Instance = null!;
     public static bool FavoriteInBanks => !UnloadedInventoryManagement.Value.favoriteInBanks && Instance.favoriteInBanks;
     public static bool DepositClick => Instance.depositClick;
     public static bool InventorySlotsTexture => !UnloadedInventoryManagement.Value.inventorySlotsTexture && Instance.inventorySlotsTexture;
     public static bool SmartPickup => Instance.smartPickup;
+    public static bool GetItemToVoidVault => Instance.getItemToVoidVault;
 
     // Compatibility version < v0.6
     [JsonProperty, DefaultValue(AutoEquipLevel.PreferredSlots)] private AutoEquipLevel autoEquip { set => ConfigHelper.MoveMember(value != AutoEquipLevel.PreferredSlots, _ => smartPickup.Value.autoEquip.Key = value); }
@@ -38,6 +40,7 @@ public sealed class InventoryManagement : ModConfig {
 
     public override void OnChanged() {
         Reflection.ItemSlot.canFavoriteAt.GetValue()[ItemSlot.Context.BankItem] = FavoriteInBanks;
+        global::BetterInventory.InventoryManagement.GetItemToVoidVault.UpdateValues(Instance.getItemToVoidVault);
     }
 
     public override ConfigScope Mode => ConfigScope.ClientSide;

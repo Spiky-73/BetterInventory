@@ -295,6 +295,11 @@ InventoryManagement: {
 		Label: "[i:420] Inventory Slots Texture"
 		Tooltip: Removes the texts "Coin", "Ammo" and adds background textures to various item slots
 	}
+
+	GetItemToVoidBag: {
+		Label: "[i:4076] Extended Pickup to Void Vault"
+		Tooltip: Allows items to be picked to the void bag even when not picked up from the world.
+	}
 }
 
 SmartConsumption: {
