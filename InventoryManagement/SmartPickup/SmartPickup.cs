@@ -171,7 +171,6 @@ public sealed class SmartPickup : ModSystem {
             GetItemSettings.InventoryEntityToPlayerInventorySettings,
             [.. armorInventories, ..vanityInventories]
         );
-        success = false;
-        return item;
+        return orig(item, out success);
     }
 }
