@@ -369,7 +369,7 @@ SmartPickup: {
 	}
 
 	quickStack: {
-		Label: Quick stack
+		Label: Quick Stack
 		Tooltip: Automatically quick stacks items not in the inventory to available chests
 	}
 
@@ -449,6 +449,11 @@ PreviousSlot: {
 	mouse: {
 		Label: Mouse Items
 		Tooltip: Applies to items moved with the mouse
+	}
+
+	shiftClick: {
+		Label: Shift Click
+		Tooltip: Applies to items moved Shift-Click
 	}
 
 	consumption: {

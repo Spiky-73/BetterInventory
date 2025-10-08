@@ -26,19 +26,21 @@ public sealed class PreviousSlotItem : GlobalItem {
 
 public sealed partial class PreviousSlotPlayer : ModPlayer {
     private static void HookItemSlotLeftClick(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) => HookItemSlotMarkOnClick((inv, context, slot) => orig(inv, context, slot), inv, context, slot, Main.mouseLeft && Main.mouseLeftRelease);
-    private static void HookItemSlotRightClick(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) => HookItemSlotMarkOnClick((inv, context, slot) => orig(inv, context, slot), inv, context, slot, Main.mouseRight);
+    private static void HookItemSlotRightClick(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) => HookItemSlotMarkOnClick((inv, context, slot) => orig(inv, context, slot), inv, context, slot, Main.mouseRight || (Configs.InventoryManagement.DepositClick && Main.mouseMiddle));
     private static void HookItemSlotMarkOnClick(Action<Item[], int, int> orig, Item[] inv, int context, int slot, bool click) {
-        if (!click || !Configs.PreviousSlot.Mouse || !InventoryLoader.IsInventorySlot(Main.LocalPlayer, inv, context, slot, out InventorySlot mark)) {
+        if (!click || !(Configs.PreviousSlot.Mouse || Configs.PreviousSlot.ShiftClick) || !InventoryLoader.IsInventorySlot(Main.LocalPlayer, inv, context, slot, out InventorySlot mark)) {
             orig(inv, context, slot);
             return;
         }
         (int oldType, int oldMouse, bool oldFav) = (inv[slot].type, Main.mouseItem.type, inv[slot].favorited);
         int oldCount = inv[slot].stack + Main.mouseItem.stack;
         orig(inv, context, slot);
-        if (inv[slot].type == oldType) return; // No point if the item did not change
-        if (oldCount != inv[slot].stack + Main.mouseItem.stack) return; // or if an item was consumed
-        if (oldType != ItemID.None && oldType != inv[slot].type && oldType != Main.mouseItem.type) return; // or if an item was moved elsewhere
-        if (oldMouse != ItemID.None && oldMouse != inv[slot].type && oldMouse != Main.mouseItem.type) return;
+        if (Main.cursorOverride <= CursorOverrideID.DefaultCursor) {
+            if (!Configs.PreviousSlot.Mouse) return;
+            if (oldCount != inv[slot].stack + Main.mouseItem.stack) return; // or if an item was consumed
+            if (oldType != ItemID.None && oldType != inv[slot].type && oldType != Main.mouseItem.type) return; // or if an item was moved elsewhere
+            if (oldMouse != ItemID.None && oldMouse != inv[slot].type && oldMouse != Main.mouseItem.type) return;
+        } else if (!Configs.PreviousSlot.ShiftClick) return;
 
         var modPlayer = Main.LocalPlayer.GetModPlayer<PreviousSlotPlayer>();
         if (oldType != ItemID.None) modPlayer.RemoveItem(mark, oldType, oldFav);
@@ -225,8 +227,10 @@ public sealed partial class PreviousSlotPlayer : ModPlayer {
     }
 
     public void PlaceItem(InventorySlot slot, Item item) {
-        if (!_inventoryPreviousSlots.TryGetValue(slot.Inventory, out var previousItems)) return;
-        if (previousItems.TryGet(slot.Index, out Item? oldItem)) previousItems.Replace(item, oldItem);
+        if (_inventoryPreviousSlots.TryGetValue(slot.Inventory, out var previousItems)) {
+            if (previousItems.TryGet(slot.Index, out Item? oldItem)) previousItems.Replace(item, oldItem);
+            previousItems.Clear(slot.Index);
+        }
         foreach ((var _, var value) in _inventoryPreviousSlots) value.ClearSlots(item);
     }
     public void RemoveItem(InventorySlot slot, int type, bool favorited, bool delayed = false) => RemoveItem(slot, new(type, 1) { favorited = favorited }, delayed);
