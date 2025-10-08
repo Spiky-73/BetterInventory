@@ -522,7 +522,11 @@ PreviousDisplay: {
 
 	fakeItem: {
 		Label: Fake Item
-		Tooltip: Displays a fake item when the slot is empty
+		Tooltip:
+			'''
+			Displays a fake item when the slot is empty
+			Trash the item to clear the slot
+			'''
 	}
 
 	icon: {

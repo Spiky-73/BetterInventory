@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using SpikysLib;
 using SpikysLib.IL;
 using Terraria;
+using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
@@ -80,6 +80,28 @@ public sealed partial class PreviousSlotPlayer : ModPlayer {
         }
         orig(self);
     }
+
+    public override bool HoverSlot(Item[] inventory, int context, int slot) {
+        if (!Configs.PreviousDisplay.Icon || ! InventoryLoader.IsInventorySlot(Player, inventory, context, slot, out var itemSlot)) return false;
+        if (!TryGetPreviousItem(itemSlot, out _)) return false;
+        
+        if (!ItemSlot.Options.DisableQuickTrash && (ItemSlot.Options.DisableLeftShiftTrashCan ? ItemSlot.ControlInUse : ItemSlot.ShiftInUse)){
+            Main.cursorOverride = CursorOverrideID.TrashCan;
+            return true;
+        }
+        return false;
+    }
+
+    private static bool HookClearMark(On_ItemSlot.orig_OverrideLeftClick orig, Item[] inv, int context, int slot) {
+        if (!Configs.PreviousDisplay.Icon || ! InventoryLoader.IsInventorySlot(Main.LocalPlayer, inv, context, slot, out var itemSlot)) return false;
+        var modPlayer = Main.LocalPlayer.GetModPlayer<PreviousSlotPlayer>();
+        if (!modPlayer.TryGetPreviousItem(itemSlot, out _) || Main.cursorOverride != CursorOverrideID.TrashCan) return false;
+
+        modPlayer.ClearPreviousItem(itemSlot);
+        SoundEngine.PlaySound(SoundID.Grab);
+        return true;
+    }
+    
 }
 
 public sealed partial class PreviousSlotPlayer : ModPlayer {
@@ -156,6 +178,8 @@ public sealed partial class PreviousSlotPlayer : ModPlayer {
             if (!il.ApplyTo(ILDrawFakeItem, Configs.PreviousDisplay.FakeItem)) Configs.UnloadedInventoryManagement.Value.displayFakeItem = true;
             if (!il.ApplyTo(ILDrawIcon, Configs.PreviousDisplay.Icon)) Configs.UnloadedInventoryManagement.Value.displayIcon = true;
         };
+
+        On_ItemSlot.OverrideLeftClick += HookClearMark;
     }
 
     public Item PickupItemToAnyPreviousSlot(Item item, GetItemSettings settings) => PickupItemToPreviousSlot(item, settings, [.._inventoryPreviousSlots.Keys]);
@@ -189,7 +213,7 @@ public sealed partial class PreviousSlotPlayer : ModPlayer {
             item = inventory.GetItem(item, slot, settings);
             if (items[slot].type == mark.type) {
                 items[slot].favorited |= mark.favorited;
-                previousItemSlots.Unset(slot);
+                previousItemSlots.Clear(slot);
             }
 
             if (!oldItem.IsAir) oldItem = inventory.GetItem(oldItem, slot, settings);
@@ -221,6 +245,9 @@ public sealed partial class PreviousSlotPlayer : ModPlayer {
     public bool TryGetPreviousItem(InventorySlot slot, [MaybeNullWhen(false)] out Item item) {
         item = default;
         return _inventoryPreviousSlots.TryGetValue(slot.Inventory, out var previousSlots) && previousSlots.TryGet(slot.Index, out item);
+    }
+    public void ClearPreviousItem(InventorySlot slot) {
+        _inventoryPreviousSlots[slot.Inventory].Clear(slot.Index);
     }
 
     public override void PostUpdate() {

@@ -1,8 +1,10 @@
 # Better Inventory changelog
 
 ## v0.9.1
-- Save Return to previous slot data between reloads
-- Reworked Previous Slot separation
+- Save Return to Previous Slot data between reloads
+- Added Return to Previous Slot when depositing items in chests of equipping them
+- Added a way to clear a marked slot when Fake Item is enabled
+
 
 ## v0.9.0.2
 - Fixed Refill Mouse Items deleting favorited stackable items
