@@ -82,10 +82,10 @@ public sealed partial class PreviousSlotPlayer : ModPlayer {
     }
 
     public override bool HoverSlot(Item[] inventory, int context, int slot) {
-        if (!Configs.PreviousDisplay.Icon || ! InventoryLoader.IsInventorySlot(Player, inventory, context, slot, out var itemSlot)) return false;
-        if (!TryGetPreviousItem(itemSlot, out _)) return false;
-        
-        if (!ItemSlot.Options.DisableQuickTrash && (ItemSlot.Options.DisableLeftShiftTrashCan ? ItemSlot.ControlInUse : ItemSlot.ShiftInUse)){
+        if (!Configs.PreviousDisplay.Icon || !InventoryLoader.IsInventorySlot(Player, inventory, context, slot, out var itemSlot)) return false;
+        if (!inventory[slot].IsAir || !TryGetPreviousItem(itemSlot, out _)) return false;
+
+        if (!ItemSlot.Options.DisableQuickTrash && (ItemSlot.Options.DisableLeftShiftTrashCan ? ItemSlot.ControlInUse : ItemSlot.ShiftInUse)) {
             Main.cursorOverride = CursorOverrideID.TrashCan;
             return true;
         }
@@ -93,15 +93,14 @@ public sealed partial class PreviousSlotPlayer : ModPlayer {
     }
 
     private static bool HookClearMark(On_ItemSlot.orig_OverrideLeftClick orig, Item[] inv, int context, int slot) {
-        if (!Configs.PreviousDisplay.Icon || ! InventoryLoader.IsInventorySlot(Main.LocalPlayer, inv, context, slot, out var itemSlot)) return false;
+        if (!Configs.PreviousDisplay.Icon || !InventoryLoader.IsInventorySlot(Main.LocalPlayer, inv, context, slot, out var itemSlot)) return orig(inv, context, slot);
         var modPlayer = Main.LocalPlayer.GetModPlayer<PreviousSlotPlayer>();
-        if (!modPlayer.TryGetPreviousItem(itemSlot, out _) || Main.cursorOverride != CursorOverrideID.TrashCan) return false;
+        if (!inv[slot].IsAir || !modPlayer.TryGetPreviousItem(itemSlot, out _) || Main.cursorOverride != CursorOverrideID.TrashCan) return orig(inv, context, slot);
 
         modPlayer.ClearPreviousItem(itemSlot);
         SoundEngine.PlaySound(SoundID.Grab);
         return true;
     }
-    
 }
 
 public sealed partial class PreviousSlotPlayer : ModPlayer {
@@ -182,7 +181,7 @@ public sealed partial class PreviousSlotPlayer : ModPlayer {
         On_ItemSlot.OverrideLeftClick += HookClearMark;
     }
 
-    public Item PickupItemToAnyPreviousSlot(Item item, GetItemSettings settings) => PickupItemToPreviousSlot(item, settings, [.._inventoryPreviousSlots.Keys]);
+    public Item PickupItemToAnyPreviousSlot(Item item, GetItemSettings settings) => PickupItemToPreviousSlot(item, settings, [.. _inventoryPreviousSlots.Keys]);
     public Item PickupItemToPreviousSlot(Item item, GetItemSettings settings, params ModSubInventory[] inventories) {
         foreach (var inventory in inventories) {
             item = PickupItemToPreviousSlot(item, settings, inventory);
@@ -228,7 +227,7 @@ public sealed partial class PreviousSlotPlayer : ModPlayer {
     public void PlaceItem(InventorySlot slot, Item item) {
         if (!_inventoryPreviousSlots.TryGetValue(slot.Inventory, out var previousItems)) return;
         if (previousItems.TryGet(slot.Index, out Item? oldItem)) previousItems.Replace(item, oldItem);
-        foreach((var _, var value) in _inventoryPreviousSlots) value.ClearSlots(item);
+        foreach ((var _, var value) in _inventoryPreviousSlots) value.ClearSlots(item);
     }
     public void RemoveItem(InventorySlot slot, int type, bool favorited, bool delayed = false) => RemoveItem(slot, new(type, 1) { favorited = favorited }, delayed);
     public void RemoveItem(InventorySlot slot, Item item, bool delayed = false) {
