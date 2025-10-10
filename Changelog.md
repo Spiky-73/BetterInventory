@@ -5,6 +5,7 @@
 - Added Return to Previous Slot when depositing items in chests or equipping them
 - Added a way to clear a marked slot when Fake Item is enabled
 - Added Shift-Click to Return to Previous Slot
+- Fixed Return To Previous Slot marking all items when crafting
 
 ## v0.9.0.2
 - Fixed Refill Mouse Items deleting favorited stackable items

@@ -63,9 +63,11 @@ public sealed partial class PreviousSlotPlayer : ModPlayer {
 
     private static bool HookMarkConsumeMaterial(On_Recipe.orig_ConsumeForCraft orig, Recipe self, Item item, Item requiredItem, ref int stackRequired) {
         if (!Configs.PreviousSlot.Consumption) return orig(self, item, requiredItem, ref stackRequired);
+        bool consumed = orig(self, item, requiredItem, ref stackRequired);
+        if (!consumed || !item.IsAir) return consumed;
         var inventorySlot = InventoryLoader.FindItem(Main.LocalPlayer, i => i == item);
         if (inventorySlot.HasValue) Main.LocalPlayer.GetModPlayer<PreviousSlotPlayer>().RemoveItem(inventorySlot.Value, item);
-        return orig(self, item, requiredItem, ref stackRequired);
+        return consumed;
     }
 
     private static void HookMarkOnDeath(On_Player.orig_DropItems orig, Player self) {
