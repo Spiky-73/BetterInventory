@@ -194,35 +194,53 @@ public sealed partial class PreviousSlotPlayer : ModPlayer {
     public Item PickupItemToPreviousSlot(Item item, GetItemSettings settings, ModSubInventory inventory) {
         if (Player.whoAmI != Main.myPlayer) return item;
         if (!_inventoryPreviousSlots.TryGetValue(inventory, out var previousItemSlots)) return item;
-
-        var slots = previousItemSlots.GetSlots(item);
+        int itemType = item.type;
         IList<Item> items = inventory.Items;
 
-        foreach (int slot in slots) {
-            Item mark = previousItemSlots.Get(slot);
-            if (slot >= items.Count) continue;
+        // TODO refactor to remove the materials and add them to auto-equip
+        Queue<(Item item, int depth)> itemsToCheck = [];
+        int checksLeft = Configs.PreviousSlot.Value.materials ? Configs.PreviousSlot.Value.materials.Value.maxChecks : 1;
+        itemsToCheck.Enqueue((item, Configs.PreviousSlot.Value.materials.Value.maxDepth));
+        HashSet<int> queuedItems = [item.type];
+        while (itemsToCheck.TryDequeue(out var itemToCheck)) {
 
-            Item oldItem = items[slot];
+            foreach (int slot in previousItemSlots.GetSlots(itemToCheck.item)) {
+                Item mark = previousItemSlots.Get(slot);
+                if (slot >= items.Count) continue;
 
-            if (!oldItem.IsAir && Configs.PreviousSlot.Value.movePolicy switch {
-                Configs.MovePolicy.Always => oldItem.favorited && !(mark.favorited || item.favorited),
-                Configs.MovePolicy.NotFavorited => oldItem.favorited,
-                Configs.MovePolicy.Never or _ => true,
-            }) continue;
+                Item oldItem = items[slot];
 
-            items[slot] = new(); // stored in `oldItem`
-            item = inventory.GetItem(item, slot, settings);
-            if (items[slot].type == mark.type) {
-                items[slot].favorited |= mark.favorited;
-                previousItemSlots.Clear(slot);
+                if (!oldItem.IsAir && Configs.PreviousSlot.Value.movePolicy switch {
+                    Configs.MovePolicy.Always => oldItem.favorited && !(mark.favorited || item.favorited),
+                    Configs.MovePolicy.NotFavorited => oldItem.favorited,
+                    Configs.MovePolicy.Never or _ => true,
+                }) continue;
+
+                items[slot] = new(); // stored in `oldItem`
+                item = inventory.GetItem(item, slot, settings);
+                if (items[slot].type == itemType) {
+                    items[slot].favorited |= mark.favorited;
+                    previousItemSlots.Clear(slot);
+                }
+
+                if (!oldItem.IsAir) oldItem = inventory.GetItem(oldItem, slot, settings);
+                if (!oldItem.IsAir) oldItem = inventory.GetItem(oldItem, settings);
+                if (!oldItem.IsAir) Player.GetDropItem(ref oldItem);
+
+                if (item.IsAir) return item;
             }
 
-            if (!oldItem.IsAir) oldItem = inventory.GetItem(oldItem, slot, settings);
-            if (!oldItem.IsAir) oldItem = inventory.GetItem(oldItem, settings);
-            if (!oldItem.IsAir) Player.GetDropItem(ref oldItem);
-
-            if (item.IsAir) return item;
+            checksLeft--;
+            if (checksLeft == 0) break;
+            itemToCheck.depth--;
+            if (itemToCheck.depth == 0) continue;
+            foreach (int recipeIndex in ItemID.Sets.CraftingRecipeIndices[itemToCheck.item.type]) {
+                foreach (Item material in Main.recipe[recipeIndex].requiredItem) {
+                    if (queuedItems.Add(material.type)) itemsToCheck.Enqueue((material, itemToCheck.depth));
+                }
+            }
         }
+
         return item;
     }
 
