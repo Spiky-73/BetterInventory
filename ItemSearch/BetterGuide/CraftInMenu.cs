@@ -81,7 +81,7 @@ public sealed class CraftInMenuPlayer : ModPlayer {
             SoundEngine.PlaySound(SoundID.MenuTick);
             Recipe.FindRecipes();
         }
-        return Main.player[Main.myPlayer].mouseInterface = s_visibilityHover = true;
+        return Main.LocalPlayer.mouseInterface = s_visibilityHover = true;
     }
     public static void DrawVisibility() {
         bool showAll = LocalPlayer.visibility.HasFlag(CurrentVisibilityFlag);

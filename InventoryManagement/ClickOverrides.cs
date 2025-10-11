@@ -449,7 +449,7 @@ public sealed class ClickOverrides : ModPlayer {
         orig(inv, context, slot);
         if (!Configs.InventoryManagement.DepositClick) return;
 
-        Player player = Main.player[Main.myPlayer];
+        Player player = Main.LocalPlayer;
         if (player.itemAnimation > 0) return;
 
         if (!Main.mouseMiddle) {

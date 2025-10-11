@@ -210,7 +210,7 @@ public sealed class FixedUI : ILoadable {
         x -= size;
         Rectangle hitbox = new(x, y, _craftCenterButton.Width(), _craftCenterButton.Height());
         if (hitbox.Contains(Main.mouseX, Main.mouseY) && !PlayerInput.IgnoreMouseInterface) {
-            Main.player[Main.myPlayer].mouseInterface = true;
+            Main.LocalPlayer.mouseInterface = true;
             if (Main.mouseLeftRelease && Main.mouseLeft) {
                 Main.recStart = Math.Max(0, SpikysLib.MathHelper.Snap(Main.focusRecipe, UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow, SpikysLib.MathHelper.SnapMode.Floor)
                     - UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow * (UILinkPointNavigator.Shortcuts.CRAFT_IconsPerColumn / 2 - 1));
