@@ -7,6 +7,8 @@
 - Added Shift-Click to Return to Previous Slot
 - Fixed Return To Previous Slot marking all items when crafting
 - Fixed Return To Previous Slot causing a crash when a chest with a mark is destroyed
+- Fixed Recipe Search Bar not changing the state of the Available Recipes filter
+- Fixed Search Previous on Right click not working properly
 
 ## v0.9.0.2
 - Fixed Refill Mouse Items deleting favorited stackable items

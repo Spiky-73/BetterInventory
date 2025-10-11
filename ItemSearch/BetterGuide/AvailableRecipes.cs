@@ -7,6 +7,7 @@ using SpikysLib;
 using SpikysLib.IL;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using BetterInventory.Crafting;
 
 namespace BetterInventory.ItemSearch.BetterGuide;
 
@@ -29,7 +30,10 @@ public sealed class AvailableRecipes : ModSystem {
         // Recipe.ClearAvailableRecipes();
         // ++ noCLear:
         cursor.GotoNext(MoveType.AfterLabel, i => i.MatchCall(Reflection.Recipe.ClearAvailableRecipes));
-        cursor.EmitDelegate<Action>(() => s_guideRecipes = false);
+        cursor.EmitDelegate(() => {
+            s_guideRecipes = false;
+            if (Configs.RecipeSearchBar.Enabled && !string.IsNullOrEmpty(RecipeUI.SearchFilter.GetSearch())) s_guideRecipes = true;
+        });
 
         // if (<displayGuideRecipes>) {
         //     ++ goto <skip>
