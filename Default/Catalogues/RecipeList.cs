@@ -154,6 +154,11 @@ public sealed class RecipeList : ModEntityCatalogue {
             (Main.mouseLeft, Main.mouseLeftRelease) = (left, rel);
             Main.mouseItem = mouse;
         }
+
+        // Updated guideItem/Tile before Finding the recipes as ItemSlot.LeftClick is called with ref Main.guideItem and has only been updated in inv, no really.
+        if (slot == 0) Main.guideItem = inv[slot];
+        else GuideTile.guideTile = inv[slot];
+
         Recipe.FindRecipes();
     }
 

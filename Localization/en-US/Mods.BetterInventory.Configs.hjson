@@ -369,7 +369,7 @@ SmartPickup: {
 	}
 
 	quickStack: {
-		Label: Quick stack
+		Label: Quick Stack
 		Tooltip: Automatically quick stacks items not in the inventory to available chests
 	}
 
@@ -451,6 +451,11 @@ PreviousSlot: {
 		Tooltip: Applies to items moved with the mouse
 	}
 
+	shiftClick: {
+		Label: Shift Click
+		Tooltip: Applies to items moved Shift-Click
+	}
+
 	consumption: {
 		Label: Consumption
 		Tooltip:
@@ -522,7 +527,11 @@ PreviousDisplay: {
 
 	fakeItem: {
 		Label: Fake Item
-		Tooltip: Displays a fake item when the slot is empty
+		Tooltip:
+			'''
+			Displays a fake item when the slot is empty
+			Trash the item to clear the slot
+			'''
 	}
 
 	icon: {

@@ -37,11 +37,6 @@ public abstract class ModSubInventory : ModType<Player, ModSubInventory>, ILocal
         return true;
     }
 
-    protected override void ValidateType() {
-        base.ValidateType();
-        LoaderUtils.MustOverrideTogether(this, i => i.Focus, i => i.Unfocus);
-    }
-
     public virtual void Focus(int slot) { }
     public virtual void Unfocus(int slot) { }
     public virtual void OnSlotChange(int slot) { }
@@ -72,8 +67,9 @@ public abstract class ModSubInventory : ModType<Player, ModSubInventory>, ILocal
         return;
     }
 
-    public virtual IList<ModSubInventory> GetInventories(Player player) => [NewInstance(player)];
-    public virtual IList<ModSubInventory> GetActiveInventories(Player player) => GetInventories(player);
+    public virtual IEnumerable<ModSubInventory> GetInventories(Player player) => [NewInstance(player)];
+    public virtual IEnumerable<ModSubInventory> GetActiveInventories(Player player) => GetInventories(player);
+    public virtual bool IsActive() => true;
 
     public virtual int ComparePositionTo(ModSubInventory other) => 0;
 
@@ -84,6 +80,14 @@ public abstract class ModSubInventory : ModType<Player, ModSubInventory>, ILocal
     }
     public sealed override void SetupContent() => SetStaticDefaults();
 
+    protected override void ValidateType() {
+        base.ValidateType();
+        LoaderUtils.MustOverrideTogether(this, i => i.Focus, i => i.Unfocus);
+        LoaderUtils.MustOverrideTogether(this, i => i.GetActiveInventories, i => i.IsActive);
+        LoaderUtils.MustOverrideTogether(this, i => i.GetInventories, i => i.SaveData, i => i.LoadData);
+    }
+
+
     public string LocalizationCategory => "SubInventories";
     public virtual LocalizedText DisplayName => this.GetLocalization("DisplayName");
 
@@ -91,4 +95,8 @@ public abstract class ModSubInventory : ModType<Player, ModSubInventory>, ILocal
 
     public override bool Equals(object? obj) => obj is ModSubInventory subInventory && FullName == subInventory.FullName;
     public override int GetHashCode() => FullName.GetHashCode();
+
+    public virtual void SaveData(TagCompound tag) { }
+    public virtual void LoadData(TagCompound tag) { }
+    public virtual bool ForceUnloaded => false;
 }

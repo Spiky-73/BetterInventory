@@ -3,6 +3,7 @@
   <PropertyGroup>
     <AssemblyName>BetterInventory</AssemblyName>
     <nullable>enable</nullable>
+    <NoWarn>CommonCollisionName</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="../ModAssemblies/SpikysLib_v1.3.1.1.dll" />

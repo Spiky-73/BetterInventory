@@ -1,5 +1,15 @@
 # Better Inventory changelog
 
+## v0.9.1
+- Save Return to Previous Slot data between reloads
+- Added Return to Previous Slot when depositing items in chests or equipping them
+- Added a way to clear a marked slot when Fake Item is enabled
+- Added Shift-Click to Return to Previous Slot
+- Fixed Return To Previous Slot marking all items when crafting
+- Fixed Return To Previous Slot causing a crash when a chest with a mark is destroyed
+- Fixed Recipe Search Bar not changing the state of the Available Recipes filter
+- Fixed Search Previous on Right click not working properly
+
 ## v0.9.0.2
 - Fixed Refill Mouse Items deleting favorited stackable items
 - Fixed Pickup to Void Bag First moving favorited items inside the Void Bag

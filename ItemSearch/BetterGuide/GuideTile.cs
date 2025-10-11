@@ -117,8 +117,8 @@ public sealed class GuideTilePlayer : ModPlayer {
 
         // Handle Mouse hover
         Rectangle hitbox = new((int)x, (int)y, (int)(TextureAssets.InventoryBack.Width() * Main.inventoryScale), (int)(TextureAssets.InventoryBack.Height() * Main.inventoryScale));
-        if (!Main.player[Main.myPlayer].mouseInterface && hitbox.Contains(Main.mouseX, Main.mouseY) && !PlayerInput.IgnoreMouseInterface) {
-            Main.player[Main.myPlayer].mouseInterface = true;
+        if (!Main.LocalPlayer.mouseInterface && hitbox.Contains(Main.mouseX, Main.mouseY) && !PlayerInput.IgnoreMouseInterface) {
+            Main.LocalPlayer.mouseInterface = true;
             Main.craftingHide = true;
             ItemSlot.OverrideHover(items, ContextID.GuideItem, 1);
             ItemSlot.LeftClick(items, ContextID.GuideItem, 1);

@@ -107,14 +107,16 @@ public enum VoidBagLevel { None, IfInside, Always }
 
 public sealed class PreviousSlot {
     [DefaultValue(true)] public bool mouse = true;
+    [DefaultValue(true)] public bool shiftClick = true;
     [DefaultValue(true)] public bool consumption = true;
     [DefaultValue(true)] public bool mediumCore = true;
     [DefaultValue(false)] public bool overridePrevious = false;
     [DefaultValue(MovePolicy.NotFavorited)] public MovePolicy movePolicy = MovePolicy.NotFavorited;
-    public Toggle<Materials> materials = new(true);
+    public Toggle<Materials> materials = new(true); // TODO refactor
     public Toggle<PreviousDisplay> displayPrevious = new(true);
 
     public static bool Mouse => SmartPickup.PreviousSlot && Value.mouse;
+    public static bool ShiftClick => SmartPickup.PreviousSlot && Value.shiftClick;
     public static bool Consumption => SmartPickup.PreviousSlot && Value.consumption;
     public static bool MediumCore => SmartPickup.PreviousSlot && Value.mediumCore;
     public static PreviousSlot Value => SmartPickup.Value.previousSlot.Value;
