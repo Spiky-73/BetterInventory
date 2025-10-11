@@ -47,7 +47,7 @@ public abstract class Container : ModSubInventory {
 public sealed class Chest : Container {
     public int WorldId { get; private set; } = -1;
     public int Index { get; private set; } = -1;
-    public sealed override Item[] Items => Index > -1 ? Main.chest[Index].item : [];
+    public sealed override Item[] Items => Index > -1 && Main.chest[Index] is not null ? Main.chest[Index].item : [];
     public sealed override int Context => ContextID.ChestItem;
     
     public sealed override void OnSlotChange(int slot) => NetMessage.SendData(MessageID.SyncChestItem, number: Index, number2: slot);
