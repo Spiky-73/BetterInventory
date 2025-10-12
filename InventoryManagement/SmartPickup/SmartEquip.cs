@@ -26,7 +26,9 @@ public static class SmartEquip {
             for (int i = 0; i < fakeInventory.Length; i++) fakeInventory[i] = new();
             fakeInventory[0] = item;
             (var inventory, player.inventory) = (player.inventory, fakeInventory);
+            SmartPickup.skippedQuickStack = player.chest;
             player.QuickStackAllChests();
+            SmartPickup.skippedQuickStack = -1;
             player.inventory = inventory;
             item = fakeInventory[0];
         }

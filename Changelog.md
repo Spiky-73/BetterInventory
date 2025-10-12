@@ -1,5 +1,8 @@
 # Better Inventory changelog
 
+## v0.9.1.1
+- Fixed Quick Stack on item pickup deleting coins
+
 ## v0.9.1
 - Save Return to Previous Slot data between reloads
 - Added Return to Previous Slot when depositing items in chests or equipping them
