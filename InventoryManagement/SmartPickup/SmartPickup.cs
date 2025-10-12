@@ -7,6 +7,7 @@ using SpikysLib.IL;
 using BetterInventory.Default.Inventories;
 using Terraria.UI;
 using System.Collections.Generic;
+using Terraria.DataStructures;
 
 namespace BetterInventory.InventoryManagement.SmartPickup;
 
@@ -26,6 +27,8 @@ public sealed class SmartPickup : ModSystem {
         // On_ItemSlot.DyeSwap += HookDyeSwap // Unused code, probably does not work either?
         On_ItemSlot.ArmorSwap += HookArmorSwap;
         // On_ItemSlot.AccessorySwap += HookAccessorySwap; // Handled in HookArmorSwap
+
+        On_ChestUI.QuickStack += HookNoQuickStackToSameChest;
     }
 
     private static void ILGetItem(ILContext il) {
@@ -173,4 +176,11 @@ public sealed class SmartPickup : ModSystem {
         );
         return orig(item, out success);
     }
+
+    private static void HookNoQuickStackToSameChest(On_ChestUI.orig_QuickStack orig, ContainerTransferContext context, bool voidStack) {
+        if (Main.LocalPlayer.chest == skippedQuickStack) return;
+        orig(context, voidStack);
+    }
+    internal static int skippedQuickStack = -1;
+
 }
