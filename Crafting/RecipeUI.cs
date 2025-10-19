@@ -144,16 +144,19 @@ public sealed class RecipeUI : ModSystem {
     }
 
     public static void DrawRecipeUI(int hammerX, int hammerY) {
+        _recipeUIVisible = true;
         _recipeState.container.Top.Pixels = hammerY - TextureAssets.InfoIcon[0].Width() - 1;
         _recipeState.container.Left.Pixels = hammerX - TextureAssets.InfoIcon[0].Width() - 1;
         _recipeInterface.Draw(Main.spriteBatch, _lastUpdateUiGameTime);
     }
 
     public override void UpdateUI(GameTime gameTime) {
-        if (!Configs.Crafting.RecipeUI) return;
+        if (!_recipeUIVisible) return;
+        _recipeUIVisible = false;
         _lastUpdateUiGameTime = gameTime;
         _recipeInterface.Update(gameTime);
     }
+    private static bool _recipeUIVisible;
 
     public static void FilterAndSortRecipes() {
         UnfilteredCount = Main.numAvailableRecipes;

@@ -28,6 +28,7 @@ public sealed class SmartPickup : ModSystem {
         On_ItemSlot.ArmorSwap += HookArmorSwap;
         // On_ItemSlot.AccessorySwap += HookAccessorySwap; // Handled in HookArmorSwap
 
+        On_ChestUI.LootAll += HookQuickStackLootAll;
         On_ChestUI.QuickStack += HookNoQuickStackToSameChest;
     }
 
@@ -46,7 +47,7 @@ public sealed class SmartPickup : ModSystem {
         EmitSmartPickup(cursor, newItem, (Player self, int plr, Item item, GetItemSettings settings) => {
             if (vanillaGetItem) return item;
             if (!item.IsAir && Configs.SmartPickup.RefillMouse) item = SmartEquip.RefillMouse(self, item, settings);
-            if (!item.IsAir && !settings.NoText) item = self.GetModPlayer<PreviousSlotPlayer>().PickupItemToAnyPreviousSlot(item, settings);
+            if (!item.IsAir && Configs.SmartPickup.PreviousSlot && IsGetItemWorld(self, settings, item)) item = self.GetModPlayer<PreviousSlotPlayer>().PickupItemToAnyPreviousSlot(item, settings);
             if (!item.IsAir && Configs.SmartPickup.PreviousSlot) item = self.GetModPlayer<PreviousSlotPlayer>().PickupItemToPreviousSlot(
                 item, settings,
                 ModContent.GetInstance<Hotbar>().NewInstance(self),
@@ -79,7 +80,7 @@ public sealed class SmartPickup : ModSystem {
 
         // ++<upgradeItems>
         EmitSmartPickup(cursor, newItem, (Player self, int plr, Item item, GetItemSettings settings) => {
-            if (vanillaGetItem || settings.NoText) return item;
+            if (vanillaGetItem || !IsGetItemWorld(self, settings, item)) return item;
             if (!item.IsAir && Configs.SmartPickup.QuickStack) item = SmartEquip.QuickStack(self, item, settings);
             if (!item.IsAir && Configs.SmartPickup.FixAmmo && item.FitsAmmoSlot()) item = self.FillAmmo(plr, item, settings);
             if (!item.IsAir && Configs.SmartPickup.UpgradeItems) item = SmartEquip.UpgradeItems(self, item, settings);
@@ -177,10 +178,18 @@ public sealed class SmartPickup : ModSystem {
         return orig(item, out success);
     }
 
+    private static void HookQuickStackLootAll(On_ChestUI.orig_LootAll orig) {
+        if (Configs.SmartPickup.QuickStack) _skippedQuickStack = Main.LocalPlayer.chest;
+        orig();
+        _skippedQuickStack = -1;
+    }
+
     private static void HookNoQuickStackToSameChest(On_ChestUI.orig_QuickStack orig, ContainerTransferContext context, bool voidStack) {
-        if (Main.LocalPlayer.chest == skippedQuickStack) return;
+        if (Main.LocalPlayer.chest == _skippedQuickStack) return;
         orig(context, voidStack);
     }
-    internal static int skippedQuickStack = -1;
+    private static int _skippedQuickStack = -1;
+
+    private static bool IsGetItemWorld(Player player, GetItemSettings settings, Item item) => !settings.NoText || item == Main.mouseItem || item == player.HeldItem;
 
 }

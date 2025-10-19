@@ -13,5 +13,13 @@ Homepage: homepage
 Workshop: Steam Workshop page
 Summary: ""
 Details: ""
-Changelog: - Fixed Quick Stack on item pickup deleting coins
-Version: 0.9.1.1
+Changelog:
+	'''
+	- Fixed Return to Previous Slot not working as expected when dropping favorited items
+	- Fixed Void Bag First not handling coins properly
+	- Fixed RecipeUI consuming keyboard input even when not visible
+	- Fixed Quick Stack hotkey not refreshing recipes
+	- Fixed Quick Stack on Pickup not handling multiplayer properly
+	- Fixed Quick Stack on Pickup not working properly when a chest was opened
+	'''
+Version: 0.9.1.2
