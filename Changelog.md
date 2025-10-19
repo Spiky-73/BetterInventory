@@ -6,7 +6,7 @@
 - Fixed RecipeUI consuming keyboard input even when not visible
 - Fixed Quick Stack hotkey not refreshing recipes
 - Fixed Quick Stack on Pickup not handling multiplayer properly
-- Fixed Quick Stack on Pickup
+- Fixed Quick Stack on Pickup not working properly when a chest was opened
 
 ## v0.9.1.1
 - Fixed Quick Stack on item pickup deleting coins

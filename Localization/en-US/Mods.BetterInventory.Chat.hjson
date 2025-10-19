@@ -20,6 +20,6 @@ Changelog:
 	- Fixed RecipeUI consuming keyboard input even when not visible
 	- Fixed Quick Stack hotkey not refreshing recipes
 	- Fixed Quick Stack on Pickup not handling multiplayer properly
-	- Fixed Quick Stack on Pickup
+	- Fixed Quick Stack on Pickup not working properly when a chest was opened
 	'''
 Version: 0.9.1.2
