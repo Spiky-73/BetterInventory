@@ -46,7 +46,7 @@ public sealed class SmartPickup : ModSystem {
         EmitSmartPickup(cursor, newItem, (Player self, int plr, Item item, GetItemSettings settings) => {
             if (vanillaGetItem) return item;
             if (!item.IsAir && Configs.SmartPickup.RefillMouse) item = SmartEquip.RefillMouse(self, item, settings);
-            if (!item.IsAir && !settings.NoText) item = self.GetModPlayer<PreviousSlotPlayer>().PickupItemToAnyPreviousSlot(item, settings);
+            if (!item.IsAir && Configs.SmartPickup.PreviousSlot && IsGetItemWorld(self, settings, item)) item = self.GetModPlayer<PreviousSlotPlayer>().PickupItemToAnyPreviousSlot(item, settings);
             if (!item.IsAir && Configs.SmartPickup.PreviousSlot) item = self.GetModPlayer<PreviousSlotPlayer>().PickupItemToPreviousSlot(
                 item, settings,
                 ModContent.GetInstance<Hotbar>().NewInstance(self),
@@ -79,7 +79,7 @@ public sealed class SmartPickup : ModSystem {
 
         // ++<upgradeItems>
         EmitSmartPickup(cursor, newItem, (Player self, int plr, Item item, GetItemSettings settings) => {
-            if (vanillaGetItem || settings.NoText) return item;
+            if (vanillaGetItem || !IsGetItemWorld(self, settings, item)) return item;
             if (!item.IsAir && Configs.SmartPickup.QuickStack) item = SmartEquip.QuickStack(self, item, settings);
             if (!item.IsAir && Configs.SmartPickup.FixAmmo && item.FitsAmmoSlot()) item = self.FillAmmo(plr, item, settings);
             if (!item.IsAir && Configs.SmartPickup.UpgradeItems) item = SmartEquip.UpgradeItems(self, item, settings);
@@ -181,6 +181,8 @@ public sealed class SmartPickup : ModSystem {
         if (Main.LocalPlayer.chest == skippedQuickStack) return;
         orig(context, voidStack);
     }
+
+    private static bool IsGetItemWorld(Player player, GetItemSettings settings, Item item) => !settings.NoText || item == Main.mouseItem || item == player.HeldItem;
     internal static int skippedQuickStack = -1;
 
 }

@@ -1,3 +1,4 @@
+using System;
 using BetterInventory.Default.Inventories;
 using SpikysLib;
 using SpikysLib.Constants;
@@ -56,6 +57,7 @@ public static class SmartEquip {
 
     public static Item VoidBagFirst(Player player, Item item, GetItemSettings settings) {
         if (!settings.CanGoIntoVoidVault || !player.IsVoidVaultEnabled) return item;
+        if (item.IsACoin && Array.FindIndex(player.inventory, i => i.IsACoin) != -1) return item;
         if (Reflection.Player.GetItem_VoidVault.Invoke(player, player.whoAmI, player.bank4.item, item, settings, item)) return new();
         return item;
     }

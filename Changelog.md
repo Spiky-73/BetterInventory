@@ -1,5 +1,10 @@
 # Better Inventory changelog
 
+## v0.9.1.2
+- Fixed Return to Previous Slot not working as expected when dropping favorited items
+- Fixed Void Bag First not handling coins properly
+- Fixed RecipeUI consuming keyboard input event when not visible
+
 ## v0.9.1.1
 - Fixed Quick Stack on item pickup deleting coins
 
