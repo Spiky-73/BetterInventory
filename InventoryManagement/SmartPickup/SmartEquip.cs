@@ -21,18 +21,20 @@ public static class SmartEquip {
     }
 
     public static Item QuickStack(Player player, Item item, GetItemSettings settings) {
-        if (Configs.QuickStackPickup.Value.voidBag && player.HasItem(item.type, player.bank4.item)) item = VoidBagFirst(player, item, settings);
         if (Configs.QuickStackPickup.Value.chests) {
             Item[] fakeInventory = new Item[player.inventory.Length];
             for (int i = 0; i < fakeInventory.Length; i++) fakeInventory[i] = new();
             fakeInventory[0] = item;
             (var inventory, player.inventory) = (player.inventory, fakeInventory);
-            SmartPickup.skippedQuickStack = player.chest;
             player.QuickStackAllChests();
-            SmartPickup.skippedQuickStack = -1;
             player.inventory = inventory;
             item = fakeInventory[0];
+            if (Main.netMode == NetmodeID.MultiplayerClient) {
+                // Resync inventory[0] as it the modified slot was synched by QuickStackAllChests
+                NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, player.whoAmI, PlayerItemSlotID.Inventory0, player.inventory[0].prefix, 0f, 0, 0, 0);
+            }
         }
+        if (Configs.QuickStackPickup.Value.voidBag && player.HasItem(item.type, player.bank4.item)) item = VoidBagFirst(player, item, settings);
 
         return item;
     }

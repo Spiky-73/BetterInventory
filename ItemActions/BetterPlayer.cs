@@ -108,7 +108,7 @@ public sealed class BetterPlayer : ModPlayer {
     public override void ProcessTriggers(TriggersSet triggersSet) {
         QuickSearch.ProcessTriggers();
         if (Configs.ItemActions.FavoritedBuff && FavoritedBuffKb.JustPressed) FavoritedBuff(Player);
-        if (Configs.ItemActions.QuickStack && QuickStackKb.JustPressed) Player.QuickStackAllChests();
+        if (Configs.ItemActions.QuickStack && QuickStackKb.JustPressed) QuickStack(Player);
         if (Configs.ItemActions.BuilderAccs) BuilderKeys();
     }
 
@@ -176,6 +176,11 @@ public sealed class BetterPlayer : ModPlayer {
             SoundEngine.PlaySound(SoundID.MenuTick);
         }
     }
+    private static void QuickStack(Player player) {
+        player.QuickStackAllChests();
+        Recipe.FindRecipes();
+    }
+
     public override void SaveData(TagCompound tag) {
         tag[FavoritedInBanksTag] = new FavoritedInBanks(Player);
     }

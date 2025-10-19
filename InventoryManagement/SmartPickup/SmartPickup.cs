@@ -28,6 +28,7 @@ public sealed class SmartPickup : ModSystem {
         On_ItemSlot.ArmorSwap += HookArmorSwap;
         // On_ItemSlot.AccessorySwap += HookAccessorySwap; // Handled in HookArmorSwap
 
+        On_ChestUI.LootAll += HookQuickStackLootAll;
         On_ChestUI.QuickStack += HookNoQuickStackToSameChest;
     }
 
@@ -177,12 +178,18 @@ public sealed class SmartPickup : ModSystem {
         return orig(item, out success);
     }
 
-    private static void HookNoQuickStackToSameChest(On_ChestUI.orig_QuickStack orig, ContainerTransferContext context, bool voidStack) {
-        if (Main.LocalPlayer.chest == skippedQuickStack) return;
-        orig(context, voidStack);
+    private static void HookQuickStackLootAll(On_ChestUI.orig_LootAll orig) {
+        if (Configs.SmartPickup.QuickStack) _skippedQuickStack = Main.LocalPlayer.chest;
+        orig();
+        _skippedQuickStack = -1;
     }
 
+    private static void HookNoQuickStackToSameChest(On_ChestUI.orig_QuickStack orig, ContainerTransferContext context, bool voidStack) {
+        if (Main.LocalPlayer.chest == _skippedQuickStack) return;
+        orig(context, voidStack);
+    }
+    private static int _skippedQuickStack = -1;
+
     private static bool IsGetItemWorld(Player player, GetItemSettings settings, Item item) => !settings.NoText || item == Main.mouseItem || item == player.HeldItem;
-    internal static int skippedQuickStack = -1;
 
 }

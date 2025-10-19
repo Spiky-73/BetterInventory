@@ -125,8 +125,8 @@ public sealed class PreviousSlot {
 public enum MovePolicy { Never, NotFavorited, Always }
 
 public sealed class QuickStackPickup {
-    [DefaultValue(true)] public bool voidBag = true;
     [DefaultValue(true)] public bool chests = true;
+    [DefaultValue(true)] public bool voidBag = true;
 
     public static QuickStackPickup Value => SmartPickup.Value.quickStack.Value;
 }
