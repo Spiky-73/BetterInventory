@@ -52,9 +52,6 @@ public sealed class GrabBagTooltip {
 
 public sealed class TooltipScroll {
     [DefaultValue(1)] public float maximumHeight = 1;
-
-    public static bool Enabled => ItemActions.Instance.tooltipScroll;
-    public static TooltipScroll Value => ItemActions.Instance.tooltipScroll.Value;
 }
 
 public sealed class TooltipHover {

@@ -10,63 +10,65 @@ using Terraria.ModLoader;
 
 namespace BetterInventory.ItemActions;
 
-public class TooltipScroll : ILoadable {
-    
-    public void Load(Mod mod) {
+public class TooltipScrollItem : GlobalItem {
+
+    public override void Load() {
         MonoModHooks.Add(Reflection.ItemLoader.ModifyTooltips, HookTooltipScroll);
     }
-    public void Unload() { }
 
     private static List<TooltipLine> HookTooltipScroll(Reflection.ItemLoader.ModifyTooltipsFn orig, Item item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out Color?[] overrideColor, int prefixlineIndex) {
-        var tooltipsAll = orig.Invoke(item, ref numTooltips, names, ref text, ref modifier, ref badModifier, ref oneDropLogo, out overrideColor, prefixlineIndex);
-        if (!Configs.TooltipScroll.Enabled) return tooltipsAll;
-        if (_tooltipType != item.type) _tooltipType = item.type;
+        var tooltips = orig.Invoke(item, ref numTooltips, names, ref text, ref modifier, ref badModifier, ref oneDropLogo, out overrideColor, prefixlineIndex);
+        if (!TooltipScroll.Enabled) return tooltips;
 
-        int inset = Main.SettingsEnabled_OpaqueBoxBehindTooltips ? 18 : 4;
-        int count = Math.Max(1, (int)((Main.screenHeight - inset) * Configs.TooltipScroll.Value.maximumHeight / FontAssets.MouseText.Value.LineSpacing) - 2);
-        if (numTooltips <= count + 1) return tooltipsAll;
-        HandleTooltipScroll(numTooltips, count);
+        if (!TooltipScroll.ScrollItemTooltip(item.type, PlayerInput.ScrollWheelDelta / 120, numTooltips)) return tooltips;
 
-        (T[] text, T[]) NewArray<T>(T[] array) {
-            T[] a = new T[count + 2];
-            a[0] = array[0];
-            return (array, a);
+        PlayerInput.LockVanillaMouseScroll("BetterInventory/ScrollableTooltip");
+        return TooltipScroll.CropItemTooltip(item.type, tooltips, ref numTooltips, ref text, ref modifier, ref badModifier, ref oneDropLogo, ref overrideColor);
+    }
+}
+
+public static class TooltipScroll {
+
+    public static bool Enabled => Configs.ItemActions.Instance.tooltipScroll;
+    public static Configs.TooltipScroll Config => Configs.ItemActions.Instance.tooltipScroll.Value;
+
+    public static bool ScrollItemTooltip(int type, int delta, int numTooltips) {
+        int croppedNumTooltips = GetCroppedNumTooltips();
+        if (numTooltips <= croppedNumTooltips) return false;
+
+        _scroll[type] = Math.Clamp(GetTooltipScroll(type) - delta, 0, numTooltips - (croppedNumTooltips - 1));
+        return true;
+    }
+
+    public static List<TooltipLine> CropItemTooltip(int type, List<TooltipLine> tooltips, ref int numTooltips, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, ref Color?[] overrideColor) {
+        int scroll = GetTooltipScroll(type);
+        int croppedNumTooltips = GetCroppedNumTooltips();
+
+        if (numTooltips <= croppedNumTooltips) return tooltips;
+
+        (var start, var end) = (scroll + 1, scroll + croppedNumTooltips - 1);
+        TooltipLine scrollLine = new(BetterInventory.Instance, "scrollTooltip", Language.GetTextValue($"{Localization.Keys.UI}.ScrollTooltip", start, end - 1, numTooltips - 1)) { OverrideColor = Colors.RarityTrash };
+
+        tooltips = [tooltips[0], .. tooltips[start..end], scrollLine];
+        numTooltips = croppedNumTooltips;
+        text = [text[0], .. text[start..end], scrollLine.Text];
+        modifier = [modifier[0], .. modifier[start..end], scrollLine.IsModifier];
+        badModifier = [badModifier[0], .. badModifier[start..end], scrollLine.IsModifierBad];
+        overrideColor = [overrideColor[0], .. overrideColor[start..end], scrollLine.OverrideColor];
+        if (oneDropLogo > 0) {
+            if (oneDropLogo < start || oneDropLogo >= end) oneDropLogo = -1;
+            else oneDropLogo -= start - 1;
         }
-        (var numTooltipsAll, numTooltips) = (numTooltips, count + 2);
-        List<TooltipLine> tooltips = new(count + 2) { tooltipsAll[0] };
-        (var textAll, text) = NewArray(text);
-        (var modifierAll, modifier) = NewArray(modifier);
-        (var badModifierAll, badModifier) = NewArray(badModifier);
-        (var oneDropLogoAll, oneDropLogo) = (oneDropLogo, -1);
-        (var overrideColorAll, overrideColor) = NewArray(overrideColor);
-
-        int start = tooltipStart.GetValueOrDefault(_tooltipType, 1);
-        for (int i = 0; i < count; i++) {
-            int iAll = start + i;
-            tooltips.Add(tooltipsAll[iAll]);
-            text[i + 1] = textAll[iAll];
-            modifier[i + 1] = modifierAll[iAll];
-            badModifier[i + 1] = badModifierAll[iAll];
-            if (oneDropLogoAll == iAll) oneDropLogo = i + 1;
-            overrideColor[i + 1] = overrideColorAll[iAll];
-        }
-
-        TooltipLine scrollLine = new(BetterInventory.Instance, "scrollTooltip", Language.GetTextValue($"{Localization.Keys.UI}.ScrollTooltip", start, start + count - 1, numTooltipsAll - 1)) { OverrideColor = Colors.RarityTrash };
-        tooltips.Add(scrollLine);
-        text[count + 1] = scrollLine.Text;
-        overrideColor[count + 1] = scrollLine.OverrideColor;
 
         return tooltips;
     }
 
-    private static void HandleTooltipScroll(int numTooltips, int visibleLines) {
-        PlayerInput.LockVanillaMouseScroll("BetterInventory: Scrollable Tooltip");
-        int scroll = PlayerInput.ScrollWheelDelta / 120;
-        if (scroll == 0) return;
-        int s = tooltipStart.GetValueOrDefault(_tooltipType, 1);
-        tooltipStart[_tooltipType] = Math.Clamp(s - scroll, 1, numTooltips - visibleLines);
+    public static int GetTooltipScroll(int type) => _scroll.GetValueOrDefault(type, 0);
+
+    public static int GetCroppedNumTooltips() {
+        int inset = Main.SettingsEnabled_OpaqueBoxBehindTooltips ? 18 : 4;
+        return Math.Max(3, (int)((Main.screenHeight - inset) * Config.maximumHeight / FontAssets.MouseText.Value.LineSpacing));
     }
 
-    private static int _tooltipType;
-    public static Dictionary<int, int> tooltipStart = [];
+    private static Dictionary<int, int> _scroll = [];
 }
