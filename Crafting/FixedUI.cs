@@ -19,10 +19,8 @@ namespace BetterInventory.Crafting;
 public sealed class FixedUI : ILoadable {
 
     public void Load(Mod mod) {
-        On_Main.TryAllowingToCraftRecipe += HookTryAllowingToCraftRecipe;
         IL_Main.DrawInventory += static il => {
             if (!il.ApplyTo(ILFastScroll, Configs.FixedUI.FastScroll)) Configs.UnloadedCrafting.Value.fastScroll = true;
-            if (!il.ApplyTo(ILMaterialWrapping, Configs.FixedUI.Wrapping)) Configs.UnloadedCrafting.Value.wrapping = true;
             if (!il.ApplyTo(ILScrollButtonsFix, Configs.FixedUI.ScrollButtons)) Configs.UnloadedCrafting.Value.scrollButtons = true;
             if (!il.ApplyTo(ILRecipeListUI, Configs.FixedUI.RecipeListUI)) Configs.UnloadedCrafting.Value.RecipeListUI = true;
             if (!il.ApplyTo(ILNoRecStartOffset, Configs.FixedUI.NoRecStartOffset)) Configs.UnloadedCrafting.Value.noRecStartOffset = true;
@@ -30,15 +28,6 @@ public sealed class FixedUI : ILoadable {
         };
         On_Main.DrawInterface_Resources_ClearBuffs += HookRememberListPosition;
         On_Recipe.ClearAvailableRecipes += HookClearAvailableRecipes;
-        IL_Player.Update += static il => {
-            if (!il.ApplyTo(ILFixRecipeScrollUpdate, Configs.ScrollDirection.RecipesUnpaused)) Configs.UnloadedCrafting.Value.scrollDirectionRecipesUnpaused = true;
-        };
-        IL_Main.DoUpdate_WhilePaused += static il => {
-            if (!il.ApplyTo(ILFixRecipeScrollWhilePaused, Configs.ScrollDirection.RecipesPaused)) Configs.UnloadedCrafting.Value.scrollDirectionRecipesPaused = true;
-        };
-        MonoModHooks.Modify(Reflection.AccessorySlotLoader.DrawScrollbar, static il => {
-            if (!il.ApplyTo(ILFixAccessoryScroll, Configs.ScrollDirection.Accessories)) Configs.UnloadedCrafting.Value.scrollDirectionAccessories = true;
-        });
 
         _craftCenterButton = mod.Assets.Request<Texture2D>($"Assets/RecCenter");
     }
@@ -80,51 +69,6 @@ public sealed class FixedUI : ILoadable {
             //     }
         }
         //         ...
-        //     }
-        //     ...
-        // }
-    }
-
-    private static void ILMaterialWrapping(ILContext il) {
-        ILCursor cursor = new(il);
-
-        // if(<showRecipes>){
-        //     ...
-        //     if (Main.numAvailableRecipes > 0) {
-        //         for (<focusRecipeMaterialIndex>) {
-        //             ...
-        cursor.GotoNext(i => i.MatchStsfld(Reflection.UILinkPointNavigator.CRAFT_CurrentIngredientsCount));
-
-        cursor.FindPrevLoc(out _, out int materialIndex, i => true, 130); // int num68
-
-        //             int num69 = 80 + num68 * 40;
-        cursor.GotoNext(i => i.MatchLdcI4(40));
-        cursor.GotoNext(MoveType.Before, i => i.MatchStloc(out _));
-
-        //             ++ <wrappingX>
-        cursor.EmitLdloc(materialIndex);
-        cursor.EmitDelegate((int x, int i) => {
-            if (!Configs.FixedUI.Wrapping) return x;
-            if (!Main.recBigList) return x + VanillaCorrection * i;
-            x -= i * VanillaMaterialSpacing;
-            if (i >= MaterialsPerLine[0]) i = MaterialsPerLine[0] - MaterialsPerLine[1] + (i - MaterialsPerLine[0]) % MaterialsPerLine[1];
-            return x + (VanillaMaterialSpacing + VanillaCorrection) * i;
-        });
-
-        //             int num70 = 380 + num51;
-        cursor.GotoNext(i => i.MatchLdcI4(380));
-        cursor.GotoNext(MoveType.Before, i => i.MatchStloc(out _)); // int num70
-
-        //             ++ <wrappingY>
-        cursor.EmitLdloc(materialIndex);
-        cursor.EmitDelegate((int y, int i) => {
-            if (!Configs.FixedUI.Wrapping || !Main.recBigList) return y;
-            i = i < MaterialsPerLine[0] ? 0 : ((i - MaterialsPerLine[0]) / MaterialsPerLine[1] + 1);
-            return y + (VanillaMaterialSpacing + VanillaCorrection) * i;
-        });
-
-        //             ...
-        //         }
         //     }
         //     ...
         // }
@@ -256,9 +200,6 @@ public sealed class FixedUI : ILoadable {
         //     }
     }
 
-    private static bool HookTryAllowingToCraftRecipe(On_Main.orig_TryAllowingToCraftRecipe orig, Recipe currentRecipe, bool tryFittingItemInInventoryToAllowCrafting, out bool movedAnItemToAllowCrafting)
-        => orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting || Configs.FixedUI.CraftWhenHolding, out movedAnItemToAllowCrafting);
-
     private static void HookRememberListPosition(On_Main.orig_DrawInterface_Resources_ClearBuffs orig) {
         var start = Main.recStart;
         orig();
@@ -291,42 +232,11 @@ public sealed class FixedUI : ILoadable {
             - _focusedRecipeLine * UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow);
     }
 
-    private static void ILFixRecipeScrollUpdate(ILContext il) {
-        ILCursor cursor = new(il);
-
-        // int num8 = Player.GetMouseScrollDelta();
-        cursor.GotoNextLoc(out var offset, i => i.Previous.MatchCall(Reflection.Player.GetMouseScrollDelta), 41);
-        // if (Main.recBigList) ...
-        // else {
-        //     Main.focusRecipe += ++[-1 *] num8;
-        cursor.GotoNext(i => i.MatchStsfld(Reflection.Main.focusRecipe));
-        cursor.GotoPrev(MoveType.After, i => i.MatchLdloc(offset));
-        cursor.EmitDelegate((int offset) => Configs.ScrollDirection.RecipesUnpaused  ? -offset : offset);
-        // }
-    }
-    private static void ILFixRecipeScrollWhilePaused(ILContext il) {
-        ILCursor cursor = new(il);
-
-        // int num = ++[-1 *] PlayerInput.ScrollWheelDelta / 120;
-        cursor.GotoNext(MoveType.After, i => i.MatchLdsfld(Reflection.PlayerInput.ScrollWheelDelta));
-        cursor.EmitDelegate((int ScrollWheelDelta) => Configs.ScrollDirection.RecipesUnpaused ? -ScrollWheelDelta : ScrollWheelDelta);
-    }
-    private static void ILFixAccessoryScroll(ILContext il) {
-        ILCursor cursor = new(il);
-        // int scrollDelta = AccessorySlotLoader.ModSlotPlayer(AccessorySlotLoader.Player).scrollbarSlotPosition + ++[-1 *] PlayerInput.ScrollWheelDelta / 120;
-        cursor.GotoNext(MoveType.After, i => i.MatchLdsfld(Reflection.PlayerInput.ScrollWheelDelta));
-        cursor.EmitDelegate((int ScrollWheelDelta) => Configs.ScrollDirection.Accessories ? -ScrollWheelDelta : ScrollWheelDelta);
-    }
-
     private static bool _skipFollow;
     private static bool _focusedVisible;
     private static int _focusedRecipeLine;
 
     private static int _recDelay = 0;
-    public static readonly int[] MaterialsPerLine = [6, 4];
-
-    public const int VanillaMaterialSpacing = 40;
-    public const int VanillaCorrection = -2;
 
     private static Asset<Texture2D> _craftCenterButton = null!;
 }

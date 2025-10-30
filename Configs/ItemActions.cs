@@ -50,10 +50,6 @@ public sealed class GrabBagTooltip {
     public static GrabBagTooltip Value => ItemActions.Instance.grabBagTooltip.Value;
 }
 
-public sealed class TooltipScroll {
-    [DefaultValue(1)] public float maximumHeight = 1;
-}
-
 public sealed class TooltipHover {
     [DefaultValue(10)] public int graceTime = 10;
 

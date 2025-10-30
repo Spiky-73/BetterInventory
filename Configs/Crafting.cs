@@ -30,26 +30,20 @@ public sealed class Crafting : ModConfig {
 public sealed class FixedUI {
     public Toggle<FastScroll> fastScroll = new(true);
     [DefaultValue(true)] public bool scrollButtons = true;
-    [DefaultValue(true)] public bool wrapping = true;
-    [DefaultValue(true)] public bool craftWhenHolding = true;
     [DefaultValue(true)] public bool recipeCount = true;
     [DefaultValue(true)] public bool noRecStartOffset = true;
     [DefaultValue(true)] public bool noRecListClose = true;
     [DefaultValue(true)] public bool rememberListPosition = true;
     [DefaultValue(true)] public bool focusButton = true;
-    [DefaultValue(true)] public Toggle<ScrollDirection> scrollDirection = new(true);
 
     public static bool Enabled => Crafting.Instance.fixedUI;
     public static bool FastScroll => Enabled && Value.fastScroll && !UnloadedCrafting.Value.fastScroll;
     public static bool ScrollButtons => Enabled && Value.scrollButtons && !UnloadedCrafting.Value.scrollButtons;
-    public static bool Wrapping => Enabled && Value.wrapping && !UnloadedCrafting.Value.wrapping;
-    public static bool CraftWhenHolding => Enabled && Value.craftWhenHolding;
     public static bool RecipeCount => Enabled && Value.recipeCount && !UnloadedCrafting.Value.recipeCount;
     public static bool NoRecStartOffset => Enabled && Value.noRecStartOffset && !UnloadedCrafting.Value.noRecStartOffset;
     public static bool NoRecListClose => Enabled && Value.noRecListClose && !UnloadedCrafting.Value.noRecListClose;
     public static bool RememberListPosition => Enabled && Value.rememberListPosition;
     public static bool FocusButton => Enabled && Value.focusButton && !UnloadedCrafting.Value.focusButton;
-    public static bool ScrollDirection => Enabled && Value.scrollDirection;
     public static FixedUI Value => Crafting.Instance.fixedUI.Value;
 
     public static bool RecipeListUI => RecipeCount || FocusButton;
@@ -62,16 +56,6 @@ public sealed class FastScroll {
     [DefaultValue(true)] public bool listScroll = true;
     
     public static FastScroll Value => Crafting.Instance.fixedUI.Value.fastScroll.Value;
-}
-public sealed class ScrollDirection {
-    [DefaultValue(true)] public bool recipesUnpaused = true;
-    [DefaultValue(true)] public bool recipesPaused = true;
-    [DefaultValue(true)] public bool accessories = true;
-
-    public static bool RecipesUnpaused => FixedUI.ScrollDirection && Value.recipesUnpaused && !UnloadedCrafting.Value.scrollDirectionRecipesUnpaused;
-    public static bool RecipesPaused => FixedUI.ScrollDirection && Value.recipesPaused && !UnloadedCrafting.Value.scrollDirectionRecipesPaused;
-    public static bool Accessories => FixedUI.ScrollDirection && Value.accessories && !UnloadedCrafting.Value.scrollDirectionAccessories;
-    public static ScrollDirection Value => Crafting.Instance.fixedUI.Value.scrollDirection.Value;
 }
 
 public sealed class RecipeFilters {
