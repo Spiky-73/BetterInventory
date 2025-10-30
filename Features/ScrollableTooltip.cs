@@ -10,7 +10,7 @@ using Terraria.ModLoader;
 
 namespace BetterInventory.Features;
 
-public class TooltipScrollItem : GlobalItem {
+public class ScrollableTooltipItem : GlobalItem {
 
     public override void Load() {
         MonoModHooks.Add(Reflection.ItemLoader.ModifyTooltips, HookTooltipScroll);
@@ -18,17 +18,17 @@ public class TooltipScrollItem : GlobalItem {
 
     private static List<TooltipLine> HookTooltipScroll(Reflection.ItemLoader.ModifyTooltipsFn orig, Item item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out Color?[] overrideColor, int prefixlineIndex) {
         var tooltips = orig.Invoke(item, ref numTooltips, names, ref text, ref modifier, ref badModifier, ref oneDropLogo, out overrideColor, prefixlineIndex);
-        if (!Configs.FeatureList.TooltipScroll) return tooltips;
+        if (!Configs.FeatureList.ScrollableTooltip) return tooltips;
 
-        if (!TooltipScroll.ScrollItemTooltip(item.type, PlayerInput.ScrollWheelDelta / 120, numTooltips)) return tooltips;
+        if (!ScrollableTooltip.ScrollItemTooltip(item.type, PlayerInput.ScrollWheelDelta / 120, numTooltips)) return tooltips;
 
         PlayerInput.LockVanillaMouseScroll("BetterInventory/ScrollableTooltip");
-        return TooltipScroll.CropItemTooltip(item.type, tooltips, ref numTooltips, ref text, ref modifier, ref badModifier, ref oneDropLogo, ref overrideColor);
+        return ScrollableTooltip.CropItemTooltip(item.type, tooltips, ref numTooltips, ref text, ref modifier, ref badModifier, ref oneDropLogo, ref overrideColor);
     }
 }
 
 
-public static class TooltipScroll {
+public static class ScrollableTooltip {
 
     public static bool ScrollItemTooltip(int type, int delta, int numTooltips) {
         int croppedNumTooltips = GetCroppedNumTooltips();
@@ -65,7 +65,7 @@ public static class TooltipScroll {
 
     public static int GetCroppedNumTooltips() {
         int inset = Main.SettingsEnabled_OpaqueBoxBehindTooltips ? 18 : 4;
-        return Math.Max(3, (int)((Main.screenHeight - inset) * Configs.TooltipScroll.Instance.maximumHeight / FontAssets.MouseText.Value.LineSpacing));
+        return Math.Max(3, (int)((Main.screenHeight - inset) * Configs.ScrollableTooltip.Instance.maximumHeight / FontAssets.MouseText.Value.LineSpacing));
     }
 
     private static Dictionary<int, int> _scroll = [];

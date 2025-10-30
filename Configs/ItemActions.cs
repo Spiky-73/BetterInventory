@@ -14,7 +14,6 @@ public sealed class ItemActions : ModConfig {
     [DefaultValue(true)] public bool builderAccs;
     [DefaultValue(true)] public bool keepSwappedFavorited;
     public Toggle<GrabBagTooltip> grabBagTooltip = new(true);
-    public Toggle<TooltipScroll> tooltipScroll = new(true);
     public bool fixedTooltipPosition;
     public Toggle<TooltipHover> tooltipHover = new(true);
     public Toggle<ItemAmmo> itemAmmo = new(true);
