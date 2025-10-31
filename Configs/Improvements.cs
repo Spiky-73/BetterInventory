@@ -9,11 +9,13 @@ public sealed class Improvements : ModConfig {
     public Toggle<BetterRecipeList> betterRecipeList = new(true);
     public Toggle<BetterRecipeGrid> betterRecipeGrid = new(true);
     public Toggle<MoreMaterials> moreMaterials = new(true);
+    public Toggle<ScrollableTooltip> scrollableTooltip = new(true);
 
     public static Improvements Instance = null!;
     public static bool BetterRecipeList => Instance.betterRecipeList;
     public static bool BetterRecipeGrid => Instance.betterRecipeGrid;
     public static bool MoreMaterials => Instance.moreMaterials;
+    public static bool ScrollableTooltip => Instance.scrollableTooltip;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
 }
@@ -69,4 +71,10 @@ public sealed class CraftOnRecipeGrid {
     [DefaultValue(false)] public bool focusHovered = false;
 
     public static CraftOnRecipeGrid Instance => BetterRecipeGrid.Instance.craftOnRecipeGrid.Value;
+}
+
+public sealed class ScrollableTooltip {
+    [DefaultValue(1)] public float maximumHeight = 1;
+
+    public static ScrollableTooltip Instance = Improvements.Instance.scrollableTooltip.Value;
 }

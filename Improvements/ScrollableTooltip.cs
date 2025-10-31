@@ -8,7 +8,7 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
-namespace BetterInventory.Features;
+namespace BetterInventory.Improvements;
 
 public class ScrollableTooltipItem : GlobalItem {
 
@@ -18,7 +18,7 @@ public class ScrollableTooltipItem : GlobalItem {
 
     private static List<TooltipLine> HookTooltipScroll(Reflection.ItemLoader.ModifyTooltipsFn orig, Item item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out Color?[] overrideColor, int prefixlineIndex) {
         var tooltips = orig.Invoke(item, ref numTooltips, names, ref text, ref modifier, ref badModifier, ref oneDropLogo, out overrideColor, prefixlineIndex);
-        if (!Configs.FeatureList.ScrollableTooltip) return tooltips;
+        if (!Configs.Improvements.ScrollableTooltip) return tooltips;
 
         if (!ScrollableTooltip.ScrollItemTooltip(item.type, PlayerInput.ScrollWheelDelta / 120, numTooltips)) return tooltips;
 
