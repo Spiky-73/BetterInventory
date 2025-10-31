@@ -12,11 +12,11 @@ using Terraria.ModLoader;
 using Terraria.UI;
 using Terraria.UI.Chat;
 
-namespace BetterInventory.Crafting;
+namespace BetterInventory.VisualChanges;
 
-public sealed class AvailableMaterialsItem : GlobalItem {
+public sealed class DisplayAvailableMaterialsItem : GlobalItem {
 
-
+    public override bool IsLoadingEnabled(Mod mod) => !Configs.Compatibility.CompatibilityMode || Configs.AvailableMaterials.Enabled;
     public override void Load() {
         On_Recipe.FindRecipes += HookFindRecipes;
         On_Recipe.CollectItemsToCraftWithFrom += HookCollectItems;
@@ -26,16 +26,16 @@ public sealed class AvailableMaterialsItem : GlobalItem {
     }
 
     private static void HookFindRecipes(On_Recipe.orig_FindRecipes orig, bool canDelayCheck) {
-        if (!canDelayCheck) _collectedRecipes = false;
+        if (!canDelayCheck) DisplayAvailableMaterials.ResetCollectedMaterials();
         orig(canDelayCheck);
     }
     private static void HookCollectItems(On_Recipe.orig_CollectItemsToCraftWithFrom orig, Player player) {
         orig(player);
-        if (player.whoAmI == Main.myPlayer) _collectedRecipes = true;
+        if (player.whoAmI == Main.myPlayer) DisplayAvailableMaterials.SetCollectedMaterials();
     }
 
     public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
-        if (!Configs.AvailableMaterials.Tooltip || !ShouldDisplayStack(item, item.tooltipContext, out string? text) || text.Length == 0) return;
+        if (!Configs.AvailableMaterials.Tooltip || !DisplayAvailableMaterials.ShouldDisplayStack(item, item.tooltipContext, out string? text) || text.Length == 0) return;
         if (item.stack != 1) tooltips[0].Text = tooltips[0].Text[0..^(2 + item.stack.ToString().Length)];
         tooltips[0].Text += $" ({text})";
     }
@@ -50,18 +50,24 @@ public sealed class AvailableMaterialsItem : GlobalItem {
         cursor.EmitLdarg1().EmitLdarg2().EmitLdarg3();
         cursor.EmitDelegate((string stack, Item[] inv, int context, int slot) => {
             Item item = inv[slot];
-            return Configs.AvailableMaterials.ItemSlot && ShouldDisplayStack(item, context, out string? text, true) ? text : stack;
+            return Configs.AvailableMaterials.ItemSlot && DisplayAvailableMaterials.ShouldDisplayStack(item, context, out string? text, true) ? text : stack;
         });
         cursor.GotoPrev(i => i.MatchLdflda(Reflection.Item.stack));
         cursor.GotoPrev(MoveType.After, i => i.MatchLdfld(Reflection.Item.stack));
         cursor.EmitLdarg1().EmitLdarg2().EmitLdarg3();
-        cursor.EmitDelegate((int stack, Item[] inv, int context, int slot) => Configs.AvailableMaterials.ItemSlot && ShouldDisplayStack(inv[slot], context, out _) ? 2 : stack);
+        cursor.EmitDelegate((int stack, Item[] inv, int context, int slot) => Configs.AvailableMaterials.ItemSlot && DisplayAvailableMaterials.ShouldDisplayStack(inv[slot], context, out _) ? 2 : stack);
     }
+}
 
-    private static bool ShouldDisplayStack(Item item, int context, [MaybeNullWhen(false)] out string text, bool compact = false) {
+public static class DisplayAvailableMaterials {
+
+    public static bool ResetCollectedMaterials() => _collectedMaterials = false;
+    public static bool SetCollectedMaterials() => _collectedMaterials = true;
+
+    public static bool ShouldDisplayStack(Item item, int context, [MaybeNullWhen(false)] out string text, bool compact = false) {
         text = null;
         if (!(context == ItemSlot.Context.CraftingMaterial || (Configs.RecipeTooltip.Enabled && context == ItemSlot.Context.ChatItem))) return false;
-        if (!_collectedRecipes) return false;
+        if (!_collectedMaterials) return false;
 
         (Recipe? recipe, Item[] tiles, Item[] conditions) = context == ItemSlot.Context.CraftingMaterial ?
             (Main.recipe[Main.availableRecipe[Main.focusRecipe]], RequiredObjectsDisplay._displayedRecipeTiles, RequiredObjectsDisplay._displayedRecipeConditions) :
@@ -88,5 +94,6 @@ public sealed class AvailableMaterialsItem : GlobalItem {
         return false;
     }
 
-    private static bool _collectedRecipes;
+    private static bool _collectedMaterials;
 }
+

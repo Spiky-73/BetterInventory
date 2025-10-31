@@ -35,7 +35,7 @@ public sealed class MaterialsWrapping : ILoadable {
         //             ++ <wrappingX>
         cursor.EmitLdloc(materialIndex);
         cursor.EmitDelegate((int x, int i) => {
-            if (!Configs.FixedUI.Wrapping) return x;
+            if (!Configs.VanillaFixes.MaterialsWrapping) return x;
             if (!Main.recBigList) return x + VanillaCorrection * i;
             x -= i * VanillaMaterialSpacing;
             if (i >= MaterialsPerLine[0]) i = MaterialsPerLine[0] - MaterialsPerLine[1] + (i - MaterialsPerLine[0]) % MaterialsPerLine[1];
@@ -49,7 +49,7 @@ public sealed class MaterialsWrapping : ILoadable {
         //             ++ <wrappingY>
         cursor.EmitLdloc(materialIndex);
         cursor.EmitDelegate((int y, int i) => {
-            if (!Configs.FixedUI.Wrapping || !Main.recBigList) return y;
+            if (!Configs.VanillaFixes.MaterialsWrapping || !Main.recBigList) return y;
             i = i < MaterialsPerLine[0] ? 0 : ((i - MaterialsPerLine[0]) / MaterialsPerLine[1] + 1);
             return y + (VanillaMaterialSpacing + VanillaCorrection) * i;
         });
