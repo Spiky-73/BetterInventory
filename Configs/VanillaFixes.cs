@@ -6,7 +6,6 @@ namespace BetterInventory.Configs;
 
 public sealed class VanillaFixes : ModConfig {
 
-    public Toggle<Empty> craftWhenHolding = new(true);
     [DefaultValue(true)] public bool ammoPickup;
     public Toggle<ConsistantScrollDirection> consistantScrollDirection = new(true);
     [DefaultValue(true)] public bool materialsWrapping;

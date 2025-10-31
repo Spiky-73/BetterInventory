@@ -55,7 +55,7 @@ public sealed class RequiredObjectsDisplay : ILoadable {
                 ItemSlot.MouseHover(ref tile, ContextID.CraftingMaterial);
             }
 
-            if (Configs.FixedUI.Wrapping && ++number % TilesPerLine == 0) {
+            if (Configs.VanillaFixes.MaterialsWrapping && ++number % TilesPerLine == 0) {
                 position.X = minX;
                 position.Y += delta.Y;
                 if (Configs.BetterGuide.CraftingStation && number == TilesPerLine) position.X += delta.X; // Skip the position of guideTile if it is enabled

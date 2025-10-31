@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using BetterInventory.Crafting;
 using BetterInventory.DataStructures;
+using BetterInventory.Improvements;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
@@ -73,7 +73,7 @@ public sealed class FavoritedRecipesPlayer : ModPlayer {
         }
         orig(recipeIndex);
         if (clicked) {
-            if (!Configs.FavoritedRecipes.Value.followOnFavorite) FixedUI.DontFollowOnNextRefocus();
+            if (!Configs.FavoritedRecipes.Value.followOnFavorite) BetterRecipeGrid.DontFollowOnNextRefocus();
             Recipe.FindRecipes();
             SoundEngine.PlaySound(SoundID.MenuTick);
             Main.mouseLeftRelease = false;

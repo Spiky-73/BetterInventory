@@ -1268,6 +1268,16 @@ Compatibility: {
 		Label: "[i:487] Unloaded {$Mods.BetterInventory.Configs.ItemSearch.DisplayName} Features"
 		Tooltip: ""
 	}
+
+	unloadedImprovements: {
+		Label: unloaded Improvements
+		Tooltip: ""
+	}
+
+	unloadedVanillaFixes: {
+		Label: unloaded Vanilla Fixes
+		Tooltip: ""
+	}
 }
 
 UnloadedCrafting: {
@@ -1542,3 +1552,193 @@ Version: {
 
 PickupUpgraderDefinition.Tooltip: ""
 EntityCatalogueDefinition.Tooltip: ""
+
+UnloadedImprovements: {
+	Tooltip: ""
+
+	craftOnRecipeList: {
+		Label: craft On Recipe List
+		Tooltip: ""
+	}
+
+	betterRecipeList_craftOnRecList: {
+		Label: better Recipe List_craft On Rec List
+		Tooltip: ""
+	}
+
+	betterRecipeList_refocusButton: {
+		Label: better Recipe List_refocus Button
+		Tooltip: ""
+	}
+
+	betterRecipeList_noRecStartOffset: {
+		Label: better Recipe List_no Rec Start Offset
+		Tooltip: ""
+	}
+
+	betterRecipeList_noRecListClose: {
+		Label: better Recipe List_no Rec List Close
+		Tooltip: ""
+	}
+
+	betterRecipeList_rememberListPosition: {
+		Label: better Recipe List_remember List Position
+		Tooltip: ""
+	}
+}
+
+UnloadedVanillaFixes: {
+	Tooltip: ""
+
+	ammoPickup: {
+		Label: ammo Pickup
+		Tooltip: ""
+	}
+
+	consistantScrollDirection_recipesUnpaused: {
+		Label: consistant Scroll Direction_recipes Unpaused
+		Tooltip: ""
+	}
+
+	consistantScrollDirection_recipesPaused: {
+		Label: consistant Scroll Direction_recipes Paused
+		Tooltip: ""
+	}
+
+	consistantScrollDirection_accessories: {
+		Label: consistant Scroll Direction_accessories
+		Tooltip: ""
+	}
+
+	materialsWrapping: {
+		Label: materials Wrapping
+		Tooltip: ""
+	}
+}
+
+FeatureList: {
+	DisplayName: Feature List
+
+	scrollableTooltip: {
+		Label: scrollable Tooltip
+		Tooltip: ""
+	}
+}
+
+ScrollableTooltip: {
+	Tooltip: ""
+
+	maximumHeight: {
+		Label: maximum Height
+		Tooltip: ""
+	}
+}
+
+Improvements: {
+	DisplayName: Improvements
+
+	moreMaterials: {
+		Label: more Materials
+		Tooltip: ""
+	}
+
+	craftOnRecipeList: {
+		Label: craft On Recipe List
+		Tooltip: ""
+	}
+
+	betterRecipeList: {
+		Label: better Recipe List
+		Tooltip: ""
+	}
+}
+
+EquipmentMaterials: {
+	Tooltip: ""
+
+	allLoadouts: {
+		Label: all Loadouts
+		Tooltip: ""
+	}
+}
+
+CraftOnRecipeList: {
+	Tooltip: ""
+
+	focusHovered: {
+		Label: focus Hovered
+		Tooltip: ""
+	}
+}
+
+VanillaFixes: {
+	DisplayName: Vanilla Fixes
+
+	craftWhenHolding: {
+		Label: craft When Holding
+		Tooltip: ""
+	}
+
+	ammoPickup: {
+		Label: ammo Pickup
+		Tooltip: ""
+	}
+
+	consistantScrollDirection: {
+		Label: consistant Scroll Direction
+		Tooltip: ""
+	}
+
+	materialsWrapping: {
+		Label: materials Wrapping
+		Tooltip: ""
+	}
+}
+
+ConsistantScrollDirection: {
+	Tooltip: ""
+
+	recipesUnpaused: {
+		Label: recipes Unpaused
+		Tooltip: ""
+	}
+
+	recipesPaused: {
+		Label: recipes Paused
+		Tooltip: ""
+	}
+
+	accessories: {
+		Label: accessories
+		Tooltip: ""
+	}
+}
+
+BetterRecipeList: {
+	Tooltip: ""
+
+	craftOnRecipeList: {
+		Label: craft On Recipe List
+		Tooltip: ""
+	}
+
+	refocusButton: {
+		Label: refocus Button
+		Tooltip: ""
+	}
+
+	noRecStartOffset: {
+		Label: no Rec Start Offset
+		Tooltip: ""
+	}
+
+	noRecListClose: {
+		Label: no Rec List Close
+		Tooltip: ""
+	}
+
+	rememberListPosition: {
+		Label: remember List Position
+		Tooltip: ""
+	}
+}

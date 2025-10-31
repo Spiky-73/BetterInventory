@@ -97,7 +97,7 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public void DisplayMagicStorageStackWarning() {
-        if (!Configs.RecipeTooltip.Enabled || !Configs.AvailableMaterials.Enabled || !MagicStorageIntegration.StackingFix) return;
+        if (!Configs.VisualChanges.RecipeTooltip || !Configs.VisualChanges.AvailableMaterialsCount || !MagicStorageIntegration.StackingFix) return;
         InGameNotificationsTracker.AddNotification(new InGameNotification(Mod, new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.MagicStorageStackWarning"), Colors.RarityAmber)));
     }
 

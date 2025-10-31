@@ -11,13 +11,12 @@ using Terraria.ModLoader;
 using Terraria.UI;
 using Terraria.UI.Chat;
 
-namespace BetterInventory.ItemActions;
+namespace BetterInventory.VisualChanges;
 
 public class RecipeTooltipItem : GlobalItem {
 
     public override void Load() {
         On_ItemTagHandler.ItemSnippet.ctor += HookItemGroupName;
-
         On_Recipe.ClearAvailableRecipes += HookClearAvailableRecipes;
         On_Recipe.CollectGuideRecipes += HookCollectGuideRecipes;
     }
@@ -33,7 +32,7 @@ public class RecipeTooltipItem : GlobalItem {
     }
 
     private void HookItemGroupName(On_ItemTagHandler.ItemSnippet.orig_ctor orig, TextSnippet self, Item item) {
-        if(Configs.RecipeTooltip.Enabled && HoveredRecipe is not null) {
+        if(Configs.VisualChanges.RecipeTooltip && HoveredRecipe is not null) {
             item.tooltipContext = ItemSlot.Context.CraftingMaterial;
             Guid guid = item.UniqueId();
             if (HoveredRecipe.requiredItem.Exists(i => i.UniqueId() == guid) && HoveredRecipe.ProcessGroupsForText(item.type, out var text)) {
@@ -45,7 +44,7 @@ public class RecipeTooltipItem : GlobalItem {
 
     public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
         HoveredRecipe = null;
-        if (!Configs.RecipeTooltip.Enabled || !ShouldDisplayRequiredItems(item, out HoveredRecipe)) return;
+        if (!Configs.VisualChanges.RecipeTooltip || !ShouldDisplayRequiredItems(item, out HoveredRecipe)) return;
         int index = tooltips.FindIndex(l => l.Name == nameof(TooltipLineID.ItemName)) + 1;
         tooltips.InsertRange(index, GetRecipeLines(HoveredRecipe));
     }
@@ -81,7 +80,7 @@ public class RecipeTooltipItem : GlobalItem {
                 objectsText = objects.Count == 0 ? Lang.inter[23].Value : string.Join(", ", objects);
             }
 
-            if (!Configs.RecipeTooltip.Value.objectsLine) _requiredItemsTooltips[0].Text += $" @ {objectsText}";
+            if (!Configs.RecipeTooltip.Instance.objectsLine) _requiredItemsTooltips[0].Text += $" @ {objectsText}";
             else _requiredItemsTooltips.Add(new(BetterInventory.Instance, "RequiredObjects", $"@ {objectsText}"));
         }
         return _requiredItemsTooltips;

@@ -37,7 +37,7 @@ public sealed class AmmoPickup : ILoadable {
         // <occupied slot>
         // <hotbar>
         cursor.GotoNext(i => i.SaferMatchCall(Reflection.Player.GetItem_FillEmptyInventorySlot));
-        cursor.GotoPrev(i => i.MatchLdfld(Reflection.Item.favorited));
+        cursor.GotoNext(i => i.MatchLdfld(Reflection.Item.favorited));
         cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdarg2());
 
         // ++<ammo pickup>

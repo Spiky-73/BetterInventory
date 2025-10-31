@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using BetterInventory.Crafting;
+using BetterInventory.Improvements;
 using BetterInventory.ItemSearch.BetterGuide;
 using Terraria;
 using Terraria.ModLoader;
@@ -64,7 +65,7 @@ public sealed class DisplayedRecipes : ModSystem {
 
     private void HookNoRefocus(On_Recipe.orig_TryRefocusingRecipe orig, int oldRecipe) {
         if (!Enabled || Main.availableRecipe != availableRecipes) {
-            FixedUI.HookTryRefocusingList(orig, oldRecipe);
+            BetterRecipeGrid.HookTryRefocusingList(orig, oldRecipe);
         }
     }
 
