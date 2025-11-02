@@ -12,6 +12,7 @@ using System;
 namespace BetterInventory.Reflection;
 
 public static class Main {
+    public static readonly StaticField<int> netMode = new(typeof(TMain), nameof(TMain.netMode));
     public static readonly StaticField<int[]> availableRecipe = new(typeof(TMain), nameof(TMain.availableRecipe));
     public static readonly StaticField<int> numAvailableRecipes = new(typeof(TMain), nameof(TMain.numAvailableRecipes));
     public static readonly StaticField<int> recStart = new(typeof(TMain), nameof(TMain.recStart));

@@ -30,6 +30,12 @@ public sealed class SmartPickup : ModSystem {
 
         On_ChestUI.LootAll += HookQuickStackLootAll;
         On_ChestUI.QuickStack += HookNoQuickStackToSameChest;
+
+        IL_Player.QuickStackAllChests += static il => {
+            if (!il.ApplyTo(IlQuickStackMultiplayer, Configs.QuickStackPickup.Value.chests)) Configs.UnloadedInventoryManagement.Value.pickupQuickStackChestsMulti = false;
+        };
+        On_Player.GetItem_FillEmptyInventorySlot += HookQuickStackMultiplayerFix;
+        On_Player.GetItem_FillEmptyInventorySlot_VoidBag += HookQuickStackMultiplayerFixVoidSlot;
     }
 
     private static void ILGetItem(ILContext il) {
@@ -173,7 +179,7 @@ public sealed class SmartPickup : ModSystem {
         item = player.GetModPlayer<PreviousSlotPlayer>().PickupItemToPreviousSlot(
             item,
             GetItemSettings.InventoryEntityToPlayerInventorySettings,
-            [.. armorInventories, ..vanityInventories]
+            [.. armorInventories, .. vanityInventories]
         );
         return orig(item, out success);
     }
@@ -192,4 +198,36 @@ public sealed class SmartPickup : ModSystem {
 
     private static bool IsGetItemWorld(Player player, GetItemSettings settings, Item item) => !settings.NoText || item == Main.mouseItem || item == player.HeldItem;
 
+    internal static bool quickStackNoChests;
+    private static void IlQuickStackMultiplayer(ILContext context) {
+        ILCursor cursor = new(context);
+
+        cursor.GotoNext(MoveType.AfterLabel, i => i.MatchLdsfld(Reflection.Main.netMode));
+
+        cursor.EmitDelegate(() => quickStackNoChests);
+        ILLabel label = cursor.DefineLabel();
+        cursor.EmitBrfalse(label);
+        cursor.EmitRet();
+        cursor.MarkLabel(label);
+    }
+
+    private bool HookQuickStackMultiplayerFix(On_Player.orig_GetItem_FillEmptyInventorySlot orig, Player self, int plr, Item newItem, GetItemSettings settings, Item returnItem, int i) {
+        bool res = orig(self, plr, newItem, settings, returnItem, i);
+        if (Main.netMode == NetmodeID.MultiplayerClient && Configs.SmartPickup.QuickStack && Configs.QuickStackPickup.Chest && res) {
+            NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, plr, PlayerItemSlotID.Inventory0 + i, self.inventory[i].prefix);
+            NetMessage.SendData(MessageID.QuickStackChests, -1, -1, null, PlayerItemSlotID.Inventory0 + i);
+            self.inventoryChestStack[i] = true;
+        }
+        return res;
+    }
+
+    private bool HookQuickStackMultiplayerFixVoidSlot(On_Player.orig_GetItem_FillEmptyInventorySlot_VoidBag orig, Player self, int plr, Item[] inv, Item newItem, GetItemSettings settings, Item returnItem, int i) {
+        bool res = orig(self, plr, inv, newItem, settings, returnItem, i);
+        if (Main.netMode == NetmodeID.MultiplayerClient && Configs.SmartPickup.QuickStack && Configs.QuickStackPickup.Chest && res) {
+            NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, plr, PlayerItemSlotID.Bank4_0 + i, self.bank4.item[i].prefix);
+            NetMessage.SendData(MessageID.QuickStackChests, -1, -1, null, PlayerItemSlotID.Bank4_0 + i);
+            self.disableVoidBag = i;
+        }
+        return res;
+    }
 }

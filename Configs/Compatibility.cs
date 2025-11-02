@@ -57,6 +57,7 @@ public sealed class Compatibility : ModConfig {
         SmartPickup.Value.hotbarLast = false;
         SmartPickup.Value.fixSlot = false;
         SmartPickup.Value.fixAmmo = false;
+        QuickStackPickup.Value.chests = false;
         PreviousDisplay.Value.fakeItem.Key = false;
         PreviousDisplay.Value.icon.Key = false;
         QuickMove.Value.displayedHotkeys.Key = HotkeyDisplayMode.None;
@@ -118,6 +119,7 @@ public sealed class UnloadedInventoryManagement {
     public bool baits;
     public bool pickupOverrideSlot;
     public bool pickupDedicatedSlot;
+    public bool pickupQuickStackChestsMulti;
     public bool hotbarLast;
     public bool fixSlot;
     public bool displayFakeItem;
@@ -132,7 +134,7 @@ public sealed class UnloadedInventoryManagement {
     public bool quickStackComplete;
     public bool quickStackLimitedBanks;
     public bool inventorySlotsTexture;
-    
+
     public static UnloadedInventoryManagement Value => Compatibility.Instance.unloadedInventoryManagement;
 }
 

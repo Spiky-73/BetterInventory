@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using MonoMod.Cil;
 using SpikysLib.Constants;
@@ -69,6 +68,6 @@ public sealed class BetterQuickStack : ILoadable {
         cursor.FindPrevLoc(out _, out int emptySlots, i => i.Previous.MatchNewobj<List<int>>(), 8);
 
         cursor.GotoNext(MoveType.After, i => i.MatchCallvirt(Reflection.List<int>.Count.GetMethod) && i.Previous.MatchLdloc(emptySlots));
-        cursor.EmitDelegate((int count) => Configs.BetterQuickStack.LimitedBanksQuickStack && Main.LocalPlayer.chest < 0 ? 0 : count);
+        cursor.EmitDelegate((int count) => Configs.BetterQuickStack.LimitedBanksQuickStack && Main.LocalPlayer.chest < -1 ? 0 : count);
     }
 }

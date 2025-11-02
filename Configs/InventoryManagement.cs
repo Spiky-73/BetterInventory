@@ -8,6 +8,8 @@ using SpikysLib.Configs.UI;
 using System.Collections.Generic;
 using BetterInventory.InventoryManagement;
 using Newtonsoft.Json;
+using Terraria.ID;
+using Terraria;
 
 namespace BetterInventory.Configs;
 
@@ -129,6 +131,7 @@ public sealed class QuickStackPickup {
     [DefaultValue(true)] public bool voidBag = true;
 
     public static QuickStackPickup Value => SmartPickup.Value.quickStack.Value;
+    public static bool Chest => Value.chests && (Main.netMode != NetmodeID.MultiplayerClient || !UnloadedInventoryManagement.Value.pickupQuickStackChestsMulti);
 }
 
 public sealed class PreviousDisplay {

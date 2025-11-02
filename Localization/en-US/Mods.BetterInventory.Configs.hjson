@@ -421,17 +421,42 @@ SmartPickup: {
 
 ItemPickupLevel: {
 	Tooltip: ""
-	None.Label: Off
-	ImportantItems.Label: Favorited and Equiped Items
-	AllItems.Label: All Items
+
+	None: {
+		Label: Off
+		Tooltip: ""
+	}
+
+	ImportantItems: {
+		Label: Favorited and Equiped Items
+		Tooltip: ""
+	}
+
+	AllItems: {
+		Label: All Items
+		Tooltip: ""
+	}
 }
 
 AutoEquipLevel: {
 	Tooltip: ""
-	None.Label: Off
+
+	None: {
+		Label: Off
+		Tooltip: ""
+	}
+
 	Preferred.Label: Preferred Slots
-	AnySlot.Label: Any Slot
-	PreferredSlots.Label: Preferred Slots
+
+	AnySlot: {
+		Label: Any Slot
+		Tooltip: ""
+	}
+
+	PreferredSlots: {
+		Label: Preferred Slots
+		Tooltip: ""
+	}
 }
 
 AutoEquip: {
@@ -503,9 +528,21 @@ PreviousSlot: {
 
 MovePolicy: {
 	Tooltip: ""
-	Never.Label: Never
-	NotFavorited.Label: Not If Favorited
-	Always.Label: Always
+
+	Never: {
+		Label: Never
+		Tooltip: ""
+	}
+
+	NotFavorited: {
+		Label: Not If Favorited
+		Tooltip: ""
+	}
+
+	Always: {
+		Label: Always
+		Tooltip: ""
+	}
 }
 
 Materials: {
@@ -592,7 +629,11 @@ QuickStackPickup: {
 
 	chests: {
 		Label: Chests
-		Tooltip: Quick stack items to nearby chests
+		Tooltip:
+			'''
+			Quick stack items to nearby chests
+			In multiplayer, this will be executed after any other smart pickup features
+			'''
 	}
 }
 
@@ -667,16 +708,40 @@ QuickMove: {
 
 HotkeyMode: {
 	Tooltip: ""
-	Hotbar.Label: Hotbar
-	FromEnd.Label: From End
-	Reversed.Label: Reversed
+
+	Hotbar: {
+		Label: Hotbar
+		Tooltip: ""
+	}
+
+	FromEnd: {
+		Label: From End
+		Tooltip: ""
+	}
+
+	Reversed: {
+		Label: Reversed
+		Tooltip: ""
+	}
 }
 
 HotkeyDisplayMode: {
 	Tooltip: ""
-	None.Label: Off
-	Next.Label: Next
-	All.Label: All
+
+	None: {
+		Label: Off
+		Tooltip: ""
+	}
+
+	Next: {
+		Label: Next
+		Tooltip: ""
+	}
+
+	All: {
+		Label: All
+		Tooltip: ""
+	}
 }
 
 DisplayedHotkeys: {
@@ -934,10 +999,26 @@ ItemSlotAmmo: {
 
 Corner: {
 	Tooltip: ""
-	TopLeft.Label: Top Left
-	TopRight.Label: Top Right
-	BottomLeft.Label: Bottom Left
-	BottomRight.Label: Bottom Right
+
+	TopLeft: {
+		Label: Top Left
+		Tooltip: ""
+	}
+
+	TopRight: {
+		Label: Top Right
+		Tooltip: ""
+	}
+
+	BottomLeft: {
+		Label: Bottom Left
+		Tooltip: ""
+	}
+
+	BottomRight: {
+		Label: Bottom Right
+		Tooltip: ""
+	}
 }
 
 ItemSearch: {
@@ -963,10 +1044,26 @@ ItemSearch: {
 
 UnknownDisplay: {
 	Tooltip: ""
-	Vanilla.Label: Off
-	Hidden.Label: Hidden
-	Unknown.Label: "{$Mods.BetterInventory.UI.Unknown}"
-	Known.Label: Known
+
+	Vanilla: {
+		Label: Off
+		Tooltip: ""
+	}
+
+	Hidden: {
+		Label: Hidden
+		Tooltip: ""
+	}
+
+	Unknown: {
+		Label: "{$Mods.BetterInventory.UI.Unknown}"
+		Tooltip: ""
+	}
+
+	Known: {
+		Label: Known
+		Tooltip: ""
+	}
 }
 
 BetterGuide: {
@@ -1052,10 +1149,26 @@ FavoritedRecipes: {
 
 UnfavoriteOnCraft: {
 	Tooltip: ""
-	None.Label: Off
-	Favorited.Label: Favorited
-	Blacklisted.Label: Blacklisted
-	Both.Label: Favorited or Blacklisted
+
+	None: {
+		Label: Off
+		Tooltip: ""
+	}
+
+	Favorited: {
+		Label: Favorited
+		Tooltip: ""
+	}
+
+	Blacklisted: {
+		Label: Blacklisted
+		Tooltip: ""
+	}
+
+	Both: {
+		Label: Favorited or Blacklisted
+		Tooltip: ""
+	}
 }
 
 BetterBestiary: {
@@ -1095,11 +1208,31 @@ BetterBestiary: {
 
 UnlockLevel: {
 	Tooltip: ""
-	Vanilla.Label: Off
-	Name.Label: Name
-	Stats.Label: Detailed Stats
-	Drops.Label: Drops
-	DropRates.Label: Drop Rates
+
+	Vanilla: {
+		Label: Off
+		Tooltip: ""
+	}
+
+	Name: {
+		Label: Name
+		Tooltip: ""
+	}
+
+	Stats: {
+		Label: Detailed Stats
+		Tooltip: ""
+	}
+
+	Drops: {
+		Label: Drops
+		Tooltip: ""
+	}
+
+	DropRates: {
+		Label: Drop Rates
+		Tooltip: ""
+	}
 }
 
 QuickSearch: {
@@ -1145,10 +1278,26 @@ QuickSearch: {
 
 SearchAction: {
 	Tooltip: ""
-	None.Label: Off
-	Search.Label: Search
-	Toggle.Label: Toggle
-	Both.Label: Search and Toggle
+
+	None: {
+		Label: Off
+		Tooltip: ""
+	}
+
+	Search: {
+		Label: Search
+		Tooltip: ""
+	}
+
+	Toggle: {
+		Label: Toggle
+		Tooltip: ""
+	}
+
+	Both: {
+		Label: Search and Toggle
+		Tooltip: ""
+	}
 }
 
 IndividualKeybinds: {
@@ -1176,9 +1325,21 @@ SharedKeybind: {
 
 RightClickAction: {
 	Tooltip: ""
-	None.Label: Off
-	Clear.Label: Clear
-	SearchPrevious.Label: Search Previous
+
+	None: {
+		Label: Off
+		Tooltip: ""
+	}
+
+	Clear: {
+		Label: Clear
+		Tooltip: ""
+	}
+
+	SearchPrevious: {
+		Label: Search Previous
+		Tooltip: ""
+	}
 }
 
 Compatibility: {
@@ -1445,6 +1606,11 @@ UnloadedInventoryManagement: {
 	inventorySlotsTexture: {
 		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.inventorySlotsTexture.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	pickupQuickStackChestsMulti: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ {$Mods.BetterInventory.Configs.SmartPickup.quickStack.Label} @ {$Mods.BetterInventory.Configs.QuickStackPickup.chest.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded} in Multiplayer"
 	}
 }
 

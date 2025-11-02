@@ -447,6 +447,7 @@ public sealed class ClickOverrides : ModPlayer {
 
     private static void HookDepositClick(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
         orig(inv, context, slot);
+        if (ItemSlot.PickItemMovementAction(inv, context, slot, Main.mouseItem) == -1) return;
         if (!Configs.InventoryManagement.DepositClick) return;
 
         Player player = Main.LocalPlayer;
@@ -460,10 +461,7 @@ public sealed class ClickOverrides : ModPlayer {
         if (Main.stackSplit > 1) return;
 
         Item testItem = Main.mouseItem.IsAir ? inv[slot] : Main.mouseItem;
-        if (testItem.maxStack <= 1 && testItem.stack == 1
-        && (context == ItemSlot.Context.InventoryItem || context == ItemSlot.Context.ChestItem || context == ItemSlot.Context.BankItem || context == ItemSlot.Context.VoidItem)) {
-            return;
-        }
+        if (testItem.maxStack <= 1 && testItem.stack == 1) return;
 
         // Pickup all items if the mouse is empty
         if (Main.mouseMiddleRelease && Main.mouseItem.IsAir && context != ItemSlot.Context.CreativeInfinite && context != ItemSlot.Context.ShopItem) {
