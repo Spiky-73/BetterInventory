@@ -1,5 +1,9 @@
 # Better Inventory changelog
 
+## v0.9.1.3
+- Fixed Deposit Click not respecting item slots contraints
+- Fixed Quick Stack on Pickup causing item duplication in Multiplayer
+
 ## v0.9.1.2
 - Fixed Return to Previous Slot not working as expected when dropping favorited items
 - Fixed Void Bag First not handling coins properly

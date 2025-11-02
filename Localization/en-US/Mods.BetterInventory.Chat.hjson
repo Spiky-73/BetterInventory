@@ -11,15 +11,11 @@ ModName: Better Inventory
 SPIC.ModName: Spy's Infinite Consumables
 Homepage: homepage
 Workshop: Steam Workshop page
-Summary: ""
+Summary: Quick Stack on Pickup should no longer cause item duplication on Multiplayer
 Details: ""
 Changelog:
 	'''
-	- Fixed Return to Previous Slot not working as expected when dropping favorited items
-	- Fixed Void Bag First not handling coins properly
-	- Fixed RecipeUI consuming keyboard input even when not visible
-	- Fixed Quick Stack hotkey not refreshing recipes
-	- Fixed Quick Stack on Pickup not handling multiplayer properly
-	- Fixed Quick Stack on Pickup not working properly when a chest was opened
+	- Fixed Deposit Click not respecting item slots contraints
+	- Fixed Quick Stack on Pickup causing item duplication in Multiplayer
 	'''
-Version: 0.9.1.2
+Version: 0.9.1.3
