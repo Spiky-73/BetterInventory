@@ -18,7 +18,6 @@ public sealed class Compatibility : ModConfig {
     [JsonIgnore, ShowDespiteJsonIgnore, NullAllowed] public Empty? DisableAll { get => null; set => DisableAllILs(); }
 
 
-    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedCrafting unloadedCrafting {get; set;} = new();
     [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedInventoryManagement unloadedInventoryManagement {get; set;} = new();
     [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedItemActions unloadedItemActions { get; set;} = new();
     [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedItemSearch unloadedItemSearch {get; set;} = new();
@@ -26,6 +25,7 @@ public sealed class Compatibility : ModConfig {
     [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedImprovements unloadedImprovements {get; set;} = new();
     [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedVisualChanges unloadedVisualChanges {get; set;} = new();
     [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedVanillaFixes unloadedVanillaFixes {get; set;} = new();
+    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedFeatures unloadedFeatures {get; set;} = new();
     
     [DefaultValue(0), JsonProperty] internal int failedILs = 0;
 
@@ -33,11 +33,6 @@ public sealed class Compatibility : ModConfig {
     public static Compatibility Instance = null!;
 
     private static void DisableAllILs() {
-        Crafting.Instance.recipeFilters.Key = false;
-        Crafting.Instance.recipeSearchBar.Key = false;
-        Crafting.Instance.recipeSort = false;
-        Crafting.Instance.Save();
-
         SmartConsumption.Value.materials = false;
         SmartConsumption.Value.baits = false;
         SmartPickup.Value.refillMouse = false;
@@ -80,6 +75,7 @@ public sealed class Compatibility : ModConfig {
         UnloadedImprovements.DisableAllILs();
         UnloadedVisualChanges.DisableAllILs();
         UnloadedVanillaFixes.DisableAllILs();
+        UnloadedFeatures.DisableAllILs();
     }
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
@@ -94,11 +90,10 @@ public sealed class UnloadedVanillaFixes {
 
     public static void DisableAllILs() {
         VanillaFixes.Instance.ammoPickup = false;
-        ConsistantScrollDirection.Instance.accessories = false;
-        ConsistantScrollDirection.Instance.recipesPaused = false;
-        ConsistantScrollDirection.Instance.recipesUnpaused = false;
+        VanillaFixes.Instance.consistantScrollDirection.Value.accessories = false;
+        VanillaFixes.Instance.consistantScrollDirection.Value.recipesPaused = false;
+        VanillaFixes.Instance.consistantScrollDirection.Value.recipesUnpaused = false;
         VanillaFixes.Instance.materialsWrapping = false;
-
         VanillaFixes.Instance.SaveChanges();
     }
 
@@ -114,13 +109,12 @@ public sealed class UnloadedImprovements {
     public bool betterRecipeList_fastScroll;
 
     public static void DisableAllILs() {
-        BetterRecipeGrid.Instance.craftOnRecipeGrid.Key = false;
-        BetterRecipeGrid.Instance.refocusButton = false;
-        BetterRecipeGrid.Instance.noRecStartOffset = false;
-        BetterRecipeGrid.Instance.noRecListClose = false;
-        BetterRecipeGrid.Instance.pageScroll = false;
-        BetterRecipeList.Instance.fastScroll.Key = false;
-
+        Improvements.Instance.betterRecipeGrid.Value.craftOnRecipeGrid.Key = false;
+        Improvements.Instance.betterRecipeGrid.Value.refocusButton = false;
+        Improvements.Instance.betterRecipeGrid.Value.noRecStartOffset = false;
+        Improvements.Instance.betterRecipeGrid.Value.noRecListClose = false;
+        Improvements.Instance.betterRecipeGrid.Value.pageScroll = false;
+        Improvements.Instance.betterRecipeList.Value.fastScroll.Key = false;
         Improvements.Instance.SaveChanges();
     }
 
@@ -132,33 +126,24 @@ public sealed class UnloadedVisualChanges {
     public bool recipeCount;
 
     public static void DisableAllILs() {
-        AvailableMaterialsCount.Instance.itemSlot = false;
+        VisualChanges.Instance.availableMaterialsCount.Value.itemSlot = false;
         VisualChanges.Instance.recipeCount = false;
-
         VisualChanges.Instance.SaveChanges();
     }
 
     public static UnloadedVisualChanges Instance => Compatibility.Instance.unloadedVisualChanges;
 }
 
-public sealed class UnloadedCrafting {
-    public bool fastScroll;
-    public bool scrollButtons;
-    public bool recipeCount;
-    public bool focusButton;
-    public bool noRecStartOffset;
-    public bool noRecListClose;
-    public bool recipeFilters;
-    public bool recipeSearchBar;
-    public bool recipeSort;
+public sealed class UnloadedFeatures {
+    public bool recipeFiltering;
 
-    [JsonIgnore] public bool RecipeListUI { set { recipeCount = focusButton = value; } }
-    [JsonIgnore] public bool RecipeUI { set { recipeFilters = recipeSearchBar = recipeSort = value; } }
+    public static void DisableAllILs() {
+        Features.Instance.recipeFiltering.Key = false;
+        Features.Instance.SaveChanges();
+    }
 
-    public static UnloadedCrafting Value => Compatibility.Instance.unloadedCrafting;
+    public static UnloadedFeatures Instance => Compatibility.Instance.unloadedFeatures;
 }
-
-
 
 public sealed class UnloadedInventoryManagement {
     public bool materials;

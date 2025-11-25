@@ -421,17 +421,42 @@ SmartPickup: {
 
 ItemPickupLevel: {
 	Tooltip: ""
-	None.Label: Off
-	ImportantItems.Label: Favorited and Equiped Items
-	AllItems.Label: All Items
+
+	None: {
+		Label: Off
+		Tooltip: ""
+	}
+
+	ImportantItems: {
+		Label: Favorited and Equiped Items
+		Tooltip: ""
+	}
+
+	AllItems: {
+		Label: All Items
+		Tooltip: ""
+	}
 }
 
 AutoEquipLevel: {
 	Tooltip: ""
-	None.Label: Off
+
+	None: {
+		Label: Off
+		Tooltip: ""
+	}
+
 	Preferred.Label: Preferred Slots
-	AnySlot.Label: Any Slot
-	PreferredSlots.Label: Preferred Slots
+
+	AnySlot: {
+		Label: Any Slot
+		Tooltip: ""
+	}
+
+	PreferredSlots: {
+		Label: Preferred Slots
+		Tooltip: ""
+	}
 }
 
 AutoEquip: {
@@ -503,9 +528,21 @@ PreviousSlot: {
 
 MovePolicy: {
 	Tooltip: ""
-	Never.Label: Never
-	NotFavorited.Label: Not If Favorited
-	Always.Label: Always
+
+	Never: {
+		Label: Never
+		Tooltip: ""
+	}
+
+	NotFavorited: {
+		Label: Not If Favorited
+		Tooltip: ""
+	}
+
+	Always: {
+		Label: Always
+		Tooltip: ""
+	}
 }
 
 Materials: {
@@ -667,16 +704,40 @@ QuickMove: {
 
 HotkeyMode: {
 	Tooltip: ""
-	Hotbar.Label: Hotbar
-	FromEnd.Label: From End
-	Reversed.Label: Reversed
+
+	Hotbar: {
+		Label: Hotbar
+		Tooltip: ""
+	}
+
+	FromEnd: {
+		Label: From End
+		Tooltip: ""
+	}
+
+	Reversed: {
+		Label: Reversed
+		Tooltip: ""
+	}
 }
 
 HotkeyDisplayMode: {
 	Tooltip: ""
-	None.Label: Off
-	Next.Label: Next
-	All.Label: All
+
+	None: {
+		Label: Off
+		Tooltip: ""
+	}
+
+	Next: {
+		Label: Next
+		Tooltip: ""
+	}
+
+	All: {
+		Label: All
+		Tooltip: ""
+	}
 }
 
 DisplayedHotkeys: {
@@ -934,10 +995,26 @@ ItemSlotAmmo: {
 
 Corner: {
 	Tooltip: ""
-	TopLeft.Label: Top Left
-	TopRight.Label: Top Right
-	BottomLeft.Label: Bottom Left
-	BottomRight.Label: Bottom Right
+
+	TopLeft: {
+		Label: Top Left
+		Tooltip: ""
+	}
+
+	TopRight: {
+		Label: Top Right
+		Tooltip: ""
+	}
+
+	BottomLeft: {
+		Label: Bottom Left
+		Tooltip: ""
+	}
+
+	BottomRight: {
+		Label: Bottom Right
+		Tooltip: ""
+	}
 }
 
 ItemSearch: {
@@ -963,10 +1040,26 @@ ItemSearch: {
 
 UnknownDisplay: {
 	Tooltip: ""
-	Vanilla.Label: Off
-	Hidden.Label: Hidden
-	Unknown.Label: "{$Mods.BetterInventory.UI.Unknown}"
-	Known.Label: Known
+
+	Vanilla: {
+		Label: Off
+		Tooltip: ""
+	}
+
+	Hidden: {
+		Label: Hidden
+		Tooltip: ""
+	}
+
+	Unknown: {
+		Label: "{$Mods.BetterInventory.UI.Unknown}"
+		Tooltip: ""
+	}
+
+	Known: {
+		Label: Known
+		Tooltip: ""
+	}
 }
 
 BetterGuide: {
@@ -1052,10 +1145,26 @@ FavoritedRecipes: {
 
 UnfavoriteOnCraft: {
 	Tooltip: ""
-	None.Label: Off
-	Favorited.Label: Favorited
-	Blacklisted.Label: Blacklisted
-	Both.Label: Favorited or Blacklisted
+
+	None: {
+		Label: Off
+		Tooltip: ""
+	}
+
+	Favorited: {
+		Label: Favorited
+		Tooltip: ""
+	}
+
+	Blacklisted: {
+		Label: Blacklisted
+		Tooltip: ""
+	}
+
+	Both: {
+		Label: Favorited or Blacklisted
+		Tooltip: ""
+	}
 }
 
 BetterBestiary: {
@@ -1095,11 +1204,31 @@ BetterBestiary: {
 
 UnlockLevel: {
 	Tooltip: ""
-	Vanilla.Label: Off
-	Name.Label: Name
-	Stats.Label: Detailed Stats
-	Drops.Label: Drops
-	DropRates.Label: Drop Rates
+
+	Vanilla: {
+		Label: Off
+		Tooltip: ""
+	}
+
+	Name: {
+		Label: Name
+		Tooltip: ""
+	}
+
+	Stats: {
+		Label: Detailed Stats
+		Tooltip: ""
+	}
+
+	Drops: {
+		Label: Drops
+		Tooltip: ""
+	}
+
+	DropRates: {
+		Label: Drop Rates
+		Tooltip: ""
+	}
 }
 
 QuickSearch: {
@@ -1145,10 +1274,26 @@ QuickSearch: {
 
 SearchAction: {
 	Tooltip: ""
-	None.Label: Off
-	Search.Label: Search
-	Toggle.Label: Toggle
-	Both.Label: Search and Toggle
+
+	None: {
+		Label: Off
+		Tooltip: ""
+	}
+
+	Search: {
+		Label: Search
+		Tooltip: ""
+	}
+
+	Toggle: {
+		Label: Toggle
+		Tooltip: ""
+	}
+
+	Both: {
+		Label: Search and Toggle
+		Tooltip: ""
+	}
 }
 
 IndividualKeybinds: {
@@ -1176,9 +1321,21 @@ SharedKeybind: {
 
 RightClickAction: {
 	Tooltip: ""
-	None.Label: Off
-	Clear.Label: Clear
-	SearchPrevious.Label: Search Previous
+
+	None: {
+		Label: Off
+		Tooltip: ""
+	}
+
+	Clear: {
+		Label: Clear
+		Tooltip: ""
+	}
+
+	SearchPrevious: {
+		Label: Search Previous
+		Tooltip: ""
+	}
 }
 
 Compatibility: {
@@ -1276,6 +1433,16 @@ Compatibility: {
 
 	unloadedVanillaFixes: {
 		Label: unloaded Vanilla Fixes
+		Tooltip: ""
+	}
+
+	unloadedVisualChanges: {
+		Label: unloaded Visual Changes
+		Tooltip: ""
+	}
+
+	unloadedFeatures: {
+		Label: unloaded Features
 		Tooltip: ""
 	}
 }
@@ -1585,6 +1752,36 @@ UnloadedImprovements: {
 		Label: better Recipe List_remember List Position
 		Tooltip: ""
 	}
+
+	betterRecipeGrid_craftOnRecipeGrid: {
+		Label: better Recipe Grid_craft On Recipe Grid
+		Tooltip: ""
+	}
+
+	betterRecipeGrid_refocusButton: {
+		Label: better Recipe Grid_refocus Button
+		Tooltip: ""
+	}
+
+	betterRecipeGrid_noRecStartOffset: {
+		Label: better Recipe Grid_no Rec Start Offset
+		Tooltip: ""
+	}
+
+	betterRecipeGrid_noRecListClose: {
+		Label: better Recipe Grid_no Rec List Close
+		Tooltip: ""
+	}
+
+	betterRecipeGrid_pageScroll: {
+		Label: better Recipe Grid_page Scroll
+		Tooltip: ""
+	}
+
+	betterRecipeList_fastScroll: {
+		Label: better Recipe List_fast Scroll
+		Tooltip: ""
+	}
 }
 
 UnloadedVanillaFixes: {
@@ -1649,6 +1846,16 @@ Improvements: {
 
 	betterRecipeList: {
 		Label: better Recipe List
+		Tooltip: ""
+	}
+
+	betterRecipeGrid: {
+		Label: better Recipe Grid
+		Tooltip: ""
+	}
+
+	scrollableTooltip: {
+		Label: scrollable Tooltip
 		Tooltip: ""
 	}
 }
@@ -1739,6 +1946,148 @@ BetterRecipeList: {
 
 	rememberListPosition: {
 		Label: remember List Position
+		Tooltip: ""
+	}
+
+	craftWhenHolding: {
+		Label: craft When Holding
+		Tooltip: ""
+	}
+
+	fastScroll: {
+		Label: fast Scroll
+		Tooltip: ""
+	}
+}
+
+UnloadedVisualChanges: {
+	Tooltip: ""
+
+	availableMaterialsCount_itemSlot: {
+		Label: available Materials Count_item Slot
+		Tooltip: ""
+	}
+
+	recipeCount: {
+		Label: recipe Count
+		Tooltip: ""
+	}
+}
+
+UnloadedFeatures: {
+	Tooltip: ""
+
+	recipeFiltering: {
+		Label: recipe Filtering
+		Tooltip: ""
+	}
+}
+
+Features: {
+	DisplayName: Features
+
+	recipeFiltering: {
+		Label: recipe Filtering
+		Tooltip: ""
+	}
+}
+
+RecipeFiltering: {
+	Tooltip: ""
+
+	searchBar: {
+		Label: search Bar
+		Tooltip: ""
+	}
+
+	search: {
+		Label: search
+		Tooltip: ""
+	}
+
+	filters: {
+		Label: filters
+		Tooltip: ""
+	}
+
+	sort: {
+		Label: sort
+		Tooltip: ""
+	}
+}
+
+BetterRecipeGrid: {
+	Tooltip: ""
+
+	craftOnRecipeGrid: {
+		Label: craft On Recipe Grid
+		Tooltip: ""
+	}
+
+	refocusButton: {
+		Label: refocus Button
+		Tooltip: ""
+	}
+
+	noRecStartOffset: {
+		Label: no Rec Start Offset
+		Tooltip: ""
+	}
+
+	noRecListClose: {
+		Label: no Rec List Close
+		Tooltip: ""
+	}
+
+	rememberListPosition: {
+		Label: remember List Position
+		Tooltip: ""
+	}
+
+	pageScroll: {
+		Label: page Scroll
+		Tooltip: ""
+	}
+}
+
+CraftOnRecipeGrid: {
+	Tooltip: ""
+
+	focusHovered: {
+		Label: focus Hovered
+		Tooltip: ""
+	}
+}
+
+VisualChanges: {
+	DisplayName: Visual Changes
+
+	availableMaterialsCount: {
+		Label: available Materials Count
+		Tooltip: ""
+	}
+
+	recipeCount: {
+		Label: recipe Count
+		Tooltip: ""
+	}
+
+	recipeTooltip: {
+		Label: recipe Tooltip
+		Tooltip: ""
+	}
+}
+
+AvailableMaterialsCount: {
+	Tooltip: ""
+
+	tooltip: {
+		Label: tooltip
+		Tooltip: ""
+	}
+
+	itemSlot: {
+		Label: item Slot
 		Tooltip: ""
 	}
 }

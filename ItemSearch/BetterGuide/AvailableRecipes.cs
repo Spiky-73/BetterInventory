@@ -32,7 +32,9 @@ public sealed class AvailableRecipes : ModSystem {
         cursor.GotoNext(MoveType.AfterLabel, i => i.MatchCall(Reflection.Recipe.ClearAvailableRecipes));
         cursor.EmitDelegate(() => {
             s_guideRecipes = false;
-            if (Configs.RecipeSearchBar.Enabled && !string.IsNullOrEmpty(RecipeUI.SearchFilter.GetSearch())) s_guideRecipes = true;
+
+            // TODO config together with filters
+            // if (Configs.RecipeSearchBar.Enabled && !string.IsNullOrEmpty(Features.RecipeFiltering.RecipeFiltering.SearchFilter.GetSearch())) s_guideRecipes = true;
         });
 
         // if (<displayGuideRecipes>) {

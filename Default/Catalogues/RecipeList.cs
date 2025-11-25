@@ -235,7 +235,7 @@ public sealed class RecipeList : ModEntityCatalogue {
         };
     }
 
-    public static void HookSearchRecipe_Cancel(UISearchBar searchBar) {
+    internal static void HookSearchRecipe_Cancel(UISearchBar searchBar) {
         if (Instance.Enabled && Configs.QuickSearch.Value.rightClick == Configs.RightClickAction.SearchPrevious && searchBar.HasContents) _searchHistory.Add(Reflection.UISearchBar.actualContents.GetValue(searchBar));
     }
 

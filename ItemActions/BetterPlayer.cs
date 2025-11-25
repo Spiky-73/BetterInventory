@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using BetterInventory.ItemSearch;
-using BetterInventory.Crafting;
 using Terraria;
 using Terraria.GameInput;
 using Terraria.ModLoader;
@@ -197,10 +196,7 @@ public sealed class BetterPlayer : ModPlayer {
         if (tag.TryGet(GuideTilePlayer.GuideTileTag, out Item tile)) { // Compatibility version < v0.8
             Player.GetModPlayer<GuideTilePlayer>()._tempGuideTile = tile;
         }
-        
-        if (tag.TryGet("recipes", out RecipeFilters recipe)) { // Compatibility version < v0.8
-            Player.GetModPlayer<RecipeUIPlayer>().filters = recipe.filters;
-        }
+
         if (Configs.InventoryManagement.FavoriteInBanks && tag.TryGet(FavoritedInBanksTag, out FavoritedInBanks favorited)) favorited.Apply(Player);
     }
 
