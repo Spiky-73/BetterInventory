@@ -12,7 +12,6 @@ using Newtonsoft.Json;
 namespace BetterInventory.Configs;
 
 public sealed class InventoryManagement : ModConfig {
-    public Toggle<SmartConsumption> smartConsumption = new(true);
     public Toggle<SmartPickup> smartPickup = new(true);
     public Toggle<QuickMove> quickMove = new(true);
     public Toggle<CraftStack> craftStack = new(true);
@@ -41,25 +40,6 @@ public sealed class InventoryManagement : ModConfig {
     }
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
-}
-
-public sealed class SmartConsumption {
-    [DefaultValue(true)] public bool consumables = true;
-    [DefaultValue(true)] public bool ammo = true;
-    [DefaultValue(true)] public bool baits = true;
-    [DefaultValue(true)] public bool paints = true;
-    [DefaultValue(true)] public bool materials = true;
-    [DefaultValue(false)] public bool mouse = false;
-    [DefaultValue(false)] public bool self = false;
-
-    public static bool Enabled => InventoryManagement.Instance.smartConsumption;
-    public static bool Consumables => Enabled && Value.consumables;
-    public static bool Ammo => Enabled && Value.ammo;
-    public static bool Baits => Enabled && Value.baits && !UnloadedInventoryManagement.Value.baits;
-    public static bool Paints => Enabled && Value.paints;
-    public static bool Materials => Enabled && Value.materials && !UnloadedInventoryManagement.Value.materials;
-    public static AllowedItems AllowedItems => (Value.mouse ? AllowedItems.Mouse : AllowedItems.None) | (Value.self ? AllowedItems.Self : AllowedItems.None);
-    public static SmartConsumption Value => InventoryManagement.Instance.smartConsumption.Value;
 }
 
 public sealed class SmartPickup {

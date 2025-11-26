@@ -1,5 +1,5 @@
 using System.Linq;
-using BetterInventory.InventoryManagement;
+using BetterInventory.VisualChanges.ItemAmmo;
 using SpikysLib;
 using Terraria;
 using Terraria.ID;

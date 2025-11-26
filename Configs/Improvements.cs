@@ -10,12 +10,14 @@ public sealed class Improvements : ModConfig {
     public Toggle<BetterRecipeGrid> betterRecipeGrid = new(true);
     public Toggle<MoreMaterials> moreMaterials = new(true);
     public Toggle<ScrollableTooltip> scrollableTooltip = new(true);
+    public Toggle<SmartConsumption> smartConsumption = new(true);
 
     public static Improvements Instance = null!;
     public static bool BetterRecipeList => Instance.betterRecipeList;
     public static bool BetterRecipeGrid => Instance.betterRecipeGrid;
     public static bool MoreMaterials => Instance.moreMaterials;
     public static bool ScrollableTooltip => Instance.scrollableTooltip;
+    public static bool SmartConsumption => Instance.smartConsumption;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
 }
@@ -77,4 +79,21 @@ public sealed class ScrollableTooltip {
     [DefaultValue(1)] public float maximumHeight = 1;
 
     public static ScrollableTooltip Instance = Improvements.Instance.scrollableTooltip.Value;
+}
+
+public sealed class SmartConsumption {
+    [DefaultValue(true)] public bool consumables = true;
+    [DefaultValue(true)] public bool ammo = true;
+    [DefaultValue(true)] public bool baits = true;
+    [DefaultValue(true)] public bool paints = true;
+    [DefaultValue(true)] public bool materials = true;
+    [DefaultValue(false)] public bool mouse = false;
+    [DefaultValue(false)] public bool self = false;
+
+    public static SmartConsumption Value => Improvements.Instance.smartConsumption.Value;
+    public static bool Consumables => Improvements.SmartConsumption && Value.consumables;
+    public static bool Ammo => Improvements.SmartConsumption && Value.ammo;
+    public static bool Baits => Improvements.SmartConsumption && Value.baits && !UnloadedImprovements.Instance.smartConsumption_baits;
+    public static bool Paints => Improvements.SmartConsumption && Value.paints;
+    public static bool Materials => Improvements.SmartConsumption && Value.materials && !UnloadedImprovements.Instance.smartConsumption_materials;
 }

@@ -1,0 +1,104 @@
+using System;
+using MonoMod.Cil;
+using SpikysLib.Constants;
+using SpikysLib.IL;
+using Terraria;
+using Terraria.ModLoader;
+
+namespace BetterInventory.Improvements;
+
+public sealed class SmartConsumptionItem : GlobalItem {
+
+    public override void Load() {
+        IL_Player.ItemCheck_CheckFishingBobber_PickAndConsumeBait += static il => {
+            if (!il.ApplyTo(ILOnConsumeBait, Configs.SmartConsumption.Baits)) Configs.UnloadedInventoryManagement.Value.baits = true;
+
+        };
+        IL_Recipe.ConsumeForCraft += static il => {
+            if (!il.ApplyTo(ILOnConsumedMaterial, Configs.SmartConsumption.Materials)) Configs.UnloadedInventoryManagement.Value.materials = true;
+        };
+    }
+
+    public override void OnConsumeItem(Item item, Player player) {
+        if (item.PaintOrCoating) {
+            if (Configs.SmartConsumption.Paints) SmartConsumption.SmartConsume(player, item, SmartConsumption.LastStack);
+        } else {
+            if (Configs.SmartConsumption.Consumables) SmartConsumption.SmartConsume(player, item, SmartConsumption.SmallestStack);
+        }
+    }
+
+    public override void OnConsumedAsAmmo(Item ammo, Item weapon, Player player) {
+        if (Configs.SmartConsumption.Ammo) SmartConsumption.SmartConsume(player, ammo, SmartConsumption.LastStack);
+    }
+
+    private static void ILOnConsumedMaterial(ILContext il) {
+        ILCursor cursor = new(il);
+
+        cursor.GotoNextLoc(out int consumed, i => i.Previous.SaferMatchCallvirt(Reflection.Item.Clone), 0);
+
+        cursor.GotoNext(MoveType.Before, i => i.MatchLdsfld(Reflection.RecipeLoader.ConsumedItems));
+        cursor.EmitLdarg1();
+        cursor.EmitLdloc(consumed);
+        cursor.EmitDelegate((Item item, Item consumed) => {
+            if (Configs.SmartConsumption.Materials) SmartConsumption.SmartConsume(Main.LocalPlayer, item, SmartConsumption.SmallestStack, consumed.stack, new(true, Configs.SmartConsumption.Value.mouse));
+        });
+    }
+
+    private static void ILOnConsumeBait(ILContext il) {
+        ILCursor cursor = new(il);
+
+        cursor.GotoNextLoc(out int i, i => i.Previous.MatchLdcI4(-1), 0);
+
+        cursor.GotoNext(i => i.SaferMatchCall(Reflection.NPC.LadyBugKilled));
+        cursor.GotoNext(MoveType.After, i => i.MatchStfld(Reflection.Item.stack));
+        cursor.EmitLdarg0();
+        cursor.EmitLdloc(i);
+        cursor.EmitDelegate((Player self, int i) => {
+            if (Configs.SmartConsumption.Baits) SmartConsumption.SmartConsume(self, self.inventory[i], SmartConsumption.LastStack);
+        });
+    }
+}
+
+public static class SmartConsumption {
+    public static Item? LastStack(Player player, Item item, StackPickerSettings settings) {
+        bool Check(Item i) => item.type == i.type && (settings.CanPickArg || i != item);
+
+        for (int i = InventorySlots.Items.End - 1; i >= InventorySlots.Items.Start; i--) if (Check(player.inventory[i])) return player.inventory[i];
+        for (int i = InventorySlots.Ammo.End - 1; i >= InventorySlots.Coins.Start; i--) if (Check(player.inventory[i])) return player.inventory[i];
+        if (settings.CanPickMouse && Check(player.inventory[InventorySlots.Mouse])) return player.inventory[InventorySlots.Mouse];
+        return null;
+    }
+
+    public static Item? SmallestStack(Player player, Item item, StackPickerSettings settings) {
+        Item? min = null;
+        void Check(Item i) {
+            if (item.type == i.type && (min is null || i.stack < min.stack) && (settings.CanPickArg || i != item)) min = i;
+        }
+
+        for (int i = InventorySlots.Items.End - 1; i >= InventorySlots.Items.Start; i--) Check(player.inventory[i]);
+        for (int i = InventorySlots.Ammo.End - 1; i >= InventorySlots.Coins.Start; i--) Check(player.inventory[i]);
+        if (settings.CanPickMouse) Check(player.inventory[InventorySlots.Mouse]);
+        return min;
+    }
+
+    public delegate Item? StackPickerFn(Player player, Item item, StackPickerSettings settings);
+    public static void SmartConsume(Player player, Item item, StackPickerFn stackPicker, int consumed = 1, StackPickerSettings? settings = null) {
+        if (!Configs.SmartConsumption.Value.mouse && (item == Main.mouseItem || item == player.inventory[InventorySlots.Mouse])) return;
+        settings ??= new(Configs.SmartConsumption.Value.self, Configs.SmartConsumption.Value.mouse);
+        while (consumed > 0) {
+            Item? i = stackPicker(player, item, settings.Value);
+            if (i == null) return;
+            int amount = Math.Min(consumed, i.stack);
+            item.stack += amount;
+            i.stack -= amount;
+            if (player.whoAmI == Main.myPlayer) {
+                if (item == player.inventory[InventorySlots.Mouse]) Main.mouseItem.stack += amount;
+                if (i == player.inventory[InventorySlots.Mouse]) Main.mouseItem.stack -= amount;
+            }
+            consumed -= amount;
+            if (i.stack == 0) i.TurnToAir();
+        }
+    }
+}
+
+public record struct StackPickerSettings(bool CanPickArg, bool CanPickMouse);

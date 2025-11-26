@@ -89,12 +89,13 @@ public sealed class UnloadedVanillaFixes {
     public bool materialsWrapping;
 
     public static void DisableAllILs() {
-        VanillaFixes.Instance.ammoPickup = false;
-        VanillaFixes.Instance.consistantScrollDirection.Value.accessories = false;
-        VanillaFixes.Instance.consistantScrollDirection.Value.recipesPaused = false;
-        VanillaFixes.Instance.consistantScrollDirection.Value.recipesUnpaused = false;
-        VanillaFixes.Instance.materialsWrapping = false;
-        VanillaFixes.Instance.SaveChanges();
+        var config = VanillaFixes.Instance;
+        config.ammoPickup = false;
+        config.consistantScrollDirection.Value.accessories = false;
+        config.consistantScrollDirection.Value.recipesPaused = false;
+        config.consistantScrollDirection.Value.recipesUnpaused = false;
+        config.materialsWrapping = false;
+        config.SaveChanges();
     }
 
     public static UnloadedVanillaFixes Instance => Compatibility.Instance.unloadedVanillaFixes;
@@ -107,15 +108,20 @@ public sealed class UnloadedImprovements {
     public bool betterRecipeGrid_noRecListClose;
     public bool betterRecipeGrid_pageScroll;
     public bool betterRecipeList_fastScroll;
+    public bool smartConsumption_baits;
+    public bool smartConsumption_materials;
 
     public static void DisableAllILs() {
-        Improvements.Instance.betterRecipeGrid.Value.craftOnRecipeGrid.Key = false;
-        Improvements.Instance.betterRecipeGrid.Value.refocusButton = false;
-        Improvements.Instance.betterRecipeGrid.Value.noRecStartOffset = false;
-        Improvements.Instance.betterRecipeGrid.Value.noRecListClose = false;
-        Improvements.Instance.betterRecipeGrid.Value.pageScroll = false;
-        Improvements.Instance.betterRecipeList.Value.fastScroll.Key = false;
-        Improvements.Instance.SaveChanges();
+        var config = Improvements.Instance;
+        config.betterRecipeGrid.Value.craftOnRecipeGrid.Key = false;
+        config.betterRecipeGrid.Value.refocusButton = false;
+        config.betterRecipeGrid.Value.noRecStartOffset = false;
+        config.betterRecipeGrid.Value.noRecListClose = false;
+        config.betterRecipeGrid.Value.pageScroll = false;
+        config.betterRecipeList.Value.fastScroll.Key = false;
+        config.smartConsumption.Value.baits = false;
+        config.smartConsumption.Value.materials = false;
+        config.SaveChanges();
     }
 
     public static UnloadedImprovements Instance => Compatibility.Instance.unloadedImprovements;
@@ -126,9 +132,10 @@ public sealed class UnloadedVisualChanges {
     public bool recipeCount;
 
     public static void DisableAllILs() {
-        VisualChanges.Instance.availableMaterialsCount.Value.itemSlot = false;
-        VisualChanges.Instance.recipeCount = false;
-        VisualChanges.Instance.SaveChanges();
+        var config = VisualChanges.Instance;
+        config.availableMaterialsCount.Value.itemSlot = false;
+        config.recipeCount = false;
+        config.SaveChanges();
     }
 
     public static UnloadedVisualChanges Instance => Compatibility.Instance.unloadedVisualChanges;
@@ -138,8 +145,9 @@ public sealed class UnloadedFeatures {
     public bool recipeFiltering;
 
     public static void DisableAllILs() {
-        Features.Instance.recipeFiltering.Key = false;
-        Features.Instance.SaveChanges();
+        var config = Features.Instance;
+        config.recipeFiltering.Key = false;
+        config.SaveChanges();
     }
 
     public static UnloadedFeatures Instance => Compatibility.Instance.unloadedFeatures;

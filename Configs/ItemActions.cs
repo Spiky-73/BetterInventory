@@ -16,7 +16,6 @@ public sealed class ItemActions : ModConfig {
     public Toggle<GrabBagTooltip> grabBagTooltip = new(true);
     public bool fixedTooltipPosition;
     public Toggle<TooltipHover> tooltipHover = new(true);
-    public Toggle<ItemAmmo> itemAmmo = new(true);
     [DefaultValue(true)] public bool quickStack;
 
     public static bool FastContainerOpening => Instance.fastContainerOpening;
@@ -55,20 +54,3 @@ public sealed class TooltipHover {
     public static bool Enabled => ItemActions.Instance.tooltipHover && !UnloadedItemActions.Value.tooltipHover;
     public static TooltipHover Value => ItemActions.Instance.tooltipHover.Value;
 }
-
-public sealed class ItemAmmo {
-    [DefaultValue(true)] public bool tooltip = true;
-    public Toggle<ItemSlotAmmo> itemSlot = new(true);
-
-    public static bool Enabled => ItemActions.Instance.itemAmmo;
-    public static ItemAmmo Value => ItemActions.Instance.itemAmmo.Value;
-    public static bool Tooltip => Enabled && Value.tooltip;
-    public static bool ItemSlot => Enabled && Value.itemSlot;
-}
-public sealed class ItemSlotAmmo {
-    [DefaultValue(0.55f)] public float size = 0.55f;
-    [DefaultValue(Corner.BottomRight)] public Corner position = Corner.BottomRight;
-    [DefaultValue(true)] public bool hover = true;
-}
-
-public enum Corner { TopLeft, TopRight, BottomLeft, BottomRight }

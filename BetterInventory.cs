@@ -11,7 +11,6 @@ public sealed class BetterInventory : Mod, IPreLoadMod {
     public void PreLoadMod() => Instance = this;
 
     public override void Unload() {
-        ItemAmmoLoader.Unload();
         PickupUpgraderLoader.Unload();
         Instance = null!;
     }
