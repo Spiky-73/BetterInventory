@@ -33,6 +33,7 @@ public sealed class RecipeSortPlayer {
     }
     public int GetActiveSortStepIndex() => _availableSortSteps.IndexOf(GetActiveSortStep());
 
+    public bool IsActive() => _activeSort is not RecipeSortStep.ByRecipeId;
     public IComparer<Recipe> Comparer => GetActiveSortStep();
 
     private IRecipeSortStep? _activeSort;

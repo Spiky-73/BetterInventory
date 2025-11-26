@@ -46,18 +46,18 @@ public sealed class UIRecipeSearch : UIPanel {
         _searchBar.SetContents(null, true);
         Append(_searchBar);
 
-        UIImageButton searchCancel = new(RecipeSearchPlayer.ImageSearchCancel) {
+        _cancelButton = new(RecipeSearchPlayer.ImageSearchCancel) {
             HAlign = 1f,
             VAlign = 0.5f,
             Left = new StyleDimension(-2f, 0f)
         };
-        searchCancel.OnMouseOver += (_, _) => SoundEngine.PlaySound(SoundID.MenuTick);
-        searchCancel.OnLeftClick += (_, _) => {
+        _cancelButton.OnMouseOver += (_, _) => SoundEngine.PlaySound(SoundID.MenuTick);
+        _cancelButton.OnLeftClick += (_, _) => {
             RecipeList.HookSearchRecipe_Cancel(_searchBar);
             _searchBar.SetContents(null, true);
             SoundEngine.PlaySound(SoundID.MenuTick);
         };
-        Append(searchCancel);
+        Append(_cancelButton);
         RecipeList.OnSearchBarInit(_searchBar);
     }
 
@@ -91,5 +91,6 @@ public sealed class UIRecipeSearch : UIPanel {
 
     private bool _pendingRebuild;
     private bool _expanded;
+    private UIImageButton _cancelButton = null!;
     private UISearchBar _searchBar = null!;
 }

@@ -37,6 +37,7 @@ public sealed class RecipeFiltersPlayer {
     public void ClearActiveFilters() => _activeFilters.Clear();
     public ReadOnlyCollection<IRecipeFilter> GetActiveFilters() => _activeFilters.AsReadOnly();
 
+    public bool IsActive() => _activeFilters.Count > 0;
     public bool FitsFilters(Recipe recipe) {
         if (_activeFilters.Count == 0) return true;
         return _activeFilters.Exists(f => f.FitsFilter(recipe));

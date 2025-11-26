@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Terraria;
@@ -20,13 +21,14 @@ public sealed class RecipeSearchPlayer {
     }
     public const string SearchTag = "search";
 
-    public void SetSearch(string? search) => _search = search;
+    public void SetSearch(string? search) => _filter.SetSearch(_search = search);
     public void ClearSearch() => _search = null;
     public string? GetSearch() => _search;
 
+    public bool IsActive() => string.IsNullOrEmpty(_search);
     public bool FitsFilters(Recipe recipe) {
         if (!Configs.RecipeSearchBar.Instance.simpleSearch) return _filter.FitsFilter(recipe.createItem);
-        return string.IsNullOrEmpty(_search) || recipe.createItem.HoverName.ToLower().Contains(_search, System.StringComparison.OrdinalIgnoreCase);
+        return string.IsNullOrEmpty(_search) || recipe.createItem.HoverName.ToLower().Contains(_search, StringComparison.OrdinalIgnoreCase);
     }
 
     private string? _search;

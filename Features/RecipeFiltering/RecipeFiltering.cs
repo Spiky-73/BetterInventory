@@ -36,21 +36,28 @@ public sealed class RecipeFilteringPlayer : ModPlayer {
         RecipeFiltering.RebuildUI();
     }
 
+    public RecipeFiltersPlayer GetFiltersPlayer() => _filters;
+    public RecipeSearchPlayer GetSearchPlayer() => _search;
+    public RecipeSortPlayer GetSortPlayer() => _sort;
+    
     private readonly RecipeFiltersPlayer _filters = new();
     private readonly RecipeSearchPlayer _search = new();
     private readonly RecipeSortPlayer _sort = new();
 
 
     public static void FilterAndSortRecipes() {
-        var player = LocalPlayer;
-
         UnfilteredCount = Main.numAvailableRecipes;
+ 
+        var player = LocalPlayer;
+        var filters = player.GetFiltersPlayer();
+        var search = player.GetSearchPlayer();
+        var sort = player.GetSortPlayer();
+        if (!filters.IsActive() && !search.IsActive() && !sort.IsActive()) return;
 
         var recipes = Main.availableRecipe[0..Main.numAvailableRecipes].Select(i => Main.recipe[i]);
-
-        recipes = recipes.Where(player._filters.FitsFilters);
-        recipes = recipes.Where(player._search.FitsFilters);
-        recipes = recipes.Order(player._sort.Comparer);
+        if(filters.IsActive()) recipes = recipes.Where(filters.FitsFilters);
+        if(search.IsActive()) recipes = recipes.Where(search.FitsFilters);
+        if(sort.IsActive()) recipes = recipes.Order(sort.Comparer);
 
         int count = 0;
         foreach (var recipe in recipes) Main.availableRecipe[count++] = recipe.RecipeIndex;
@@ -58,9 +65,6 @@ public sealed class RecipeFilteringPlayer : ModPlayer {
         Main.numAvailableRecipes = count;
     }
 
-    public RecipeFiltersPlayer GetFiltersPlayer() => _filters;
-    public RecipeSearchPlayer GetSearchPlayer() => _search;
-    public RecipeSortPlayer GetSortPlayer() => _sort;
 
     public static int UnfilteredCount { get; private set; }
 }
