@@ -22,22 +22,22 @@ public sealed class AmmoPickup : ILoadable {
     private static void ILDelayAmmoPickup(ILContext il) {
         ILCursor cursor = new(il);
 
-        cursor.GotoNextLoc(out int isACoin, i => i.Previous.MatchCallvirt(Reflection.Item.IsACoin.GetMethod!), 0);
+        cursor.GotoNextLoc(out int isACoin, i => i.Previous.MatchGetppt((Item i) => i.IsACoin), 0);
         cursor.GotoNextLoc(out int item, i => i.Previous.MatchLdarg2(), 1);
 
         // if (isACoin) ...
         // if (item.FitsAmmoSlot()) {
         //     <fill ++[OCCUPIED] slots>
         // }
-        cursor.GotoNext(MoveType.AfterLabel, i => i.SaferMatchCall(Reflection.Player.FillAmmo));
+        cursor.GotoNext(MoveType.AfterLabel, i => i.SaferMatchCall((Player i) => i.FillAmmo));
         cursor.EmitDelegate<Action>(() => _forceSkipEmptyAmmoSlots = Configs.VanillaFixes.AmmoPickup);
-        cursor.GotoNext(MoveType.After, i => i.SaferMatchCall(Reflection.Player.FillAmmo));
+        cursor.GotoNext(MoveType.After, i => i.SaferMatchCall((Player i) => i.FillAmmo));
         cursor.EmitDelegate<Action>(() => _forceSkipEmptyAmmoSlots = false);
 
         // <occupied slot>
         // <hotbar>
-        cursor.GotoNext(i => i.SaferMatchCall(Reflection.Player.GetItem_FillEmptyInventorySlot));
-        cursor.GotoNext(i => i.MatchLdfld(Reflection.Item.favorited));
+        cursor.GotoNext(i => i.SaferMatchCall((Player i) => i.GetItem_FillEmptyInventorySlot));
+        cursor.GotoNext(i => i.MatchLdfld((Item i) => i.favorited));
         cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdarg2());
 
         // ++<ammo pickup>

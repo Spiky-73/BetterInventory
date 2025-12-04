@@ -1782,6 +1782,16 @@ UnloadedImprovements: {
 		Label: better Recipe List_fast Scroll
 		Tooltip: ""
 	}
+
+	smartConsumption_baits: {
+		Label: smart Consumption_baits
+		Tooltip: ""
+	}
+
+	smartConsumption_materials: {
+		Label: smart Consumption_materials
+		Tooltip: ""
+	}
 }
 
 UnloadedVanillaFixes: {
@@ -1856,6 +1866,11 @@ Improvements: {
 
 	scrollableTooltip: {
 		Label: scrollable Tooltip
+		Tooltip: ""
+	}
+
+	smartConsumption: {
+		Label: smart Consumption
 		Tooltip: ""
 	}
 }
@@ -2074,6 +2089,11 @@ VisualChanges: {
 
 	recipeTooltip: {
 		Label: recipe Tooltip
+		Tooltip: ""
+	}
+
+	itemAmmo: {
+		Label: item Ammo
 		Tooltip: ""
 	}
 }

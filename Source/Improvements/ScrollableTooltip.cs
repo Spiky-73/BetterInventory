@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using SpikysLib;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.GameInput;
@@ -13,10 +14,11 @@ namespace BetterInventory.Improvements;
 public class ScrollableTooltipItem : GlobalItem {
 
     public override void Load() {
-        MonoModHooks.Add(Reflection.ItemLoader.ModifyTooltips, HookTooltipScroll);
+        MonoModHooks.Add(TypeHelper.GetMethod(() => ItemLoader.ModifyTooltips), HookTooltipScroll);
     }
 
-    private static List<TooltipLine> HookTooltipScroll(Reflection.ItemLoader.ModifyTooltipsFn orig, Item item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out Color?[] overrideColor, int prefixlineIndex) {
+    private delegate List<TooltipLine> ModifyTooltipsFn(Item item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out Color?[] overrideColor, int prefixlineIndex);
+    private static List<TooltipLine> HookTooltipScroll(ModifyTooltipsFn orig, Item item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out Color?[] overrideColor, int prefixlineIndex) {
         var tooltips = orig.Invoke(item, ref numTooltips, names, ref text, ref modifier, ref badModifier, ref oneDropLogo, out overrideColor, prefixlineIndex);
         if (!Configs.Improvements.ScrollableTooltip) return tooltips;
 

@@ -6,6 +6,7 @@ using ReLogic.Content;
 using SpikysLib.IL;
 using Terraria;
 using Terraria.Audio;
+using Terraria.GameContent;
 using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -43,13 +44,13 @@ public sealed class BetterRecipeGrid : ILoadable {
         //     int num78 = 310; // x
         //     UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow = num79;
         //     UILinkPointNavigator.Shortcuts.CRAFT_IconsPerColumn = num80;
-        cursor.GotoNext(MoveType.After, i => i.MatchStsfld(Reflection.UILinkPointNavigator.CRAFT_IconsPerColumn));
+        cursor.GotoNext(MoveType.After, i => i.MatchStsfld(() => UILinkPointNavigator.Shortcuts.CRAFT_IconsPerColumn));
         cursor.FindPrevLoc(out _, out int y, i => i.Previous.MatchLdcI4(340), 143);
         cursor.FindPrevLoc(out _, out int x, i => i.Previous.MatchLdcI4(310), 144);
 
         //     <up/down buttons>
-        cursor.GotoNextLoc(out _, i => i.Previous.MatchLdsfld(Reflection.Main.recStart), 153);
-        cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdsfld(Reflection.Main.recStart));
+        cursor.GotoNextLoc(out _, i => i.Previous.MatchLdsfld(() => Main.recStart), 153);
+        cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdsfld(() => Main.recStart));
 
         //     ++ <drawRecipeCount>
         cursor.EmitLdloc(x).EmitLdloc(y);
@@ -85,15 +86,15 @@ public sealed class BetterRecipeGrid : ILoadable {
         // Main.hidePlayerCraftingMenu = false;
         // if(<recBigListVisible>) {
         //     ...
-        cursor.GotoNext(i => i.MatchStsfld(Reflection.UILinkPointNavigator.CRAFT_IconsPerColumn));
-        cursor.GotoNext(MoveType.AfterLabel, i => i.MatchStsfld(Reflection.Main.recStart));
+        cursor.GotoNext(i => i.MatchStsfld(() => UILinkPointNavigator.Shortcuts.CRAFT_IconsPerColumn));
+        cursor.GotoNext(MoveType.AfterLabel, i => i.MatchStsfld(() => Main.recStart));
         //     ++<no max bound>
         cursor.EmitDelegate((int rs) => !Configs.BetterRecipeGrid.NoRecStartOffset ? rs : Main.recStart);
 
         //     <handle scroll>
         //     ++<set max bound and snap>
-        cursor.GotoNext(i => i.MatchLdsfld(Reflection.TextureAssets.CraftDownButton));
-        cursor.GotoNext(MoveType.AfterLabel, i => i.MatchLdsfld(Reflection.Main.recStart));
+        cursor.GotoNext(i => i.MatchLdsfld(() => TextureAssets.CraftDownButton));
+        cursor.GotoNext(MoveType.AfterLabel, i => i.MatchLdsfld(() => Main.recStart));
         cursor.EmitDelegate(() => {
             if (!Configs.BetterRecipeGrid.NoRecStartOffset) return;
             Main.recStart -= Main.recStart % UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow;
@@ -113,8 +114,8 @@ public sealed class BetterRecipeGrid : ILoadable {
         //         int num73 = 94;
         //         int num74 = 450 + num51;
         //         if (++[false] && Main.InGuideCraftMenu) num74 -= 150;
-        cursor.GotoNext(i => i.MatchLdsfld(Reflection.TextureAssets.CraftToggle));
-        cursor.GotoPrev(MoveType.After, i => i.MatchLdsfld(Reflection.Main.numAvailableRecipes));
+        cursor.GotoNext(i => i.MatchLdsfld(() => TextureAssets.CraftToggle));
+        cursor.GotoPrev(MoveType.After, i => i.MatchLdsfld(() => Main.numAvailableRecipes));
         cursor.EmitDelegate((int numAvailableRecipes) => Configs.BetterRecipeGrid.NoRecListClose && numAvailableRecipes == 0 ? 1 : numAvailableRecipes);
         //         ...
         //     }
@@ -150,7 +151,7 @@ public sealed class BetterRecipeGrid : ILoadable {
 
         ILCursor cursor = new(il);
 
-        cursor.GotoNextLoc(out int recipeListIndex, i => i.Previous.MatchLdsfld(Reflection.Main.recStart), 153);
+        cursor.GotoNextLoc(out int recipeListIndex, i => i.Previous.MatchLdsfld(() => Main.recStart), 153);
 
         // if(<recBigListVisible>) {
         //     ...
@@ -158,8 +159,8 @@ public sealed class BetterRecipeGrid : ILoadable {
         //         ...
         //         if (<mouseHover>) {
         //             Main.player[Main.myPlayer].mouseInterface = true;
-        cursor.GotoNext(i => i.SaferMatchCall(Reflection.Main.LockCraftingForThisCraftClickDuration));
-        cursor.GotoPrev(MoveType.After, i => i.MatchStfld(Reflection.Player.mouseInterface));
+        cursor.GotoNext(i => i.SaferMatchCall(() => Main.LockCraftingForThisCraftClickDuration));
+        cursor.GotoPrev(MoveType.After, i => i.MatchStfld((Player p) => p.mouseInterface));
 
         ILLabel skipVanillaHover = null!;
         cursor.FindPrev(out _, i => i.MatchBrtrue(out skipVanillaHover!));
@@ -170,7 +171,7 @@ public sealed class BetterRecipeGrid : ILoadable {
             if (!Configs.BetterRecipeGrid.CraftOnRecList) return false;
             int f = Main.focusRecipe;
             if (Configs.CraftOnRecipeGrid.Instance.focusHovered) Main.focusRecipe = i;
-            Reflection.Main.HoverOverCraftingItemButton.Invoke(i);
+            Main.HoverOverCraftingItemButton(i);
             if (f != Main.focusRecipe) Main.recFastScroll = true;
             Main.craftingHide = false;
             return true;
@@ -197,19 +198,19 @@ public sealed class BetterRecipeGrid : ILoadable {
         // Main.hidePlayerCraftingMenu = false;
         // if(<recBigListVisible>) {
         //     ...
-        cursor.GotoNext(i => i.MatchStsfld(Reflection.UILinkPointNavigator.CRAFT_IconsPerColumn));
+        cursor.GotoNext(i => i.MatchStsfld(() => UILinkPointNavigator.Shortcuts.CRAFT_IconsPerColumn));
 
         cursor.FindNext(out ILCursor[] cursors,
-            i => i.MatchLdsfld(Reflection.TextureAssets.CraftUpButton) && i.Next.MatchCallvirt(Reflection.Asset<Texture2D>.Value.GetMethod!),
-            i => i.MatchLdsfld(Reflection.TextureAssets.CraftDownButton) && i.Next.MatchCallvirt(Reflection.Asset<Texture2D>.Value.GetMethod!)
+            i => i.MatchLdsfld(() => TextureAssets.CraftUpButton) && i.Next.MatchGetppt((Asset<Texture2D> t) => t.Value),
+            i => i.MatchLdsfld(() => TextureAssets.CraftDownButton) && i.Next.MatchGetppt((Asset<Texture2D> t) => t.Value)
         );
         for (int j = 0; j < cursors.Length; j++) {
             ILCursor c = cursors[j];
             // if (<upVisible> / <downVisible>) {
             //     if(<hover>) {
             //         Main.player[Main.myPlayer].mouseInterface = true;
-            c.GotoPrev(i => i.MatchStfld(Reflection.Player.mouseInterface));
-            c.GotoNext(i => i.MatchStsfld(Reflection.Main.recStart));
+            c.GotoPrev(i => i.MatchStfld((Player p) => p.mouseInterface));
+            c.GotoNext(i => i.MatchStsfld(() => Main.recStart));
             c.GotoPrev(MoveType.AfterLabel, i => j == 0 ? i.MatchSub() : i.MatchAdd());
 
             //         ++ <listScroll>
@@ -220,23 +221,6 @@ public sealed class BetterRecipeGrid : ILoadable {
             //     }
             // }
         }
-        // foreach (ILCursor c in cursors) {
-        //     // if (<upVisible> / <downVisible>) {
-        //     //     if(<hover>) {
-        //     //         Main.player[Main.myPlayer].mouseInterface = true;
-        //     c.GotoPrev(MoveType.After, i => i.MatchStfld(typeof(Player), nameof(Player.mouseInterface)));
-
-        //     //         ++ <listScroll>
-        //     c.EmitDelegate(() => {
-        //         if (!Configs.FixedUI.ScrollButtons || !Main.mouseLeft) return;
-        //         if (Main.mouseLeftRelease || _recDelay == 0) {
-        //             Main.mouseLeftRelease = true;
-        //             _recDelay = 1;
-        //         } else _recDelay--;
-        //     });
-        //     //     }
-        //     // }
-        // }
         // }
 
     }

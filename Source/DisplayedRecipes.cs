@@ -86,14 +86,14 @@ public sealed class DisplayedRecipes : ModSystem {
             Main.numAvailableRecipes = numAvailableRecipes;
         } else {
             Recipe.ClearAvailableRecipes();
-            Reflection.Recipe.CollectGuideRecipes.Invoke();
+            Recipe.CollectGuideRecipes();
         }
 
         if (Configs.Features.RecipeFiltering) Features.RecipeFiltering.RecipeFilteringPlayer.FilterAndSortRecipes();
         if (Configs.BetterGuide.RecipeOrdering) FavoritedRecipesPlayer.FilterAndSortRecipes();
 
-        Reflection.Recipe.TryRefocusingRecipe.Invoke(oldRecipe);
-        Reflection.Recipe.VisuallyRepositionRecipes.Invoke(focusY);
+        Recipe.TryRefocusingRecipe(oldRecipe);
+        Recipe.VisuallyRepositionRecipes(focusY);
     }
 
     public static int numAvailableRecipes;

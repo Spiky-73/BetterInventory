@@ -34,9 +34,9 @@ public sealed class SmartConsumptionItem : GlobalItem {
     private static void ILOnConsumedMaterial(ILContext il) {
         ILCursor cursor = new(il);
 
-        cursor.GotoNextLoc(out int consumed, i => i.Previous.SaferMatchCallvirt(Reflection.Item.Clone), 0);
+        cursor.GotoNextLoc(out int consumed, i => i.Previous.SaferMatchCallvirt((Item i) => i.Clone), 0);
 
-        cursor.GotoNext(MoveType.Before, i => i.MatchLdsfld(Reflection.RecipeLoader.ConsumedItems));
+        cursor.GotoNext(MoveType.Before, i => i.MatchLdsfld(() => RecipeLoader.ConsumedItems));
         cursor.EmitLdarg1();
         cursor.EmitLdloc(consumed);
         cursor.EmitDelegate((Item item, Item consumed) => {
@@ -49,8 +49,8 @@ public sealed class SmartConsumptionItem : GlobalItem {
 
         cursor.GotoNextLoc(out int i, i => i.Previous.MatchLdcI4(-1), 0);
 
-        cursor.GotoNext(i => i.SaferMatchCall(Reflection.NPC.LadyBugKilled));
-        cursor.GotoNext(MoveType.After, i => i.MatchStfld(Reflection.Item.stack));
+        cursor.GotoNext(i => i.SaferMatchCall(() => NPC.LadyBugKilled));
+        cursor.GotoNext(MoveType.After, i => i.MatchStfld((Item i ) => i.stack));
         cursor.EmitLdarg0();
         cursor.EmitLdloc(i);
         cursor.EmitDelegate((Player self, int i) => {

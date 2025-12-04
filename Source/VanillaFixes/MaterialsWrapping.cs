@@ -2,6 +2,7 @@ using MonoMod.Cil;
 using SpikysLib.IL;
 using Terraria;
 using Terraria.ModLoader;
+using Terraria.UI.Gamepad;
 
 namespace BetterInventory.Crafting;
 
@@ -24,7 +25,7 @@ public sealed class MaterialsWrapping : ILoadable {
         //     if (Main.numAvailableRecipes > 0) {
         //         for (<focusRecipeMaterialIndex>) {
         //             ...
-        cursor.GotoNext(i => i.MatchStsfld(Reflection.UILinkPointNavigator.CRAFT_CurrentIngredientsCount));
+        cursor.GotoNext(i => i.MatchStsfld(() => UILinkPointNavigator.Shortcuts.CRAFT_CurrentIngredientsCount));
 
         cursor.FindPrevLoc(out _, out int materialIndex, i => true, 130); // int num68
 

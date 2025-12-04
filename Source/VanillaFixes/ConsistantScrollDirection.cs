@@ -1,6 +1,8 @@
 using MonoMod.Cil;
+using SpikysLib;
 using SpikysLib.IL;
 using Terraria;
+using Terraria.GameInput;
 using Terraria.ModLoader;
 
 namespace BetterInventory.VanillaFixes;
@@ -15,7 +17,7 @@ public sealed class ConsistantScrollDirection : ILoadable {
         IL_Main.DoUpdate_WhilePaused += static il => {
             if (!il.ApplyTo(ILFixRecipeScrollWhilePaused, Configs.ConsistantScrollDirection.RecipesPaused)) Configs.UnloadedVanillaFixes.Instance.consistantScrollDirection_recipesPaused = true;
         };
-        MonoModHooks.Modify(Reflection.AccessorySlotLoader.DrawScrollbar, static il => {
+        MonoModHooks.Modify(TypeHelper.GetMethod((AccessorySlotLoader i) => i.DrawScrollbar), static il => {
             if (!il.ApplyTo(ILFixAccessoryScroll, Configs.ConsistantScrollDirection.Accessories)) Configs.UnloadedVanillaFixes.Instance.consistantScrollDirection_accessories = true;
         });
 
@@ -27,11 +29,11 @@ public sealed class ConsistantScrollDirection : ILoadable {
         ILCursor cursor = new(il);
 
         // int num8 = Player.GetMouseScrollDelta();
-        cursor.GotoNextLoc(out var offset, i => i.Previous.MatchCall(Reflection.Player.GetMouseScrollDelta), 41);
+        cursor.GotoNextLoc(out var offset, i => i.Previous.MatchCall(() => Player.GetMouseScrollDelta), 41);
         // if (Main.recBigList) ...
         // else {
         //     Main.focusRecipe += ++[-1 *] num8;
-        cursor.GotoNext(i => i.MatchStsfld(Reflection.Main.focusRecipe));
+        cursor.GotoNext(i => i.MatchStsfld(() => Main.focusRecipe));
         cursor.GotoPrev(MoveType.After, i => i.MatchLdloc(offset));
         cursor.EmitDelegate((int offset) => Configs.ConsistantScrollDirection.RecipesUnpaused ? -offset : offset);
         // }
@@ -41,14 +43,14 @@ public sealed class ConsistantScrollDirection : ILoadable {
         ILCursor cursor = new(il);
 
         // int num = ++[-1 *] PlayerInput.ScrollWheelDelta / 120;
-        cursor.GotoNext(MoveType.After, i => i.MatchLdsfld(Reflection.PlayerInput.ScrollWheelDelta));
+        cursor.GotoNext(MoveType.After, i => i.MatchLdsfld(() => PlayerInput.ScrollWheelDelta));
         cursor.EmitDelegate((int ScrollWheelDelta) => Configs.ConsistantScrollDirection.RecipesUnpaused ? -ScrollWheelDelta : ScrollWheelDelta);
     }
 
     private static void ILFixAccessoryScroll(ILContext il) {
         ILCursor cursor = new(il);
         // int scrollDelta = AccessorySlotLoader.ModSlotPlayer(AccessorySlotLoader.Player).scrollbarSlotPosition + ++[-1 *] PlayerInput.ScrollWheelDelta / 120;
-        cursor.GotoNext(MoveType.After, i => i.MatchLdsfld(Reflection.PlayerInput.ScrollWheelDelta));
+        cursor.GotoNext(MoveType.After, i => i.MatchLdsfld(() => PlayerInput.ScrollWheelDelta));
         cursor.EmitDelegate((int ScrollWheelDelta) => Configs.ConsistantScrollDirection.Accessories ? -ScrollWheelDelta : ScrollWheelDelta);
     }
 

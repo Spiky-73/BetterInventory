@@ -2,12 +2,21 @@
   <Import Project="..\tModLoader.targets" />
   <PropertyGroup>
     <AssemblyName>BetterInventory</AssemblyName>
-    <nullable>enable</nullable>
-    <NoWarn>CommonCollisionName</NoWarn>
+    <Nullable>enable</Nullable>
+    <NoWarn>IDE0130,CommonCollisionName</NoWarn>
   </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="../ModAssemblies/SpikysLib_v1.3.1.1.dll" />
-    <!-- <ProjectReference Include="../SpikysLib/SpikysLib.csproj" /> -->
+    <PackageReference Include="Krafs.Publicizer" Version="2.3.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <Publicize Include="tModLoader" IncludeCompilerGeneratedMembers="false" IncludeVirtualMembers="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- <Reference Include="../ModAssemblies/SpikysLib_v1.4.dll" /> -->
+    <ProjectReference Include="../SpikysLib/SpikysLib.csproj" />
     <Reference Include="../ModAssemblies/SPIC_v4.0.dll" />
     <!-- <ProjectReference Include="../SPIC/SPIC.csproj" /> -->
   </ItemGroup>

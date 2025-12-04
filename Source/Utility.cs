@@ -7,8 +7,8 @@ using MonoMod.Cil;
 using SpikysLib;
 using SpikysLib.IL;
 using Terraria;
-using Terraria.DataStructures;
 using Terraria.ModLoader;
+using Terraria.UI.Gamepad;
 
 namespace BetterInventory;
 
@@ -23,7 +23,7 @@ public static class Utility {
 
     public static void ClearMouseText() {
         Main.HoverItem = new();
-        Reflection.Main._mouseTextCache.SetValue(Main.instance, Activator.CreateInstance(Reflection.Main.MouseTextCache));
+        Main.instance._mouseTextCache = new();
     }
 
     public static Item GetItem_Inner(Player self, int plr, Item newItem, GetItemSettings settings) {
@@ -74,8 +74,8 @@ public static class Utility {
         // if (!Main.InReforgeMenu && !Main.LocalPlayer.tileEntityAnchor.InUse && !flag10) {
         //     UILinkPointNavigator.Shortcuts.CRAFT_CurrentRecipeBig = -1;
         //     UILinkPointNavigator.Shortcuts.CRAFT_CurrentRecipeSmall = -1;
-        cursor.GotoNext(i => i.MatchLdsfld(Reflection.Main.hidePlayerCraftingMenu));
-        cursor.GotoNext(MoveType.After, i => i.MatchStsfld(Reflection.UILinkPointNavigator.CRAFT_CurrentRecipeSmall));
+        cursor.GotoNext(i => i.MatchLdsfld(() => Main.hidePlayerCraftingMenu));
+        cursor.GotoNext(MoveType.After, i => i.MatchStsfld(() => UILinkPointNavigator.Shortcuts.CRAFT_CurrentRecipeSmall));
         return cursor;
     }
 
@@ -84,7 +84,7 @@ public static class Utility {
         // for (<recipeIndex>) {
         //     ...
         //     if (recipe.Disabled) continue;
-        cursor.GotoNext(i => i.MatchCallvirt(Reflection.Recipe.Disabled.GetMethod!));
+        cursor.GotoNext(i => i.MatchGetppt((Recipe r) => r.Disabled));
         int r = 0;
         recipe = cursor.TryFindPrev(out _, i => i.MatchLdloc(out r)) ? r : 2;
         ILLabel end = null!;
@@ -115,10 +115,6 @@ public static class Utility {
         str = str[0..Math.Min(str.Length, Math.Max(1, digits - prefix.Length))];
         if (str[^1] == '.') str = str[0..^1];
         return $"{str}{prefix}";
-    }
-
-    public static int GetPrioritizedStepIndex<TEntryType, TStepType>(this EntrySorter<TEntryType, TStepType> sorter) where TEntryType : new() where TStepType : IEntrySortStep<TEntryType> {
-        return Reflection.EntrySorter<TEntryType, TStepType>._prioritizedStep.GetValue(sorter);
     }
 
     public static readonly string[] MetricPrefixes = [string.Empty, "k", "M", "G", "T", "P"];

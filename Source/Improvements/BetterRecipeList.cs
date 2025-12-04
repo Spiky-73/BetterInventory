@@ -37,7 +37,7 @@ public sealed class BetterRecipeList : ILoadable {
             //         if(...) SoundEngine.PlaySound(...);
             //         Main.availableRecipeY[num63] += 6.5f;
             cursor.GotoNext(i => i.SaferMatchCall(typeof(SoundEngine), nameof(SoundEngine.PlaySound)));
-            cursor.GotoNext(MoveType.AfterLabel, i => i.MatchLdsfld(Reflection.Main.recFastScroll));
+            cursor.GotoNext(MoveType.AfterLabel, i => i.MatchLdsfld(() => Main.recFastScroll));
 
             // ++ <fastScroll>
             cursor.EmitLdloc(recipeIndex); // int num63

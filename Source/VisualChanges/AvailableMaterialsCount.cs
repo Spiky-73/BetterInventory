@@ -43,16 +43,16 @@ public sealed class AvailableMaterialsCountItem : GlobalItem {
         // if (++[true] || item.stack > 1) {
         //     ChatManager.DrawColorCodedStringWithShadow(spriteBatch, FontAssets.ItemStack.Value, ++[customStack], position + new Vector2(10f, 26f) * inventoryScale, color, 0f, Vector2.Zero, new Vector2(inventoryScale), -1f, inventoryScale);
         // }
-        cursor.GotoNext(i => i.MatchLdfld(Reflection.Item.DD2Summon));
+        cursor.GotoNext(i => i.MatchLdfld((Item i) => i.DD2Summon));
         cursor.GotoPrev(i => i.SaferMatchCall(typeof(ChatManager), nameof(ChatManager.DrawColorCodedStringWithShadow)));
-        cursor.GotoPrev(MoveType.After, i => i.MatchCall(Reflection.Int32.ToString) && i.Previous.MatchLdflda(Reflection.Item.stack));
+        cursor.GotoPrev(MoveType.After, i => i.MatchCall((int i) => i.ToString()) && i.Previous.MatchLdflda((Item i) => i.stack));
         cursor.EmitLdarg1().EmitLdarg2().EmitLdarg3();
         cursor.EmitDelegate((string stack, Item[] inv, int context, int slot) => {
             Item item = inv[slot];
             return Configs.AvailableMaterialsCount.ItemSlot && AvailableMaterialsCount.ShouldDisplayStack(item, context, out string? text, true) ? text : stack;
         });
-        cursor.GotoPrev(i => i.MatchLdflda(Reflection.Item.stack));
-        cursor.GotoPrev(MoveType.After, i => i.MatchLdfld(Reflection.Item.stack));
+        cursor.GotoPrev(i => i.MatchLdflda((Item i) => i.stack));
+        cursor.GotoPrev(MoveType.After, i => i.MatchLdfld((Item i) => i.stack));
         cursor.EmitLdarg1().EmitLdarg2().EmitLdarg3();
         cursor.EmitDelegate((int stack, Item[] inv, int context, int slot) => Configs.AvailableMaterialsCount.ItemSlot && AvailableMaterialsCount.ShouldDisplayStack(inv[slot], context, out _) ? 2 : stack);
     }

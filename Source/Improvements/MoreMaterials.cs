@@ -19,7 +19,7 @@ public sealed class MoreMaterialsPlayer : ModPlayer {
 
     public override IEnumerable<Item> AddMaterialsForCrafting(out ItemConsumedCallback? itemConsumedCallback) {
         itemConsumedCallback = (item, index) => {
-            if (item == Main.mouseItem) item.stack -= Reflection.RecipeLoader.ConsumedItems.GetValue()[^1].stack; // FIXME seems hacky
+            if (item == Main.mouseItem) item.stack -= RecipeLoader.ConsumedItems[^1].stack; // FIXME seems hacky
             return;
         };
         List<Item> materials = [];

@@ -5,9 +5,7 @@ using ReLogic.Graphics;
 using SpikysLib;
 using SpikysLib.IL;
 using Terraria;
-using Terraria.Audio;
 using Terraria.GameContent;
-using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI.Gamepad;
 
@@ -33,13 +31,13 @@ public sealed class RecipeCount : ILoadable {
         //     int num78 = 310; // x
         //     UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow = num79;
         //     UILinkPointNavigator.Shortcuts.CRAFT_IconsPerColumn = num80;
-        cursor.GotoNext(MoveType.After, i => i.MatchStsfld(Reflection.UILinkPointNavigator.CRAFT_IconsPerColumn));
+        cursor.GotoNext(MoveType.After, i => i.MatchStsfld(() => UILinkPointNavigator.Shortcuts.CRAFT_IconsPerColumn));
         cursor.FindPrevLoc(out _, out int y, i => i.Previous.MatchLdcI4(340), 143);
         cursor.FindPrevLoc(out _, out int x, i => i.Previous.MatchLdcI4(310), 144);
 
         //     <up/down buttons>
-        cursor.GotoNextLoc(out _, i => i.Previous.MatchLdsfld(Reflection.Main.recStart), 153);
-        cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdsfld(Reflection.Main.recStart));
+        cursor.GotoNextLoc(out _, i => i.Previous.MatchLdsfld(() => Main.recStart), 153);
+        cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdsfld(() => Main.recStart));
 
         //     ++ <drawRecipeCount>
         cursor.EmitLdloc(x).EmitLdloc(y);
@@ -60,6 +58,6 @@ public sealed class RecipeCount : ILoadable {
         Vector2 origin = font.MeasureString(text);
         origin.Y *= 0.5f;
 
-        Main.spriteBatch.DrawStringWithShadow(font, text, new(x, y), Color.White, 0, origin, Vector2.One);
+        GraphicsHelper.DrawStringWithShadow(Main.spriteBatch, font, text, new(x, y), Color.White, 0, origin, Vector2.One);
     }
 }

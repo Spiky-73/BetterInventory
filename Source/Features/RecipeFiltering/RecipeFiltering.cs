@@ -1,10 +1,10 @@
-using System;
 using System.Linq;
 using BetterInventory.Features.RecipeFiltering.UI.States;
 using Microsoft.Xna.Framework;
 using MonoMod.Cil;
 using SpikysLib.IL;
 using Terraria;
+using Terraria.GameContent;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
@@ -97,8 +97,8 @@ public sealed class RecipeFiltering : ModSystem {
 
         // BetterGameUI Compatibility
         int screenY = 13;
-        if (cursor.TryGotoNext(i => i.SaferMatchCallvirt(Reflection.AccessorySlotLoader.DrawAccSlots))) {
-            cursor.GotoNext(i => i.MatchLdsfld(Reflection.Main.screenHeight));
+        if (cursor.TryGotoNext(i => i.MatchCallvirt((AccessorySlotLoader i) => i.DrawAccSlots))) {
+            cursor.GotoNext(i => i.MatchLdsfld(() => Main.screenHeight));
             cursor.GotoNextLoc(out screenY, i => true, 13);
         }
 
@@ -118,8 +118,8 @@ public sealed class RecipeFiltering : ModSystem {
         //         int num73 = 94;
         //         int num74 = 450 + num51;
         //         if (++false && Main.InGuideCraftMenu) num74 -= 150;
-        cursor.GotoNext(i => i.MatchLdsfld(Reflection.TextureAssets.CraftToggle));
-        cursor.GotoPrev(MoveType.After, i => i.MatchLdsfld(Reflection.Main.InGuideCraftMenu));
+        cursor.GotoNext(i => i.MatchLdsfld(() => TextureAssets.CraftToggle));
+        cursor.GotoPrev(MoveType.After, i => i.MatchLdsfld(() => Main.InGuideCraftMenu));
         cursor.EmitDelegate((bool inGuide) => !Configs.Features.RecipeFiltering && inGuide);
         //         ...
         //     }
