@@ -6,12 +6,12 @@ using Terraria.ModLoader;
 
 namespace BetterInventory.VanillaFixes;
 
-public sealed class AmmoPickup : ILoadable {
+public sealed class AmmoPickupOrder : ILoadable {
 
-    public bool IsLoadingEnabled(Mod mod) => !Configs.Compatibility.CompatibilityMode || Configs.VanillaFixes.ConsistantScrollDirection;
+    public bool IsLoadingEnabled(Mod mod) => !Configs.Compatibility.CompatibilityMode || Configs.VanillaFixes.AmmoPickupOrder;
     public void Load(Mod mod) {
         IL_Player.GetItem += static il => {
-            if (!il.ApplyTo(ILDelayAmmoPickup, Configs.VanillaFixes.AmmoPickup)) Configs.UnloadedVanillaFixes.Instance.ammoPickup = true;
+            if (!il.ApplyTo(ILDelayAmmoPickup, Configs.VanillaFixes.AmmoPickupOrder)) Configs.UnloadedVanillaFixes.Instance.ammoPickupOrder = true;
         };
 
         On_Item.CanFillEmptyAmmoSlot += HookForceSkipEmptySlots;
@@ -30,7 +30,7 @@ public sealed class AmmoPickup : ILoadable {
         //     <fill ++[OCCUPIED] slots>
         // }
         cursor.GotoNext(MoveType.AfterLabel, i => i.SaferMatchCall((Player i) => i.FillAmmo));
-        cursor.EmitDelegate<Action>(() => _forceSkipEmptyAmmoSlots = Configs.VanillaFixes.AmmoPickup);
+        cursor.EmitDelegate<Action>(() => _forceSkipEmptyAmmoSlots = Configs.VanillaFixes.AmmoPickupOrder);
         cursor.GotoNext(MoveType.After, i => i.SaferMatchCall((Player i) => i.FillAmmo));
         cursor.EmitDelegate<Action>(() => _forceSkipEmptyAmmoSlots = false);
 
@@ -43,7 +43,7 @@ public sealed class AmmoPickup : ILoadable {
         // ++<ammo pickup>
         cursor.EmitLdarg0().EmitLdarg1().EmitLdloc(item).EmitLdarg3();
         cursor.EmitDelegate((Player self, int plr, Item item, GetItemSettings settings) => {
-            if (!Configs.VanillaFixes.AmmoPickup || !item.FitsAmmoSlot()) return false;
+            if (!Configs.VanillaFixes.AmmoPickupOrder || !item.FitsAmmoSlot()) return false;
             item = self.FillAmmo(plr, item, settings);
             return item.IsAir;
         });

@@ -11,7 +11,7 @@ using Terraria.ModLoader;
 using Terraria.UI;
 using Terraria.UI.Chat;
 
-namespace BetterInventory.VisualChanges;
+namespace BetterInventory.VisualChanges.RecipeTooltip;
 
 public class RecipeTooltipItem : GlobalItem {
 

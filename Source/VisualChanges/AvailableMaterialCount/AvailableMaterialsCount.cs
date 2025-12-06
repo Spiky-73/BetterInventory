@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using BetterInventory.ItemSearch.BetterGuide;
+using BetterInventory.VisualChanges.RecipeTooltip;
 using MonoMod.Cil;
 using SpikysLib;
 using SpikysLib.IL;
@@ -11,7 +12,7 @@ using Terraria.ModLoader;
 using Terraria.UI;
 using Terraria.UI.Chat;
 
-namespace BetterInventory.VisualChanges;
+namespace BetterInventory.VisualChanges.AvailableMaterialsCount;
 
 public sealed class AvailableMaterialsCountItem : GlobalItem {
 

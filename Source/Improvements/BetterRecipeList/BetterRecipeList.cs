@@ -6,7 +6,7 @@ using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace BetterInventory.Improvements;
+namespace BetterInventory.Improvements.BetterRecipeList;
 
 public sealed class BetterRecipeList : ILoadable {
 

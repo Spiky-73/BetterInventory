@@ -13,7 +13,7 @@ using Terraria.ModLoader;
 using Terraria.UI;
 using Terraria.UI.Gamepad;
 
-namespace BetterInventory.Improvements;
+namespace BetterInventory.Improvements.BetterRecipeGrid;
 
 public sealed class BetterRecipeGrid : ILoadable {
 

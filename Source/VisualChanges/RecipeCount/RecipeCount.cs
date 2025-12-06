@@ -9,7 +9,7 @@ using Terraria.GameContent;
 using Terraria.ModLoader;
 using Terraria.UI.Gamepad;
 
-namespace BetterInventory.VisualChanges;
+namespace BetterInventory.VisualChanges.RecipeCount;
 
 public sealed class RecipeCount : ILoadable {
 

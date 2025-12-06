@@ -82,7 +82,7 @@ public sealed class Compatibility : ModConfig {
 }
 
 public sealed class UnloadedVanillaFixes {
-    public bool ammoPickup;
+    public bool ammoPickupOrder;
     public bool consistantScrollDirection_recipesUnpaused;
     public bool consistantScrollDirection_recipesPaused;
     public bool consistantScrollDirection_accessories;
@@ -90,7 +90,7 @@ public sealed class UnloadedVanillaFixes {
 
     public static void DisableAllILs() {
         var config = VanillaFixes.Instance;
-        config.ammoPickup = false;
+        config.ammoPickupOrder = false;
         config.consistantScrollDirection.Value.accessories = false;
         config.consistantScrollDirection.Value.recipesPaused = false;
         config.consistantScrollDirection.Value.recipesUnpaused = false;

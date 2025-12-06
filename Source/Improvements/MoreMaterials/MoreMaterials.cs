@@ -4,7 +4,7 @@ using Terraria;
 using Terraria.ModLoader;
 using Terraria.UI;
 
-namespace BetterInventory.Improvements;
+namespace BetterInventory.Improvements.MoreMaterials;
 
 public sealed class MoreMaterialsPlayer : ModPlayer {
 

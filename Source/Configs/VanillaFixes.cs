@@ -6,13 +6,13 @@ namespace BetterInventory.Configs;
 
 public sealed class VanillaFixes : ModConfig {
 
-    [DefaultValue(true)] public bool ammoPickup;
+    [DefaultValue(true)] public bool ammoPickupOrder;
     public Toggle<ConsistantScrollDirection> consistantScrollDirection = new(true);
     [DefaultValue(true)] public bool materialsWrapping;
 
 
     public static VanillaFixes Instance = null!;
-    public static bool AmmoPickup => Instance.ammoPickup && !UnloadedVanillaFixes.Instance.ammoPickup;
+    public static bool AmmoPickupOrder => Instance.ammoPickupOrder && !UnloadedVanillaFixes.Instance.ammoPickupOrder;
     public static bool ConsistantScrollDirection => Instance.consistantScrollDirection;
     public static bool MaterialsWrapping => Instance.materialsWrapping && !UnloadedVanillaFixes.Instance.materialsWrapping;
 

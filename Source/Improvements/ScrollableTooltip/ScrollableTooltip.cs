@@ -9,7 +9,7 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
-namespace BetterInventory.Improvements;
+namespace BetterInventory.Improvements.ScrollableTooltip;
 
 public class ScrollableTooltipItem : GlobalItem {
 

@@ -5,7 +5,7 @@ using SpikysLib.IL;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace BetterInventory.Improvements;
+namespace BetterInventory.Improvements.SmartConsumption;
 
 public sealed class SmartConsumptionItem : GlobalItem {
 
