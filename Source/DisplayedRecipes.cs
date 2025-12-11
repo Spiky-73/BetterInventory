@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using BetterInventory.Improvements;
+using BetterInventory.Improvements.BetterRecipeGrid;
 using BetterInventory.ItemSearch.BetterGuide;
 using Terraria;
 using Terraria.ModLoader;
