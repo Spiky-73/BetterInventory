@@ -45,8 +45,6 @@ public sealed class Compatibility : ModConfig {
         SmartPickup.Value.fixSlot = false;
         PreviousDisplay.Value.fakeItem.Key = false;
         PreviousDisplay.Value.icon.Key = false;
-        QuickMove.Value.displayedHotkeys.Key = HotkeyDisplayMode.None;
-        QuickMove.Value.displayedHotkeys.Value.highlightIntensity = 0;
         InventoryManagement.Instance.betterShiftClick.Value.shiftRight = false;
         InventoryManagement.Instance.betterShiftClick.Value.universalShift = false;
         InventoryManagement.Instance.favoriteInBanks = false;
@@ -143,10 +141,12 @@ public sealed class UnloadedVisualChanges {
 
 public sealed class UnloadedFeatures {
     public bool recipeFiltering;
+    public bool quickMove_displayHotkeys;
 
     public static void DisableAllILs() {
         var config = Features.Instance;
         config.recipeFiltering.Key = false;
+        config.quickMove.Value.displayedHotkeys = HotkeyDisplayMode.None;
         config.SaveChanges();
     }
 
@@ -162,8 +162,6 @@ public sealed class UnloadedInventoryManagement {
     public bool fixSlot;
     public bool displayFakeItem;
     public bool displayIcon;
-    public bool quickMoveHotkeys;
-    public bool quickMoveHighlight;
     public bool favoriteInBanks;
     public bool shiftRight;
     public bool universalShift;

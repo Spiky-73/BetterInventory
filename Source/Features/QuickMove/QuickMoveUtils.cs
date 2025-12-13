@@ -12,7 +12,7 @@ public static class QuickMoveUtils {
 
     public static readonly string[] MoveKeyNames = [.. new SpikysLib.DataStructures.Range(0, 10).Select(i => $"Hotbar{i + 1}")];
 
-    public static int HotkeyToSlotRaw(int hotkey, int slotCount) => Configs.QuickMove.Value.hotkeyMode switch {
+    public static int HotkeyToSlotRaw(int hotkey, int slotCount) => Configs.QuickMove.Instance.hotkeyMode switch {
         Configs.HotkeyMode.FromEnd => slotCount - MoveKeyNames.Length + hotkey,
         Configs.HotkeyMode.Reversed => MoveKeyNames.Length - hotkey - 1,
         Configs.HotkeyMode.Hotbar or _ => hotkey
@@ -105,7 +105,7 @@ public static class QuickMoveUtils {
     }
 
     public static List<ModSubInventory> GetChain(Player player, Item item, ModSubInventory? prioritizedInventory) {
-        var inventories = Configs.QuickMove.InactiveInventories ? InventoryLoader.GetPreferredInventories(player) : InventoryLoader.GetPreferredActiveInventories(player);
+        var inventories = Configs.QuickMove.Instance.inactiveInventories ? InventoryLoader.GetPreferredInventories(player) : InventoryLoader.GetPreferredActiveInventories(player);
         List<ModSubInventory> targets = [.. inventories.Where(i => i.Accepts(item) && i.Items.Count > 0)];
         if (prioritizedInventory is not null && targets.Remove(prioritizedInventory) && prioritizedInventory.Items.Count > 1) targets.Insert(0, prioritizedInventory);
         return targets;

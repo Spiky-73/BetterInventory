@@ -22,7 +22,7 @@ public static class QuickMoveChain {
             InventorySlot from = new(hotbar, countToSlot(hotbar.Items.Count));
 
             // No item to chain on
-            if (!Configs.QuickMove.Value.bringItem || from.Item.IsAir) return;
+            if (!Configs.QuickMove.Instance.bringItem || from.Item.IsAir) return;
 
             // hotbar, source, chain
             var inventories = QuickMoveUtils.GetChain(itemSlot.Inventory.Entity, from.Item, itemSlot.Inventory);
@@ -42,15 +42,15 @@ public static class QuickMoveChain {
         if (!InChain()) return;
 
         if (_index != 0) {
-            if (Configs.QuickMove.FollowItem) _chain[_index].Unfocus();
-            if (Configs.QuickMove.Value.returnToSlot || _index != _chain.Count - 1) QuickMoveUtils.UndoMove(_movedItems);
+            if (Configs.QuickMove.Instance.followItem) _chain[_index].Unfocus();
+            if (Configs.QuickMove.Instance.returnToSlot || _index != _chain.Count - 1) QuickMoveUtils.UndoMove(_movedItems);
         }
 
         _index++;
         if (_index >= _chain.Count) {
             BreakChain();
         } else {
-            if (Configs.QuickMove.FollowItem) _chain[_index].Focus();
+            if (Configs.QuickMove.Instance.followItem) _chain[_index].Focus();
             _movedItems = QuickMoveUtils.Move(_chain[0], _chain[_index]);
         }
         Recipe.FindRecipes();

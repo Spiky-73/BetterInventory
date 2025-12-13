@@ -21,7 +21,7 @@ public sealed class QuickMovePlayer : ModPlayer {
     }
 
     public override void ProcessTriggers(TriggersSet triggersSet) {
-        if (!Configs.QuickMove.Enabled) return;
+        if (!Configs.Features.QuickMove) return;
 
         // Break the chain if we close the inventory
         if (!Main.playerInventory) {
@@ -37,14 +37,14 @@ public sealed class QuickMovePlayer : ModPlayer {
 
     public override bool HoverSlot(Item[] inventory, int context, int slot) {
         QuickMoveItem.HoverSlot(inventory, context, slot);
-        if (Configs.QuickMove.Enabled) HandleInput(() => InventoryLoader.GetInventorySlot(Player, inventory, context, slot));
+        if (Configs.Features.QuickMove) HandleInput(() => InventoryLoader.GetInventorySlot(Player, inventory, context, slot));
         return false;
     }
 
     private static void HookDrawInventory(On_Main.orig_DrawInventory orig, Main self) {
         orig(self);
         // Check for inputs if we did not hover any ItemSlot
-        if (Configs.QuickMove.Enabled && QuickMoveChain.InChain() && !Main.LocalPlayer.mouseInterface) LocalPlayer.HandleInput(() => null);
+        if (Configs.Features.QuickMove && QuickMoveChain.InChain() && !Main.LocalPlayer.mouseInterface) LocalPlayer.HandleInput(() => null);
     }
 
     private void HandleInput(Func<InventorySlot?> getSourceSlot) {
@@ -71,7 +71,7 @@ public sealed class QuickMovePlayer : ModPlayer {
         }
         QuickMoveChain.ContinueChain();
         SoundEngine.PlaySound(SoundID.Grab);
-        _graceTime = Configs.QuickMove.Value.resetTime;
+        _graceTime = Configs.QuickMove.Instance.graceTime;
     }
 
     private static void HookSaveSlotPosition(On_ItemSlot.orig_Draw_SpriteBatch_ItemArray_int_int_Vector2_Color orig, SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, Color lightColor) {

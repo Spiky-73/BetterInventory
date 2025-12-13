@@ -7,9 +7,11 @@ namespace BetterInventory.Configs;
 public sealed class Features : ModConfig {
 
     public Toggle<RecipeFiltering> recipeFiltering = new(true);
+    public Toggle<QuickMove> quickMove = new(true);
 
     public static Features Instance = null!;
     public static bool RecipeFiltering => Instance.recipeFiltering;
+    public static bool QuickMove => Instance.quickMove;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
 
@@ -42,3 +44,17 @@ public sealed class RecipeFilters {
     public static RecipeFilters Instance => RecipeFiltering.Instance.filters.Value;
 }
 
+public sealed class QuickMove {
+    [DefaultValue(HotkeyMode.Hotbar)] public HotkeyMode hotkeyMode = HotkeyMode.Hotbar;
+    [Range(0, 3600), DefaultValue(60 * 3)] public int graceTime = 60 * 3;
+    [DefaultValue(true)] public bool followItem = true;
+    [DefaultValue(true)] public bool bringItem = true;
+    [DefaultValue(true)] public bool returnToSlot = true;
+    [DefaultValue(false)] public bool inactiveInventories = false;
+    [DefaultValue(HotkeyDisplayMode.All)] public HotkeyDisplayMode displayedHotkeys = HotkeyDisplayMode.All;
+    [DefaultValue(false)] public bool tooltip = false;
+
+    public static bool DisplayHotkeys =>  Features.QuickMove && Instance.displayedHotkeys != HotkeyDisplayMode.None && !UnloadedFeatures.Instance.quickMove_displayHotkeys;
+    public static bool Tooltip =>  Features.QuickMove && Instance.tooltip;
+    public static QuickMove Instance => InventoryManagement.Instance.quickMove.Value;
+}

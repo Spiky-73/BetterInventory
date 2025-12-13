@@ -19,13 +19,13 @@ public sealed class QuickMoveItem : GlobalItem {
 
     public override void Load() {
         IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += static il => {
-            if (!il.ApplyTo(ILDisplayHotkey, Configs.QuickMove.DisplayHotkeys)) Configs.UnloadedInventoryManagement.Value.quickMoveHotkeys = true;
+            if (!il.ApplyTo(ILDisplayHotkey, Configs.QuickMove.DisplayHotkeys)) Configs.UnloadedFeatures.Instance.quickMove_displayHotkeys = true;
         };
         On_Main.DrawInventory += HookDrawInventory;
     }
 
     public static void HoverSlot(Item[] inventory, int context, int slot) {
-        if (!(Configs.QuickMove.DisplayHotkeys || Configs.QuickMove.Value.tooltip) || inventory[slot].IsAir) return;
+        if (!(Configs.QuickMove.DisplayHotkeys || Configs.QuickMove.Tooltip) || inventory[slot].IsAir) return;
         if (!InventoryLoader.IsInventorySlot(Main.LocalPlayer, inventory, context, slot, out var itemSlot)) return;
         if (itemSlot == _hoverSlot && inventory[slot].type == _hoverType) return;
         _hoverSlot = itemSlot;
@@ -39,12 +39,12 @@ public sealed class QuickMoveItem : GlobalItem {
                 )
             ).ToDictionary();
         }
-        if (Configs.QuickMove.Value.tooltip) {
+        if (Configs.QuickMove.Tooltip) {
             _hoverChain = [itemSlot.Inventory, .. QuickMoveUtils.GetChain(Main.LocalPlayer, itemSlot.Item, itemSlot.Inventory)];
         }
     }
     public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
-        if (!Configs.QuickMove.Value.tooltip || !_hovering || _hoverChain.Count == 0) return;
+        if (!Configs.QuickMove.Tooltip || !_hovering || _hoverChain.Count == 0) return;
 
         tooltips.Add(new(
             BetterInventory.Instance, "QuickMove",
@@ -93,7 +93,7 @@ public sealed class QuickMoveItem : GlobalItem {
 
             }
 
-            if (presses == 0 || Configs.QuickMove.Value.displayedHotkeys.Key == Configs.HotkeyDisplayMode.Next && presses != 1) return;
+            if (presses == 0 || Configs.QuickMove.Instance.displayedHotkeys == Configs.HotkeyDisplayMode.Next && presses != 1) return;
             var key = (moveKey + 1) % QuickMoveUtils.MoveKeyNames.Length;
             string text = presses switch {
                 1 => $"{key}",

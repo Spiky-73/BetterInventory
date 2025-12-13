@@ -152,29 +152,6 @@ public sealed class UpgradeItems {
     }
 }
 
-public sealed class QuickMove {
-    [DefaultValue(HotkeyMode.Hotbar)] public HotkeyMode hotkeyMode = HotkeyMode.Hotbar;
-    [Range(0, 3600), DefaultValue(60 * 3)] public int resetTime = 60 * 3;
-    [DefaultValue(true)] public bool returnToSlot = true;
-    public NestedValue<HotkeyDisplayMode, DisplayedHotkeys> displayedHotkeys = new(HotkeyDisplayMode.All);
-    [DefaultValue(true)] public bool followItem = true;
-    [DefaultValue(false)] public bool inactiveInventories = false;
-    [DefaultValue(false)] public bool tooltip = false;
-    [DefaultValue(true)] public bool bringItem = true;
-
-    public static bool Enabled => InventoryManagement.Instance.quickMove;
-    public static bool InactiveInventories => Value.inactiveInventories;
-    public static bool FollowItem => Value.followItem;
-    public static bool DisplayHotkeys => Value.displayedHotkeys != HotkeyDisplayMode.None && !UnloadedInventoryManagement.Value.quickMoveHotkeys;
-    public static bool Highlight => DisplayHotkeys && Value.displayedHotkeys.Value.highlightIntensity != 0 && !UnloadedInventoryManagement.Value.quickMoveHighlight;
-    public static QuickMove Value => InventoryManagement.Instance.quickMove.Value;
-
-    // Compatibility version < v0.6
-    [JsonProperty, DefaultValue(60 * 3)] private int chainTime { set => ConfigHelper.MoveMember(value != 60 * 3, _ => resetTime = value); }
-    [JsonProperty, DefaultValue(false)] private bool showTooltip { set => ConfigHelper.MoveMember(value, _ => tooltip = value); }
-    [JsonProperty] private NestedValue<HotkeyDisplayMode, DisplayedHotkeys> displayHotkeys { set => ConfigHelper.MoveMember(value is not null, _ => displayedHotkeys = value!); }
-}
-
 public enum HotkeyDisplayMode { None, Next, All }
 public enum HotkeyMode { Hotbar, FromEnd, Reversed }
 
