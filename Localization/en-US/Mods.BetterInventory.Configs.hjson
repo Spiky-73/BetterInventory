@@ -1821,6 +1821,11 @@ UnloadedVanillaFixes: {
 		Label: materials Wrapping
 		Tooltip: ""
 	}
+
+	ammoPickupOrder: {
+		Label: ammo Pickup Order
+		Tooltip: ""
+	}
 }
 
 FeatureList: {
@@ -1913,6 +1918,11 @@ VanillaFixes: {
 
 	materialsWrapping: {
 		Label: materials Wrapping
+		Tooltip: ""
+	}
+
+	ammoPickupOrder: {
+		Label: ammo Pickup Order
 		Tooltip: ""
 	}
 }
