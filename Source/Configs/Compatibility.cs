@@ -141,12 +141,10 @@ public sealed class UnloadedVisualChanges {
 
 public sealed class UnloadedFeatures {
     public bool recipeFiltering;
-    public bool quickMove_displayHotkeys;
 
     public static void DisableAllILs() {
-        var config = Features.Instance;
+        var config = FeaturesConfig.Instance;
         config.recipeFiltering.Key = false;
-        config.quickMove.Value.displayedHotkeys = HotkeyDisplayMode.None;
         config.SaveChanges();
     }
 

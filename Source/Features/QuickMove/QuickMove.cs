@@ -1,23 +1,79 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using BetterInventory.Default.Inventories;
 using SpikysLib;
 using SpikysLib.Collections;
 using Terraria;
+using Terraria.ModLoader;
 using Terraria.UI;
 
 namespace BetterInventory.Features.QuickMove;
 
-public static class QuickMoveUtils {
+public static class QuickMove {
 
-    public static readonly string[] MoveKeyNames = [.. new SpikysLib.DataStructures.Range(0, 10).Select(i => $"Hotbar{i + 1}")];
+    public static List<ModSubInventory> GetChain(Player player, Item item, ModSubInventory? prioritizedInventory) {
+        var inventories = QuickMoveConfig.Instance.inactiveInventories ? InventoryLoader.GetPreferredInventories(player) : InventoryLoader.GetPreferredActiveInventories(player);
+        List<ModSubInventory> targets = [.. inventories.Where(i => i.Accepts(item) && i.Items.Count > 0)];
+        if (prioritizedInventory is not null && targets.Remove(prioritizedInventory) && prioritizedInventory.Items.Count > 1) targets.Insert(0, prioritizedInventory);
+        return targets;
+    }
 
-    public static int HotkeyToSlotRaw(int hotkey, int slotCount) => Configs.QuickMove.Instance.hotkeyMode switch {
-        Configs.HotkeyMode.FromEnd => slotCount - MoveKeyNames.Length + hotkey,
-        Configs.HotkeyMode.Reversed => MoveKeyNames.Length - hotkey - 1,
-        Configs.HotkeyMode.Hotbar or _ => hotkey
-    };
-    public static int HotkeyToSlot(int hotkey, int slotCount) => Math.Clamp(HotkeyToSlotRaw(hotkey, slotCount), 0, slotCount - 1);
+
+    public static bool InChain() => _chain.Count > 1;
+
+    public static void SetupChain(InventorySlot itemSlot, Func<int, int> countToSlot) {
+        _chain = [];
+        _index = 0;
+        _movedItems = [];
+        
+        if (itemSlot.Item.IsAir) {
+            ModSubInventory hotbar = ModContent.GetInstance<Hotbar>().NewInstance(Main.LocalPlayer);
+            InventorySlot from = new(hotbar, countToSlot(hotbar.Items.Count));
+
+            // No item to chain on
+            if (!QuickMoveConfig.Instance.bringItem || from.Item.IsAir) return;
+
+            // hotbar, source, chain
+            var inventories = GetChain(itemSlot.Inventory.Entity, from.Item, itemSlot.Inventory);
+            inventories.Remove(hotbar);
+            _chain = [from, itemSlot, .. inventories.Select(i => new InventorySlot(i, countToSlot(i.Items.Count)))];
+        } else {
+            // source, chain
+            _chain = [itemSlot, .. GetChain(itemSlot.Inventory.Entity, itemSlot.Item, itemSlot.Inventory).Select(i => new InventorySlot(i, countToSlot(i.Items.Count)))];
+        }
+    }
+
+    public static void BreakChain() {
+        _chain.Clear();
+    }
+
+    public static void ContinueChain() {
+        if (!InChain()) return;
+
+        if (_index != 0) {
+            if (QuickMoveConfig.Instance.followItem) _chain[_index].Unfocus();
+            if (QuickMoveConfig.Instance.returnToSlot || _index != _chain.Count - 1) UndoMove(_movedItems);
+        }
+
+        _index++;
+        if (_index >= _chain.Count) {
+            BreakChain();
+        } else {
+            if (QuickMoveConfig.Instance.followItem) _chain[_index].Focus();
+            _movedItems = Move(_chain[0], _chain[_index]);
+        }
+        Recipe.FindRecipes();
+    }
+
+    public static ReadOnlyCollection<InventorySlot> Chain() => _chain.AsReadOnly();
+    public static int ChainIndex() => _index;
+
+    private static List<InventorySlot> _chain = [];
+    private static int _index = 0;
+    private static List<MovedItem> _movedItems = [];
+
 
     /// <summary>
     /// Moves <paramref name="source"/> to <paramref name="target"/>, moving conflicting items if needed.
@@ -26,7 +82,7 @@ public static class QuickMoveUtils {
     /// <param name="source">An InventorySlot to move from</param>
     /// <param name="target">An InventorySlot to move <paramref name="source"/> to</param>
     /// <returns>A list containing every item moved by the function</returns>
-    public static List<MovedItem> Move(InventorySlot source, InventorySlot target) {
+    private static List<MovedItem> Move(InventorySlot source, InventorySlot target) {
         Item item = source.Item;
 
         // Check if the item can go to its target, moving items if needed
@@ -86,7 +142,7 @@ public static class QuickMoveUtils {
     /// Moves the items described in <paramref name="movedItems"/> to their slot before they were moved.
     /// </summary>
     /// <param name="movedItems">A list of moved items</param>
-    public static void UndoMove(List<MovedItem> movedItems) {
+    private static void UndoMove(List<MovedItem> movedItems) {
         foreach (MovedItem moved in movedItems) {
             // Try to find the item in the expected inventory, or in the entire player's inventory otherwise
             bool Predicate(Item i) => i.type == moved.Type && i.prefix == moved.Prefix;
@@ -102,13 +158,6 @@ public static class QuickMoveUtils {
             item.favorited = fav;
         }
         movedItems.Clear();
-    }
-
-    public static List<ModSubInventory> GetChain(Player player, Item item, ModSubInventory? prioritizedInventory) {
-        var inventories = Configs.QuickMove.Instance.inactiveInventories ? InventoryLoader.GetPreferredInventories(player) : InventoryLoader.GetPreferredActiveInventories(player);
-        List<ModSubInventory> targets = [.. inventories.Where(i => i.Accepts(item) && i.Items.Count > 0)];
-        if (prioritizedInventory is not null && targets.Remove(prioritizedInventory) && prioritizedInventory.Items.Count > 1) targets.Insert(0, prioritizedInventory);
-        return targets;
     }
 }
 

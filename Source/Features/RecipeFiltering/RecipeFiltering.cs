@@ -73,7 +73,7 @@ public sealed class RecipeFiltering : ModSystem {
 
     public override void Load() {
         IL_Main.DrawInventory += static il => {
-            if (!il.ApplyTo(ILDrawUI, Configs.Features.RecipeFiltering)) Configs.UnloadedFeatures.Instance.recipeFiltering = true;
+            if (!il.ApplyTo(ILDrawUI, Configs.FeaturesConfig.RecipeFiltering)) Configs.UnloadedFeatures.Instance.recipeFiltering = true;
         };
 
     }
@@ -109,7 +109,7 @@ public sealed class RecipeFiltering : ModSystem {
         //     ++<drawFilters>
         cursor.EmitLdloc(screenY); // int num54
         cursor.EmitDelegate((int y) => {
-            if (Configs.Features.RecipeFiltering && RecipeFilteringPlayer.UnfilteredCount != 0) DrawRecipeUI(94, 450 + y);
+            if (Configs.FeaturesConfig.RecipeFiltering && RecipeFilteringPlayer.UnfilteredCount != 0) DrawRecipeUI(94, 450 + y);
         });
 
         //     ...
@@ -120,7 +120,7 @@ public sealed class RecipeFiltering : ModSystem {
         //         if (++false && Main.InGuideCraftMenu) num74 -= 150;
         cursor.GotoNext(i => i.MatchLdsfld(() => TextureAssets.CraftToggle));
         cursor.GotoPrev(MoveType.After, i => i.MatchLdsfld(() => Main.InGuideCraftMenu));
-        cursor.EmitDelegate((bool inGuide) => !Configs.Features.RecipeFiltering && inGuide);
+        cursor.EmitDelegate((bool inGuide) => !Configs.FeaturesConfig.RecipeFiltering && inGuide);
         //         ...
         //     }
     }

@@ -13,7 +13,6 @@ namespace BetterInventory.Configs;
 
 public sealed class InventoryManagement : ModConfig {
     public Toggle<SmartPickup> smartPickup = new(true);
-    public Toggle<QuickMove> quickMove = new(true);
     public Toggle<CraftStack> craftStack = new(true);
     [DefaultValue(true)] public bool favoriteInBanks;
     public Toggle<BetterShiftClick> betterShiftClick = new(true);
@@ -151,9 +150,6 @@ public sealed class UpgradeItems {
         foreach (ModPickupUpgrader upgrader in PickupUpgraderLoader.Upgraders) upgraders.TryAdd(new(upgrader), true);
     }
 }
-
-public enum HotkeyDisplayMode { None, Next, All }
-public enum HotkeyMode { Hotbar, FromEnd, Reversed }
 
 public sealed class DisplayedHotkeys {
     [DefaultValue(0.2f)] public float highlightIntensity = 0.2f;

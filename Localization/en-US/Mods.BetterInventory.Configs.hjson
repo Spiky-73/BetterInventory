@@ -2121,3 +2121,93 @@ AvailableMaterialsCount: {
 		Tooltip: ""
 	}
 }
+
+CompatibilityConfig: {
+	DisplayName: Compatibility Config
+
+	loadFeatureIfDisabled: {
+		Label: load Feature If Disabled
+		Tooltip: ""
+	}
+
+	unloadedFeatures: {
+		Label: unloaded Features
+		Tooltip: ""
+	}
+}
+
+UnloadedFeaturesConfig: {
+	Tooltip: ""
+
+	quickMove: {
+		Label: quick Move
+		Tooltip: ""
+	}
+}
+
+UnloadedQuickMoveConfig: {
+	Tooltip: ""
+
+	displayedHotkeys: {
+		Label: displayed Hotkeys
+		Tooltip: ""
+	}
+}
+
+FeaturesConfig: {
+	DisplayName: Features Config
+
+	recipeFiltering: {
+		Label: recipe Filtering
+		Tooltip: ""
+	}
+
+	quickMove: {
+		Label: quick Move
+		Tooltip: ""
+	}
+}
+
+QuickMoveConfig: {
+	Tooltip: ""
+
+	hotkeyMode: {
+		Label: hotkey Mode
+		Tooltip: ""
+	}
+
+	graceTime: {
+		Label: grace Time
+		Tooltip: ""
+	}
+
+	followItem: {
+		Label: follow Item
+		Tooltip: ""
+	}
+
+	bringItem: {
+		Label: bring Item
+		Tooltip: ""
+	}
+
+	returnToSlot: {
+		Label: return To Slot
+		Tooltip: ""
+	}
+
+	inactiveInventories: {
+		Label: inactive Inventories
+		Tooltip: ""
+	}
+
+	displayedHotkeys: {
+		Label: displayed Hotkeys
+		Tooltip: ""
+	}
+
+	itemTooltip: {
+		Label: item Tooltip
+		Tooltip: ""
+	}
+}
