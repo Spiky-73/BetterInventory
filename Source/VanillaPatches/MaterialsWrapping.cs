@@ -1,17 +1,18 @@
+using BetterInventory.Configs;
 using MonoMod.Cil;
 using SpikysLib.IL;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.UI.Gamepad;
 
-namespace BetterInventory.Crafting;
+namespace BetterInventory.VanillaPatches;
 
 public sealed class MaterialsWrapping : ILoadable {
 
-    public bool IsLoadingEnabled(Mod mod) => !Configs.Compatibility.CompatibilityMode || Configs.VanillaFixes.MaterialsWrapping;
+    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || VanillaPatchesConfig.MaterialsWrapping;
     public void Load(Mod mod) {
         IL_Main.DrawInventory += static il => {
-            if (!il.ApplyTo(ILMaterialWrapping, Configs.VanillaFixes.MaterialsWrapping)) Configs.UnloadedVanillaFixes.Instance.materialsWrapping = true;
+            if (!il.ApplyTo(ILMaterialWrapping, VanillaPatchesConfig.MaterialsWrapping)) Configs.UnloadedVanillaFixes.Instance.materialsWrapping = true;
         };
     }
     public void Unload() { }
@@ -36,7 +37,7 @@ public sealed class MaterialsWrapping : ILoadable {
         //             ++ <wrappingX>
         cursor.EmitLdloc(materialIndex);
         cursor.EmitDelegate((int x, int i) => {
-            if (!Configs.VanillaFixes.MaterialsWrapping) return x;
+            if (!VanillaPatchesConfig.MaterialsWrapping) return x;
             if (!Main.recBigList) return x + VanillaCorrection * i;
             x -= i * VanillaMaterialSpacing;
             if (i >= MaterialsPerLine[0]) i = MaterialsPerLine[0] - MaterialsPerLine[1] + (i - MaterialsPerLine[0]) % MaterialsPerLine[1];
@@ -50,7 +51,7 @@ public sealed class MaterialsWrapping : ILoadable {
         //             ++ <wrappingY>
         cursor.EmitLdloc(materialIndex);
         cursor.EmitDelegate((int y, int i) => {
-            if (!Configs.VanillaFixes.MaterialsWrapping || !Main.recBigList) return y;
+            if (!VanillaPatchesConfig.MaterialsWrapping || !Main.recBigList) return y;
             i = i < MaterialsPerLine[0] ? 0 : ((i - MaterialsPerLine[0]) / MaterialsPerLine[1] + 1);
             return y + (VanillaMaterialSpacing + VanillaCorrection) * i;
         });

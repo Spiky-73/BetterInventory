@@ -15,6 +15,7 @@ public sealed class CompatibilityConfig : ModConfig {
 
     [ReloadRequired, DefaultValue(true)] public bool loadDisabledFeatures = true;
 
+    [JsonIgnore, ShowDespiteJsonIgnore] public UnloadedVanillaPatchesConfig unloadedVanillaPatches = new();
     [JsonIgnore, ShowDespiteJsonIgnore] public UnloadedFeaturesConfig unloadedFeatures = new();
     [JsonIgnore, ShowDespiteJsonIgnore] public UnloadedImprovementsConfig unloadedImprovements = new();
 

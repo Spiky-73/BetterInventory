@@ -22,7 +22,6 @@ public sealed class Compatibility : ModConfig {
     [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedItemSearch unloadedItemSearch {get; set;} = new();
     
     [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedVisualChanges unloadedVisualChanges {get; set;} = new();
-    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedVanillaFixes unloadedVanillaFixes {get; set;} = new();
     
     [DefaultValue(0), JsonProperty] internal int failedILs = 0;
 
@@ -66,30 +65,9 @@ public sealed class Compatibility : ModConfig {
         ItemSearch.Instance.Save();
 
         UnloadedVisualChanges.DisableAllILs();
-        UnloadedVanillaFixes.DisableAllILs();
     }
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
-}
-
-public sealed class UnloadedVanillaFixes {
-    public bool ammoPickupOrder;
-    public bool consistantScrollDirection_recipesUnpaused;
-    public bool consistantScrollDirection_recipesPaused;
-    public bool consistantScrollDirection_accessories;
-    public bool materialsWrapping;
-
-    public static void DisableAllILs() {
-        var config = VanillaFixes.Instance;
-        config.ammoPickupOrder = false;
-        config.consistantScrollDirection.Value.accessories = false;
-        config.consistantScrollDirection.Value.recipesPaused = false;
-        config.consistantScrollDirection.Value.recipesUnpaused = false;
-        config.materialsWrapping = false;
-        config.SaveChanges();
-    }
-
-    public static UnloadedVanillaFixes Instance => Compatibility.Instance.unloadedVanillaFixes;
 }
 
 public sealed class UnloadedVisualChanges {

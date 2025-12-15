@@ -1,4 +1,3 @@
-using System;
 using MonoMod.Cil;
 using Terraria;
 using Terraria.UI;
@@ -7,7 +6,6 @@ using SpikysLib;
 using SpikysLib.IL;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
-using BetterInventory.Crafting;
 
 namespace BetterInventory.ItemSearch.BetterGuide;
 

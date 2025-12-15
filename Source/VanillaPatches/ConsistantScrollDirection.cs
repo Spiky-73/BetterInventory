@@ -1,3 +1,4 @@
+using BetterInventory.Configs;
 using MonoMod.Cil;
 using SpikysLib;
 using SpikysLib.IL;
@@ -5,25 +6,17 @@ using Terraria;
 using Terraria.GameInput;
 using Terraria.ModLoader;
 
-namespace BetterInventory.VanillaFixes;
+namespace BetterInventory.VanillaPatches;
 
 public sealed class ConsistantScrollDirection : ILoadable {
 
-    public bool IsLoadingEnabled(Mod mod) => !Configs.Compatibility.CompatibilityMode || Configs.VanillaFixes.ConsistantScrollDirection;
+    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || VanillaPatchesConfig.ConsistantScrollDirection;
     public void Load(Mod mod) {
-        IL_Player.Update += static il => {
-            if (!il.ApplyTo(ILFixRecipeScrollUpdate, Configs.ConsistantScrollDirection.RecipesUnpaused)) Configs.UnloadedVanillaFixes.Instance.consistantScrollDirection_recipesUnpaused = true;
-        };
-        IL_Main.DoUpdate_WhilePaused += static il => {
-            if (!il.ApplyTo(ILFixRecipeScrollWhilePaused, Configs.ConsistantScrollDirection.RecipesPaused)) Configs.UnloadedVanillaFixes.Instance.consistantScrollDirection_recipesPaused = true;
-        };
-        MonoModHooks.Modify(TypeHelper.GetMethod((AccessorySlotLoader i) => i.DrawScrollbar), static il => {
-            if (!il.ApplyTo(ILFixAccessoryScroll, Configs.ConsistantScrollDirection.Accessories)) Configs.UnloadedVanillaFixes.Instance.consistantScrollDirection_accessories = true;
-        });
-
+        IL_Player.Update += il => il.TryEdit(ILFixRecipeScrollUpdate, ref UnloadedConsistantScrollDirectionConfig.Instance.recipesUnpaused);
+        IL_Main.DoUpdate_WhilePaused += il => il.TryEdit(ILFixRecipeScrollWhilePaused, ref UnloadedConsistantScrollDirectionConfig.Instance.recipesPaused);
+        MonoModHooks.Modify(TypeHelper.GetMethod((AccessorySlotLoader i) => i.DrawScrollbar), il => il.TryEdit(ILFixAccessoryScroll, ref UnloadedConsistantScrollDirectionConfig.Instance.accessories));
     }
     public void Unload() { }
-
 
     private static void ILFixRecipeScrollUpdate(ILContext il) {
         ILCursor cursor = new(il);
@@ -35,7 +28,7 @@ public sealed class ConsistantScrollDirection : ILoadable {
         //     Main.focusRecipe += ++[-1 *] num8;
         cursor.GotoNext(i => i.MatchStsfld(() => Main.focusRecipe));
         cursor.GotoPrev(MoveType.After, i => i.MatchLdloc(offset));
-        cursor.EmitDelegate((int offset) => Configs.ConsistantScrollDirection.RecipesUnpaused ? -offset : offset);
+        cursor.EmitDelegate((int offset) => VanillaPatchesConfig.ConsistantScrollDirection && ConsistantScrollDirectionConfig.RecipesUnpaused ? -offset : offset);
         // }
     }
 
@@ -44,14 +37,14 @@ public sealed class ConsistantScrollDirection : ILoadable {
 
         // int num = ++[-1 *] PlayerInput.ScrollWheelDelta / 120;
         cursor.GotoNext(MoveType.After, i => i.MatchLdsfld(() => PlayerInput.ScrollWheelDelta));
-        cursor.EmitDelegate((int ScrollWheelDelta) => Configs.ConsistantScrollDirection.RecipesUnpaused ? -ScrollWheelDelta : ScrollWheelDelta);
+        cursor.EmitDelegate((int ScrollWheelDelta) => VanillaPatchesConfig.ConsistantScrollDirection && ConsistantScrollDirectionConfig.RecipesUnpaused ? -ScrollWheelDelta : ScrollWheelDelta);
     }
 
     private static void ILFixAccessoryScroll(ILContext il) {
         ILCursor cursor = new(il);
         // int scrollDelta = AccessorySlotLoader.ModSlotPlayer(AccessorySlotLoader.Player).scrollbarSlotPosition + ++[-1 *] PlayerInput.ScrollWheelDelta / 120;
         cursor.GotoNext(MoveType.After, i => i.MatchLdsfld(() => PlayerInput.ScrollWheelDelta));
-        cursor.EmitDelegate((int ScrollWheelDelta) => Configs.ConsistantScrollDirection.Accessories ? -ScrollWheelDelta : ScrollWheelDelta);
+        cursor.EmitDelegate((int ScrollWheelDelta) => VanillaPatchesConfig.ConsistantScrollDirection && ConsistantScrollDirectionConfig.Accessories ? -ScrollWheelDelta : ScrollWheelDelta);
     }
 
 }
