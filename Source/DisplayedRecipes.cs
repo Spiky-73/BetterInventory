@@ -65,7 +65,7 @@ public sealed class DisplayedRecipes : ModSystem {
 
     private void HookNoRefocus(On_Recipe.orig_TryRefocusingRecipe orig, int oldRecipe) {
         if (!Enabled || Main.availableRecipe != availableRecipes) {
-            BetterRecipeGrid.HookTryRefocusingList(orig, oldRecipe);
+            BetterRecipeGridHooks.HookTryRefocusingList(orig, oldRecipe);
         }
     }
 

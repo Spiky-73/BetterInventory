@@ -3,13 +3,14 @@ using BetterInventory.Features.RecipeFiltering;
 using SpikysLib.Configs;
 using Terraria.ModLoader.Config;
 
-namespace BetterInventory.Configs; 
+namespace BetterInventory.Configs;
 
 using FUnloadableAttribute = UnloadableAttribute<UnloadedFeaturesConfig>;
+
 public sealed class FeaturesConfig : ModConfig {
 
-    [FUnloadable("recipeFiltering")] public Toggle<RecipeFilteringConfig> recipeFiltering = new(true);
-    [FUnloadable("quickMove")] public Toggle<QuickMoveConfig> quickMove = new(true);
+    [FUnloadable(nameof(recipeFiltering))] public Toggle<RecipeFilteringConfig> recipeFiltering = new(true);
+    [FUnloadable(nameof(quickMove))] public Toggle<QuickMoveConfig> quickMove = new(true);
 
     public static FeaturesConfig Instance = null!;
 

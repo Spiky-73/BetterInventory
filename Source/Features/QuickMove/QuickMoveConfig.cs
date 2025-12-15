@@ -6,6 +6,7 @@ using Terraria.ModLoader.Config;
 namespace BetterInventory.Features.QuickMove;
 
 using QMUnloadableAttribute = UnloadableAttribute<UnloadedQuickMoveConfig>;
+
 public sealed class QuickMoveConfig {
     [DefaultValue(HotkeyMode.Hotbar)] public HotkeyMode hotkeyMode = HotkeyMode.Hotbar;
     [Range(0, 3600), DefaultValue(60 * 3)] public int graceTime = 60 * 3;
@@ -15,7 +16,7 @@ public sealed class QuickMoveConfig {
     [DefaultValue(true)] public bool returnToSlot = true;
     [DefaultValue(false)] public bool inactiveInventories = false;
 
-    [QMUnloadable("displayedHotkeys"), DefaultValue(HotkeyDisplayMode.All)] public HotkeyDisplayMode displayedHotkeys = HotkeyDisplayMode.All;
+    [QMUnloadable(nameof(displayedHotkeys)), DefaultValue(HotkeyDisplayMode.All)] public HotkeyDisplayMode displayedHotkeys = HotkeyDisplayMode.All;
     [DefaultValue(false)] public bool itemTooltip = false;
 
     public static bool Enabled => FeaturesConfig.Instance.quickMove;

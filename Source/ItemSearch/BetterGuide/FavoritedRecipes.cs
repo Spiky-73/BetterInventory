@@ -73,7 +73,7 @@ public sealed class FavoritedRecipesPlayer : ModPlayer {
         }
         orig(recipeIndex);
         if (clicked) {
-            if (!Configs.FavoritedRecipes.Value.followOnFavorite) BetterRecipeGrid.DontFollowOnNextRefocus();
+            if (!Configs.FavoritedRecipes.Value.followOnFavorite) RememberGridPosition.DontFollowOnNextRefocus();
             Recipe.FindRecipes();
             SoundEngine.PlaySound(SoundID.MenuTick);
             Main.mouseLeftRelease = false;

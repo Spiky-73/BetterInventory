@@ -16,7 +16,7 @@ public sealed class RecipeFilteringPlayer : ModPlayer {
     public override void Load() {
         RecipeFiltersPlayer.Load();
         RecipeSearchPlayer.Load();
-        RecipeSortPlayer.Load();
+        RecipeSortPlayer.Load(Mod);
     }
 
     public override void SaveData(TagCompound tag) {
@@ -58,6 +58,7 @@ public sealed class RecipeFilteringSystem : ModSystem {
         ILCursor cursor = new(il);
 
         // BetterGameUI Compatibility
+        // TODO test
         int screenY = 13;
         if (cursor.TryGotoNext(i => i.MatchCallvirt((AccessorySlotLoader i) => i.DrawAccSlots))) {
             cursor.GotoNext(i => i.MatchLdsfld(() => Main.screenHeight));

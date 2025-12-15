@@ -10,7 +10,7 @@ namespace BetterInventory.Improvements.BetterRecipeList;
 
 public sealed class BetterRecipeList : ILoadable {
 
-    public bool IsLoadingEnabled(Mod mod) => !Configs.Compatibility.CompatibilityMode || Configs.Improvements.BetterRecipeList;
+    public bool IsLoadingEnabled(Mod mod) => !Configs.Compatibility.CompatibilityMode || Configs.ImprovementsConfig.BetterRecipeList;
     public void Load(Mod mod) {
         IL_Main.DrawInventory += static il => {
             if (!il.ApplyTo(ILFastScroll, Configs.BetterRecipeList.FastScroll)) Configs.UnloadedImprovements.Instance.betterRecipeList_fastScroll = true;

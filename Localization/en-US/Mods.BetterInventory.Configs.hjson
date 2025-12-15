@@ -2139,6 +2139,11 @@ CompatibilityConfig: {
 		Label: load Disabled Features
 		Tooltip: ""
 	}
+
+	unloadedImprovements: {
+		Label: unloaded Improvements
+		Tooltip: ""
+	}
 }
 
 UnloadedFeaturesConfig: {
@@ -2270,6 +2275,136 @@ RecipeFiltersConfig: {
 
 	filtersPerLine: {
 		Label: filters Per Line
+		Tooltip: ""
+	}
+}
+
+UnloadedImprovementsConfig: {
+	Tooltip: ""
+
+	betterRecipeGrid: {
+		Label: better Recipe Grid
+		Tooltip: ""
+	}
+}
+
+UnloadedBetterRecipeGridConfig: {
+	Tooltip: ""
+
+	craftOnRecipeGrid: {
+		Label: craft On Recipe Grid
+		Tooltip: ""
+	}
+
+	refocusButton: {
+		Label: refocus Button
+		Tooltip: ""
+	}
+
+	noRecStartOffset: {
+		Label: no Rec Start Offset
+		Tooltip: ""
+	}
+
+	noRecListClose: {
+		Label: no Rec List Close
+		Tooltip: ""
+	}
+
+	rememberListPosition: {
+		Label: remember List Position
+		Tooltip: ""
+	}
+
+	pageScroll: {
+		Label: page Scroll
+		Tooltip: ""
+	}
+
+	noRecGridOffset: {
+		Label: no Rec Grid Offset
+		Tooltip: ""
+	}
+
+	noRecGridClose: {
+		Label: no Rec Grid Close
+		Tooltip: ""
+	}
+
+	rememberGridPosition: {
+		Label: remember Grid Position
+		Tooltip: ""
+	}
+}
+
+ImprovementsConfig: {
+	DisplayName: Improvements Config
+
+	betterRecipeList: {
+		Label: better Recipe List
+		Tooltip: ""
+	}
+
+	betterRecipeGrid: {
+		Label: better Recipe Grid
+		Tooltip: ""
+	}
+
+	moreMaterials: {
+		Label: more Materials
+		Tooltip: ""
+	}
+
+	scrollableTooltip: {
+		Label: scrollable Tooltip
+		Tooltip: ""
+	}
+
+	smartConsumption: {
+		Label: smart Consumption
+		Tooltip: ""
+	}
+}
+
+BetterRecipeGridConfig: {
+	Tooltip: ""
+
+	craftOnRecipeGrid: {
+		Label: craft On Recipe Grid
+		Tooltip: ""
+	}
+
+	refocusButton: {
+		Label: refocus Button
+		Tooltip: ""
+	}
+
+	noRecGridOffset: {
+		Label: no Rec Grid Offset
+		Tooltip: ""
+	}
+
+	noRecGridClose: {
+		Label: no Rec Grid Close
+		Tooltip: ""
+	}
+
+	rememberGridPosition: {
+		Label: remember Grid Position
+		Tooltip: ""
+	}
+
+	pageScroll: {
+		Label: page Scroll
+		Tooltip: ""
+	}
+}
+
+CraftOnRecipeGridConfig: {
+	Tooltip: ""
+
+	focusHovered: {
+		Label: focus Hovered
 		Tooltip: ""
 	}
 }

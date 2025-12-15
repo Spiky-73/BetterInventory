@@ -1,36 +1,30 @@
-using System;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using ReLogic.Content;
 using SpikysLib.IL;
 using Terraria;
-using Terraria.Audio;
 using Terraria.GameContent;
-using Terraria.GameInput;
-using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.UI;
 using Terraria.UI.Gamepad;
 
 namespace BetterInventory.Improvements.BetterRecipeGrid;
 
-public sealed class BetterRecipeGrid : ILoadable {
+public sealed class BetterRecipeGridHooks : ILoadable {
 
-    public bool IsLoadingEnabled(Mod mod) => !Configs.Compatibility.CompatibilityMode || Configs.Improvements.BetterRecipeGrid;
+    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterRecipeGridConfig.Enabled;
     public void Load(Mod mod) {
         IL_Main.DrawInventory += static il => {
-            if (!il.ApplyTo(ILRefocusButton, Configs.BetterRecipeGrid.RefocusButton)) Configs.UnloadedImprovements.Instance.betterRecipeGrid_refocusButton = true;
-            if (!il.ApplyTo(ILNoRecStartOffset, Configs.BetterRecipeGrid.NoRecStartOffset)) Configs.UnloadedImprovements.Instance.betterRecipeGrid_noRecStartOffset = true;
-            if (!il.ApplyTo(ILNoRecListClose, Configs.BetterRecipeGrid.NoRecListClose)) Configs.UnloadedImprovements.Instance.betterRecipeGrid_noRecListClose = true;
-            if (!il.ApplyTo(ILCraftOnList, Configs.BetterRecipeGrid.CraftOnRecList)) Configs.UnloadedImprovements.Instance.betterRecipeGrid_craftOnRecipeGrid = true;
-            if (!il.ApplyTo(ILScrollButtonsFix, Configs.BetterRecipeGrid.PageScroll)) Configs.UnloadedImprovements.Instance.betterRecipeGrid_pageScroll = true;
+            il.TryEdit(ILRefocusButton, ref UnloadedBetterRecipeGridConfig.Instance.refocusButton);
+            il.TryEdit(ILNoRecStartOffset, ref UnloadedBetterRecipeGridConfig.Instance.noRecGridOffset);
+            il.TryEdit(ILNoRecListClose, ref UnloadedBetterRecipeGridConfig.Instance.noRecGridClose);
+            il.TryEdit(ILCraftOnList, ref UnloadedBetterRecipeGridConfig.Instance.craftOnRecipeGrid);
+            il.TryEdit(ILScrollButtonsFix, ref UnloadedBetterRecipeGridConfig.Instance.pageScroll);
         };
 
         On_Main.DrawInterface_Resources_ClearBuffs += HookRememberListPosition;
         On_Recipe.ClearAvailableRecipes += HookClearAvailableRecipes;
 
-        _craftCenterButton = mod.Assets.Request<Texture2D>($"Assets/RecCenter");
+        RefocusButton.Load(mod);
     }
     public void Unload() { }
 
@@ -55,29 +49,12 @@ public sealed class BetterRecipeGrid : ILoadable {
         //     ++ <drawRecipeCount>
         cursor.EmitLdloc(x).EmitLdloc(y);
         cursor.EmitDelegate((int x, int y) => {
-            if (Configs.BetterRecipeGrid.RefocusButton) DrawFocusButton(x, y);
+            if (!BetterRecipeGridConfig.Enabled) return;
+            if (BetterRecipeGridConfig.RefocusButton) RefocusButton.DrawButton(x, y);
         });
 
         //     while (...) <recipeList>
         // }
-    }
-    private static void DrawFocusButton(int x, int y) {
-        int line = GetRecipeLine(Main.focusRecipe);
-        if (0 <= line && line < UILinkPointNavigator.Shortcuts.CRAFT_IconsPerColumn) return;
-        const int size = 20;
-        y += 2 + 2 * size;
-        x -= size;
-        Rectangle hitbox = new(x, y, _craftCenterButton.Width(), _craftCenterButton.Height());
-        if (hitbox.Contains(Main.mouseX, Main.mouseY) && !PlayerInput.IgnoreMouseInterface) {
-            Main.LocalPlayer.mouseInterface = true;
-            if (Main.mouseLeftRelease && Main.mouseLeft) {
-                Main.recStart = Math.Max(0, SpikysLib.MathHelper.Snap(Main.focusRecipe, UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow, SpikysLib.MathHelper.SnapMode.Floor)
-                    - UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow * (UILinkPointNavigator.Shortcuts.CRAFT_IconsPerColumn / 2 - 1));
-                SoundEngine.PlaySound(SoundID.MenuTick);
-                Main.mouseLeftRelease = false;
-            }
-        }
-        Main.spriteBatch.Draw(_craftCenterButton.Value, new Vector2(x, y), new(200, 200, 200, 200));
     }
 
     private static void ILNoRecStartOffset(ILContext il) {
@@ -89,16 +66,18 @@ public sealed class BetterRecipeGrid : ILoadable {
         cursor.GotoNext(i => i.MatchStsfld(() => UILinkPointNavigator.Shortcuts.CRAFT_IconsPerColumn));
         cursor.GotoNext(MoveType.AfterLabel, i => i.MatchStsfld(() => Main.recStart));
         //     ++<no max bound>
-        cursor.EmitDelegate((int rs) => !Configs.BetterRecipeGrid.NoRecStartOffset ? rs : Main.recStart);
+        cursor.EmitDelegate((int rs) => {
+            if (!BetterRecipeGridConfig.Enabled) return rs;
+            return BetterRecipeGridConfig.NoRecGridOffset ? Main.recStart : rs;
+        });
 
         //     <handle scroll>
         //     ++<set max bound and snap>
         cursor.GotoNext(i => i.MatchLdsfld(() => TextureAssets.CraftDownButton));
         cursor.GotoNext(MoveType.AfterLabel, i => i.MatchLdsfld(() => Main.recStart));
         cursor.EmitDelegate(() => {
-            if (!Configs.BetterRecipeGrid.NoRecStartOffset) return;
-            Main.recStart -= Main.recStart % UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow;
-            Main.recStart = Math.Min(Main.recStart, Math.Max(0, SpikysLib.MathHelper.Snap(Main.numAvailableRecipes, UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow, SpikysLib.MathHelper.SnapMode.Ceiling) - UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow * UILinkPointNavigator.Shortcuts.CRAFT_IconsPerColumn));
+            if (!BetterRecipeGridConfig.Enabled) return;
+            if (BetterRecipeGridConfig.NoRecGridOffset) NoRecGridOffset.PostScroll();
         });
     }
 
@@ -116,35 +95,37 @@ public sealed class BetterRecipeGrid : ILoadable {
         //         if (++[false] && Main.InGuideCraftMenu) num74 -= 150;
         cursor.GotoNext(i => i.MatchLdsfld(() => TextureAssets.CraftToggle));
         cursor.GotoPrev(MoveType.After, i => i.MatchLdsfld(() => Main.numAvailableRecipes));
-        cursor.EmitDelegate((int numAvailableRecipes) => Configs.BetterRecipeGrid.NoRecListClose && numAvailableRecipes == 0 ? 1 : numAvailableRecipes);
+        cursor.EmitDelegate((int numAvailableRecipes) => {
+            if (!BetterRecipeGridConfig.Enabled) return numAvailableRecipes;
+            return BetterRecipeGridConfig.NoRecGridClose && numAvailableRecipes == 0 ? 1 : numAvailableRecipes;
+        });
         //         ...
         //     }
     }
 
     private static void HookRememberListPosition(On_Main.orig_DrawInterface_Resources_ClearBuffs orig) {
-        var start = Main.recStart;
+        if (!BetterRecipeGridConfig.Enabled || !BetterRecipeGridConfig.RememberGridPosition) {
+            orig();
+            return;
+        }
+        RememberGridPosition.PreClearBuffs();
         orig();
-        if (Configs.BetterRecipeGrid.RememberListPosition) Main.recStart = start;
+        RememberGridPosition.PostClearBuffs();
     }
 
 
-    private void HookClearAvailableRecipes(On_Recipe.orig_ClearAvailableRecipes orig) {
-        _focusedRecipeLine = GetRecipeLine(Main.focusRecipe);
-        _focusedVisible = !_skipFollow && 0 <= _focusedRecipeLine && _focusedRecipeLine < UILinkPointNavigator.Shortcuts.CRAFT_IconsPerColumn;
+    private static void HookClearAvailableRecipes(On_Recipe.orig_ClearAvailableRecipes orig) {
+        if (BetterRecipeGridConfig.Enabled && BetterRecipeGridConfig.RememberGridPosition) {
+            RememberGridPosition.PreClearAvailableRecipes();
+        }
         orig();
-    }
-
-    public static void DontFollowOnNextRefocus() {
-        _skipFollow = true;
     }
 
     // TODO Called in DisplayedRecipes
     internal static void HookTryRefocusingList(On_Recipe.orig_TryRefocusingRecipe orig, int oldRecipe) {
         orig(oldRecipe);
-        _skipFollow = false;
-        if (!Configs.BetterRecipeGrid.RememberListPosition || !_focusedVisible) return;
-        Main.recStart = Math.Max(0, SpikysLib.MathHelper.Snap(Main.focusRecipe, UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow, SpikysLib.MathHelper.SnapMode.Floor)
-            - _focusedRecipeLine * UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow);
+        if (!BetterRecipeGridConfig.Enabled) return;
+        if (BetterRecipeGridConfig.RememberGridPosition) RememberGridPosition.TryRefocusingRecipe();
     }
 
     private static void ILCraftOnList(ILContext il) {
@@ -168,13 +149,12 @@ public sealed class BetterRecipeGrid : ILoadable {
         //             if(++[!craftInList] &&<click>) {
         cursor.EmitLdloc(recipeListIndex);
         cursor.EmitDelegate((int i) => {
-            if (!Configs.BetterRecipeGrid.CraftOnRecList) return false;
-            int f = Main.focusRecipe;
-            if (Configs.CraftOnRecipeGrid.Instance.focusHovered) Main.focusRecipe = i;
-            Main.HoverOverCraftingItemButton(i);
-            if (f != Main.focusRecipe) Main.recFastScroll = true;
-            Main.craftingHide = false;
-            return true;
+            if (!BetterRecipeGridConfig.Enabled) return false;
+            if (BetterRecipeGridConfig.CraftOnRecGrid) {
+                CraftOnRecipeGrid.PreCraftItem(i);
+                return true;
+            }
+            return false;
         });
         cursor.EmitBrtrue(skipVanillaHover);
         //                 <scrollList>
@@ -186,8 +166,8 @@ public sealed class BetterRecipeGrid : ILoadable {
         cursor.GotoLabel(skipVanillaHover, MoveType.AfterLabel);
         cursor.EmitLdloc(recipeListIndex);
         cursor.EmitDelegate((int i) => {
-            if (!Configs.BetterRecipeGrid.CraftOnRecList) return;
-            if (Main.numAvailableRecipes > 0 && Main.focusRecipe == i && !Configs.CraftOnRecipeGrid.Instance.focusHovered) ItemSlot.DrawGoldBGForCraftingMaterial = true;
+            if (!BetterRecipeGridConfig.Enabled) return;
+            if (BetterRecipeGridConfig.CraftOnRecGrid) CraftOnRecipeGrid.PostHoverRecipe(i);
         });
         //     }
         // }
@@ -215,8 +195,9 @@ public sealed class BetterRecipeGrid : ILoadable {
 
             //         ++ <listScroll>
             c.EmitDelegate((int delta) => {
-                if (!Configs.BetterRecipeGrid.PageScroll) return delta;
-                return UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow * UILinkPointNavigator.Shortcuts.CRAFT_IconsPerColumn;
+                if (!BetterRecipeGridConfig.Enabled) return delta;
+                if (BetterRecipeGridConfig.PageScroll) return PageScroll.ModifyRecipeScroll(delta);
+                return delta;
             });
             //     }
             // }
@@ -224,17 +205,4 @@ public sealed class BetterRecipeGrid : ILoadable {
         // }
 
     }
-
-    public static int GetRecipeLine(int availableRecipeIndex) {
-        int delta = availableRecipeIndex - Main.recStart;
-        int line = delta / UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow;
-        if (delta < 0) line--;
-        return line;
-    }
-
-    private static bool _skipFollow;
-    private static bool _focusedVisible;
-    private static int _focusedRecipeLine;
-
-    private static Asset<Texture2D> _craftCenterButton = null!;
 }

@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
 
@@ -13,15 +14,15 @@ public sealed class RecipeSortPlayer {
 
     public static RecipeSortPlayer LocalPlayer => RecipeFilteringPlayer.LocalPlayer.SortPlayer;
 
-    public static void Load() {
+    public static void Load(Mod mod) {
         AddSortStep(new RecipeSortStep.ByRecipeId());
         AddSortStep(new RecipeSortStep.ByCreateItemName());
         AddSortStep(new RecipeSortStep.ByCreateItemCreativeId());
         AddSortStep(new RecipeSortStep.ByCreateItemValue());
 
-        RecipeSortToggle = BetterInventory.Instance.Assets.Request<Texture2D>($"Assets/Sort_Toggle");
-        RecipeSortToggleBorder = BetterInventory.Instance.Assets.Request<Texture2D>($"Assets/Sort_Toggle_Border");
-        RecipeSortingSteps = BetterInventory.Instance.Assets.Request<Texture2D>($"Assets/RecipeSortingSteps");
+        RecipeSortToggle = mod.Assets.Request<Texture2D>($"Assets/Sort_Toggle");
+        RecipeSortToggleBorder = mod.Assets.Request<Texture2D>($"Assets/Sort_Toggle_Border");
+        RecipeSortingSteps = mod.Assets.Request<Texture2D>($"Assets/RecipeSortingSteps");
     }
 
     public void LoadData(TagCompound tag) {
