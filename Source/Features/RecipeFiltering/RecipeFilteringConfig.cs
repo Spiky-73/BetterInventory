@@ -1,4 +1,5 @@
 
+using System;
 using System.ComponentModel;
 using BetterInventory.Configs;
 using SpikysLib.Configs;
@@ -16,6 +17,10 @@ public sealed class RecipeFilteringConfig {
     public static bool Filters => Instance.filters;
     public static bool Search => Instance.search;
     public static bool Sort => Instance.sort;
+
+    public static void OnChanged() {
+        if (Enabled) RecipeFilteringUI.RebuildUI();
+    }
 }
 public sealed class RecipeSearchBarConfig {
     [DefaultValue(true)] public bool expand = true;
