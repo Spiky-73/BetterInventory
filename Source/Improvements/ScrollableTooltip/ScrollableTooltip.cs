@@ -13,14 +13,15 @@ namespace BetterInventory.Improvements.ScrollableTooltip;
 
 public class ScrollableTooltipItem : GlobalItem {
 
+    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || ScrollableTooltipConfig.Enabled;
     public override void Load() {
         MonoModHooks.Add(TypeHelper.GetMethod(() => ItemLoader.ModifyTooltips), HookTooltipScroll);
     }
 
-    private delegate List<TooltipLine> ModifyTooltipsFn(Item item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out Color?[] overrideColor, int prefixlineIndex);
-    private static List<TooltipLine> HookTooltipScroll(ModifyTooltipsFn orig, Item item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out Color?[] overrideColor, int prefixlineIndex) {
+    private delegate List<TooltipLine> orig_ModifyTooltips(Item item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out Color?[] overrideColor, int prefixlineIndex);
+    private static List<TooltipLine> HookTooltipScroll(orig_ModifyTooltips orig, Item item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out Color?[] overrideColor, int prefixlineIndex) {
         var tooltips = orig.Invoke(item, ref numTooltips, names, ref text, ref modifier, ref badModifier, ref oneDropLogo, out overrideColor, prefixlineIndex);
-        if (!Configs.ImprovementsConfig.ScrollableTooltip) return tooltips;
+        if (!ScrollableTooltipConfig.Enabled) return tooltips;
 
         if (!ScrollableTooltip.ScrollItemTooltip(item.type, PlayerInput.ScrollWheelDelta / 120, numTooltips)) return tooltips;
 
@@ -67,8 +68,8 @@ public static class ScrollableTooltip {
 
     public static int GetCroppedNumTooltips() {
         int inset = Main.SettingsEnabled_OpaqueBoxBehindTooltips ? 18 : 4;
-        return Math.Max(3, (int)((Main.screenHeight - inset) * Configs.ScrollableTooltip.Instance.maximumHeight / FontAssets.MouseText.Value.LineSpacing));
+        return Math.Max(3, (int)((Main.screenHeight - inset) * ScrollableTooltipConfig.Instance.maximumHeight / FontAssets.MouseText.Value.LineSpacing));
     }
 
-    private static Dictionary<int, int> _scroll = [];
+    private static readonly Dictionary<int, int> _scroll = [];
 }

@@ -9,26 +9,24 @@ namespace BetterInventory.Improvements.SmartConsumption;
 
 public sealed class SmartConsumptionItem : GlobalItem {
 
+    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || SmartConsumptionConfig.Enabled;
     public override void Load() {
-        IL_Player.ItemCheck_CheckFishingBobber_PickAndConsumeBait += static il => {
-            if (!il.ApplyTo(ILOnConsumeBait, Configs.SmartConsumption.Baits)) Configs.UnloadedInventoryManagement.Value.baits = true;
-
-        };
-        IL_Recipe.ConsumeForCraft += static il => {
-            if (!il.ApplyTo(ILOnConsumedMaterial, Configs.SmartConsumption.Materials)) Configs.UnloadedInventoryManagement.Value.materials = true;
-        };
+        IL_Player.ItemCheck_CheckFishingBobber_PickAndConsumeBait += il => il.TryEdit(ILOnConsumeBait, ref UnloadedSmartConsumptionConfig.Instance.baits);
+        IL_Recipe.ConsumeForCraft += static il => il.TryEdit(ILOnConsumedMaterial, ref UnloadedSmartConsumptionConfig.Instance.materials);
     }
 
     public override void OnConsumeItem(Item item, Player player) {
+        if (!SmartConsumptionConfig.Enabled) return;
         if (item.PaintOrCoating) {
-            if (Configs.SmartConsumption.Paints) SmartConsumption.SmartConsume(player, item, SmartConsumption.LastStack);
+            if (SmartConsumptionConfig.Paints) SmartConsumption.SmartConsume(player, item, SmartConsumption.LastStack);
         } else {
-            if (Configs.SmartConsumption.Consumables) SmartConsumption.SmartConsume(player, item, SmartConsumption.SmallestStack);
+            if (SmartConsumptionConfig.Consumables) SmartConsumption.SmartConsume(player, item, SmartConsumption.SmallestStack);
         }
     }
 
     public override void OnConsumedAsAmmo(Item ammo, Item weapon, Player player) {
-        if (Configs.SmartConsumption.Ammo) SmartConsumption.SmartConsume(player, ammo, SmartConsumption.LastStack);
+        if (!SmartConsumptionConfig.Enabled) return;
+        if (SmartConsumptionConfig.Ammo) SmartConsumption.SmartConsume(player, ammo, SmartConsumption.LastStack);
     }
 
     private static void ILOnConsumedMaterial(ILContext il) {
@@ -40,7 +38,8 @@ public sealed class SmartConsumptionItem : GlobalItem {
         cursor.EmitLdarg1();
         cursor.EmitLdloc(consumed);
         cursor.EmitDelegate((Item item, Item consumed) => {
-            if (Configs.SmartConsumption.Materials) SmartConsumption.SmartConsume(Main.LocalPlayer, item, SmartConsumption.SmallestStack, consumed.stack, new(true, Configs.SmartConsumption.Value.mouse));
+            if (!SmartConsumptionConfig.Enabled) return;
+            if (SmartConsumptionConfig.Materials) SmartConsumption.SmartConsume(Main.LocalPlayer, item, SmartConsumption.SmallestStack, consumed.stack, new(true, SmartConsumptionConfig.Instance.mouse));
         });
     }
 
@@ -54,7 +53,8 @@ public sealed class SmartConsumptionItem : GlobalItem {
         cursor.EmitLdarg0();
         cursor.EmitLdloc(i);
         cursor.EmitDelegate((Player self, int i) => {
-            if (Configs.SmartConsumption.Baits) SmartConsumption.SmartConsume(self, self.inventory[i], SmartConsumption.LastStack);
+            if (!SmartConsumptionConfig.Enabled) return;
+            if (SmartConsumptionConfig.Baits) SmartConsumption.SmartConsume(self, self.inventory[i], SmartConsumption.LastStack);
         });
     }
 }
@@ -83,8 +83,8 @@ public static class SmartConsumption {
 
     public delegate Item? StackPickerFn(Player player, Item item, StackPickerSettings settings);
     public static void SmartConsume(Player player, Item item, StackPickerFn stackPicker, int consumed = 1, StackPickerSettings? settings = null) {
-        if (!Configs.SmartConsumption.Value.mouse && (item == Main.mouseItem || item == player.inventory[InventorySlots.Mouse])) return;
-        settings ??= new(Configs.SmartConsumption.Value.self, Configs.SmartConsumption.Value.mouse);
+        if (!SmartConsumptionConfig.Instance.mouse && (item == Main.mouseItem || item == player.inventory[InventorySlots.Mouse])) return;
+        settings ??= new(SmartConsumptionConfig.Instance.self, SmartConsumptionConfig.Instance.mouse);
         while (consumed > 0) {
             Item? i = stackPicker(player, item, settings.Value);
             if (i == null) return;

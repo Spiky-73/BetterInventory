@@ -21,7 +21,6 @@ public sealed class Compatibility : ModConfig {
     [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedItemActions unloadedItemActions { get; set;} = new();
     [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedItemSearch unloadedItemSearch {get; set;} = new();
     
-    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedImprovements unloadedImprovements {get; set;} = new();
     [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedVisualChanges unloadedVisualChanges {get; set;} = new();
     [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedVanillaFixes unloadedVanillaFixes {get; set;} = new();
     
@@ -31,8 +30,6 @@ public sealed class Compatibility : ModConfig {
     public static Compatibility Instance = null!;
 
     private static void DisableAllILs() {
-        SmartConsumption.Value.materials = false;
-        SmartConsumption.Value.baits = false;
         SmartPickup.Value.refillMouse = false;
         SmartPickup.Value.previousSlot.Key = ItemPickupLevel.None;
         SmartPickup.Value.quickStack.Key = false;
@@ -68,7 +65,6 @@ public sealed class Compatibility : ModConfig {
         QuickSearch.Value.catalogues[new(RecipeList.Instance)] = false;
         ItemSearch.Instance.Save();
 
-        UnloadedImprovements.DisableAllILs();
         UnloadedVisualChanges.DisableAllILs();
         UnloadedVanillaFixes.DisableAllILs();
     }
@@ -94,22 +90,6 @@ public sealed class UnloadedVanillaFixes {
     }
 
     public static UnloadedVanillaFixes Instance => Compatibility.Instance.unloadedVanillaFixes;
-}
-
-public sealed class UnloadedImprovements {
-    public bool betterRecipeList_fastScroll;
-    public bool smartConsumption_baits;
-    public bool smartConsumption_materials;
-
-    public static void DisableAllILs() {
-        var config = ImprovementsConfig.Instance;
-        config.betterRecipeList.Value.fastScroll.Key = false;
-        config.smartConsumption.Value.baits = false;
-        config.smartConsumption.Value.materials = false;
-        config.SaveChanges();
-    }
-
-    public static UnloadedImprovements Instance => Compatibility.Instance.unloadedImprovements;
 }
 
 public sealed class UnloadedVisualChanges {
