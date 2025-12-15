@@ -41,6 +41,7 @@ public sealed class UIRecipeSort : UIElement {
     public void Rebuild(bool immediate = false) {
         _pendingRebuild = !immediate;
         if (_pendingRebuild) return;
+        RemoveAllChildren();
 
         RecipeSortPlayer player = RecipeSortPlayer.LocalPlayer;
         IRecipeSortStep sortStep = player.GetActiveSortStep();

@@ -11,32 +11,7 @@ namespace BetterInventory.Features.RecipeFiltering;
 
 public sealed class RecipeSortPlayer {
 
-    public static RecipeSortPlayer LocalPlayer => RecipeFilteringPlayer.LocalPlayer.GetSortPlayer();
-
-    public void LoadData(TagCompound tag) {
-        ResetSortStep();
-        if (tag.TryGet(SortTag, out int sort)) SetActiveSortStep(sort);
-    }
-    public void SaveData(TagCompound tag) {
-        int sort = GetActiveSortStepIndex();
-        if (sort != 0) tag[SortTag] = sort;
-    }
-    public const string SortTag = "sort";
-
-    public void SelectNextSortStep() => SetActiveSortStep((GetActiveSortStepIndex() + 1) % GetAvailableSortStep().Count);
-    public void SetActiveSortStep(int sortStep) => SetActiveSortStep(GetAvailableSortStep()[sortStep]);
-    public void SetActiveSortStep(IRecipeSortStep sortStep) =>_activeSort = sortStep;
-    public void ResetSortStep() => _activeSort = _availableSortSteps[0];
-    public IRecipeSortStep GetActiveSortStep() {
-        if (_activeSort is null) ResetSortStep();
-        return _activeSort!;
-    }
-    public int GetActiveSortStepIndex() => _availableSortSteps.IndexOf(GetActiveSortStep());
-
-    public bool IsActive() => _activeSort is not RecipeSortStep.ByRecipeId;
-    public IComparer<Recipe> Comparer => GetActiveSortStep();
-
-    private IRecipeSortStep? _activeSort;
+    public static RecipeSortPlayer LocalPlayer => RecipeFilteringPlayer.LocalPlayer.SortPlayer;
 
     public static void Load() {
         AddSortStep(new RecipeSortStep.ByRecipeId());
@@ -49,6 +24,28 @@ public sealed class RecipeSortPlayer {
         RecipeSortingSteps = BetterInventory.Instance.Assets.Request<Texture2D>($"Assets/RecipeSortingSteps");
     }
 
+    public void LoadData(TagCompound tag) {
+        ResetSortStep();
+        if (tag.TryGet(SortTag, out int sort)) SetActiveSortStep(sort);
+    }
+    public void SaveData(TagCompound tag) {
+        int sort = GetActiveSortStepIndex();
+        if (IsActive()) tag[SortTag] = sort;
+    }
+    public const string SortTag = "sort";
+
+    public void SelectNextSortStep() => SetActiveSortStep((GetActiveSortStepIndex() + 1) % GetAvailableSortStep().Count);
+    public IRecipeSortStep GetActiveSortStep() => GetAvailableSortStep()[GetActiveSortStepIndex()];
+
+    public void SetActiveSortStep(int sortStep) => _sortIndex = sortStep;
+    public void ResetSortStep() => _sortIndex = 0;
+    public int GetActiveSortStepIndex() => _sortIndex;
+
+    public bool IsActive() => _sortIndex != 0;
+    public IComparer<Recipe> Comparer => GetActiveSortStep();
+
+    private int _sortIndex = 0;
+
     public static Asset<Texture2D> RecipeSortToggle = null!;
     public static Asset<Texture2D> RecipeSortToggleBorder = null!;
     public static Asset<Texture2D> RecipeSortingSteps = null!;
@@ -60,6 +57,5 @@ public sealed class RecipeSortPlayer {
 }
 
 public interface IRecipeSortStep : IEntrySortStep<Recipe> {
-    public bool HiddenFromSortOptions { get; }
     UIElement GetImage();
 }

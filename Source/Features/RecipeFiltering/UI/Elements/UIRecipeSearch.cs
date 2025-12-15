@@ -71,8 +71,8 @@ public sealed class UIRecipeSearch : UIPanel {
     }
 
     public override void Recalculate() {
-        if (Configs.RecipeSearchBar.Instance.expand && _expanded) Width.Pixels = 220;
-        else Width.Pixels = Configs.RecipeSearchBar.Instance.minWidth;
+        if (RecipeSearchBarConfig.Instance.expand && _expanded) Width.Pixels = 220;
+        else Width.Pixels = RecipeSearchBarConfig.Instance.minWidth;
         base.Recalculate();
     }
 

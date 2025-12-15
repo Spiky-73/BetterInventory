@@ -30,7 +30,7 @@ public sealed class UIRecipeFilters : UIFlexGrid {
         if (_pendingRebuild) return;
 
         Clear();
-        ItemsPerLine = Configs.RecipeFilters.Instance.filtersPerLine;
+        ItemsPerLine = RecipeFiltersConfig.Instance.filtersPerLine;
 
         RecipeFiltersPlayer player = RecipeFiltersPlayer.LocalPlayer;
         foreach (var filter in RecipeFiltersPlayer.GetAvailableFilters()) {

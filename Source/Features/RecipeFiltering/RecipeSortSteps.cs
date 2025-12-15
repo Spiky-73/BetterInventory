@@ -7,8 +7,6 @@ using Terraria.UI;
 namespace BetterInventory.Features.RecipeFiltering.RecipeSortStep;
 
 public sealed class ByRecipeId : IRecipeSortStep {
-    public bool HiddenFromSortOptions => true;
-
     public int Compare(Recipe? x, Recipe? y) => Utility.CompareHandleNullable(x, y) ?? x!.RecipeIndex.CompareTo(y!.RecipeIndex);
 
     public string GetDisplayNameKey() => $"{Localization.Keys.UI}.RecipeSort.ByRecipeId";
@@ -17,8 +15,6 @@ public sealed class ByRecipeId : IRecipeSortStep {
 }
 
 public sealed class ByCreateItemName : IRecipeSortStep {
-    public bool HiddenFromSortOptions => false;
-
     public int Compare(Recipe? x, Recipe? y) => Utility.CompareHandleNullable(x, y) ?? x!.createItem.Name.CompareTo(y!.createItem.Name);
 
     public string GetDisplayNameKey() => $"{Localization.Keys.UI}.RecipeSort.ByCreateItemName";
@@ -27,8 +23,6 @@ public sealed class ByCreateItemName : IRecipeSortStep {
 }
 
 public sealed class ByCreateItemValue : IRecipeSortStep {
-    public bool HiddenFromSortOptions => false;
-
     public int Compare(Recipe? x, Recipe? y) {
         int? nullCompare = Utility.CompareHandleNullable(x, y);
         if (nullCompare.HasValue) return nullCompare.Value;
@@ -41,7 +35,6 @@ public sealed class ByCreateItemValue : IRecipeSortStep {
 }
 
 public sealed class ByCreateItemCreativeId : IRecipeSortStep {
-    public bool HiddenFromSortOptions => false;
     private readonly SortingSteps.ByCreativeSortingId _creativeSorter = new();
     private readonly SortingSteps.Alphabetical _azSorter = new();
 

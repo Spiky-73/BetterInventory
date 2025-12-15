@@ -2134,6 +2134,11 @@ CompatibilityConfig: {
 		Label: unloaded Features
 		Tooltip: ""
 	}
+
+	loadDisabledFeatures: {
+		Label: load Disabled Features
+		Tooltip: ""
+	}
 }
 
 UnloadedFeaturesConfig: {
@@ -2141,6 +2146,11 @@ UnloadedFeaturesConfig: {
 
 	quickMove: {
 		Label: quick Move
+		Tooltip: ""
+	}
+
+	recipeFiltering: {
+		Label: recipe Filtering
 		Tooltip: ""
 	}
 }
@@ -2208,6 +2218,58 @@ QuickMoveConfig: {
 
 	itemTooltip: {
 		Label: item Tooltip
+		Tooltip: ""
+	}
+}
+
+RecipeFilteringConfig: {
+	Tooltip: ""
+
+	search: {
+		Label: search
+		Tooltip: ""
+	}
+
+	filters: {
+		Label: filters
+		Tooltip: ""
+	}
+
+	sort: {
+		Label: sort
+		Tooltip: ""
+	}
+}
+
+RecipeSearchBarConfig: {
+	Tooltip: ""
+
+	expand: {
+		Label: expand
+		Tooltip: ""
+	}
+
+	minWidth: {
+		Label: min Width
+		Tooltip: ""
+	}
+
+	simpleSearch: {
+		Label: simple Search
+		Tooltip: ""
+	}
+}
+
+RecipeFiltersConfig: {
+	Tooltip: ""
+
+	hideUnavailable: {
+		Label: hide Unavailable
+		Tooltip: ""
+	}
+
+	filtersPerLine: {
+		Label: filters Per Line
 		Tooltip: ""
 	}
 }

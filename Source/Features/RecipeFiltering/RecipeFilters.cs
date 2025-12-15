@@ -12,39 +12,7 @@ namespace BetterInventory.Features.RecipeFiltering;
 
 public sealed class RecipeFiltersPlayer {
 
-    public static RecipeFiltersPlayer LocalPlayer => RecipeFilteringPlayer.LocalPlayer.GetFiltersPlayer();
-
-    public void LoadData(TagCompound tag) {
-        ClearActiveFilters();
-        if (tag.TryGet(FiltersTag, out int filters)) {
-            for (int i = 0; i < GetAvailableFilters().Count; i++) if ((filters & (1 << i)) != 0) ToggleFilter(i);
-        }
-    }
-    public void SaveData(TagCompound tag) {
-        int filters = 0;
-        for (int i = 0; i < GetAvailableFilters().Count; i++) if (IsFilterActive(i)) filters |= 1 << i;
-        if (filters != 0) tag[FiltersTag] = filters;
-
-    }
-    public const string FiltersTag = "filters";
-
-    public bool IsFilterActive(int index) => IsFilterActive(GetAvailableFilters()[index]);
-    public void ToggleFilter(int index) => ToggleFilter(GetAvailableFilters()[index]);
-    public bool IsFilterActive(IRecipeFilter filter) => _activeFilters.Contains(filter);
-    public void ToggleFilter(IRecipeFilter filter) {
-        if (!_activeFilters.Remove(filter)) _activeFilters.Add(filter);
-    }
-    public void ClearActiveFilters() => _activeFilters.Clear();
-    public ReadOnlyCollection<IRecipeFilter> GetActiveFilters() => _activeFilters.AsReadOnly();
-
-    public bool IsActive() => _activeFilters.Count > 0;
-    public bool FitsFilters(Recipe recipe) {
-        if (_activeFilters.Count == 0) return true;
-        return _activeFilters.Exists(f => f.FitsFilter(recipe));
-    }
-
-    private readonly List<IRecipeFilter> _activeFilters = [];
-
+    public static RecipeFiltersPlayer LocalPlayer => RecipeFilteringPlayer.LocalPlayer.FiltersPlayer;
 
     public static void Load() {
         List<(IItemEntryFilter, int)> filters = [
@@ -68,6 +36,38 @@ public sealed class RecipeFiltersPlayer {
     public static void PostSetupRecipes() {
         AddAvailableFilter(new RecipeMiscFallback(_availableFilters));
     }
+
+    public void LoadData(TagCompound tag) {
+        ClearActiveFilters();
+        if (tag.TryGet(FiltersTag, out int filters)) {
+            for (int i = 0; i < GetAvailableFilters().Count; i++) if ((filters & (1 << i)) != 0) ToggleFilter(i);
+        }
+    }
+    public void SaveData(TagCompound tag) {
+        int filters = 0;
+        for (int i = 0; i < GetAvailableFilters().Count; i++) if (IsFilterActive(i)) filters |= 1 << i;
+        if (IsActive()) tag[FiltersTag] = filters;
+
+    }
+    public const string FiltersTag = "filters";
+
+    public bool IsFilterActive(int index) => IsFilterActive(GetAvailableFilters()[index]);
+    public void ToggleFilter(int index) => ToggleFilter(GetAvailableFilters()[index]);
+    public bool IsFilterActive(IRecipeFilter filter) => _activeFilters.Contains(filter);
+    public void ToggleFilter(IRecipeFilter filter) {
+        if (!_activeFilters.Remove(filter)) _activeFilters.Add(filter);
+    }
+    public void ClearActiveFilters() => _activeFilters.Clear();
+    public ReadOnlyCollection<IRecipeFilter> GetActiveFilters() => _activeFilters.AsReadOnly();
+
+    public bool IsActive() => _activeFilters.Count > 0;
+    public bool FitsFilters(Recipe recipe) {
+        if (_activeFilters.Count == 0) return true;
+        return _activeFilters.Exists(f => f.FitsFilter(recipe));
+    }
+
+    private readonly List<IRecipeFilter> _activeFilters = [];
+
 
     public static void AddAvailableFilter(IRecipeFilter filter) => _availableFilters.Add(filter);
     public static ReadOnlyCollection<IRecipeFilter> GetAvailableFilters() => _availableFilters.AsReadOnly();
