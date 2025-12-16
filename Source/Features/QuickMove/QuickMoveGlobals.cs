@@ -15,26 +15,26 @@ namespace BetterInventory.Features.QuickMove;
 
 public sealed class QuickMovePlayer : ModPlayer {
 
-    public override bool IsLoadingEnabled(Mod mod) => !Configs.Compatibility.CompatibilityMode || QuickMoveConfig.Enabled;
+    public override bool IsLoadingEnabled(Mod mod) => !Configs.Compatibility.CompatibilityMode || FeaturesConfig.QuickMove;
 
     public override void Load() {
         On_Main.DrawInventory += HookDrawInventory;
     }
 
     public override void ProcessTriggers(TriggersSet triggersSet) {
-        if (!QuickMoveConfig.Enabled) return;
+        if (!FeaturesConfig.QuickMove) return;
         MoveChainInputs.ProcessTriggers(triggersSet);
     }
 
     private static void HookDrawInventory(On_Main.orig_DrawInventory orig, Main self) {
         orig(self);
-        if (!QuickMoveConfig.Enabled) return;
+        if (!FeaturesConfig.QuickMove) return;
         MoveChainInputs.PostDrawInventory();
         if (QuickMoveConfig.DisplayHotkeys) MoveChainUI.PostDrawInventory();
     }
 
     public override bool HoverSlot(Item[] inventory, int context, int slot) {
-        if (!QuickMoveConfig.Enabled) return false;
+        if (!FeaturesConfig.QuickMove) return false;
         MoveChainInputs.HoverSlot(inventory, context, slot);
         if (QuickMoveConfig.DisplayHotkeys || QuickMoveConfig.ItemTooltip) MoveChainUI.HoverSlot(inventory, context, slot);
         return false;
@@ -44,7 +44,7 @@ public sealed class QuickMovePlayer : ModPlayer {
 
 public sealed class QuickMoveItem : GlobalItem {
 
-    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || QuickMoveConfig.Enabled;
+    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || FeaturesConfig.QuickMove;
 
     public override void Load() {
         On_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += HookItemSlotDraw;
@@ -53,7 +53,7 @@ public sealed class QuickMoveItem : GlobalItem {
 
     private static void HookItemSlotDraw(On_ItemSlot.orig_Draw_SpriteBatch_ItemArray_int_int_Vector2_Color orig, SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, Color lightColor) {
         orig(spriteBatch, inv, context, slot, position, lightColor);
-        if (!QuickMoveConfig.Enabled) return;
+        if (!FeaturesConfig.QuickMove) return;
         MoveChainInputs.PostDrawItemSlot(position);
         if (QuickMoveConfig.DisplayHotkeys) MoveChainUI.PostDrawItemSlot(spriteBatch, inv, context, slot, position);
     }
@@ -79,13 +79,13 @@ public sealed class QuickMoveItem : GlobalItem {
         cursor.GotoNext(MoveType.After, i => i.MatchLdarg3());
 
         cursor.EmitDelegate((int slot) => {
-            if (!QuickMoveConfig.Enabled) return slot;
+            if (!FeaturesConfig.QuickMove) return slot;
             return QuickMoveConfig.DisplayHotkeys && MoveChainUI.HideHotbarText() ? InventorySlots.Hotbar.End : slot;
         });
     }
 
     public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
-        if (!QuickMoveConfig.Enabled) return;
+        if (!FeaturesConfig.QuickMove) return;
         if (QuickMoveConfig.ItemTooltip) MoveChainUI.ModifyTooltips(tooltips);
     }
 }

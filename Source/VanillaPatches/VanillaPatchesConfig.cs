@@ -1,18 +1,17 @@
 using System.ComponentModel;
 using SpikysLib.Configs;
 using Terraria.ModLoader.Config;
+using BetterInventory.Configs;
 
-namespace BetterInventory.Configs;
+namespace BetterInventory.VanillaPatches;
 
 using VPUnloadable = UnloadableAttribute<UnloadedVanillaPatchesConfig>;
 using CSDUnloadable = UnloadableAttribute<UnloadedConsistantScrollDirectionConfig>;
 
 public sealed class VanillaPatchesConfig : ModConfig {
-
-    [DefaultValue(true)] public bool ammoPickupOrder;
+    [VPUnloadable(nameof(ammoPickupOrder)), DefaultValue(true)] public bool ammoPickupOrder;
     [VPUnloadable(nameof(consistantScrollDirection))] public Toggle<ConsistantScrollDirectionConfig> consistantScrollDirection = new(true);
-    [DefaultValue(true)] public bool materialsWrapping;
-
+    [VPUnloadable(nameof(materialsWrapping)), DefaultValue(true)] public bool materialsWrapping;
 
     public static VanillaPatchesConfig Instance = null!;
     public static bool AmmoPickupOrder => Instance.ammoPickupOrder && !UnloadedVanillaPatchesConfig.Instance.ammoPickupOrder;
@@ -23,9 +22,6 @@ public sealed class VanillaPatchesConfig : ModConfig {
 }
 public sealed class UnloadedVanillaPatchesConfig {
     public bool ammoPickupOrder;
-    public bool consistantScrollDirection_recipesUnpaused;
-    public bool consistantScrollDirection_recipesPaused;
-    public bool consistantScrollDirection_accessories;
     public bool materialsWrapping;
     public UnloadedConsistantScrollDirectionConfig consistantScrollDirection = new();
 

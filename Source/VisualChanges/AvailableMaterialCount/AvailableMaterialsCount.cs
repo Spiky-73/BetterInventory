@@ -16,13 +16,11 @@ namespace BetterInventory.VisualChanges.AvailableMaterialsCount;
 
 public sealed class AvailableMaterialsCountItem : GlobalItem {
 
-    public override bool IsLoadingEnabled(Mod mod) => !Configs.Compatibility.CompatibilityMode || Configs.VisualChanges.AvailableMaterialsCount;
+    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || VisualChangesConfig.AvailableMaterialsCount;
     public override void Load() {
         On_Recipe.FindRecipes += HookFindRecipes;
         On_Recipe.CollectItemsToCraftWithFrom += HookCollectItems;
-        IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += static il => {
-            if (!il.ApplyTo(ILModifyStackText, Configs.VisualChanges.AvailableMaterialsCount)) Configs.UnloadedVisualChanges.Instance.availableMaterialsCount_itemSlot = true;
-        };
+        IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += il => il.TryEdit(ILModifyStackText, ref UnloadedAvailableMaterialsCountConfig.Instance.itemSlot);
     }
 
     private static void HookFindRecipes(On_Recipe.orig_FindRecipes orig, bool canDelayCheck) {
@@ -35,9 +33,8 @@ public sealed class AvailableMaterialsCountItem : GlobalItem {
     }
 
     public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
-        if (!Configs.AvailableMaterialsCount.Tooltip || !AvailableMaterialsCount.ShouldDisplayStack(item, item.tooltipContext, out string? text) || text.Length == 0) return;
-        if (item.stack != 1) tooltips[0].Text = tooltips[0].Text[0..^(2 + item.stack.ToString().Length)];
-        tooltips[0].Text += $" ({text})";
+        if (!VisualChangesConfig.AvailableMaterialsCount) return;
+        if (AvailableMaterialsCountConfig.Tooltip) AvailableMaterialsCount.Tooltip_ModifyTooltips(item, tooltips);
     }
     private static void ILModifyStackText(ILContext il) {
         ILCursor cursor = new(il);
@@ -49,13 +46,14 @@ public sealed class AvailableMaterialsCountItem : GlobalItem {
         cursor.GotoPrev(MoveType.After, i => i.MatchCall((int i) => i.ToString()) && i.Previous.MatchLdflda((Item i) => i.stack));
         cursor.EmitLdarg1().EmitLdarg2().EmitLdarg3();
         cursor.EmitDelegate((string stack, Item[] inv, int context, int slot) => {
-            Item item = inv[slot];
-            return Configs.AvailableMaterialsCount.ItemSlot && AvailableMaterialsCount.ShouldDisplayStack(item, context, out string? text, true) ? text : stack;
+            if (!VisualChangesConfig.AvailableMaterialsCount) return stack;
+            if (AvailableMaterialsCountConfig.ItemSlot) return AvailableMaterialsCount.ItemStack_ModifyText(inv[slot], context, stack);
+            return stack;
         });
         cursor.GotoPrev(i => i.MatchLdflda((Item i) => i.stack));
         cursor.GotoPrev(MoveType.After, i => i.MatchLdfld((Item i) => i.stack));
         cursor.EmitLdarg1().EmitLdarg2().EmitLdarg3();
-        cursor.EmitDelegate((int stack, Item[] inv, int context, int slot) => Configs.AvailableMaterialsCount.ItemSlot && AvailableMaterialsCount.ShouldDisplayStack(inv[slot], context, out _) ? 2 : stack);
+        cursor.EmitDelegate((int stack, Item[] inv, int context, int slot) => VisualChangesConfig.AvailableMaterialsCount && AvailableMaterialsCountConfig.ItemSlot && AvailableMaterialsCount.ShouldDisplayStack(inv[slot], context, out _) ? 2 : stack);
     }
 }
 
@@ -66,12 +64,12 @@ public static class AvailableMaterialsCount {
 
     public static bool ShouldDisplayStack(Item item, int context, [MaybeNullWhen(false)] out string text, bool compact = false) {
         text = null;
-        if (!(context == ItemSlot.Context.CraftingMaterial || (Configs.VisualChanges.RecipeTooltip && context == ItemSlot.Context.ChatItem))) return false;
+        if (!(context == ItemSlot.Context.CraftingMaterial || (VisualChangesConfig.RecipeTooltip && context == ItemSlot.Context.ChatItem))) return false;
         if (!_collectedMaterials) return false;
 
         (Recipe? recipe, Item[] tiles, Item[] conditions) = context == ItemSlot.Context.CraftingMaterial ?
             (Main.recipe[Main.availableRecipe[Main.focusRecipe]], RequiredObjectsDisplay._displayedRecipeTiles, RequiredObjectsDisplay._displayedRecipeConditions) :
-            (RecipeTooltipItem.HoveredRecipe, RecipeTooltipItem._displayedTiles, RecipeTooltipItem._displayedConditions);
+            RecipeTooltip.RecipeTooltip.GetHoveredRecipeData();
         if (recipe is null) return false;
         var guid = item.UniqueId();
         if (recipe.requiredItem.Exists(i => i.UniqueId() == guid)) {
@@ -84,7 +82,7 @@ public static class AvailableMaterialsCount {
             bool? met = null;
             if ((index = Array.FindIndex(tiles, t => t.UniqueId() == guid)) >= 0) met = index >= recipe.requiredTile.Count || Main.LocalPlayer.adjTile[recipe.requiredTile[index]];
             if ((index = Array.FindIndex(conditions, c => c.UniqueId() == guid)) >= 0) met = recipe.Conditions[index].Predicate();
-            if(met.HasValue) {
+            if (met.HasValue) {
                 text = compact ?
                     met.Value ? string.Empty : "0/1" :
                     met.Value ? string.Empty : Language.GetTextValue($"{Localization.Keys.UI}.Unmet");
@@ -95,5 +93,15 @@ public static class AvailableMaterialsCount {
     }
 
     private static bool _collectedMaterials;
+
+    public static void Tooltip_ModifyTooltips(Item item, List<TooltipLine> tooltips) {
+        if (!ShouldDisplayStack(item, item.tooltipContext, out string? text) || text.Length == 0) return;
+        if (item.stack != 1) tooltips[0].Text = tooltips[0].Text[0..^(2 + item.stack.ToString().Length)];
+        tooltips[0].Text += $" ({text})";
+    }
+
+    public static string ItemStack_ModifyText(Item item, int context, string stack) {
+        return ShouldDisplayStack(item, context, out string? text, true) ? text : stack;
+    }
 }
 

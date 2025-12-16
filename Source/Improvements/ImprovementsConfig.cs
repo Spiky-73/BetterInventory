@@ -5,8 +5,9 @@ using BetterInventory.Improvements.ScrollableTooltip;
 using BetterInventory.Improvements.SmartConsumption;
 using SpikysLib.Configs;
 using Terraria.ModLoader.Config;
+using BetterInventory.Configs;
 
-namespace BetterInventory.Configs;
+namespace BetterInventory.Improvements;
 
 using IUnloadableAttribute = UnloadableAttribute<UnloadedImprovementsConfig>;
 
@@ -20,6 +21,10 @@ public sealed class ImprovementsConfig : ModConfig {
 
     public static ImprovementsConfig Instance = null!;
     public static bool SmartConsumption => Instance.smartConsumption;
+    public static bool ScrollableTooltip => Instance.scrollableTooltip;
+    public static bool MoreMaterials => Instance.moreMaterials;
+    public static bool BetterRecipeList => Instance.betterRecipeList;
+    public static bool BetterRecipeGrid => Instance.betterRecipeGrid;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
 }

@@ -2144,6 +2144,11 @@ CompatibilityConfig: {
 		Label: unloaded Improvements
 		Tooltip: ""
 	}
+
+	unloadedVanillaPatches: {
+		Label: unloaded Vanilla Patches
+		Tooltip: ""
+	}
 }
 
 UnloadedFeaturesConfig: {
@@ -2286,6 +2291,16 @@ UnloadedImprovementsConfig: {
 		Label: better Recipe Grid
 		Tooltip: ""
 	}
+
+	betterRecipeList: {
+		Label: better Recipe List
+		Tooltip: ""
+	}
+
+	smartConsumption: {
+		Label: smart Consumption
+		Tooltip: ""
+	}
 }
 
 UnloadedBetterRecipeGridConfig: {
@@ -2405,6 +2420,214 @@ CraftOnRecipeGridConfig: {
 
 	focusHovered: {
 		Label: focus Hovered
+		Tooltip: ""
+	}
+}
+
+UnloadedVanillaPatchesConfig: {
+	Tooltip: ""
+
+	ammoPickupOrder: {
+		Label: ammo Pickup Order
+		Tooltip: ""
+	}
+
+	consistantScrollDirection_recipesUnpaused: {
+		Label: consistant Scroll Direction_recipes Unpaused
+		Tooltip: ""
+	}
+
+	consistantScrollDirection_recipesPaused: {
+		Label: consistant Scroll Direction_recipes Paused
+		Tooltip: ""
+	}
+
+	consistantScrollDirection_accessories: {
+		Label: consistant Scroll Direction_accessories
+		Tooltip: ""
+	}
+
+	consistantScrollDirection: {
+		Label: consistant Scroll Direction
+		Tooltip: ""
+	}
+
+	materialsWrapping: {
+		Label: materials Wrapping
+		Tooltip: ""
+	}
+}
+
+UnloadedConsistantScrollDirectionConfig: {
+	Tooltip: ""
+
+	recipesUnpaused: {
+		Label: recipes Unpaused
+		Tooltip: ""
+	}
+
+	recipesPaused: {
+		Label: recipes Paused
+		Tooltip: ""
+	}
+
+	accessories: {
+		Label: accessories
+		Tooltip: ""
+	}
+}
+
+UnloadedBetterRecipeListConfig: {
+	Tooltip: ""
+
+	fastScroll: {
+		Label: fast Scroll
+		Tooltip: ""
+	}
+}
+
+UnloadedSmartConsumptionConfig: {
+	Tooltip: ""
+
+	baits: {
+		Label: baits
+		Tooltip: ""
+	}
+
+	materials: {
+		Label: materials
+		Tooltip: ""
+	}
+}
+
+BetterRecipeListConfig: {
+	Tooltip: ""
+
+	craftWhenHolding: {
+		Label: craft When Holding
+		Tooltip: ""
+	}
+
+	fastScroll: {
+		Label: fast Scroll
+		Tooltip: ""
+	}
+}
+
+FastScrollConfig: {
+	Tooltip: ""
+
+	listScroll: {
+		Label: list Scroll
+		Tooltip: ""
+	}
+}
+
+MoreMaterialsConfig: {
+	Tooltip: ""
+
+	mouse: {
+		Label: mouse
+		Tooltip: ""
+	}
+
+	equipment: {
+		Label: equipment
+		Tooltip: ""
+	}
+}
+
+EquipmentMaterialsConfig: {
+	Tooltip: ""
+
+	allLoadouts: {
+		Label: all Loadouts
+		Tooltip: ""
+	}
+}
+
+ScrollableTooltipConfig: {
+	Tooltip: ""
+
+	maximumHeight: {
+		Label: maximum Height
+		Tooltip: ""
+	}
+}
+
+SmartConsumptionConfig: {
+	Tooltip: ""
+
+	consumables: {
+		Label: consumables
+		Tooltip: ""
+	}
+
+	ammo: {
+		Label: ammo
+		Tooltip: ""
+	}
+
+	baits: {
+		Label: baits
+		Tooltip: ""
+	}
+
+	paints: {
+		Label: paints
+		Tooltip: ""
+	}
+
+	materials: {
+		Label: materials
+		Tooltip: ""
+	}
+
+	mouse: {
+		Label: mouse
+		Tooltip: ""
+	}
+
+	self: {
+		Label: self
+		Tooltip: ""
+	}
+}
+
+VanillaPatchesConfig: {
+	DisplayName: Vanilla Patches Config
+
+	ammoPickupOrder: {
+		Label: ammo Pickup Order
+		Tooltip: ""
+	}
+
+	consistantScrollDirection: {
+		Label: consistant Scroll Direction
+		Tooltip: ""
+	}
+
+	materialsWrapping: {
+		Label: materials Wrapping
+		Tooltip: ""
+	}
+}
+
+ConsistantScrollDirectionConfig: {
+	Tooltip: ""
+
+	recipesUnpaused: {
+		Label: recipes Unpaused
+		Tooltip: ""
+	}
+
+	recipesPaused: {
+		Label: recipes Paused
+		Tooltip: ""
+	}
+
+	accessories: {
+		Label: accessories
 		Tooltip: ""
 	}
 }

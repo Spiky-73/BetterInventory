@@ -8,20 +8,20 @@ namespace BetterInventory.Improvements.MoreMaterials;
 
 public sealed class MoreMaterialsPlayer : ModPlayer {
 
-    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || MoreMaterialsConfig.Enabled;
+    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || ImprovementsConfig.MoreMaterials;
     public override void Load() {
         On_ItemSlot.RecordLoadoutChange += HookSwapLoadout;
     }
 
     private static void HookSwapLoadout(On_ItemSlot.orig_RecordLoadoutChange orig) {
         orig();
-        if (!MoreMaterialsConfig.Enabled) return;
+        if (!ImprovementsConfig.MoreMaterials) return;
         if (MoreMaterialsConfig.Equipment) Recipe.FindRecipes();
     }
 
     public override IEnumerable<Item> AddMaterialsForCrafting(out ItemConsumedCallback? itemConsumedCallback) {
         itemConsumedCallback = null;
-        if (!MoreMaterialsConfig.Enabled) return [];
+        if (!ImprovementsConfig.MoreMaterials) return [];
 
         List<Item> materials = [];
         itemConsumedCallback = (item, index) => {

@@ -13,11 +13,9 @@ namespace BetterInventory.VisualChanges.RecipeCount;
 
 public sealed class RecipeCount : ILoadable {
 
-    public bool IsLoadingEnabled(Mod mod) => !Configs.Compatibility.CompatibilityMode || Configs.VisualChanges.RecipeCount;
+    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || VisualChangesConfig.RecipeCount;
     public void Load(Mod mod) {
-        IL_Main.DrawInventory += static il => {
-            if (!il.ApplyTo(ILRecipeCount, Configs.VisualChanges.RecipeCount)) Configs.UnloadedVisualChanges.Instance.recipeCount = true;
-        };
+        IL_Main.DrawInventory += il => il.TryEdit(ILRecipeCount, ref UnloadedVisualChangesConfig.Instance.recipeCount);
     }
     public void Unload() { }
 
@@ -42,7 +40,7 @@ public sealed class RecipeCount : ILoadable {
         //     ++ <drawRecipeCount>
         cursor.EmitLdloc(x).EmitLdloc(y);
         cursor.EmitDelegate((int x, int y) => {
-            if (Configs.VisualChanges.RecipeCount) DrawRecipeCount(x, y);
+            if (VisualChangesConfig.RecipeCount) DrawRecipeCount(x, y);
         });
 
         //     while (...) <recipeList>

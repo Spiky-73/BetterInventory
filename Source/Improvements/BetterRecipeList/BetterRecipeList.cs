@@ -10,7 +10,7 @@ namespace BetterInventory.Improvements.BetterRecipeList;
 
 public sealed class BetterRecipeListHooks : ILoadable {
 
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterRecipeListConfig.Enabled;
+    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || ImprovementsConfig.BetterRecipeList;
     public void Load(Mod mod) {
         IL_Main.DrawInventory += static il => il.TryEdit(ILFastScroll, ref UnloadedBetterRecipeListConfig.Instance.fastScroll);
 
@@ -40,7 +40,7 @@ public sealed class BetterRecipeListHooks : ILoadable {
             cursor.EmitLdloc(recipeIndex); // int num63
             int s = j == 0 ? -1 : 1;
             cursor.EmitDelegate((int r) => {
-                if (!BetterRecipeListConfig.Enabled) return;
+                if (!ImprovementsConfig.BetterRecipeList) return;
                 if (BetterRecipeListConfig.FastScroll) FastScroll_ModifyScroll(s, r);
             });
             //         ...
@@ -64,7 +64,7 @@ public sealed class BetterRecipeListHooks : ILoadable {
     }
 
     private static bool HookTryAllowingToCraftRecipe(On_Main.orig_TryAllowingToCraftRecipe orig, Recipe currentRecipe, bool tryFittingItemInInventoryToAllowCrafting, out bool movedAnItemToAllowCrafting) {
-        if (BetterRecipeListConfig.Enabled && BetterRecipeListConfig.CraftWhenHolding) tryFittingItemInInventoryToAllowCrafting = true;
+        if (ImprovementsConfig.BetterRecipeList && BetterRecipeListConfig.CraftWhenHolding) tryFittingItemInInventoryToAllowCrafting = true;
         return orig(currentRecipe, tryFittingItemInInventoryToAllowCrafting, out movedAnItemToAllowCrafting);
     }
 }

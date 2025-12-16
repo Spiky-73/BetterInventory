@@ -1,7 +1,6 @@
 
 using System;
 using System.ComponentModel;
-using BetterInventory.Configs;
 using SpikysLib.Configs;
 using Terraria.ModLoader.Config;
 
@@ -12,15 +11,12 @@ public sealed class RecipeFilteringConfig {
     public Toggle<RecipeSearchBarConfig> search = new(true);
     [DefaultValue(true)] public bool sort = true;
 
-    public static bool Enabled => FeaturesConfig.Instance.recipeFiltering && !UnloadedFeaturesConfig.Instance.recipeFiltering;
     public static RecipeFilteringConfig Instance => FeaturesConfig.Instance.recipeFiltering.Value;
     public static bool Filters => Instance.filters;
     public static bool Search => Instance.search;
     public static bool Sort => Instance.sort;
 
-    public static void OnChanged() {
-        if (Enabled) RecipeFilteringUI.RebuildUI();
-    }
+    public static void OnChanged() => RecipeFilteringUI.RebuildUI();
 }
 public sealed class RecipeSearchBarConfig {
     [DefaultValue(true)] public bool expand = true;

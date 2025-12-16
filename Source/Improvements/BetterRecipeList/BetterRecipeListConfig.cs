@@ -10,7 +10,6 @@ public sealed class BetterRecipeListConfig {
     [DefaultValue(true)] public bool craftWhenHolding = true;
     [BRLUnloadable(nameof(fastScroll))] public Toggle<FastScrollConfig> fastScroll = new(true);
 
-    public static bool Enabled => ImprovementsConfig.Instance.betterRecipeList;
     public static BetterRecipeListConfig Instance => ImprovementsConfig.Instance.betterRecipeList.Value;
     public static bool CraftWhenHolding => Instance.craftWhenHolding;
     public static bool FastScroll => Instance.fastScroll && !UnloadedBetterRecipeListConfig.Instance.fastScroll;

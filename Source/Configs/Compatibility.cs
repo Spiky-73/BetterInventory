@@ -17,12 +17,10 @@ public sealed class Compatibility : ModConfig {
 
     [JsonIgnore, ShowDespiteJsonIgnore, NullAllowed] public Empty? DisableAll { get => null; set => DisableAllILs(); }
 
-    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedInventoryManagement unloadedInventoryManagement {get; set;} = new();
-    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedItemActions unloadedItemActions { get; set;} = new();
-    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedItemSearch unloadedItemSearch {get; set;} = new();
-    
-    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedVisualChanges unloadedVisualChanges {get; set;} = new();
-    
+    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedInventoryManagement unloadedInventoryManagement { get; set; } = new();
+    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedItemActions unloadedItemActions { get; set; } = new();
+    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedItemSearch unloadedItemSearch { get; set; } = new();
+
     [DefaultValue(0), JsonProperty] internal int failedILs = 0;
 
     public static bool CompatibilityMode => Instance.compatibilityMode;
@@ -63,25 +61,9 @@ public sealed class Compatibility : ModConfig {
         BetterBestiary.Value.unknownDisplay = UnknownDisplay.Vanilla;
         QuickSearch.Value.catalogues[new(RecipeList.Instance)] = false;
         ItemSearch.Instance.Save();
-
-        UnloadedVisualChanges.DisableAllILs();
     }
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
-}
-
-public sealed class UnloadedVisualChanges {
-    public bool availableMaterialsCount_itemSlot;
-    public bool recipeCount;
-
-    public static void DisableAllILs() {
-        var config = VisualChanges.Instance;
-        config.availableMaterialsCount.Value.itemSlot = false;
-        config.recipeCount = false;
-        config.SaveChanges();
-    }
-
-    public static UnloadedVisualChanges Instance => Compatibility.Instance.unloadedVisualChanges;
 }
 
 public sealed class UnloadedInventoryManagement {
@@ -101,7 +83,7 @@ public sealed class UnloadedInventoryManagement {
     public bool quickStackComplete;
     public bool quickStackLimitedBanks;
     public bool inventorySlotsTexture;
-    
+
     public static UnloadedInventoryManagement Value => Compatibility.Instance.unloadedInventoryManagement;
 }
 
@@ -125,6 +107,6 @@ public sealed class UnloadedItemSearch {
     [JsonIgnore] public bool GuideAvailableRecipes { set { guideFavoritedRecipes = guideCraftInMenu = value; } }
     [JsonIgnore] public bool GuideRecipeFiltering { set { guideCraftInMenu = guideFavoritedRecipes = guideCraftingStation = guideMoreRecipes = guideUnknownDisplay = value; } }
     [JsonIgnore] public bool BestiaryUnlock { set { bestiaryUnknown = bestiaryDisplayedInfo = value; } }
-    
+
     public static UnloadedItemSearch Value => Compatibility.Instance.unloadedItemSearch;
 }

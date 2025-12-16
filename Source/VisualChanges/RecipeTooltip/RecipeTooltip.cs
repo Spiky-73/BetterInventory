@@ -21,35 +21,49 @@ public class RecipeTooltipItem : GlobalItem {
         On_Recipe.CollectGuideRecipes += HookCollectGuideRecipes;
     }
 
-    private void HookClearAvailableRecipes(On_Recipe.orig_ClearAvailableRecipes orig) {
-        _guideRecipes = false;
+    private static void HookClearAvailableRecipes(On_Recipe.orig_ClearAvailableRecipes orig) {
+        if (VisualChangesConfig.RecipeTooltip) RecipeTooltip.PreClearAvailableRecipes();
         orig();
     }
 
-    private void HookCollectGuideRecipes(On_Recipe.orig_CollectGuideRecipes orig) {
-        _guideRecipes = true;
+    private static void HookCollectGuideRecipes(On_Recipe.orig_CollectGuideRecipes orig) {
+        if (VisualChangesConfig.RecipeTooltip) RecipeTooltip.PreCollectGuideRecipes();
         orig();
     }
 
-    private void HookItemGroupName(On_ItemTagHandler.ItemSnippet.orig_ctor orig, TextSnippet self, Item item) {
-        if(Configs.VisualChanges.RecipeTooltip && HoveredRecipe is not null) {
-            item.tooltipContext = ItemSlot.Context.CraftingMaterial;
-            Guid guid = item.UniqueId();
-            if (HoveredRecipe.requiredItem.Exists(i => i.UniqueId() == guid) && HoveredRecipe.ProcessGroupsForText(item.type, out var text)) {
-                item.SetNameOverride(text);
-            }
-        }
+    private static void HookItemGroupName(On_ItemTagHandler.ItemSnippet.orig_ctor orig, TextSnippet self, Item item) {
+        if (VisualChangesConfig.RecipeTooltip) RecipeTooltip.ModifyRecipeGroupName(item);
         orig(self, item);
     }
 
     public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
-        HoveredRecipe = null;
-        if (!Configs.VisualChanges.RecipeTooltip || !ShouldDisplayRequiredItems(item, out HoveredRecipe)) return;
-        int index = tooltips.FindIndex(l => l.Name == nameof(TooltipLineID.ItemName)) + 1;
-        tooltips.InsertRange(index, GetRecipeLines(HoveredRecipe));
+        if (VisualChangesConfig.RecipeTooltip) RecipeTooltip.ModifyTooltips(item, tooltips);
+    }
+}
+
+public static class RecipeTooltip {
+    public static void PreClearAvailableRecipes() => _guideRecipes = false;
+    public static void PreCollectGuideRecipes() => _guideRecipes = true;
+
+    public static void ModifyRecipeGroupName(Item item) {
+        if (_hoveredRecipe is not null) {
+            item.tooltipContext = ItemSlot.Context.CraftingMaterial;
+            Guid guid = item.UniqueId();
+            if (_hoveredRecipe.requiredItem.Exists(i => i.UniqueId() == guid) && _hoveredRecipe.ProcessGroupsForText(item.type, out var text)) {
+                item.SetNameOverride(text);
+            }
+        }
     }
 
-    private static bool ShouldDisplayRequiredItems(Item item, [MaybeNullWhen(false)] out Recipe recipe) {
+    public static void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
+        _hoveredRecipe = null;
+        if (!ShouldDisplayRequiredItems(item, out _hoveredRecipe)) return;
+        int index = tooltips.FindIndex(l => l.Name == nameof(TooltipLineID.ItemName)) + 1;
+        tooltips.InsertRange(index, GetRecipeLines(_hoveredRecipe));
+    }
+
+
+    public static bool ShouldDisplayRequiredItems(Item item, [MaybeNullWhen(false)] out Recipe recipe) {
         recipe = null;
         if (item.tooltipContext != ItemSlot.Context.CraftingMaterial || Main.numAvailableRecipes == 0) return false;
         Guid guid = item.UniqueId();
@@ -60,18 +74,18 @@ public class RecipeTooltipItem : GlobalItem {
         return false;
     }
 
-    private static List<TooltipLine> GetRecipeLines(Recipe recipe) {
+    public static List<TooltipLine> GetRecipeLines(Recipe recipe) {
         if (_lineRecipeIndex == recipe.RecipeIndex) return _requiredItemsTooltips;
         _lineRecipeIndex = recipe.RecipeIndex;
         string materials = string.Join(string.Empty, recipe.requiredItem.Select(ItemTagHandler.GenerateTag));
 
         _requiredItemsTooltips = [new(BetterInventory.Instance, "RequiredItems", materials)];
-        if(_guideRecipes) {
+        if (_guideRecipes) {
             string objectsText;
             if (Configs.BetterGuide.RequiredObjectsDisplay) {
                 if (recipe.requiredTile.Count == 0) _displayedTiles = [PlaceholderItem.FromTile(PlaceholderItem.ByHandTile)];
-                else _displayedTiles = recipe.requiredTile.TakeWhile(t => t != -1).Select(PlaceholderItem.FromTile).ToArray();
-                _displayedConditions = recipe.Conditions.Select(PlaceholderItem.FromCondition).ToArray();
+                else _displayedTiles = [.. recipe.requiredTile.TakeWhile(t => t != -1).Select(PlaceholderItem.FromTile)];
+                _displayedConditions = [.. recipe.Conditions.Select(PlaceholderItem.FromCondition)];
                 objectsText = string.Join(string.Empty, _displayedTiles.Select(ItemTagHandler.GenerateTag)) + string.Join(string.Empty, _displayedConditions.Select(ItemTagHandler.GenerateTag));
             } else {
                 List<string> objects = [];
@@ -80,17 +94,19 @@ public class RecipeTooltipItem : GlobalItem {
                 objectsText = objects.Count == 0 ? Lang.inter[23].Value : string.Join(", ", objects);
             }
 
-            if (!Configs.RecipeTooltip.Instance.objectsLine) _requiredItemsTooltips[0].Text += $" @ {objectsText}";
+            if (!RecipeTooltipConfig.Instance.objectsLine) _requiredItemsTooltips[0].Text += $" @ {objectsText}";
             else _requiredItemsTooltips.Add(new(BetterInventory.Instance, "RequiredObjects", $"@ {objectsText}"));
         }
         return _requiredItemsTooltips;
     }
 
-    public static Recipe? HoveredRecipe;
+    private static Recipe? _hoveredRecipe;
+
+    public static (Recipe?, Item[], Item[]) GetHoveredRecipeData() => (_hoveredRecipe, _displayedTiles, _displayedConditions);
 
     private static List<TooltipLine> _requiredItemsTooltips = [];
-    internal static Item[] _displayedTiles = [];
-    internal static Item[] _displayedConditions = [];
+    private static Item[] _displayedTiles = [];
+    private static Item[] _displayedConditions = [];
 
     private static int _lineRecipeIndex;
 

@@ -9,14 +9,14 @@ namespace BetterInventory.Improvements.SmartConsumption;
 
 public sealed class SmartConsumptionItem : GlobalItem {
 
-    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || SmartConsumptionConfig.Enabled;
+    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || ImprovementsConfig.SmartConsumption;
     public override void Load() {
         IL_Player.ItemCheck_CheckFishingBobber_PickAndConsumeBait += il => il.TryEdit(ILOnConsumeBait, ref UnloadedSmartConsumptionConfig.Instance.baits);
         IL_Recipe.ConsumeForCraft += static il => il.TryEdit(ILOnConsumedMaterial, ref UnloadedSmartConsumptionConfig.Instance.materials);
     }
 
     public override void OnConsumeItem(Item item, Player player) {
-        if (!SmartConsumptionConfig.Enabled) return;
+        if (!ImprovementsConfig.SmartConsumption) return;
         if (item.PaintOrCoating) {
             if (SmartConsumptionConfig.Paints) SmartConsumption.SmartConsume(player, item, SmartConsumption.LastStack);
         } else {
@@ -25,7 +25,7 @@ public sealed class SmartConsumptionItem : GlobalItem {
     }
 
     public override void OnConsumedAsAmmo(Item ammo, Item weapon, Player player) {
-        if (!SmartConsumptionConfig.Enabled) return;
+        if (!ImprovementsConfig.SmartConsumption) return;
         if (SmartConsumptionConfig.Ammo) SmartConsumption.SmartConsume(player, ammo, SmartConsumption.LastStack);
     }
 
@@ -38,7 +38,7 @@ public sealed class SmartConsumptionItem : GlobalItem {
         cursor.EmitLdarg1();
         cursor.EmitLdloc(consumed);
         cursor.EmitDelegate((Item item, Item consumed) => {
-            if (!SmartConsumptionConfig.Enabled) return;
+            if (!ImprovementsConfig.SmartConsumption) return;
             if (SmartConsumptionConfig.Materials) SmartConsumption.SmartConsume(Main.LocalPlayer, item, SmartConsumption.SmallestStack, consumed.stack, new(true, SmartConsumptionConfig.Instance.mouse));
         });
     }
@@ -53,7 +53,7 @@ public sealed class SmartConsumptionItem : GlobalItem {
         cursor.EmitLdarg0();
         cursor.EmitLdloc(i);
         cursor.EmitDelegate((Player self, int i) => {
-            if (!SmartConsumptionConfig.Enabled) return;
+            if (!ImprovementsConfig.SmartConsumption) return;
             if (SmartConsumptionConfig.Baits) SmartConsumption.SmartConsume(self, self.inventory[i], SmartConsumption.LastStack);
         });
     }

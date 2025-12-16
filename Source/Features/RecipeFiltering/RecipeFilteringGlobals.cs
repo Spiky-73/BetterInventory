@@ -12,7 +12,7 @@ namespace BetterInventory.Features.RecipeFiltering;
 public sealed class RecipeFilteringPlayer : ModPlayer {
     public static RecipeFilteringPlayer LocalPlayer => Main.LocalPlayer.GetModPlayer<RecipeFilteringPlayer>();
 
-    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || RecipeFilteringConfig.Enabled;
+    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || FeaturesConfig.RecipeFiltering;
     public override void Load() {
         RecipeFiltersPlayer.Load();
         RecipeSearchPlayer.Load();
@@ -20,20 +20,20 @@ public sealed class RecipeFilteringPlayer : ModPlayer {
     }
 
     public override void SaveData(TagCompound tag) {
-        // if (!RecipeFilteringConfig.Enabled) return; // Always save/load data to preserve it if the feature is re-enabled in the future
+        // if (!FeaturesConfig.RecipeFiltering) return; // Always save/load data to preserve it if the feature is re-enabled in the future
         FiltersPlayer.SaveData(tag);
         SearchPlayer.SaveData(tag);
         SortPlayer.SaveData(tag);
     }
     public override void LoadData(TagCompound tag) {
-        // if (!RecipeFilteringConfig.Enabled) return; // Always save/load data to preserve it if the feature is re-enabled in the future
+        // if (!FeaturesConfig.RecipeFiltering) return; // Always save/load data to preserve it if the feature is re-enabled in the future
         FiltersPlayer.LoadData(tag);
         SearchPlayer.LoadData(tag);
         SortPlayer.LoadData(tag);
     }
 
     public override void OnEnterWorld() {
-        if (!RecipeFilteringConfig.Enabled) return;
+        if (!FeaturesConfig.RecipeFiltering) return;
         RecipeFilteringUI.RebuildUI();
     }
 
@@ -44,9 +44,9 @@ public sealed class RecipeFilteringPlayer : ModPlayer {
 
 public sealed class RecipeFilteringSystem : ModSystem {
 
-    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || RecipeFilteringConfig.Enabled;
+    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || FeaturesConfig.RecipeFiltering;
     public override void Load() {
-        IL_Main.DrawInventory += il => il.TryEdit(ILDrawUI, ref Configs.UnloadedFeaturesConfig.Instance.recipeFiltering);
+        IL_Main.DrawInventory += il => il.TryEdit(ILDrawUI, ref UnloadedFeaturesConfig.Instance.recipeFiltering);
     }
 
     public override void PostSetupRecipes() {
@@ -72,7 +72,7 @@ public sealed class RecipeFilteringSystem : ModSystem {
         //     ++<drawFilters>
         cursor.EmitLdloc(screenY); // int num54
         cursor.EmitDelegate((int y) => {
-            if (!RecipeFilteringConfig.Enabled) return;
+            if (!FeaturesConfig.RecipeFiltering) return;
             RecipeFilteringUI.DrawRecipeUI(94, 450 + y);
         });
 
@@ -85,7 +85,7 @@ public sealed class RecipeFilteringSystem : ModSystem {
         cursor.GotoNext(i => i.MatchLdsfld(() => TextureAssets.CraftToggle));
         cursor.GotoPrev(MoveType.After, i => i.MatchLdsfld(() => Main.InGuideCraftMenu));
         cursor.EmitDelegate((bool inGuide) => {
-            if (!RecipeFilteringConfig.Enabled) return inGuide;
+            if (!FeaturesConfig.RecipeFiltering) return inGuide;
             return false;
         });
         //         ...
@@ -93,12 +93,12 @@ public sealed class RecipeFilteringSystem : ModSystem {
     }
 
     public override void UpdateUI(GameTime gameTime) {
-        if (!RecipeFilteringConfig.Enabled) return;
+        if (!FeaturesConfig.RecipeFiltering) return;
         RecipeFilteringUI.UpdateUI(gameTime);
     }
 
     public static void FilterAndSortRecipes() {
-        if (!RecipeFilteringConfig.Enabled) return;
+        if (!FeaturesConfig.RecipeFiltering) return;
         if (!(RecipeFilteringConfig.Search || RecipeFilteringConfig.Filters || RecipeFilteringConfig.Sort)) return;
 
         RecipeFilteringUI.PreRecipeFiltering();

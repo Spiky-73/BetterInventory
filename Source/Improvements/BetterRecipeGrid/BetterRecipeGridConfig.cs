@@ -11,10 +11,9 @@ public sealed class BetterRecipeGridConfig {
     [BRGUnloadable(nameof(refocusButton)), DefaultValue(true)] public bool refocusButton = true;
     [BRGUnloadable(nameof(noRecGridOffset)), DefaultValue(true)] public bool noRecGridOffset = true;
     [BRGUnloadable(nameof(noRecGridClose)), DefaultValue(true)] public bool noRecGridClose = true;
-    [BRGUnloadable(nameof(rememberGridPosition)), DefaultValue(true)] public bool rememberGridPosition = true;
+    [DefaultValue(true)] public bool rememberGridPosition = true;
     [BRGUnloadable(nameof(pageScroll)), DefaultValue(true)] public bool pageScroll = true;
 
-    public static bool Enabled => ImprovementsConfig.Instance.betterRecipeGrid;
     public static BetterRecipeGridConfig Instance => ImprovementsConfig.Instance.betterRecipeGrid.Value;
     public static bool CraftOnRecGrid => Instance.craftOnRecipeGrid && !UnloadedBetterRecipeGridConfig.Instance.craftOnRecipeGrid;
     public static bool RefocusButton => Instance.refocusButton && !UnloadedBetterRecipeGridConfig.Instance.refocusButton;

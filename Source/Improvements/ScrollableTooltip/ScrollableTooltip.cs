@@ -13,7 +13,7 @@ namespace BetterInventory.Improvements.ScrollableTooltip;
 
 public class ScrollableTooltipItem : GlobalItem {
 
-    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || ScrollableTooltipConfig.Enabled;
+    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || ImprovementsConfig.ScrollableTooltip;
     public override void Load() {
         MonoModHooks.Add(TypeHelper.GetMethod(() => ItemLoader.ModifyTooltips), HookTooltipScroll);
     }
@@ -21,7 +21,7 @@ public class ScrollableTooltipItem : GlobalItem {
     private delegate List<TooltipLine> orig_ModifyTooltips(Item item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out Color?[] overrideColor, int prefixlineIndex);
     private static List<TooltipLine> HookTooltipScroll(orig_ModifyTooltips orig, Item item, ref int numTooltips, string[] names, ref string[] text, ref bool[] modifier, ref bool[] badModifier, ref int oneDropLogo, out Color?[] overrideColor, int prefixlineIndex) {
         var tooltips = orig.Invoke(item, ref numTooltips, names, ref text, ref modifier, ref badModifier, ref oneDropLogo, out overrideColor, prefixlineIndex);
-        if (!ScrollableTooltipConfig.Enabled) return tooltips;
+        if (!ImprovementsConfig.ScrollableTooltip) return tooltips;
 
         if (!ScrollableTooltip.ScrollItemTooltip(item.type, PlayerInput.ScrollWheelDelta / 120, numTooltips)) return tooltips;
 

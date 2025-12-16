@@ -1,4 +1,3 @@
-using BetterInventory.Configs;
 using MonoMod.Cil;
 using SpikysLib.IL;
 using Terraria;
@@ -11,9 +10,7 @@ public sealed class MaterialsWrapping : ILoadable {
 
     public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || VanillaPatchesConfig.MaterialsWrapping;
     public void Load(Mod mod) {
-        IL_Main.DrawInventory += static il => {
-            if (!il.ApplyTo(ILMaterialWrapping, VanillaPatchesConfig.MaterialsWrapping)) Configs.UnloadedVanillaFixes.Instance.materialsWrapping = true;
-        };
+        IL_Main.DrawInventory += il => il.TryEdit(ILMaterialWrapping, ref UnloadedVanillaPatchesConfig.Instance.materialsWrapping);
     }
     public void Unload() { }
 

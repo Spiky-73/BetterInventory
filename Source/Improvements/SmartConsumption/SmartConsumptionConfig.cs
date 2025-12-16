@@ -15,7 +15,6 @@ public sealed class SmartConsumptionConfig {
     [DefaultValue(false)] public bool mouse = false;
     [DefaultValue(false)] public bool self = false;
 
-    public static bool Enabled => ImprovementsConfig.Instance.smartConsumption;
     public static SmartConsumptionConfig Instance => ImprovementsConfig.Instance.smartConsumption.Value;
     public static bool Consumables => Instance.consumables;
     public static bool Ammo => Instance.ammo;

@@ -17,6 +17,7 @@ using SpikysLib;
 using MonoMod.Utils;
 using BetterInventory.ItemSearch.BetterGuide;
 using SpikysLib.CrossMod;
+using BetterInventory.VisualChanges;
 
 namespace BetterInventory.ItemActions;
 
@@ -96,7 +97,7 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public void DisplayMagicStorageStackWarning() {
-        if (!Configs.VisualChanges.RecipeTooltip || !Configs.VisualChanges.AvailableMaterialsCount || !MagicStorageIntegration.StackingFix) return;
+        if (!VisualChangesConfig.RecipeTooltip || !VisualChangesConfig.AvailableMaterialsCount || !MagicStorageIntegration.StackingFix) return;
         InGameNotificationsTracker.AddNotification(new InGameNotification(Mod, new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.MagicStorageStackWarning"), Colors.RarityAmber)));
     }
 

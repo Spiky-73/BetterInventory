@@ -11,7 +11,7 @@ namespace BetterInventory;
 
 public sealed class DisplayedRecipes : ModSystem {
 
-    public static bool Enabled => RecipeFilteringConfig.Enabled || Configs.BetterGuide.AvailableRecipes || Configs.BetterGuide.RecipeOrdering;
+    public static bool Enabled => Features.FeaturesConfig.RecipeFiltering || Configs.BetterGuide.AvailableRecipes || Configs.BetterGuide.RecipeOrdering;
     
     public override void Load() {
         On_Recipe.FindRecipes += HookFindAvailableRecipes;
@@ -90,7 +90,7 @@ public sealed class DisplayedRecipes : ModSystem {
             Recipe.CollectGuideRecipes();
         }
 
-        if (RecipeFilteringConfig.Enabled) RecipeFilteringSystem.FilterAndSortRecipes();
+        if (Features.FeaturesConfig.RecipeFiltering) RecipeFilteringSystem.FilterAndSortRecipes();
         if (Configs.BetterGuide.RecipeOrdering) FavoritedRecipesPlayer.FilterAndSortRecipes();
 
         Recipe.TryRefocusingRecipe(oldRecipe);

@@ -19,7 +19,6 @@ public sealed class QuickMoveConfig {
     [QMUnloadable(nameof(displayedHotkeys)), DefaultValue(HotkeyDisplayMode.All)] public HotkeyDisplayMode displayedHotkeys = HotkeyDisplayMode.All;
     [DefaultValue(false)] public bool itemTooltip = false;
 
-    public static bool Enabled => FeaturesConfig.Instance.quickMove;
     public static QuickMoveConfig Instance => FeaturesConfig.Instance.quickMove.Value;
     public static bool DisplayHotkeys => Instance.displayedHotkeys != HotkeyDisplayMode.None && !UnloadedQuickMoveConfig.Instance.displayedHotkeys;
     public static bool ItemTooltip => Instance.itemTooltip;

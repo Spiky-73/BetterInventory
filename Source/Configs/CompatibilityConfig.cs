@@ -1,6 +1,10 @@
 using System;
 using System.ComponentModel;
 using System.Reflection;
+using BetterInventory.Features;
+using BetterInventory.Improvements;
+using BetterInventory.VanillaPatches;
+using BetterInventory.VisualChanges;
 using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
 using SpikysLib;
@@ -18,6 +22,7 @@ public sealed class CompatibilityConfig : ModConfig {
     [JsonIgnore, ShowDespiteJsonIgnore] public UnloadedVanillaPatchesConfig unloadedVanillaPatches = new();
     [JsonIgnore, ShowDespiteJsonIgnore] public UnloadedFeaturesConfig unloadedFeatures = new();
     [JsonIgnore, ShowDespiteJsonIgnore] public UnloadedImprovementsConfig unloadedImprovements = new();
+    [JsonIgnore, ShowDespiteJsonIgnore] public UnloadedVisualChangesConfig unloadedVisualChanges = new();
 
     public static CompatibilityConfig Instance = null!;
 

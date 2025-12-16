@@ -1,4 +1,3 @@
-using BetterInventory.Configs;
 using MonoMod.Cil;
 using SpikysLib.IL;
 using Terraria;
