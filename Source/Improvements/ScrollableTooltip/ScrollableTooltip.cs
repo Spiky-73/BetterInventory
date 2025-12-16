@@ -30,7 +30,6 @@ public class ScrollableTooltipItem : GlobalItem {
     }
 }
 
-
 public static class ScrollableTooltip {
 
     public static bool ScrollItemTooltip(int type, int delta, int numTooltips) {

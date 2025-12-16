@@ -1,27 +1,49 @@
 using System;
 using Terraria;
+using Terraria.ModLoader;
 using Terraria.UI.Gamepad;
 
 namespace BetterInventory.Improvements.BetterRecipeGrid;
 
-public static class RememberGridPosition {
-    public static void PreClearBuffs() => _start = Main.recStart;
-    public static void PostClearBuffs() => Main.recStart = _start;
+public class RememberGridPosition : ILoadable {
 
-    public static void PreClearAvailableRecipes() {
-        _focusedRecipeLine = GetRecipeLine(Main.focusRecipe);
-        _focusedVisible = !_skipFollow && 0 <= _focusedRecipeLine && _focusedRecipeLine < UILinkPointNavigator.Shortcuts.CRAFT_IconsPerColumn;
+    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterRecipeGridConfig.RememberGridPosition;
+    public void Load(Mod mod) {
+        On_Main.DrawInterface_Resources_ClearBuffs += HookRememberListPosition;
+        On_Recipe.ClearAvailableRecipes += HookClearAvailableRecipes;
+    }
+    public void Unload() { }
+
+    private static void HookRememberListPosition(On_Main.orig_DrawInterface_Resources_ClearBuffs orig) {
+        if (!BetterRecipeGridConfig.RememberGridPosition) {
+            orig();
+            return;
+        }
+        _start = Main.recStart;
+        orig();
+        Main.recStart = _start;
+    }
+
+
+    private static void HookClearAvailableRecipes(On_Recipe.orig_ClearAvailableRecipes orig) {
+        if (BetterRecipeGridConfig.RememberGridPosition) {
+            _focusedRecipeLine = GetRecipeLine(Main.focusRecipe);
+            _focusedVisible = !_skipFollow && 0 <= _focusedRecipeLine && _focusedRecipeLine < UILinkPointNavigator.Shortcuts.CRAFT_IconsPerColumn;
+        }
+        orig();
+    }
+
+    // TODO Called in DisplayedRecipes
+    internal static void HookTryRefocusingList(On_Recipe.orig_TryRefocusingRecipe orig, int oldRecipe) {
+        orig(oldRecipe);
+        if (!BetterRecipeGridConfig.RememberGridPosition) return;
+        _skipFollow = false;
+        if (!_focusedVisible) return;
+        Main.recStart = Math.Max(0, SpikysLib.MathHelper.Snap(Main.focusRecipe, UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow, SpikysLib.MathHelper.SnapMode.Floor) - _focusedRecipeLine * UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow);
     }
 
     public static void DontFollowOnNextRefocus() {
         _skipFollow = true;
-    }
-
-    public static void TryRefocusingRecipe() {
-        _skipFollow = false;
-        if (!_focusedVisible) return;
-        Main.recStart = Math.Max(0, SpikysLib.MathHelper.Snap(Main.focusRecipe, UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow, SpikysLib.MathHelper.SnapMode.Floor)
-            - _focusedRecipeLine * UILinkPointNavigator.Shortcuts.CRAFT_IconsPerRow);
     }
 
     public static int GetRecipeLine(int availableRecipeIndex) {

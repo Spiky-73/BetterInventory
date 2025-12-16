@@ -9,8 +9,6 @@ public sealed class MoreMaterialsConfig {
     public Toggle<EquipmentMaterialsConfig> equipment = new(true);
 
     public static MoreMaterialsConfig Instance => ImprovementsConfig.Instance.moreMaterials.Value;
-    public static bool Mouse => Instance.mouse;
-    public static bool Equipment => Instance.equipment;
 }
 
 public sealed class EquipmentMaterialsConfig {

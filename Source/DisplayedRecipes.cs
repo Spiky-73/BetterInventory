@@ -65,7 +65,7 @@ public sealed class DisplayedRecipes : ModSystem {
 
     private void HookNoRefocus(On_Recipe.orig_TryRefocusingRecipe orig, int oldRecipe) {
         if (!Enabled || Main.availableRecipe != availableRecipes) {
-            BetterRecipeGridHooks.HookTryRefocusingList(orig, oldRecipe);
+            RememberGridPosition.HookTryRefocusingList(orig, oldRecipe);
         }
     }
 
@@ -90,7 +90,7 @@ public sealed class DisplayedRecipes : ModSystem {
             Recipe.CollectGuideRecipes();
         }
 
-        if (Features.FeaturesConfig.RecipeFiltering) RecipeFilteringSystem.FilterAndSortRecipes();
+        if (Features.FeaturesConfig.RecipeFiltering) RecipeFilteringPlayer.FilterAndSortRecipes();
         if (Configs.BetterGuide.RecipeOrdering) FavoritedRecipesPlayer.FilterAndSortRecipes();
 
         Recipe.TryRefocusingRecipe(oldRecipe);

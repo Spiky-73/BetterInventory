@@ -16,11 +16,11 @@ public sealed class SmartConsumptionConfig {
     [DefaultValue(false)] public bool self = false;
 
     public static SmartConsumptionConfig Instance => ImprovementsConfig.Instance.smartConsumption.Value;
-    public static bool Consumables => Instance.consumables;
-    public static bool Ammo => Instance.ammo;
-    public static bool Baits => Instance.baits && !UnloadedSmartConsumptionConfig.Instance.baits;
-    public static bool Paints => Instance.paints;
-    public static bool Materials => Instance.materials && !UnloadedSmartConsumptionConfig.Instance.materials;
+    public static bool Consumables => ImprovementsConfig.SmartConsumption && Instance.consumables;
+    public static bool Ammo => ImprovementsConfig.SmartConsumption && Instance.ammo;
+    public static bool Baits => ImprovementsConfig.SmartConsumption && Instance.baits && !UnloadedSmartConsumptionConfig.Instance.baits;
+    public static bool Paints => ImprovementsConfig.SmartConsumption && Instance.paints;
+    public static bool Materials => ImprovementsConfig.SmartConsumption && Instance.materials && !UnloadedSmartConsumptionConfig.Instance.materials;
 }
 
 public sealed class UnloadedSmartConsumptionConfig {

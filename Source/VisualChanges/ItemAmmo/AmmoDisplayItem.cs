@@ -21,17 +21,15 @@ public sealed class AmmoDisplayItem : GlobalItem {
         // TODO change
         ClickOverrides.AddCraftStackLine(item, tooltips);
 
-        if (!VisualChangesConfig.ItemAmmo) return;
         if (ItemAmmoConfig.Tooltip) ItemAmmo.Tooltip_ModifyTooltips(item, tooltips);
     }
 
     public sealed override void PostDrawInInventory(Item item, SpriteBatch spriteBatch, Vector2 position, Rectangle frame, Color drawColor, Color itemColor, Vector2 origin, float scale) {
-        if (!VisualChangesConfig.ItemAmmo) return;
         if (ItemAmmoConfig.ItemSlot) ItemAmmo.ItemSlot_PostDrawInInventory(item, spriteBatch, position);
     }
 
     private static float HookDrawItemContext(On_ItemSlot.orig_DrawItemIcon orig, Item item, int context, SpriteBatch spriteBatch, Vector2 screenPositionForItemCenter, float scale, float sizeLimit, Color environmentColor) {
-        if (!VisualChangesConfig.ItemAmmo || !ItemAmmoConfig.ItemSlot) return orig(item, context, spriteBatch, screenPositionForItemCenter, scale, sizeLimit, environmentColor);
+        if (!ItemAmmoConfig.ItemSlot) return orig(item, context, spriteBatch, screenPositionForItemCenter, scale, sizeLimit, environmentColor);
         ItemAmmo.ItemSlot_PreDrawItemIcon(context, scale);
         var finalScale = orig(item, context, spriteBatch, screenPositionForItemCenter, scale, sizeLimit, environmentColor);
         ItemAmmo.ItemSlot_PostDrawItemIcon();

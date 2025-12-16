@@ -15,12 +15,12 @@ public sealed class BetterRecipeGridConfig {
     [BRGUnloadable(nameof(pageScroll)), DefaultValue(true)] public bool pageScroll = true;
 
     public static BetterRecipeGridConfig Instance => ImprovementsConfig.Instance.betterRecipeGrid.Value;
-    public static bool CraftOnRecGrid => Instance.craftOnRecipeGrid && !UnloadedBetterRecipeGridConfig.Instance.craftOnRecipeGrid;
-    public static bool RefocusButton => Instance.refocusButton && !UnloadedBetterRecipeGridConfig.Instance.refocusButton;
-    public static bool NoRecGridOffset => Instance.noRecGridOffset && !UnloadedBetterRecipeGridConfig.Instance.noRecGridOffset;
-    public static bool NoRecGridClose => Instance.noRecGridClose && !UnloadedBetterRecipeGridConfig.Instance.noRecGridClose;
-    public static bool RememberGridPosition => Instance.rememberGridPosition;
-    public static bool PageScroll => Instance.pageScroll && !UnloadedBetterRecipeGridConfig.Instance.pageScroll;
+    public static bool CraftOnRecGrid => ImprovementsConfig.BetterRecipeGrid && Instance.craftOnRecipeGrid && !UnloadedBetterRecipeGridConfig.Instance.craftOnRecipeGrid;
+    public static bool RefocusButton => ImprovementsConfig.BetterRecipeGrid && Instance.refocusButton && !UnloadedBetterRecipeGridConfig.Instance.refocusButton;
+    public static bool NoRecGridOffset => ImprovementsConfig.BetterRecipeGrid && Instance.noRecGridOffset && !UnloadedBetterRecipeGridConfig.Instance.noRecGridOffset;
+    public static bool NoRecGridClose => ImprovementsConfig.BetterRecipeGrid && Instance.noRecGridClose && !UnloadedBetterRecipeGridConfig.Instance.noRecGridClose;
+    public static bool RememberGridPosition => ImprovementsConfig.BetterRecipeGrid && Instance.rememberGridPosition;
+    public static bool PageScroll => ImprovementsConfig.BetterRecipeGrid && Instance.pageScroll && !UnloadedBetterRecipeGridConfig.Instance.pageScroll;
 }
 
 public sealed class CraftOnRecipeGridConfig {

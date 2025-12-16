@@ -16,7 +16,7 @@ public sealed class MoreMaterialsPlayer : ModPlayer {
     private static void HookSwapLoadout(On_ItemSlot.orig_RecordLoadoutChange orig) {
         orig();
         if (!ImprovementsConfig.MoreMaterials) return;
-        if (MoreMaterialsConfig.Equipment) Recipe.FindRecipes();
+        if (MoreMaterialsConfig.Instance.equipment) Recipe.FindRecipes();
     }
 
     public override IEnumerable<Item> AddMaterialsForCrafting(out ItemConsumedCallback? itemConsumedCallback) {
@@ -28,8 +28,8 @@ public sealed class MoreMaterialsPlayer : ModPlayer {
             if (item == Main.mouseItem) item.stack -= RecipeLoader.ConsumedItems[^1].stack; // FIXME seems hacky
             return;
         };
-        if (MoreMaterialsConfig.Mouse) Mouse_AddMaterials(materials);
-        if (MoreMaterialsConfig.Equipment) Equipment_AddMaterials(materials);
+        if (MoreMaterialsConfig.Instance.mouse) Mouse_AddMaterials(materials);
+        if (MoreMaterialsConfig.Instance.equipment) Equipment_AddMaterials(materials);
         return materials;
     }
 

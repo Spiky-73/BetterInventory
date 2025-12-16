@@ -50,15 +50,15 @@ public sealed class UIRecipeFiltering : UIState {
         _toggleIcons.Add(_craftingToggle);
         _container.Add(_toggleIcons);
 
-        if (RecipeFilteringConfig.Sort) {
+        if (RecipeFilteringConfig.Instance.sort) {
             _container.Add(_sort);
             _sort.Rebuild(immediate);
         }
-        if (RecipeFilteringConfig.Search) {
+        if (RecipeFilteringConfig.Instance.search) {
             _container.Add(_search);
             _search.Rebuild(immediate);
         }
-        if (RecipeFilteringConfig.Filters) {
+        if (RecipeFilteringConfig.Instance.filters) {
             _container.Add(_filters);
             _filters.Rebuild(immediate);
         }

@@ -20,8 +20,8 @@ public sealed class QuickMoveConfig {
     [DefaultValue(false)] public bool itemTooltip = false;
 
     public static QuickMoveConfig Instance => FeaturesConfig.Instance.quickMove.Value;
-    public static bool DisplayHotkeys => Instance.displayedHotkeys != HotkeyDisplayMode.None && !UnloadedQuickMoveConfig.Instance.displayedHotkeys;
-    public static bool ItemTooltip => Instance.itemTooltip;
+    public static bool DisplayHotkeys => FeaturesConfig.QuickMove && Instance.displayedHotkeys != HotkeyDisplayMode.None && !UnloadedQuickMoveConfig.Instance.displayedHotkeys;
+    public static bool ItemTooltip => FeaturesConfig.QuickMove && Instance.itemTooltip;
 }
 
 public enum HotkeyDisplayMode { None, Next, All }

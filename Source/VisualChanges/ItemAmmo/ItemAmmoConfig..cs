@@ -8,8 +8,8 @@ public sealed class ItemAmmoConfig {
     public Toggle<ItemSlotAmmoConfig> itemSlot = new(true);
 
     public static ItemAmmoConfig Instance => VisualChangesConfig.Instance.itemAmmo.Value;
-    public static bool Tooltip => Instance.tooltip;
-    public static bool ItemSlot => Instance.itemSlot;
+    public static bool Tooltip => VisualChangesConfig.ItemAmmo && Instance.tooltip;
+    public static bool ItemSlot => VisualChangesConfig.ItemAmmo && Instance.itemSlot;
 }
 public sealed class ItemSlotAmmoConfig {
     [DefaultValue(0.55f)] public float size = 0.55f;

@@ -11,8 +11,8 @@ public sealed class BetterRecipeListConfig {
     [BRLUnloadable(nameof(fastScroll))] public Toggle<FastScrollConfig> fastScroll = new(true);
 
     public static BetterRecipeListConfig Instance => ImprovementsConfig.Instance.betterRecipeList.Value;
-    public static bool CraftWhenHolding => Instance.craftWhenHolding;
-    public static bool FastScroll => Instance.fastScroll && !UnloadedBetterRecipeListConfig.Instance.fastScroll;
+    public static bool CraftWhenHolding => ImprovementsConfig.BetterRecipeList && Instance.craftWhenHolding;
+    public static bool FastScroll => ImprovementsConfig.BetterRecipeList && Instance.fastScroll && !UnloadedBetterRecipeListConfig.Instance.fastScroll;
 }
 
 public sealed class FastScrollConfig {

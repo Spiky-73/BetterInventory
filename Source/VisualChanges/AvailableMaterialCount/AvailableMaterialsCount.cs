@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using BetterInventory.ItemSearch.BetterGuide;
-using BetterInventory.VisualChanges.RecipeTooltip;
 using MonoMod.Cil;
 using SpikysLib;
 using SpikysLib.IL;
@@ -33,7 +32,6 @@ public sealed class AvailableMaterialsCountItem : GlobalItem {
     }
 
     public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
-        if (!VisualChangesConfig.AvailableMaterialsCount) return;
         if (AvailableMaterialsCountConfig.Tooltip) AvailableMaterialsCount.Tooltip_ModifyTooltips(item, tooltips);
     }
     private static void ILModifyStackText(ILContext il) {
@@ -46,14 +44,13 @@ public sealed class AvailableMaterialsCountItem : GlobalItem {
         cursor.GotoPrev(MoveType.After, i => i.MatchCall((int i) => i.ToString()) && i.Previous.MatchLdflda((Item i) => i.stack));
         cursor.EmitLdarg1().EmitLdarg2().EmitLdarg3();
         cursor.EmitDelegate((string stack, Item[] inv, int context, int slot) => {
-            if (!VisualChangesConfig.AvailableMaterialsCount) return stack;
-            if (AvailableMaterialsCountConfig.ItemSlot) return AvailableMaterialsCount.ItemStack_ModifyText(inv[slot], context, stack);
-            return stack;
+            if (!AvailableMaterialsCountConfig.ItemSlot) return stack;
+            return AvailableMaterialsCount.ItemStack_ModifyText(inv[slot], context, stack);
         });
         cursor.GotoPrev(i => i.MatchLdflda((Item i) => i.stack));
         cursor.GotoPrev(MoveType.After, i => i.MatchLdfld((Item i) => i.stack));
         cursor.EmitLdarg1().EmitLdarg2().EmitLdarg3();
-        cursor.EmitDelegate((int stack, Item[] inv, int context, int slot) => VisualChangesConfig.AvailableMaterialsCount && AvailableMaterialsCountConfig.ItemSlot && AvailableMaterialsCount.ShouldDisplayStack(inv[slot], context, out _) ? 2 : stack);
+        cursor.EmitDelegate((int stack, Item[] inv, int context, int slot) => AvailableMaterialsCountConfig.ItemSlot && AvailableMaterialsCount.ShouldDisplayStack(inv[slot], context, out _) ? 2 : stack);
     }
 }
 

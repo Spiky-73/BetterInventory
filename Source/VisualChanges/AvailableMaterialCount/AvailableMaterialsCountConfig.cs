@@ -10,8 +10,8 @@ public sealed class AvailableMaterialsCountConfig {
     [AMCUnloadable(nameof(itemSlot)), DefaultValue(true)] public bool itemSlot = true;
 
     public static AvailableMaterialsCountConfig Instance => VisualChangesConfig.Instance.availableMaterialsCount.Value;
-    public static bool Tooltip => Instance.tooltip;
-    public static bool ItemSlot => Instance.itemSlot && !UnloadedAvailableMaterialsCountConfig.Instance.itemSlot;
+    public static bool Tooltip => VisualChangesConfig.AvailableMaterialsCount && Instance.tooltip;
+    public static bool ItemSlot => VisualChangesConfig.AvailableMaterialsCount && Instance.itemSlot && !UnloadedAvailableMaterialsCountConfig.Instance.itemSlot;
 }
 
 public sealed class UnloadedAvailableMaterialsCountConfig {

@@ -16,7 +16,6 @@ public sealed class SmartConsumptionItem : GlobalItem {
     }
 
     public override void OnConsumeItem(Item item, Player player) {
-        if (!ImprovementsConfig.SmartConsumption) return;
         if (item.PaintOrCoating) {
             if (SmartConsumptionConfig.Paints) SmartConsumption.SmartConsume(player, item, SmartConsumption.LastStack);
         } else {
@@ -25,7 +24,6 @@ public sealed class SmartConsumptionItem : GlobalItem {
     }
 
     public override void OnConsumedAsAmmo(Item ammo, Item weapon, Player player) {
-        if (!ImprovementsConfig.SmartConsumption) return;
         if (SmartConsumptionConfig.Ammo) SmartConsumption.SmartConsume(player, ammo, SmartConsumption.LastStack);
     }
 
@@ -38,7 +36,6 @@ public sealed class SmartConsumptionItem : GlobalItem {
         cursor.EmitLdarg1();
         cursor.EmitLdloc(consumed);
         cursor.EmitDelegate((Item item, Item consumed) => {
-            if (!ImprovementsConfig.SmartConsumption) return;
             if (SmartConsumptionConfig.Materials) SmartConsumption.SmartConsume(Main.LocalPlayer, item, SmartConsumption.SmallestStack, consumed.stack, new(true, SmartConsumptionConfig.Instance.mouse));
         });
     }
@@ -53,7 +50,6 @@ public sealed class SmartConsumptionItem : GlobalItem {
         cursor.EmitLdarg0();
         cursor.EmitLdloc(i);
         cursor.EmitDelegate((Player self, int i) => {
-            if (!ImprovementsConfig.SmartConsumption) return;
             if (SmartConsumptionConfig.Baits) SmartConsumption.SmartConsume(self, self.inventory[i], SmartConsumption.LastStack);
         });
     }
