@@ -56,7 +56,7 @@ public sealed class BetterPlayer : ModPlayer {
                 WireDisplayToggles.Add(toggle);
                 continue;
             }
-            BuilderTogglesKb.Add((toggle, KeybindLoader.RegisterKeybind(Mod, toggle.Name.Replace("BuilderToggle",string.Empty), Microsoft.Xna.Framework.Input.Keys.None)));
+            BuilderTogglesKb.Add((toggle, KeybindLoader.RegisterKeybind(Mod, toggle.Name.Replace("BuilderToggle", string.Empty), Microsoft.Xna.Framework.Input.Keys.None)));
         }
     }
 
@@ -126,12 +126,12 @@ public sealed class BetterPlayer : ModPlayer {
             (int type, int stack, int prefix) = (item.type, item.stack, item.prefix);
             int animation = Player.itemAnimation;
             Player.itemAnimation--;
-            if(Main.stackSplit == 1) Player.itemAnimation = 0;
+            if (Main.stackSplit == 1) Player.itemAnimation = 0;
 
             if (!Configs.ItemRightClick.Value.stackableItems) s_noMousePickup = true;
             ItemSlot.RightClick(Player.inventory, ItemSlot.Context.InventoryItem, Player.selectedItem);
             s_noMousePickup = false;
-            
+
             if (type == item.type && stack == item.stack && prefix == item.prefix) {
                 Player.itemAnimation = animation;
                 return true;
@@ -147,11 +147,11 @@ public sealed class BetterPlayer : ModPlayer {
 
     private static void HookTryOpenContainer(On_ItemSlot.orig_TryOpenContainer orig, Item item, Player player) {
         if (!Configs.ItemActions.FastContainerOpening) {
-            orig(item,player);
+            orig(item, player);
             return;
         }
         int split = Main.stackSplit;
-        for (int i = 0; i < Main.superFastStack + 1; i++) orig(item,player);
+        for (int i = 0; i < Main.superFastStack + 1; i++) orig(item, player);
         Main.stackSplit = split;
         ItemSlot.RefreshStackSplitCooldown();
     }
@@ -181,10 +181,7 @@ public sealed class BetterPlayer : ModPlayer {
         Recipe.FindRecipes();
     }
 
-    public override void SaveData(TagCompound tag) {
-        tag[FavoritedInBanksTag] = new FavoritedInBanks(Player);
-    }
-
+    public override void SaveData(TagCompound tag) { }
     public override void LoadData(TagCompound tag) {
         if (tag.TryGet(CraftInMenuPlayer.VisibilityTag, out VisibilityFilters visibility)) { // Compatibility version < v0.8
             Player.GetModPlayer<CraftInMenuPlayer>().visibility = (RecipeVisibility)visibility.Visibility;
@@ -197,8 +194,6 @@ public sealed class BetterPlayer : ModPlayer {
         if (tag.TryGet(GuideTilePlayer.GuideTileTag, out Item tile)) { // Compatibility version < v0.8
             Player.GetModPlayer<GuideTilePlayer>()._tempGuideTile = tile;
         }
-
-        if (Configs.InventoryManagement.FavoriteInBanks && tag.TryGet(FavoritedInBanksTag, out FavoritedInBanks favorited)) favorited.Apply(Player);
     }
 
     private static bool s_noMousePickup;
@@ -214,6 +209,4 @@ public sealed class BetterPlayer : ModPlayer {
         if (success && favorited && Configs.ItemActions.KeepSwappedFavorited) swapped.favorited = true;
         return swapped;
     }
-
-    public const string FavoritedInBanksTag = "favorited";
 }

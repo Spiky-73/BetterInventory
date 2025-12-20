@@ -14,8 +14,6 @@ public sealed class ItemActions : ModConfig {
     [DefaultValue(true)] public bool builderAccs;
     [DefaultValue(true)] public bool keepSwappedFavorited;
     public Toggle<GrabBagTooltip> grabBagTooltip = new(true);
-    public bool fixedTooltipPosition;
-    public Toggle<TooltipHover> tooltipHover = new(true);
     [DefaultValue(true)] public bool quickStack;
 
     public static bool FastContainerOpening => Instance.fastContainerOpening;
@@ -23,7 +21,6 @@ public sealed class ItemActions : ModConfig {
     public static bool FavoritedBuff => Instance.favoritedBuff;
     public static bool BuilderAccs => Instance.builderAccs;
     public static bool KeepSwappedFavorited => Instance.keepSwappedFavorited;
-    public static bool FixedTooltipPosition => Instance.fixedTooltipPosition && !UnloadedItemActions.Value.fixedTooltipPosition;
     public static bool QuickStack => Instance.quickStack;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
@@ -46,11 +43,4 @@ public sealed class GrabBagTooltip {
     
     public static bool Enabled => ItemActions.Instance.grabBagTooltip;
     public static GrabBagTooltip Value => ItemActions.Instance.grabBagTooltip.Value;
-}
-
-public sealed class TooltipHover {
-    [DefaultValue(10)] public int graceTime = 10;
-
-    public static bool Enabled => ItemActions.Instance.tooltipHover && !UnloadedItemActions.Value.tooltipHover;
-    public static TooltipHover Value => ItemActions.Instance.tooltipHover.Value;
 }

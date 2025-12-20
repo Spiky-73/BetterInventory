@@ -8,7 +8,6 @@ using BetterInventory.CrossMod;
 using SpikysLib.IL;
 using SpikysLib.UI;
 using Terraria;
-using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -24,9 +23,6 @@ public sealed class ClickOverrides : ModPlayer {
 
         On_Main.TryAllowingToCraftRecipe += HookTryAllowingToCraftRecipe;
 
-        On_ChestUI.LootAll += HookLootAll;
-        On_ChestUI.Restock += HookRestock;
-
         On_ItemSlot.LeftClick_ItemArray_int_int += HookShiftLeftCustom;
         On_ItemSlot.RightClick_ItemArray_int_int += HookDepositClick; // Needs to be added before `HookShiftRight` for Shift+Deposit to work 
         On_ItemSlot.RightClick_ItemArray_int_int += HookShiftRight;
@@ -38,9 +34,6 @@ public sealed class ClickOverrides : ModPlayer {
         };
         IL_Recipe.Create += static il => {
             if (!il.ApplyTo(ILRecipeConsumeStack, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
-        };
-        IL_ItemSlot.LeftClick_ItemArray_int_int += static il => {
-            if (!il.ApplyTo(ILKeepFavoriteInBanks, Configs.InventoryManagement.FavoriteInBanks)) Configs.UnloadedInventoryManagement.Value.favoriteInBanks = true;
         };
         IL_ItemSlot.HandleShopSlot += static il => {
             if (!il.ApplyTo(ILPreventChainBuy, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
@@ -56,9 +49,6 @@ public sealed class ClickOverrides : ModPlayer {
             if (!il.ApplyTo(ILCraftMultiplier, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
             if (!il.ApplyTo(ILCraftStackAndPickup, Configs.CraftStack.Enabled || Configs.BetterShiftClick.UniversalShift)) Configs.UnloadedInventoryManagement.Value.craftStack = Configs.UnloadedInventoryManagement.Value.universalShift = true;
             if (!il.ApplyTo(ILCraftFixMouseText, Configs.CraftStack.Enabled)) Configs.UnloadedInventoryManagement.Value.craftStack = true;
-        };
-        IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += static il => {
-            if (!il.ApplyTo(ILFavoritedBankBackground, Configs.InventoryManagement.FavoriteInBanks)) Configs.UnloadedInventoryManagement.Value.favoriteInBanks = true;
         };
     }
 
@@ -345,39 +335,6 @@ public sealed class ClickOverrides : ModPlayer {
         cursor.EmitDelegate((int stack) => Configs.CraftStack.Enabled ? (stack * s_ilCraftMultiplier) : stack);
         // PopupText.NewText(...);
         // ...
-    }
-
-    private static void ILKeepFavoriteInBanks(ILContext il) {
-        ILCursor cursor = new(il);
-        cursor.GotoNext(MoveType.Before, i => i.MatchStfld(Reflection.Item.favorited));
-        cursor.EmitLdarg0();
-        cursor.EmitLdarg1();
-        cursor.EmitLdarg2();
-        cursor.EmitDelegate((bool fav, Item[] inv, int context, int slot) => {
-            if (Configs.InventoryManagement.FavoriteInBanks && context == ItemSlot.Context.BankItem) fav = inv[slot].favorited;
-            return fav;
-        });
-    }
-    private static void HookRestock(On_ChestUI.orig_Restock orig) {
-        ChestUI.GetContainerUsageInfo(out bool sync, out Item[] items);
-        if (!sync && Configs.InventoryManagement.FavoriteInBanks) ItemHelper.RunWithHiddenItems(items, () => orig(), i => i.favorited);
-        else orig();
-    }
-    private static void HookLootAll(On_ChestUI.orig_LootAll orig) {
-        ChestUI.GetContainerUsageInfo(out bool sync, out Item[] items);
-        if (!sync && Configs.InventoryManagement.FavoriteInBanks) ItemHelper.RunWithHiddenItems(items, () => orig(), i => i.favorited);
-        else orig();
-    }
-    private static void ILFavoritedBankBackground(ILContext il) {
-        ILCursor cursor = new(il);
-
-        // if (item.type > 0 && item.stack > 0 && item.favorited && context != 13 && context != 21 && context != 22 && context != 14) {
-        //     value = TextureAssets.InventoryBack10.Value;
-        //     ++ <favorited>
-        cursor.GotoNext(MoveType.After, i => i.MatchCallvirt(Reflection.Asset<Texture2D>.Value.GetMethod!) && i.Previous.MatchLdsfld(Reflection.TextureAssets.InventoryBack10));
-        cursor.EmitLdarg1().EmitLdarg2().EmitLdarg3();
-        cursor.EmitDelegate((Texture2D texture, Item[] inv, int context, int slot) => Configs.InventoryManagement.FavoriteInBanks && context == ItemSlot.Context.BankItem && inv[slot].favorited ? TextureAssets.InventoryBack19.Value : texture);
-        // }
     }
 
     public static int GetMaxCraftStackAmount(Item item) {

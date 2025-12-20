@@ -2149,6 +2149,11 @@ CompatibilityConfig: {
 		Label: unloaded Vanilla Patches
 		Tooltip: ""
 	}
+
+	unloadedVisualChanges: {
+		Label: unloaded Visual Changes
+		Tooltip: ""
+	}
 }
 
 UnloadedFeaturesConfig: {
@@ -2301,6 +2306,26 @@ UnloadedImprovementsConfig: {
 		Label: smart Consumption
 		Tooltip: ""
 	}
+
+	favoriteInBanks: {
+		Label: favorite In Banks
+		Tooltip: ""
+	}
+
+	betterQuickStack: {
+		Label: better Quick Stack
+		Tooltip: ""
+	}
+
+	betterTrash: {
+		Label: better Trash
+		Tooltip: ""
+	}
+
+	betterTooltip: {
+		Label: better Tooltip
+		Tooltip: ""
+	}
 }
 
 UnloadedBetterRecipeGridConfig: {
@@ -2377,6 +2402,26 @@ ImprovementsConfig: {
 
 	smartConsumption: {
 		Label: smart Consumption
+		Tooltip: ""
+	}
+
+	favoriteInBanks: {
+		Label: favorite In Banks
+		Tooltip: ""
+	}
+
+	betterQuickStack: {
+		Label: better Quick Stack
+		Tooltip: ""
+	}
+
+	betterTooltip: {
+		Label: better Tooltip
+		Tooltip: ""
+	}
+
+	betterTrash: {
+		Label: better Trash
 		Tooltip: ""
 	}
 }
@@ -2628,6 +2673,207 @@ ConsistantScrollDirectionConfig: {
 
 	accessories: {
 		Label: accessories
+		Tooltip: ""
+	}
+}
+
+UnloadedBetterQuickStackConfig: {
+	Tooltip: ""
+
+	completeQuickStack: {
+		Label: complete Quick Stack
+		Tooltip: ""
+	}
+
+	limitedBanksQuickStack: {
+		Label: limited Banks Quick Stack
+		Tooltip: ""
+	}
+}
+
+UnloadedVisualChangesConfig: {
+	Tooltip: ""
+
+	recipeCount: {
+		Label: recipe Count
+		Tooltip: ""
+	}
+
+	availableMaterialsCount: {
+		Label: available Materials Count
+		Tooltip: ""
+	}
+
+	inventorySlotsTexture: {
+		Label: inventory Slots Texture
+		Tooltip: ""
+	}
+}
+
+UnloadedAvailableMaterialsCountConfig: {
+	Tooltip: ""
+
+	itemSlot: {
+		Label: item Slot
+		Tooltip: ""
+	}
+}
+
+BetterQuickStackConfig: {
+	Tooltip: ""
+
+	completeQuickStack: {
+		Label: complete Quick Stack
+		Tooltip: ""
+	}
+
+	limitedBanksQuickStack: {
+		Label: limited Banks Quick Stack
+		Tooltip: ""
+	}
+}
+
+VisualChangesConfig: {
+	DisplayName: Visual Changes Config
+
+	availableMaterialsCount: {
+		Label: available Materials Count
+		Tooltip: ""
+	}
+
+	recipeCount: {
+		Label: recipe Count
+		Tooltip: ""
+	}
+
+	recipeTooltip: {
+		Label: recipe Tooltip
+		Tooltip: ""
+	}
+
+	itemAmmo: {
+		Label: item Ammo
+		Tooltip: ""
+	}
+
+	inventorySlotsTexture: {
+		Label: inventory Slots Texture
+		Tooltip: ""
+	}
+}
+
+AvailableMaterialsCountConfig: {
+	Tooltip: ""
+
+	tooltip: {
+		Label: tooltip
+		Tooltip: ""
+	}
+
+	itemSlot: {
+		Label: item Slot
+		Tooltip: ""
+	}
+}
+
+RecipeTooltipConfig: {
+	Tooltip: ""
+
+	objectsLine: {
+		Label: objects Line
+		Tooltip: ""
+	}
+}
+
+ItemAmmoConfig: {
+	Tooltip: ""
+
+	tooltip: {
+		Label: tooltip
+		Tooltip: ""
+	}
+
+	itemSlot: {
+		Label: item Slot
+		Tooltip: ""
+	}
+}
+
+ItemSlotAmmoConfig: {
+	Tooltip: ""
+
+	size: {
+		Label: size
+		Tooltip: ""
+	}
+
+	position: {
+		Label: position
+		Tooltip: ""
+	}
+
+	hover: {
+		Label: hover
+		Tooltip: ""
+	}
+}
+
+UnloadedBetterTrashConfig: {
+	Tooltip: ""
+
+	stackTrash: {
+		Label: stack Trash
+		Tooltip: ""
+	}
+}
+
+UnloadedBetterTooltipConfig: {
+	Tooltip: ""
+
+	tooltipHover: {
+		Label: tooltip Hover
+		Tooltip: ""
+	}
+}
+
+BetterTooltipConfig: {
+	Tooltip: ""
+
+	scrollableTooltip: {
+		Label: scrollable Tooltip
+		Tooltip: ""
+	}
+
+	tooltipHover: {
+		Label: tooltip Hover
+		Tooltip: ""
+	}
+
+	fixedTooltipPosition: {
+		Label: fixed Tooltip Position
+		Tooltip: ""
+	}
+}
+
+TooltipHoverConfig: {
+	Tooltip: ""
+
+	graceTime: {
+		Label: grace Time
+		Tooltip: ""
+	}
+}
+
+BetterTrashConfig: {
+	Tooltip: ""
+
+	stackTrash: {
+		Label: stack Trash
+		Tooltip: ""
+	}
+
+	trashTrash: {
+		Label: trash Trash
 		Tooltip: ""
 	}
 }

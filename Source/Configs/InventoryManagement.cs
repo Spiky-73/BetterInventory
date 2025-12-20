@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.Serialization;
 using Terraria.ModLoader.Config;
-using Terraria.UI;
 using SpikysLib.Configs;
 using Microsoft.Xna.Framework;
 using SpikysLib.Configs.UI;
@@ -14,29 +13,16 @@ namespace BetterInventory.Configs;
 public sealed class InventoryManagement : ModConfig {
     public Toggle<SmartPickup> smartPickup = new(true);
     public Toggle<CraftStack> craftStack = new(true);
-    [DefaultValue(true)] public bool favoriteInBanks;
     public Toggle<BetterShiftClick> betterShiftClick = new(true);
-    public Toggle<BetterTrash> betterTrash = new(true);
     [DefaultValue(true)] public bool depositClick;
-    public Toggle<BetterQuickStack> betterQuickStack = new(true);
-    [DefaultValue(true)] public bool inventorySlotsTexture = true;
 
     public static InventoryManagement Instance = null!;
-    public static bool FavoriteInBanks => !UnloadedInventoryManagement.Value.favoriteInBanks && Instance.favoriteInBanks;
     public static bool DepositClick => Instance.depositClick;
-    public static bool InventorySlotsTexture => !UnloadedInventoryManagement.Value.inventorySlotsTexture && Instance.inventorySlotsTexture;
     public static bool SmartPickup => Instance.smartPickup;
 
     // Compatibility version < v0.6
     [JsonProperty, DefaultValue(AutoEquipLevel.PreferredSlots)] private AutoEquipLevel autoEquip { set => ConfigHelper.MoveMember(value != AutoEquipLevel.PreferredSlots, _ => smartPickup.Value.autoEquip.Key = value); }
     [JsonProperty, DefaultValue(true)] private bool shiftRight { set => ConfigHelper.MoveMember<InventoryManagement>(!value, c => c.betterShiftClick.Key = value); }
-
-    // Compatibility version < v0.9
-    [JsonProperty, DefaultValue(true)] private bool stackTrash { set => ConfigHelper.MoveMember<InventoryManagement>(!value, c => c.betterTrash.Key = value); }
-
-    public override void OnChanged() {
-        Reflection.ItemSlot.canFavoriteAt.GetValue()[ItemSlot.Context.BankItem] = FavoriteInBanks;
-    }
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
 }
@@ -151,10 +137,6 @@ public sealed class UpgradeItems {
     }
 }
 
-public sealed class DisplayedHotkeys {
-    [DefaultValue(0.2f)] public float highlightIntensity = 0.2f;
-}
-
 public sealed class CraftStack {
     public NestedValue<MaxCraftAmount, MaxRounding> maxItems = new(999);
     [DefaultValue(true)] public bool repeat = true;
@@ -204,24 +186,4 @@ public sealed class BetterShiftClick {
     public static bool ShiftRight => !UnloadedInventoryManagement.Value.shiftRight && Value.shiftRight && Enabled;
     public static bool UniversalShift => !UnloadedInventoryManagement.Value.universalShift && Value.universalShift && Enabled;
     public static BetterShiftClick Value => InventoryManagement.Instance.betterShiftClick.Value;
-}
-
-public sealed class BetterTrash {
-    [DefaultValue(true)] public bool stackTrash = true;
-    [DefaultValue(true)] public bool trashTrash = true;
-
-    public static bool Enabled => InventoryManagement.Instance.betterTrash;
-    public static bool StackTrash => !UnloadedInventoryManagement.Value.stackTrash && Enabled && Value.stackTrash;
-    public static bool TrashTrash => Enabled && Value.trashTrash;
-    public static BetterTrash Value => InventoryManagement.Instance.betterTrash.Value;
-}
-
-public sealed class BetterQuickStack {
-    [DefaultValue(true)] public bool completeQuickStack = true;
-    [DefaultValue(true)] public bool limitedBanksQuickStack = true;
-
-    public static bool Enabled => InventoryManagement.Instance.betterQuickStack;
-    public static bool CompleteQuickStack => !UnloadedInventoryManagement.Value.quickStackComplete && Enabled && Value.completeQuickStack;
-    public static bool LimitedBanksQuickStack => !UnloadedInventoryManagement.Value.quickStackLimitedBanks && Enabled && Value.limitedBanksQuickStack;
-    public static BetterQuickStack Value => InventoryManagement.Instance.betterQuickStack.Value;
 }

@@ -18,7 +18,6 @@ public sealed class Compatibility : ModConfig {
     [JsonIgnore, ShowDespiteJsonIgnore, NullAllowed] public Empty? DisableAll { get => null; set => DisableAllILs(); }
 
     [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedInventoryManagement unloadedInventoryManagement { get; set; } = new();
-    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedItemActions unloadedItemActions { get; set; } = new();
     [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(HideDefaultElement))] public UnloadedItemSearch unloadedItemSearch { get; set; } = new();
 
     [DefaultValue(0), JsonProperty] internal int failedILs = 0;
@@ -39,16 +38,8 @@ public sealed class Compatibility : ModConfig {
         PreviousDisplay.Value.icon.Key = false;
         InventoryManagement.Instance.betterShiftClick.Value.shiftRight = false;
         InventoryManagement.Instance.betterShiftClick.Value.universalShift = false;
-        InventoryManagement.Instance.favoriteInBanks = false;
-        BetterTrash.Value.stackTrash = false;
         InventoryManagement.Instance.craftStack.Key = false;
         InventoryManagement.Instance.Save();
-        InventoryManagement.Instance.betterQuickStack.Value.completeQuickStack = false;
-        InventoryManagement.Instance.betterQuickStack.Value.limitedBanksQuickStack = false;
-        InventoryManagement.Instance.inventorySlotsTexture = false;
-
-        ItemActions.Instance.fixedTooltipPosition = false;
-        ItemActions.Instance.tooltipHover.Key = false;
         ItemActions.Instance.Save();
 
         BetterGuide.Value.favoritedRecipes.Key = false;
@@ -75,22 +66,11 @@ public sealed class UnloadedInventoryManagement {
     public bool fixSlot;
     public bool displayFakeItem;
     public bool displayIcon;
-    public bool favoriteInBanks;
     public bool shiftRight;
     public bool universalShift;
-    public bool stackTrash;
     public bool craftStack;
-    public bool quickStackComplete;
-    public bool quickStackLimitedBanks;
-    public bool inventorySlotsTexture;
 
     public static UnloadedInventoryManagement Value => Compatibility.Instance.unloadedInventoryManagement;
-}
-
-public sealed class UnloadedItemActions {
-    public bool fixedTooltipPosition;
-    public bool tooltipHover;
-    public static UnloadedItemActions Value => Compatibility.Instance.unloadedItemActions;
 }
 
 public sealed class UnloadedItemSearch {
