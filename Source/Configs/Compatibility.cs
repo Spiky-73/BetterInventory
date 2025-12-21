@@ -40,7 +40,6 @@ public sealed class Compatibility : ModConfig {
         InventoryManagement.Instance.betterShiftClick.Value.universalShift = false;
         InventoryManagement.Instance.craftStack.Key = false;
         InventoryManagement.Instance.Save();
-        ItemActions.Instance.Save();
 
         BetterGuide.Value.favoritedRecipes.Key = false;
         BetterGuide.Value.craftInMenu = false;

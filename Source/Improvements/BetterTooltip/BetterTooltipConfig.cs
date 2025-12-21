@@ -12,9 +12,9 @@ public sealed class BetterTooltipConfig {
     public bool fixedTooltipPosition;
 
     public static BetterTooltipConfig Instance => ImprovementsConfig.Instance.betterTooltip.Value;
-    public static bool ScrollableTooltip => Instance.scrollableTooltip;
-    public static bool TooltipHover => Instance.tooltipHover;
-    public static bool FixedTooltipPosition => Instance.fixedTooltipPosition;
+    public static bool ScrollableTooltip => ImprovementsConfig.BetterTooltip && Instance.scrollableTooltip;
+    public static bool TooltipHover => ImprovementsConfig.BetterTooltip && Instance.tooltipHover;
+    public static bool FixedTooltipPosition => ImprovementsConfig.BetterTooltip && Instance.fixedTooltipPosition;
 }
 
 public sealed class ScrollableTooltipConfig {

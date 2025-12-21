@@ -10,7 +10,7 @@ public sealed class RecipeFilteringPlayer : ModPlayer {
 
     public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || FeaturesConfig.RecipeFiltering;
     public override void Load() {
-        RecipeFiltersPlayer.Load();
+        RecipeFiltersPlayer.Load(Mod);
         RecipeSearchPlayer.Load();
         RecipeSortPlayer.Load(Mod);
     }

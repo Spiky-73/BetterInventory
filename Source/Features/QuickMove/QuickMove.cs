@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using BetterInventory.Default.Inventories;
+using BetterInventory.Improvements;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SpikysLib;
@@ -222,7 +223,7 @@ public static class QuickMove {
 
             // Try GetItem on the inventory item came from, preserving the favorite state of the moved item
             bool f = free.favorited;
-            if (Configs.ItemActions.KeepSwappedFavorited && keepFavorited) free.favorited = true;
+            if (ImprovementsConfig.KeepSwappedFavorited && keepFavorited) free.favorited = true;
             free = source.GetItem(free, GetItemSettings.GetItemInDropItemCheck);
             free.favorited = f; // Restore the original favorite state
 

@@ -7,6 +7,7 @@ using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent.Creative;
 using Terraria.GameContent.UI.Elements;
+using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
 
@@ -16,7 +17,7 @@ public sealed class RecipeFiltersPlayer {
 
     public static RecipeFiltersPlayer LocalPlayer => RecipeFilteringPlayer.LocalPlayer.FiltersPlayer;
 
-    public static void Load() {
+    public static void Load(Mod mod) {
         List<(IItemEntryFilter, int)> filters = [
             (new ItemFilters.Weapon(), 0),
             (new ItemFilters.Armor(), 2),
@@ -31,8 +32,8 @@ public sealed class RecipeFiltersPlayer {
         ];
         foreach (var (f, i) in filters) AddAvailableFilter(new ItemFilterWrapper(f, i));
 
-        RecipeFilters = BetterInventory.Instance.Assets.Request<Texture2D>($"Assets/Recipe_Filters");
-        RecipeFiltersGray = BetterInventory.Instance.Assets.Request<Texture2D>($"Assets/Recipe_Filters_Gray");
+        RecipeFilters = mod.Assets.Request<Texture2D>($"Assets/Recipe_Filters");
+        RecipeFiltersGray = mod.Assets.Request<Texture2D>($"Assets/Recipe_Filters_Gray");
     }
 
     public static void PostSetupRecipes() {

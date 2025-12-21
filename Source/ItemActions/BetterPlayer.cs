@@ -6,14 +6,11 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
 using BetterInventory.InventoryManagement;
-using Terraria.Audio;
 using Terraria.ID;
 using SpikysLib.UI;
 using Terraria.Localization;
 using BetterInventory.CrossMod;
-using SpikysLib.Constants;
 using SpikysLib.Configs;
-using SpikysLib;
 using MonoMod.Utils;
 using BetterInventory.ItemSearch.BetterGuide;
 using SpikysLib.CrossMod;
@@ -22,43 +19,6 @@ using BetterInventory.VisualChanges;
 namespace BetterInventory.ItemActions;
 
 public sealed class BetterPlayer : ModPlayer {
-
-    public static BetterPlayer LocalPlayer => Main.LocalPlayer.GetModPlayer<BetterPlayer>();
-
-    public static ModKeybind FavoritedBuffKb { get; private set; } = null!;
-    public static ModKeybind QuickStackKb { get; private set; } = null!;
-    public static readonly List<(BuilderToggle? toggle, ModKeybind kb)> BuilderTogglesKb = [];
-    public static readonly List<BuilderToggle> WireDisplayToggles = [];
-
-    public override void Load() {
-        FavoritedBuffKb = KeybindLoader.RegisterKeybind(Mod, "FavoritedQuickBuff", Microsoft.Xna.Framework.Input.Keys.B);
-        QuickStackKb = KeybindLoader.RegisterKeybind(Mod, "QuickStack", Microsoft.Xna.Framework.Input.Keys.None);
-        On_ItemSlot.TryOpenContainer += HookTryOpenContainer;
-        On_Player.DropItemFromExtractinator += HookFastExtractinator;
-
-        On_ItemSlot.PickupItemIntoMouse += HookNoPickupMouse;
-
-        On_ItemSlot.DyeSwap += HookDyeSwapFavorited;
-        On_ItemSlot.ArmorSwap += HookArmorSwapFavorited;
-        On_ItemSlot.EquipSwap += HookEquipSwapFavorited;
-    }
-
-    public override void Unload() {
-        FavoritedBuffKb = null!;
-        QuickStackKb = null!;
-        BuilderTogglesKb.Clear();
-        WireDisplayToggles.Clear();
-    }
-    public override void SetStaticDefaults() {
-        foreach (BuilderToggle toggle in Reflection.BuilderToggleLoader.BuilderToggles.GetValue()) {
-            if (toggle is WireVisibilityBuilderToggle wv && wv.NumberOfStates == 3) {
-                if (WireDisplayToggles.Count == 0) BuilderTogglesKb.Add((null, KeybindLoader.RegisterKeybind(Mod, "WireDisplay", Microsoft.Xna.Framework.Input.Keys.None)));
-                WireDisplayToggles.Add(toggle);
-                continue;
-            }
-            BuilderTogglesKb.Add((toggle, KeybindLoader.RegisterKeybind(Mod, toggle.Name.Replace("BuilderToggle", string.Empty), Microsoft.Xna.Framework.Input.Keys.None)));
-        }
-    }
 
     public override void OnEnterWorld() {
         DisplayUpdate();
@@ -101,15 +61,8 @@ public sealed class BetterPlayer : ModPlayer {
         InGameNotificationsTracker.AddNotification(new InGameNotification(Mod, new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.MagicStorageStackWarning"), Colors.RarityAmber)));
     }
 
-    public override void SetControls() {
-        if (Configs.ItemActions.FastContainerOpening && Main.mouseRight && Main.stackSplit == 1) Main.mouseRightRelease = true;
-    }
-
     public override void ProcessTriggers(TriggersSet triggersSet) {
         QuickSearch.ProcessTriggers();
-        if (Configs.ItemActions.FavoritedBuff && FavoritedBuffKb.JustPressed) FavoritedBuff(Player);
-        if (Configs.ItemActions.QuickStack && QuickStackKb.JustPressed) QuickStack(Player);
-        if (Configs.ItemActions.BuilderAccs) BuilderKeys();
     }
 
     public override bool HoverSlot(Item[] inventory, int context, int slot) {
@@ -117,70 +70,6 @@ public sealed class BetterPlayer : ModPlayer {
         if (ClickOverrides.OverrideHover(inventory, context, slot)) return true;
         return false;
     }
-
-    public override bool PreItemCheck() {
-        if (Main.myPlayer == Player.whoAmI && Configs.ItemRightClick.Enabled && Player.controlUseTile && Player.releaseUseItem && !Player.controlUseItem && !Player.tileInteractionHappened
-                && !Player.mouseInterface && !Terraria.Graphics.Capture.CaptureManager.Instance.Active && !Main.HoveringOverAnNPC && !Main.SmartInteractShowingGenuine
-                && Main.HoverItem.IsAir && Player.altFunctionUse == 0 && Player.selectedItem < InventorySlots.Hotbar.End) {
-            Item item = Player.inventory[Player.selectedItem];
-            (int type, int stack, int prefix) = (item.type, item.stack, item.prefix);
-            int animation = Player.itemAnimation;
-            Player.itemAnimation--;
-            if (Main.stackSplit == 1) Player.itemAnimation = 0;
-
-            if (!Configs.ItemRightClick.Value.stackableItems) s_noMousePickup = true;
-            ItemSlot.RightClick(Player.inventory, ItemSlot.Context.InventoryItem, Player.selectedItem);
-            s_noMousePickup = false;
-
-            if (type == item.type && stack == item.stack && prefix == item.prefix) {
-                Player.itemAnimation = animation;
-                return true;
-            }
-            if (!Main.mouseItem.IsAir) Player.DropSelectedItem();
-            return false;
-        }
-        return true;
-    }
-    private static void HookNoPickupMouse(On_ItemSlot.orig_PickupItemIntoMouse orig, Item[] inv, int context, int slot, Player player) {
-        if (!Configs.ItemRightClick.Enabled || !s_noMousePickup) orig(inv, context, slot, player);
-    }
-
-    private static void HookTryOpenContainer(On_ItemSlot.orig_TryOpenContainer orig, Item item, Player player) {
-        if (!Configs.ItemActions.FastContainerOpening) {
-            orig(item, player);
-            return;
-        }
-        int split = Main.stackSplit;
-        for (int i = 0; i < Main.superFastStack + 1; i++) orig(item, player);
-        Main.stackSplit = split;
-        ItemSlot.RefreshStackSplitCooldown();
-    }
-    private static void HookFastExtractinator(On_Player.orig_DropItemFromExtractinator orig, Player self, int itemType, int stack) {
-        orig(self, itemType, stack);
-        if (!Configs.ItemActions.FastExtractinator || self.ItemTimeIsZero) return;
-        ItemSlot.RefreshStackSplitCooldown();
-        self.itemTime = self.itemTimeMax = Main.stackSplit - 1;
-    }
-
-    public static void CycleBuilderState(Player player, BuilderToggle toggle, int? state = null) => player.builderAccStatus[toggle.Type] = (state ?? (player.builderAccStatus[toggle.Type] + 1)) % toggle.NumberOfStates;
-    public static void FavoritedBuff(Player player) => ItemHelper.RunWithHiddenItems(player.inventory, player.QuickBuff, i => !i.favorited);
-    private void BuilderKeys() {
-        foreach ((BuilderToggle? builder, ModKeybind kb) in BuilderTogglesKb) {
-            if (!kb.JustPressed) continue;
-            if (builder is null) {
-                CycleBuilderState(Player, WireDisplayToggles[0]);
-                for (int i = 1; i < WireDisplayToggles.Count; i++) CycleBuilderState(Player, WireDisplayToggles[i], WireDisplayToggles[i].CurrentState);
-            } else {
-                CycleBuilderState(Player, builder);
-            }
-            SoundEngine.PlaySound(SoundID.MenuTick);
-        }
-    }
-    private static void QuickStack(Player player) {
-        player.QuickStackAllChests();
-        Recipe.FindRecipes();
-    }
-
     public override void SaveData(TagCompound tag) { }
     public override void LoadData(TagCompound tag) {
         if (tag.TryGet(CraftInMenuPlayer.VisibilityTag, out VisibilityFilters visibility)) { // Compatibility version < v0.8
@@ -194,19 +83,5 @@ public sealed class BetterPlayer : ModPlayer {
         if (tag.TryGet(GuideTilePlayer.GuideTileTag, out Item tile)) { // Compatibility version < v0.8
             Player.GetModPlayer<GuideTilePlayer>()._tempGuideTile = tile;
         }
-    }
-
-    private static bool s_noMousePickup;
-
-    private static Item HookEquipSwapFavorited(On_ItemSlot.orig_EquipSwap orig, Item item, Item[] inv, int slot, out bool success) => EquipSwapFavorited((out bool success) => orig(item, inv, slot, out success), item, out success);
-    private static Item HookArmorSwapFavorited(On_ItemSlot.orig_ArmorSwap orig, Item item, out bool success) => EquipSwapFavorited((out bool success) => orig(item, out success), item, out success);
-    private static Item HookDyeSwapFavorited(On_ItemSlot.orig_DyeSwap orig, Item item, out bool success) => EquipSwapFavorited((out bool success) => orig(item, out success), item, out success);
-
-    private delegate Item EquipSwapFn(out bool success);
-    private static Item EquipSwapFavorited(EquipSwapFn swap, Item item, out bool success) {
-        bool favorited = item.favorited;
-        Item swapped = swap(out success);
-        if (success && favorited && Configs.ItemActions.KeepSwappedFavorited) swapped.favorited = true;
-        return swapped;
     }
 }

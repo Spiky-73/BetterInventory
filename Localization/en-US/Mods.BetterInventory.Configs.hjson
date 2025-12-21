@@ -2191,6 +2191,11 @@ FeaturesConfig: {
 		Label: quick Move
 		Tooltip: ""
 	}
+
+	keybindShortcuts: {
+		Label: keybind Shortcuts
+		Tooltip: ""
+	}
 }
 
 QuickMoveConfig: {
@@ -2422,6 +2427,11 @@ ImprovementsConfig: {
 
 	betterTrash: {
 		Label: better Trash
+		Tooltip: ""
+	}
+
+	fastGrabBags: {
+		Label: fast Grab Bags
 		Tooltip: ""
 	}
 }
@@ -2760,6 +2770,11 @@ VisualChangesConfig: {
 		Label: inventory Slots Texture
 		Tooltip: ""
 	}
+
+	grabBagTooltip: {
+		Label: grab Bag Tooltip
+		Tooltip: ""
+	}
 }
 
 AvailableMaterialsCountConfig: {
@@ -2874,6 +2889,48 @@ BetterTrashConfig: {
 
 	trashTrash: {
 		Label: trash Trash
+		Tooltip: ""
+	}
+}
+
+KeybindShortcutsConfig: {
+	Tooltip: ""
+
+	favoritedBuff: {
+		Label: favorited Buff
+		Tooltip: ""
+	}
+
+	builderAccs: {
+		Label: builder Accs
+		Tooltip: ""
+	}
+
+	quickStack: {
+		Label: quick Stack
+		Tooltip: ""
+	}
+}
+
+FastGrabBagsConfig: {
+	Tooltip: ""
+
+	fastContainerOpening: {
+		Label: fast Container Opening
+		Tooltip: ""
+	}
+
+	fastExtractinator: {
+		Label: fast Extractinator
+		Tooltip: ""
+	}
+}
+
+GrabBagTooltipConfig: {
+	Tooltip: ""
+
+	compact: {
+		Label: compact
 		Tooltip: ""
 	}
 }

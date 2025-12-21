@@ -10,6 +10,7 @@ using BetterInventory.Improvements.FavoriteInBanks;
 using BetterInventory.Improvements.BetterQuickStack;
 using BetterInventory.Improvements.BetterTrash;
 using BetterInventory.Improvements.BetterTooltip;
+using BetterInventory.Improvements.FastGrabBags;
 
 namespace BetterInventory.Improvements;
 
@@ -25,6 +26,8 @@ public sealed class ImprovementsConfig : ModConfig {
     [IUnloadable(nameof(favoriteInBanks)), DefaultValue(true)] public bool favoriteInBanks;
     [IUnloadable(nameof(betterQuickStack))] public Toggle<BetterQuickStackConfig> betterQuickStack = new(true);
     [IUnloadable(nameof(betterTrash))] public Toggle<BetterTrashConfig> betterTrash = new(true);
+    public Toggle<FastGrabBagsConfig> fastGrabBags = new(true);
+    [DefaultValue(true)] public bool keepSwappedFavorited = true;
 
     public static ImprovementsConfig Instance = null!;
     public static bool SmartConsumption => Instance.smartConsumption;
@@ -35,6 +38,8 @@ public sealed class ImprovementsConfig : ModConfig {
     public static bool FavoriteInBanks => Instance.favoriteInBanks && !UnloadedImprovementsConfig.Instance.favoriteInBanks;
     public static bool BetterQuickStack => Instance.betterQuickStack;
     public static bool BetterTrash => Instance.betterTrash;
+    public static bool FastGrabBags => Instance.fastGrabBags;
+    public static bool KeepSwappedFavorited => Instance.keepSwappedFavorited;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
 

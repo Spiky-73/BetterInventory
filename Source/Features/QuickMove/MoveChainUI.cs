@@ -90,7 +90,7 @@ public sealed class MoveChainUIItem : GlobalItem {
     public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
         if (!QuickMoveConfig.ItemTooltip || !DisplayedMoveChain.InChain()) return;
 
-        tooltips.Add(new(BetterInventory.Instance, "QuickMove", DisplayedMoveChain.GetTooltip(DisplayedMoveChain.Chain())));
+        tooltips.Add(new(Mod, "QuickMove", DisplayedMoveChain.GetTooltip(DisplayedMoveChain.Chain())));
     }
 
     private static bool DisplayChainHotkeys => _hovering ? DisplayedMoveChain.InChain() : QuickMove.InChain();
