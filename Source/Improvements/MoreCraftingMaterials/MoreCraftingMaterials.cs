@@ -4,32 +4,32 @@ using Terraria;
 using Terraria.ModLoader;
 using Terraria.UI;
 
-namespace BetterInventory.Improvements.MoreMaterials;
+namespace BetterInventory.Improvements.MoreCraftingMaterials;
 
-public sealed class MoreMaterialsPlayer : ModPlayer {
+public sealed class MoreCraftingMaterialsPlayer : ModPlayer {
 
-    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || ImprovementsConfig.MoreMaterials;
+    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || ImprovementsConfig.MoreCraftingMaterials;
     public override void Load() {
         On_ItemSlot.RecordLoadoutChange += HookSwapLoadout;
     }
 
     private static void HookSwapLoadout(On_ItemSlot.orig_RecordLoadoutChange orig) {
         orig();
-        if (!ImprovementsConfig.MoreMaterials) return;
-        if (MoreMaterialsConfig.Instance.equipment) Recipe.FindRecipes();
+        if (!ImprovementsConfig.MoreCraftingMaterials) return;
+        if (MoreCraftingMaterialsConfig.Instance.equipment) Recipe.FindRecipes();
     }
 
     public override IEnumerable<Item> AddMaterialsForCrafting(out ItemConsumedCallback? itemConsumedCallback) {
         itemConsumedCallback = null;
-        if (!ImprovementsConfig.MoreMaterials) return [];
+        if (!ImprovementsConfig.MoreCraftingMaterials) return [];
 
         List<Item> materials = [];
         itemConsumedCallback = (item, index) => {
             if (item == Main.mouseItem) item.stack -= RecipeLoader.ConsumedItems[^1].stack; // FIXME seems hacky
             return;
         };
-        if (MoreMaterialsConfig.Instance.mouse) Mouse_AddMaterials(materials);
-        if (MoreMaterialsConfig.Instance.equipment) Equipment_AddMaterials(materials);
+        if (MoreCraftingMaterialsConfig.Instance.mouse) Mouse_AddMaterials(materials);
+        if (MoreCraftingMaterialsConfig.Instance.equipment) Equipment_AddMaterials(materials);
         return materials;
     }
 
