@@ -1,6 +1,5 @@
 using BetterInventory.Improvements.BetterRecipeGrid;
 using BetterInventory.Improvements.BetterRecipeList;
-using BetterInventory.Improvements.MoreMaterials;
 using BetterInventory.Improvements.SmartConsumption;
 using SpikysLib.Configs;
 using Terraria.ModLoader.Config;
@@ -11,6 +10,7 @@ using BetterInventory.Improvements.BetterQuickStack;
 using BetterInventory.Improvements.BetterTrash;
 using BetterInventory.Improvements.BetterTooltip;
 using BetterInventory.Improvements.FastGrabBags;
+using BetterInventory.Improvements.MoreCraftingMaterials;
 
 namespace BetterInventory.Improvements;
 
@@ -20,7 +20,7 @@ public sealed class ImprovementsConfig : ModConfig {
 
     [IUnloadable(nameof(betterRecipeList))] public Toggle<BetterRecipeListConfig> betterRecipeList = new(true);
     [IUnloadable(nameof(betterRecipeGrid))] public Toggle<BetterRecipeGridConfig> betterRecipeGrid = new(true);
-    public Toggle<MoreMaterialsConfig> moreMaterials = new(true);
+    public Toggle<MoreCraftingMaterialsConfig> moreCraftingMaterials = new(true);
     [IUnloadable(nameof(betterTooltip))] public Toggle<BetterTooltipConfig> betterTooltip = new(true);
     [IUnloadable(nameof(smartConsumption))] public Toggle<SmartConsumptionConfig> smartConsumption = new(true);
     [IUnloadable(nameof(favoriteInBanks)), DefaultValue(true)] public bool favoriteInBanks;
@@ -32,7 +32,7 @@ public sealed class ImprovementsConfig : ModConfig {
     public static ImprovementsConfig Instance = null!;
     public static bool SmartConsumption => Instance.smartConsumption;
     public static bool BetterTooltip => Instance.betterTooltip;
-    public static bool MoreMaterials => Instance.moreMaterials;
+    public static bool MoreCraftingMaterials => Instance.moreCraftingMaterials;
     public static bool BetterRecipeList => Instance.betterRecipeList;
     public static bool BetterRecipeGrid => Instance.betterRecipeGrid;
     public static bool FavoriteInBanks => Instance.favoriteInBanks && !UnloadedImprovementsConfig.Instance.favoriteInBanks;
