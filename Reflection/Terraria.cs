@@ -59,6 +59,8 @@ public static class Item {
     public static readonly Property<TItem, bool> IsAir = new(nameof(TItem.IsAir));
     public static readonly Property<TItem, bool> IsACoin = new(nameof(TItem.IsACoin));
     public static readonly Method<TItem, bool> FitsAmmoSlot = new(nameof(TItem.FitsAmmoSlot));
+    public static readonly Method<TItem, TColor> GetAlpha = new(nameof(TItem.GetAlpha), typeof(TColor));
+    public static readonly Method<TItem, TColor> GetColor = new(nameof(TItem.GetColor), typeof(TColor));
     public static readonly Method<TItem, TItem> Clone = new(nameof(TItem.Clone));
     public static readonly Field<TItem, bool> DD2Summon = new(nameof(TItem.DD2Summon));
 }

@@ -158,14 +158,26 @@ public sealed partial class PreviousSlotPlayer : ModPlayer {
         });
     }
 
+    private static void IlFixMarkGlow(ILContext il) {
+        ILCursor cursor = new(il);
+
+        while (cursor.TryGotoNext(MoveType.After, i => i.MatchCallvirt(Reflection.Item.GetAlpha) || i.MatchCallvirt(Reflection.Item.GetColor))) {
+            cursor.EmitDelegate((Color color) => color * s_ilAlpha);
+        }
+    }
+
     private static bool TryDrawMark(SpriteBatch spriteBatch, Item[] inv, int context, int slot, Vector2 position, float scale, Texture2D texture, Color color, Configs.IPreviousDisplay ui) {
         var modPlayer = Main.LocalPlayer.GetModPlayer<PreviousSlotPlayer>();
+        s_ilAlpha = 1;
         if (!InventoryLoader.IsInventorySlot(Main.LocalPlayer, inv, context, slot, out InventorySlot itemSlot) || !modPlayer.TryGetPreviousItem(itemSlot, out Item? mark)) return false;
-        ItemSlot.DrawItemIcon(mark, ItemSlot.Context.InWorld, spriteBatch, position + texture.Size() * ui.position * scale, scale * ui.scale, 32f, color * Main.cursorAlpha * ui.intensity);
+        s_ilAlpha = ui.intensity * Main.cursorAlpha;
+        ItemSlot.DrawItemIcon(mark, ItemSlot.Context.InWorld, spriteBatch, position + texture.Size() * ui.position * scale, scale * ui.scale, 32f, color);
+        s_ilAlpha = 1;
         return true;
     }
 
     private static bool s_ilBackgroundMark;
+    private static float s_ilAlpha = 1;
 }
 
 public sealed partial class PreviousSlotPlayer : ModPlayer {
@@ -181,6 +193,9 @@ public sealed partial class PreviousSlotPlayer : ModPlayer {
             if (!il.ApplyTo(ILDrawFakeItem, Configs.PreviousDisplay.FakeItem)) Configs.UnloadedInventoryManagement.Value.displayFakeItem = true;
             if (!il.ApplyTo(ILDrawIcon, Configs.PreviousDisplay.Icon)) Configs.UnloadedInventoryManagement.Value.displayIcon = true;
         };
+        IL_ItemSlot.DrawItemIcon += static il => {
+            if (!il.ApplyTo(IlFixMarkGlow, Configs.PreviousDisplay.FakeItem || Configs.PreviousDisplay.Icon)) Configs.UnloadedInventoryManagement.Value.displayFakeItem = Configs.UnloadedInventoryManagement.Value.displayIcon = true;
+        }; ;
 
         On_ItemSlot.OverrideLeftClick += HookClearMark;
     }

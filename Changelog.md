@@ -1,5 +1,8 @@
 # Better Inventory changelog
 
+## v0.9.1.4
+- Fixed Return to previous slot marks sometimes been fully opaque
+
 ## v0.9.1.3
 - Fixed Deposit Click not respecting item slots contraints
 - Fixed Quick Stack on Pickup causing item duplication in Multiplayer
