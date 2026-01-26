@@ -16,7 +16,7 @@ public sealed class KeybindShortcutsPlayer : ModPlayer {
         QuickStackKb = KeybindLoader.RegisterKeybind(Mod, "QuickStack", Microsoft.Xna.Framework.Input.Keys.None);
     }
     public override void SetStaticDefaults() {
-        foreach (BuilderToggle toggle in Reflection.BuilderToggleLoader.BuilderToggles.GetValue()) {
+        foreach (BuilderToggle toggle in BuilderToggleLoader.BuilderToggles) {
             if (toggle is WireVisibilityBuilderToggle wv && wv.NumberOfStates == 3) {
                 if (WireDisplayToggles.Count == 0) BuilderTogglesKb.Add((null, KeybindLoader.RegisterKeybind(Mod, "WireDisplay", Microsoft.Xna.Framework.Input.Keys.None)));
                 WireDisplayToggles.Add(toggle);

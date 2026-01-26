@@ -12,14 +12,13 @@ public static class LoadoutInventoryHelper {
     
     public static Item[] Dyes(this Player player, int loadout = -1) => loadout == -1 || player.CurrentLoadoutIndex == loadout ? player.dye : player.Loadouts[loadout].Dye;
     public static Item[] ExDyes(this Player player, int loadout = -1) => loadout == -1 || player.CurrentLoadoutIndex == loadout ?
-        Reflection.ModAccessorySlotPlayer.exDyesAccessory.GetValue(player.GetModPlayer<ModAccessorySlotPlayer>()) :
-        Reflection.ModAccessorySlotPlayer.ExEquipmentLoadout.ExDyesAccessory.GetValue(((IList)Reflection.ModAccessorySlotPlayer.exLoadouts.GetValue(player.GetModPlayer<ModAccessorySlotPlayer>())!)[loadout]!)!;
+        player.GetModPlayer<ModAccessorySlotPlayer>().exDyesAccessory :
+        player.GetModPlayer<ModAccessorySlotPlayer>().exLoadouts[loadout].ExDyesAccessory;
 
 
     public static Item[] ExAccessories(this Player player, int loadout = -1) => loadout == -1 || player.CurrentLoadoutIndex == loadout ?
-        Reflection.ModAccessorySlotPlayer.exAccessorySlot.GetValue(player.GetModPlayer<ModAccessorySlotPlayer>()) :
-        Reflection.ModAccessorySlotPlayer.ExEquipmentLoadout.ExAccessorySlot.GetValue(((IList)Reflection.ModAccessorySlotPlayer.exLoadouts.GetValue(player.GetModPlayer<ModAccessorySlotPlayer>())!)[loadout]!)!;
-
+        player.GetModPlayer<ModAccessorySlotPlayer>().exAccessorySlot :
+        player.GetModPlayer<ModAccessorySlotPlayer>().exLoadouts[loadout].ExAccessorySlot;
 
     public static List<int> UnlockedVanillaSlots(this Player player, bool vanity = false) {
         List<int> unlocked = [];
@@ -34,7 +33,7 @@ public static class LoadoutInventoryHelper {
         int offset = vanity ? accPlayer.SlotCount : 0;
         for (int i = 0; i < accPlayer.SlotCount; i++) {
             if (!LoaderManager.Get<AccessorySlotLoader>().ModdedIsItemSlotUnlockedAndUsable(i, player)) continue;
-            if (shared != Reflection.ModAccessorySlotPlayer.IsSharedSlot.Invoke(accPlayer, i)) continue;
+            if (shared != accPlayer.IsSharedSlot(i)) continue;
             unlocked.Add(i + offset);
         }
         return unlocked;
