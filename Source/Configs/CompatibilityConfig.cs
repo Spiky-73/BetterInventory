@@ -29,6 +29,7 @@ public sealed class CompatibilityConfig : ModConfig {
     public override ConfigScope Mode => ConfigScope.ClientSide;
 }
 
+// TODO modify the label and tooltip
 [AttributeUsage(AttributeTargets.Field)]
 public class UnloadableAttribute : BackgroundColorAttribute {
     public UnloadableAttribute(Type config, string field) : this(UICommon.DefaultUIBlue, GetLoadedState(config, field)) { }

@@ -24,9 +24,6 @@ public sealed class Bestiary : ILoadable {
     public void Load(Mod mod) {
         // On_FewFromOptionsNotScaledWithLuckDropRule.ReportDroprates += HookFixDropRates;
 
-        On_Filters.ByUnlockState.GetDisplayNameKey += HookCustomUnlockFilterName;
-        On_Filters.ByUnlockState.FitsFilter += HookCustomUnlockFilter;
-
         On_UIBestiaryEntryButton.ctor += HookDarkenEntryButton;
 
         On_UIBestiaryEntryInfoPage.AddInfoToList += HookDarkenEntryPage;
@@ -80,9 +77,6 @@ public sealed class Bestiary : ILoadable {
         });
         // ...
     }
-
-    private static string HookCustomUnlockFilterName(On_Filters.ByUnlockState.orig_GetDisplayNameKey orig, Filters.ByUnlockState self) => Configs.BetterBestiary.UnlockFilter ? $"{Localization.Keys.UI}.FullUnlock" : orig(self);
-    private static bool HookCustomUnlockFilter(On_Filters.ByUnlockState.orig_FitsFilter orig, Filters.ByUnlockState self, BestiaryEntry entry) => Configs.BetterBestiary.UnlockFilter ? entry.UIInfoProvider.GetEntryUICollectionInfo().UnlockState != BestiaryEntryUnlockState.CanShowDropsWithDropRates_4 : orig(self, entry);
 
 
     private static void ILIconUpdateFakeUnlock(ILContext il) {

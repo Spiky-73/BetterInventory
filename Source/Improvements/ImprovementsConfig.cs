@@ -28,6 +28,7 @@ public sealed class ImprovementsConfig : ModConfig {
     [IUnloadable(nameof(betterTrash))] public Toggle<BetterTrashConfig> betterTrash = new(true);
     public Toggle<FastGrabBagsConfig> fastGrabBags = new(true);
     [DefaultValue(true)] public bool keepSwappedFavorited = true;
+    [DefaultValue(true)] public bool unlockFilter = true;
 
     public static ImprovementsConfig Instance = null!;
     public static bool SmartConsumption => Instance.smartConsumption;
@@ -40,6 +41,7 @@ public sealed class ImprovementsConfig : ModConfig {
     public static bool BetterTrash => Instance.betterTrash;
     public static bool FastGrabBags => Instance.fastGrabBags;
     public static bool KeepSwappedFavorited => Instance.keepSwappedFavorited;
+    public static bool UnlockFilter => Instance.unlockFilter;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
 

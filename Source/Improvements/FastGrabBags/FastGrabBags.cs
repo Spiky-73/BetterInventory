@@ -5,7 +5,7 @@ using Terraria.UI;
 
 namespace BetterInventory.Improvements.FastGrabBags;
 
-public sealed class FastGrabBags : ModPlayer {
+public sealed class FastGrabBagsPlayer : ModPlayer {
 
     public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || ImprovementsConfig.FastGrabBags;
     public override void Load() {
