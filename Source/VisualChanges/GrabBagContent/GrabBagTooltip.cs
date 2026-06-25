@@ -7,23 +7,23 @@ using Terraria.GameContent.Bestiary;
 using Terraria.GameContent.ItemDropRules;
 using Terraria.ModLoader;
 
-namespace BetterInventory.VisualChanges.GrabBagTooltip;
+namespace BetterInventory.VisualChanges.GrabBagContent;
 
 public sealed class GrabBagTooltipItem : GlobalItem {
 
-    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || VisualChangesConfig.GrabBagTooltip;
+    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || VisualChangesConfig.GrabBagContent;
 
     public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
-        if (!VisualChangesConfig.GrabBagTooltip) return;
+        if (!VisualChangesConfig.GrabBagContent || !GrabBagContentConfig.Instance.tooltip) return;
         tooltips.AddRange(GrabBagTooltip.GetContentTooltips(item.type));
     }
 }
 
 public static class GrabBagTooltip {
     public static List<TooltipLine> GetContentTooltips(int type) {
-        if (_type == type && _compact == GrabBagTooltipConfig.Instance.compact) return _tooltips;
+        if (_type == type && _compact == GrabBagContentConfig.Instance.compact) return _tooltips;
         _type = type;
-        _compact = GrabBagTooltipConfig.Instance.compact;
+        _compact = GrabBagContentConfig.Instance.compact;
         _tooltips.Clear();
 
         List<IItemDropRule> itemDropRules = Main.ItemDropsDB.GetRulesForItemID(type);

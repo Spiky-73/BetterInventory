@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using BetterInventory.Configs;
 using BetterInventory.VisualChanges.AvailableMaterialsCount;
-using BetterInventory.VisualChanges.GrabBagTooltip;
+using BetterInventory.VisualChanges.GrabBagContent;
 using BetterInventory.VisualChanges.ItemAmmo;
 using BetterInventory.VisualChanges.RecipeTooltip;
 using SpikysLib.Configs;
@@ -17,7 +17,7 @@ public sealed class VisualChangesConfig : ModConfig {
     public Toggle<RecipeTooltipConfig> recipeTooltip = new(true);
     public Toggle<ItemAmmoConfig> itemAmmo = new(true);
     [VCUnloadable(nameof(inventorySlotsTexture)), DefaultValue(true)] public bool inventorySlotsTexture = true;
-    public Toggle<GrabBagTooltipConfig> grabBagTooltip = new(true);
+    public Toggle<GrabBagContentConfig> grabBagContent = new(true);
 
     public static VisualChangesConfig Instance = null!;
     public static bool AvailableMaterialsCount => Instance.availableMaterialsCount;
@@ -25,7 +25,7 @@ public sealed class VisualChangesConfig : ModConfig {
     public static bool RecipeTooltip => Instance.recipeTooltip;
     public static bool ItemAmmo => Instance.itemAmmo;
     public static bool InventorySlotsTexture => Instance.inventorySlotsTexture && !UnloadedVisualChangesConfig.Instance.inventorySlotsTexture;
-    public static bool GrabBagTooltip => Instance.grabBagTooltip;
+    public static bool GrabBagContent => Instance.grabBagContent;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
 }

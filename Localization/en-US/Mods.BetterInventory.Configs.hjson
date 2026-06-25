@@ -2196,6 +2196,11 @@ FeaturesConfig: {
 		Label: keybind Shortcuts
 		Tooltip: ""
 	}
+
+	extraItemRightClick: {
+		Label: extra Item Right Click
+		Tooltip: ""
+	}
 }
 
 QuickMoveConfig: {
@@ -2437,6 +2442,11 @@ ImprovementsConfig: {
 
 	keepSwappedFavorited: {
 		Label: keep Swapped Favorited
+		Tooltip: ""
+	}
+
+	moreCraftingMaterials: {
+		Label: more Crafting Materials
 		Tooltip: ""
 	}
 }
@@ -2780,6 +2790,11 @@ VisualChangesConfig: {
 		Label: grab Bag Tooltip
 		Tooltip: ""
 	}
+
+	grabBagContent: {
+		Label: grab Bag Content
+		Tooltip: ""
+	}
 }
 
 AvailableMaterialsCountConfig: {
@@ -2933,6 +2948,48 @@ FastGrabBagsConfig: {
 
 GrabBagTooltipConfig: {
 	Tooltip: ""
+
+	compact: {
+		Label: compact
+		Tooltip: ""
+	}
+}
+
+ExtraItemRightClickConfig: {
+	Tooltip: ""
+
+	stackableItems: {
+		Label: stackable Items
+		Tooltip: ""
+	}
+}
+
+MoreCraftingMaterialsConfig: {
+	Tooltip: ""
+
+	mouse: {
+		Label: mouse
+		Tooltip: ""
+	}
+
+	equipment: {
+		Label: equipment
+		Tooltip: ""
+	}
+}
+
+GrabBagContentConfig: {
+	Tooltip: ""
+
+	tooltip: {
+		Label: tooltip
+		Tooltip: ""
+	}
+
+	bestiary: {
+		Label: bestiary
+		Tooltip: ""
+	}
 
 	compact: {
 		Label: compact

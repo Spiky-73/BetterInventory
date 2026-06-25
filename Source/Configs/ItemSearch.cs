@@ -88,13 +88,11 @@ public sealed class FavoritedRecipes {
 
 public sealed class BetterBestiary {
     [DefaultValue(UnlockLevel.Drops)] public UnlockLevel displayedInfo = UnlockLevel.Drops;
-    [DefaultValue(true)] public bool showBagContent = true;
     [DefaultValue(true)] public bool unlockFilter = true;
     [DefaultValue(Configs.UnknownDisplay.Unknown)] public UnknownDisplay unknownDisplay = Configs.UnknownDisplay.Unknown;
 
     public static bool Enabled => ItemSearch.Instance.betterBestiary;
     public static bool DisplayedInfo => Enabled && Value.displayedInfo != UnlockLevel.Vanilla && !UnloadedItemSearch.Value.bestiaryDisplayedInfo;
-    public static bool ShowBagContent => Enabled && Value.showBagContent;
     public static bool UnlockFilter => Enabled && Value.unlockFilter;
     public static bool UnknownDisplay => Enabled && Value.unknownDisplay > Configs.UnknownDisplay.Vanilla && !UnloadedItemSearch.Value.bestiaryUnknown;
     public static bool Unlock => UnknownDisplay || DisplayedInfo;

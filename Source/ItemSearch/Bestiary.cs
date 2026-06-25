@@ -24,9 +24,6 @@ public sealed class Bestiary : ILoadable {
     public void Load(Mod mod) {
         // On_FewFromOptionsNotScaledWithLuckDropRule.ReportDroprates += HookFixDropRates;
 
-        On_UIBestiaryInfoItemLine.ctor += HookShowBagContent;
-        On_ItemDropBestiaryInfoElement.GetSearchString += HookSearchBagText;
-
         On_Filters.ByUnlockState.GetDisplayNameKey += HookCustomUnlockFilterName;
         On_Filters.ByUnlockState.FitsFilter += HookCustomUnlockFilter;
 
@@ -82,47 +79,6 @@ public sealed class Bestiary : ILoadable {
             return info;
         });
         // ...
-    }
-
-
-    private static void HookShowBagContent(On_UIBestiaryInfoItemLine.orig_ctor orig, UIBestiaryInfoItemLine self, DropRateInfo info, BestiaryUICollectionInfo uiinfo, float textScale) {
-        orig(self, info, uiinfo, textScale);
-        if (Configs.BetterBestiary.ShowBagContent && ItemID.Sets.BossBag[info.itemId]) {
-            UIList uIList = new() {
-                Left = StyleDimension.FromPixelsAndPercent(-1, 0f),
-                Width = StyleDimension.FromPixelsAndPercent(0, 1f),
-                Height = StyleDimension.FromPixelsAndPercent(0, 1f),
-            };
-            uIList.SetPadding(0);
-            uIList.PaddingBottom = uIList.ListPadding = 4;
-            uIList.Top.Set(self.Height.Pixels + uIList.PaddingTop, 0);
-            self.Append(uIList);
-
-            List<DropRateInfo> drops = [];
-            DropRateInfoChainFeed ratesInfo = new(1f);
-            foreach (IItemDropRule itemDropRule in Main.ItemDropsDB.GetRulesForItemID(info.itemId)) itemDropRule.ReportDroprates(drops, ratesInfo);
-            foreach (DropRateInfo drop in drops) {
-                if (ItemID.CopperCoin <= drop.itemId && drop.itemId <= ItemID.PlatinumCoin) continue;
-                ItemDropBestiaryInfoElement element = new(drop);
-                UIElement? dropLine = element.ProvideUIElement(uiinfo);
-                if (dropLine is null) continue;
-                dropLine.Left.Set(0, 0);
-                dropLine.Width.Set(0, 1);
-                dropLine.PaddingLeft /= 2;
-                dropLine.PaddingRight /= 2;
-                uIList.Add(dropLine);
-            }
-            uIList.Recalculate();
-            self.Height.Pixels += uIList.GetTotalHeight() + uIList.PaddingBottom;
-        }
-    }
-    private static string HookSearchBagText(On_ItemDropBestiaryInfoElement.orig_GetSearchString orig, ItemDropBestiaryInfoElement self, ref BestiaryUICollectionInfo info) {
-        string s = orig(self, ref info);
-        if (!Configs.BetterBestiary.ShowBagContent) return s;
-        DropRateInfo dropRateInfo = Reflection.ItemDropBestiaryInfoElement._droprateInfo.GetValue(self);
-        if (!Reflection.ItemDropBestiaryInfoElement.ShouldShowItem.Invoke(dropRateInfo)) return s;
-        if (!ItemID.Sets.BossBag[dropRateInfo.itemId]) return s;
-        return $"{s}|{GetBossBagSearch(dropRateInfo)}";
     }
 
     private static string HookCustomUnlockFilterName(On_Filters.ByUnlockState.orig_GetDisplayNameKey orig, Filters.ByUnlockState self) => Configs.BetterBestiary.UnlockFilter ? $"{Localization.Keys.UI}.FullUnlock" : orig(self);
