@@ -47,7 +47,6 @@ public sealed class Compatibility : ModConfig {
         BetterGuide.Value.craftingStation = false;
         BetterGuide.Value.conditionsDisplay = false;
         BetterGuide.Value.unknownDisplay = UnknownDisplay.Vanilla;
-        BetterBestiary.Value.displayedInfo = UnlockLevel.Vanilla;
         BetterBestiary.Value.unknownDisplay = UnknownDisplay.Vanilla;
         QuickSearch.Value.catalogues[new(RecipeList.Instance)] = false;
         ItemSearch.Instance.Save();
@@ -79,13 +78,11 @@ public sealed class UnloadedItemSearch {
     public bool guideCraftingStation;
     public bool guideRequiredObjectsDisplay;
     public bool guideUnknownDisplay;
-    public bool bestiaryDisplayedInfo;
     public bool bestiaryUnknown;
     public bool recipeList;
 
     [JsonIgnore] public bool GuideAvailableRecipes { set { guideFavoritedRecipes = guideCraftInMenu = value; } }
     [JsonIgnore] public bool GuideRecipeFiltering { set { guideCraftInMenu = guideFavoritedRecipes = guideCraftingStation = guideMoreRecipes = guideUnknownDisplay = value; } }
-    [JsonIgnore] public bool BestiaryUnlock { set { bestiaryUnknown = bestiaryDisplayedInfo = value; } }
 
     public static UnloadedItemSearch Value => Compatibility.Instance.unloadedItemSearch;
 }

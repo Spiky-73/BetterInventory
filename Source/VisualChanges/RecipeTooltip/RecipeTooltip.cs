@@ -15,6 +15,8 @@ namespace BetterInventory.VisualChanges.RecipeTooltip;
 
 public class RecipeTooltipItem : GlobalItem {
 
+    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || VisualChangesConfig.RecipeTooltip;
+
     public override void Load() {
         On_ItemTagHandler.ItemSnippet.ctor += HookItemGroupName;
         On_Recipe.ClearAvailableRecipes += HookClearAvailableRecipes;

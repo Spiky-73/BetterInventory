@@ -2449,6 +2449,11 @@ ImprovementsConfig: {
 		Label: more Crafting Materials
 		Tooltip: ""
 	}
+
+	unlockFilter: {
+		Label: unlock Filter
+		Tooltip: ""
+	}
 }
 
 BetterRecipeGridConfig: {
@@ -2733,6 +2738,11 @@ UnloadedVisualChangesConfig: {
 		Label: inventory Slots Texture
 		Tooltip: ""
 	}
+
+	minimalDisplayedInfo: {
+		Label: minimal Displayed Info
+		Tooltip: ""
+	}
 }
 
 UnloadedAvailableMaterialsCountConfig: {
@@ -2793,6 +2803,11 @@ VisualChangesConfig: {
 
 	grabBagContent: {
 		Label: grab Bag Content
+		Tooltip: ""
+	}
+
+	minimalDisplayedInfo: {
+		Label: minimal Displayed Info
 		Tooltip: ""
 	}
 }
@@ -2993,6 +3008,44 @@ GrabBagContentConfig: {
 
 	compact: {
 		Label: compact
+		Tooltip: ""
+	}
+}
+
+MinimalDisplayedInfoConfig: {
+	Tooltip: ""
+
+	unlockLevel: {
+		Label: unlock Level
+		Tooltip: ""
+	}
+}
+
+DisplayedUnlockLevel: {
+	Tooltip: ""
+
+	Locked: {
+		Label: Locked
+		Tooltip: ""
+	}
+
+	Name: {
+		Label: Name
+		Tooltip: ""
+	}
+
+	Stats: {
+		Label: Stats
+		Tooltip: ""
+	}
+
+	Drops: {
+		Label: Drops
+		Tooltip: ""
+	}
+
+	DropRates: {
+		Label: Drop Rates
 		Tooltip: ""
 	}
 }

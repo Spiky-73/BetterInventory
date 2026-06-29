@@ -87,20 +87,12 @@ public sealed class FavoritedRecipes {
 [Flags] public enum UnfavoriteOnCraft { None = 0b00, Favorited = 0b01, Blacklisted = 0b10, Both = Favorited | Blacklisted }
 
 public sealed class BetterBestiary {
-    [DefaultValue(UnlockLevel.Drops)] public UnlockLevel displayedInfo = UnlockLevel.Drops;
     [DefaultValue(Configs.UnknownDisplay.Unknown)] public UnknownDisplay unknownDisplay = Configs.UnknownDisplay.Unknown;
 
     public static bool Enabled => ItemSearch.Instance.betterBestiary;
-    public static bool DisplayedInfo => Enabled && Value.displayedInfo != UnlockLevel.Vanilla && !UnloadedItemSearch.Value.bestiaryDisplayedInfo;
     public static bool UnknownDisplay => Enabled && Value.unknownDisplay > Configs.UnknownDisplay.Vanilla && !UnloadedItemSearch.Value.bestiaryUnknown;
-    public static bool Unlock => UnknownDisplay || DisplayedInfo;
     public static BetterBestiary Value => ItemSearch.Instance.betterBestiary.Value;
-
-    // Compatibility version < v0.6
-    [JsonProperty, DefaultValue(UnlockLevel.Drops)] private UnlockLevel displayedUnlock { set => ConfigHelper.MoveMember(value != UnlockLevel.Drops, _ => displayedInfo = value); }
 }
-public enum UnlockLevel { Vanilla, Name, Stats, Drops, DropRates }
-
 
 public sealed class QuickSearch {
     public NestedValue<SearchAction, IndividualKeybinds> individualKeybinds = new(SearchAction.Both);

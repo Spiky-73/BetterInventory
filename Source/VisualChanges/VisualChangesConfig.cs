@@ -3,6 +3,7 @@ using BetterInventory.Configs;
 using BetterInventory.VisualChanges.AvailableMaterialsCount;
 using BetterInventory.VisualChanges.GrabBagContent;
 using BetterInventory.VisualChanges.ItemAmmo;
+using BetterInventory.VisualChanges.MinimalDisplayedInfo;
 using BetterInventory.VisualChanges.RecipeTooltip;
 using SpikysLib.Configs;
 using Terraria.ModLoader.Config;
@@ -18,6 +19,7 @@ public sealed class VisualChangesConfig : ModConfig {
     public Toggle<ItemAmmoConfig> itemAmmo = new(true);
     [VCUnloadable(nameof(inventorySlotsTexture)), DefaultValue(true)] public bool inventorySlotsTexture = true;
     public Toggle<GrabBagContentConfig> grabBagContent = new(true);
+    [VCUnloadable(nameof(minimalDisplayedInfo))] public Toggle<MinimalDisplayedInfoConfig> minimalDisplayedInfo = new(true);
 
     public static VisualChangesConfig Instance = null!;
     public static bool AvailableMaterialsCount => Instance.availableMaterialsCount;
@@ -26,6 +28,7 @@ public sealed class VisualChangesConfig : ModConfig {
     public static bool ItemAmmo => Instance.itemAmmo;
     public static bool InventorySlotsTexture => Instance.inventorySlotsTexture && !UnloadedVisualChangesConfig.Instance.inventorySlotsTexture;
     public static bool GrabBagContent => Instance.grabBagContent;
+    public static bool MinimalDisplayedInfo => Instance.minimalDisplayedInfo && !UnloadedVisualChangesConfig.Instance.minimalDisplayedInfo;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
 }
@@ -34,6 +37,7 @@ public sealed class UnloadedVisualChangesConfig {
     public bool recipeCount;
     public UnloadedAvailableMaterialsCountConfig availableMaterialsCount = new();
     public bool inventorySlotsTexture;
+    public bool minimalDisplayedInfo;
 
     public static UnloadedVisualChangesConfig Instance => CompatibilityConfig.Instance.unloadedVisualChanges;
 }
