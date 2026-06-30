@@ -47,7 +47,6 @@ public sealed class Compatibility : ModConfig {
         BetterGuide.Value.craftingStation = false;
         BetterGuide.Value.conditionsDisplay = false;
         BetterGuide.Value.unknownDisplay = UnknownDisplay.Vanilla;
-        BetterBestiary.Value.unknownDisplay = UnknownDisplay.Vanilla;
         QuickSearch.Value.catalogues[new(RecipeList.Instance)] = false;
         ItemSearch.Instance.Save();
     }

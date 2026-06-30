@@ -11,6 +11,7 @@ using BetterInventory.Improvements.BetterTrash;
 using BetterInventory.Improvements.BetterTooltip;
 using BetterInventory.Improvements.FastGrabBags;
 using BetterInventory.Improvements.MoreCraftingMaterials;
+using BetterInventory.Improvements.UnknownEntities;
 
 namespace BetterInventory.Improvements;
 
@@ -29,6 +30,7 @@ public sealed class ImprovementsConfig : ModConfig {
     public Toggle<FastGrabBagsConfig> fastGrabBags = new(true);
     [DefaultValue(true)] public bool keepSwappedFavorited = true;
     [DefaultValue(true)] public bool unlockFilter = true;
+    [IUnloadable(nameof(unknownEntities))] public Toggle<UnknownEntitiesConfig> unknownEntities = new(true);
 
     public static ImprovementsConfig Instance = null!;
     public static bool SmartConsumption => Instance.smartConsumption;
@@ -42,6 +44,7 @@ public sealed class ImprovementsConfig : ModConfig {
     public static bool FastGrabBags => Instance.fastGrabBags;
     public static bool KeepSwappedFavorited => Instance.keepSwappedFavorited;
     public static bool UnlockFilter => Instance.unlockFilter;
+    public static bool UnknownEntities => Instance.unknownEntities;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
 
@@ -58,6 +61,7 @@ public sealed class UnloadedImprovementsConfig {
     public UnloadedBetterQuickStackConfig betterQuickStack = new();
     public UnloadedBetterTrashConfig betterTrash = new();
     public UnloadedBetterTooltipConfig betterTooltip = new();
+    public UnloadedUnknownEntitiesConfig unknownEntities = new();
 
     public static UnloadedImprovementsConfig Instance => CompatibilityConfig.Instance.unloadedImprovements;
 }

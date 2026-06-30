@@ -15,7 +15,6 @@ namespace BetterInventory.Configs;
 
 public sealed class ItemSearch : ModConfig {
     public Toggle<BetterGuide> betterGuide = new(true);
-    public Toggle<BetterBestiary> betterBestiary = new(true);
     public Toggle<QuickSearch> quickSearch = new(true);
 
     // Compatibility version < v0.6
@@ -85,14 +84,6 @@ public sealed class FavoritedRecipes {
     public static FavoritedRecipes Value => BetterGuide.Value.favoritedRecipes.Value;
 }
 [Flags] public enum UnfavoriteOnCraft { None = 0b00, Favorited = 0b01, Blacklisted = 0b10, Both = Favorited | Blacklisted }
-
-public sealed class BetterBestiary {
-    [DefaultValue(Configs.UnknownDisplay.Unknown)] public UnknownDisplay unknownDisplay = Configs.UnknownDisplay.Unknown;
-
-    public static bool Enabled => ItemSearch.Instance.betterBestiary;
-    public static bool UnknownDisplay => Enabled && Value.unknownDisplay > Configs.UnknownDisplay.Vanilla && !UnloadedItemSearch.Value.bestiaryUnknown;
-    public static BetterBestiary Value => ItemSearch.Instance.betterBestiary.Value;
-}
 
 public sealed class QuickSearch {
     public NestedValue<SearchAction, IndividualKeybinds> individualKeybinds = new(SearchAction.Both);
