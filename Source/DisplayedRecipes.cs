@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
-using BetterInventory.Features.RecipeFiltering;
-using BetterInventory.Improvements.BetterRecipeGrid;
+using BetterInventory.BetterRecipeList;
 using BetterInventory.ItemSearch.BetterGuide;
 using Terraria;
 using Terraria.ModLoader;
@@ -11,7 +10,7 @@ namespace BetterInventory;
 
 public sealed class DisplayedRecipes : ModSystem {
 
-    public static bool Enabled => Features.FeaturesConfig.RecipeFiltering || Configs.BetterGuide.AvailableRecipes || Configs.BetterGuide.RecipeOrdering;
+    public static bool Enabled => BetterRecipeListConfig.RecipeFilters || Configs.BetterGuide.AvailableRecipes || Configs.BetterGuide.RecipeOrdering;
     
     public override void Load() {
         On_Recipe.FindRecipes += HookFindAvailableRecipes;
@@ -90,7 +89,7 @@ public sealed class DisplayedRecipes : ModSystem {
             Recipe.CollectGuideRecipes();
         }
 
-        if (Features.FeaturesConfig.RecipeFiltering) RecipeFilteringPlayer.FilterAndSortRecipes();
+        if (BetterRecipeListConfig.RecipeFilters) RecipeFilteringPlayer.FilterAndSortRecipes();
         if (Configs.BetterGuide.RecipeOrdering) FavoritedRecipesPlayer.FilterAndSortRecipes();
 
         Recipe.TryRefocusingRecipe(oldRecipe);

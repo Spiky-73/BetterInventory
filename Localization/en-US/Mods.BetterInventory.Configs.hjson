@@ -2297,6 +2297,21 @@ RecipeFiltersConfig: {
 		Label: filters Per Line
 		Tooltip: ""
 	}
+
+	simpleSearch: {
+		Label: simple Search
+		Tooltip: ""
+	}
+
+	minWidth: {
+		Label: min Width
+		Tooltip: ""
+	}
+
+	expand: {
+		Label: expand
+		Tooltip: ""
+	}
 }
 
 UnloadedImprovementsConfig: {
@@ -2334,6 +2349,11 @@ UnloadedImprovementsConfig: {
 
 	betterTooltip: {
 		Label: better Tooltip
+		Tooltip: ""
+	}
+
+	unknownEntities: {
+		Label: unknown Entities
 		Tooltip: ""
 	}
 }
@@ -2454,6 +2474,11 @@ ImprovementsConfig: {
 		Label: unlock Filter
 		Tooltip: ""
 	}
+
+	unknownEntities: {
+		Label: unknown Entities
+		Tooltip: ""
+	}
 }
 
 BetterRecipeGridConfig: {
@@ -2559,6 +2584,51 @@ UnloadedBetterRecipeListConfig: {
 		Label: fast Scroll
 		Tooltip: ""
 	}
+
+	craftOnRecipeGrid: {
+		Label: craft On Recipe Grid
+		Tooltip: ""
+	}
+
+	refocusButton: {
+		Label: refocus Button
+		Tooltip: ""
+	}
+
+	noRecGridOffset: {
+		Label: no Rec Grid Offset
+		Tooltip: ""
+	}
+
+	noRecGridClose: {
+		Label: no Rec Grid Close
+		Tooltip: ""
+	}
+
+	pageScroll: {
+		Label: page Scroll
+		Tooltip: ""
+	}
+
+	recipeCount: {
+		Label: recipe Count
+		Tooltip: ""
+	}
+
+	availableMaterialsCount: {
+		Label: available Materials Count
+		Tooltip: ""
+	}
+
+	materialsWrapping: {
+		Label: materials Wrapping
+		Tooltip: ""
+	}
+
+	recipeFilters: {
+		Label: recipe Filters
+		Tooltip: ""
+	}
 }
 
 UnloadedSmartConsumptionConfig: {
@@ -2585,6 +2655,63 @@ BetterRecipeListConfig: {
 
 	fastScroll: {
 		Label: fast Scroll
+		Tooltip: ""
+	}
+
+	DisplayName: Better Recipe List Config
+
+	craftOnRecipeGrid: {
+		Label: craft On Recipe Grid
+		Tooltip: ""
+	}
+
+	refocusButton: {
+		Label: refocus Button
+		Tooltip: ""
+	}
+
+	noRecGridOffset: {
+		Label: no Rec Grid Offset
+		Tooltip: ""
+	}
+
+	noRecGridClose: {
+		Label: no Rec Grid Close
+		Tooltip: ""
+	}
+
+	rememberGridPosition: {
+		Label: remember Grid Position
+		Tooltip: ""
+	}
+
+	pageScroll: {
+		Label: page Scroll
+		Tooltip: ""
+	}
+
+	recipeCount: {
+		Label: recipe Count
+		Tooltip: ""
+	}
+
+	recipeTooltip: {
+		Label: recipe Tooltip
+		Tooltip: ""
+	}
+
+	availableMaterialsCount: {
+		Label: available Materials Count
+		Tooltip: ""
+	}
+
+	materialsWrapping: {
+		Label: materials Wrapping
+		Tooltip: ""
+	}
+
+	recipeFilters: {
+		Label: recipe Filters
 		Tooltip: ""
 	}
 }
@@ -2903,6 +3030,8 @@ BetterTooltipConfig: {
 		Label: fixed Tooltip Position
 		Tooltip: ""
 	}
+
+	DisplayName: Better Tooltip Config
 }
 
 TooltipHoverConfig: {
@@ -3046,6 +3175,380 @@ DisplayedUnlockLevel: {
 
 	DropRates: {
 		Label: Drop Rates
+		Tooltip: ""
+	}
+}
+
+UnloadedUnknownEntitiesConfig: {
+	Tooltip: ""
+
+	bestiary: {
+		Label: bestiary
+		Tooltip: ""
+	}
+
+	recipeList: {
+		Label: recipe List
+		Tooltip: ""
+	}
+}
+
+UnknownEntitiesConfig: {
+	Tooltip: ""
+
+	unknownDisplay: {
+		Label: unknown Display
+		Tooltip: ""
+	}
+
+	bestiary: {
+		Label: bestiary
+		Tooltip: ""
+	}
+
+	recipeList: {
+		Label: recipe List
+		Tooltip: ""
+	}
+}
+
+BetterInventoryConfig: {
+	DisplayName: Better Inventory Config
+
+	betterTooltips: {
+		Label: better Tooltips
+		Tooltip: ""
+	}
+
+	unloadedBetterTooltips: {
+		Label: unloaded Better Tooltips
+		Tooltip: ""
+	}
+
+	betterBestiary: {
+		Label: better Bestiary
+		Tooltip: ""
+	}
+
+	unloadedBetterBestiary: {
+		Label: unloaded Better Bestiary
+		Tooltip: ""
+	}
+
+	betterRecipeList: {
+		Label: better Recipe List
+		Tooltip: ""
+	}
+
+	unloadedBetterRecipeList: {
+		Label: unloaded Better Recipe List
+		Tooltip: ""
+	}
+
+	betterItemInformationDisplay: {
+		Label: better Item Information Display
+		Tooltip: ""
+	}
+
+	betterItemPickup: {
+		Label: better Item Pickup
+		Tooltip: ""
+	}
+
+	betterInventoryManagement: {
+		Label: better Inventory Management
+		Tooltip: ""
+	}
+
+	betterKeybinds: {
+		Label: better Keybinds
+		Tooltip: ""
+	}
+
+	unloadedBetterItemInformationDisplay: {
+		Label: unloaded Better Item Information Display
+		Tooltip: ""
+	}
+
+	unloadedBetterItemPickup: {
+		Label: unloaded Better Item Pickup
+		Tooltip: ""
+	}
+
+	unloadedBetterInventoryManagement: {
+		Label: unloaded Better Inventory Management
+		Tooltip: ""
+	}
+
+	unloadedBetterKeybinds: {
+		Label: unloaded Better Keybinds
+		Tooltip: ""
+	}
+
+	loadDisabledModule: {
+		Label: load Disabled Module
+		Tooltip: ""
+	}
+}
+
+UnloadedBetterTooltipsConfig: {
+	Tooltip: ""
+
+	tooltipHover: {
+		Label: tooltip Hover
+		Tooltip: ""
+	}
+}
+
+BetterTooltipsConfig: {
+	DisplayName: Better Tooltips Config
+
+	enabled: {
+		Label: enabled
+		Tooltip: ""
+	}
+
+	scrollableTooltip: {
+		Label: scrollable Tooltip
+		Tooltip: ""
+	}
+
+	tooltipHover: {
+		Label: tooltip Hover
+		Tooltip: ""
+	}
+
+	fixedTooltipPosition: {
+		Label: fixed Tooltip Position
+		Tooltip: ""
+	}
+}
+
+BetterBestiaryConfig: {
+	DisplayName: Better Bestiary Config
+
+	unlockFilter: {
+		Label: unlock Filter
+		Tooltip: ""
+	}
+
+	minimalDisplayedInfo: {
+		Label: minimal Displayed Info
+		Tooltip: ""
+	}
+
+	treasureBagContent: {
+		Label: treasure Bag Content
+		Tooltip: ""
+	}
+
+	unknownNPCs: {
+		Label: unknown N P Cs
+		Tooltip: ""
+	}
+}
+
+UnloadedBetterBestiaryConfig: {
+	Tooltip: ""
+
+	minimalDisplayedInfo: {
+		Label: minimal Displayed Info
+		Tooltip: ""
+	}
+
+	unknownNPCs: {
+		Label: unknown N P Cs
+		Tooltip: ""
+	}
+}
+
+UnknownNPCsConfig: {
+	Tooltip: ""
+
+	unknownDisplay: {
+		Label: unknown Display
+		Tooltip: ""
+	}
+}
+
+UnloadedBetterItemInformationDisplayConfig: {
+	Tooltip: ""
+
+	inventorySlotsTexture: {
+		Label: inventory Slots Texture
+		Tooltip: ""
+	}
+}
+
+UnloadedBetterItemPickupConfig: {
+	Tooltip: ""
+
+	ammoPickupOrder: {
+		Label: ammo Pickup Order
+		Tooltip: ""
+	}
+}
+
+UnloadedBetterInventoryManagementConfig: {
+	Tooltip: ""
+
+	completeQuickStack: {
+		Label: complete Quick Stack
+		Tooltip: ""
+	}
+
+	limitedBanksQuickStack: {
+		Label: limited Banks Quick Stack
+		Tooltip: ""
+	}
+
+	stackTrash: {
+		Label: stack Trash
+		Tooltip: ""
+	}
+
+	favoriteInBanks: {
+		Label: favorite In Banks
+		Tooltip: ""
+	}
+
+	smartConsumption: {
+		Label: smart Consumption
+		Tooltip: ""
+	}
+
+	quickMove: {
+		Label: quick Move
+		Tooltip: ""
+	}
+}
+
+UnloadedBetterKeybindsConfig: {
+	Tooltip: ""
+
+	consistantScrollDirection: {
+		Label: consistant Scroll Direction
+		Tooltip: ""
+	}
+}
+
+BetterInventoryManagementConfig: {
+	DisplayName: Better Inventory Management Config
+
+	completeQuickStack: {
+		Label: complete Quick Stack
+		Tooltip: ""
+	}
+
+	limitedBanksQuickStack: {
+		Label: limited Banks Quick Stack
+		Tooltip: ""
+	}
+
+	stackTrash: {
+		Label: stack Trash
+		Tooltip: ""
+	}
+
+	trashTrash: {
+		Label: trash Trash
+		Tooltip: ""
+	}
+
+	fasterGrabBags: {
+		Label: faster Grab Bags
+		Tooltip: ""
+	}
+
+	fasterExtractinator: {
+		Label: faster Extractinator
+		Tooltip: ""
+	}
+
+	favoriteInBanks: {
+		Label: favorite In Banks
+		Tooltip: ""
+	}
+
+	smartConsumption: {
+		Label: smart Consumption
+		Tooltip: ""
+	}
+
+	keepSwappedFavorited: {
+		Label: keep Swapped Favorited
+		Tooltip: ""
+	}
+
+	craftWithMouse: {
+		Label: craft With Mouse
+		Tooltip: ""
+	}
+
+	craftWithEquipment: {
+		Label: craft With Equipment
+		Tooltip: ""
+	}
+
+	extraItemRightClick: {
+		Label: extra Item Right Click
+		Tooltip: ""
+	}
+
+	quickMove: {
+		Label: quick Move
+		Tooltip: ""
+	}
+}
+
+BetterItemInformationDisplayConfig: {
+	DisplayName: Better Item Information Display Config
+
+	itemAmmo: {
+		Label: item Ammo
+		Tooltip: ""
+	}
+
+	inventorySlotsTexture: {
+		Label: inventory Slots Texture
+		Tooltip: ""
+	}
+
+	grabBagContent: {
+		Label: grab Bag Content
+		Tooltip: ""
+	}
+}
+
+BetterItemPickupConfig: {
+	DisplayName: Better Item Pickup Config
+
+	ammoPickupOrder: {
+		Label: ammo Pickup Order
+		Tooltip: ""
+	}
+}
+
+BetterKeybindsConfig: {
+	DisplayName: Better Keybinds Config
+
+	consistantScrollDirection: {
+		Label: consistant Scroll Direction
+		Tooltip: ""
+	}
+
+	favoritedBuff: {
+		Label: favorited Buff
+		Tooltip: ""
+	}
+
+	builderAccs: {
+		Label: builder Accs
+		Tooltip: ""
+	}
+
+	quickStack: {
+		Label: quick Stack
 		Tooltip: ""
 	}
 }

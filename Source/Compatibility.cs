@@ -1,13 +1,12 @@
 using System;
 using System.Runtime.CompilerServices;
-using BetterInventory.Configs;
 using MonoMod.Cil;
 using Terraria.ModLoader;
 
 namespace BetterInventory;
 
 public static class Compatibility {
-    public static bool LoadDisabledFeatures => CompatibilityConfig.Instance.loadDisabledFeatures;
+    public static bool LoadDisabledFeatures => BetterInventoryConfig.Instance.loadDisabledModule;
 
     public static bool TryEdit(this ILContext context, Action<ILContext> ilEdit, ref bool unloaded, [CallerArgumentExpression(nameof(ilEdit))] string name = "") {
         Mod mod = ModContent.GetInstance<BetterInventory>();

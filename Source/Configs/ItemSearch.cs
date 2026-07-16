@@ -39,7 +39,6 @@ public sealed class ItemSearch : ModConfig {
             RecipeList.UpdateGuide();
             Recipe.FindRecipes();
         }
-
     }
 }
 

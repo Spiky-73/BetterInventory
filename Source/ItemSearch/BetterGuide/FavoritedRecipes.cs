@@ -1,6 +1,6 @@
 using System.Collections.Generic;
+using BetterInventory.BetterRecipeList;
 using BetterInventory.DataStructures;
-using BetterInventory.Improvements.BetterRecipeGrid;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;

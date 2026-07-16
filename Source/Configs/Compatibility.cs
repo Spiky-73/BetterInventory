@@ -77,7 +77,6 @@ public sealed class UnloadedItemSearch {
     public bool guideCraftingStation;
     public bool guideRequiredObjectsDisplay;
     public bool guideUnknownDisplay;
-    public bool bestiaryUnknown;
     public bool recipeList;
 
     [JsonIgnore] public bool GuideAvailableRecipes { set { guideFavoritedRecipes = guideCraftInMenu = value; } }

@@ -7,6 +7,7 @@ using ContextID = Terraria.UI.ItemSlot.Context;
 using System.Linq;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
+using BetterInventory.BetterRecipeList;
 
 namespace BetterInventory.ItemSearch.BetterGuide;
 
@@ -55,7 +56,7 @@ public sealed class RequiredObjectsDisplay : ILoadable {
                 ItemSlot.MouseHover(ref tile, ContextID.CraftingMaterial);
             }
 
-            if (VanillaPatches.VanillaPatchesConfig.MaterialsWrapping && ++number % TilesPerLine == 0) {
+            if (BetterRecipeListConfig.MaterialsWrapping && ++number % TilesPerLine == 0) {
                 position.X = minX;
                 position.Y += delta.Y;
                 if (Configs.BetterGuide.CraftingStation && number == TilesPerLine) position.X += delta.X; // Skip the position of guideTile if it is enabled
