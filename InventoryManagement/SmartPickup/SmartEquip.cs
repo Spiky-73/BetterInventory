@@ -1,10 +1,13 @@
 using System;
+using System.Collections.Generic;
 using BetterInventory.Default.Inventories;
 using SpikysLib;
 using SpikysLib.Constants;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
+using Terraria.Localization;
+using Terraria.ModLoader;
 
 namespace BetterInventory.InventoryManagement.SmartPickup;
 
@@ -31,9 +34,9 @@ public static class SmartEquip {
         for (int i = 0; i < fakeInventory.Length; i++) fakeInventory[i] = new();
         fakeInventory[0] = item;
         (var inventory, player.inventory) = (player.inventory, fakeInventory);
-        if (Main.netMode == NetmodeID.MultiplayerClient) SmartPickup.quickStackNoChests = true;
+        if (Main.netMode == NetmodeID.MultiplayerClient) SmartPickupPlayer.quickStackNoChests = true;
         player.QuickStackAllChests();
-        SmartPickup.quickStackNoChests = false;
+        SmartPickupPlayer.quickStackNoChests = false;
         player.inventory = inventory;
         return fakeInventory[0];
     }
@@ -56,10 +59,28 @@ public static class SmartEquip {
         return item;
     }
 
+    public static void UpdateLockedItems(Player player) {
+        if (!Configs.UpgradeItems.Value.autoLockItems) return;
+        foreach (var upgrader in PickupUpgraderLoader.Upgraders) {
+            if (upgrader.Enabled) upgrader.CheckLockedItems(player);
+        }
+    }
+
     public static Item VoidBagFirst(Player player, Item item, GetItemSettings settings) {
         if (!settings.CanGoIntoVoidVault || !player.IsVoidVaultEnabled) return item;
         if (item.IsACoin && Array.FindIndex(player.inventory, i => i.IsACoin) != -1) return item; // Do not put coins if the player has coins in their inventory
         if (Reflection.Player.GetItem_VoidVault.Invoke(player, player.whoAmI, player.bank4.item, item, settings, item)) return new();
         return item;
+    }
+}
+
+public sealed class UpgradeItemsItem : GlobalItem {
+    public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
+        if (!Configs.SmartPickup.UpgradeItems || !Configs.UpgradeItems.Value.lockedTooltip) return;
+        if (!Configs.UpgradeItems.Value.IsLocked(new(item.type))) return;
+        tooltips.Add(new(
+            BetterInventory.Instance, "UpgradeLocked",
+            Language.GetTextValue($"{Localization.Keys.UI}.UpgradeLocked")
+        ));
     }
 }

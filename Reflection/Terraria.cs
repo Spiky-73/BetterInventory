@@ -48,6 +48,7 @@ public static class Player {
     public static readonly Method<TPlayer, bool> GetItem_VoidVault = new(nameof(GetItem_VoidVault), typeof(int), typeof(TItem[]), typeof(TItem), typeof(Terraria.GetItemSettings), typeof(TItem));
     public static readonly Method<TPlayer, bool> HasItem = new(nameof(TPlayer.HasItem), typeof(int));
     public static readonly Method<TPlayer, TItem> FillAmmo = new(nameof(TPlayer.FillAmmo), typeof(int), typeof(TItem), typeof(Terraria.GetItemSettings));
+    public static readonly Method<TPlayer, object?> SmartSelect_PickToolForStrategy = new("SmartSelect_PickToolForStrategy", typeof(int), typeof(int), typeof(int), typeof(bool));
     public static readonly StaticMethod<int> GetMouseScrollDelta = new(typeof(TPlayer), nameof(TPlayer.GetMouseScrollDelta));
 }
 
