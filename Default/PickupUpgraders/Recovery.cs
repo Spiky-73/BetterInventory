@@ -48,7 +48,7 @@ public sealed class Recovery : ModPickupUpgrader {
         if (Configs.UpgradeItems.Value.IsLocked(new(equipped.type))) return item;
         if (!IsAnUpgrade(player, item, equipped)) return item;
 
-        InventorySlot? possibleSlot = InventoryLoader.FindItem(player, i => i == item);
+        InventorySlot? possibleSlot = InventoryLoader.FindItem(player, i => i == equipped);
         if (!possibleSlot.HasValue) return item;
         var slot = possibleSlot.Value;
         (slot.Item, item) = (item, slot.Item);

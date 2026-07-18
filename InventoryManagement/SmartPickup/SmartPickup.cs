@@ -141,10 +141,6 @@ public sealed class SmartPickupPlayer : ModPlayer {
             if (Configs.SmartPickup.HotbarLast) return ItemUseStyleID.None;
             return style;
         });
-        cursor.EmitLdloc(newItem);
-        cursor.EmitDelegate((Item newItem) => {
-            BetterInventory.Instance.Logger.Debug("test");
-        });
     }
     internal static bool vanillaGetItem;
 
