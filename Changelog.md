@@ -5,6 +5,7 @@
 - Added Automatically Lock Items to Upgrade Items
 - Fixed inconsistencies in Upgrade Items
 - Fixed Hotbar Last not working with Upgrade Items
+- Added steam workshop assets
 
 ## v0.9.1.4
 - Fixed Return to previous slot marks sometimes been fully opaque
