@@ -649,6 +649,25 @@ UpgradeItems: {
 		Label: "{$Mods.BetterInventory.Configs.ItemPickupLevel.ImportantItems.Label} only"
 		Tooltip: Only upgrades favorited and Equiped items
 	}
+
+	autoLockItems: {
+		Label: Automatically Lock Items
+		Tooltip:
+			'''
+			Automatically add items to the "Locked Items" list
+			An item is automatically locked when it was upgraded and directly reequipped or moved back.
+			'''
+	}
+
+	lockedItems: {
+		Label: Locked Items
+		Tooltip: Items in this list will not be upgraded automatically
+	}
+
+	lockedTooltip: {
+		Label: Locked Items Tooltip
+		Tooltip: Display if an item is locked in its tooltip
+	}
 }
 
 QuickMove: {

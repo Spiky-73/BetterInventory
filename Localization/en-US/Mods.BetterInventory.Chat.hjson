@@ -11,7 +11,14 @@ ModName: Better Inventory
 SPIC.ModName: Spy's Infinite Consumables
 Homepage: homepage
 Workshop: Steam Workshop page
-Summary: ""
-Details: Small bug fix
-Changelog: - Fixed Return to previous slot marks sometimes been fully opaque
-Version: 0.9.1.4
+Summary: '''"Upgrade Items" can now be disabled for specific items'''
+Details: ""
+Changelog:
+	'''
+	- Added Locked Items to Upgrade Items
+	- Added Automatically Lock Items to Upgrade Items
+	- Fixed inconsistencies in Upgrade Items
+	- Fixed Hotbar Last not working with Upgrade Items
+	- Added steam workshop assets
+	'''
+Version: 0.9.2
