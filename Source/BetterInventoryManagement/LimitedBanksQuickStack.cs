@@ -22,6 +22,6 @@ public sealed class LimitedBanksQuickStack : ILoadable {
         cursor.FindPrevLoc(out _, out int emptySlots, i => i.Previous.MatchNewobj<List<int>>(), 8);
 
         cursor.GotoNext(MoveType.After, i => i.MatchGetppt((List<int> l) => l.Count) && i.Previous.MatchLdloc(emptySlots));
-        cursor.EmitDelegate((int count) => !BetterInventoryManagementConfig.LimitedBanksQuickStack || Main.LocalPlayer.chest > -1 ? count : 0);
+        cursor.EmitDelegate((int count) => BetterInventoryManagementConfig.LimitedBanksQuickStack && Main.LocalPlayer.chest < -1 ? 0 : count);
     }
 }

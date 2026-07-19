@@ -27,9 +27,9 @@ public static class Utility {
     }
 
     public static Item GetItem_Inner(Player self, int plr, Item newItem, GetItemSettings settings) {
-        SmartPickup.vanillaGetItem = true;
+        SmartPickupPlayer.vanillaGetItem = true;
         Item i = self.GetItem(plr, newItem, settings);
-        SmartPickup.vanillaGetItem = false;
+        SmartPickupPlayer.vanillaGetItem = false;
         return i;
     }
 

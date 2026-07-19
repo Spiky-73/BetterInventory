@@ -7,6 +7,9 @@ using SpikysLib.Configs.UI;
 using System.Collections.Generic;
 using BetterInventory.InventoryManagement;
 using Newtonsoft.Json;
+using Terraria.ID;
+using Terraria;
+using System;
 
 namespace BetterInventory.Configs;
 
@@ -92,6 +95,7 @@ public sealed class QuickStackPickup {
     [DefaultValue(true)] public bool voidBag = true;
 
     public static QuickStackPickup Value => SmartPickup.Value.quickStack.Value;
+    public static bool Chest => Value.chests && (Main.netMode != NetmodeID.MultiplayerClient || !UnloadedInventoryManagement.Value.pickupQuickStackChestsMulti);
 }
 
 public sealed class PreviousDisplay {
@@ -128,8 +132,17 @@ public sealed class AutoEquip {
 public sealed class UpgradeItems {
     [CustomModConfigItem(typeof(DictionaryValuesElement))] public Dictionary<PickupUpgraderDefinition, bool> upgraders = [];
     [DefaultValue(true)] public bool importantOnly = true;
+    [DefaultValue(true)] public bool autoLockItems = true;
+    [DefaultValue(false)] public bool lockedTooltip = false;
+    public HashSet<ItemDefinition> lockedItems = [];
 
     public static UpgradeItems Value => SmartPickup.Value.upgradeItems.Value;
+
+    public bool IsLocked(ItemDefinition item) => lockedItems.Contains(item);
+    public void Lock(ItemDefinition item){
+        lockedItems.Add(item);
+        InventoryManagement.Instance.SaveChanges();
+    } 
 
     [OnDeserialized]
     private void OnDeserialized(StreamingContext context) {

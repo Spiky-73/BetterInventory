@@ -1,10 +1,13 @@
 using System;
+using System.Collections.Generic;
 using BetterInventory.Default.Inventories;
 using SpikysLib;
 using SpikysLib.Constants;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
+using Terraria.Localization;
+using Terraria.ModLoader;
 
 namespace BetterInventory.InventoryManagement.SmartPickup;
 
@@ -21,22 +24,21 @@ public static class SmartEquip {
     }
 
     public static Item QuickStack(Player player, Item item, GetItemSettings settings) {
-        if (Configs.QuickStackPickup.Value.chests) {
-            Item[] fakeInventory = new Item[player.inventory.Length];
-            for (int i = 0; i < fakeInventory.Length; i++) fakeInventory[i] = new();
-            fakeInventory[0] = item;
-            (var inventory, player.inventory) = (player.inventory, fakeInventory);
-            player.QuickStackAllChests();
-            player.inventory = inventory;
-            item = fakeInventory[0];
-            if (Main.netMode == NetmodeID.MultiplayerClient) {
-                // Resync inventory[0] as it the modified slot was synched by QuickStackAllChests
-                NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, player.whoAmI, PlayerItemSlotID.Inventory0, player.inventory[0].prefix, 0f, 0, 0, 0);
-            }
-        }
-        if (Configs.QuickStackPickup.Value.voidBag && player.HasItem(item.type, player.bank4.item)) item = VoidBagFirst(player, item, settings);
-
+        if (Configs.QuickStackPickup.Chest) item = QuickStackChest(player, item);
+        if (!item.IsAir && Configs.QuickStackPickup.Value.voidBag && player.HasItem(item.type, player.bank4.item)) item = VoidBagFirst(player, item, settings);
         return item;
+    }
+
+    public static Item QuickStackChest(Player player, Item item) {
+        Item[] fakeInventory = new Item[player.inventory.Length];
+        for (int i = 0; i < fakeInventory.Length; i++) fakeInventory[i] = new();
+        fakeInventory[0] = item;
+        (var inventory, player.inventory) = (player.inventory, fakeInventory);
+        if (Main.netMode == NetmodeID.MultiplayerClient) SmartPickupPlayer.quickStackNoChests = true;
+        player.QuickStackAllChests();
+        SmartPickupPlayer.quickStackNoChests = false;
+        player.inventory = inventory;
+        return fakeInventory[0];
     }
 
     public static Item AutoEquip(Player player, Item item, GetItemSettings settings) {
@@ -57,10 +59,28 @@ public static class SmartEquip {
         return item;
     }
 
+    public static void UpdateLockedItems(Player player) {
+        if (!Configs.UpgradeItems.Value.autoLockItems) return;
+        foreach (var upgrader in PickupUpgraderLoader.Upgraders) {
+            if (upgrader.Enabled) upgrader.CheckLockedItems(player);
+        }
+    }
+
     public static Item VoidBagFirst(Player player, Item item, GetItemSettings settings) {
         if (!settings.CanGoIntoVoidVault || !player.IsVoidVaultEnabled) return item;
-        if (item.IsACoin && Array.FindIndex(player.inventory, i => i.IsACoin) != -1) return item;
+        if (item.IsACoin && Array.FindIndex(player.inventory, i => i.IsACoin) != -1) return item; // Do not put coins if the player has coins in their inventory
         if (Reflection.Player.GetItem_VoidVault.Invoke(player, player.whoAmI, player.bank4.item, item, settings, item)) return new();
         return item;
+    }
+}
+
+public sealed class UpgradeItemsItem : GlobalItem {
+    public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) {
+        if (!Configs.SmartPickup.UpgradeItems || !Configs.UpgradeItems.Value.lockedTooltip) return;
+        if (!Configs.UpgradeItems.Value.IsLocked(new(item.type))) return;
+        tooltips.Add(new(
+            BetterInventory.Instance, "UpgradeLocked",
+            Language.GetTextValue($"{Localization.Keys.UI}.UpgradeLocked")
+        ));
     }
 }

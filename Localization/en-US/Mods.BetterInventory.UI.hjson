@@ -21,3 +21,5 @@ RecipeSort: {
 	ByCreateItemValue: Sort by Value
 	ByCreateItemCreativeId: Journey Catalogue Sort
 }
+
+UpgradeLocked: Pickup Upgrade Locked

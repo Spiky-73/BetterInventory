@@ -1,5 +1,19 @@
 # Better Inventory changelog
 
+## v0.9.2
+- Added Locked Items to Upgrade Items
+- Added Automatically Lock Items to Upgrade Items
+- Fixed inconsistencies in Upgrade Items
+- Fixed Hotbar Last not working with Upgrade Items
+- Added steam workshop assets
+
+## v0.9.1.4
+- Fixed Return to previous slot marks sometimes been fully opaque
+
+## v0.9.1.3
+- Fixed Deposit Click not respecting item slots contraints
+- Fixed Quick Stack on Pickup causing item duplication in Multiplayer
+
 ## v0.9.1.2
 - Fixed Return to Previous Slot not working as expected when dropping favorited items
 - Fixed Void Bag First not handling coins properly

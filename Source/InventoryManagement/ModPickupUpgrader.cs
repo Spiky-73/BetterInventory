@@ -15,6 +15,8 @@ public abstract class ModPickupUpgrader : ModType, ILocalizedModType {
 
     public virtual bool Enabled => Configs.QuickSearch.Enabled && Configs.UpgradeItems.Value.upgraders.GetValueOrDefault(new(this), true);
 
+    public virtual void CheckLockedItems(Player player) {}
+
     public abstract bool AppliesTo(Item item);
     public abstract Item AttemptUpgrade(Player player, Item item);
 

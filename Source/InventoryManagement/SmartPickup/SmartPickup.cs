@@ -11,7 +11,7 @@ using Terraria.DataStructures;
 
 namespace BetterInventory.InventoryManagement.SmartPickup;
 
-public sealed class SmartPickup : ModSystem {
+public sealed class SmartPickupPlayer : ModPlayer {
 
     public override void Load() {
         IL_Player.GetItem += static il => {
@@ -29,13 +29,21 @@ public sealed class SmartPickup : ModSystem {
 
         On_ChestUI.LootAll += HookQuickStackLootAll;
         On_ChestUI.QuickStack += HookNoQuickStackToSameChest;
+
+        IL_Player.QuickStackAllChests += static il => {
+            if (!il.ApplyTo(IlQuickStackMultiplayer, Configs.QuickStackPickup.Value.chests)) Configs.UnloadedInventoryManagement.Value.pickupQuickStackChestsMulti = false;
+        };
+        On_Player.GetItem_FillEmptyInventorySlot += HookQuickStackMultiplayerFix;
+        On_Player.GetItem_FillEmptyInventorySlot_VoidBag += HookQuickStackMultiplayerFixVoidSlot;
+
+        On_Recipe.FindRecipes += HookUpdateLockedItems;
     }
 
     private static void ILGetItem(ILContext il) {
         ILCursor cursor = new(il);
 
         cursor.GotoNextLoc(out int coin, i => i.Previous.MatchCallvirt(Reflection.Item.IsACoin.GetMethod!), 0);
-        cursor.GotoNextLoc(out int newItem, i => i.Previous.MatchLdarg2(), 1);
+        cursor.GotoNextLoc(out int returnItem, i => i.Previous.MatchLdarg2(), 1);
 
         // ...
         // if (newItem.uniqueStack && this.HasItem(newItem.type)) return item;
@@ -43,7 +51,7 @@ public sealed class SmartPickup : ModSystem {
         cursor.GotoNext(MoveType.AfterLabel, i => i.MatchLdloc(coin));
 
         // ++ item = <previousSlot>
-        EmitSmartPickup(cursor, newItem, (Player self, int plr, Item item, GetItemSettings settings) => {
+        EmitSmartPickup(cursor, returnItem, (self, plr, item, settings) => {
             if (vanillaGetItem) return item;
             if (!item.IsAir && Configs.SmartPickup.RefillMouse) item = SmartEquip.RefillMouse(self, item, settings);
             if (!item.IsAir && Configs.SmartPickup.PreviousSlot && IsGetItemWorld(self, settings, item)) item = self.GetModPlayer<PreviousSlotPlayer>().PickupItemToAnyPreviousSlot(item, settings);
@@ -63,14 +71,14 @@ public sealed class SmartPickup : ModSystem {
         ILCursor cursor = new(il);
 
         cursor.GotoNextLoc(out int coin, i => i.Previous.MatchCallvirt(Reflection.Item.IsACoin.GetMethod!), 0);
-        cursor.GotoNextLoc(out int newItem, i => i.Previous.MatchLdarg2(), 1);
+        cursor.GotoNextLoc(out int returnItem, i => i.Previous.MatchLdarg2(), 1);
 
         // for(...) ...
         cursor.GotoNext(i => i.SaferMatchCall(Reflection.Player.GetItem_FillEmptyInventorySlot));
         cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdloc(coin));
 
         // ++<upgradeItems>
-        EmitSmartPickup(cursor, newItem, (Player self, int plr, Item item, GetItemSettings settings) => {
+        EmitSmartPickup(cursor, returnItem, (Player self, int plr, Item item, GetItemSettings settings) => {
             if (vanillaGetItem || !IsGetItemWorld(self, settings, item)) return item;
             if (!item.IsAir && Configs.SmartPickup.QuickStack) item = SmartEquip.QuickStack(self, item, settings);
             if (!item.IsAir && Configs.SmartPickup.UpgradeItems) item = SmartEquip.UpgradeItems(self, item, settings);
@@ -83,24 +91,22 @@ public sealed class SmartPickup : ModSystem {
     private static void ILFixNewItem(ILContext il) {
         ILCursor cursor = new(il);
 
-        cursor.GotoNextLoc(out int newItem, i => i.Previous.MatchLdarg2(), 1);
+        cursor.GotoNextLoc(out int returnItem, i => i.Previous.MatchLdarg2(), 1);
 
-        cursor.GotoNext(MoveType.After, i => i.MatchStloc(newItem));
         while (cursor.TryGotoNext(MoveType.After, i => i.MatchLdarg2() && i.Next.MatchLdfld(out _))) {
-            cursor.EmitLdloc(newItem);
-            cursor.EmitDelegate((Item newItem, Item item) => Configs.SmartPickup.FixSlot ? item : newItem);
-            cursor.GotoNext(MoveType.After, i => i.Next.MatchLdfld(out _));
+            cursor.EmitLdloc(returnItem);
+            cursor.EmitDelegate((Item newItem, Item returnItem) => Configs.SmartPickup.FixSlot ? returnItem : newItem);
         }
     }
 
-    private static void EmitSmartPickup(ILCursor cursor, int newItem, Func<Player, int, Item, GetItemSettings, Item> cb) {
+    private static void EmitSmartPickup(ILCursor cursor, int returnItem, Func<Player, int, Item, GetItemSettings, Item> cb) {
         cursor.EmitLdarg0();
         cursor.EmitLdarg1();
-        cursor.EmitLdloc(newItem);
+        cursor.EmitLdloc(returnItem);
         cursor.EmitLdarg3();
         cursor.EmitDelegate(cb);
         cursor.EmitDup();
-        cursor.EmitStloc(newItem);
+        cursor.EmitStloc(returnItem);
 
         // ++if (newItem.IsAir) return new()
         cursor.EmitDelegate((Item item) => item.IsAir);
@@ -113,6 +119,8 @@ public sealed class SmartPickup : ModSystem {
 
     private static void ILHotbarLast(ILContext il) {
         ILCursor cursor = new(il);
+
+        cursor.GotoNextLoc(out int newItem, i => i.Previous.MatchLdarg2(), 1);
 
         // if (!isACoin ++[&& !<hotbarLast>] && newItem.useStyle != 0) <hotbar>
         cursor.GotoNext(MoveType.After, i => i.MatchLdfld(Reflection.Item.useStyle));
@@ -161,7 +169,7 @@ public sealed class SmartPickup : ModSystem {
         item = player.GetModPlayer<PreviousSlotPlayer>().PickupItemToPreviousSlot(
             item,
             GetItemSettings.InventoryEntityToPlayerInventorySettings,
-            [.. armorInventories, ..vanityInventories]
+            [.. armorInventories, .. vanityInventories]
         );
         return orig(item, out success);
     }
@@ -180,4 +188,41 @@ public sealed class SmartPickup : ModSystem {
 
     private static bool IsGetItemWorld(Player player, GetItemSettings settings, Item item) => !settings.NoText || item == Main.mouseItem || item == player.HeldItem;
 
+    internal static bool quickStackNoChests;
+    private static void IlQuickStackMultiplayer(ILContext context) {
+        ILCursor cursor = new(context);
+
+        cursor.GotoNext(MoveType.AfterLabel, i => i.MatchLdsfld(Reflection.Main.netMode));
+
+        cursor.EmitDelegate(() => quickStackNoChests);
+        ILLabel label = cursor.DefineLabel();
+        cursor.EmitBrfalse(label);
+        cursor.EmitRet();
+        cursor.MarkLabel(label);
+    }
+
+    private bool HookQuickStackMultiplayerFix(On_Player.orig_GetItem_FillEmptyInventorySlot orig, Player self, int plr, Item newItem, GetItemSettings settings, Item returnItem, int i) {
+        bool res = orig(self, plr, newItem, settings, returnItem, i);
+        if (Main.netMode == NetmodeID.MultiplayerClient && Configs.SmartPickup.QuickStack && Configs.QuickStackPickup.Chest && res) {
+            NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, plr, PlayerItemSlotID.Inventory0 + i, self.inventory[i].prefix);
+            NetMessage.SendData(MessageID.QuickStackChests, -1, -1, null, PlayerItemSlotID.Inventory0 + i);
+            self.inventoryChestStack[i] = true;
+        }
+        return res;
+    }
+
+    private bool HookQuickStackMultiplayerFixVoidSlot(On_Player.orig_GetItem_FillEmptyInventorySlot_VoidBag orig, Player self, int plr, Item[] inv, Item newItem, GetItemSettings settings, Item returnItem, int i) {
+        bool res = orig(self, plr, inv, newItem, settings, returnItem, i);
+        if (Main.netMode == NetmodeID.MultiplayerClient && Configs.SmartPickup.QuickStack && Configs.QuickStackPickup.Chest && res) {
+            NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, plr, PlayerItemSlotID.Bank4_0 + i, self.bank4.item[i].prefix);
+            NetMessage.SendData(MessageID.QuickStackChests, -1, -1, null, PlayerItemSlotID.Bank4_0 + i);
+            self.disableVoidBag = i;
+        }
+        return res;
+    }
+
+    private static void HookUpdateLockedItems(On_Recipe.orig_FindRecipes orig, bool canDelayCheck) {
+        if (!canDelayCheck) SmartEquip.UpdateLockedItems(Main.LocalPlayer);
+        orig(canDelayCheck);
+    }
 }

@@ -11,15 +11,14 @@ ModName: Better Inventory
 SPIC.ModName: Spy's Infinite Consumables
 Homepage: homepage
 Workshop: Steam Workshop page
-Summary: ""
+Summary: '''"Upgrade Items" can now be disabled for specific items'''
 Details: ""
 Changelog:
 	'''
-	- Fixed Return to Previous Slot not working as expected when dropping favorited items
-	- Fixed Void Bag First not handling coins properly
-	- Fixed RecipeUI consuming keyboard input even when not visible
-	- Fixed Quick Stack hotkey not refreshing recipes
-	- Fixed Quick Stack on Pickup not handling multiplayer properly
-	- Fixed Quick Stack on Pickup not working properly when a chest was opened
+	- Added Locked Items to Upgrade Items
+	- Added Automatically Lock Items to Upgrade Items
+	- Fixed inconsistencies in Upgrade Items
+	- Fixed Hotbar Last not working with Upgrade Items
+	- Added steam workshop assets
 	'''
-Version: 0.9.1.2
+Version: 0.9.2

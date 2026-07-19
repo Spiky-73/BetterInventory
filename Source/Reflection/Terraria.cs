@@ -12,6 +12,7 @@ using System;
 namespace BetterInventory.Reflection;
 
 public static class Main {
+    public static readonly StaticField<int> netMode = new(typeof(TMain), nameof(TMain.netMode));
     public static readonly StaticField<int[]> availableRecipe = new(typeof(TMain), nameof(TMain.availableRecipe));
     public static readonly StaticField<int> numAvailableRecipes = new(typeof(TMain), nameof(TMain.numAvailableRecipes));
     public static readonly StaticField<int> recStart = new(typeof(TMain), nameof(TMain.recStart));
@@ -47,6 +48,7 @@ public static class Player {
     public static readonly Method<TPlayer, bool> GetItem_VoidVault = new(nameof(GetItem_VoidVault), typeof(int), typeof(TItem[]), typeof(TItem), typeof(Terraria.GetItemSettings), typeof(TItem));
     public static readonly Method<TPlayer, bool> HasItem = new(nameof(TPlayer.HasItem), typeof(int));
     public static readonly Method<TPlayer, TItem> FillAmmo = new(nameof(TPlayer.FillAmmo), typeof(int), typeof(TItem), typeof(Terraria.GetItemSettings));
+    public static readonly Method<TPlayer, object?> SmartSelect_PickToolForStrategy = new("SmartSelect_PickToolForStrategy", typeof(int), typeof(int), typeof(int), typeof(bool));
     public static readonly StaticMethod<int> GetMouseScrollDelta = new(typeof(TPlayer), nameof(TPlayer.GetMouseScrollDelta));
 }
 
@@ -58,6 +60,8 @@ public static class Item {
     public static readonly Property<TItem, bool> IsAir = new(nameof(TItem.IsAir));
     public static readonly Property<TItem, bool> IsACoin = new(nameof(TItem.IsACoin));
     public static readonly Method<TItem, bool> FitsAmmoSlot = new(nameof(TItem.FitsAmmoSlot));
+    public static readonly Method<TItem, TColor> GetAlpha = new(nameof(TItem.GetAlpha), typeof(TColor));
+    public static readonly Method<TItem, TColor> GetColor = new(nameof(TItem.GetColor), typeof(TColor));
     public static readonly Method<TItem, TItem> Clone = new(nameof(TItem.Clone));
     public static readonly Field<TItem, bool> DD2Summon = new(nameof(TItem.DD2Summon));
 }

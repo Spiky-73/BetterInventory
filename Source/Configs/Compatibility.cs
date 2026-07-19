@@ -34,6 +34,7 @@ public sealed class Compatibility : ModConfig {
         SmartPickup.Value.voidBagFirst = false;
         SmartPickup.Value.hotbarLast = false;
         SmartPickup.Value.fixSlot = false;
+        QuickStackPickup.Value.chests = false;
         PreviousDisplay.Value.fakeItem.Key = false;
         PreviousDisplay.Value.icon.Key = false;
         InventoryManagement.Instance.betterShiftClick.Value.shiftRight = false;
@@ -59,6 +60,7 @@ public sealed class UnloadedInventoryManagement {
     public bool baits;
     public bool pickupOverrideSlot;
     public bool pickupDedicatedSlot;
+    public bool pickupQuickStackChestsMulti;
     public bool hotbarLast;
     public bool fixSlot;
     public bool displayFakeItem;
