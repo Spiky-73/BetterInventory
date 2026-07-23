@@ -1,20 +1,15 @@
 using System.Collections.Generic;
-using SpikysLib;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace BetterInventory.BetterKeybinds;
+namespace BetterInventory.BetterInventoryManagement;
 
-public sealed class KeybindShortcutsPlayer : ModPlayer {
+public sealed class BuilderTogglesKeybinds : ModPlayer {
 
-    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterInventoryConfig.BetterKeybinds;
-    public override void Load() {
-        FavoritedBuffKb = KeybindLoader.RegisterKeybind(Mod, "FavoritedQuickBuff", Microsoft.Xna.Framework.Input.Keys.B);
-        QuickStackKb = KeybindLoader.RegisterKeybind(Mod, "QuickStack", Microsoft.Xna.Framework.Input.Keys.None);
-    }
+    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterInventoryManagementConfig.BuilderTogglesKeybinds;
     public override void SetStaticDefaults() {
         foreach (BuilderToggle toggle in BuilderToggleLoader.BuilderToggles) {
             if (toggle is WireVisibilityBuilderToggle wv && wv.NumberOfStates == 3) {
@@ -27,15 +22,7 @@ public sealed class KeybindShortcutsPlayer : ModPlayer {
     }
 
     public override void ProcessTriggers(TriggersSet triggersSet) {
-        if (BetterKeybindsConfig.FavoritedBuff && FavoritedBuffKb.JustPressed) FavoritedQuickBuff();
-        if (BetterKeybindsConfig.QuickStack && QuickStackKb.JustPressed) QuickStack();
-        if (BetterKeybindsConfig.BuilderAccs) BuilderKeys();
-    }
-
-    // TODO mods adding a quickbuff from safes
-    private void FavoritedQuickBuff() => ItemHelper.RunWithHiddenItems(Player.inventory, Player.QuickBuff, i => !i.favorited);
-
-    private void BuilderKeys() {
+        if (!BetterInventoryManagementConfig.BuilderTogglesKeybinds) return;
         foreach ((BuilderToggle? builder, ModKeybind kb) in BuilderTogglesKb) {
             if (!kb.JustPressed) continue;
             if (builder is null) {
@@ -47,15 +34,9 @@ public sealed class KeybindShortcutsPlayer : ModPlayer {
             SoundEngine.PlaySound(SoundID.MenuTick);
         }
     }
+
     private void CycleBuilderState(BuilderToggle toggle, int? state = null) => Player.builderAccStatus[toggle.Type] = (state ?? (Player.builderAccStatus[toggle.Type] + 1)) % toggle.NumberOfStates;
 
-    private void QuickStack() {
-        Player.QuickStackAllChests();
-        Recipe.FindRecipes();
-    }
-
-    public static ModKeybind FavoritedBuffKb { get; private set; } = null!;
-    public static ModKeybind QuickStackKb { get; private set; } = null!;
     public static readonly List<(BuilderToggle? toggle, ModKeybind kb)> BuilderTogglesKb = [];
     public static readonly List<BuilderToggle> WireDisplayToggles = [];
 }

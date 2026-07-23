@@ -22,6 +22,9 @@ public sealed class BetterInventoryManagementConfig : ModConfig {
     public Toggle<EquipmentMaterialsConfig> craftWithEquipment = new(true);
     public Toggle<ExtraItemRightClickConfig> extraItemRightClick = new(true);
     [BIMUnloadable(nameof(quickMove))] public Toggle<QuickMoveConfig> quickMove = new(true);
+    public Toggle<PreferFavoritedItemsConfig> preferFavoritedItems = new(true);
+    [DefaultValue(true)] public bool quickActionsKeybinds = true;
+    [DefaultValue(true)] public bool builderTogglesKeybinds = true;
 
     public static BetterInventoryManagementConfig Instance = null!;
     public static bool CompleteQuickStack => BetterInventoryConfig.BetterInventoryManagement && Instance.completeQuickStack && !UnloadedBetterInventoryManagementConfig.Instance.completeQuickStack;
@@ -37,6 +40,9 @@ public sealed class BetterInventoryManagementConfig : ModConfig {
     public static bool CraftWithEquipment => BetterInventoryConfig.BetterInventoryManagement && Instance.craftWithEquipment;
     public static bool ExtraItemRightClick => BetterInventoryConfig.BetterInventoryManagement && Instance.extraItemRightClick;
     public static bool QuickMove => BetterInventoryConfig.BetterInventoryManagement && Instance.quickMove;
+    public static bool PreferFavoritedItems => BetterInventoryConfig.BetterInventoryManagement && Instance.preferFavoritedItems;
+    public static bool QuickActionsKeybinds => BetterInventoryConfig.BetterInventoryManagement && Instance.quickActionsKeybinds;
+    public static bool BuilderTogglesKeybinds => BetterInventoryConfig.BetterInventoryManagement && Instance.builderTogglesKeybinds;
 
     public override void OnChanged() {
         FavoriteInBanksPlayer.OnConfigChanged();
@@ -105,6 +111,12 @@ public sealed class UnloadedQuickMoveConfig {
     public bool displayedHotkeys;
 
     public static UnloadedQuickMoveConfig Instance => UnloadedBetterInventoryManagementConfig.Instance.quickMove;
+}
+
+public sealed class PreferFavoritedItemsConfig {
+    [DefaultValue(true)] public bool quickBuff = true;
+
+    public static PreferFavoritedItemsConfig Instance => BetterInventoryManagementConfig.Instance.preferFavoritedItems.Value;
 }
 
 public sealed class UnloadedBetterInventoryManagementConfig {

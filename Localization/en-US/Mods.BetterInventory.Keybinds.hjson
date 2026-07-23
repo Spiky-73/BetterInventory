@@ -12,3 +12,5 @@ Bestiary.DisplayName: Bestiary
 RecipeList.DisplayName: Recipe List
 HoverTooltip.DisplayName: Hover Tooltip
 QuickStack.DisplayName: Quick Stack
+QuickSort.DisplayName: Quick Sort
+EquipPageMenuCycle.DisplayName: Equip Page Menu Cycle

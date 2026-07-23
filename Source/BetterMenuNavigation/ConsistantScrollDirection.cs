@@ -5,11 +5,11 @@ using Terraria;
 using Terraria.GameInput;
 using Terraria.ModLoader;
 
-namespace BetterInventory.BetterKeybinds;
+namespace BetterInventory.BetterMenuNavigation;
 
 public sealed class ConsistantScrollDirection : ILoadable {
 
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterKeybindsConfig.ConsistantScrollDirection;
+    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterMenuNavigationConfig.ConsistantScrollDirection;
     public void Load(Mod mod) {
         IL_Player.Update += il => il.TryEdit(ILFixRecipeScrollUpdate, ref UnloadedConsistantScrollDirectionConfig.Instance.recipesUnpaused);
         IL_Main.DoUpdate_WhilePaused += il => il.TryEdit(ILFixRecipeScrollWhilePaused, ref UnloadedConsistantScrollDirectionConfig.Instance.recipesPaused);
@@ -27,7 +27,7 @@ public sealed class ConsistantScrollDirection : ILoadable {
         //     Main.focusRecipe += ++[-1 *] num8;
         cursor.GotoNext(i => i.MatchStsfld(() => Main.focusRecipe));
         cursor.GotoPrev(MoveType.After, i => i.MatchLdloc(offset));
-        cursor.EmitDelegate((int offset) => BetterKeybindsConfig.ConsistantScrollDirection && ConsistantScrollDirectionConfig.RecipesUnpaused ? -offset : offset);
+        cursor.EmitDelegate((int offset) => BetterMenuNavigationConfig.ConsistantScrollDirection && ConsistantScrollDirectionConfig.RecipesUnpaused ? -offset : offset);
         // }
     }
 
@@ -36,14 +36,14 @@ public sealed class ConsistantScrollDirection : ILoadable {
 
         // int num = ++[-1 *] PlayerInput.ScrollWheelDelta / 120;
         cursor.GotoNext(MoveType.After, i => i.MatchLdsfld(() => PlayerInput.ScrollWheelDelta));
-        cursor.EmitDelegate((int ScrollWheelDelta) => BetterKeybindsConfig.ConsistantScrollDirection && ConsistantScrollDirectionConfig.RecipesUnpaused ? -ScrollWheelDelta : ScrollWheelDelta);
+        cursor.EmitDelegate((int ScrollWheelDelta) => BetterMenuNavigationConfig.ConsistantScrollDirection && ConsistantScrollDirectionConfig.RecipesUnpaused ? -ScrollWheelDelta : ScrollWheelDelta);
     }
 
     private static void ILFixAccessoryScroll(ILContext il) {
         ILCursor cursor = new(il);
         // int scrollDelta = AccessorySlotLoader.ModSlotPlayer(AccessorySlotLoader.Player).scrollbarSlotPosition + ++[-1 *] PlayerInput.ScrollWheelDelta / 120;
         cursor.GotoNext(MoveType.After, i => i.MatchLdsfld(() => PlayerInput.ScrollWheelDelta));
-        cursor.EmitDelegate((int ScrollWheelDelta) => BetterKeybindsConfig.ConsistantScrollDirection && ConsistantScrollDirectionConfig.Accessories ? -ScrollWheelDelta : ScrollWheelDelta);
+        cursor.EmitDelegate((int ScrollWheelDelta) => BetterMenuNavigationConfig.ConsistantScrollDirection && ConsistantScrollDirectionConfig.Accessories ? -ScrollWheelDelta : ScrollWheelDelta);
     }
 
 }

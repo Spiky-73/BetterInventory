@@ -16,8 +16,9 @@ public static class Compatibility {
             return true;
         } catch {
             mod.Logger.Warn($"ILHook {name} failed to load. Related features will be disabled until reload");
+            Utility.FailedILs++; // TODO fix
             MonoModHooks.DumpIL(mod, context);
-            unloaded = true;
+            unloaded = true; // TODO fix
             return false;
         }
     }

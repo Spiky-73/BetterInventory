@@ -3317,6 +3317,16 @@ BetterInventoryConfig: {
 		Label: load Disabled Module
 		Tooltip: ""
 	}
+
+	betterMenuNavigation: {
+		Label: better Menu Navigation
+		Tooltip: ""
+	}
+
+	unloadedBetterMenuNavigation: {
+		Label: unloaded Better Menu Navigation
+		Tooltip: ""
+	}
 }
 
 UnloadedBetterTooltipsConfig: {
@@ -3527,6 +3537,21 @@ BetterInventoryManagementConfig: {
 		Label: quick Move
 		Tooltip: ""
 	}
+
+	preferFavoritedItems: {
+		Label: prefer Favorited Items
+		Tooltip: ""
+	}
+
+	quickActionsKeybinds: {
+		Label: quick Actions Keybinds
+		Tooltip: ""
+	}
+
+	builderTogglesKeybinds: {
+		Label: builder Toggles Keybinds
+		Tooltip: ""
+	}
 }
 
 BetterItemInformationDisplayConfig: {
@@ -3577,6 +3602,95 @@ BetterKeybindsConfig: {
 
 	quickStack: {
 		Label: quick Stack
+		Tooltip: ""
+	}
+}
+
+UnloadedBetterMenuNavigationConfig: {
+	Tooltip: ""
+
+	consistantScrollDirection: {
+		Label: consistant Scroll Direction
+		Tooltip: ""
+	}
+}
+
+PreferFavoritedItemsConfig: {
+	Tooltip: ""
+
+	quickBuff: {
+		Label: quick Buff
+		Tooltip: ""
+	}
+}
+
+BetterMenuNavigationConfig: {
+	DisplayName: Better Menu Navigation Config
+
+	consistantScrollDirection: {
+		Label: consistant Scroll Direction
+		Tooltip: ""
+	}
+
+	quickSearch: {
+		Label: quick Search
+		Tooltip: ""
+	}
+
+	menuCycles: {
+		Label: menu Cycles
+		Tooltip: ""
+	}
+}
+
+QuickSearchConfig: {
+	Tooltip: ""
+
+	composite: {
+		Label: composite
+		Tooltip: ""
+	}
+}
+
+MenuCyclesConfig: {
+	Tooltip: ""
+
+	tap: {
+		Label: tap
+		Tooltip: ""
+	}
+
+	delay: {
+		Label: delay
+		Tooltip: ""
+	}
+
+	mode: {
+		Label: mode
+		Tooltip: ""
+	}
+}
+
+MenuCycleMode: {
+	Tooltip: ""
+
+	Restart: {
+		Label: Restart
+		Tooltip: ""
+	}
+
+	Continue: {
+		Label: Continue
+		Tooltip: ""
+	}
+
+	Skip: {
+		Label: Skip
+		Tooltip: ""
+	}
+
+	Toggle: {
+		Label: Toggle
 		Tooltip: ""
 	}
 }

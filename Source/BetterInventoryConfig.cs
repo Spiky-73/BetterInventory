@@ -1,11 +1,12 @@
 using System;
 using System.ComponentModel;
 using System.Reflection;
+using System.Text.Json.Serialization;
 using BetterInventory.BetterBestiary;
 using BetterInventory.BetterInventoryManagement;
 using BetterInventory.BetterItemInformationDisplay;
 using BetterInventory.BetterItemPickup;
-using BetterInventory.BetterKeybinds;
+using BetterInventory.BetterMenuNavigation;
 using BetterInventory.BetterRecipeList;
 using BetterInventory.BetterTooltips;
 using Microsoft.Xna.Framework;
@@ -25,18 +26,18 @@ public sealed class BetterInventoryConfig : ModConfig {
     [DefaultValue(true)] public bool betterItemInformationDisplay = true;
     [DefaultValue(true)] public bool betterItemPickup = true;
     [DefaultValue(true)] public bool betterInventoryManagement = true;
-    [DefaultValue(true)] public bool betterKeybinds = true;
+    [DefaultValue(true)] public bool betterMenuNavigation = true;
 
     // TODO add "load disable configs"
     [ReloadRequired, DefaultValue(true)] public bool loadDisabledModule = true;
 
-    public UnloadedBetterTooltipsConfig unloadedBetterTooltips = new();
-    public UnloadedBetterBestiaryConfig unloadedBetterBestiary = new();
-    public UnloadedBetterRecipeListConfig unloadedBetterRecipeList = new();
-    public UnloadedBetterItemInformationDisplayConfig unloadedBetterItemInformationDisplay = new();
-    public UnloadedBetterItemPickupConfig unloadedBetterItemPickup = new();
-    public UnloadedBetterInventoryManagementConfig unloadedBetterInventoryManagement = new();
-    public UnloadedBetterKeybindsConfig unloadedBetterKeybinds = new();
+    [JsonIgnore, ShowDespiteJsonIgnore] public UnloadedBetterTooltipsConfig unloadedBetterTooltips = new();
+    [JsonIgnore, ShowDespiteJsonIgnore] public UnloadedBetterBestiaryConfig unloadedBetterBestiary = new();
+    [JsonIgnore, ShowDespiteJsonIgnore] public UnloadedBetterRecipeListConfig unloadedBetterRecipeList = new();
+    [JsonIgnore, ShowDespiteJsonIgnore] public UnloadedBetterItemInformationDisplayConfig unloadedBetterItemInformationDisplay = new();
+    [JsonIgnore, ShowDespiteJsonIgnore] public UnloadedBetterItemPickupConfig unloadedBetterItemPickup = new();
+    [JsonIgnore, ShowDespiteJsonIgnore] public UnloadedBetterInventoryManagementConfig unloadedBetterInventoryManagement = new();
+    [JsonIgnore, ShowDespiteJsonIgnore] public UnloadedBetterMenuNavigationConfig unloadedBetterMenuNavigation = new();
 
     public static BetterInventoryConfig Instance = null!;
     public static bool BetterTooltips => Instance.betterTooltips;
@@ -45,7 +46,7 @@ public sealed class BetterInventoryConfig : ModConfig {
     public static bool BetterItemInformationDisplay => Instance.betterItemInformationDisplay;
     public static bool BetterItemPickup => Instance.betterItemPickup;
     public static bool BetterInventoryManagement => Instance.betterInventoryManagement;
-    public static bool BetterKeybinds => Instance.betterKeybinds;
+    public static bool BetterMenuNavigation => Instance.betterMenuNavigation;
 
     public sealed override ConfigScope Mode => ConfigScope.ClientSide;
 }

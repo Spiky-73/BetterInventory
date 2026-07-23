@@ -42,7 +42,7 @@ public sealed class UnknownNPCs : ILoadable {
         cursor.EmitDelegate((BestiaryUICollectionInfo info) => {
             if (BetterBestiaryConfig.UnknownNPCs && UnknownNPCsConfig.Instance.unknownDisplay == UnknownDisplay.Known && info.UnlockState < BestiaryEntryUnlockState.CanShowPortraitOnly_1) info.UnlockState = BestiaryEntryUnlockState.CanShowPortraitOnly_1;
             return info;
-        }); cursor.GotoNext(MoveType.After, i => i.MatchCallvirt((IEntryIcon i) => i.GetUnlockState));
+        });
 
         // ...
     }

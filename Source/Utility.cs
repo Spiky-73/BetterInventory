@@ -33,7 +33,7 @@ public static class Utility {
         return i;
     }
 
-    public static int FailedILs { get; private set; }
+    public static int FailedILs { get; internal set; }
 
     public static bool ApplyTo(this ILContext context, Action<ILContext> ilEdit, bool enabled, [CallerArgumentExpression(nameof(ilEdit))] string name = "") {
         Mod mod = ModContent.GetInstance<BetterInventory>();
