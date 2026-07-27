@@ -1,7 +1,6 @@
 using System;
 using System.ComponentModel;
 using System.Reflection;
-using System.Text.Json.Serialization;
 using BetterInventory.BetterBestiary;
 using BetterInventory.BetterInventoryManagement;
 using BetterInventory.BetterItemInformationDisplay;
@@ -10,6 +9,7 @@ using BetterInventory.BetterMenuNavigation;
 using BetterInventory.BetterRecipeList;
 using BetterInventory.BetterTooltips;
 using Microsoft.Xna.Framework;
+using Newtonsoft.Json;
 using SpikysLib;
 using SpikysLib.Collections;
 using SpikysLib.Configs;
