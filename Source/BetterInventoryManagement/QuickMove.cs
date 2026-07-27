@@ -109,7 +109,7 @@ public sealed class QuickMovePlayer : ModPlayer {
 
 public static class QuickMove {
 
-    public static List<ModSubInventory> GetChain(InventorySlot slot) => GetChain(slot.Player, slot.Item, slot.Inventory);
+    public static List<ModSubInventory> GetChain(InventorySlot slot) => GetChain(slot.Inventory.Entity, slot.Item, slot.Inventory);
     public static List<ModSubInventory> GetChain(Player player, Item item, ModSubInventory? prioritizedInventory) {
         var inventories = QuickMoveConfig.Instance.inactiveInventories ? InventoryLoader.GetPreferredInventories(player) : InventoryLoader.GetPreferredActiveInventories(player);
         List<ModSubInventory> targets = [.. inventories.Where(i => i.Accepts(item) && i.Items.Count > 0)];
