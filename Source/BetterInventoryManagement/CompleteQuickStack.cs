@@ -25,14 +25,14 @@ public sealed class CompleteQuickStack : ILoadable {
         // int num2 = 10;
         // ++ <completQuickStack>
         // if (player.chest <= -2) num += 4;
-        cursor.GotoNextLoc(out int upperBound, i => i.Previous.MatchLdcI4(50), 12);
+        cursor.GotoNextLoc(out int upperBound, i => i.Previous.MatchLdcI4(InventorySlots.Items.End), 12);
         cursor.EmitLdloc0();
         cursor.EmitDelegate((int upper, Player player) => {
             if (!BetterInventoryManagementConfig.CompleteQuickStack) return upper;
             // Deposit coins into banks (chest <= -2)
             return player.chest <= InventorySlots.PiggyBank ? (InventorySlots.Ammo.End - InventorySlots.Coins.Count) : InventorySlots.Ammo.End;
         });
-        cursor.GotoNextLoc(out int lowerBound, i => i.Previous.MatchLdcI4(10), 13);
+        cursor.GotoNextLoc(out int lowerBound, i => i.Previous.MatchLdcI4(InventorySlots.Hotbar.End), 13);
         cursor.EmitDelegate((int lower) => !BetterInventoryManagementConfig.CompleteQuickStack ? lower : 0);
     }
 
@@ -40,9 +40,9 @@ public sealed class CompleteQuickStack : ILoadable {
         ILCursor cursor = new(il);
 
         for (int i = 0; i < 2; i++) {
-            cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(10));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(InventorySlots.Hotbar.End));
             cursor.EmitDelegate((int lower) => !BetterInventoryManagementConfig.CompleteQuickStack ? lower : InventorySlots.Hotbar.Start);
-            cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(50));
+            cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(InventorySlots.Items.End));
             cursor.EmitDelegate((int upper) => !BetterInventoryManagementConfig.CompleteQuickStack ? upper : InventorySlots.Ammo.End);
         }
     }
@@ -51,9 +51,9 @@ public sealed class CompleteQuickStack : ILoadable {
         ILCursor cursor = new(il);
 
         // for (int num = ++[57]; num >= ++[0]; num--)
-        cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(49));
+        cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(InventorySlots.Items.End-1));
         cursor.EmitDelegate((int upper) => !BetterInventoryManagementConfig.CompleteQuickStack ? upper : InventorySlots.Ammo.End - 1);
-        cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(10));
+        cursor.GotoNext(MoveType.After, i => i.MatchLdcI4(InventorySlots.Hotbar.End));
         cursor.EmitDelegate((int lower) => !BetterInventoryManagementConfig.CompleteQuickStack ? lower : InventorySlots.Hotbar.Start);
     }
 

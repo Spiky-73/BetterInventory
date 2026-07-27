@@ -3,7 +3,7 @@ using SpikysLib;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace BetterInventory.BetterItemInformationDisplay;
+namespace BetterInventory;
 
 
 public abstract class ModItemAmmo : ModType {
@@ -25,5 +25,4 @@ public abstract class ModItemAmmo : ModType {
 
     public virtual TooltipLineID TooltipPosition => TooltipLineID.WandConsumes;
     public abstract TooltipLine GetTooltip(Item ammo);
-
 }

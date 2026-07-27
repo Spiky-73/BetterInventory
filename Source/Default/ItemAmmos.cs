@@ -4,7 +4,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace BetterInventory.BetterItemInformationDisplay.Defaults.ItemAmmo;
+namespace BetterInventory.Defaults.ItemAmmo;
 
 public sealed class WeaponAmmo : ModItemAmmo {
     public sealed override bool UsesAmmo(Item item) => item.useAmmo > AmmoID.None;

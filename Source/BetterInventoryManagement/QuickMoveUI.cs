@@ -103,12 +103,12 @@ public static class QuickMoveUI {
         _itemSlot = itemSlot;
         _itemType = itemSlot.Item.type;
 
-        _chainSlots = QuickMove.GetChain(Main.LocalPlayer, itemSlot.Item, itemSlot.Inventory).SelectMany((inv, index) =>
+        _chainSlots = QuickMove.GetChain(itemSlot).SelectMany((inv, index) =>
             QuickMovePlayer.MoveKeyNames.Select((_, key) =>
                 (new InventorySlot(inv, QuickMovePlayer.HotkeyToSlotRaw(key, inv.Items.Count)), new QuickMoveChainSlotDisplay(key, index + 1))
             )
         ).ToDictionary();
-        _chain = [itemSlot.Inventory, .. QuickMove.GetChain(Main.LocalPlayer, itemSlot.Item, itemSlot.Inventory)];
+        _chain = [itemSlot.Inventory, .. QuickMove.GetChain(itemSlot)];
     }
 
     public static bool InChain() => _chain.Count > 1;

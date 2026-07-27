@@ -109,13 +109,13 @@ public sealed class QuickMovePlayer : ModPlayer {
 
 public static class QuickMove {
 
+    public static List<ModSubInventory> GetChain(InventorySlot slot) => GetChain(slot.Player, slot.Item, slot.Inventory);
     public static List<ModSubInventory> GetChain(Player player, Item item, ModSubInventory? prioritizedInventory) {
         var inventories = QuickMoveConfig.Instance.inactiveInventories ? InventoryLoader.GetPreferredInventories(player) : InventoryLoader.GetPreferredActiveInventories(player);
         List<ModSubInventory> targets = [.. inventories.Where(i => i.Accepts(item) && i.Items.Count > 0)];
         if (prioritizedInventory is not null && targets.Remove(prioritizedInventory) && prioritizedInventory.Items.Count > 1) targets.Insert(0, prioritizedInventory);
         return targets;
     }
-
 
     public static bool InChain() => _chain.Count > 1;
 
@@ -132,12 +132,12 @@ public static class QuickMove {
             if (!QuickMoveConfig.Instance.bringItem || from.Item.IsAir) return;
 
             // hotbar, source, chain
-            var inventories = GetChain(itemSlot.Inventory.Entity, from.Item, itemSlot.Inventory);
+            var inventories = GetChain(itemSlot);
             inventories.Remove(hotbar);
             _chain = [from, itemSlot, .. inventories.Select(i => new InventorySlot(i, countToSlot(i.Items.Count)))];
         } else {
             // source, chain
-            _chain = [itemSlot, .. GetChain(itemSlot.Inventory.Entity, itemSlot.Item, itemSlot.Inventory).Select(i => new InventorySlot(i, countToSlot(i.Items.Count)))];
+            _chain = [itemSlot, .. GetChain(itemSlot).Select(i => new InventorySlot(i, countToSlot(i.Items.Count)))];
         }
     }
 
@@ -224,7 +224,7 @@ public static class QuickMove {
             // Try GetItem on the inventory item came from, preserving the favorite state of the moved item
             bool f = free.favorited;
             if (BetterInventoryManagementConfig.KeepSwappedFavorited && keepFavorited) free.favorited = true;
-            free = source.GetItem(free, GetItemSettings.GetItemInDropItemCheck);
+            free = source.Inventory.GetItem(free, GetItemSettings.GetItemInDropItemCheck);
             free.favorited = f; // Restore the original favorite state
 
             // General GetItem if it can't go in the original inventory

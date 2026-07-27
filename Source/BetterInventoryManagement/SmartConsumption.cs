@@ -55,6 +55,8 @@ public sealed class SmartConsumptionItem : GlobalItem {
     }
 }
 
+// TODO void bag
+// TODO ? use Inventory Proxy
 public static class SmartConsumption {
     public static Item? LastStack(Player player, Item item, StackPickerSettings settings) {
         bool Check(Item i) => item.type == i.type && (settings.CanPickArg || i != item);

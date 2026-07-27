@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace BetterInventory.BetterItemInformationDisplay;
+namespace BetterInventory;
 
 public sealed class ItemAmmoLoader : ILoadable {
 
