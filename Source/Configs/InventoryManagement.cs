@@ -15,7 +15,6 @@ namespace BetterInventory.Configs;
 
 public sealed class InventoryManagement : ModConfig {
     public Toggle<SmartPickup> smartPickup = new(true);
-    public Toggle<CraftStack> craftStack = new(true);
     public Toggle<BetterShiftClick> betterShiftClick = new(true);
     [DefaultValue(true)] public bool depositClick;
 
@@ -148,47 +147,6 @@ public sealed class UpgradeItems {
     private void OnDeserialized(StreamingContext context) {
         foreach (ModPickupUpgrader upgrader in PickupUpgraderLoader.Upgraders) upgraders.TryAdd(new(upgrader), true);
     }
-}
-
-public sealed class CraftStack {
-    public NestedValue<MaxCraftAmount, MaxRounding> maxItems = new(999);
-    [DefaultValue(true)] public bool repeat = true;
-    [DefaultValue(false)] public bool invertClicks = false;
-    [DefaultValue(true)] public bool tooltip = true;
-
-    public static bool Enabled => !UnloadedInventoryManagement.Value.craftStack && InventoryManagement.Instance.craftStack;
-    public static bool Tooltip => Enabled && Value.tooltip;
-    public static CraftStack Value => InventoryManagement.Instance.craftStack.Value;
-
-    // Compatibility version < v0.6
-    [JsonProperty, DefaultValue(false)] private bool single { set => ConfigHelper.MoveMember(value, _ => repeat = !value); }
-    [JsonProperty, DefaultValue(999)] private int maxAmount { set => ConfigHelper.MoveMember(value != 999, _ => maxItems.Key = value); }
-}
-
-public sealed class MaxCraftAmount : MultiChoice<int> {
-    public MaxCraftAmount() : base() { }
-    public MaxCraftAmount(int value) : base(value) { }
-
-    [Choice, Range(1, 9999), DefaultValue(999)] public int amount = 999;
-    [Choice] public Text? spicRequirement;
-
-    public override int Value {
-        get => Choice == nameof(spicRequirement) ? 0 : amount;
-        set {
-            if (value == 0) Choice = nameof(spicRequirement);
-            else {
-                Choice = nameof(amount);
-                amount = value;
-            }
-        }
-    }
-
-    public static implicit operator MaxCraftAmount(int count) => new(count);
-    public static MaxCraftAmount FromString(string s) => new(int.Parse(s));
-}
-
-public sealed class MaxRounding {
-    [DefaultValue(true)] public bool above = true;
 }
 
 public sealed class BetterShiftClick {

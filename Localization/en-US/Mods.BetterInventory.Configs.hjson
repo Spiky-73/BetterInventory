@@ -3459,6 +3459,11 @@ UnloadedBetterInventoryManagementConfig: {
 		Label: quick Move
 		Tooltip: ""
 	}
+
+	craftStack: {
+		Label: craft Stack
+		Tooltip: ""
+	}
 }
 
 UnloadedBetterKeybindsConfig: {
@@ -3550,6 +3555,11 @@ BetterInventoryManagementConfig: {
 
 	builderTogglesKeybinds: {
 		Label: builder Toggles Keybinds
+		Tooltip: ""
+	}
+
+	craftStack: {
+		Label: craft Stack
 		Tooltip: ""
 	}
 }
@@ -3691,6 +3701,77 @@ MenuCycleMode: {
 
 	Toggle: {
 		Label: Toggle
+		Tooltip: ""
+	}
+}
+
+CraftStackConfig: {
+	Tooltip: ""
+
+	maxItems: {
+		Label: max Items
+		Tooltip: ""
+	}
+
+	repeat: {
+		Label: repeat
+		Tooltip: ""
+	}
+
+	invertClicks: {
+		Label: invert Clicks
+		Tooltip: ""
+	}
+
+	tooltip: {
+		Label: tooltip
+		Tooltip: ""
+	}
+
+	shops: {
+		Label: shops
+		Tooltip: ""
+	}
+
+	crafting: {
+		Label: crafting
+		Tooltip: ""
+	}
+}
+
+MaxCraftAmountConfig: {
+	Tooltip: ""
+
+	amount: {
+		Label: amount
+		Tooltip: ""
+	}
+
+	spicRequirement: {
+		Label: spic Requirement
+		Tooltip: ""
+	}
+}
+
+MaxRoundingConfig: {
+	Tooltip: ""
+
+	above: {
+		Label: above
+		Tooltip: ""
+	}
+}
+
+UnloadedCraftStackConfig: {
+	Tooltip: ""
+
+	shops: {
+		Label: shops
+		Tooltip: ""
+	}
+
+	crafting: {
+		Label: crafting
 		Tooltip: ""
 	}
 }

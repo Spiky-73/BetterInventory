@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using BetterInventory.InventoryManagement.SmartPickup;
 using MonoMod.Cil;
@@ -50,22 +49,6 @@ public static class Utility {
             return false;
         }
         return true;
-    }
-
-    public static int GetMouseFreeSpace(Item item) => GetFreeSpace(Main.mouseItem, item);
-
-    // TODO remove dependency on InventoryLoader
-    public static int GetInventoryFreeSpace(Player player, Item item)
-        => InventoryLoader.GetInventories(player)
-            .Where(si => PlayerHelper.InventoryContexts.Contains(si.Context))
-            .Select(si => GetFreeSpace(si.Items, item))
-            .Sum();
-
-    public static int GetFreeSpace(IList<Item> inv, Item item) => inv.Select(i => GetFreeSpace(i, item)).Sum();
-    public static int GetFreeSpace(Item test, Item item) {
-        if (test.IsAir) return item.maxStack;
-        if (test.type == item.type) return item.maxStack - test.stack;
-        return 0;
     }
 
     public static ILCursor GotoRecipeDraw(this ILCursor cursor) {

@@ -39,7 +39,6 @@ public sealed class Compatibility : ModConfig {
         PreviousDisplay.Value.icon.Key = false;
         InventoryManagement.Instance.betterShiftClick.Value.shiftRight = false;
         InventoryManagement.Instance.betterShiftClick.Value.universalShift = false;
-        InventoryManagement.Instance.craftStack.Key = false;
         InventoryManagement.Instance.Save();
 
         BetterGuide.Value.favoritedRecipes.Key = false;
@@ -67,7 +66,6 @@ public sealed class UnloadedInventoryManagement {
     public bool displayIcon;
     public bool shiftRight;
     public bool universalShift;
-    public bool craftStack;
 
     public static UnloadedInventoryManagement Value => Compatibility.Instance.unloadedInventoryManagement;
 }

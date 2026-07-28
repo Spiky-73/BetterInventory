@@ -25,6 +25,7 @@ public sealed class BetterInventoryManagementConfig : ModConfig {
     public Toggle<PreferFavoritedItemsConfig> preferFavoritedItems = new(true);
     [DefaultValue(true)] public bool quickActionsKeybinds = true;
     [DefaultValue(true)] public bool builderTogglesKeybinds = true;
+    public Toggle<CraftStackConfig> craftStack = new(true);
 
     public static BetterInventoryManagementConfig Instance = null!;
     public static bool CompleteQuickStack => BetterInventoryConfig.BetterInventoryManagement && Instance.completeQuickStack && !UnloadedBetterInventoryManagementConfig.Instance.completeQuickStack;
@@ -43,6 +44,7 @@ public sealed class BetterInventoryManagementConfig : ModConfig {
     public static bool PreferFavoritedItems => BetterInventoryConfig.BetterInventoryManagement && Instance.preferFavoritedItems;
     public static bool QuickActionsKeybinds => BetterInventoryConfig.BetterInventoryManagement && Instance.quickActionsKeybinds;
     public static bool BuilderTogglesKeybinds => BetterInventoryConfig.BetterInventoryManagement && Instance.builderTogglesKeybinds;
+    public static bool CraftStack => BetterInventoryConfig.BetterInventoryManagement && Instance.craftStack;
 
     public override void OnChanged() {
         FavoriteInBanksPlayer.OnConfigChanged();
@@ -117,6 +119,41 @@ public sealed class PreferFavoritedItemsConfig {
     [DefaultValue(true)] public bool quickBuff = true;
 
     public static PreferFavoritedItemsConfig Instance => BetterInventoryManagementConfig.Instance.preferFavoritedItems.Value;
+}
+
+public sealed class CraftStackConfig {
+    public NestedValue<MaxCraftAmountConfig, MaxRoundingConfig> maxItems = new(999);
+    [DefaultValue(true)] public bool repeat = true;
+    [DefaultValue(false)] public bool invertClicks = false;
+    [DefaultValue(true)] public bool tooltip = true;
+
+    public static CraftStackConfig Instance => BetterInventoryManagementConfig.Instance.craftStack.Value;
+}
+
+public sealed class MaxCraftAmountConfig : MultiChoice<int> {
+    public MaxCraftAmountConfig() : base() { }
+    public MaxCraftAmountConfig(int value) : base(value) { }
+
+    [Choice, Range(1, 9999), DefaultValue(999)] public int amount = 999;
+    [Choice] public Text? spicRequirement;
+
+    public override int Value {
+        get => Choice == nameof(spicRequirement) ? 0 : amount;
+        set {
+            if (value == 0) Choice = nameof(spicRequirement);
+            else {
+                Choice = nameof(amount);
+                amount = value;
+            }
+        }
+    }
+
+    public static implicit operator MaxCraftAmountConfig(int count) => new(count);
+    public static MaxCraftAmountConfig FromString(string s) => new(int.Parse(s));
+}
+
+public sealed class MaxRoundingConfig {
+    [DefaultValue(true)] public bool above = true;
 }
 
 public sealed class UnloadedBetterInventoryManagementConfig {

@@ -15,6 +15,7 @@ using MonoMod.Utils;
 using BetterInventory.ItemSearch.BetterGuide;
 using SpikysLib.CrossMod;
 using BetterInventory.BetterRecipeList;
+using BetterInventory.BetterInventoryManagement;
 
 namespace BetterInventory.ItemActions;
 
@@ -52,7 +53,7 @@ public sealed class BetterPlayer : ModPlayer {
     }
 
     public void DisplaySpicWarning() {
-        if (!Configs.CraftStack.Enabled || Configs.CraftStack.Value.maxItems.Key.Choice != nameof(Configs.MaxCraftAmount.spicRequirement) || SpysInfiniteConsumablesIntegration.Enabled) return;
+        if (!BetterInventoryManagementConfig.CraftStack || CraftStackConfig.Instance.maxItems.Key.Choice != nameof(MaxCraftAmountConfig.spicRequirement) || SpysInfiniteConsumablesIntegration.Enabled) return;
         InGameNotificationsTracker.AddNotification(new InGameNotification(Mod, new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.SPICWarning"), Colors.RarityAmber)));
     }
 

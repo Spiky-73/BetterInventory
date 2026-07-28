@@ -10,7 +10,7 @@ public sealed class CraftWithMouse : ModPlayer {
 
     public override IEnumerable<Item> AddMaterialsForCrafting(out ItemConsumedCallback? itemConsumedCallback) {
         itemConsumedCallback = null;
-        if (BetterInventoryManagementConfig.CraftWithMouse || Main.myPlayer != Player.whoAmI) return [];
+        if (!BetterInventoryManagementConfig.CraftWithMouse || Main.myPlayer != Player.whoAmI) return [];
 
         List<Item> materials = [Main.mouseItem];
         itemConsumedCallback = (item, index) => {
