@@ -27,7 +27,7 @@ public sealed class UniversalShiftClick : ModPlayer {
             Main.cursorOverride = CursorOverrideID.TrashCan;
             return true;
         }
-        if (context == ItemSlot.Context.ShopItem && ItemSlot.ShiftInUse && Main.LocalPlayer.ItemSpace(inventory[slot]).CanTakeItem) {
+        if (context == ItemSlot.Context.ShopItem && ItemSlot.ShiftInUse && Main.LocalPlayer.ItemSpace(inventory[slot]).CanTakeItemToPersonalInventory) {
             Main.cursorOverride = QuickBuyCursor.Type;
             return true;
         }
@@ -70,7 +70,7 @@ public sealed class UniversalShiftClick : ModPlayer {
         cursor.EmitDelegate((int recipeIndex, bool canCraft, bool crafting) => {
             if (!BetterInventoryManagementConfig.UniversalShiftClick || !ItemSlot.ShiftInUse || !canCraft || crafting) return;
             var createItem = Main.recipe[Main.availableRecipe[recipeIndex]].createItem;
-            if (!Main.LocalPlayer.ItemSpace(createItem).CanTakeItem) return;
+            if (!Main.LocalPlayer.ItemSpace(createItem).CanTakeItemToPersonalInventory) return;
             Main.cursorOverride = QuickCraftCursor.Type;
             _fakeStack = createItem.maxStack - GetInventoryFreeSpace(Main.LocalPlayer, createItem);
             (_mouse, Main.mouseItem) = (Main.mouseItem, new(createItem.type, _fakeStack));

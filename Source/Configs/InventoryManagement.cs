@@ -15,10 +15,8 @@ namespace BetterInventory.Configs;
 
 public sealed class InventoryManagement : ModConfig {
     public Toggle<SmartPickup> smartPickup = new(true);
-    [DefaultValue(true)] public bool depositClick;
 
     public static InventoryManagement Instance = null!;
-    public static bool DepositClick => Instance.depositClick;
     public static bool SmartPickup => Instance.smartPickup;
 
     // Compatibility version < v0.6

@@ -3464,6 +3464,11 @@ UnloadedBetterInventoryManagementConfig: {
 		Label: craft Stack
 		Tooltip: ""
 	}
+
+	universalShiftClick: {
+		Label: universal Shift Click
+		Tooltip: ""
+	}
 }
 
 UnloadedBetterKeybindsConfig: {
@@ -3560,6 +3565,21 @@ BetterInventoryManagementConfig: {
 
 	craftStack: {
 		Label: craft Stack
+		Tooltip: ""
+	}
+
+	depositClick: {
+		Label: deposit Click
+		Tooltip: ""
+	}
+
+	shiftRightClick: {
+		Label: shift Right Click
+		Tooltip: ""
+	}
+
+	universalShiftClick: {
+		Label: universal Shift Click
 		Tooltip: ""
 	}
 }
@@ -3772,6 +3792,15 @@ UnloadedCraftStackConfig: {
 
 	crafting: {
 		Label: crafting
+		Tooltip: ""
+	}
+}
+
+UnloadedUniversalShiftClick: {
+	Tooltip: ""
+
+	quickCraft: {
+		Label: quick Craft
 		Tooltip: ""
 	}
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using BetterInventory.BetterInventoryManagement;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
@@ -25,8 +26,8 @@ public sealed class PreviousSlotItem : GlobalItem {
 }
 
 public sealed partial class PreviousSlotPlayer : ModPlayer {
-    private static void HookItemSlotLeftClick(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) => HookItemSlotMarkOnClick((inv, context, slot) => orig(inv, context, slot), inv, context, slot, Main.mouseLeft && Main.mouseLeftRelease);
-    private static void HookItemSlotRightClick(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) => HookItemSlotMarkOnClick((inv, context, slot) => orig(inv, context, slot), inv, context, slot, Main.mouseRight || (Configs.InventoryManagement.DepositClick && Main.mouseMiddle));
+    private static void HookItemSlotLeftClick(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) => HookItemSlotMarkOnClick((inv, context, slot) => orig(inv, context, slot), inv, context, slot, Main.mouseLeft && Main.mouseLeftRelease || (BetterInventoryManagementConfig.DepositClick && Main.mouseMiddle));
+    private static void HookItemSlotRightClick(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) => HookItemSlotMarkOnClick((inv, context, slot) => orig(inv, context, slot), inv, context, slot, Main.mouseRight);
     private static void HookItemSlotMarkOnClick(Action<Item[], int, int> orig, Item[] inv, int context, int slot, bool click) {
         if (!click || !(Configs.PreviousSlot.Mouse || Configs.PreviousSlot.ShiftClick) || !InventoryLoader.IsInventorySlot(Main.LocalPlayer, inv, context, slot, out InventorySlot mark)) {
             orig(inv, context, slot);

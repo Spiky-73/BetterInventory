@@ -28,6 +28,7 @@ public sealed class BetterInventoryManagementConfig : ModConfig {
     public Toggle<CraftStackConfig> craftStack = new(true);
     [DefaultValue(true)] public bool shiftRightClick = true;
     [BIMUnloadable(nameof(universalShiftClick)), DefaultValue(true)] public bool universalShiftClick = true;
+    [DefaultValue(true)] public bool depositClick = true;
 
     public static BetterInventoryManagementConfig Instance = null!;
     public static bool CompleteQuickStack => BetterInventoryConfig.BetterInventoryManagement && Instance.completeQuickStack && !UnloadedBetterInventoryManagementConfig.Instance.completeQuickStack;
@@ -49,6 +50,7 @@ public sealed class BetterInventoryManagementConfig : ModConfig {
     public static bool CraftStack => BetterInventoryConfig.BetterInventoryManagement && Instance.craftStack;
     public static bool ShiftRightClick => BetterInventoryConfig.BetterInventoryManagement && Instance.shiftRightClick;
     public static bool UniversalShiftClick => BetterInventoryConfig.BetterInventoryManagement && Instance.universalShiftClick;
+    public static bool DepositClick => BetterInventoryConfig.BetterInventoryManagement && Instance.depositClick;
 
     public override void OnChanged() {
         FavoriteInBanksPlayer.OnConfigChanged();
