@@ -37,8 +37,6 @@ public sealed class Compatibility : ModConfig {
         QuickStackPickup.Value.chests = false;
         PreviousDisplay.Value.fakeItem.Key = false;
         PreviousDisplay.Value.icon.Key = false;
-        InventoryManagement.Instance.betterShiftClick.Value.shiftRight = false;
-        InventoryManagement.Instance.betterShiftClick.Value.universalShift = false;
         InventoryManagement.Instance.Save();
 
         BetterGuide.Value.favoritedRecipes.Key = false;

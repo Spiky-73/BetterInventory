@@ -17,7 +17,7 @@ public sealed class CraftStackItem : GlobalItem {
     public override void Load() {
         On_ItemSlot.HandleShopSlot += HookBuyStack;
         On_Main.CraftItem += HookCraftStack;
-        bool skip = false; // Not saved as unloaded as if this is the case, this mean there is no findrecipes to skip
+        bool skip = false; // Not saved as unloaded as if this is the case, this mean there is no find recipes to skip
         IL_Recipe.Create += il => il.TryEdit(ILSkipFindRecipes, ref skip);
     }
 

@@ -5,7 +5,6 @@ using Terraria.GameInput;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
-using BetterInventory.InventoryManagement;
 using Terraria.ID;
 using SpikysLib.UI;
 using Terraria.Localization;
@@ -68,7 +67,6 @@ public sealed class BetterPlayer : ModPlayer {
 
     public override bool HoverSlot(Item[] inventory, int context, int slot) {
         if (PlaceholderItem.OverrideHover(inventory, context, slot)) return true;
-        if (ClickOverrides.OverrideHover(inventory, context, slot)) return true;
         return false;
     }
     public override void SaveData(TagCompound tag) { }

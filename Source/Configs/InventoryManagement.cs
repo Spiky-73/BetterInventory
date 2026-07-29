@@ -15,7 +15,6 @@ namespace BetterInventory.Configs;
 
 public sealed class InventoryManagement : ModConfig {
     public Toggle<SmartPickup> smartPickup = new(true);
-    public Toggle<BetterShiftClick> betterShiftClick = new(true);
     [DefaultValue(true)] public bool depositClick;
 
     public static InventoryManagement Instance = null!;
@@ -24,7 +23,6 @@ public sealed class InventoryManagement : ModConfig {
 
     // Compatibility version < v0.6
     [JsonProperty, DefaultValue(AutoEquipLevel.PreferredSlots)] private AutoEquipLevel autoEquip { set => ConfigHelper.MoveMember(value != AutoEquipLevel.PreferredSlots, _ => smartPickup.Value.autoEquip.Key = value); }
-    [JsonProperty, DefaultValue(true)] private bool shiftRight { set => ConfigHelper.MoveMember<InventoryManagement>(!value, c => c.betterShiftClick.Key = value); }
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
 }
@@ -147,14 +145,4 @@ public sealed class UpgradeItems {
     private void OnDeserialized(StreamingContext context) {
         foreach (ModPickupUpgrader upgrader in PickupUpgraderLoader.Upgraders) upgraders.TryAdd(new(upgrader), true);
     }
-}
-
-public sealed class BetterShiftClick {
-    [DefaultValue(true)] public bool shiftRight = true;
-    [DefaultValue(true)] public bool universalShift = true;
-
-    public static bool Enabled => InventoryManagement.Instance.betterShiftClick;
-    public static bool ShiftRight => !UnloadedInventoryManagement.Value.shiftRight && Value.shiftRight && Enabled;
-    public static bool UniversalShift => !UnloadedInventoryManagement.Value.universalShift && Value.universalShift && Enabled;
-    public static BetterShiftClick Value => InventoryManagement.Instance.betterShiftClick.Value;
 }

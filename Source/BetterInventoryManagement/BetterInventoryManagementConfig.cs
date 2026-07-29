@@ -26,6 +26,8 @@ public sealed class BetterInventoryManagementConfig : ModConfig {
     [DefaultValue(true)] public bool quickActionsKeybinds = true;
     [DefaultValue(true)] public bool builderTogglesKeybinds = true;
     public Toggle<CraftStackConfig> craftStack = new(true);
+    [DefaultValue(true)] public bool shiftRightClick = true;
+    [BIMUnloadable(nameof(universalShiftClick)), DefaultValue(true)] public bool universalShiftClick = true;
 
     public static BetterInventoryManagementConfig Instance = null!;
     public static bool CompleteQuickStack => BetterInventoryConfig.BetterInventoryManagement && Instance.completeQuickStack && !UnloadedBetterInventoryManagementConfig.Instance.completeQuickStack;
@@ -45,6 +47,8 @@ public sealed class BetterInventoryManagementConfig : ModConfig {
     public static bool QuickActionsKeybinds => BetterInventoryConfig.BetterInventoryManagement && Instance.quickActionsKeybinds;
     public static bool BuilderTogglesKeybinds => BetterInventoryConfig.BetterInventoryManagement && Instance.builderTogglesKeybinds;
     public static bool CraftStack => BetterInventoryConfig.BetterInventoryManagement && Instance.craftStack;
+    public static bool ShiftRightClick => BetterInventoryConfig.BetterInventoryManagement && Instance.shiftRightClick;
+    public static bool UniversalShiftClick => BetterInventoryConfig.BetterInventoryManagement && Instance.universalShiftClick;
 
     public override void OnChanged() {
         FavoriteInBanksPlayer.OnConfigChanged();
@@ -156,6 +160,12 @@ public sealed class MaxRoundingConfig {
     [DefaultValue(true)] public bool above = true;
 }
 
+public sealed class UnloadedUniversalShiftClick {
+    public bool quickCraft;
+
+    public static UnloadedUniversalShiftClick Instance => UnloadedBetterInventoryManagementConfig.Instance.universalShiftClick;
+}
+
 public sealed class UnloadedBetterInventoryManagementConfig {
     public bool completeQuickStack;
     public bool limitedBanksQuickStack;
@@ -163,6 +173,7 @@ public sealed class UnloadedBetterInventoryManagementConfig {
     public bool favoriteInBanks;
     public UnloadedSmartConsumptionConfig smartConsumption = new();
     public UnloadedQuickMoveConfig quickMove = new();
+    public UnloadedUniversalShiftClick universalShiftClick = new();
 
     public static UnloadedBetterInventoryManagementConfig Instance => BetterInventoryConfig.Instance.unloadedBetterInventoryManagement;
 }

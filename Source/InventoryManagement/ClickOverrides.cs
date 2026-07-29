@@ -1,15 +1,5 @@
-using System;
-using System.Collections.Generic;
-using Microsoft.Xna.Framework.Graphics;
-using MonoMod.Cil;
-using SpikysLib;
-using SpikysLib.Collections;
-using BetterInventory.CrossMod;
-using SpikysLib.IL;
-using SpikysLib.UI;
 using Terraria;
 using Terraria.ID;
-using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
 using Terraria.Audio;
@@ -19,109 +9,8 @@ namespace BetterInventory.InventoryManagement;
 public sealed class ClickOverrides : ModPlayer {
 
     public override void Load() {
-        CraftCursor = CursorLoader.RegisterCursor(Mod, Mod.Assets.Request<Texture2D>($"Assets/Cursor_Craft"));
-
-        On_ItemSlot.LeftClick_ItemArray_int_int += HookShiftLeftCustom;
         On_ItemSlot.RightClick_ItemArray_int_int += HookDepositClick; // Needs to be added before `HookShiftRight` for Shift+Deposit to work 
-        On_ItemSlot.RightClick_ItemArray_int_int += HookShiftRight;
-
-        IL_Main.HoverOverCraftingItemButton += static il => {
-            if (!il.ApplyTo(ILShiftRightCursorOverride, Configs.BetterShiftClick.UniversalShift)) Configs.UnloadedInventoryManagement.Value.universalShift = true;
-        };
-        IL_Main.CraftItem += static il => {
-            if (!il.ApplyTo(ILShiftCraft, Configs.BetterShiftClick.ShiftRight)) Configs.UnloadedInventoryManagement.Value.shiftRight = true;
-        };
     }
-
-    private static void HookShiftLeftCustom(On_ItemSlot.orig_LeftClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
-        if (!Configs.BetterShiftClick.UniversalShift || !Main.mouseLeft || Main.cursorOverride <= CursorOverrideID.DefaultCursor || context != ItemSlot.Context.ShopItem && context != ItemSlot.Context.CreativeInfinite) orig(inv, context, slot);
-        else TwoStepClick(inv, context, slot, (inv, context, slot) => orig(inv, context, slot));
-    }
-    private static void HookShiftRight(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
-        if (!Configs.BetterShiftClick.ShiftRight || Main.cursorOverride <= CursorOverrideID.DefaultCursor
-        || !(Main.mouseRight || Configs.InventoryManagement.DepositClick && Main.mouseMiddle)) {
-            orig(inv, context, slot);
-        } else TwoStepClick(inv, context, slot, (inv, context, slot) => orig(inv, context, slot));
-    }
-    private static void TwoStepClick(Item[] inv, int context, int slot, Action<Item[], int, int> click) {
-        (Item mouse, Main.mouseItem) = (Main.mouseItem, new());
-        click(inv, context, slot);
-        (Main.mouseItem, Item[] inv2) = (mouse, new[] { Main.mouseItem });
-        if (inv2[0].IsAir) return;
-        (bool left, bool leftR, Main.mouseLeft, Main.mouseLeftRelease) = (Main.mouseLeft, Main.mouseLeftRelease, true, true);
-        int cursor = Main.cursorOverride;
-        if (Array.IndexOf(TransportCursors, Main.cursorOverride) == -1) (context, Main.cursorOverride) = (ItemSlot.Context.ChestItem, CursorOverrideID.ChestToInventory);
-        ItemSlot.LeftClick(inv2, context, 0);
-        (Main.mouseLeft, Main.mouseLeftRelease) = (left, leftR);
-        Main.cursorOverride = cursor;
-        if (!inv2[0].IsAir) inv[slot] = ItemHelper.MoveInto(inv[slot], inv2[0], out _);
-        if (Main.mouseRight || Main.mouseMiddle) Recipe.FindRecipes();
-    }
-
-
-    public static bool OverrideHover(Item[] inv, int context, int slot) {
-        if (!Configs.BetterShiftClick.UniversalShift || inv[slot].IsAir) return false;
-        if ((context == ItemSlot.Context.ChestItem || context == ItemSlot.Context.BankItem) && ItemSlot.ControlInUse) {
-            Main.cursorOverride = CursorOverrideID.TrashCan;
-            return true;
-        }
-        if (context == ItemSlot.Context.ShopItem && ItemSlot.ShiftInUse && Main.LocalPlayer.ItemSpace(inv[slot]).CanTakeItem) {
-            Main.cursorOverride = CursorOverrideID.QuickSell;
-            return true;
-        }
-        return false;
-    }
-
-    private static void ILShiftRightCursorOverride(ILContext context) {
-        ILCursor cursor = new(context);
-
-        // if (Main.focusRecipe == recipeIndex && ++[Main.guideItem.IsAir || <allowCraft>]) {
-        //     <flags*4>
-        cursor.GotoNext(i => i.MatchLdsfld(Reflection.Main._preventCraftingBecauseClickWasUsedToChangeFocusedRecipe));
-        cursor.GotoNextLoc(out int flag3, i => true, 3);
-        cursor.GotoNextLoc(MoveType.After, out int flag5, i => i.Previous.MatchOr(), 5);
-
-        //     + <overrideHover>
-        cursor.EmitLdloc(flag3);
-        cursor.EmitLdloc(flag5);
-        cursor.EmitDelegate((bool canCraft, bool crafting) => {
-            if (!Configs.BetterShiftClick.UniversalShift || !ItemSlot.ShiftInUse) return;
-            if (canCraft && Main.LocalPlayer.ItemSpace(Main.recipe[Main.availableRecipe[Main.focusRecipe]].createItem).CanTakeItem && !crafting && Main.stackSplit <= 1) CraftCursor.SetAsCurrent();
-        });
-        //     ...
-        // }
-    }
-    private static void ILShiftCraft(ILContext il) {
-        ILCursor cursor = new(il);
-
-        // ++ if(<Shift>){
-        // ++     if(!<canTakeItem>) return;
-        // ++     goto skipCheck;
-        // ++ }
-        ILLabel skipVanillaCheck = cursor.DefineLabel();
-        ILLabel vanillaCheck = cursor.DefineLabel();
-        cursor.EmitLdarg0();
-        cursor.EmitDelegate((Recipe r) => Configs.BetterShiftClick.ShiftRight && CraftCursor.IsCurrent);
-        cursor.EmitBrfalse(vanillaCheck);
-        cursor.EmitLdarg0();
-        cursor.EmitDelegate((Recipe r) => Main.LocalPlayer.ItemSpace(r.createItem).CanTakeItem);
-        cursor.EmitBrtrue(skipVanillaCheck);
-        cursor.EmitRet();
-        cursor.MarkLabel(vanillaCheck);
-        cursor.MarkLabel(skipVanillaCheck); // Here in case of exception
-
-        // if (Main.mouseItem.stack > 0 && !ItemLoader.CanStack(Main.mouseItem, r.createItem)) return;
-        cursor.GotoNextLoc(out _, i => i.Previous.SaferMatchCallvirt(Reflection.Item.Clone), 0);
-        cursor.GotoPrev(MoveType.After, i => i.MatchRet());
-
-        // ++ skipCheck:
-        cursor.MarkLabel(skipVanillaCheck);
-        // if (<cannotCraft>) return;
-    }
-
-    public static ModCursor CraftCursor { get; private set; } = null!;
-
-    public static readonly int[] TransportCursors = [CursorOverrideID.TrashCan, CursorOverrideID.InventoryToChest, CursorOverrideID.ChestToInventory];
 
     private static void HookDepositClick(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
         orig(inv, context, slot);
@@ -188,8 +77,5 @@ public sealed class ClickOverrides : ModPlayer {
 
         }
     }
-
     private static bool s_allowResetStackSplit = false;
 }
-
-public record struct Multipliers(int Mouse, int Inventory);
