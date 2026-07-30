@@ -13,16 +13,6 @@ namespace BetterInventory.InventoryManagement.SmartPickup;
 
 public static class SmartEquip {
 
-    public static Item RefillMouse(Player player, Item item, GetItemSettings settings) {
-        if (item == Main.mouseItem || item == player.inventory[InventorySlots.Mouse] || Main.mouseItem.IsAir || Main.mouseItem.type != item.type) return item;
-        Main.mouseItem = ItemHelper.MoveInto(Main.mouseItem, item, out int transferred, item.maxStack);
-        if (transferred == 0) return item;
-        SoundEngine.PlaySound(SoundID.Grab);
-        Main.mouseItem.position = player.position;
-        if (!settings.NoText) PopupText.NewText(PopupTextContext.ItemPickupToVoidContainer, Main.mouseItem, transferred, false, settings.LongText);
-        return item;
-    }
-
     public static Item QuickStack(Player player, Item item, GetItemSettings settings) {
         if (Configs.QuickStackPickup.Chest) item = QuickStackChest(player, item);
         if (!item.IsAir && Configs.QuickStackPickup.Value.voidBag && player.HasItem(item.type, player.bank4.item)) item = VoidBagFirst(player, item, settings);

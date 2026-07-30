@@ -20,10 +20,7 @@ public sealed class SmartPickupPlayer : ModPlayer {
         };
 
         On_ChestUI.TryPlacingInChest += HookTryPlacingInChest;
-        // On_ItemSlot.EquipSwap += HookEquipSwap; // Not need a each item only goes to a single slot
-        // On_ItemSlot.DyeSwap += HookDyeSwap // Unused code, probably does not work either?
         On_ItemSlot.ArmorSwap += HookArmorSwap;
-        // On_ItemSlot.AccessorySwap += HookAccessorySwap; // Handled in HookArmorSwap
 
         On_ChestUI.LootAll += HookQuickStackLootAll;
         On_ChestUI.QuickStack += HookNoQuickStackToSameChest;
@@ -51,7 +48,6 @@ public sealed class SmartPickupPlayer : ModPlayer {
         // ++ item = <previousSlot>
         EmitSmartPickup(cursor, returnItem, (self, plr, item, settings) => {
             if (vanillaGetItem) return item;
-            if (!item.IsAir && Configs.SmartPickup.RefillMouse) item = SmartEquip.RefillMouse(self, item, settings);
             if (!item.IsAir && Configs.SmartPickup.PreviousSlot && IsGetItemWorld(self, settings, item)) item = self.GetModPlayer<PreviousSlotPlayer>().PickupItemToAnyPreviousSlot(item, settings);
             if (!item.IsAir && Configs.SmartPickup.PreviousSlot) item = self.GetModPlayer<PreviousSlotPlayer>().PickupItemToPreviousSlot(
                 item, settings,
@@ -76,7 +72,7 @@ public sealed class SmartPickupPlayer : ModPlayer {
         cursor.GotoPrev(MoveType.AfterLabel, i => i.MatchLdloc(coin));
 
         // ++<upgradeItems>
-        EmitSmartPickup(cursor, returnItem, (Player self, int plr, Item item, GetItemSettings settings) => {
+        EmitSmartPickup(cursor, returnItem, (self, plr, item, settings) => {
             if (vanillaGetItem || !IsGetItemWorld(self, settings, item)) return item;
             if (!item.IsAir && Configs.SmartPickup.QuickStack) item = SmartEquip.QuickStack(self, item, settings);
             if (!item.IsAir && Configs.SmartPickup.UpgradeItems) item = SmartEquip.UpgradeItems(self, item, settings);

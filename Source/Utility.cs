@@ -25,6 +25,7 @@ public static class Utility {
         Main.instance._mouseTextCache = new();
     }
 
+    // TODO remove and test
     public static Item GetItem_Inner(Player self, int plr, Item newItem, GetItemSettings settings) {
         SmartPickupPlayer.vanillaGetItem = true;
         Item i = self.GetItem(plr, newItem, settings);

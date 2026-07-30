@@ -26,7 +26,6 @@ public sealed class Compatibility : ModConfig {
     public static Compatibility Instance = null!;
 
     private static void DisableAllILs() {
-        SmartPickup.Value.refillMouse = false;
         SmartPickup.Value.previousSlot.Key = ItemPickupLevel.None;
         SmartPickup.Value.quickStack.Key = false;
         SmartPickup.Value.autoEquip.Key = AutoEquipLevel.None;
