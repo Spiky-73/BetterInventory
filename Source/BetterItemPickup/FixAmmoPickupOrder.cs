@@ -5,11 +5,11 @@ using Terraria.ModLoader;
 
 namespace BetterInventory.BetterItemPickup;
 
-public sealed class AmmoPickupOrder : ILoadable {
+public sealed class FixAmmoPickupOrder : ILoadable {
 
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterItemPickupConfig.AmmoPickupOrder;
+    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterItemPickupConfig.FixAmmoPickupOrder;
     public void Load(Mod mod) {
-        IL_Player.GetItem += il => il.TryEdit(ILDelayAmmoPickup, ref UnloadedBetterItemPickupConfig.Instance.ammoPickupOrder);
+        IL_Player.GetItem += il => il.TryEdit(ILDelayAmmoPickup, ref UnloadedBetterItemPickupConfig.Instance.fixAmmoPickupOrder);
         On_Item.CanFillEmptyAmmoSlot += HookForceSkipEmptySlots;
     }
     public void Unload() { }
@@ -26,12 +26,12 @@ public sealed class AmmoPickupOrder : ILoadable {
         // }
         cursor.GotoNext(MoveType.AfterLabel, i => i.SaferMatchCall((Player i) => i.FillAmmo));
         cursor.EmitDelegate(() => {
-            if (!BetterItemPickupConfig.AmmoPickupOrder) return;
+            if (!BetterItemPickupConfig.FixAmmoPickupOrder) return;
             _forceSkipEmptyAmmoSlots = true;
         });
         cursor.GotoNext(MoveType.After, i => i.SaferMatchCall((Player i) => i.FillAmmo));
         cursor.EmitDelegate(() => {
-            if (!BetterItemPickupConfig.AmmoPickupOrder) return;
+            if (!BetterItemPickupConfig.FixAmmoPickupOrder) return;
             _forceSkipEmptyAmmoSlots = false;
         });
 
@@ -44,7 +44,7 @@ public sealed class AmmoPickupOrder : ILoadable {
         // ++<ammo pickup>
         cursor.EmitLdarg0().EmitLdarg1().EmitLdloc(item).EmitLdarg3();
         cursor.EmitDelegate((Player self, int plr, Item item, GetItemSettings settings) => {
-            if (!BetterItemPickupConfig.AmmoPickupOrder || !item.FitsAmmoSlot()) return false;
+            if (!BetterItemPickupConfig.FixAmmoPickupOrder || !item.FitsAmmoSlot()) return false;
             item = self.FillAmmo(plr, item, settings);
             return item.IsAir;
         });
@@ -56,7 +56,7 @@ public sealed class AmmoPickupOrder : ILoadable {
     }
 
     private static bool HookForceSkipEmptySlots(On_Item.orig_CanFillEmptyAmmoSlot orig, Item self) {
-        if (!BetterItemPickupConfig.AmmoPickupOrder) return orig(self);
+        if (!BetterItemPickupConfig.FixAmmoPickupOrder) return orig(self);
         return !_forceSkipEmptyAmmoSlots && orig(self);
     }
 

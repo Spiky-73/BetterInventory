@@ -32,8 +32,6 @@ public sealed class Compatibility : ModConfig {
         SmartPickup.Value.autoEquip.Key = AutoEquipLevel.None;
         SmartPickup.Value.upgradeItems.Key = false;
         SmartPickup.Value.voidBagFirst = false;
-        SmartPickup.Value.hotbarLast = false;
-        SmartPickup.Value.fixSlot = false;
         QuickStackPickup.Value.chests = false;
         PreviousDisplay.Value.fakeItem.Key = false;
         PreviousDisplay.Value.icon.Key = false;

@@ -17,8 +17,6 @@ public sealed class SmartPickupPlayer : ModPlayer {
         IL_Player.GetItem += static il => {
             if (!il.ApplyTo(ILGetItem, Configs.SmartPickup.OverrideSlot)) Configs.UnloadedInventoryManagement.Value.pickupOverrideSlot = true;
             if (!il.ApplyTo(ILGetItemWorld, Configs.SmartPickup.DedicatedSlot)) Configs.UnloadedInventoryManagement.Value.pickupDedicatedSlot = true;
-            if (!il.ApplyTo(ILHotbarLast, Configs.SmartPickup.HotbarLast)) Configs.UnloadedInventoryManagement.Value.hotbarLast = true;
-            if (!il.ApplyTo(ILFixNewItem, Configs.SmartPickup.FixSlot)) Configs.UnloadedInventoryManagement.Value.fixSlot = true;
         };
 
         On_ChestUI.TryPlacingInChest += HookTryPlacingInChest;
@@ -88,17 +86,6 @@ public sealed class SmartPickupPlayer : ModPlayer {
         });
     }
 
-    private static void ILFixNewItem(ILContext il) {
-        ILCursor cursor = new(il);
-
-        cursor.GotoNextLoc(out int returnItem, i => i.Previous.MatchLdarg2(), 1);
-
-        while (cursor.TryGotoNext(MoveType.After, i => i.MatchLdarg2() && i.Next.MatchLdfld(out _))) {
-            cursor.EmitLdloc(returnItem);
-            cursor.EmitDelegate((Item newItem, Item returnItem) => Configs.SmartPickup.FixSlot ? returnItem : newItem);
-        }
-    }
-
     private static void EmitSmartPickup(ILCursor cursor, int returnItem, Func<Player, int, Item, GetItemSettings, Item> cb) {
         cursor.EmitLdarg0();
         cursor.EmitLdarg1();
@@ -117,19 +104,6 @@ public sealed class SmartPickupPlayer : ModPlayer {
         cursor.MarkLabel(skip);
     }
 
-    private static void ILHotbarLast(ILContext il) {
-        ILCursor cursor = new(il);
-
-        cursor.GotoNextLoc(out int newItem, i => i.Previous.MatchLdarg2(), 1);
-
-        // if (!isACoin ++[&& !<hotbarLast>] && newItem.useStyle != 0) <hotbar>
-        cursor.GotoNext(MoveType.After, i => i.MatchLdfld(Reflection.Item.useStyle));
-
-        cursor.EmitDelegate((int style) => {
-            if (Configs.SmartPickup.HotbarLast) return ItemUseStyleID.None;
-            return style;
-        });
-    }
     internal static bool vanillaGetItem;
 
     private static bool HookTryPlacingInChest(On_ChestUI.orig_TryPlacingInChest orig, Item item, bool justCheck, int itemSlotContext) {
