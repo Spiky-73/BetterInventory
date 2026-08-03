@@ -1,5 +1,8 @@
 # Better Inventory changelog
 
+## v0.9.2.1
+- Fixed an infinite loop with Smart Item Consumption
+
 ## v0.9.2
 - Added Locked Items to Upgrade Items
 - Added Automatically Lock Items to Upgrade Items
