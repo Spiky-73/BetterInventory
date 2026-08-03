@@ -18,25 +18,24 @@ public sealed class SmartConsumptionItem : GlobalItem {
     public override void Load() {
         On_ItemSlot.DrawItemIcon += HookDrawItemContext;
         IL_Player.ItemCheck_CheckFishingBobber_PickAndConsumeBait += static il => {
-            if(!il.ApplyTo(ILOnConsumeBait, Configs.SmartConsumption.Baits)) Configs.UnloadedInventoryManagement.Value.baits = true;
+            if (!il.ApplyTo(ILOnConsumeBait, Configs.SmartConsumption.Baits)) Configs.UnloadedInventoryManagement.Value.baits = true;
 
         };
         IL_Recipe.ConsumeForCraft += static il => {
             if (!il.ApplyTo(ILOnConsumedMaterial, Configs.SmartConsumption.Materials)) Configs.UnloadedInventoryManagement.Value.materials = true;
         };
-
     }
 
     public override void OnConsumeItem(Item item, Player player) {
         if (item.PaintOrCoating) {
-            if (Configs.SmartConsumption.Paints) SmartConsume(player, item, Utility.LastStack);
+            if (Configs.SmartConsumption.Paints) SmartConsume(player, item, Utility.LastStack, Configs.SmartConsumption.Value.self, Configs.SmartConsumption.Value.mouse);
         } else {
-            if (Configs.SmartConsumption.Consumables) SmartConsume(player, item, Utility.SmallestStack);
+            if (Configs.SmartConsumption.Consumables) SmartConsume(player, item, Utility.SmallestStack, Configs.SmartConsumption.Value.self, Configs.SmartConsumption.Value.mouse);
         }
     }
 
     public override void OnConsumedAsAmmo(Item ammo, Item weapon, Player player) {
-        if (Configs.SmartConsumption.Ammo) SmartConsume(player, ammo, Utility.LastStack);
+        if (Configs.SmartConsumption.Ammo) SmartConsume(player, ammo, Utility.LastStack, Configs.SmartConsumption.Value.self, Configs.SmartConsumption.Value.mouse);
     }
 
     private static void ILOnConsumedMaterial(ILContext il) {
@@ -48,7 +47,7 @@ public sealed class SmartConsumptionItem : GlobalItem {
         cursor.EmitLdarg1();
         cursor.EmitLdloc(consumed);
         cursor.EmitDelegate((Item item, Item consumed) => {
-            if (Configs.SmartConsumption.Materials) SmartConsume(Main.LocalPlayer, item, Utility.SmallestStack, consumed.stack, new(true, Configs.SmartConsumption.Value.mouse));
+            if (Configs.SmartConsumption.Materials) SmartConsume(Main.LocalPlayer, item, Utility.SmallestStack, true, Configs.SmartConsumption.Value.mouse, consumed.stack);
         });
     }
 
@@ -62,7 +61,7 @@ public sealed class SmartConsumptionItem : GlobalItem {
         cursor.EmitLdarg0();
         cursor.EmitLdloc(i);
         cursor.EmitDelegate((Player self, int i) => {
-            if (Configs.SmartConsumption.Baits) SmartConsume(self, self.inventory[i], Utility.LastStack);
+            if (Configs.SmartConsumption.Baits) SmartConsume(self, self.inventory[i], Utility.LastStack, Configs.SmartConsumption.Value.self, Configs.SmartConsumption.Value.mouse);
         });
     }
 
@@ -74,22 +73,25 @@ public sealed class SmartConsumptionItem : GlobalItem {
     private static void AddWeaponConsumeLine(Item item, List<TooltipLine> tooltips) {
         if (!Configs.ItemAmmo.Tooltip) return;
         if (!ItemHelper.IsInventoryContext(item.tooltipContext)) return;
-        foreach(var itemAmmo in ItemAmmoLoader.ItemAmmos) {
+        foreach (var itemAmmo in ItemAmmoLoader.ItemAmmos) {
             if (itemAmmo.TryGetAmmo(Main.LocalPlayer, item, out var ammo)) tooltips.FindOrAddLine(itemAmmo.GetTooltip(ammo), itemAmmo.TooltipPosition);
         }
     }
 
-    public delegate Item? StackPickerFn(Player player, Item item, StackPickerSettings settings);
-    public static void SmartConsume(Player player, Item item, StackPickerFn stackPicker, int consumed = 1, StackPickerSettings? settings = default) {
+    public delegate Item? StackPickerFn(Player player, int type, HashSet<Item> avoid);
+    public static void SmartConsume(Player player, Item item, StackPickerFn stackPicker, bool allowSelf = false, bool allowMouse = false, int consumed = 1) {
         if (!Configs.SmartConsumption.Value.mouse && (item == Main.mouseItem || item == player.inventory[InventorySlots.Mouse])) return;
-        settings ??= new(Configs.SmartConsumption.Value.self, Configs.SmartConsumption.Value.mouse);
+        int type = item.type;
+        HashSet<Item> avoid = [];
+        if (!allowSelf) avoid.Add(item);
+        if (!allowMouse) avoid.Add(player.inventory[InventorySlots.Mouse]);
         while (consumed > 0) {
-            Item? i = stackPicker(player, item, settings.Value);
+            Item? i = stackPicker(player, type, avoid);
             if (i == null) return;
             int amount = Math.Min(consumed, i.stack);
             item.stack += amount;
             i.stack -= amount;
-            if(player.whoAmI == Main.myPlayer) {
+            if (player.whoAmI == Main.myPlayer) {
                 if (item == player.inventory[InventorySlots.Mouse]) Main.mouseItem.stack += amount;
                 if (i == player.inventory[InventorySlots.Mouse]) Main.mouseItem.stack -= amount;
             }
@@ -120,11 +122,11 @@ public sealed class SmartConsumptionItem : GlobalItem {
                 Configs.Corner.BottomRight => new Vector2(1, 1),
                 Configs.Corner.BottomLeft or _ => new Vector2(-1, 1),
             };
-            Vector2 delta = direction * width * (0.5f - size/2 - 0.1f*(1-size));
+            Vector2 delta = direction * width * (0.5f - size / 2 - 0.1f * (1 - size));
 
-            if (Configs.ItemAmmo.Value.itemSlot.Value.hover){
+            if (Configs.ItemAmmo.Value.itemSlot.Value.hover) {
                 float sizeHitbox = Configs.ItemAmmo.Value.itemSlot.Value.size * 0.75f;
-                Vector2 deltaHitbox = direction * width * (0.5f - sizeHitbox/2);
+                Vector2 deltaHitbox = direction * width * (0.5f - sizeHitbox / 2);
                 if (new Rectangle((int)(position.X + deltaHitbox.X - width * sizeHitbox / 2), (int)(position.Y + deltaHitbox.Y - width * sizeHitbox / 2), (int)(width * sizeHitbox), (int)(width * sizeHitbox)).Contains(Main.mouseX, Main.mouseY)) {
                     Item displayed = ammo.Clone();
                     displayed.stack = 1;
@@ -138,4 +140,3 @@ public sealed class SmartConsumptionItem : GlobalItem {
 }
 
 public readonly record struct DrawItemIconParams(int Context, float Scale);
-public record struct StackPickerSettings(bool CanPickArg, bool CanPickMouse);

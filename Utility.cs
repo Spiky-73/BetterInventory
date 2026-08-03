@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using BetterInventory.InventoryManagement;
 using BetterInventory.InventoryManagement.SmartPickup;
 using MonoMod.Cil;
 using SpikysLib;
@@ -39,24 +38,22 @@ public static class Utility {
 
     public static int FailedILs { get; private set; }
 
-    public static Item? LastStack(this Player player, Item item, StackPickerSettings settings) {
-        bool Check(Item i) => item.type == i.type && (settings.CanPickArg || i != item);
+    public static Item? LastStack(this Player player, int type, HashSet<Item> avoid) {
+        bool Check(Item i) => !avoid.Contains(i) && i.type == type && i.stack > 0;
 
         for (int i = InventorySlots.Items.End - 1; i >= InventorySlots.Items.Start; i--) if (Check(player.inventory[i])) return player.inventory[i];
         for (int i = InventorySlots.Ammo.End - 1; i >= InventorySlots.Coins.Start; i--) if (Check(player.inventory[i])) return player.inventory[i];
-        if (settings.CanPickMouse && Check(player.inventory[InventorySlots.Mouse])) return player.inventory[InventorySlots.Mouse];
+        if (Check(player.inventory[InventorySlots.Mouse])) return player.inventory[InventorySlots.Mouse];
         return null;
     }
 
-    public static Item? SmallestStack(this Player player, Item item, StackPickerSettings settings) {
+    public static Item? SmallestStack(this Player player, int type, HashSet<Item> avoid) {
+        bool Check(Item i, Item? min) => !avoid.Contains(i) && i.type == type && i.stack > 0 && (min is null || i.stack < min.stack);
+        
         Item? min = null;
-        void Check(Item i) {
-            if (item.type == i.type && (min is null || i.stack < min.stack) && (settings.CanPickArg || i != item)) min = i;
-        }
-
-        for (int i = InventorySlots.Items.End - 1; i >= InventorySlots.Items.Start; i--) Check(player.inventory[i]);
-        for (int i = InventorySlots.Ammo.End - 1; i >= InventorySlots.Coins.Start; i--) Check(player.inventory[i]);
-        if (settings.CanPickMouse) Check(player.inventory[InventorySlots.Mouse]);
+        for (int i = InventorySlots.Items.End - 1; i >= InventorySlots.Items.Start; i--) if(Check(player.inventory[i], min)) min = player.inventory[i];
+        for (int i = InventorySlots.Ammo.End - 1; i >= InventorySlots.Coins.Start; i--) if(Check(player.inventory[i], min)) min = player.inventory[i];
+        if(Check(player.inventory[InventorySlots.Mouse], min)) min = player.inventory[InventorySlots.Mouse];
         return min;
     }
 
