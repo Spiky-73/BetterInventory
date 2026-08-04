@@ -85,7 +85,7 @@ public sealed class UniversalShiftClick : ModPlayer {
         cursor.EmitDelegate(() => {
             if (_mouse is null) return;
             Main.mouseItem.stack -= _fakeStack;
-            Main.LocalPlayer.GetItem(Main.myPlayer, Main.mouseItem, GetItemSettings.InventoryUIToInventorySettingsShowAsNew);
+            Main.LocalPlayer.GetItem(Main.myPlayer, Main.mouseItem, GetItemSettings.InventoryUIToInventorySettings);
             (_mouse, Main.mouseItem) = (null, _mouse);
         });
     }

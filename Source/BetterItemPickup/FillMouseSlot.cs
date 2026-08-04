@@ -27,7 +27,6 @@ public sealed class FillMouseSlot : ILoadable {
         cursor.GotoNext(MoveType.AfterLabel, i => i.MatchLdloc(coin));
 
         cursor.EmitLdarg0().EmitLdarg1().EmitLdloc(returnItem).EmitLdarg3();
-
         cursor.EmitDelegate((Player player, int plr, Item item, GetItemSettings settings) => {
             if (!BetterItemPickupConfig.FillMouseSlot) return item;
             if (Main.mouseItem.IsAir || Main.mouseItem.stack >= Main.mouseItem.maxStack || !Main.mouseItem.IsTheSameAs(item)) return item;
