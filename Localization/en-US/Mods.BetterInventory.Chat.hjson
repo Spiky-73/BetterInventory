@@ -13,5 +13,5 @@ Homepage: homepage
 Workshop: Steam Workshop page
 Summary: ""
 Details: ""
-Changelog: - Fixed an infinite loop with Smart Item Consumption
-Version: 0.9.2.1
+Changelog: - Fixed Display Previous Slots toggle not working as intended
+Version: 0.9.2.2

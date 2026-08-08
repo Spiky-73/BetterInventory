@@ -139,7 +139,7 @@ public sealed class PreviousDisplay {
     public Toggle<FakeItemDisplay> fakeItem = new(true);
     public Toggle<IconDisplay> icon = new(true, new());
 
-    public static bool Enabled => InventoryManagement.SmartPickup && PreviousSlot.Value.displayPrevious;
+    public static bool Enabled => SmartPickup.PreviousSlot && PreviousSlot.Value.displayPrevious;
     public static bool FakeItem => Enabled && Value.icon && !UnloadedInventoryManagement.Value.displayFakeItem;
     public static bool Icon => Enabled && Value.icon && !UnloadedInventoryManagement.Value.displayIcon;
     public static PreviousDisplay Value => PreviousSlot.Value.displayPrevious.Value;
