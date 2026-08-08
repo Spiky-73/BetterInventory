@@ -1,7 +1,7 @@
 # Better Inventory changelog
 
 ## v0.9.2.2
-. Fixed Previous Display toggle
+. Fixed Display Previous Slots toggle not working as intended
 
 ## v0.9.2.1
 - Fixed an infinite loop with Smart Item Consumption

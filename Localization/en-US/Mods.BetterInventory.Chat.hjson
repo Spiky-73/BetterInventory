@@ -13,5 +13,5 @@ Homepage: homepage
 Workshop: Steam Workshop page
 Summary: ""
 Details: ""
-Changelog: - Fixed Previous Display toggle
+Changelog: - Fixed Display Previous Slots toggle not working as intended
 Version: 0.9.2.2
