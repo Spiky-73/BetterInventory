@@ -1,4 +1,7 @@
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.Serialization;
+using BetterInventory.Default.Interfaces;
 using SpikysLib.Configs;
 using Terraria.ModLoader.Config;
 
@@ -10,11 +13,11 @@ using CSDUnloadable = UnloadableAttribute<UnloadedConsistantScrollDirectionConfi
 public sealed class BetterMenuNavigationConfig : ModConfig {
     [BKUnloadable(nameof(consistantScrollDirection))] public Toggle<ConsistantScrollDirectionConfig> consistantScrollDirection = new(true);
     public Toggle<QuickSearchConfig> quickSearch = new();
-    public Toggle<MenuCyclesConfig> menuCycles = new();
+    public Toggle<MenuChainsConfig> menuChains = new();
 
     public static BetterMenuNavigationConfig Instance = null!;
     public static bool ConsistantScrollDirection => BetterInventoryConfig.BetterMenuNavigation && Instance.consistantScrollDirection;
-    public static bool MenuCycles => BetterInventoryConfig.BetterMenuNavigation && Instance.menuCycles;
+    public static bool MenuChains => BetterInventoryConfig.BetterMenuNavigation && Instance.menuChains;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
 }
@@ -41,19 +44,35 @@ public sealed class QuickSearchConfig {
     [DefaultValue(true)] public bool composite = true;
 }
 
-public sealed class MenuCyclesConfig {
-    [DefaultValue(10)] public int tap = 10;
-    [DefaultValue(10)] public int delay = 10;
-    [DefaultValue(MenuCycleMode.Toggle)] public MenuCycleMode mode = MenuCycleMode.Toggle;
+public sealed class MenuChainsConfig {
+    [DefaultValue(MenuChainMode.Toggle)] public MenuChainMode mode = MenuChainMode.Toggle;
+    [ReloadRequired] public List<MenuChain> chains = [];
+    [Range(0, 3600), DefaultValue(30)] public int holdTime = 30;
+    [Range(0, 3600), DefaultValue(30)] public int graceTime = 30;
 
-    public static MenuCyclesConfig Instance => BetterMenuNavigationConfig.Instance.menuCycles.Value;
+    // BUG [tML][research] list of Reference type are duplicating when initialized directly
+    [OnDeserialized]
+    private void OnDeserialized(StreamingContext context) {
+        if (chains.Count > 0) return;
+        chains = [ new() {
+            name = "Toggle Equip Pages",
+            interfaces = [new(nameof(BetterInventory), nameof(ArmorInterface)),new(nameof(BetterInventory), nameof(MiscEquipInterface)), new(nameof(BetterInventory), nameof(HousingInterface)), ]
+        }];
+    }
+
+    public static MenuChainsConfig Instance => BetterMenuNavigationConfig.Instance.menuChains.Value;
 }
 
-public enum MenuCycleMode { // ex for a cycle [0,1,>2<,3]
-    Restart, // Restart from 0 (close): (2), 0, 1, 2, 3
-    Continue, // Continue where we are: (2), 3, 0, 1, 2
-    Skip, // (2), 0, 1, 3
-    Toggle, // (2), 1,0,3
+public sealed class MenuChain {
+    [DefaultValue("")] public string name = "";
+    public List<InterfaceDefinition> interfaces = [];
+}
+
+public enum MenuChainMode { // ex for a chain [0,1,(2),3]
+    Restart, // Restart from 0 (close): (2), 0
+    Continue, // Continue where we are: (2), 3, 0
+    Skip, // (2), 0, 1, 3, 2
+    Toggle, // (2), 1,0,3, 2
 }
 
 public sealed class UnloadedBetterMenuNavigationConfig {

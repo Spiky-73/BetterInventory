@@ -3741,6 +3741,11 @@ BetterMenuNavigationConfig: {
 		Label: menu Cycles
 		Tooltip: ""
 	}
+
+	menuChains: {
+		Label: menu Chains
+		Tooltip: ""
+	}
 }
 
 QuickSearchConfig: {
@@ -3899,6 +3904,87 @@ AutoQuickStackConfig: {
 
 	chests: {
 		Label: chests
+		Tooltip: ""
+	}
+}
+
+MenuChainsConfig: {
+	Tooltip: ""
+
+	mode: {
+		Label: mode
+		Tooltip: ""
+	}
+
+	chains: {
+		Label: chains
+		Tooltip: ""
+	}
+
+	holdTime: {
+		Label: hold Time
+		Tooltip: ""
+	}
+
+	graceTime: {
+		Label: grace Time
+		Tooltip: ""
+	}
+
+	items: {
+		Label: items
+		Tooltip: ""
+	}
+
+	test: {
+		Label: test
+		Tooltip: ""
+	}
+}
+
+MenuChainMode: {
+	Tooltip: ""
+
+	Restart: {
+		Label: Restart
+		Tooltip: ""
+	}
+
+	Continue: {
+		Label: Continue
+		Tooltip: ""
+	}
+
+	Skip: {
+		Label: Skip
+		Tooltip: ""
+	}
+
+	Toggle: {
+		Label: Toggle
+		Tooltip: ""
+	}
+}
+
+MenuChain: {
+	Tooltip: ""
+
+	name: {
+		Label: name
+		Tooltip: ""
+	}
+
+	interfaces: {
+		Label: interfaces
+		Tooltip: ""
+	}
+}
+
+InterfaceDefinition: {
+	Tooltip: ""
+
+	IsUnloaded: {
+		Label: Is Unloaded
 		Tooltip: ""
 	}
 }

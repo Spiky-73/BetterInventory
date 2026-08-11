@@ -27,7 +27,7 @@ public sealed class ScrollableTooltipConfig {
 }
 
 public sealed class TooltipHoverConfig {
-    [DefaultValue(10)] public int graceTime = 10;
+    [Range(0, 3600), DefaultValue(10)] public int graceTime = 10;
 
     public static TooltipHoverConfig Value => BetterTooltipsConfig.Instance.tooltipHover.Value;
 }
