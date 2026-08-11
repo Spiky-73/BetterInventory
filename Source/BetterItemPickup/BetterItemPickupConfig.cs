@@ -1,4 +1,6 @@
 using System.ComponentModel;
+using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader.Config;
 
 namespace BetterInventory.BetterItemPickup;
@@ -6,25 +8,33 @@ namespace BetterInventory.BetterItemPickup;
 using BIPUnloadableAttribute = UnloadableAttribute<UnloadedBetterItemPickupConfig>;
 
 public sealed class BetterItemPickupConfig : ModConfig {
-    [BIPUnloadable(nameof(fixAmmoPickupOrder)), DefaultValue(true)] public bool fixAmmoPickupOrder;
-    [BIPUnloadable(nameof(fixPickupSlot)), DefaultValue(true)] public bool fixPickupSlot;
+
+    // public Toggle<PickupToPreviousSlotConfig> pickupToPreviousSlot = new(true);
+    [DefaultValue(true)] public bool smartPickup = true;
+    [DefaultValue(true)] public bool pickupToBanks = true;
+    [DefaultValue(true)] public bool autoQuickStack = true;
+    // public Toggle<AutoEquipConfig> autoEquip = new(true);
+    // public Toggle<AutoUpgradeConfig> autoUpgrade = new(true);
+    [DefaultValue(false)] public bool prioritizeVoidBag = false;
     [BIPUnloadable(nameof(pickupHotbarLast)), DefaultValue(true)] public bool pickupHotbarLast;
-    [BIPUnloadable(nameof(fillMouseSlot)), DefaultValue(true)] public bool fillMouseSlot;
 
     public static BetterItemPickupConfig Instance = null!;
-    public static bool FixAmmoPickupOrder => BetterInventoryConfig.BetterItemPickup && Instance.fixAmmoPickupOrder && !UnloadedBetterItemPickupConfig.Instance.fixAmmoPickupOrder;
-    public static bool FixPickupSlot => BetterInventoryConfig.BetterItemPickup && Instance.fixPickupSlot && !UnloadedBetterItemPickupConfig.Instance.fixPickupSlot;
+
+    // public static bool PickupToPreviousSlot => BetterInventoryConfig.BetterItemPickup && Instance.pickupToPreviousSlot && !UnloadedBetterItemPickupConfig.Instance.;
+    public static bool SmartPickup => BetterInventoryConfig.BetterItemPickup && Instance.smartPickup;
+    public static bool PickupToBanks => BetterInventoryConfig.BetterItemPickup && Instance.pickupToBanks;
+    public static bool AutoQuickStack => BetterInventoryConfig.BetterItemPickup && Instance.autoQuickStack && (Main.netMode != NetmodeID.MultiplayerClient || !UnloadedBetterItemPickupConfig.Instance.autoQuickStack_Multiplayer);
+    // public static bool AutoEquip => BetterInventoryConfig.BetterItemPickup && Instance.autoEquip && !UnloadedBetterItemPickupConfig.Instance.;
+    // public static bool AutoUpgrade => BetterInventoryConfig.BetterItemPickup && Instance.autoUpgrade && !UnloadedBetterItemPickupConfig.Instance.;
+    public static bool PrioritizeVoidBag => BetterInventoryConfig.BetterItemPickup && Instance.prioritizeVoidBag;
     public static bool PickupHotbarLast => BetterInventoryConfig.BetterItemPickup && Instance.pickupHotbarLast && !UnloadedBetterItemPickupConfig.Instance.pickupHotbarLast;
-    public static bool FillMouseSlot => BetterInventoryConfig.BetterItemPickup && Instance.fillMouseSlot && !UnloadedBetterItemPickupConfig.Instance.fillMouseSlot;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
 }
 
 public sealed class UnloadedBetterItemPickupConfig {
-    public bool fixAmmoPickupOrder;
-    public bool fixPickupSlot;
     public bool pickupHotbarLast;
-    public bool fillMouseSlot;
+    public bool autoQuickStack_Multiplayer;
 
     public static UnloadedBetterItemPickupConfig Instance => BetterInventoryConfig.Instance.unloadedBetterItemPickup;
 }

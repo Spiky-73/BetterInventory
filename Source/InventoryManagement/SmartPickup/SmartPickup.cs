@@ -1,13 +1,11 @@
 using MonoMod.Cil;
 using Terraria;
-using Terraria.ID;
 using Terraria.ModLoader;
 using System;
 using SpikysLib.IL;
 using BetterInventory.Default.Inventories;
 using Terraria.UI;
 using System.Collections.Generic;
-using Terraria.DataStructures;
 
 namespace BetterInventory.InventoryManagement.SmartPickup;
 
@@ -21,15 +19,6 @@ public sealed class SmartPickupPlayer : ModPlayer {
 
         On_ChestUI.TryPlacingInChest += HookTryPlacingInChest;
         On_ItemSlot.ArmorSwap += HookArmorSwap;
-
-        On_ChestUI.LootAll += HookQuickStackLootAll;
-        On_ChestUI.QuickStack += HookNoQuickStackToSameChest;
-
-        IL_Player.QuickStackAllChests += static il => {
-            if (!il.ApplyTo(IlQuickStackMultiplayer, Configs.QuickStackPickup.Value.chests)) Configs.UnloadedInventoryManagement.Value.pickupQuickStackChestsMulti = false;
-        };
-        On_Player.GetItem_FillEmptyInventorySlot += HookQuickStackMultiplayerFix;
-        On_Player.GetItem_FillEmptyInventorySlot_VoidBag += HookQuickStackMultiplayerFixVoidSlot;
 
         On_Recipe.FindRecipes += HookUpdateLockedItems;
     }
@@ -48,7 +37,7 @@ public sealed class SmartPickupPlayer : ModPlayer {
         // ++ item = <previousSlot>
         EmitSmartPickup(cursor, returnItem, (self, plr, item, settings) => {
             if (vanillaGetItem) return item;
-            if (!item.IsAir && Configs.SmartPickup.PreviousSlot && IsGetItemWorld(self, settings, item)) item = self.GetModPlayer<PreviousSlotPlayer>().PickupItemToAnyPreviousSlot(item, settings);
+            if (!item.IsAir && Configs.SmartPickup.PreviousSlot && (IsGetItemWorld(self, settings, item) || item == Main.mouseItem || item == self.HeldItem)) item = self.GetModPlayer<PreviousSlotPlayer>().PickupItemToAnyPreviousSlot(item, settings);
             if (!item.IsAir && Configs.SmartPickup.PreviousSlot) item = self.GetModPlayer<PreviousSlotPlayer>().PickupItemToPreviousSlot(
                 item, settings,
                 ModContent.GetInstance<Hotbar>().NewInstance(self),
@@ -74,10 +63,8 @@ public sealed class SmartPickupPlayer : ModPlayer {
         // ++<upgradeItems>
         EmitSmartPickup(cursor, returnItem, (self, plr, item, settings) => {
             if (vanillaGetItem || !IsGetItemWorld(self, settings, item)) return item;
-            if (!item.IsAir && Configs.SmartPickup.QuickStack) item = SmartEquip.QuickStack(self, item, settings);
             if (!item.IsAir && Configs.SmartPickup.UpgradeItems) item = SmartEquip.UpgradeItems(self, item, settings);
             if (!item.IsAir && Configs.SmartPickup.AutoEquip) item = SmartEquip.AutoEquip(self, item, settings);
-            if (!item.IsAir && !item.favorited && Configs.SmartPickup.VoidBagFirst) item = SmartEquip.VoidBagFirst(self, item, settings);
             return item;
         });
     }
@@ -144,52 +131,7 @@ public sealed class SmartPickupPlayer : ModPlayer {
         return orig(item, out success);
     }
 
-    private static void HookQuickStackLootAll(On_ChestUI.orig_LootAll orig) {
-        if (Configs.SmartPickup.QuickStack) _skippedQuickStack = Main.LocalPlayer.chest;
-        orig();
-        _skippedQuickStack = -1;
-    }
-
-    private static void HookNoQuickStackToSameChest(On_ChestUI.orig_QuickStack orig, ContainerTransferContext context, bool voidStack) {
-        if (Main.LocalPlayer.chest == _skippedQuickStack) return;
-        orig(context, voidStack);
-    }
-    private static int _skippedQuickStack = -1;
-
-    private static bool IsGetItemWorld(Player player, GetItemSettings settings, Item item) => !settings.NoText || item == Main.mouseItem || item == player.HeldItem;
-
-    internal static bool quickStackNoChests;
-    private static void IlQuickStackMultiplayer(ILContext context) {
-        ILCursor cursor = new(context);
-
-        cursor.GotoNext(MoveType.AfterLabel, i => i.MatchLdsfld(Reflection.Main.netMode));
-
-        cursor.EmitDelegate(() => quickStackNoChests);
-        ILLabel label = cursor.DefineLabel();
-        cursor.EmitBrfalse(label);
-        cursor.EmitRet();
-        cursor.MarkLabel(label);
-    }
-
-    private bool HookQuickStackMultiplayerFix(On_Player.orig_GetItem_FillEmptyInventorySlot orig, Player self, int plr, Item newItem, GetItemSettings settings, Item returnItem, int i) {
-        bool res = orig(self, plr, newItem, settings, returnItem, i);
-        if (Main.netMode == NetmodeID.MultiplayerClient && Configs.SmartPickup.QuickStack && Configs.QuickStackPickup.Chest && res) {
-            NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, plr, PlayerItemSlotID.Inventory0 + i, self.inventory[i].prefix);
-            NetMessage.SendData(MessageID.QuickStackChests, -1, -1, null, PlayerItemSlotID.Inventory0 + i);
-            self.inventoryChestStack[i] = true;
-        }
-        return res;
-    }
-
-    private bool HookQuickStackMultiplayerFixVoidSlot(On_Player.orig_GetItem_FillEmptyInventorySlot_VoidBag orig, Player self, int plr, Item[] inv, Item newItem, GetItemSettings settings, Item returnItem, int i) {
-        bool res = orig(self, plr, inv, newItem, settings, returnItem, i);
-        if (Main.netMode == NetmodeID.MultiplayerClient && Configs.SmartPickup.QuickStack && Configs.QuickStackPickup.Chest && res) {
-            NetMessage.SendData(MessageID.SyncEquipment, -1, -1, null, plr, PlayerItemSlotID.Bank4_0 + i, self.bank4.item[i].prefix);
-            NetMessage.SendData(MessageID.QuickStackChests, -1, -1, null, PlayerItemSlotID.Bank4_0 + i);
-            self.disableVoidBag = i;
-        }
-        return res;
-    }
+    private static bool IsGetItemWorld(Player player, GetItemSettings settings, Item item) => !settings.NoText;
 
     private static void HookUpdateLockedItems(On_Recipe.orig_FindRecipes orig, bool canDelayCheck) {
         if (!canDelayCheck) SmartEquip.UpdateLockedItems(Main.LocalPlayer);

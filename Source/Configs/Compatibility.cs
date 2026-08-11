@@ -27,11 +27,8 @@ public sealed class Compatibility : ModConfig {
 
     private static void DisableAllILs() {
         SmartPickup.Value.previousSlot.Key = ItemPickupLevel.None;
-        SmartPickup.Value.quickStack.Key = false;
         SmartPickup.Value.autoEquip.Key = AutoEquipLevel.None;
         SmartPickup.Value.upgradeItems.Key = false;
-        SmartPickup.Value.voidBagFirst = false;
-        QuickStackPickup.Value.chests = false;
         PreviousDisplay.Value.fakeItem.Key = false;
         PreviousDisplay.Value.icon.Key = false;
         InventoryManagement.Instance.Save();
@@ -50,17 +47,10 @@ public sealed class Compatibility : ModConfig {
 }
 
 public sealed class UnloadedInventoryManagement {
-    public bool materials;
-    public bool baits;
     public bool pickupOverrideSlot;
     public bool pickupDedicatedSlot;
-    public bool pickupQuickStackChestsMulti;
-    public bool hotbarLast;
-    public bool fixSlot;
     public bool displayFakeItem;
     public bool displayIcon;
-    public bool shiftRight;
-    public bool universalShift;
 
     public static UnloadedInventoryManagement Value => Compatibility.Instance.unloadedInventoryManagement;
 }

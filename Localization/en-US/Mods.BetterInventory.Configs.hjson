@@ -3425,6 +3425,36 @@ UnloadedBetterItemPickupConfig: {
 		Label: ammo Pickup Order
 		Tooltip: ""
 	}
+
+	fixAmmoPickupOrder: {
+		Label: fix Ammo Pickup Order
+		Tooltip: ""
+	}
+
+	fixPickupSlot: {
+		Label: fix Pickup Slot
+		Tooltip: ""
+	}
+
+	pickupHotbarLast: {
+		Label: pickup Hotbar Last
+		Tooltip: ""
+	}
+
+	fillMouseSlot: {
+		Label: fill Mouse Slot
+		Tooltip: ""
+	}
+
+	autoQuickStack: {
+		Label: auto Quick Stack
+		Tooltip: ""
+	}
+
+	autoQuickStack_Multiplayer: {
+		Label: auto Quick Stack_ Multiplayer
+		Tooltip: ""
+	}
 }
 
 UnloadedBetterInventoryManagementConfig: {
@@ -3608,6 +3638,46 @@ BetterItemPickupConfig: {
 
 	ammoPickupOrder: {
 		Label: ammo Pickup Order
+		Tooltip: ""
+	}
+
+	fixAmmoPickupOrder: {
+		Label: fix Ammo Pickup Order
+		Tooltip: ""
+	}
+
+	fixPickupSlot: {
+		Label: fix Pickup Slot
+		Tooltip: ""
+	}
+
+	pickupHotbarLast: {
+		Label: pickup Hotbar Last
+		Tooltip: ""
+	}
+
+	fillMouseSlot: {
+		Label: fill Mouse Slot
+		Tooltip: ""
+	}
+
+	autoQuickStack: {
+		Label: auto Quick Stack
+		Tooltip: ""
+	}
+
+	prioritizeVoidBag: {
+		Label: prioritize Void Bag
+		Tooltip: ""
+	}
+
+	smartPickup: {
+		Label: smart Pickup
+		Tooltip: ""
+	}
+
+	pickupToBanks: {
+		Label: pickup To Banks
 		Tooltip: ""
 	}
 }
@@ -3801,6 +3871,34 @@ UnloadedUniversalShiftClick: {
 
 	quickCraft: {
 		Label: quick Craft
+		Tooltip: ""
+	}
+}
+
+UnloadedAutoQuickStack: {
+	Tooltip: ""
+
+	chestsMultiplayer: {
+		Label: chests Multiplayer
+		Tooltip: ""
+	}
+}
+
+AutoQuickStackConfig: {
+	Tooltip: ""
+
+	voidBag: {
+		Label: void Bag
+		Tooltip: ""
+	}
+
+	banks: {
+		Label: banks
+		Tooltip: ""
+	}
+
+	chests: {
+		Label: chests
 		Tooltip: ""
 	}
 }

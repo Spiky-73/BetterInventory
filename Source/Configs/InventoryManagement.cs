@@ -27,38 +27,19 @@ public sealed class InventoryManagement : ModConfig {
 
 public sealed class SmartPickup {
     public NestedValue<ItemPickupLevel, PreviousSlot> previousSlot = new(ItemPickupLevel.AllItems);
-    public Toggle<QuickStackPickup> quickStack = new(true);
     [DefaultValue(AutoEquipLevel.PreferredSlots)] public NestedValue<AutoEquipLevel, AutoEquip> autoEquip = new(AutoEquipLevel.PreferredSlots);
     public Toggle<UpgradeItems> upgradeItems = new(true);
-    [DefaultValue(false)] public bool voidBagFirst = false;
-
-    // Compatibility version < v0.9
-    [JsonProperty, DefaultValue(VoidBagLevel.IfInside)] private VoidBagLevel voidBag { set => ConfigHelper.MoveMember<InventoryManagement>(value != VoidBagLevel.IfInside, c => {
-        c.smartPickup.Value.voidBagFirst = value == VoidBagLevel.Always;
-        c.smartPickup.Value.quickStack.Key = value != VoidBagLevel.None;
-    }); }
-
 
     public static bool PreviousSlot => !UnloadedInventoryManagement.Value.pickupOverrideSlot && InventoryManagement.SmartPickup && Value.previousSlot > ItemPickupLevel.None;
-    public static bool QuickStack => !UnloadedInventoryManagement.Value.pickupDedicatedSlot && InventoryManagement.SmartPickup && Value.quickStack;
     public static bool AutoEquip => !UnloadedInventoryManagement.Value.pickupDedicatedSlot && InventoryManagement.SmartPickup && Value.autoEquip > AutoEquipLevel.None;
     public static bool UpgradeItems => !UnloadedInventoryManagement.Value.pickupDedicatedSlot && InventoryManagement.SmartPickup && Value.upgradeItems;
-    public static bool VoidBagFirst => !UnloadedInventoryManagement.Value.pickupDedicatedSlot && InventoryManagement.SmartPickup && Value.voidBagFirst;
 
     public static bool OverrideSlot => PreviousSlot;
-    public static bool DedicatedSlot => QuickStack || AutoEquip || UpgradeItems || VoidBagFirst;
+    public static bool DedicatedSlot => AutoEquip || UpgradeItems;
     public static SmartPickup Value => InventoryManagement.Instance.smartPickup.Value;
-
-    // Compatibility version < v0.6
-    [JsonProperty, DefaultValue(true)] private bool mediumCore { set => ConfigHelper.MoveMember(!value, _ => previousSlot.Value.mediumCore = value); }
-    [JsonProperty, DefaultValue(0.33f)] private float markIntensity { set => ConfigHelper.MoveMember(value != 0.33f, _ => {
-        if (value == 0) previousSlot.Value.displayPrevious.Key = false;
-        else previousSlot.Value.displayPrevious.Value.fakeItem.Value.intensity = value;
-    }); }
 }
 public enum ItemPickupLevel { None, ImportantItems, AllItems }
 public enum AutoEquipLevel { None, PreferredSlots, AnySlot }
-public enum VoidBagLevel { None, IfInside, Always }
 
 public sealed class PreviousSlot {
     [DefaultValue(true)] public bool mouse = true;
@@ -78,14 +59,6 @@ public sealed class PreviousSlot {
 }
 
 public enum MovePolicy { Never, NotFavorited, Always }
-
-public sealed class QuickStackPickup {
-    [DefaultValue(true)] public bool chests = true;
-    [DefaultValue(true)] public bool voidBag = true;
-
-    public static QuickStackPickup Value => SmartPickup.Value.quickStack.Value;
-    public static bool Chest => Value.chests && (Main.netMode != NetmodeID.MultiplayerClient || !UnloadedInventoryManagement.Value.pickupQuickStackChestsMulti);
-}
 
 public sealed class PreviousDisplay {
     public Toggle<FakeItemDisplay> fakeItem = new(true);
