@@ -28,8 +28,6 @@ public sealed class RecipeFilteringUISystem : ModSystem {
     public override void PostSetupRecipes() {
         RecipeFilteringPlayer.SetupMiscFallbackFilter();
         RecipeFilteringUI.Setup();
-
-        // TODO update UI pre-enter world (e.g. different player)
     }
 
     private static void ILDrawUI(ILContext il) {

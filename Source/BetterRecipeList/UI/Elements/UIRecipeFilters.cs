@@ -16,16 +16,16 @@ namespace BetterInventory.BetterRecipeList.UI.Elements;
 public sealed class UIRecipeFilters : UIFlexGrid {
 
     public UIRecipeFilters() {
-        ListPadding = 0; // FIXME Cannot be set to 0 for some reason;
+        ListPadding = 0.1f; // FIXME Cannot be set to 0 for some reason;
     }
 
-    public override void OnInitialize() {
+    public override void OnActivate() {
+        Clear();
         var player = RecipeFilteringPlayer.LocalPlayer.Filterer;
         foreach (var filter in player.AvailableFilters()) {
-            bool active = player.IsFilterActive(filter);
             UIRecipeFilterIcon icon = new(filter);
             icon.OnLeftClick += (_, _) => {
-                bool keepOn = !active || player.ActiveFilters().Count > 1;
+                bool keepOn = !player.IsFilterActive(filter) || player.ActiveFilters().Count > 1;
                 player.ClearActiveFilters();
                 if (keepOn) player.ToggleFilter(filter);
                 OnFiltersChange();
@@ -37,9 +37,8 @@ public sealed class UIRecipeFilters : UIFlexGrid {
             _filterIcons.Add(icon);
             Add(icon);
         }
+        UpdateFilters();
     }
-
-    public override void OnActivate() => UpdateFilters();
 
     public void UpdateFilters() {
         var player = RecipeFilteringPlayer.LocalPlayer.Filterer;
@@ -90,7 +89,7 @@ public class UIRecipeFilterIcon : UIElement {
     }
 
     public IRecipeFilter Filter { get; private set; }
-    
+
     private readonly UIElement _icon;
     private readonly string _hoverText = string.Empty;
     private readonly Color _originalColor;
