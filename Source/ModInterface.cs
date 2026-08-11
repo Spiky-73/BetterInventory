@@ -3,6 +3,7 @@ using Terraria.ModLoader;
 namespace BetterInventory;
 
 public abstract class ModInterface : ModType {
+    public virtual bool Available => true;
     public abstract bool Active { get; }
     public abstract void Activate();
 

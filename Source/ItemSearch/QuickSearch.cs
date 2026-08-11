@@ -58,7 +58,6 @@ public sealed class QuickSearch : ILoadable {
     public static void ProcessTriggers() {
         if (!Configs.QuickSearch.Enabled) return;
         if (Configs.QuickSearch.IndividualKeybinds) ProcessIndividualKeybinds();
-        if (Configs.QuickSearch.SharedKeybind) ProcessSharedKeybind();
     }
 
     private static void ProcessIndividualKeybinds() {
@@ -79,36 +78,6 @@ public sealed class QuickSearch : ILoadable {
             else QuickToggle(catalogue);
         }
     }
-    private static void ProcessSharedKeybind() {
-        if (QuickSearchKb.JustPressed) {
-            if (s_timer >= Configs.SharedKeybind.Value.delay) s_provider = -1;
-            s_timer = 0;
-        }
-        else if (QuickSearchKb.JustReleased) {
-            if (s_timer >= Configs.SharedKeybind.Value.tap) s_provider = -1;
-            else {
-                bool first = s_provider == -1;
-                if (first) {
-                    if(!CanQuickSearch(Configs.QuickSearch.Value.sharedKeybind, Main.HoverItem, out s_sharedSearch, out _)) return;
-                    // if (s_sharedSearch && !CanSearch(Main.HoverItem)) return;
-                    s_sharedItem = Main.HoverItem.Clone();
-                    s_enabledProviders = EntityCatalogues.Where(p => p.Enabled).ToList();
-                    s_provider = Math.Max(s_enabledProviders.FindIndex(p => p.Visible), 0);
-                }
-                if (s_provider == -1 || s_enabledProviders.Count == 0) return;
-
-                if (!first) {
-                    s_enabledProviders[s_provider].Toggle(false);
-                    s_provider = (s_provider + 1) % s_enabledProviders.Count;
-                }
-                if (s_sharedSearch) QuickItemSearch(s_enabledProviders[s_provider], s_sharedItem);
-                else QuickToggle(s_enabledProviders[s_provider]);
-            }
-            s_timer = 0;
-        }
-        s_timer++;
-    }
-
     public static bool CanQuickSearch(Configs.SearchAction actions, Item item, out bool canSearch, out bool canToggle) {
         canSearch = actions.HasFlag(Configs.SearchAction.Search) && !item.IsAir && (item.tooltipContext != ItemSlot.Context.CraftingMaterial || !UnknownRecipesPlayer.IsUnknown(item));
         canToggle = actions.HasFlag(Configs.SearchAction.Toggle);
@@ -143,9 +112,4 @@ public sealed class QuickSearch : ILoadable {
     private static bool s_redirect = false;
 
     private static bool s_customCursor = false;
-
-    private static bool s_sharedSearch;
-    private static int s_timer = 0, s_provider = 0;
-    private static Item s_sharedItem = new();
-    private static List<ModEntityCatalogue> s_enabledProviders = [];
 }

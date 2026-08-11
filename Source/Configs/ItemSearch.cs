@@ -18,11 +18,6 @@ public sealed class ItemSearch : ModConfig {
     public Toggle<QuickSearch> quickSearch = new(true);
 
     // Compatibility version < v0.6
-    [JsonProperty] private Toggle<QuickList>? quickList { set => ConfigHelper.MoveMember(value is not null, _ => {
-        quickSearch.Value.sharedKeybind.Key = value!.Key ? SearchAction.Toggle : SearchAction.None;
-        quickSearch.Value.sharedKeybind.Value.tap = value.Value.tap;
-        quickSearch.Value.sharedKeybind.Value.delay = value.Value.delay;
-    }); }
     [JsonProperty] private Toggle<SearchItems>? searchItems { set => ConfigHelper.MoveMember(value is not null, _ => {
         quickSearch.Value.individualKeybinds.Key = value!.Key ? SearchAction.Both : SearchAction.None;
         quickSearch.Value.catalogues[new(Mod.Name, nameof(Default.Catalogues.RecipeList))] = value.Value.recipes;
@@ -86,13 +81,11 @@ public sealed class FavoritedRecipes {
 
 public sealed class QuickSearch {
     public NestedValue<SearchAction, IndividualKeybinds> individualKeybinds = new(SearchAction.Both);
-    public NestedValue<SearchAction, SharedKeybind> sharedKeybind = new(SearchAction.Toggle);
     [CustomModConfigItem(typeof(DictionaryValuesElement))] public Dictionary<EntityCatalogueDefinition, bool> catalogues = [];
     [DefaultValue(RightClickAction.SearchPrevious)] public RightClickAction rightClick = RightClickAction.SearchPrevious;
 
     public static bool Enabled => ItemSearch.Instance.quickSearch;
     public static bool IndividualKeybinds => Enabled && Value.individualKeybinds > SearchAction.None;
-    public static bool SharedKeybind => Enabled && Value.sharedKeybind > SearchAction.None;
     public static bool RightClick => Enabled && Value.rightClick != RightClickAction.None;
     public static QuickSearch Value => ItemSearch.Instance.quickSearch.Value;
 
@@ -109,18 +102,8 @@ public sealed class IndividualKeybinds {
 
     public static IndividualKeybinds Value => QuickSearch.Value.individualKeybinds.Value;
 }
-public sealed class SharedKeybind {
-    [DefaultValue(10)] public int tap = 10;
-    [DefaultValue(10)] public int delay = 10;
-
-    public static SharedKeybind Value => QuickSearch.Value.sharedKeybind.Value;
-}
 
 // Compatibility version < v0.6
-class QuickList {
-    [DefaultValue(10)] public int tap = 10;
-    [DefaultValue(10)] public int delay = 10;
-}
 class SearchItems {
     [DefaultValue(true)] public bool recipes = true;
     [DefaultValue(true)] public bool drops = true;

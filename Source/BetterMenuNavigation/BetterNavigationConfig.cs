@@ -12,8 +12,8 @@ using CSDUnloadable = UnloadableAttribute<UnloadedConsistantScrollDirectionConfi
 
 public sealed class BetterMenuNavigationConfig : ModConfig {
     [BKUnloadable(nameof(consistantScrollDirection))] public Toggle<ConsistantScrollDirectionConfig> consistantScrollDirection = new(true);
-    public Toggle<QuickSearchConfig> quickSearch = new();
-    public Toggle<MenuChainsConfig> menuChains = new();
+    public Toggle<MenuChainsConfig> menuChains = new(true);
+    // public Toggle<QuickSearchConfig> quickSearch = new(true);
 
     public static BetterMenuNavigationConfig Instance = null!;
     public static bool ConsistantScrollDirection => BetterInventoryConfig.BetterMenuNavigation && Instance.consistantScrollDirection;
@@ -45,10 +45,10 @@ public sealed class QuickSearchConfig {
 }
 
 public sealed class MenuChainsConfig {
-    [DefaultValue(MenuChainMode.Toggle)] public MenuChainMode mode = MenuChainMode.Toggle;
+    [DefaultValue(MenuChainMode.Skip)] public MenuChainMode mode = MenuChainMode.Skip;
     [ReloadRequired] public List<MenuChain> chains = [];
-    [Range(0, 3600), DefaultValue(30)] public int holdTime = 30;
-    [Range(0, 3600), DefaultValue(30)] public int graceTime = 30;
+    [Range(0, 3600), DefaultValue(20)] public int holdTime = 20;
+    [Range(0, 3600), DefaultValue(20)] public int graceTime = 20;
 
     // BUG [tML][research] list of Reference type are duplicating when initialized directly
     [OnDeserialized]
@@ -56,8 +56,37 @@ public sealed class MenuChainsConfig {
         if (chains.Count > 0) return;
         chains = [ new() {
             name = "Toggle Equip Pages",
-            interfaces = [new(nameof(BetterInventory), nameof(ArmorInterface)),new(nameof(BetterInventory), nameof(MiscEquipInterface)), new(nameof(BetterInventory), nameof(HousingInterface)), ]
-        }];
+            interfaces = [
+                new(nameof(BetterInventory), nameof(ArmorPage)),
+                new(nameof(BetterInventory), nameof(MiscEquipPage)),
+                new(nameof(BetterInventory), nameof(HousingPage)),
+            ]
+        }, new() {
+            name = "Toggle Map Styles",
+            interfaces = [
+                new(nameof(BetterInventory), nameof(MapClosed)),
+                new(nameof(BetterInventory), nameof(MiniMap)),
+                new(nameof(BetterInventory), nameof(BackgroundMap)),
+                new(nameof(BetterInventory), nameof(FullScreenMap)),
+            ]
+        }, new() {
+            name = "Toggle Catalogues",
+            interfaces = [
+                new(nameof(BetterInventory), nameof(CataloguesClosed)),
+                new(nameof(BetterInventory), nameof(RecipeList)),
+                new(nameof(BetterInventory), nameof(Bestiary)),
+                new(nameof(BetterInventory), nameof(JourneyCatalogue)),
+            ]
+        }, new() {
+            name = "Toggle Main Interfaces",
+            interfaces = [
+                new(nameof(BetterInventory), nameof(GameInterface)),
+                new(nameof(BetterInventory), nameof(PlayerInventory)),
+                new(nameof(BetterInventory), nameof(Settings)),
+                new(nameof(BetterInventory), nameof(ModConfigList)),
+                new(nameof(BetterInventory), nameof(ControlsMenu)),
+            ]
+        }, ];
     }
 
     public static MenuChainsConfig Instance => BetterMenuNavigationConfig.Instance.menuChains.Value;
