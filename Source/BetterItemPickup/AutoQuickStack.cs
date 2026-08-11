@@ -1,6 +1,7 @@
 using System;
 using MonoMod.Cil;
 using SpikysLib.Constants;
+using SpikysLib.IL;
 using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
@@ -62,7 +63,7 @@ public sealed class AutoQuickStack : ILoadable {
     private static void IlQuickStackChestsMultiplayer(ILContext context) {
         ILCursor cursor = new(context);
 
-        cursor.GotoNext(MoveType.AfterLabel, i => i.MatchLdsfld(Reflection.Main.netMode));
+        cursor.GotoNext(MoveType.AfterLabel, i => i.MatchLdsfld(() => Main.netMode));
 
         cursor.EmitDelegate(() => BetterItemPickupConfig.AutoQuickStack && _quickStackNoChests);
         ILLabel label = cursor.DefineLabel();

@@ -59,7 +59,7 @@ public sealed class UniversalShiftClick : ModPlayer {
 
         // if (Main.focusRecipe == recipeIndex && ++[Main.guideItem.IsAir || <allowCraft>]) {
         //     <flags*4>
-        cursor.GotoNext(i => i.MatchLdsfld(Reflection.Main._preventCraftingBecauseClickWasUsedToChangeFocusedRecipe));
+        cursor.GotoNext(i => i.MatchLdsfld(() => Main._preventCraftingBecauseClickWasUsedToChangeFocusedRecipe));
         cursor.GotoNextLoc(out int flag3, i => true, 3);
         cursor.GotoNextLoc(MoveType.After, out int flag5, i => i.Previous.MatchOr(), 5);
 
