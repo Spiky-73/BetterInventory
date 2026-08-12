@@ -4,38 +4,37 @@ using Terraria.ModLoader.Config;
 
 namespace BetterInventory.BetterRecipeList;
 
-using BRLUnloadableAttribute = UnloadableAttribute<UnloadedBetterRecipeListConfig>;
-using AMCUnloadableAttribute = UnloadableAttribute<UnloadedAvailableMaterialsCountConfig>;
-
 public sealed class BetterRecipeListConfig : ModConfig {
+    public override bool Autoload(ref string name) => BetterInventoryConfig.EnsureLoaded(this) && base.Autoload(ref name) && BetterInventoryConfig.BetterRecipeList;
+
     [DefaultValue(true)] public bool craftWhenHolding = true;
-    [BRLUnloadable(nameof(fastScroll))] public Toggle<FastScrollConfig> fastScroll = new(true);
-    [BRLUnloadable(nameof(craftOnRecipeGrid))] public Toggle<CraftOnRecipeGridConfig> craftOnRecipeGrid = new(true);
-    [BRLUnloadable(nameof(refocusButton)), DefaultValue(true)] public bool refocusButton = true;
-    [BRLUnloadable(nameof(noRecGridOffset)), DefaultValue(true)] public bool noRecGridOffset = true;
-    [BRLUnloadable(nameof(noRecGridClose)), DefaultValue(true)] public bool noRecGridClose = true;
+    [Fallible] public Toggle<FastScrollConfig> fastScroll = new(true);
+    [Fallible] public Toggle<CraftOnRecipeGridConfig> craftOnRecipeGrid = new(true);
+    [Fallible, DefaultValue(true)] public bool refocusButton = true;
+    [Fallible, DefaultValue(true)] public bool noRecGridOffset = true;
+    [Fallible, DefaultValue(true)] public bool noRecGridClose = true;
     [DefaultValue(true)] public bool rememberGridPosition = true;
-    [BRLUnloadable(nameof(pageScroll)), DefaultValue(true)] public bool pageScroll = true;
-    [BRLUnloadable(nameof(recipeCount)), DefaultValue(true)] public bool recipeCount = true;
+    [Fallible, DefaultValue(true)] public bool pageScroll = true;
+    [Fallible, DefaultValue(true)] public bool recipeCount = true;
     public Toggle<RecipeTooltipConfig> recipeTooltip = new(true);
-    [BRLUnloadable(nameof(availableMaterialsCount))] public Toggle<AvailableMaterialsCountConfig> availableMaterialsCount = new(true);
-    [BRLUnloadable(nameof(materialsWrapping)), DefaultValue(true)] public bool materialsWrapping;
-    [BRLUnloadable(nameof(recipeFilters))] public Toggle<RecipeFiltersConfig> recipeFilters = new();
+    [Fallible] public Toggle<AvailableMaterialsCountConfig> availableMaterialsCount = new(true);
+    [Fallible, DefaultValue(true)] public bool materialsWrapping;
+    [Fallible] public Toggle<RecipeFiltersConfig> recipeFilters = new();
 
     public static BetterRecipeListConfig Instance = null!;
     public static bool CraftWhenHolding => BetterInventoryConfig.BetterRecipeList && Instance.craftWhenHolding;
-    public static bool FastScroll => BetterInventoryConfig.BetterRecipeList && Instance.fastScroll && !UnloadedBetterRecipeListConfig.Instance.fastScroll;
-    public static bool CraftOnRecGrid => BetterInventoryConfig.BetterRecipeList && Instance.craftOnRecipeGrid && !UnloadedBetterRecipeListConfig.Instance.craftOnRecipeGrid;
-    public static bool RefocusButton => BetterInventoryConfig.BetterRecipeList && Instance.refocusButton && !UnloadedBetterRecipeListConfig.Instance.refocusButton;
-    public static bool NoRecGridOffset => BetterInventoryConfig.BetterRecipeList && Instance.noRecGridOffset && !UnloadedBetterRecipeListConfig.Instance.noRecGridOffset;
-    public static bool NoRecGridClose => BetterInventoryConfig.BetterRecipeList && Instance.noRecGridClose && !UnloadedBetterRecipeListConfig.Instance.noRecGridClose;
+    public static bool FastScroll => BetterInventoryConfig.BetterRecipeList && Instance.fastScroll && !FailedBetterRecipeListConfig.Instance.fastScroll;
+    public static bool CraftOnRecGrid => BetterInventoryConfig.BetterRecipeList && Instance.craftOnRecipeGrid && !FailedBetterRecipeListConfig.Instance.craftOnRecipeGrid;
+    public static bool RefocusButton => BetterInventoryConfig.BetterRecipeList && Instance.refocusButton && !FailedBetterRecipeListConfig.Instance.refocusButton;
+    public static bool NoRecGridOffset => BetterInventoryConfig.BetterRecipeList && Instance.noRecGridOffset && !FailedBetterRecipeListConfig.Instance.noRecGridOffset;
+    public static bool NoRecGridClose => BetterInventoryConfig.BetterRecipeList && Instance.noRecGridClose && !FailedBetterRecipeListConfig.Instance.noRecGridClose;
     public static bool RememberGridPosition => BetterInventoryConfig.BetterRecipeList && Instance.rememberGridPosition;
-    public static bool PageScroll => BetterInventoryConfig.BetterRecipeList && Instance.pageScroll && !UnloadedBetterRecipeListConfig.Instance.pageScroll;
-    public static bool RecipeCount => BetterInventoryConfig.BetterRecipeList && Instance.recipeCount && !UnloadedBetterRecipeListConfig.Instance.recipeCount;
+    public static bool PageScroll => BetterInventoryConfig.BetterRecipeList && Instance.pageScroll && !FailedBetterRecipeListConfig.Instance.pageScroll;
+    public static bool RecipeCount => BetterInventoryConfig.BetterRecipeList && Instance.recipeCount && !FailedBetterRecipeListConfig.Instance.recipeCount;
     public static bool RecipeTooltip => BetterInventoryConfig.BetterRecipeList && Instance.recipeTooltip;
     public static bool AvailableMaterialsCount => BetterInventoryConfig.BetterRecipeList && Instance.availableMaterialsCount;
-    public static bool MaterialsWrapping => BetterInventoryConfig.BetterRecipeList && Instance.materialsWrapping && !UnloadedBetterRecipeListConfig.Instance.materialsWrapping;
-    public static bool RecipeFilters => BetterInventoryConfig.BetterRecipeList && Instance.recipeFilters && !UnloadedBetterRecipeListConfig.Instance.recipeFilters;
+    public static bool MaterialsWrapping => BetterInventoryConfig.BetterRecipeList && Instance.materialsWrapping && !FailedBetterRecipeListConfig.Instance.materialsWrapping;
+    public static bool RecipeFilters => BetterInventoryConfig.BetterRecipeList && Instance.recipeFilters && !FailedBetterRecipeListConfig.Instance.recipeFilters;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
 }
@@ -60,17 +59,11 @@ public sealed class RecipeTooltipConfig {
 
 public sealed class AvailableMaterialsCountConfig {
     [DefaultValue(true)] public bool tooltip = true;
-    [AMCUnloadable(nameof(itemSlot)), DefaultValue(true)] public bool itemSlot = true;
+    [Fallible, DefaultValue(true)] public bool itemSlot = true;
 
     public static AvailableMaterialsCountConfig Instance => BetterRecipeListConfig.Instance.availableMaterialsCount.Value;
     public static bool Tooltip => BetterRecipeListConfig.AvailableMaterialsCount && Instance.tooltip;
-    public static bool ItemSlot => BetterRecipeListConfig.AvailableMaterialsCount && Instance.itemSlot && !UnloadedAvailableMaterialsCountConfig.Instance.itemSlot;
-}
-
-public sealed class UnloadedAvailableMaterialsCountConfig {
-    public bool itemSlot;
-
-    public static UnloadedAvailableMaterialsCountConfig Instance => UnloadedBetterRecipeListConfig.Instance.availableMaterialsCount;
+    public static bool ItemSlot => BetterRecipeListConfig.AvailableMaterialsCount && Instance.itemSlot && !FailedAvailableMaterialsCountConfig.Instance.itemSlot;
 }
 
 public sealed class RecipeFiltersConfig {
@@ -82,7 +75,7 @@ public sealed class RecipeFiltersConfig {
     public static RecipeFiltersConfig Instance => BetterRecipeListConfig.Instance.recipeFilters.Value;
 }
 
-public sealed class UnloadedBetterRecipeListConfig {
+public sealed class FailedBetterRecipeListConfig {
     public bool fastScroll;
     public bool craftOnRecipeGrid;
     public bool refocusButton;
@@ -90,9 +83,15 @@ public sealed class UnloadedBetterRecipeListConfig {
     public bool noRecGridClose;
     public bool pageScroll;
     public bool recipeCount;
-    public UnloadedAvailableMaterialsCountConfig availableMaterialsCount = new();
+    public FailedAvailableMaterialsCountConfig availableMaterialsCount = new();
     public bool materialsWrapping;
     public bool recipeFilters;
 
-    public static UnloadedBetterRecipeListConfig Instance => BetterInventoryConfig.Instance.unloadedBetterRecipeList;
+    public static FailedBetterRecipeListConfig Instance => FailedBetterInventoryConfig.Instance.betterRecipeList;
+}
+
+public sealed class FailedAvailableMaterialsCountConfig {
+    public bool itemSlot;
+
+    public static FailedAvailableMaterialsCountConfig Instance => FailedBetterRecipeListConfig.Instance.availableMaterialsCount;
 }

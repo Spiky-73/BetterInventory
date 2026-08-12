@@ -9,7 +9,7 @@ namespace BetterInventory.BetterItemPickup;
 
 public sealed class SmartPickup : ILoadable {
 
-    // TODO autoload
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterItemPickup;
     public void Load(Mod mod) {
         On_Item.FitsAmmoSlot += HookSkipAmmoSlots;
         On_Player.FindItem_int_ItemArray += HookFixFindItemCollection;

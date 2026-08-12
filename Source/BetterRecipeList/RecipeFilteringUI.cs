@@ -12,10 +12,9 @@ using Terraria.UI;
 namespace BetterInventory.BetterRecipeList;
 
 public sealed class RecipeFilteringUISystem : ModSystem {
-
-    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterRecipeListConfig.RecipeFilters;
+    public override bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterRecipeList;
     public override void Load() {
-        IL_Main.DrawInventory += il => il.TryEdit(ILDrawUI, ref UnloadedBetterRecipeListConfig.Instance.recipeFilters);
+        IL_Main.DrawInventory += il => il.TryEdit(ILDrawUI, ref FailedBetterRecipeListConfig.Instance.recipeFilters);
 
         RecipeFilters = Mod.Assets.Request<Texture2D>($"Assets/Recipe_Filters");
         RecipeFiltersGray = Mod.Assets.Request<Texture2D>($"Assets/Recipe_Filters_Gray");

@@ -12,10 +12,9 @@ using Terraria.UI.Gamepad;
 namespace BetterInventory.BetterRecipeList;
 
 public sealed class RecipeCount : ILoadable {
-
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterRecipeListConfig.RecipeCount;
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterRecipeList;
     public void Load(Mod mod) {
-        IL_Main.DrawInventory += il => il.TryEdit(ILRecipeCount, ref UnloadedBetterRecipeListConfig.Instance.recipeCount);
+        IL_Main.DrawInventory += il => il.TryEdit(ILRecipeCount, ref FailedBetterRecipeListConfig.Instance.recipeCount);
     }
     public void Unload() { }
 

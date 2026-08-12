@@ -7,11 +7,10 @@ using Terraria.ModLoader;
 namespace BetterInventory.BetterRecipeList;
 
 public sealed class NoRecGridClose : ILoadable {
-
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterRecipeListConfig.NoRecGridClose;
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterRecipeList;
     public void Load(Mod mod) {
         IL_Main.DrawInventory += static il => {
-            il.TryEdit(ILNoRecListClose, ref UnloadedBetterRecipeListConfig.Instance.noRecGridClose);
+            il.TryEdit(ILNoRecListClose, ref FailedBetterRecipeListConfig.Instance.noRecGridClose);
         };
     }
     public void Unload() { }

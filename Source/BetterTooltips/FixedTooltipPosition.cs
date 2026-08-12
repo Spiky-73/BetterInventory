@@ -8,8 +8,7 @@ using Terraria.UI;
 namespace BetterInventory.BetterTooltips;
 
 public class FixedTooltipPositionHooks : ILoadable {
-
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterTooltipsConfig.FixedTooltipPosition;
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterTooltips;
     public void Load(Mod mod) {
         On_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += HookFindSlotPosition;
         On_Main.DrawInterface_41_InterfaceLogic4 += HookFixTooltipPosition;

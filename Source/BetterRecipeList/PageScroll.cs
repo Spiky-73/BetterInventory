@@ -10,10 +10,9 @@ using Terraria.UI.Gamepad;
 namespace BetterInventory.BetterRecipeList;
 
 public sealed class PageScroll : ILoadable {
-
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterRecipeListConfig.PageScroll;
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterRecipeList;
     public void Load(Mod mod) {
-        IL_Main.DrawInventory += il => il.TryEdit(ILScrollButtonsFix, ref UnloadedBetterRecipeListConfig.Instance.pageScroll);
+        IL_Main.DrawInventory += il => il.TryEdit(ILScrollButtonsFix, ref FailedBetterRecipeListConfig.Instance.pageScroll);
     }
     public void Unload() { }
 

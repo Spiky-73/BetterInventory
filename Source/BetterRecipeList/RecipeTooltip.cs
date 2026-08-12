@@ -14,9 +14,7 @@ using Terraria.UI.Chat;
 namespace BetterInventory.BetterRecipeList;
 
 public class RecipeTooltipItem : GlobalItem {
-
-    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterRecipeListConfig.RecipeTooltip;
-
+    public override bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterRecipeList;
     public override void Load() {
         On_ItemTagHandler.ItemSnippet.ctor += HookItemGroupName;
         On_Recipe.ClearAvailableRecipes += HookClearAvailableRecipes;
@@ -85,6 +83,7 @@ public static class RecipeTooltip {
         if (_guideRecipes) {
             string objectsText;
             if (Configs.BetterGuide.RequiredObjectsDisplay) {
+                // TODO refactor cross dependency
                 if (recipe.requiredTile.Count == 0) _displayedTiles = [PlaceholderItem.FromTile(PlaceholderItem.ByHandTile)];
                 else _displayedTiles = [.. recipe.requiredTile.TakeWhile(t => t != -1).Select(PlaceholderItem.FromTile)];
                 _displayedConditions = [.. recipe.Conditions.Select(PlaceholderItem.FromCondition)];

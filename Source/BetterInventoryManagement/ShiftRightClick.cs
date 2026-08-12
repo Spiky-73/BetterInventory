@@ -8,7 +8,7 @@ using Terraria.UI;
 namespace BetterInventory.BetterInventoryManagement;
 
 public sealed class ShiftRightClick : ILoadable {
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterInventoryManagementConfig.ShiftRightClick;
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterInventoryManagement;
     public void Load(Mod mod) {
         On_ItemSlot.RightClick_ItemArray_int_int += HookShiftRightClick;
     }

@@ -7,11 +7,10 @@ using Terraria.ModLoader.Config;
 
 namespace BetterInventory.BetterMenuNavigation;
 
-using BKUnloadableAttribute = UnloadableAttribute<UnloadedBetterMenuNavigationConfig>;
-using CSDUnloadable = UnloadableAttribute<UnloadedConsistantScrollDirectionConfig>;
-
 public sealed class BetterMenuNavigationConfig : ModConfig {
-    [BKUnloadable(nameof(consistantScrollDirection))] public Toggle<ConsistantScrollDirectionConfig> consistantScrollDirection = new(true);
+    public override bool Autoload(ref string name) => BetterInventoryConfig.EnsureLoaded(this) && base.Autoload(ref name) && BetterInventoryConfig.BetterMenuNavigation;
+
+    [Fallible] public Toggle<ConsistantScrollDirectionConfig> consistantScrollDirection = new(true);
     public Toggle<MenuChainsConfig> menuChains = new(true);
     // public Toggle<QuickSearchConfig> quickSearch = new(true);
 
@@ -23,21 +22,14 @@ public sealed class BetterMenuNavigationConfig : ModConfig {
 }
 
 public sealed class ConsistantScrollDirectionConfig {
-    [CSDUnloadable(nameof(recipesUnpaused)), DefaultValue(true)] public bool recipesUnpaused = true;
-    [CSDUnloadable(nameof(recipesPaused)), DefaultValue(true)] public bool recipesPaused = true;
-    [CSDUnloadable(nameof(accessories)), DefaultValue(true)] public bool accessories = true;
+    [Fallible, DefaultValue(true)] public bool recipesUnpaused = true;
+    [Fallible, DefaultValue(true)] public bool recipesPaused = true;
+    [Fallible, DefaultValue(true)] public bool accessories = true;
 
     public static ConsistantScrollDirectionConfig Instance => BetterMenuNavigationConfig.Instance.consistantScrollDirection.Value;
-    public static bool RecipesUnpaused => Instance.recipesUnpaused && !UnloadedConsistantScrollDirectionConfig.Instance.recipesUnpaused;
-    public static bool RecipesPaused => Instance.recipesPaused && !UnloadedConsistantScrollDirectionConfig.Instance.recipesPaused;
-    public static bool Accessories => Instance.accessories && !UnloadedConsistantScrollDirectionConfig.Instance.accessories;
-}
-public sealed class UnloadedConsistantScrollDirectionConfig {
-    public bool recipesUnpaused;
-    public bool recipesPaused;
-    public bool accessories;
-
-    public static UnloadedConsistantScrollDirectionConfig Instance => UnloadedBetterMenuNavigationConfig.Instance.consistantScrollDirection;
+    public static bool RecipesUnpaused => Instance.recipesUnpaused && !FailedConsistantScrollDirectionConfig.Instance.recipesUnpaused;
+    public static bool RecipesPaused => Instance.recipesPaused && !FailedConsistantScrollDirectionConfig.Instance.recipesPaused;
+    public static bool Accessories => Instance.accessories && !FailedConsistantScrollDirectionConfig.Instance.accessories;
 }
 
 public sealed class QuickSearchConfig {
@@ -73,9 +65,9 @@ public sealed class MenuChainsConfig {
             name = "Toggle Catalogues",
             interfaces = [
                 new(nameof(BetterInventory), nameof(CataloguesClosed)),
-                new(nameof(BetterInventory), nameof(RecipeList)),
+                new(nameof(BetterInventory), nameof(CraftingWindow)),
                 new(nameof(BetterInventory), nameof(Bestiary)),
-                new(nameof(BetterInventory), nameof(JourneyCatalogue)),
+                new(nameof(BetterInventory), nameof(DuplicationMenu)),
             ]
         }, new() {
             name = "Toggle Main Interfaces",
@@ -104,8 +96,16 @@ public enum MenuChainMode { // ex for a chain [0,1,(2),3]
     Toggle, // (2), 1,0,3, 2
 }
 
-public sealed class UnloadedBetterMenuNavigationConfig {
-    public UnloadedConsistantScrollDirectionConfig consistantScrollDirection = new();
+public sealed class FailedBetterMenuNavigationConfig {
+    public FailedConsistantScrollDirectionConfig consistantScrollDirection = new();
 
-    public static UnloadedBetterMenuNavigationConfig Instance => BetterInventoryConfig.Instance.unloadedBetterMenuNavigation;
+    public static FailedBetterMenuNavigationConfig Instance => FailedBetterInventoryConfig.Instance.betterMenuNavigation;
+}
+
+public sealed class FailedConsistantScrollDirectionConfig {
+    public bool recipesUnpaused;
+    public bool recipesPaused;
+    public bool accessories;
+
+    public static FailedConsistantScrollDirectionConfig Instance => FailedBetterMenuNavigationConfig.Instance.consistantScrollDirection;
 }

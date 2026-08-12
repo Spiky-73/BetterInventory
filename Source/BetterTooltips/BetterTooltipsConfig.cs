@@ -4,17 +4,16 @@ using Terraria.ModLoader.Config;
 
 namespace BetterInventory.BetterTooltips;
 
-using BTUnloadableAttribute = UnloadableAttribute<UnloadedBetterTooltipsConfig>;
-
 public sealed class BetterTooltipsConfig : ModConfig {
+    public override bool Autoload(ref string name) => BetterInventoryConfig.EnsureLoaded(this) && base.Autoload(ref name) && BetterInventoryConfig.BetterTooltips;
 
     public Toggle<ScrollableTooltipConfig> scrollableTooltip = new(true);
-    [BTUnloadable(nameof(tooltipHover))] public Toggle<TooltipHoverConfig> tooltipHover = new(true);
+    [Fallible] public Toggle<TooltipHoverConfig> tooltipHover = new(true);
     public bool fixedTooltipPosition;
 
     public static BetterTooltipsConfig Instance = null!;
     public static bool ScrollableTooltip => BetterInventoryConfig.BetterTooltips && Instance.scrollableTooltip;
-    public static bool TooltipHover => BetterInventoryConfig.BetterTooltips && Instance.tooltipHover && !UnloadedBetterTooltipsConfig.Instance.tooltipHover;
+    public static bool TooltipHover => BetterInventoryConfig.BetterTooltips && Instance.tooltipHover && !FailedBetterTooltipsConfig.Instance.tooltipHover;
     public static bool FixedTooltipPosition => BetterInventoryConfig.BetterTooltips && Instance.fixedTooltipPosition;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
@@ -32,8 +31,8 @@ public sealed class TooltipHoverConfig {
     public static TooltipHoverConfig Value => BetterTooltipsConfig.Instance.tooltipHover.Value;
 }
 
-public sealed class UnloadedBetterTooltipsConfig {
+public sealed class FailedBetterTooltipsConfig {
     public bool tooltipHover;
 
-    public static UnloadedBetterTooltipsConfig Instance => BetterInventoryConfig.Instance.unloadedBetterTooltips;
+    public static FailedBetterTooltipsConfig Instance => FailedBetterInventoryConfig.Instance.betterTooltips;
 }

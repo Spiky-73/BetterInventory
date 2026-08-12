@@ -6,8 +6,7 @@ using Terraria.UI.Gamepad;
 namespace BetterInventory.BetterRecipeList;
 
 public class RememberGridPosition : ILoadable {
-
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterRecipeListConfig.RememberGridPosition;
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterRecipeList;
     public void Load(Mod mod) {
         On_Main.DrawInterface_Resources_ClearBuffs += HookRememberListPosition;
         On_Recipe.ClearAvailableRecipes += HookClearAvailableRecipes;

@@ -17,12 +17,11 @@ using Terraria.UI.Gamepad;
 namespace BetterInventory.BetterInventoryManagement;
 
 public sealed class QuickMoveUIItem : GlobalItem {
-
-    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || QuickMoveConfig.ItemTooltip || QuickMoveConfig.DisplayHotkeys;
+    public override bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterInventoryManagement;
     public override void Load() {
         On_ItemSlot.MouseHover_ItemArray_int_int += HookItemSlotHover;
         On_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += HookItemSlotDraw;
-        IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += il => il.TryEdit(ILHideHotbarText, ref UnloadedQuickMoveConfig.Instance.displayedHotkeys);
+        IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += il => il.TryEdit(ILHideHotbarText, ref FailedQuickMoveConfig.Instance.displayedHotkeys);
         On_Main.DrawInventory += HookDrawInventory;
     }
 

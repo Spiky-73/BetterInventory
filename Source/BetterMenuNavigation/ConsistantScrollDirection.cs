@@ -8,12 +8,11 @@ using Terraria.ModLoader;
 namespace BetterInventory.BetterMenuNavigation;
 
 public sealed class ConsistantScrollDirection : ILoadable {
-
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterMenuNavigationConfig.ConsistantScrollDirection;
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterMenuNavigation;
     public void Load(Mod mod) {
-        IL_Player.Update += il => il.TryEdit(ILFixRecipeScrollUpdate, ref UnloadedConsistantScrollDirectionConfig.Instance.recipesUnpaused);
-        IL_Main.DoUpdate_WhilePaused += il => il.TryEdit(ILFixRecipeScrollWhilePaused, ref UnloadedConsistantScrollDirectionConfig.Instance.recipesPaused);
-        MonoModHooks.Modify(TypeHelper.GetMethod((AccessorySlotLoader i) => i.DrawScrollbar), il => il.TryEdit(ILFixAccessoryScroll, ref UnloadedConsistantScrollDirectionConfig.Instance.accessories));
+        IL_Player.Update += il => il.TryEdit(ILFixRecipeScrollUpdate, ref FailedConsistantScrollDirectionConfig.Instance.recipesUnpaused);
+        IL_Main.DoUpdate_WhilePaused += il => il.TryEdit(ILFixRecipeScrollWhilePaused, ref FailedConsistantScrollDirectionConfig.Instance.recipesPaused);
+        MonoModHooks.Modify(TypeHelper.GetMethod((AccessorySlotLoader i) => i.DrawScrollbar), il => il.TryEdit(ILFixAccessoryScroll, ref FailedConsistantScrollDirectionConfig.Instance.accessories));
     }
     public void Unload() { }
 

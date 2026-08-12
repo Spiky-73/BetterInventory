@@ -7,10 +7,9 @@ using Terraria.UI.Gamepad;
 namespace BetterInventory.BetterRecipeList;
 
 public sealed class MaterialsWrapping : ILoadable {
-
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterRecipeListConfig.MaterialsWrapping;
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterRecipeList;
     public void Load(Mod mod) {
-        IL_Main.DrawInventory += il => il.TryEdit(ILMaterialWrapping, ref UnloadedBetterRecipeListConfig.Instance.materialsWrapping);
+        IL_Main.DrawInventory += il => il.TryEdit(ILMaterialWrapping, ref FailedBetterRecipeListConfig.Instance.materialsWrapping);
     }
     public void Unload() { }
 

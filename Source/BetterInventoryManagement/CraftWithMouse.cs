@@ -5,8 +5,7 @@ using Terraria.ModLoader;
 namespace BetterInventory.BetterInventoryManagement;
 
 public sealed class CraftWithMouse : ModPlayer {
-
-    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterInventoryManagementConfig.CraftWithMouse;
+    public override bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterInventoryManagement;
 
     public override IEnumerable<Item> AddMaterialsForCrafting(out ItemConsumedCallback? itemConsumedCallback) {
         itemConsumedCallback = null;

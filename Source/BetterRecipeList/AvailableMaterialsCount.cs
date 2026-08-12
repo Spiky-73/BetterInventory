@@ -14,12 +14,11 @@ using Terraria.UI.Chat;
 namespace BetterInventory.BetterRecipeList;
 
 public sealed class AvailableMaterialsCountItem : GlobalItem {
-
-    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterRecipeListConfig.AvailableMaterialsCount;
+    public override bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterRecipeList;
     public override void Load() {
         On_Recipe.FindRecipes += HookFindRecipes;
         On_Recipe.CollectItemsToCraftWithFrom += HookCollectItems;
-        IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += il => il.TryEdit(ILModifyStackText, ref UnloadedAvailableMaterialsCountConfig.Instance.itemSlot);
+        IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += il => il.TryEdit(ILModifyStackText, ref FailedAvailableMaterialsCountConfig.Instance.itemSlot);
     }
 
     private static void HookFindRecipes(On_Recipe.orig_FindRecipes orig, bool canDelayCheck) {
@@ -64,6 +63,7 @@ public static class AvailableMaterialsCount {
         if (!(context == ItemSlot.Context.CraftingMaterial || (BetterRecipeListConfig.RecipeTooltip && context == ItemSlot.Context.ChatItem))) return false;
         if (!_collectedMaterials) return false;
 
+        // TODO remove cross dependency
         (Recipe? recipe, Item[] tiles, Item[] conditions) = context == ItemSlot.Context.CraftingMaterial ?
             (Main.recipe[Main.availableRecipe[Main.focusRecipe]], RequiredObjectsDisplay._displayedRecipeTiles, RequiredObjectsDisplay._displayedRecipeConditions) :
             RecipeTooltip.GetHoveredRecipeData();

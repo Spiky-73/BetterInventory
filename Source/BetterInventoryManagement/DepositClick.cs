@@ -6,7 +6,7 @@ using Terraria.UI;
 namespace BetterInventory.BetterInventoryManagement;
 
 public sealed class DepositClick : ILoadable {
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterInventoryManagementConfig.DepositClick;
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterInventoryManagement;
     public void Load(Mod mod) {
         On_ItemSlot.LeftClick_ItemArray_int_int += HookDepositClick;
     }

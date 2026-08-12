@@ -7,10 +7,9 @@ using Terraria.UI;
 namespace BetterInventory.BetterRecipeList;
 
 public sealed class CraftOnRecipeGrid : ILoadable {
-
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterRecipeListConfig.CraftOnRecGrid;
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterRecipeList;
     public void Load(Mod mod) {
-        IL_Main.DrawInventory += il => il.TryEdit(ILCraftOnList, ref UnloadedBetterRecipeListConfig.Instance.craftOnRecipeGrid);
+        IL_Main.DrawInventory += il => il.TryEdit(ILCraftOnList, ref FailedBetterRecipeListConfig.Instance.craftOnRecipeGrid);
     }
     public void Unload() { }
 

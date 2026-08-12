@@ -9,7 +9,6 @@ public static class PickupUpgraderLoader {
         ConfigHelper.SetInstance(upgrader);
         _upgraders.Add(upgrader);
     }
-    internal static void Unload() => _upgraders.Clear();
 
     public static ModPickupUpgrader? GetUpgrader(string mod, string name) => _upgraders.Find(p => p.Mod.Name == mod && p.Name == name);
 

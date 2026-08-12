@@ -33,7 +33,7 @@ public sealed class BetterPlayer : ModPlayer {
         else if (Mod.Version > new System.Version(Configs.Version.Instance.lastPlayedVersion)) line = new(Language.GetText($"{Localization.Keys.Chat}.Update"));
         else return;
         Configs.Version.Instance.lastPlayedVersion = Mod.Version.ToString();
-        Configs.Version.Instance.Save();
+        Configs.Version.Instance.SaveChanges();
 
         if (Language.GetText($"{Localization.Keys.Chat}.Summary").Value.Length != 0) {
             InGameNotificationsTracker.AddNotification(new InGameNotification(Mod, line, new LocalizedLine(Language.GetText($"{Localization.Keys.Chat}.Bug"), Colors.RarityAmber)) { timeLeft = 15 * 60 });
@@ -46,7 +46,7 @@ public sealed class BetterPlayer : ModPlayer {
         else if (Utility.FailedILs < Configs.Compatibility.Instance.failedILs) line = new(Language.GetText(Utility.FailedILs == 0 ? $"{Localization.Keys.Chat}.UnloadedNone" : $"{Localization.Keys.Chat}.UnloadedLess"), Colors.RarityGreen);
         else return;
         Configs.Compatibility.Instance.failedILs = Utility.FailedILs;
-        Configs.Compatibility.Instance.Save();
+        Configs.Compatibility.Instance.SaveChanges();
 
         InGameNotificationsTracker.AddNotification(new InGameNotification(Mod, line));
     }

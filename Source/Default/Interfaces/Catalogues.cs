@@ -6,7 +6,7 @@ using Terraria.UI;
 namespace BetterInventory.Default.Interfaces;
 
 public sealed class CataloguesClosed : ModInterface {
-    public override bool Active => !ModContent.GetInstance<RecipeList>().Active && !ModContent.GetInstance<Bestiary>().Active && !ModContent.GetInstance<JourneyCatalogue>().Active;
+    public override bool Active => !ModContent.GetInstance<CraftingWindow>().Active && !ModContent.GetInstance<Bestiary>().Active && !ModContent.GetInstance<DuplicationMenu>().Active;
 
     public override void Activate() {
         if (Active) return;
@@ -17,7 +17,7 @@ public sealed class CataloguesClosed : ModInterface {
     }
 }
 
-public sealed class RecipeList : ModInterface {
+public sealed class CraftingWindow : ModInterface {
     public override bool Active => Main.playerInventory && Main.recBigList && !Main.CreativeMenu.Enabled;
 
     public override void Activate() {
@@ -47,7 +47,7 @@ public sealed class Bestiary : ModInterface {
     }
 }
 
-public sealed class JourneyCatalogue : ModInterface {
+public sealed class DuplicationMenu : ModInterface {
     public sealed override bool Available => Main.LocalPlayer.difficulty == 3;
     public override bool Active => Main.CreativeMenu.Enabled && Main.CreativeMenu._uiState._mainCategory.CurrentOption == (int)UICreativePowersMenu.OpenMainSubCategory.InfiniteItems;
 

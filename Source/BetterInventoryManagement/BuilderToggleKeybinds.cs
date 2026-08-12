@@ -8,8 +8,7 @@ using Terraria.ModLoader;
 namespace BetterInventory.BetterInventoryManagement;
 
 public sealed class BuilderTogglesKeybinds : ModPlayer {
-
-    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterInventoryManagementConfig.BuilderTogglesKeybinds;
+    public override bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterInventoryManagement;
     public override void SetStaticDefaults() {
         foreach (BuilderToggle toggle in BuilderToggleLoader.BuilderToggles) {
             if (toggle is WireVisibilityBuilderToggle wv && wv.NumberOfStates == 3) {

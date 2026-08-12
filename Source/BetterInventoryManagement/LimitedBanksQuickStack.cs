@@ -9,9 +9,9 @@ namespace BetterInventory.BetterInventoryManagement;
 
 public sealed class LimitedBanksQuickStack : ILoadable {
 
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterInventoryManagementConfig.LimitedBanksQuickStack;
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterInventoryManagement;
     public void Load(Mod mod) {
-        IL_ChestUI.QuickStack += il => il.TryEdit(ILNoSkipEmptySlots, ref UnloadedBetterInventoryManagementConfig.Instance.limitedBanksQuickStack);
+        IL_ChestUI.QuickStack += il => il.TryEdit(ILNoSkipEmptySlots, ref FailedBetterInventoryManagementConfig.Instance.limitedBanksQuickStack);
     }
     public void Unload() { }
 

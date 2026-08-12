@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using BetterInventory.BetterInventoryManagement;
 using BetterInventory.Default.Inventories;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -19,8 +18,7 @@ using Terraria.UI;
 namespace BetterInventory.BetterInventoryManagement;
 
 public sealed class QuickMovePlayer : ModPlayer {
-
-    public override bool IsLoadingEnabled(Mod mod) => !Configs.Compatibility.CompatibilityMode || BetterInventoryManagementConfig.QuickMove;
+    public override bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterInventoryManagement;
     public override void Load() {
         On_Main.DrawInventory += HookDrawInventory;
         On_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += HookItemSlotDraw;

@@ -12,8 +12,7 @@ using Terraria.ModLoader;
 namespace BetterInventory.BetterTooltips;
 
 public class ScrollableTooltipItem : GlobalItem {
-
-    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterTooltipsConfig.ScrollableTooltip;
+    public override bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterTooltips;
     public override void Load() {
         MonoModHooks.Add(TypeHelper.GetMethod(() => ItemLoader.ModifyTooltips), HookTooltipScroll);
     }

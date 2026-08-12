@@ -14,14 +14,13 @@ using Terraria.UI.Chat;
 namespace BetterInventory.BetterTooltips;
 
 public sealed class TooltipHoverSystem : ModSystem {
-
-    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterTooltipsConfig.TooltipHover;
+    public override bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterTooltips;
     public override void Load() {
         HoverTooltipKb = KeybindLoader.RegisterKeybind(Mod, "HoverTooltip", Microsoft.Xna.Framework.Input.Keys.N);
 
         On_ChatManager.DrawColorCodedString_SpriteBatch_DynamicSpriteFont_TextSnippetArray_Vector2_Color_float_Vector2_Vector2_refInt32_float_bool += HookSnippetHover;
         On_Main.DrawPendingMouseText += HookFreezeTooltip;
-        IL_Main.MouseText_DrawItemTooltip += il => il.TryEdit(ILTooltipHover, ref UnloadedBetterTooltipsConfig.Instance.tooltipHover);
+        IL_Main.MouseText_DrawItemTooltip += il => il.TryEdit(ILTooltipHover, ref FailedBetterTooltipsConfig.Instance.tooltipHover);
     }
 
     public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers) {

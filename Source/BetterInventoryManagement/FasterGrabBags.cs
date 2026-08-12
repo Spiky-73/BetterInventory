@@ -6,8 +6,7 @@ using Terraria.UI;
 namespace BetterInventory.BetterInventoryManagement;
 
 public sealed class FasterGrabBagsPlayer : ModPlayer {
-
-    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterInventoryManagementConfig.FasterGrabBags;
+    public override bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterInventoryManagement;
     public override void Load() {
         On_ItemSlot.TryOpenContainer += HookTryOpenContainer;
     }

@@ -9,10 +9,9 @@ using Terraria.UI.Gamepad;
 namespace BetterInventory.BetterRecipeList;
 
 public sealed class NoRecGridOffset : ILoadable {
-
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterRecipeListConfig.NoRecGridOffset;
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterRecipeList;
     public void Load(Mod mod) {
-        IL_Main.DrawInventory += il => il.TryEdit(ILNoRecStartOffset, ref UnloadedBetterRecipeListConfig.Instance.noRecGridOffset);
+        IL_Main.DrawInventory += il => il.TryEdit(ILNoRecStartOffset, ref FailedBetterRecipeListConfig.Instance.noRecGridOffset);
     }
     public void Unload() { }
 

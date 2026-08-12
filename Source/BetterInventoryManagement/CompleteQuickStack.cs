@@ -8,12 +8,11 @@ using Terraria.UI;
 namespace BetterInventory.BetterInventoryManagement;
 
 public sealed class CompleteQuickStack : ILoadable {
-
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterInventoryManagementConfig.CompleteQuickStack;
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterInventoryManagement;
     public void Load(Mod mod) {
-        IL_ChestUI.QuickStack += il => il.TryEdit(ILCompleteQuickStack, ref UnloadedBetterInventoryManagementConfig.Instance.completeQuickStack);
-        IL_Player.QuickStackAllChests += il => il.TryEdit(ILCompleteQuickStackAllChests, ref UnloadedBetterInventoryManagementConfig.Instance.completeQuickStack);
-        IL_ChestUI.DepositAll += il => il.TryEdit(ILCompleteDepositAll, ref UnloadedBetterInventoryManagementConfig.Instance.completeQuickStack);
+        IL_ChestUI.QuickStack += il => il.TryEdit(ILCompleteQuickStack, ref FailedBetterInventoryManagementConfig.Instance.completeQuickStack);
+        IL_Player.QuickStackAllChests += il => il.TryEdit(ILCompleteQuickStackAllChests, ref FailedBetterInventoryManagementConfig.Instance.completeQuickStack);
+        IL_ChestUI.DepositAll += il => il.TryEdit(ILCompleteDepositAll, ref FailedBetterInventoryManagementConfig.Instance.completeQuickStack);
     }
 
     public void Unload() { }

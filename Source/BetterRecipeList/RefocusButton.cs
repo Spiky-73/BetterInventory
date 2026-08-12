@@ -14,10 +14,9 @@ using Terraria.UI.Gamepad;
 namespace BetterInventory.BetterRecipeList;
 
 public sealed class RefocusButton : ILoadable {
-
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterRecipeListConfig.RefocusButton;
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterRecipeList;
     public void Load(Mod mod) {
-        IL_Main.DrawInventory += il => il.TryEdit(ILRefocusButton, ref UnloadedBetterRecipeListConfig.Instance.refocusButton);
+        IL_Main.DrawInventory += il => il.TryEdit(ILRefocusButton, ref FailedBetterRecipeListConfig.Instance.refocusButton);
 
         CraftCenterButton = mod.Assets.Request<Texture2D>($"Assets/RecCenter");
     }

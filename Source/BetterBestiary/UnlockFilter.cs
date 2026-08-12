@@ -4,8 +4,7 @@ using Terraria.ModLoader;
 namespace BetterInventory.BetterBestiary;
 
 public sealed class UnlockFilter : ILoadable {
-
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterBestiaryConfig.UnlockFilter;
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterBestiary;
     public void Load(Mod mod) {
         On_Filters.ByUnlockState.GetDisplayNameKey += HookCustomUnlockFilterName;
         On_Filters.ByUnlockState.FitsFilter += HookCustomUnlockFilter;

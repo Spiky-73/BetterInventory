@@ -4,19 +4,19 @@ using Terraria.ModLoader.Config;
 
 namespace BetterInventory.BetterBestiary;
 
-using BBUnloadableAttribute = UnloadableAttribute<UnloadedBetterBestiaryConfig>;
-
 public sealed class BetterBestiaryConfig : ModConfig {
+    public override bool Autoload(ref string name) => BetterInventoryConfig.EnsureLoaded(this) && base.Autoload(ref name) && BetterInventoryConfig.BetterBestiary;
+
     [DefaultValue(true)] public bool unlockFilter = true;
-    [BBUnloadable(nameof(minimalDisplayedInfo))] public Toggle<MinimalDisplayedInfoConfig> minimalDisplayedInfo = new(true);
+    [Fallible] public Toggle<MinimalDisplayedInfoConfig> minimalDisplayedInfo = new(true);
     [DefaultValue(true)] public bool treasureBagContent = true;
-    [BBUnloadable(nameof(unknownNPCs))] public Toggle<UnknownNPCsConfig> unknownNPCs = new(true);
+    [Fallible] public Toggle<UnknownNPCsConfig> unknownNPCs = new(true);
 
     public static BetterBestiaryConfig Instance = null!;
     public static bool UnlockFilter => BetterInventoryConfig.BetterBestiary && Instance.unlockFilter;
-    public static bool MinimalDisplayedInfo => BetterInventoryConfig.BetterBestiary && Instance.minimalDisplayedInfo && !UnloadedBetterBestiaryConfig.Instance.minimalDisplayedInfo;
+    public static bool MinimalDisplayedInfo => BetterInventoryConfig.BetterBestiary && Instance.minimalDisplayedInfo && !FailedBetterBestiaryConfig.Instance.minimalDisplayedInfo;
     public static bool TreasureBagContent => BetterInventoryConfig.BetterBestiary && Instance.treasureBagContent;
-    public static bool UnknownNPCs => BetterInventoryConfig.BetterBestiary && Instance.unknownNPCs && !UnloadedBetterBestiaryConfig.Instance.unknownNPCs;
+    public static bool UnknownNPCs => BetterInventoryConfig.BetterBestiary && Instance.unknownNPCs && !FailedBetterBestiaryConfig.Instance.unknownNPCs;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
 }
@@ -36,10 +36,10 @@ public sealed class UnknownNPCsConfig {
     public static UnknownNPCsConfig Instance => BetterBestiaryConfig.Instance.unknownNPCs.Value;
 }
 
-public sealed class UnloadedBetterBestiaryConfig {
+public sealed class FailedBetterBestiaryConfig {
     public bool minimalDisplayedInfo;
     public bool unknownNPCs;
 
-    public static UnloadedBetterBestiaryConfig Instance => BetterInventoryConfig.Instance.unloadedBetterBestiary;
+    public static FailedBetterBestiaryConfig Instance => FailedBetterInventoryConfig.Instance.betterBestiary;
 }
 

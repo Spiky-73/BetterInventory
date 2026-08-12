@@ -1,0 +1,16 @@
+GameInterface.DisplayName: "{$LegacyMisc.56} {$LegacyInterface.4}"
+PlayerInventory.DisplayName: "{$LegacyInterface.4}"
+Settings.DisplayName: "{$LegacyInterface.62}"
+ControlsMenu.DisplayName: "{$LegacyMenu.66}"
+ModConfigList.DisplayName: "{$tModLoader.ModConfiguration}"
+ArmorPage.DisplayName: "{$CreativePowers.TabAccessories}"
+MiscEquipPage.DisplayName: "{$LegacyInterface.79}"
+HousingPage.DisplayName: "{$LegacyInterface.80}"
+CraftingWindow.DisplayName: "{$GameUI.CraftingWindow}"
+Bestiary.DisplayName: Bestiary
+DuplicationMenu.DisplayName: Duplication Menu
+CataloguesClosed.DisplayName: "{$LegacyMisc.56} Catalogues"
+MapClosed.DisplayName: "{$LegacyInterface.109}"
+MiniMap.DisplayName: Minimap
+BackgroundMap.DisplayName: Background Map
+FullScreenMap.DisplayName: Fullscreen Map

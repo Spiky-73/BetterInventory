@@ -1,13 +1,11 @@
-using BetterInventory.BetterInventoryManagement;
 using SpikysLib;
 using Terraria.GameInput;
 using Terraria.ModLoader;
 
-namespace BetterInventory.InventoryManagement;
+namespace BetterInventory.BetterInventoryManagement;
 
 public sealed class PreferFavoritedItems : ModPlayer {
-
-    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterInventoryManagementConfig.PreferFavoritedItems;
+    public override bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterInventoryManagement;
     public override void Load() {
         FavoritedBuffKb = KeybindLoader.RegisterKeybind(Mod, "FavoritedQuickBuff", Microsoft.Xna.Framework.Input.Keys.B);
     }

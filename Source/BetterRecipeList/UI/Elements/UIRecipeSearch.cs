@@ -51,6 +51,7 @@ public sealed class UIRecipeSearch : UIPanel {
         };
         _cancelButton.OnMouseOver += (_, _) => SoundEngine.PlaySound(SoundID.MenuTick);
         _cancelButton.OnLeftClick += (_, _) => {
+            // TODO refactor
             RecipeList.HookSearchRecipe_Cancel(_searchBar);
             _searchBar.SetContents(null, true);
             SoundEngine.PlaySound(SoundID.MenuTick);

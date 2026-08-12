@@ -4,17 +4,17 @@ using Terraria.ModLoader.Config;
 
 namespace BetterInventory.BetterItemInformationDisplay;
 
-using BIDUnloadableAttribute = UnloadableAttribute<UnloadedBetterItemInformationDisplayConfig>;
-
 // TODO review the usage to split / rename
 public sealed class BetterItemInformationDisplayConfig : ModConfig {
+    public override bool Autoload(ref string name) => BetterInventoryConfig.EnsureLoaded(this) && base.Autoload(ref name) && BetterInventoryConfig.BetterItemInformationDisplay;
+
     public Toggle<ItemAmmoConfig> itemAmmo = new(true);
-    [BIDUnloadable(nameof(inventorySlotsTexture)), DefaultValue(true)] public bool inventorySlotsTexture = true;
+    [Fallible, DefaultValue(true)] public bool inventorySlotsTexture = true;
     public Toggle<GrabBagContentConfig> grabBagContent = new(true);
 
     public static BetterItemInformationDisplayConfig Instance = null!;
     public static bool ItemAmmo => BetterInventoryConfig.BetterItemInformationDisplay && Instance.itemAmmo;
-    public static bool InventorySlotsTexture => BetterInventoryConfig.BetterItemInformationDisplay && Instance.inventorySlotsTexture && !UnloadedBetterItemInformationDisplayConfig.Instance.inventorySlotsTexture;
+    public static bool InventorySlotsTexture => BetterInventoryConfig.BetterItemInformationDisplay && Instance.inventorySlotsTexture && !FailedBetterItemInformationDisplayConfig.Instance.inventorySlotsTexture;
     public static bool GrabBagContent => BetterInventoryConfig.BetterItemInformationDisplay && Instance.grabBagContent;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
@@ -47,8 +47,8 @@ public sealed class GrabBagContentConfig {
     public static GrabBagContentConfig Instance => BetterItemInformationDisplayConfig.Instance.grabBagContent.Value;
 }
 
-public sealed class UnloadedBetterItemInformationDisplayConfig {
+public sealed class FailedBetterItemInformationDisplayConfig {
     public bool inventorySlotsTexture;
 
-    public static UnloadedBetterItemInformationDisplayConfig Instance => BetterInventoryConfig.Instance.unloadedBetterItemInformationDisplay;
+    public static FailedBetterItemInformationDisplayConfig Instance => FailedBetterInventoryConfig.Instance.betterItemInformationDisplay;
 }

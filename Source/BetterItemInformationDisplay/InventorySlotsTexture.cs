@@ -14,12 +14,11 @@ using Terraria.UI;
 namespace BetterInventory.BetterItemInformationDisplay;
 
 public sealed class InventorySlotsTexture : ILoadable {
-
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterItemInformationDisplayConfig.InventorySlotsTexture;
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterItemInformationDisplay;
     public void Load(Mod mod) {
-        IL_Main.DrawInventory += il => il.TryEdit(ILHideInterfaceText, ref UnloadedBetterItemInformationDisplayConfig.Instance.inventorySlotsTexture);
-        IL_Main.GUIHotbarDrawInner += il => il.TryEdit(ILHideInterfaceText, ref UnloadedBetterItemInformationDisplayConfig.Instance.inventorySlotsTexture);
-        IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += il => il.TryEdit(ILDrawSlotTexture, ref UnloadedBetterItemInformationDisplayConfig.Instance.inventorySlotsTexture);
+        IL_Main.DrawInventory += il => il.TryEdit(ILHideInterfaceText, ref FailedBetterItemInformationDisplayConfig.Instance.inventorySlotsTexture);
+        IL_Main.GUIHotbarDrawInner += il => il.TryEdit(ILHideInterfaceText, ref FailedBetterItemInformationDisplayConfig.Instance.inventorySlotsTexture);
+        IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += il => il.TryEdit(ILDrawSlotTexture, ref FailedBetterItemInformationDisplayConfig.Instance.inventorySlotsTexture);
 
         InventorySlotsTextures = mod.Assets.Request<Texture2D>($"Assets/Inventory_Slots_Textures");
     }

@@ -13,7 +13,7 @@ public sealed class RecipeFilteringPlayer : ModPlayer {
 
     public static RecipeFilteringPlayer LocalPlayer => Main.LocalPlayer.GetModPlayer<RecipeFilteringPlayer>();
 
-    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterRecipeListConfig.RecipeFilters;
+    public override bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterRecipeList;
     public override void Load() {
         _allFilters = [
             new RecipeFilters.ItemFilterWrapper(new ItemFilters.Weapon(), 0),

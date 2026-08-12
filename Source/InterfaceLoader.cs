@@ -19,11 +19,17 @@ public static class InterfaceLoader {
     private static readonly List<ModInterface> _interfaces = [];
 }
 
-public class InterfaceDefinition : EntityDefinition<InterfaceDefinition> {
+public class InterfaceDefinition : EntityDefinition<InterfaceDefinition, ModInterface> {
     public InterfaceDefinition() : base() { }
     public InterfaceDefinition(string key) : base(key) { }
     public InterfaceDefinition(string mod, string name) : base(mod, name) { }
     public override int Type => InterfaceLoader.Search.TryGetId(ToString(), out var id) ? id : -1;
+    public override ModInterface? Entity {
+        get {
+            int type = Type;
+            return type == -1 ? null : InterfaceLoader.Interfaces[type];
+        }
+    }
     public override bool IsUnloaded => Type < 0;
 
     public override InterfaceDefinition[] GetValues() => [.. InterfaceLoader.Interfaces.Select(i => new InterfaceDefinition(i.FullName))];

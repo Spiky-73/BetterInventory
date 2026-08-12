@@ -4,8 +4,7 @@ using Terraria.ModLoader;
 namespace BetterInventory.BetterRecipeList;
 
 public sealed class CraftWhenHolding : ILoadable {
-
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterRecipeListConfig.CraftWhenHolding;
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterRecipeList;
     public void Load(Mod mod) {
         On_Main.TryAllowingToCraftRecipe += HookTryAllowingToCraftRecipe;
     }

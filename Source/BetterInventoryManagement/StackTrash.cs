@@ -7,10 +7,9 @@ using SpikysLib.IL;
 namespace BetterInventory.BetterInventoryManagement;
 
 public sealed class StackTrash : ILoadable {
-
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterInventoryManagementConfig.StackTrash;
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterInventoryManagement;
     public void Load(Mod mod) {
-        IL_ItemSlot.SellOrTrash += static il => il.TryEdit(ILStackTrash, ref UnloadedBetterInventoryManagementConfig.Instance.stackTrash);
+        IL_ItemSlot.SellOrTrash += static il => il.TryEdit(ILStackTrash, ref FailedBetterInventoryManagementConfig.Instance.stackTrash);
         On_Chest.AddItemToShop += HookStackSold;
     }
     public void Unload() { }

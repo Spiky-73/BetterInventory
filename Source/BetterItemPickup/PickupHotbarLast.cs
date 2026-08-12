@@ -7,10 +7,9 @@ using Terraria.ModLoader;
 namespace BetterInventory.BetterItemPickup;
 
 public sealed class PickupHotbarLast : ILoadable {
-
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterItemPickupConfig.PickupHotbarLast;
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterItemPickup;
     public void Load(Mod mod) {
-        IL_Player.GetItem += il => il.TryEdit(ILPickupHotbarLast, ref UnloadedBetterItemPickupConfig.Instance.pickupHotbarLast);
+        IL_Player.GetItem += il => il.TryEdit(ILPickupHotbarLast, ref FailedBetterItemPickupConfig.Instance.pickupHotbarLast);
     }
     public void Unload() { }
 

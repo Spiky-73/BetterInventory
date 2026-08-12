@@ -5,8 +5,7 @@ using Terraria.UI;
 namespace BetterInventory.BetterInventoryManagement;
 
 public sealed class KeepSwappedFavorited : ILoadable {
-
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterInventoryManagementConfig.KeepSwappedFavorited;
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterInventoryManagement;
     public void Load(Mod mod) {
         On_ItemSlot.DyeSwap += HookDyeSwapFavorited;
         On_ItemSlot.ArmorSwap += HookArmorSwapFavorited;

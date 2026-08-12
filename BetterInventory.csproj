@@ -12,6 +12,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <Publicize Include="tModLoader" IncludeCompilerGeneratedMembers="false" IncludeVirtualMembers="false" />
+    <Publicize Include="tModLoader:Terraria.ModLoader.Config.UI.ConfigElement.DrawSelf" />
   </ItemGroup>
 
   <ItemGroup>

@@ -9,10 +9,9 @@ using Terraria.ModLoader;
 namespace BetterInventory.BetterRecipeList;
 
 public sealed class FastScroll : ILoadable {
-
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterRecipeListConfig.FastScroll;
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterRecipeList;
     public void Load(Mod mod) {
-        IL_Main.DrawInventory += static il => il.TryEdit(ILFastScroll, ref UnloadedBetterRecipeListConfig.Instance.fastScroll);
+        IL_Main.DrawInventory += static il => il.TryEdit(ILFastScroll, ref FailedBetterRecipeListConfig.Instance.fastScroll);
     }
     public void Unload() { }
 

@@ -11,9 +11,7 @@ using Terraria.ModLoader;
 namespace BetterInventory.BetterMenuNavigation;
 
 public sealed class MenuChainsPlayer : ModPlayer {
-
-    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterMenuNavigationConfig.MenuChains;
-
+    public override bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterMenuNavigation;
     public override void Load() {
         _keybinds = [.. MenuChainsConfig.Instance.chains.Select((chain, index) => {
             Language.GetOrRegister($"Mods.BetterInventory.Keybinds.MoveChain{index}.DisplayName", () => chain.name); // Needs to be first as RegisterKeybind sets it otherwise

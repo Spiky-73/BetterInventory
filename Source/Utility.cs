@@ -12,7 +12,6 @@ using Terraria.UI.Gamepad;
 namespace BetterInventory;
 
 public static class Utility {
-
     public static int? CompareHandleNullable<T>(T? x, T? y) {
         if (x is null && y is null) return 0;
         if (x is not null && y is null) return 1;
@@ -33,8 +32,21 @@ public static class Utility {
         return i;
     }
 
-    public static int FailedILs { get; internal set; }
-
+    public static int FailedILs { get; private set; }
+    public static bool TryEdit(this ILContext context, Action<ILContext> ilEdit, ref bool failed, [CallerArgumentExpression(nameof(ilEdit))] string name = "") {
+        Mod mod = ModContent.GetInstance<BetterInventory>();
+        if (failed) return false;
+        try {
+            ilEdit(context);
+            return true;
+        } catch {
+            mod.Logger.Warn($"ILHook {name} failed to load. Related features will be disabled until reload");
+            FailedILs++;
+            MonoModHooks.DumpIL(mod, context);
+            failed = true;
+            return false;
+        }
+    }
     public static bool ApplyTo(this ILContext context, Action<ILContext> ilEdit, bool enabled, [CallerArgumentExpression(nameof(ilEdit))] string name = "") {
         Mod mod = ModContent.GetInstance<BetterInventory>();
         if (Configs.Compatibility.CompatibilityMode && !enabled) {

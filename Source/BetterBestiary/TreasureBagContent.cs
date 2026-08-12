@@ -12,7 +12,7 @@ namespace BetterInventory.BetterBestiary;
 
 public sealed class TreasureBagContent : ILoadable {
 
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterBestiaryConfig.TreasureBagContent;
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterBestiary;
     public void Load(Mod mod) {
         On_UIBestiaryInfoItemLine.ctor += HookShowBagContent;
         On_ItemDropBestiaryInfoElement.GetSearchString += HookSearchBagText;

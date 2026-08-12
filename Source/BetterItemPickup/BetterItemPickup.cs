@@ -5,8 +5,7 @@ using Terraria.ModLoader;
 namespace BetterInventory.BetterItemPickup;
 
 public sealed class BetterItemPickup : ILoadable {
-
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterInventoryConfig.BetterItemPickup;
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterItemPickup;
     public void Load(Mod mod) {
         On_Player.GetItem += HookGetItem;
     }

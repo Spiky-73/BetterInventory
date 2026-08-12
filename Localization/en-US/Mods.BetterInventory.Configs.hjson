@@ -3327,6 +3327,11 @@ BetterInventoryConfig: {
 		Label: unloaded Better Menu Navigation
 		Tooltip: ""
 	}
+
+	failedBetterInventory: {
+		Label: failed Better Inventory
+		Tooltip: ""
+	}
 }
 
 UnloadedBetterTooltipsConfig: {
@@ -3985,6 +3990,253 @@ InterfaceDefinition: {
 
 	IsUnloaded: {
 		Label: Is Unloaded
+		Tooltip: ""
+	}
+}
+
+FailedBetterInventoryConfig: {
+	Tooltip: ""
+
+	betterTooltips: {
+		Label: better Tooltips
+		Tooltip: ""
+	}
+
+	betterBestiary: {
+		Label: better Bestiary
+		Tooltip: ""
+	}
+
+	betterRecipeList: {
+		Label: better Recipe List
+		Tooltip: ""
+	}
+
+	betterItemInformationDisplay: {
+		Label: better Item Information Display
+		Tooltip: ""
+	}
+
+	betterItemPickup: {
+		Label: better Item Pickup
+		Tooltip: ""
+	}
+
+	betterInventoryManagement: {
+		Label: better Inventory Management
+		Tooltip: ""
+	}
+
+	betterMenuNavigation: {
+		Label: better Menu Navigation
+		Tooltip: ""
+	}
+}
+
+FailedBetterTooltipsConfig: {
+	Tooltip: ""
+
+	tooltipHover: {
+		Label: tooltip Hover
+		Tooltip: ""
+	}
+}
+
+FailedBetterBestiaryConfig: {
+	Tooltip: ""
+
+	minimalDisplayedInfo: {
+		Label: minimal Displayed Info
+		Tooltip: ""
+	}
+
+	unknownNPCs: {
+		Label: unknown N P Cs
+		Tooltip: ""
+	}
+}
+
+FailedBetterRecipeListConfig: {
+	Tooltip: ""
+
+	fastScroll: {
+		Label: fast Scroll
+		Tooltip: ""
+	}
+
+	craftOnRecipeGrid: {
+		Label: craft On Recipe Grid
+		Tooltip: ""
+	}
+
+	refocusButton: {
+		Label: refocus Button
+		Tooltip: ""
+	}
+
+	noRecGridOffset: {
+		Label: no Rec Grid Offset
+		Tooltip: ""
+	}
+
+	noRecGridClose: {
+		Label: no Rec Grid Close
+		Tooltip: ""
+	}
+
+	pageScroll: {
+		Label: page Scroll
+		Tooltip: ""
+	}
+
+	recipeCount: {
+		Label: recipe Count
+		Tooltip: ""
+	}
+
+	availableMaterialsCount: {
+		Label: available Materials Count
+		Tooltip: ""
+	}
+
+	materialsWrapping: {
+		Label: materials Wrapping
+		Tooltip: ""
+	}
+
+	recipeFilters: {
+		Label: recipe Filters
+		Tooltip: ""
+	}
+}
+
+FailedAvailableMaterialsCountConfig: {
+	Tooltip: ""
+
+	itemSlot: {
+		Label: item Slot
+		Tooltip: ""
+	}
+}
+
+FailedBetterItemInformationDisplayConfig: {
+	Tooltip: ""
+
+	inventorySlotsTexture: {
+		Label: inventory Slots Texture
+		Tooltip: ""
+	}
+}
+
+FailedBetterItemPickupConfig: {
+	Tooltip: ""
+
+	autoQuickStack_Multiplayer: {
+		Label: auto Quick Stack_ Multiplayer
+		Tooltip: ""
+	}
+
+	pickupHotbarLast: {
+		Label: pickup Hotbar Last
+		Tooltip: ""
+	}
+}
+
+FailedBetterInventoryManagementConfig: {
+	Tooltip: ""
+
+	completeQuickStack: {
+		Label: complete Quick Stack
+		Tooltip: ""
+	}
+
+	limitedBanksQuickStack: {
+		Label: limited Banks Quick Stack
+		Tooltip: ""
+	}
+
+	stackTrash: {
+		Label: stack Trash
+		Tooltip: ""
+	}
+
+	favoriteInBanks: {
+		Label: favorite In Banks
+		Tooltip: ""
+	}
+
+	smartConsumption: {
+		Label: smart Consumption
+		Tooltip: ""
+	}
+
+	quickMove: {
+		Label: quick Move
+		Tooltip: ""
+	}
+
+	universalShiftClick: {
+		Label: universal Shift Click
+		Tooltip: ""
+	}
+}
+
+FailedSmartConsumptionConfig: {
+	Tooltip: ""
+
+	baits: {
+		Label: baits
+		Tooltip: ""
+	}
+
+	materials: {
+		Label: materials
+		Tooltip: ""
+	}
+}
+
+FailedQuickMoveConfig: {
+	Tooltip: ""
+
+	displayedHotkeys: {
+		Label: displayed Hotkeys
+		Tooltip: ""
+	}
+}
+
+FailedUniversalShiftClick: {
+	Tooltip: ""
+
+	quickCraft: {
+		Label: quick Craft
+		Tooltip: ""
+	}
+}
+
+FailedBetterMenuNavigationConfig: {
+	Tooltip: ""
+
+	consistantScrollDirection: {
+		Label: consistant Scroll Direction
+		Tooltip: ""
+	}
+}
+
+FailedConsistantScrollDirectionConfig: {
+	Tooltip: ""
+
+	recipesUnpaused: {
+		Label: recipes Unpaused
+		Tooltip: ""
+	}
+
+	recipesPaused: {
+		Label: recipes Paused
+		Tooltip: ""
+	}
+
+	accessories: {
+		Label: accessories
 		Tooltip: ""
 	}
 }

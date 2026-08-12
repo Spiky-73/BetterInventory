@@ -1,21 +1,19 @@
-using BetterInventory.BetterBestiary;
 using MonoMod.Cil;
 using SpikysLib.IL;
 using Terraria.GameContent.Bestiary;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 
-namespace BetterInventory.VisualChanges.MinimalDisplayedInfo;
+namespace BetterInventory.BetterBestiary;
 
 public sealed class MinimumDisplayedInfo : ILoadable {
 
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterBestiaryConfig.MinimalDisplayedInfo;
-
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterBestiary;
     public void Load(Mod mod) {
-        IL_Filters.BySearch.FitsFilter += il => il.TryEdit(ILSearchAddEntries, ref UnloadedBetterBestiaryConfig.Instance.minimalDisplayedInfo);
+        IL_Filters.BySearch.FitsFilter += il => il.TryEdit(ILSearchAddEntries, ref FailedBetterBestiaryConfig.Instance.minimalDisplayedInfo);
 
-        IL_UIBestiaryEntryIcon.Update += il => il.TryEdit(ILIconUpdateFakeUnlock, ref UnloadedBetterBestiaryConfig.Instance.minimalDisplayedInfo);
-        IL_UIBestiaryEntryInfoPage.AddInfoToList += il => il.TryEdit(IlEntryPageFakeUnlock, ref UnloadedBetterBestiaryConfig.Instance.minimalDisplayedInfo);
+        IL_UIBestiaryEntryIcon.Update += il => il.TryEdit(ILIconUpdateFakeUnlock, ref FailedBetterBestiaryConfig.Instance.minimalDisplayedInfo);
+        IL_UIBestiaryEntryInfoPage.AddInfoToList += il => il.TryEdit(IlEntryPageFakeUnlock, ref FailedBetterBestiaryConfig.Instance.minimalDisplayedInfo);
     }
 
     public void Unload() { }

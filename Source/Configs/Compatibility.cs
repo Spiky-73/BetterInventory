@@ -31,7 +31,7 @@ public sealed class Compatibility : ModConfig {
         SmartPickup.Value.upgradeItems.Key = false;
         PreviousDisplay.Value.fakeItem.Key = false;
         PreviousDisplay.Value.icon.Key = false;
-        InventoryManagement.Instance.Save();
+        InventoryManagement.Instance.SaveChanges();
 
         BetterGuide.Value.favoritedRecipes.Key = false;
         BetterGuide.Value.craftInMenu = false;
@@ -40,7 +40,7 @@ public sealed class Compatibility : ModConfig {
         BetterGuide.Value.conditionsDisplay = false;
         BetterGuide.Value.unknownDisplay = UnknownDisplay.Vanilla;
         QuickSearch.Value.catalogues[new(RecipeList.Instance)] = false;
-        ItemSearch.Instance.Save();
+        ItemSearch.Instance.SaveChanges();
     }
 
     public override ConfigScope Mode => ConfigScope.ClientSide;

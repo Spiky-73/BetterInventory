@@ -9,8 +9,7 @@ using Terraria.UI;
 namespace BetterInventory.BetterItemPickup;
 
 public sealed class PickupToBanks : ILoadable {
-
-    // TODO autoload
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterItemPickup;
     public void Load(Mod mod) {
         _fakeInventory = new Item[InventorySlots.Count];
         Item air = new();

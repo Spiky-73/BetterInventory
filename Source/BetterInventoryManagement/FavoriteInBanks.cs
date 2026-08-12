@@ -15,14 +15,13 @@ using Terraria.UI;
 namespace BetterInventory.BetterInventoryManagement;
 
 public sealed class FavoriteInBanksPlayer : ModPlayer {
-
-    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterInventoryManagementConfig.FavoriteInBanks;
+    public override bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterInventoryManagement;
     public override void Load() {
         IL_ItemSlot.LeftClick_ItemArray_int_int += static il => {
-            il.TryEdit(ILKeepFavoriteInBanks, ref UnloadedBetterInventoryManagementConfig.Instance.favoriteInBanks);
+            il.TryEdit(ILKeepFavoriteInBanks, ref FailedBetterInventoryManagementConfig.Instance.favoriteInBanks);
         };
         IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += static il => {
-            il.TryEdit(ILFavoritedBankBackground, ref UnloadedBetterInventoryManagementConfig.Instance.favoriteInBanks);
+            il.TryEdit(ILFavoritedBankBackground, ref FailedBetterInventoryManagementConfig.Instance.favoriteInBanks);
         };
 
         On_ChestUI.LootAll += HookLootAll;

@@ -7,8 +7,7 @@ namespace BetterInventory.BetterInventoryManagement;
 
 // TODO check if this should be in another module
 public sealed class ExtraItemRightClickPlayer : ModPlayer {
-
-    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterInventoryManagementConfig.ExtraItemRightClick;
+    public override bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterInventoryManagement;
     public override void Load() {
         On_ItemSlot.PickupItemIntoMouse += HookNoPickupMouse;
     }

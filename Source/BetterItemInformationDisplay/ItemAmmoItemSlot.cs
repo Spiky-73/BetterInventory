@@ -11,8 +11,7 @@ namespace BetterInventory.BetterItemInformationDisplay;
 public readonly record struct DrawItemIconParams(int Context, float Scale);
 
 public sealed class ItemAmmoItemSlotItem : GlobalItem {
-
-    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterItemInformationDisplayConfig.ItemAmmo;
+    public override bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterItemInformationDisplay;
     public override void Load() {
         On_ItemSlot.DrawItemIcon += HookDrawItemContext;
     }

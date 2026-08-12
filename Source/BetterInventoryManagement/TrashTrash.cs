@@ -7,8 +7,7 @@ using Terraria.Audio;
 namespace BetterInventory.BetterInventoryManagement;
 
 public sealed class TrashTrash : ILoadable {
-
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterInventoryManagementConfig.TrashTrash;
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterInventoryManagement;
     public void Load(Mod mod) {
         On_ItemSlot.LeftClick_ItemArray_int_int += HookHoverTrashSlot;
         On_ItemSlot.LeftClick_SellOrTrash += HookTrashTrash;

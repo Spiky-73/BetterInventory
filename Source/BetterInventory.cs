@@ -1,4 +1,3 @@
-using BetterInventory.InventoryManagement;
 using SpikysLib;
 using Terraria.ModLoader;
 
@@ -10,7 +9,6 @@ public sealed class BetterInventory : Mod, IPreLoadMod {
     public void PreLoadMod() => Instance = this;
 
     public override void Unload() {
-        PickupUpgraderLoader.Unload();
         Instance = null!;
     }
 }

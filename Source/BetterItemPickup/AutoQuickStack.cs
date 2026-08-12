@@ -12,13 +12,12 @@ using Terraria.UI;
 namespace BetterInventory.BetterItemPickup;
 
 public sealed class AutoQuickStack : ILoadable {
-
-    public bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterItemPickupConfig.AutoQuickStack;
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterItemPickup;
     public void Load(Mod mod) {
         On_ChestUI.LootAll += HookQuickStackLootAll;
         On_ChestUI.QuickStack += HookNoQuickStackToSameChest;
 
-        IL_Player.QuickStackAllChests += il => il.TryEdit(IlQuickStackChestsMultiplayer, ref UnloadedBetterItemPickupConfig.Instance.autoQuickStack_Multiplayer);
+        IL_Player.QuickStackAllChests += il => il.TryEdit(IlQuickStackChestsMultiplayer, ref FailedBetterItemPickupConfig.Instance.autoQuickStack_Multiplayer);
         On_Player.GetItem_FillEmptyInventorySlot += HookQuickStackMultiplayerFix;
         On_Player.GetItem_FillEmptyInventorySlot_VoidBag += HookQuickStackMultiplayerFixVoidSlot;
 

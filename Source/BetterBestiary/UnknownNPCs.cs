@@ -17,6 +17,7 @@ namespace BetterInventory.BetterBestiary;
 
 public sealed class UnknownNPCs : ILoadable {
 
+    public bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterBestiary;
     public void Load(Mod mod) {
         On_UIBestiaryEntryButton.ctor += HookDarkenEntryButton;
         On_UIBestiaryEntryInfoPage.AddInfoToList += HookDarkenEntryPage;
@@ -24,10 +25,10 @@ public sealed class UnknownNPCs : ILoadable {
 
         On_UIBestiaryTest.FilterEntries += HookBestiaryFilterRemoveHiddenEntries;
 
-        IL_UIBestiaryEntryIcon.Update += il => il.TryEdit(ILIconUpdateFakeUnlock, ref UnloadedBetterBestiaryConfig.Instance.unknownNPCs);
-        IL_UIBestiaryEntryIcon.DrawSelf += il => il.TryEdit(ILIconDrawFakeUnlock, ref UnloadedBetterBestiaryConfig.Instance.unknownNPCs);
-        IL_UIBestiaryEntryInfoPage.AddInfoToList += il => il.TryEdit(IlEntryPageFakeUnlock, ref UnloadedBetterBestiaryConfig.Instance.unknownNPCs);
-        IL_UIBestiaryFilteringOptionsGrid.UpdateAvailability += il => il.TryEdit(ILFakeUnlockFilters, ref UnloadedBetterBestiaryConfig.Instance.unknownNPCs);
+        IL_UIBestiaryEntryIcon.Update += il => il.TryEdit(ILIconUpdateFakeUnlock, ref FailedBetterBestiaryConfig.Instance.unknownNPCs);
+        IL_UIBestiaryEntryIcon.DrawSelf += il => il.TryEdit(ILIconDrawFakeUnlock, ref FailedBetterBestiaryConfig.Instance.unknownNPCs);
+        IL_UIBestiaryEntryInfoPage.AddInfoToList += il => il.TryEdit(IlEntryPageFakeUnlock, ref FailedBetterBestiaryConfig.Instance.unknownNPCs);
+        IL_UIBestiaryFilteringOptionsGrid.UpdateAvailability += il => il.TryEdit(ILFakeUnlockFilters, ref FailedBetterBestiaryConfig.Instance.unknownNPCs);
     }
 
     public void Unload() { }

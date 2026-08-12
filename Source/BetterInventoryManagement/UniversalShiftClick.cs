@@ -12,13 +12,13 @@ using Terraria.UI;
 namespace BetterInventory.BetterInventoryManagement;
 
 public sealed class UniversalShiftClick : ModPlayer {
-    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterInventoryManagementConfig.UniversalShiftClick;
+    public override bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterInventoryManagement;
     public override void Load() {
         QuickBuyCursor = CursorLoader.RegisterCursor(Mod, TextureAssets.Cursors[CursorOverrideID.QuickSell]);
         On_ItemSlot.LeftClick_ItemArray_int_int += HookShiftBuy;
 
         QuickCraftCursor = CursorLoader.RegisterCursor(Mod, Mod.Assets.Request<Texture2D>($"Assets/Cursor_Craft"));
-        IL_Main.HoverOverCraftingItemButton += il => il.TryEdit(ILShiftCraft, ref UnloadedUniversalShiftClick.Instance.quickCraft);
+        IL_Main.HoverOverCraftingItemButton += il => il.TryEdit(ILShiftCraft, ref FailedUniversalShiftClick.Instance.quickCraft);
     }
 
     public override bool HoverSlot(Item[] inventory, int context, int slot) {

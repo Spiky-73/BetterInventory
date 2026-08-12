@@ -8,11 +8,10 @@ using Terraria.ModLoader;
 namespace BetterInventory.BetterInventoryManagement;
 
 public sealed class SmartConsumptionItem : GlobalItem {
-
-    public override bool IsLoadingEnabled(Mod mod) => Compatibility.LoadDisabledFeatures || BetterInventoryManagementConfig.SmartConsumption;
+    public override bool IsLoadingEnabled(Mod mod) => BetterInventoryConfig.BetterInventoryManagement;
     public override void Load() {
-        IL_Player.ItemCheck_CheckFishingBobber_PickAndConsumeBait += il => il.TryEdit(ILOnConsumeBait, ref UnloadedSmartConsumptionConfig.Instance.baits);
-        IL_Recipe.ConsumeForCraft += static il => il.TryEdit(ILOnConsumedMaterial, ref UnloadedSmartConsumptionConfig.Instance.materials);
+        IL_Player.ItemCheck_CheckFishingBobber_PickAndConsumeBait += il => il.TryEdit(ILOnConsumeBait, ref FailedSmartConsumptionConfig.Instance.baits);
+        IL_Recipe.ConsumeForCraft += static il => il.TryEdit(ILOnConsumedMaterial, ref FailedSmartConsumptionConfig.Instance.materials);
     }
 
     public override void OnConsumeItem(Item item, Player player) {
