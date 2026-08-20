@@ -17,7 +17,7 @@ public sealed class BetterInventoryManagementConfig : ModConfig {
     [Fallible] public Toggle<SmartConsumptionConfig> smartConsumption = new(true);
     [DefaultValue(true)] public bool keepSwappedFavorited = true;
     [DefaultValue(true)] public bool craftWithMouse = true;
-    public Toggle<EquipmentMaterialsConfig> craftWithEquipment = new(true);
+    public Toggle<CraftWithEquipmentConfig> craftWithEquipment = new(true);
     public Toggle<ExtraItemRightClickConfig> extraItemRightClick = new(true);
     [Fallible] public Toggle<QuickMoveConfig> quickMove = new(true);
     public Toggle<PreferFavoritedItemsConfig> preferFavoritedItems = new(true);
@@ -74,10 +74,10 @@ public sealed class SmartConsumptionConfig {
     public static bool Materials => BetterInventoryManagementConfig.SmartConsumption && Instance.materials && !FailedSmartConsumptionConfig.Instance.materials;
 }
 
-public sealed class EquipmentMaterialsConfig {
+public sealed class CraftWithEquipmentConfig {
     [DefaultValue(false)] public bool allLoadouts = false;
 
-    public static EquipmentMaterialsConfig Instance => BetterInventoryManagementConfig.Instance.craftWithEquipment.Value;
+    public static CraftWithEquipmentConfig Instance => BetterInventoryManagementConfig.Instance.craftWithEquipment.Value;
 }
 
 public sealed class ExtraItemRightClickConfig {
