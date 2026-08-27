@@ -25,11 +25,13 @@ public sealed class InventoryManagement : ModConfig {
     [DefaultValue(true)] public bool depositClick;
     public Toggle<BetterQuickStack> betterQuickStack = new(true);
     [DefaultValue(true)] public bool inventorySlotsTexture = true;
+    public Toggle<StaticInventoryAlpha> staticInventoryAlpha = new(false);
 
     public static InventoryManagement Instance = null!;
     public static bool FavoriteInBanks => !UnloadedInventoryManagement.Value.favoriteInBanks && Instance.favoriteInBanks;
     public static bool DepositClick => Instance.depositClick;
     public static bool InventorySlotsTexture => !UnloadedInventoryManagement.Value.inventorySlotsTexture && Instance.inventorySlotsTexture;
+    public static bool StaticInventoryAlpha => Instance.staticInventoryAlpha;
     public static bool SmartPickup => Instance.smartPickup;
 
     // Compatibility version < v0.6
@@ -286,4 +288,10 @@ public sealed class BetterQuickStack {
     public static bool CompleteQuickStack => !UnloadedInventoryManagement.Value.quickStackComplete && Enabled && Value.completeQuickStack;
     public static bool LimitedBanksQuickStack => !UnloadedInventoryManagement.Value.quickStackLimitedBanks && Enabled && Value.limitedBanksQuickStack;
     public static BetterQuickStack Value => InventoryManagement.Instance.betterQuickStack.Value;
+}
+
+public sealed class StaticInventoryAlpha {
+    [DefaultValue(0.85f)] public float alpha = 0.85f;
+
+    public static StaticInventoryAlpha Value => InventoryManagement.Instance.staticInventoryAlpha.Value;
 }
