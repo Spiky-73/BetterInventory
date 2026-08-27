@@ -1,5 +1,8 @@
 # Better Inventory changelog
 
+## v0.9.3
+- Added Static Inventory Background Opacity
+
 ## v0.9.2.2
 . Fixed Display Previous Slots toggle not working as intended
 

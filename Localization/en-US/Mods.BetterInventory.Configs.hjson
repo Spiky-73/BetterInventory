@@ -292,8 +292,13 @@ InventoryManagement: {
 	}
 
 	inventorySlotsTexture: {
-		Label: "[i:420] Inventory Slots Texture"
+		Label: "[i:1952] Inventory Slots Texture"
 		Tooltip: Removes the texts "Coin", "Ammo" and adds background textures to various item slots
+	}
+
+	staticInventoryAlpha: {
+		Label: "[i:420] Static Inventory Background Opacity"
+		Tooltip: Disabled the slight pulse of the inventory background
 	}
 }
 
@@ -1727,3 +1732,12 @@ Version: {
 
 PickupUpgraderDefinition.Tooltip: ""
 EntityCatalogueDefinition.Tooltip: ""
+
+StaticInventoryAlpha: {
+	Tooltip: ""
+
+	alpha: {
+		Label: Opacity
+		Tooltip: The opacity of the background
+	}
+}
