@@ -12,41 +12,13 @@ namespace BetterInventory.InventoryManagement;
 
 public sealed class InventorySlotsTexture : ILoadable {
     public void Load(Mod mod) {
-        IL_Main.DrawInventory += static il => {
-            if (!il.ApplyTo(ILHideInterfaceText, Configs.InventoryManagement.InventorySlotsTexture)) Configs.UnloadedInventoryManagement.Value.inventorySlotsTexture = true;
-        };
-        IL_Main.GUIHotbarDrawInner += static il => {
-            if (!il.ApplyTo(ILHideInterfaceText, Configs.InventoryManagement.InventorySlotsTexture)) Configs.UnloadedInventoryManagement.Value.inventorySlotsTexture = true;
-        };
         IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += static il => {
             if (!il.ApplyTo(ILDrawSlotTexture, Configs.InventoryManagement.InventorySlotsTexture)) Configs.UnloadedInventoryManagement.Value.inventorySlotsTexture = true;
         };
 
         s_inventorySlotsTextures = mod.Assets.Request<Texture2D>($"Assets/Inventory_Slots_Textures");
     }
-
     public void Unload() { }
-
-    private static void ILHideInterfaceText(ILContext context) {
-        ILCursor cursor = new(context);
-
-        // <ld args>
-        // if (!hidden) DynamicSpriteFontExtensionMethods.DrawString(...)
-        // else <pop args>
-        while (cursor.TryGotoNext(MoveType.AfterLabel, i => i.SaferMatchCall(Reflection.DynamicSpriteFontExtensionMethods.DrawString_SpriteBatch_DynamicSpriteFont_string_Vector2_Color_float_Vector2_float_SpriteEffects_float))) {
-            ILLabel skipLabel = cursor.DefineLabel();
-            ILLabel postLabel = cursor.DefineLabel();
-            cursor.EmitDelegate(() => Configs.InventoryManagement.InventorySlotsTexture);
-            cursor.EmitBrtrue(skipLabel);
-            cursor.MarkLabel(skipLabel); // Here in case of exception
-            cursor.GotoNext(MoveType.After, i => true);
-            cursor.EmitBr(postLabel);
-            cursor.MarkLabel(postLabel); // Here in case of exception
-            cursor.MarkLabel(skipLabel);
-            for (int i = 0; i < 10; i++) cursor.EmitPop();
-            cursor.MarkLabel(postLabel);
-        }
-    }
 
     private static void ILDrawSlotTexture(ILContext context) {
         ILCursor cursor = new(context);

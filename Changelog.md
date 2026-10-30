@@ -1,5 +1,8 @@
 # Better Inventory changelog
 
+## v0.9.4
+- Split Inventory Slot Textures into Inventory Slot Textures, Hide Inventory Text, and Hide Selected Item Name
+
 ## v0.9.3
 - Added Static Inventory Background Opacity
 
