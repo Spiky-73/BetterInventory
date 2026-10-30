@@ -307,7 +307,7 @@ InventoryManagement: {
 	}
 
 	hideSelectedItemName: {
-		Label: "[i:2712] Hide Inventory Text"
+		Label: "[i:4956] Hide Selected Item Name"
 		Tooltip: Removes the selected item name above the hotbar when the inventory is closed
 	}
 }
@@ -1653,8 +1653,8 @@ UnloadedInventoryManagement: {
 	}
 
 	hideSelectedItemName: {
-		Label: hide Selected Item Name
-		Tooltip: ""
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.hideInventoryText.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 }
 
