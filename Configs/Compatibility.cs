@@ -134,6 +134,8 @@ public sealed class UnloadedInventoryManagement {
     public bool quickStackComplete;
     public bool quickStackLimitedBanks;
     public bool inventorySlotsTexture;
+    public bool hideInventoryText;
+    public bool hideSelectedItemName;
 
     public static UnloadedInventoryManagement Value => Compatibility.Instance.unloadedInventoryManagement;
 }

@@ -11,7 +11,7 @@ ModName: Better Inventory
 SPIC.ModName: Spy's Infinite Consumables
 Homepage: homepage
 Workshop: Steam Workshop page
-Summary: ""
-Details: ""
-Changelog: - Added Static Inventory Background Opacity
-Version: 0.9.3
+Summary: Is is now possible to have inventory slot features and still show the inventory texts or Item names.
+Details: Inventory Slot Textures has been split into 3 features: Inventory Slot Textures, Hide Inventory Text, and Hide Selected Item Name.
+Changelog: - Split Inventory Slot Textures into Inventory Slot Textures, Hide Inventory Text, and Hide Selected Item Name
+Version: 0.9.4

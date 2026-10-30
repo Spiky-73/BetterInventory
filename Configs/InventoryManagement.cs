@@ -25,12 +25,16 @@ public sealed class InventoryManagement : ModConfig {
     [DefaultValue(true)] public bool depositClick;
     public Toggle<BetterQuickStack> betterQuickStack = new(true);
     [DefaultValue(true)] public bool inventorySlotsTexture = true;
+    [DefaultValue(false)] public bool hideInventoryText = false;
+    [DefaultValue(false)] public bool hideSelectedItemName = false;
     public Toggle<StaticInventoryAlpha> staticInventoryAlpha = new(false);
 
     public static InventoryManagement Instance = null!;
     public static bool FavoriteInBanks => !UnloadedInventoryManagement.Value.favoriteInBanks && Instance.favoriteInBanks;
     public static bool DepositClick => Instance.depositClick;
     public static bool InventorySlotsTexture => !UnloadedInventoryManagement.Value.inventorySlotsTexture && Instance.inventorySlotsTexture;
+    public static bool HideInventoryText => !UnloadedInventoryManagement.Value.hideInventoryText && Instance.hideInventoryText;
+    public static bool HideSelectedItemName => !UnloadedInventoryManagement.Value.hideSelectedItemName && Instance.hideSelectedItemName;
     public static bool StaticInventoryAlpha => Instance.staticInventoryAlpha;
     public static bool SmartPickup => Instance.smartPickup;
 

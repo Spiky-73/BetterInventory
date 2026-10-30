@@ -288,17 +288,27 @@ InventoryManagement: {
 
 	betterQuickStack: {
 		Label: "[i:306] Better Quick Stack"
-		Tooltip: Quick stack more items and avoid creating new stack in personnal storages
+		Tooltip: Quick stack more items and avoid creating new stack in personal storages
 	}
 
 	inventorySlotsTexture: {
 		Label: "[i:1952] Inventory Slots Texture"
-		Tooltip: Removes the texts "Coin", "Ammo" and adds background textures to various item slots
+		Tooltip: Adds background textures to various item slots
 	}
 
 	staticInventoryAlpha: {
 		Label: "[i:420] Static Inventory Background Opacity"
 		Tooltip: Disabled the slight pulse of the inventory background
+	}
+
+	hideInventoryText: {
+		Label: "[i:2712] Hide Inventory Text"
+		Tooltip: Removes inventory texts such as "Inventory", "Coin", "Ammo", or "Crafting"
+	}
+
+	hideSelectedItemName: {
+		Label: "[i:4956] Hide Selected Item Name"
+		Tooltip: Removes the selected item name above the hotbar when the inventory is closed
 	}
 }
 
@@ -1635,6 +1645,16 @@ UnloadedInventoryManagement: {
 	pickupQuickStackChestsMulti: {
 		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.smartPickup.Label} @ {$Mods.BetterInventory.Configs.SmartPickup.quickStack.Label} @ {$Mods.BetterInventory.Configs.QuickStackPickup.chest.Label}"
 		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded} in Multiplayer"
+	}
+
+	hideInventoryText: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.hideInventoryText.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
+	}
+
+	hideSelectedItemName: {
+		Label: "{$Mods.BetterInventory.Configs.InventoryManagement.hideInventoryText.Label}"
+		Tooltip: "{$Mods.BetterInventory.UI.FeatureUnloaded}"
 	}
 }
 
