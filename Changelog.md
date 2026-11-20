@@ -1,5 +1,8 @@
 # Better Inventory changelog
 
+## v0.9.4.1
+- Fixed an bug in tooltip hover causing a crash if Better Inventory was loaded after certain mods (such as some Calamity addons)
+
 ## v0.9.4
 - Split Inventory Slot Textures into Inventory Slot Textures, Hide Inventory Text, and Hide Selected Item Name
 
